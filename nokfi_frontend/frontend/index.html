@@ -1,0 +1,47 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
+  <meta name="theme-color" content="#3B82F6" />
+  <meta name="description" content="Nokfi — Diagnóstico financiero y análisis de datos con IA para autónomos y pymes." />
+
+  <!--
+    ⚠️ AUDITORÍA DE SEGURIDAD — Content Security Policy añadida (defensa en
+    profundidad). No sustituye la sanitización con DOMPurify ya aplicada en
+    middleware/sanitize.js (esa es la corrección real del XSS), pero limita
+    el daño si en el futuro se colara un XSS por otra vía: bloquea scripts
+    inline no autorizados y restringe a qué dominios puede conectarse la
+    página para exfiltrar datos.
+
+    IMPORTANTE PARA EL DESPLIEGUE: `connect-src` debe incluir la URL real
+    del backend en cada entorno. Aquí se listan tanto la IP del VPS actual
+    como el futuro dominio con SSL — actualiza esta lista si cambia la
+    infraestructura. Nota técnica: la etiqueta <meta> de CSP NO soporta la
+    directiva `frame-ancestors` (los navegadores la ignoran ahí) — cuando
+    se configure Nginx (sección 17 del proyecto), añadir también la
+    cabecera HTTP real `Content-Security-Policy` con `frame-ancestors 'none'`
+    y `X-Frame-Options: DENY` a nivel de servidor para cubrir ese hueco.
+  -->
+  <meta http-equiv="Content-Security-Policy" content="
+    default-src 'self';
+    script-src 'self';
+    style-src 'self' 'unsafe-inline' https://fonts.googleapis.com;
+    font-src 'self' https://fonts.gstatic.com;
+    img-src 'self' data:;
+    connect-src 'self' http://31.76.241.222:3001 https://api.nokfi.app https://generativelanguage.googleapis.com;
+    object-src 'none';
+    base-uri 'self';
+    form-action 'self';
+  ">
+
+  <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
+  <link rel="apple-touch-icon" href="/icons/icon-192.png" />
+  <title>Nokfi — Tu negocio, bajo control</title>
+</head>
+<body>
+  <div id="root"></div>
+  <script type="module" src="/src/main.jsx"></script>
+</body>
+</html>
+
