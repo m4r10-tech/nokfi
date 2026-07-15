@@ -4,7 +4,7 @@ export default {
   theme: {
     extend: {
       fontFamily: { sans: ['"Plus Jakarta Sans"', 'sans-serif'] },
-      colors: { accent: '#3B82F6', positive: '#22C55E', negative: '#EF4444', warning: '#F59E0B' }
+      colors: { accent: '#1456A2', positive: '#22C55E', negative: '#EF4444', warning: '#F59E0B' }
     }
   },
   plugins: []
