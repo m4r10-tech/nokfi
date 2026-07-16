@@ -90,11 +90,9 @@ Si Nokfi te resulta útil y quieres contribuir al desarrollo, aceptamos donacion
 
 | Cripto | Red | Dirección |
 |--------|-----|-----------|
-| **Bitcoin** (BTC) | Bitcoin | `bc1qTU_DIRECCION_BTC_AQUI_POR_FAVOR_REEMPLAZAME` |
-| **Ethereum** (ETH) | Ethereum / L2 | `0xTU_DIRECCION_ETH_AQUI_POR_FAVOR_REEMPLAZAME` |
-| **Litecoin** (LTC) | Litecoin | `ltc1qTU_DIRECCION_LTC_AQUI_POR_FAVOR_REEMPLAZAME` |
-
-> ⚠️ Estas son direcciones placeholder. Si eres uno de los maintainers, reemplázalas con tus direcciones reales antes de compartir este README.
+| **Bitcoin** (BTC) | Bitcoin | `bc1qdndnce0d9t75r5thmerz3m85fnk2pa3jax95qk` |
+| **Ethereum** (ETH) | Ethereum / L2 | `0x8Ea6a5261112cf459d584F68D0410f2995Af0241` |
+| **Litecoin** (LTC) | Litecoin | `ltc1qk75rl0letzmy88yh6cm86tju8k5g526lu2zmt0` |
 
 ## Licencia
 
