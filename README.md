@@ -18,7 +18,7 @@ Pago único de por vida (sin suscripción). Licencia vinculada a un dispositivo 
 | Capa | Tecnología |
 |------|------------|
 | Backend | Node.js 22 + Express + SQLite (`better-sqlite3`) |
-| IA | Google Gemini (`gemini-2.5-flash`) |
+| IA | Google Gemini (`gemini-flash-latest`) |
 | Frontend | React + Vite + Tailwind CSS + PWA |
 | Gráficas | Recharts |
 | Excel/PDF | `xlsx` (SheetJS), `jspdf`, `pdfjs-dist` |

@@ -70,7 +70,13 @@ router.post('/ai', requireLicense, async (req, res) => {
     });
   }
 
-  const model = process.env.GEMINI_MODEL || 'gemini-2.5-flash';
+  // `gemini-flash-latest` es un alias de Google que siempre resuelve al
+  // modelo flash actual. Migración desde gemini-2.5-flash, retirado por
+  // Google para nuevas keys el 2026-07 ("no longer available to new users").
+  // Usar el alias evita que un futuro retiro de versión concreta vuelva a
+  // romper el análisis (bug que dio 502 en /api/proxy/ai). El .env del VPS
+  // lleva GEMINI_MODEL=gemini-flash-latest; este es el fallback por si falta.
+  const model = process.env.GEMINI_MODEL || 'gemini-flash-latest';
 
   try {
     const aiRes = await fetch(
