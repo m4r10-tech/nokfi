@@ -4,5 +4,8 @@ node_modules/
 db/*.db
 db/*.db-wal
 db/*.db-shm
+test/*.db
+test/*.db-wal
+test/*.db-shm
 *.log
 .DS_Store

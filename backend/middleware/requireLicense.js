@@ -10,10 +10,16 @@
  *   1. Existe token Bearer
  *   2. La sesión existe y no ha expirado
  *   3. La licencia asociada existe
- *   4. La licencia está 'active' (no suspendida ni revocada)
- *   5. El fingerprint de la sesión coincide con el fingerprint vinculado a la licencia
- *      (defensa en profundidad: aunque alguien robe el token, sin el dispositivo
- *       correcto la sesión ya no debería ser válida si hubo un reseteo de por medio)
+ *   4. La licencia está 'active' (no suspendida ni revokada)
+ *   5. La contraseña no se reseteó mientras esta sesión estaba viva:
+ *      aunque las sesiones no se revocan en un change-password (para no
+ *      cerrar la pestaña desde la que el usuario cambia la clave), sí
+ *      invalidamos TODAS las sesiones previas en un reset por EMAIL
+ *      (clearPasswordAndSessions). Aquí no hay nada extra que comprobar:
+ *      el token de la sesión es el secreto; sin él, no hay acceso.
+ *
+ * (Fase 2: el viejo check de device-fingerprint vs session.fingerprint ya
+ *  no aplica — el fingerprint se eliminó de la BD.)
  */
 
 'use strict';
@@ -44,7 +50,6 @@ function requireLicense(req, res, next) {
   if (license.status !== 'active') {
     audit('BLOCKED_INACTIVE_LICENSE', {
       license_id: license.id,
-      fingerprint: session.fingerprint,
       ip: req.ip,
       detail: `status=${license.status}`
     });
@@ -52,21 +57,6 @@ function requireLicense(req, res, next) {
       ? 'Esta licencia ha sido revocada. Contacta con soporte si crees que es un error.'
       : 'Esta licencia está suspendida temporalmente. Contacta con soporte.';
     return res.status(403).json({ error: 'license_inactive', message });
-  }
-
-  // Defensa en profundidad: el fingerprint de la sesión debe seguir coincidiendo
-  // con el vinculado actualmente a la licencia (por si hubo un reseteo de dispositivo
-  // que invalidó el vínculo pero, por cualquier fallo, la sesión sobreviviera)
-  if (license.device_fingerprint && license.device_fingerprint !== session.fingerprint) {
-    audit('BLOCKED_FINGERPRINT_MISMATCH', {
-      license_id: license.id,
-      fingerprint: session.fingerprint,
-      ip: req.ip
-    });
-    return res.status(401).json({
-      error: 'device_mismatch',
-      message: 'Este dispositivo ya no coincide con el registrado para tu licencia.'
-    });
   }
 
   req.session = session;

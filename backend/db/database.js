@@ -3,17 +3,21 @@
  *
  * Capa de acceso a datos — SQLite vía better-sqlite3.
  *
- * Modelo de licencia vigente (ver nokfi_proyecto.md secciones 5, 15):
- *   - Una licencia = un email + una clave XXXX-XXXX-XXXX-XXXX + UN device fingerprint fijo
- *   - Sin límite configurable de dispositivos: siempre es 1
- *   - El reseteo de dispositivo está limitado a 1 vez/año, controlado por last_device_reset
+ * Modelo de licencia vigente (tras Fase 2 — migración fingerprint → contraseña):
+ *   - Una licencia = un email + una clave XXXX-XXXX-XXXX-XXXX + UNA contraseña
+ *     elegida por el usuario (scrypt). No hay device-fingerprint.
+ *   - El anti-sharing que aportaba el fingerprint se delega en la cuota diaria
+ *     de IA por licencia (50 análisis/día en backend/routes/proxy.js).
+ *   - El reseteo de CONTRASEÑA por email está limitado a 1 vez/año
+ *     (campo last_password_reset) como anti-abuso del flujo por email.
  *
  * Tablas:
- *   licenses        → clave, email, estado, plan, fingerprint vinculado
- *   sessions        → tokens de sesión activos
+ *   licenses        → clave, email, estado, plan, password_hash (scrypt)
+ *   sessions        → tokens de sesión activos (ya sin fingerprint)
  *   payment_events  → eventos de pago recibidos por webhook (idempotencia + histórico)
- *   audit_log       → registro de eventos de seguridad
- *   reset_tokens    → tokens temporales de un solo uso (reveal de clave / reseteo de dispositivo)
+ *   audit_log       → registro de eventos de seguridad (fingerprint conservado para
+ *                     la historia, pero escribe NULL en adelante)
+ *   reset_tokens    → tokens temporales de un solo uso (reveal de clave / reset password)
  */
 
 'use strict';
@@ -45,31 +49,29 @@ function initDB() {
 
       db.exec(`
         CREATE TABLE IF NOT EXISTS licenses (
-          id                  INTEGER PRIMARY KEY AUTOINCREMENT,
-          key                 TEXT    NOT NULL UNIQUE,
-          email               TEXT    NOT NULL,
-          status              TEXT    NOT NULL DEFAULT 'active'
-                                       CHECK(status IN ('active','suspended','revoked')),
-          plan                TEXT    NOT NULL DEFAULT 'basic'
-                                       CHECK(plan IN ('basic','pro')),
-          device_fingerprint  TEXT    DEFAULT NULL,
-          device_name         TEXT    DEFAULT NULL,
-          device_registered_at TEXT   DEFAULT NULL,
-          last_device_reset   TEXT    DEFAULT NULL,
-          payment_provider    TEXT    DEFAULT NULL
-                                       CHECK(payment_provider IN ('stripe','paypal','coinbase','revolut',NULL)),
-          payment_ref         TEXT    DEFAULT NULL,
-          amount_eur          REAL    DEFAULT NULL,
-          notes               TEXT    DEFAULT '',
-          created_at          TEXT    NOT NULL DEFAULT (datetime('now')),
-          created_by          TEXT    DEFAULT 'system'
+          id                   INTEGER PRIMARY KEY AUTOINCREMENT,
+          key                  TEXT    NOT NULL UNIQUE,
+          email                TEXT    NOT NULL,
+          status               TEXT    NOT NULL DEFAULT 'active'
+                                        CHECK(status IN ('active','suspended','revoked')),
+          plan                 TEXT    NOT NULL DEFAULT 'basic'
+                                        CHECK(plan IN ('basic','pro')),
+          password_hash        TEXT    DEFAULT NULL,
+          device_name          TEXT    DEFAULT NULL,
+          last_password_reset  TEXT    DEFAULT NULL,
+          payment_provider     TEXT    DEFAULT NULL
+                                        CHECK(payment_provider IN ('stripe','paypal','coinbase','revolut',NULL)),
+          payment_ref          TEXT    DEFAULT NULL,
+          amount_eur           REAL    DEFAULT NULL,
+          notes                TEXT    DEFAULT '',
+          created_at           TEXT    NOT NULL DEFAULT (datetime('now')),
+          created_by           TEXT    DEFAULT 'system'
         );
 
         CREATE TABLE IF NOT EXISTS sessions (
           id           INTEGER PRIMARY KEY AUTOINCREMENT,
           token        TEXT    NOT NULL UNIQUE,
           license_id   INTEGER NOT NULL REFERENCES licenses(id) ON DELETE CASCADE,
-          fingerprint  TEXT    NOT NULL,
           created_at   TEXT    NOT NULL DEFAULT (datetime('now')),
           expires_at   TEXT    NOT NULL,
           last_used    TEXT    NOT NULL DEFAULT (datetime('now')),
@@ -92,7 +94,7 @@ function initDB() {
         CREATE TABLE IF NOT EXISTS reset_tokens (
           id          INTEGER PRIMARY KEY AUTOINCREMENT,
           token       TEXT    NOT NULL UNIQUE,
-          purpose     TEXT    NOT NULL CHECK(purpose IN ('reveal_key','device_reset')),
+          purpose     TEXT    NOT NULL CHECK(purpose IN ('reveal_key','password_reset')),
           license_id  INTEGER NOT NULL REFERENCES licenses(id) ON DELETE CASCADE,
           used        INTEGER NOT NULL DEFAULT 0,
           created_at  TEXT    NOT NULL DEFAULT (datetime('now')),
@@ -109,16 +111,26 @@ function initDB() {
           ts          TEXT    NOT NULL DEFAULT (datetime('now'))
         );
 
-        CREATE INDEX IF NOT EXISTS idx_licenses_key        ON licenses(key);
-        CREATE INDEX IF NOT EXISTS idx_licenses_email       ON licenses(email);
-        CREATE INDEX IF NOT EXISTS idx_licenses_fingerprint ON licenses(device_fingerprint);
-        CREATE INDEX IF NOT EXISTS idx_sessions_token       ON sessions(token);
-        CREATE INDEX IF NOT EXISTS idx_sessions_exp         ON sessions(expires_at);
-        CREATE INDEX IF NOT EXISTS idx_payment_provider_evt ON payment_events(provider, event_id);
-        CREATE INDEX IF NOT EXISTS idx_reset_tokens_token    ON reset_tokens(token);
-        CREATE INDEX IF NOT EXISTS idx_audit_license         ON audit_log(license_id);
-        CREATE INDEX IF NOT EXISTS idx_audit_ts              ON audit_log(ts);
+        CREATE INDEX IF NOT EXISTS idx_licenses_key          ON licenses(key);
+        CREATE INDEX IF NOT EXISTS idx_licenses_email        ON licenses(email);
+        CREATE INDEX IF NOT EXISTS idx_sessions_token        ON sessions(token);
+        CREATE INDEX IF NOT EXISTS idx_sessions_exp          ON sessions(expires_at);
+        CREATE INDEX IF NOT EXISTS idx_payment_provider_evt  ON payment_events(provider, event_id);
+        CREATE INDEX IF NOT EXISTS idx_reset_tokens_token     ON reset_tokens(token);
+        CREATE INDEX IF NOT EXISTS idx_audit_license          ON audit_log(license_id);
+        CREATE INDEX IF NOT EXISTS idx_audit_ts               ON audit_log(ts);
+
+        CREATE INDEX IF NOT EXISTS idx_sessions_license  ON sessions(license_id);
       `);
+
+      /* ──────────────────────────────────────────────────────────
+         MIGRACIÓN Fase 2 (fingerprint → password) — idempotente
+         Solo actúa si detecta columnas/tablas del esquema viejo.
+         En installs nuevos es un completo no-op (las columnas ya
+         no existen). Requiere SQLite ≥ 3.35 (ALTER TABLE DROP COLUMN),
+         garantizado por better-sqlite3 ^11.3.0 (SQLite 3.43+).
+      ────────────────────────────────────────────────────────── */
+      runFingerprintMigration(db);
 
       console.log('✅  Base de datos inicializada en', DB_PATH);
       resolve(db);
@@ -126,6 +138,88 @@ function initDB() {
       reject(err);
     }
   });
+}
+
+/**
+ * Migración del esquema viejo (fingerprint) al nuevo (password_hash).
+ * Idempotente y guardada por detección: cada paso comprueba si la columna/
+ * constraint vieja sigue presente antes de tocar nada, así puede ejecutarse
+ * contra una BD nueva (no-op) o contra una migrada (no-op) o contra la vieja
+ * (aplica los cambios) sin errores.
+ */
+function runFingerprintMigration(database) {
+  const columnsOf = (table) => database.prepare(`PRAGMA table_info(${table})`).all().map(c => c.name);
+
+  const migrate = database.transaction(() => {
+    /* --- licenses: añadir password_hash + last_password_reset, quitar las
+           tres columnas de fingerprint. Índice idx_licenses_fingerprint se
+           elimina ANTES de DROP COLUMN (SQLite rechaza DROP de columnas
+           indexadas). --- */
+    const licenseCols = new Set(columnsOf('licenses'));
+    if (licenseCols.has('device_fingerprint')) {
+      // Solo en esquema viejo: garantizar las columnas nuevas antes de quitar nada
+      if (!licenseCols.has('password_hash')) {
+        database.exec(`ALTER TABLE licenses ADD COLUMN password_hash TEXT DEFAULT NULL`);
+      }
+      if (!licenseCols.has('last_password_reset')) {
+        database.exec(`ALTER TABLE licenses ADD COLUMN last_password_reset TEXT DEFAULT NULL`);
+      }
+      // Orden: soltar índice primero, luego columnas
+      database.exec(`DROP INDEX IF EXISTS idx_licenses_fingerprint`);
+      database.exec(`ALTER TABLE licenses DROP COLUMN device_fingerprint`);
+      if (licenseCols.has('device_registered_at')) {
+        database.exec(`ALTER TABLE licenses DROP COLUMN device_registered_at`);
+      }
+      if (licenseCols.has('last_device_reset')) {
+        database.exec(`ALTER TABLE licenses DROP COLUMN last_device_reset`);
+      }
+      console.log('✅  Migración licenses: fingerprint → password_hash');
+    }
+
+    /* --- sessions: quitar fingerprint (era NOT NULL en el esquema viejo) --- */
+    if (!columnsOf('sessions').includes('fingerprint')) {
+      // ya migrado o fresh
+    } else {
+      database.exec(`ALTER TABLE sessions DROP COLUMN fingerprint`);
+      console.log('✅  Migración sessions: columna fingerprint eliminada');
+    }
+
+    /* --- reset_tokens: cambiar CHECK purpose de 'device_reset' a 'password_reset'.
+           SQLite no permite ALTER de un CHECK; se reconstruye la tabla (rename
+           vieja, crear nueva con el CHECK nuevo, copiar filas válidas — solo
+           'reveal_key' sobrevive; los 'device_reset' residuales ya estarían
+           expirados de cualquier forma). --- */
+    const resetTokensSql = database
+      .prepare(`SELECT sql FROM sqlite_master WHERE type='table' AND name='reset_tokens'`)
+      .get();
+    if (resetTokensSql && resetTokensSql.sql && resetTokensSql.sql.includes('device_reset')) {
+      database.exec(`ALTER TABLE reset_tokens RENAME TO reset_tokens_old`);
+      database.exec(`
+        CREATE TABLE reset_tokens (
+          id          INTEGER PRIMARY KEY AUTOINCREMENT,
+          token       TEXT    NOT NULL UNIQUE,
+          purpose     TEXT    NOT NULL CHECK(purpose IN ('reveal_key','password_reset')),
+          license_id  INTEGER NOT NULL REFERENCES licenses(id) ON DELETE CASCADE,
+          used        INTEGER NOT NULL DEFAULT 0,
+          created_at  TEXT    NOT NULL DEFAULT (datetime('now')),
+          expires_at  TEXT    NOT NULL
+        )
+      `);
+      // Solo copiamos tokens de 'reveal_key' (los 'device_reset' no tienen
+      // equivalente en el nuevo modelo y, además, viven 15-30 min — ya caducados)
+      database.exec(`
+        INSERT INTO reset_tokens (id, token, purpose, license_id, used, created_at, expires_at)
+        SELECT id, token, purpose, license_id, used, created_at, expires_at
+        FROM reset_tokens_old WHERE purpose = 'reveal_key'
+      `);
+      database.exec(`DROP TABLE reset_tokens_old`);
+      // Recrear el índice sobre la tabla recién construida
+      database.exec(`CREATE INDEX IF NOT EXISTS idx_reset_tokens_token ON reset_tokens(token)`);
+      console.log('✅  Migración reset_tokens: CHECK device_reset → password_reset');
+    }
+  });
+
+  migrate();
 }
 
 function getDB() {
@@ -144,10 +238,11 @@ function generateLicenseKey() {
 }
 
 /**
- * Crea una licencia nueva. NO vincula dispositivo todavía — eso ocurre en la activación.
- * Se invoca tras la confirmación de un pago (webhook) o manualmente desde el admin.
+ * Crea una licencia nueva. Setea password_hash opcional si llega `password`
+ * (para créditos manuales del admin con contraseña ya asignada). Se invoca
+ * tras la confirmación de un pago (webhook) o manualmente desde el admin.
  */
-function createLicense({ email, plan = 'basic', payment_provider = null, payment_ref = null, amount_eur = null, notes = '', created_by = 'system' }) {
+function createLicense({ email, plan = 'basic', payment_provider = null, payment_ref = null, amount_eur = null, notes = '', created_by = 'system', password = null }) {
   if (!email || typeof email !== 'string') {
     throw new Error('email es obligatorio para crear una licencia');
   }
@@ -156,10 +251,14 @@ function createLicense({ email, plan = 'basic', payment_provider = null, payment
   do { key = generateLicenseKey(); }
   while (db.prepare('SELECT id FROM licenses WHERE key = ?').get(key));
 
+  const password_hash = password
+    ? require('../utils/password').hashPassword(password)
+    : null;
+
   const result = db.prepare(`
-    INSERT INTO licenses (key, email, plan, payment_provider, payment_ref, amount_eur, notes, created_by)
-    VALUES (?, ?, ?, ?, ?, ?, ?, ?)
-  `).run(key.toUpperCase(), email.trim().toLowerCase(), plan, payment_provider, payment_ref, amount_eur, notes, created_by);
+    INSERT INTO licenses (key, email, plan, password_hash, payment_provider, payment_ref, amount_eur, notes, created_by)
+    VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)
+  `).run(key.toUpperCase(), email.trim().toLowerCase(), plan, password_hash, payment_provider, payment_ref, amount_eur, notes, created_by);
 
   return getLicenseById(result.lastInsertRowid);
 }
@@ -207,38 +306,38 @@ function deleteLicense(id) {
   return getDB().prepare('DELETE FROM licenses WHERE id = ?').run(id);
 }
 
-/* ── Vinculación de dispositivo (fingerprint único, fijo) ── */
+/* ── Contraseñas (sustituyen al device-fingerprint) ── */
 
-/** Vincula el fingerprint a la licencia. Solo debe llamarse si la licencia no tiene dispositivo aún. */
-function bindDevice(license_id, fingerprint, device_name = '') {
+/** Setea el hash de contraseña de una licencia (usado en activate, change-password, confirm-reset). */
+function setPasswordHash(license_id, password_hash, device_name = null) {
   getDB().prepare(`
-    UPDATE licenses
-    SET device_fingerprint = ?, device_name = ?, device_registered_at = datetime('now')
-    WHERE id = ?
-  `).run(fingerprint, device_name || '', license_id);
+    UPDATE licenses SET password_hash = ?, device_name = COALESCE(?, device_name) WHERE id = ?
+  `).run(password_hash, device_name, license_id);
   return getLicenseById(license_id);
 }
 
-/** Libera el dispositivo vinculado (usado en el flujo de reseteo) y marca la fecha de reseteo */
-function resetDevice(license_id) {
+/** Limpia la contraseña y cierra todas las sesiones — usado por admin reset-password */
+function clearPasswordAndSessions(license_id) {
   getDB().prepare(`
-    UPDATE licenses
-    SET device_fingerprint = NULL, device_name = NULL, device_registered_at = NULL,
-        last_device_reset = datetime('now')
-    WHERE id = ?
+    UPDATE licenses SET password_hash = NULL, last_password_reset = datetime('now') WHERE id = ?
   `).run(license_id);
-  // Cualquier sesión asociada a este dispositivo deja de ser válida
   getDB().prepare(`DELETE FROM sessions WHERE license_id = ?`).run(license_id);
   return getLicenseById(license_id);
 }
 
-/** Comprueba si la licencia puede resetear dispositivo (máx. 1 vez/año) */
-function canResetDevice(license) {
-  if (!license.last_device_reset) return true;
-  const last = new Date(license.last_device_reset);
+/** Comprueba si la licencia puede solicitar reset de contraseña por email (máx. 1 vez/año) */
+function canResetPassword(license) {
+  if (!license.last_password_reset) return true;
+  const last = new Date(license.last_password_reset);
   const oneYearLater = new Date(last);
   oneYearLater.setFullYear(oneYearLater.getFullYear() + 1);
   return new Date() >= oneYearLater;
+}
+
+/** Marca la licencia como reseteada (llamado en confirm-password-reset) */
+function markPasswordReset(license_id) {
+  getDB().prepare(`UPDATE licenses SET last_password_reset = datetime('now') WHERE id = ?`).run(license_id);
+  return getLicenseById(license_id);
 }
 
 /* ════════════════════════════════════════════════════════════
@@ -247,15 +346,15 @@ function canResetDevice(license) {
 
 const SESSION_TTL_DAYS = 30;
 
-function createSession(license_id, fingerprint, ip = '') {
+function createSession(license_id, ip = '') {
   const token = crypto.randomBytes(32).toString('hex');
   const expires = new Date();
   expires.setDate(expires.getDate() + SESSION_TTL_DAYS);
 
   getDB().prepare(`
-    INSERT INTO sessions (token, license_id, fingerprint, expires_at, ip)
-    VALUES (?, ?, ?, ?, ?)
-  `).run(token, license_id, fingerprint, expires.toISOString(), ip);
+    INSERT INTO sessions (token, license_id, expires_at, ip)
+    VALUES (?, ?, ?, ?)
+  `).run(token, license_id, expires.toISOString(), ip);
 
   return { token, expires_at: expires.toISOString() };
 }
@@ -361,6 +460,10 @@ function recordPaymentEvent({ provider, event_id, event_type, license_id = null,
    AUDIT LOG
 ════════════════════════════════════════════════════════════ */
 
+/**
+ * Audit log. `fingerprint` es opcional: se conserva la columna para la historia,
+ * pero el nuevo modelo no lo genera — se escribe NULL en adelante (D4).
+ */
 function audit(event, { license_id = null, fingerprint = null, ip = null, detail = null } = {}) {
   try {
     getDB().prepare(`
@@ -466,9 +569,10 @@ module.exports = {
   getAllLicenses,
   updateLicense,
   deleteLicense,
-  bindDevice,
-  resetDevice,
-  canResetDevice,
+  setPasswordHash,
+  clearPasswordAndSessions,
+  canResetPassword,
+  markPasswordReset,
   createSession,
   getSession,
   deleteSession,

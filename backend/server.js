@@ -174,7 +174,10 @@ const generalLimiter = rateLimit({
 
 const authLimiter = rateLimit({
   windowMs: 15 * 60 * 1000,
-  max: 10, // sección 5 del proyecto: "máximo 5 intentos fallidos... bloqueo temporal" — 10 de margen total (éxitos+fallos)
+  // sección 5 del proyecto: "máximo 5 intentos fallidos... bloqueo temporal" — 10 de margen total (éxitos+fallos).
+  // En desarrollo/test se relaja (probar el flujo de auth manualmente con npm run dev choca
+  // enseguida contra 10/15min); en producción se mantiene estricto como defensa anti-fuerza-bruta.
+  max: isProduction ? 10 : 1000,
   message: { error: 'rate_limited', message: 'Demasiados intentos. Espera 15 minutos.' }
 });
 

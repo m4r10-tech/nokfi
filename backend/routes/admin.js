@@ -11,7 +11,8 @@
  *   POST   /api/admin/licenses                         → crear licencia manualmente
  *   PUT    /api/admin/licenses/:id                      → editar (status, plan, notes)
  *   DELETE /api/admin/licenses/:id                      → eliminar permanentemente
- *   POST   /api/admin/licenses/:id/reset-device          → forzar reseteo de dispositivo (sin límite anual)
+ *   POST   /api/admin/licenses/:id/reset-password        → forzar reset de contraseña (limpia sesiones)
+ *   POST   /api/admin/licenses/:id/set-password          → asignar contraseña a una licencia (D3=b)
  *   GET    /api/admin/audit-log                         → últimos eventos de auditoría
  */
 
@@ -26,16 +27,19 @@ const {
   createLicense,
   updateLicense,
   deleteLicense,
-  resetDevice,
+  clearPasswordAndSessions,
+  setPasswordHash,
   deleteSessionsForLicense,
   getStats,
   getDB,
   audit
 } = require('../db/database');
 
+const { hashPassword } = require('../utils/password');
 const { sendLicenseKeyEmail, sendLicenseRevokedEmail } = require('../utils/mailer');
 
 const EMAIL_REGEX = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+const MIN_PASSWORD_LENGTH = 8;
 
 /** Ver razón en routes/auth.js — misma sanitización defensiva de texto libre */
 function sanitizeFreeText(text) {
@@ -148,13 +152,23 @@ router.post('/licenses', async (req, res) => {
   const plan = req.body?.plan === 'pro' ? 'pro' : 'basic';
   const notes = sanitizeFreeText(req.body?.notes || '').slice(0, 500);
   const notify = req.body?.notify === true;
+  const password = req.body?.password;
 
   if (!email || !EMAIL_REGEX.test(email)) {
     return res.status(400).json({ error: 'invalid_email' });
   }
+  // Contraseña opcional al crear; si llega, ya debe ser válida (no la validamos suave
+  // porque aquí decide el admin, no un usuario final, pero respetamos el mínimo).
+  if (password !== undefined && password !== null && (typeof password !== 'string' || password.length < MIN_PASSWORD_LENGTH)) {
+    return res.status(400).json({ error: 'weak_password' });
+  }
 
   try {
-    const license = createLicense({ email, plan, notes, created_by: 'admin_manual' });
+    const license = createLicense({
+      email, plan, notes,
+      password: password || null,
+      created_by: 'admin_manual'
+    });
     audit('LICENSE_CREATED_MANUAL', { license_id: license.id, ip: req.ip, detail: `email=${email}` });
 
     if (notify) {
@@ -230,21 +244,51 @@ router.delete('/licenses/:id', (req, res) => {
 });
 
 /* ──────────────────────────────────────────────────────────
-   POST /api/admin/licenses/:id/reset-device
-   Reseteo forzado por soporte, sin el límite de 1/año que aplica al usuario
-   (sección 15.2 del proyecto: "segundo reseteo en el mismo año → contactar soporte").
+   POST /api/admin/licenses/:id/reset-password
+   Reseteo forzado por soporte, sin el límite de 1/año que aplica al usuario.
+   Limpia la contraseña Y todas las sesiones activas — el usuario deberá
+   activar de nuevo (elegir contraseña) o usar el flujo de reset por email.
 ────────────────────────────────────────────────────────── */
-router.post('/licenses/:id/reset-device', (req, res) => {
+router.post('/licenses/:id/reset-password', (req, res) => {
   const id = parseInt(req.params.id, 10);
   const license = getLicenseById(id);
   if (!license) return res.status(404).json({ error: 'not_found' });
 
   try {
-    const updated = resetDevice(id);
-    audit('DEVICE_RESET_BY_ADMIN', { license_id: id, ip: req.ip });
+    const updated = clearPasswordAndSessions(id);
+    audit('PASSWORD_RESET_BY_ADMIN', { license_id: id, ip: req.ip });
     res.json(updated);
   } catch (e) {
-    console.error('[ADMIN RESET DEVICE]', e.message);
+    console.error('[ADMIN RESET PASSWORD]', e.message);
+    res.status(500).json({ error: 'internal_error' });
+  }
+});
+
+/* ──────────────────────────────────────────────────────────
+   POST /api/admin/licenses/:id/set-password
+   Body: { password }
+   El admin asigna una contraseña a una licencia que no la tiene (mecanismo D3=b
+   para licencias migradas del modelo viejo sin contraseña). El usuario entra con
+   ella y la cambia en Configuración.
+────────────────────────────────────────────────────────── */
+router.post('/licenses/:id/set-password', (req, res) => {
+  const id = parseInt(req.params.id, 10);
+  const license = getLicenseById(id);
+  if (!license) return res.status(404).json({ error: 'not_found' });
+  const password = req.body?.password;
+
+  if (typeof password !== 'string' || password.length < MIN_PASSWORD_LENGTH) {
+    return res.status(400).json({ error: 'weak_password', message: `Mínimo ${MIN_PASSWORD_LENGTH} caracteres.` });
+  }
+
+  try {
+    setPasswordHash(id, hashPassword(password));
+    const updated = getLicenseById(id);
+    audit('PASSWORD_SET_BY_ADMIN', { license_id: id, ip: req.ip });
+    // No reseteamos sesiones: el admin solo está dando acceso inicial, no revocándolo.
+    res.json(updated);
+  } catch (e) {
+    console.error('[ADMIN SET PASSWORD]', e.message);
     res.status(500).json({ error: 'internal_error' });
   }
 });

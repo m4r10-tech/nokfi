@@ -6,7 +6,8 @@ import ProtectedRoute from './components/ProtectedRoute';
 import DashboardLayout from './layouts/DashboardLayout';
 
 import Login from './pages/Login';
-import ResetDevice from './pages/ResetDevice';
+import ResetPassword from './pages/ResetPassword';
+import Reveal from './pages/Reveal';
 import Home from './pages/Home';
 import Cuestionario from './pages/Cuestionario';
 import ExcelHub from './pages/ExcelHub';
@@ -29,7 +30,8 @@ export default function App() {
           <Routes>
             <Route path="/" element={<Navigate to="/login" replace />} />
             <Route path="/login" element={<Login />} />
-            <Route path="/reset-device" element={<ResetDevice />} />
+            <Route path="/reset-password" element={<ResetPassword />} />
+            <Route path="/reveal" element={<Reveal />} />
 
             <Route
               path="/app"

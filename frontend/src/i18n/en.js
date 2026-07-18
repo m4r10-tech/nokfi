@@ -12,20 +12,45 @@ export default {
   },
   login: {
     title: 'Access Nokfi', subtitle: 'Enter your details to continue',
-    email: 'Email', licenseKey: 'License key', activateBtn: 'Activate license',
-    loginBtn: 'Log in', firstTime: 'First time? Activate your license',
+    email: 'Email', licenseKey: 'License key', password: 'Password',
+    confirmPassword: 'Confirm password', newPassword: 'New password',
+    activateBtn: 'Activate license', loginBtn: 'Log in',
+    firstTime: 'First time? Activate your license',
     alreadyActivated: 'Already activated? Log in',
-    deviceMismatch: 'This device does not match the one registered for your license.',
-    requestReset: 'Change device', notFound: 'Incorrect email or license key.',
+    deviceNameOptional: 'Name of this device (optional)', generator: 'Generate password',
+    requestReset: 'Reset password', notFound: 'Incorrect email or license key.',
+    invalidCredentials: 'Incorrect email, license key or password.',
+    invalidKeyFormat: 'Invalid key format. Use XXXX-XXXX-XXXX-XXXX.',
     licenseInactive: 'This license is not active. Contact support.',
-    notActivated: 'This license has not been activated on any device yet.'
+    notActivated: 'This license has no password yet. Use the initial activation.',
+    alreadyActivatedMsg: 'This license already has a password. Log in or reset it.',
+    passwordMismatch: 'Passwords do not match.',
+    weakPassword: 'Password must be at least 8 characters.'
   },
-  resetDevice: {
-    title: 'Request device change', email: 'Email', licenseKey: 'License key',
-    submit: 'Send confirmation link',
+  resetPassword: {
+    title: 'Reset password', email: 'Email', licenseKey: 'License key',
+    submit: 'Send link', submitConfirm: 'Save password',
     sent: 'If the details are correct, you will receive an email with instructions.',
-    confirmTitle: 'Confirm new device', confirming: 'Confirming...',
-    success: 'Device updated successfully.', invalidToken: 'This link is invalid or has expired.'
+    confirmTitle: 'Choose a new password',
+    success: 'Password reset successfully.', invalidToken: 'This link is invalid or has expired.',
+    noGeneratorHint: 'For security, pick your own password that you will remember.'
+  },
+  reveal: {
+    title: 'Payment complete!', subtitle: 'This is your Nokfi license key.',
+    yourKey: 'Your license key', alsoEmailed: 'We have also emailed it to you.',
+    goLogin: 'Go to login', notFound: 'We could not find your payment. If you believe this is an error, contact us.',
+    pending: 'We are confirming your payment, one moment...'
+  },
+  config: {
+    title: 'Settings',
+    appearance: 'Appearance', theme: 'Theme', dark: 'Dark', light: 'Light',
+    language: 'Language', profile: 'Company profile', companyName: 'Name', sector: 'Sector',
+    session: 'Session', planLabel: 'Plan', deviceLabel: 'Device', logout: 'Log out',
+    licenseKeySection: 'My license key',
+    revealKeyHint: 'Your key is hidden. Enter your password to reveal it.',
+    showKey: 'Show', hideKey: 'Hide',
+    changePasswordSection: 'Password', currentPassword: 'Current password', newPassword: 'New password',
+    changePasswordBtn: 'Change password', passwordChanged: 'Password updated successfully.'
   },
   onboarding: {
     welcome: 'Welcome to Nokfi', subtitle: 'Tell us a bit about your business to personalize your analyses',

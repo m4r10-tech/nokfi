@@ -1,10 +1,10 @@
 import { useState } from 'react';
 import { useNavigate, Link } from 'react-router-dom';
-import { KeyRound, Mail, Loader2 } from 'lucide-react';
+import { KeyRound, Mail, Lock, Eye, EyeOff, Loader2 } from 'lucide-react';
 import { authApi } from '../middleware/api';
-import { getDeviceFingerprint } from '../middleware/fingerprint';
 import { useAuth } from '../context/AuthContext';
 import { useLang } from '../context/LangContext';
+import PasswordGenerator from '../components/PasswordGenerator';
 import Logo from '../components/Logo';
 
 const KEY_REGEX = /^[A-Fa-f0-9]{4}-[A-Fa-f0-9]{4}-[A-Fa-f0-9]{4}-[A-Fa-f0-9]{4}$/;
@@ -13,7 +13,10 @@ export default function Login() {
   const [mode, setMode] = useState('login'); // 'login' | 'activate'
   const [email, setEmail] = useState('');
   const [licenseKey, setLicenseKey] = useState('');
+  const [password, setPassword] = useState('');
+  const [confirmPassword, setConfirmPassword] = useState('');
   const [deviceName, setDeviceName] = useState('');
+  const [showPwd, setShowPwd] = useState(false);
   const [loading, setLoading] = useState(false);
   const [errorMsg, setErrorMsg] = useState(null);
   const [showResetHint, setShowResetHint] = useState(false);
@@ -28,7 +31,15 @@ export default function Login() {
       return false;
     }
     if (!KEY_REGEX.test(licenseKey.trim())) {
-      setErrorMsg('Formato de clave inválido. Usa XXXX-XXXX-XXXX-XXXX.');
+      setErrorMsg(t('login.invalidKeyFormat'));
+      return false;
+    }
+    if (!password) {
+      setErrorMsg(t('login.password'));
+      return false;
+    }
+    if (mode === 'activate' && password !== confirmPassword) {
+      setErrorMsg(t('login.passwordMismatch'));
       return false;
     }
     return true;
@@ -41,11 +52,10 @@ export default function Login() {
     if (!validate()) return;
 
     setLoading(true);
-    const fingerprint = await getDeviceFingerprint();
 
     const call = mode === 'activate'
-      ? authApi.activate(email, licenseKey, fingerprint, deviceName || navigator.platform)
-      : authApi.login(email, licenseKey, fingerprint);
+      ? authApi.activate(email, licenseKey, password, deviceName || navigator.platform)
+      : authApi.login(email, licenseKey, password);
 
     const { ok, data } = await call;
     setLoading(false);
@@ -56,30 +66,33 @@ export default function Login() {
       return;
     }
 
-    // Mapeo exacto de la tabla de respuestas del contrato de API (sección 1)
     switch (data.error) {
       case 'not_found':
         setErrorMsg(t('login.notFound'));
+        break;
+      case 'invalid_credentials':
+        setErrorMsg(t('login.invalidCredentials'));
         break;
       case 'not_activated':
         setErrorMsg(t('login.notActivated'));
         setMode('activate');
         break;
-      case 'device_mismatch':
-        setErrorMsg(t('login.deviceMismatch'));
-        setShowResetHint(true);
-        break;
-      case 'device_already_bound':
-        setErrorMsg('Esta licencia ya está activada en otro dispositivo.');
-        setShowResetHint(true);
+      case 'already_activated':
+        setErrorMsg(t('login.alreadyActivatedMsg'));
+        setMode('login');
         break;
       case 'license_inactive':
         setErrorMsg(t('login.licenseInactive'));
+        break;
+      case 'weak_password':
+        setErrorMsg(data.message || t('login.weakPassword'));
         break;
       default:
         setErrorMsg(data.message || t('common.error'));
     }
   };
+
+  const fillBoth = (pwd) => { setPassword(pwd); setConfirmPassword(pwd); };
 
   return (
     <div className="min-h-screen flex items-center justify-center px-4" style={{ background: 'var(--bg-base)' }}>
@@ -92,11 +105,26 @@ export default function Login() {
 
           <form onSubmit={handleSubmit} className="flex flex-col gap-3">
             <Field icon={Mail} type="email" placeholder={t('login.email')} value={email} onChange={setEmail} />
+
             <Field icon={KeyRound} type="text" placeholder="XXXX-XXXX-XXXX-XXXX" value={licenseKey}
               onChange={(v) => setLicenseKey(v.toUpperCase())} />
 
+            <Field icon={Lock} type={showPwd ? 'text' : 'password'} placeholder={t('login.password')}
+              value={password} onChange={setPassword}
+              trailing={
+                <button type="button" onClick={() => setShowPwd(s => !s)}
+                  className="absolute right-3 top-1/2 -translate-y-1/2" style={{ color: 'var(--text-muted)' }}>
+                  {showPwd ? <EyeOff size={16} /> : <Eye size={16} />}
+                </button>
+              } />
+
             {mode === 'activate' && (
-              <Field type="text" placeholder="Nombre de este dispositivo (opcional)" value={deviceName} onChange={setDeviceName} />
+              <>
+                <Field icon={Lock} type={showPwd ? 'text' : 'password'} placeholder={t('login.confirmPassword')}
+                  value={confirmPassword} onChange={setConfirmPassword} />
+                <PasswordGenerator onGenerate={fillBoth} label={t('login.generator')} />
+                <Field type="text" placeholder={t('login.deviceNameOptional')} value={deviceName} onChange={setDeviceName} />
+              </>
             )}
 
             {errorMsg && (
@@ -106,7 +134,7 @@ export default function Login() {
             )}
 
             {showResetHint && (
-              <Link to="/reset-device" className="text-sm text-center hover:underline" style={{ color: 'var(--accent)' }}>
+              <Link to="/reset-password" className="text-sm text-center hover:underline" style={{ color: 'var(--accent)' }}>
                 {t('login.requestReset')} →
               </Link>
             )}
@@ -119,7 +147,7 @@ export default function Login() {
             </button>
           </form>
 
-          <button onClick={() => { setMode(m => (m === 'login' ? 'activate' : 'login')); setErrorMsg(null); }}
+          <button onClick={() => { setMode(m => (m === 'login' ? 'activate' : 'login')); setErrorMsg(null); setConfirmPassword(''); }}
             className="mt-4 text-sm w-full text-center hover:underline" style={{ color: 'var(--text-secondary)' }}>
             {mode === 'login' ? t('login.firstTime') : t('login.alreadyActivated')}
           </button>
@@ -129,13 +157,14 @@ export default function Login() {
   );
 }
 
-function Field({ icon: Icon, type, placeholder, value, onChange }) {
+function Field({ icon: Icon, type, placeholder, value, onChange, trailing }) {
   return (
     <div className="relative">
       {Icon && <Icon size={16} className="absolute left-3 top-1/2 -translate-y-1/2" style={{ color: 'var(--text-muted)' }} />}
       <input type={type} placeholder={placeholder} value={value} onChange={(e) => onChange(e.target.value)} required
-        className={`w-full rounded-lg py-2.5 ${Icon ? 'pl-9' : 'pl-3'} pr-3 text-sm outline-none`}
+        className={`w-full rounded-lg py-2.5 ${Icon ? 'pl-9' : 'pl-3'} ${trailing ? 'pr-10' : 'pr-3'} text-sm outline-none`}
         style={{ background: 'var(--surface-2)', border: '0.5px solid var(--border-strong)', color: 'var(--text-primary)' }} />
+      {trailing}
     </div>
   );
 }

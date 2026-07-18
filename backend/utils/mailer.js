@@ -6,7 +6,7 @@
  *
  * Emails que envía el sistema (ver secciones 3, 5, 15 del proyecto):
  *   - sendLicenseKeyEmail        → respaldo de la clave tras el pago
- *   - sendDeviceResetEmail       → enlace de un solo uso para resetear dispositivo
+ *   - sendPasswordResetEmail     → enlace de un solo uso para restablecer la contraseña
  *   - sendLicenseRevokedEmail    → aviso de revocación (chargeback / abuso)
  *
  * Diseño: cada función arma el HTML del email y delega el envío real a
@@ -132,40 +132,41 @@ async function sendLicenseKeyEmail({ to, licenseKey, plan }) {
         ${escapeHtml(licenseKey)}
       </div>
       <p style="color:#c9c9c5;line-height:1.6;">
-        Actívala en <a href="${APP_URL}" style="color:#10B981;">${APP_URL}</a> usando este email y la clave de arriba.
+        Actívala en <a href="${APP_URL}" style="color:#10B981;">${APP_URL}</a> usando este email, la clave de arriba
+        y una contraseña que elijas tú.
       </p>
       <p style="color:#6b6b67;font-size:13px;line-height:1.6;">
-        Tu licencia quedará vinculada de forma permanente al primer dispositivo donde la actives.
+        Guarda bien la contraseña: la necesitarás para iniciar sesión y para ver tu clave dentro de la app.
       </p>
     `
   });
   return dispatch({ to, subject: 'Tu clave de licencia Nokfi', html });
 }
 
-/** Enlace de un solo uso para resetear el dispositivo vinculado (sección 15.2 del proyecto) */
-async function sendDeviceResetEmail({ to, token, expires_at }) {
-  const resetUrl = `${APP_URL}/reset-device?token=${encodeURIComponent(token)}`;
+/** Enlace de un solo uso para restablecer la contraseña olvidada */
+async function sendPasswordResetEmail({ to, token, expires_at }) {
+  const resetUrl = `${APP_URL}/reset-password?token=${encodeURIComponent(token)}`;
   const html = baseTemplate({
-    title: 'Resetea tu dispositivo en Nokfi',
+    title: 'Restablece tu contraseña en Nokfi',
     bodyHtml: `
-      <h2 style="margin-top:0;color:#F5F5F5;">Cambio de dispositivo solicitado</h2>
+      <h2 style="margin-top:0;color:#F5F5F5;">Restablecimiento de contraseña</h2>
       <p style="color:#c9c9c5;line-height:1.6;">
-        Hemos recibido una solicitud para vincular tu licencia Nokfi a un nuevo dispositivo.
-        Si has sido tú, confirma con el siguiente enlace:
+        Hemos recibido una solicitud para restablecer la contraseña de tu licencia Nokfi.
+        Si has sido tú, elige una nueva contraseña con el siguiente enlace:
       </p>
       <div style="text-align:center;margin:24px 0;">
         <a href="${resetUrl}" style="background:#10B981;color:#0F0F0F;padding:12px 24px;border-radius:8px;
                   text-decoration:none;font-weight:600;display:inline-block;">
-          Confirmar nuevo dispositivo
+          Restablecer contraseña
         </a>
       </div>
       <p style="color:#6b6b67;font-size:13px;line-height:1.6;">
         Este enlace caduca el ${escapeHtml(new Date(expires_at).toLocaleString('es-ES'))} y solo puede usarse una vez.
-        Si no has sido tú, ignora este email — tu dispositivo actual seguirá funcionando con normalidad.
+        Si no has sido tú, ignora este email — tu contraseña actual seguirá funcionando con normalidad.
       </p>
     `
   });
-  return dispatch({ to, subject: 'Confirma el cambio de dispositivo — Nokfi', html });
+  return dispatch({ to, subject: 'Restablece tu contraseña — Nokfi', html });
 }
 
 /** Aviso de revocación de licencia (chargeback o abuso — sección 15.1/15.4 del proyecto) */
@@ -188,6 +189,6 @@ async function sendLicenseRevokedEmail({ to, reason }) {
 
 module.exports = {
   sendLicenseKeyEmail,
-  sendDeviceResetEmail,
+  sendPasswordResetEmail,
   sendLicenseRevokedEmail
 };

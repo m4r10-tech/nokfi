@@ -33,7 +33,7 @@ async function request(path, { method = 'GET', body, auth = false, isFormData = 
   let data = {};
   try { data = await res.json(); } catch { /* respuestas vacías, ej. 204 */ }
 
-  const sessionErrors = ['session_invalid', 'auth_required', 'license_not_found', 'device_mismatch'];
+  const sessionErrors = ['session_invalid', 'auth_required', 'license_not_found'];
   if (auth && res.status === 401 && sessionErrors.includes(data.error)) {
     sessionToken = null;
     if (onSessionExpired) onSessionExpired(data.error);
@@ -43,16 +43,19 @@ async function request(path, { method = 'GET', body, auth = false, isFormData = 
 }
 
 export const authApi = {
-  activate: (email, license_key, client_fingerprint, device_name) =>
-    request('/auth/activate', { method: 'POST', body: { email, license_key, client_fingerprint, device_name } }),
-  login: (email, license_key, client_fingerprint) =>
-    request('/auth/login', { method: 'POST', body: { email, license_key, client_fingerprint } }),
+  activate: (email, license_key, password, device_name) =>
+    request('/auth/activate', { method: 'POST', body: { email, license_key, password, device_name } }),
+  login: (email, license_key, password) =>
+    request('/auth/login', { method: 'POST', body: { email, license_key, password } }),
   verify: () => request('/auth/verify', { method: 'POST', auth: true }),
   logout: () => request('/auth/logout', { method: 'POST', auth: true }),
-  requestDeviceReset: (email, license_key) =>
-    request('/auth/request-device-reset', { method: 'POST', body: { email, license_key } }),
-  confirmDeviceReset: (token, client_fingerprint, device_name) =>
-    request('/auth/confirm-device-reset', { method: 'POST', body: { token, client_fingerprint, device_name } })
+  requestPasswordReset: (email, license_key) =>
+    request('/auth/request-password-reset', { method: 'POST', body: { email, license_key } }),
+  confirmPasswordReset: (token, new_password, device_name) =>
+    request('/auth/confirm-password-reset', { method: 'POST', body: { token, new_password, device_name } }),
+  revealKey: (password) => request('/auth/reveal-key', { method: 'POST', auth: true, body: { password } }),
+  changePassword: (current_password, new_password) =>
+    request('/auth/change-password', { method: 'POST', auth: true, body: { current_password, new_password } })
 };
 
 export const aiApi = {
@@ -70,7 +73,8 @@ export const paymentsApi = {
   stripeCheckout: (email, plan) => request('/payments/stripe/create-checkout', { method: 'POST', body: { email, plan } }),
   paypalOrder: (email, plan) => request('/payments/paypal/create-order', { method: 'POST', body: { email, plan } }),
   coinbaseCharge: (email, plan) => request('/payments/coinbase/create-charge', { method: 'POST', body: { email, plan } }),
-  revolutOrder: (email, plan) => request('/payments/revolut/create-order', { method: 'POST', body: { email, plan } })
+  revolutOrder: (email, plan) => request('/payments/revolut/create-order', { method: 'POST', body: { email, plan } }),
+  reveal: (session_id) => request('/payments/stripe/reveal?session_id=' + encodeURIComponent(session_id))
 };
 
 export default request;

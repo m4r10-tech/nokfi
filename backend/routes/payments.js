@@ -10,6 +10,7 @@
  *   POST /api/payments/paypal/create-order
  *   POST /api/payments/coinbase/create-charge
  *   POST /api/payments/revolut/create-order
+ *   GET  /api/payments/stripe/reveal        → muestra la clave recién comprada en /reveal
  */
 
 'use strict';
@@ -18,9 +19,37 @@ const express = require('express');
 const router = express.Router();
 
 const { paypalApiBase, getPaypalAccessToken } = require('../utils/paypalAuth');
+const { getLicenseByPaymentRef } = require('../db/database');
 
 const LICENSE_PRICE_EUR = Number(process.env.LICENSE_PRICE_EUR || 150);
 const EMAIL_REGEX = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+
+/* ──────────────────────────────────────────────────────────
+   GET /api/payments/stripe/reveal?session_id=...
+
+   Página /reveal al volver de Stripe Checkout: muestra la clave recién
+   comprada en la web (además del email, que ya se envía en el webhook).
+   No requiere auth — el `session_id` es la URL-secreta que Stripe solo
+   entrega al navegador del comprador (va en el success_url). No expone
+   nada que el comprador no tenga ya en su bandeja de entrada.
+
+   Estados:
+     200 → { key, email, plan }    la licencia ya fue creada por el webhook
+     404 → { error: 'not_found' }  el webhook aún no ha llegado (o el id no existe)
+────────────────────────────────────────────────────────── */
+router.get('/stripe/reveal', (req, res) => {
+  const session_id = (req.query?.session_id || '').toString().trim();
+  if (!session_id) {
+    return res.status(400).json({ error: 'missing_session_id' });
+  }
+
+  const license = getLicenseByPaymentRef('stripe', session_id);
+  if (!license || license.status !== 'active') {
+    return res.status(404).json({ error: 'not_found' });
+  }
+
+  res.json({ key: license.key, email: license.email, plan: license.plan });
+});
 
 /* ──────────────────────────────────────────────────────────
    POST /api/payments/stripe/create-checkout
