@@ -1,16 +1,25 @@
 /**
  * routes/payments.js
  *
- * Creación de la intención/sesión de pago en cada proveedor.
+ * Creación de la intención/sesión de pago para SUSCRIPCIONES mensuales (Fase 3).
  * La generación REAL de la licencia ocurre en routes/webhooks.js, nunca aquí
  * (sección 4 del proyecto: "la clave nunca existe antes del pago confirmado").
  *
+ * Modelo de billing (Fase 3): suscripción mensual de 3 tiers vía Stripe.
+ *   mini  €10/mes  → 1000 céntimos
+ *   pro   €25/mes  → 2500 céntimos
+ *   max   €40/mes  → 4000 céntimos
+ * El viejo pago único lifetime (€150) queda ELIMINADO. Cancelar y mejorar plan
+ * se gestionan vía el Stripe Customer Portal (endpoint create-portal-session),
+ * que cálcula las prorratas de forma nativa.
+ *
  * Endpoints:
- *   POST /api/payments/stripe/create-checkout
- *   POST /api/payments/paypal/create-order
- *   POST /api/payments/coinbase/create-charge
- *   POST /api/payments/revolut/create-order
- *   GET  /api/payments/stripe/reveal        → muestra la clave recién comprada en /reveal
+ *   POST /api/payments/stripe/create-checkout         → Checkout de suscripción
+ *   POST /api/payments/stripe/create-portal-session   → Customer Portal (cancel/upgrade), auth Bearer
+ *   GET  /api/payments/stripe/reveal                  → muestra la clave recién comprada en /reveal
+ *   POST /api/payments/paypal/create-order            → 410 (lifetime discontinued)
+ *   POST /api/payments/coinbase/create-charge         → 410 (lifetime discontinued)
+ *   POST /api/payments/revolut/create-order           → 410 (lifetime discontinued)
  */
 
 'use strict';
@@ -18,10 +27,19 @@
 const express = require('express');
 const router = express.Router();
 
-const { paypalApiBase, getPaypalAccessToken } = require('../utils/paypalAuth');
 const { getLicenseByPaymentRef } = require('../db/database');
+const { requireLicense } = require('../middleware/requireLicense');
 
-const LICENSE_PRICE_EUR = Number(process.env.LICENSE_PRICE_EUR || 150);
+/* Precios de los planes de suscripción mensual, en céntimos de EUR (Stripe usa
+   la unidad menor). Mismo mapa que getStats() en db/database.js para MRR. */
+const PLAN_PRICES = {
+  mini: { amount: 1000, name: 'Mini' },   // €10/mes
+  pro:  { amount: 2500, name: 'Pro' },    // €25/mes
+  max:  { amount: 4000, name: 'Max' }     // €40/mes
+};
+const VALID_PLANS = Object.keys(PLAN_PRICES);
+function coercePlan(plan) { return VALID_PLANS.includes(plan) ? plan : 'mini'; }
+
 const EMAIL_REGEX = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
 
 /* ──────────────────────────────────────────────────────────
@@ -54,10 +72,14 @@ router.get('/stripe/reveal', (req, res) => {
 /* ──────────────────────────────────────────────────────────
    POST /api/payments/stripe/create-checkout
    Body: { email, plan }
+   Crea una Checkout Session en modo SUBSCRIPTION (pago mensual recurrente)
+   para el plan elegido. La licencia se crea en el webhook al recibir el
+   `checkout.session.completed` (modo subscription).
 ────────────────────────────────────────────────────────── */
 router.post('/stripe/create-checkout', async (req, res) => {
   const email = (req.body?.email || '').trim().toLowerCase();
-  const plan = req.body?.plan === 'pro' ? 'pro' : 'basic';
+  const plan = coercePlan(req.body?.plan);
+  const price = PLAN_PRICES[plan];
 
   if (!email || !EMAIL_REGEX.test(email)) {
     return res.status(400).json({ error: 'invalid_email' });
@@ -68,14 +90,17 @@ router.post('/stripe/create-checkout', async (req, res) => {
 
   try {
     const params = new URLSearchParams({
-      'mode': 'payment',
+      'mode': 'subscription',
       'success_url': `${process.env.APP_PUBLIC_URL}/reveal?session_id={CHECKOUT_SESSION_ID}`,
       'cancel_url': `${process.env.LANDING_PUBLIC_URL}/?cancelled=true`,
       'customer_email': email,
       'line_items[0][price_data][currency]': 'eur',
-      'line_items[0][price_data][product_data][name]': `Nokfi — Licencia ${plan === 'pro' ? 'Pro' : 'Básica'}`,
-      'line_items[0][price_data][unit_amount]': String(Math.round(LICENSE_PRICE_EUR * 100)),
+      'line_items[0][price_data][recurring][interval]': 'month',
+      'line_items[0][price_data][product_data][name]': `Nokfi — Plan ${price.name}`,
+      'line_items[0][price_data][unit_amount]': String(price.amount),
       'line_items[0][quantity]': '1',
+      'subscription_data[metadata][plan]': plan,
+      'subscription_data[metadata][email]': email,
       'metadata[plan]': plan,
       'metadata[email]': email
     });
@@ -104,159 +129,83 @@ router.post('/stripe/create-checkout', async (req, res) => {
 });
 
 /* ──────────────────────────────────────────────────────────
-   POST /api/payments/paypal/create-order
-   Body: { email, plan }
+   POST /api/payments/stripe/create-portal-session   (auth: Bearer)
+
+   Crea una sesión del Stripe Customer Portal para que el usuario gestione su
+   suscripción desde la propia interfaz de Stripe: cancelar (a fin de periodo),
+   mejorar de plan (mini→pro→max) con prorrata automática, o actualizar el método
+   de pago. Se prefirió el Portal nativo sobre endpoints custom por menos código
+   y menos bordes (prorratas, currencies, dunning) ya resueltos por Stripe.
+
+   Requiere req.license (injectado por requireLicense), con un
+   stripe_customer_id válido — las licencias legacy migradas (lifetime viejo)
+   no tienen customer en Stripe y reciben un error claro en vez de un portal
+   vacío.
+
+   Devuelve: { url } → el frontend redirige a esa URL.
 ────────────────────────────────────────────────────────── */
-router.post('/paypal/create-order', async (req, res) => {
-  const email = (req.body?.email || '').trim().toLowerCase();
-  const plan = req.body?.plan === 'pro' ? 'pro' : 'basic';
-
-  if (!email || !EMAIL_REGEX.test(email)) {
-    return res.status(400).json({ error: 'invalid_email' });
+router.post('/stripe/create-portal-session', requireLicense, async (req, res) => {
+  const license = req.license;
+  if (!license.stripe_customer_id) {
+    return res.status(400).json({
+      error: 'not_stripe_customer',
+      message: 'Tu licencia no está vinculada a una suscripción de Stripe (licencia legacy). No hay suscripción que gestionar.'
+    });
   }
-  if (!process.env.PAYPAL_CLIENT_ID || !process.env.PAYPAL_CLIENT_SECRET) {
-    return res.status(500).json({ error: 'paypal_not_configured' });
+  if (!process.env.STRIPE_SECRET_KEY) {
+    return res.status(500).json({ error: 'stripe_not_configured' });
   }
 
+  const returnUrl = `${process.env.APP_PUBLIC_URL}/app/configuracion`;
   try {
-    const accessToken = await getPaypalAccessToken();
-
-    const orderRes = await fetch(`${paypalApiBase()}/v2/checkout/orders`, {
+    const portalRes = await fetch('https://api.stripe.com/v1/billing_portal/sessions', {
       method: 'POST',
       headers: {
-        'Authorization': `Bearer ${accessToken}`,
-        'Content-Type': 'application/json'
+        'Authorization': `Bearer ${process.env.STRIPE_SECRET_KEY}`,
+        'Content-Type': 'application/x-www-form-urlencoded'
       },
-      body: JSON.stringify({
-        intent: 'CAPTURE',
-        purchase_units: [{
-          amount: { currency_code: 'EUR', value: LICENSE_PRICE_EUR.toFixed(2) },
-          description: `Nokfi — Licencia ${plan === 'pro' ? 'Pro' : 'Básica'}`,
-          custom_id: JSON.stringify({ email, plan })
-        }]
-      })
+      body: new URLSearchParams({
+        'customer': license.stripe_customer_id,
+        'return_url': returnUrl
+      }).toString()
     });
 
-    if (!orderRes.ok) {
-      const errBody = await orderRes.text();
-      console.error('[PAYPAL] Error creando orden:', errBody);
-      return res.status(502).json({ error: 'paypal_error' });
+    if (!portalRes.ok) {
+      const errBody = await portalRes.text();
+      console.error('[STRIPE PORTAL] Error creando sesión de portal:', errBody);
+      return res.status(502).json({ error: 'stripe_error' });
     }
 
-    const order = await orderRes.json();
-    res.json({ order_id: order.id });
+    const session = await portalRes.json();
+    res.json({ url: session.url });
   } catch (e) {
-    console.error('[PAYPAL] Excepción:', e.message);
+    console.error('[STRIPE PORTAL] Excepción:', e.message);
     res.status(500).json({ error: 'internal_error' });
   }
 });
 
 /* ──────────────────────────────────────────────────────────
-   POST /api/payments/coinbase/create-charge
-   Body: { email, plan }
+   Proveedores alternativos (PayPal / Coinbase / Revolut) — 410 GONE
+
+   Estos tres endpoints vendían el pago ÚNICO lifetime de €150, eliminado en
+   Fase 3. Como las suscripciones recurrentes solo se soportan vía Stripe en
+   esta fase (PayPal/Revolut/Coinbase para recurring añadiría mucha
+   complejidad; se reabrirá más adelante), estos endpoints se dejan registrados
+   para no romper posibles referencias, pero responden 410 Gone con un mensaje
+   claro en vez de crear un cobro de un producto que ya no existe.
+
+   NOTA: los WEBHOOKS de estos proveedores siguen activos en routes/webhooks.js
+   para procesar eventos históricos (idempotentes vía payment_events).
 ────────────────────────────────────────────────────────── */
-router.post('/coinbase/create-charge', async (req, res) => {
-  const email = (req.body?.email || '').trim().toLowerCase();
-  const plan = req.body?.plan === 'pro' ? 'pro' : 'basic';
-
-  if (!email || !EMAIL_REGEX.test(email)) {
-    return res.status(400).json({ error: 'invalid_email' });
-  }
-  if (!process.env.COINBASE_COMMERCE_API_KEY) {
-    return res.status(500).json({ error: 'coinbase_not_configured' });
-  }
-
-  try {
-    const chargeRes = await fetch('https://api.commerce.coinbase.com/charges', {
-      method: 'POST',
-      headers: {
-        'X-CC-Api-Key': process.env.COINBASE_COMMERCE_API_KEY,
-        'X-CC-Version': '2018-03-22',
-        'Content-Type': 'application/json'
-      },
-      body: JSON.stringify({
-        name: `Nokfi — Licencia ${plan === 'pro' ? 'Pro' : 'Básica'}`,
-        description: 'Acceso de por vida a Nokfi',
-        pricing_type: 'fixed_price',
-        local_price: { amount: LICENSE_PRICE_EUR.toFixed(2), currency: 'EUR' },
-        metadata: { email, plan }
-      })
-    });
-
-    if (!chargeRes.ok) {
-      const errBody = await chargeRes.text();
-      console.error('[COINBASE] Error creando charge:', errBody);
-      return res.status(502).json({ error: 'coinbase_error' });
-    }
-
-    const charge = await chargeRes.json();
-    res.json({ checkout_url: charge.data.hosted_url });
-  } catch (e) {
-    console.error('[COINBASE] Excepción:', e.message);
-    res.status(500).json({ error: 'internal_error' });
-  }
-});
-
-/* ──────────────────────────────────────────────────────────
-   POST /api/payments/revolut/create-order
-   Body: { email, plan }
-
-   Revolut Merchant API: crear un "order" devuelve un checkout_url al que
-   se redirige al cliente, igual que Stripe/Coinbase. El email y el plan
-   se mandan en merchant_order_data.reference para poder recuperarlos en
-   el webhook (Revolut no soporta un campo "metadata" libre como Stripe,
-   así que codificamos ambos datos en un único string JSON dentro de
-   "reference", que Revolut nos devuelve tal cual en el evento del webhook).
-────────────────────────────────────────────────────────── */
-router.post('/revolut/create-order', async (req, res) => {
-  const email = (req.body?.email || '').trim().toLowerCase();
-  const plan = req.body?.plan === 'pro' ? 'pro' : 'basic';
-
-  if (!email || !EMAIL_REGEX.test(email)) {
-    return res.status(400).json({ error: 'invalid_email' });
-  }
-  if (!process.env.REVOLUT_API_KEY) {
-    return res.status(500).json({ error: 'revolut_not_configured' });
-  }
-
-  try {
-    const reference = JSON.stringify({ email, plan });
-    const amountMinorUnits = Math.round(LICENSE_PRICE_EUR * 100); // céntimos, igual que Stripe
-
-    const orderRes = await fetch(`${revolutApiBase()}/api/orders`, {
-      method: 'POST',
-      headers: {
-        'Authorization': `Bearer ${process.env.REVOLUT_API_KEY}`,
-        'Content-Type': 'application/json',
-        'Revolut-Api-Version': '2024-09-01'
-      },
-      body: JSON.stringify({
-        amount: amountMinorUnits,
-        currency: 'EUR',
-        merchant_order_data: { reference },
-        capture_mode: 'automatic'
-      })
-    });
-
-    if (!orderRes.ok) {
-      const errBody = await orderRes.text();
-      console.error('[REVOLUT] Error creando order:', errBody);
-      return res.status(502).json({ error: 'revolut_error' });
-    }
-
-    const order = await orderRes.json();
-    res.json({ checkout_url: order.checkout_url });
-  } catch (e) {
-    console.error('[REVOLUT] Excepción:', e.message);
-    res.status(500).json({ error: 'internal_error' });
-  }
-});
-
-/** Base URL de la Merchant API de Revolut según el entorno (sandbox o producción) */
-function revolutApiBase() {
-  return process.env.REVOLUT_ENV === 'live'
-    ? 'https://merchant.revolut.com'
-    : 'https://sandbox-merchant.revolut.com';
+function lifetimeDiscontinued(provider, req, res) {
+  return res.status(410).json({
+    error: 'lifetime_discontinued',
+    message: `El pago único de por vida ha sido reemplazado por suscripciones mensuales vía Stripe. ${provider} para suscripciones volverá en una próxima fase.`
+  });
 }
+
+router.post('/paypal/create-order', (req, res) => lifetimeDiscontinued('PayPal', req, res));
+router.post('/coinbase/create-charge', (req, res) => lifetimeDiscontinued('Coinbase', req, res));
+router.post('/revolut/create-order', (req, res) => lifetimeDiscontinued('Revolut', req, res));
 
 module.exports = router;

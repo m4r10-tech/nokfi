@@ -25,7 +25,8 @@ export default {
     notActivated: 'Esta licencia aún no tiene contraseña. Usa la activación inicial.',
     alreadyActivatedMsg: 'Esta licencia ya tiene contraseña. Inicia sesión o restablécela.',
     passwordMismatch: 'Las contraseñas no coinciden.',
-    weakPassword: 'La contraseña debe tener al menos 8 caracteres.'
+    weakPassword: 'La contraseña debe tener al menos 8 caracteres.',
+    noLicense: '¿Aún no tienes licencia? Ver planes y precios'
   },
   resetPassword: {
     title: 'Restablecer contraseña', email: 'Email', licenseKey: 'Clave de licencia',
@@ -50,7 +51,30 @@ export default {
     revealKeyHint: 'Tu clave está oculta. Introduce tu contraseña para verla.',
     showKey: 'Mostrar', hideKey: 'Ocultar',
     changePasswordSection: 'Contraseña', currentPassword: 'Contraseña actual', newPassword: 'Nueva contraseña',
-    changePasswordBtn: 'Cambiar contraseña', passwordChanged: 'Contraseña actualizada correctamente.'
+    changePasswordBtn: 'Cambiar contraseña', passwordChanged: 'Contraseña actualizada correctamente.',
+    subscriptionSection: 'Suscripción',
+    subscriptionPlan: 'Plan actual', subscriptionStatus: 'Estado', subscriptionRenews: 'Próxima renovación',
+    subscriptionCancelled: 'Cancelada — acceso hasta el fin de periodo',
+    subscriptionNoRenewal: 'Sin renovación programada',
+    aiQuota: 'Cuota de análisis IA', aiQuotaPerDay: 'análisis/día',
+    manageSubscription: 'Gestionar suscripción',
+    manageHint: 'Cancela o mejora tu plan desde el portal de Stripe. La mejora se prorratea automáticamente.',
+    legacyNote: 'Esta es una licencia legacy (de por vida). No hay suscripción de Stripe que gestionar.',
+    portalError: 'No se pudo abrir el portal de gestión. Inténtalo de nuevo más tarde.'
+  },
+  pricing: {
+    title: 'Elige tu plan', subtitle: 'Suscripción mensual. Cancela cuando quieras.',
+    perMonth: '/mes', emailPlaceholder: 'Tu email',
+    cta: 'Suscribirme', goLogin: 'Ya tengo licencia — iniciar sesión',
+    features: {
+      mini: ['30 análisis IA al día', 'Diagnóstico completo', '6 análisis Excel', 'Historial'],
+      pro: ['80 análisis IA al día', 'Todo lo de Mini', 'Calculadoras avanzadas', 'Informes'],
+      max: ['200 análisis IA al día', 'Todo lo de Pro', 'Soporte prioritario', 'Acceso anticipado a novedades']
+    },
+    aiBadge: 'análisis IA/día',
+    monthSuffix: '/mes',
+    invalidEmail: 'Introduce un email válido.',
+    checkoutError: 'No se pudo iniciar el pago. Inténtalo de nuevo.'
   },
   onboarding: {
     welcome: 'Bienvenido a Nokfi', subtitle: 'Cuéntanos un poco sobre tu negocio para personalizar tus análisis',

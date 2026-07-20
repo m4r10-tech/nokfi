@@ -8,6 +8,7 @@ import DashboardLayout from './layouts/DashboardLayout';
 import Login from './pages/Login';
 import ResetPassword from './pages/ResetPassword';
 import Reveal from './pages/Reveal';
+import Pricing from './pages/Pricing';
 import Home from './pages/Home';
 import Cuestionario from './pages/Cuestionario';
 import ExcelHub from './pages/ExcelHub';
@@ -32,6 +33,7 @@ export default function App() {
             <Route path="/login" element={<Login />} />
             <Route path="/reset-password" element={<ResetPassword />} />
             <Route path="/reveal" element={<Reveal />} />
+            <Route path="/pricing" element={<Pricing />} />
 
             <Route
               path="/app"

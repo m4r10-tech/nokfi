@@ -28,7 +28,7 @@
 const express = require('express');
 const router = express.Router();
 const { requireLicense } = require('../middleware/requireLicense');
-const { audit, countAiAnalysesToday } = require('../db/database');
+const { audit, countAiAnalysesToday, aiQuotaForPlan } = require('../db/database');
 
 const MAX_PROMPT_LENGTH = 50000; // protección básica contra abuso/prompts gigantes
 const DEFAULT_MAX_TOKENS = 1500;
@@ -36,11 +36,12 @@ const HARD_MAX_TOKENS = 4000;
 
 // ⚠️ AUDITORÍA DE SEGURIDAD — límite diario por licencia (ver countAiAnalysesToday
 // en db/database.js). Protege la cuota compartida de Gemini (~1.500/día para
-// todo el proyecto) de que un solo cliente la agote para el resto. 50/día por
-// licencia es generoso para el uso esperado (cuestionario + 6 subapartados de
-// Excel) y deja margen amplio para decenas de clientes simultáneos sin
-// arriesgar la cuota global.
-const MAX_AI_CALLS_PER_LICENSE_PER_DAY = 50;
+// todo el proyecto) de que un solo cliente la agote para el resto. La cuota es
+// ahora TIERED por plan (mini 30 / pro 80 / max 200 análisis/día — ver
+// aiQuotaForPlan en db/database.js), lo que da valor a los planes altos y
+// sigue dejando margen amplio para muchos clientes simultáneos sin arriesgar
+// la cuota global. Para planes legacy migrados (billing_model='legacy', plan
+// ya mapeado a 'max') aplica la cuota de max.
 
 router.post('/ai', requireLicense, async (req, res) => {
   const prompt = req.body?.prompt;
@@ -62,11 +63,12 @@ router.post('/ai', requireLicense, async (req, res) => {
   }
 
   const usedToday = countAiAnalysesToday(req.license.id);
-  if (usedToday >= MAX_AI_CALLS_PER_LICENSE_PER_DAY) {
-    audit('AI_LICENSE_DAILY_LIMIT_REACHED', { license_id: req.license.id, ip: req.ip, detail: `used=${usedToday}` });
+  const dailyLimit = aiQuotaForPlan(req.license.plan);
+  if (usedToday >= dailyLimit) {
+    audit('AI_LICENSE_DAILY_LIMIT_REACHED', { license_id: req.license.id, ip: req.ip, detail: `used=${usedToday}/${dailyLimit} plan=${req.license.plan}` });
     return res.status(429).json({
       error: 'license_daily_limit_reached',
-      message: 'Has alcanzado el límite diario de análisis de tu licencia. Inténtalo de nuevo mañana.'
+      message: 'Has alcanzado el límite diario de análisis de tu plan. Inténtalo de nuevo mañana o mejora tu suscripción para más análisis.'
     });
   }
 
@@ -128,7 +130,6 @@ router.post('/ai', requireLicense, async (req, res) => {
 
     audit('AI_ANALYSIS_GENERATED', {
       license_id: req.license.id,
-      fingerprint: req.session.fingerprint,
       ip: req.ip,
       detail: `prompt_chars=${prompt.length}, provider=gemini`
     });

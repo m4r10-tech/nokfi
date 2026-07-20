@@ -81,6 +81,12 @@ async function main() {
 
   // require server.js → initDB() + listen() automáticos (ver server.js:252)
   require('../server');
+  // Determinismo: los tests de pago llaman a handlers que leen STRIPE_SECRET_KEY
+  // en tiempo de petición. server.js ejecuta dotenv.config() al requerirlo y podría
+  // haber cargado una key real del .env local. La borramos para que los asserts sean
+  // reproducibles/offline (checkout → stripe_not_configured; portal legacy no la usa).
+  delete process.env.STRIPE_SECRET_KEY;
+  delete process.env.STRIPE_WEBHOOK_SECRET;
   baseUrl = `http://localhost:${process.env.PORT}`;
 
   // Esperar a que el server escuche (poll /health)
@@ -108,13 +114,13 @@ async function main() {
   // ═══════════════════════════════════════════════════════════
   // 1. Admin: create license WITH password
   // ═══════════════════════════════════════════════════════════
-  await checkAsync('admin createLicense+password → 201',
-    post('/api/admin/licenses', { email: testEmail, plan: 'basic', password: testPassword }, 'admin'),
+  await checkAsync('admin createLicense+password (Fase 3 plan=mini) → 201',
+    post('/api/admin/licenses', { email: testEmail, plan: 'mini', password: testPassword }, 'admin'),
     r => {
       if (r.status !== 201) return false;
       licenseKey = r.data.key;
       licenseId = r.data.id;
-      return r.status === 201 && !!r.data.key && !!r.data.password_hash;
+      return r.status === 201 && !!r.data.key && !!r.data.password_hash && r.data.plan === 'mini';
     }
   );
 
@@ -391,6 +397,146 @@ async function main() {
   await checkAsync('verify tras logout → 401',
     post('/api/auth/verify', null, token),
     r => r.status === 401
+  );
+
+  // ═══════════════════════════════════════════════════════════
+  // FASE 3 — SUSCRIPCIÓN (planes mini/pro/max, portal, billing, MRR)
+  // ═══════════════════════════════════════════════════════════
+  const { aiQuotaForPlan, getLicenseByStripeSubscriptionId, updateSubscription, createLicense: dbCreateLicense } = require('../db/database');
+
+  // — 3.a Coerción de plan legacy 'basic' → 'mini' (back-compat) + billing legacy —
+  await checkAsync('admin createLicense plan=basic (coerción) → 201 + plan=mini + billing=legacy',
+    post('/api/admin/licenses', { email: 'coerce@nokfi.local', plan: 'basic' }, 'admin'),
+    r => r.status === 201 && r.data.plan === 'mini' && r.data.billing_model === 'legacy'
+  );
+
+  // — 3.b publicLicenseView expone campos de suscripción (ai_quota tiered) —
+  await checkAsync('login Fase 3 → 200 + license.ai_quota + sin stripe',
+    post('/api/auth/login', { email: testEmail, license_key: licenseKey, password: 'AdminSetP4ss!' }),
+    r => {
+      if (r.status === 200) token = r.data.token;
+      return r.status === 200
+        && r.data.license.ai_quota === 30          // mini → 30
+        && r.data.license.has_subscription === false
+        && r.data.license.billing_model === 'legacy'
+        && r.data.license.cancel_at_period_end === false
+        && r.data.license.current_period_ends_at === null
+        && r.data.license.password_hash === undefined; // nunca expuesto
+    }
+  );
+
+  // — 3.c aiQuotaForPlan tiered (mini 30 / pro 80 / max 200) —
+  check('aiQuotaForPlan tiered mini=30 pro=80 max=200 unknown=30',
+    () => aiQuotaForPlan('mini') === 30 && aiQuotaForPlan('pro') === 80
+       && aiQuotaForPlan('max') === 200 && aiQuotaForPlan('???') === 30
+  );
+
+  // — 3.d Stripe checkout sin STRIPE_SECRET_KEY → 500 stripe_not_configured —
+  await checkAsync('stripe create-checkout sin key → 500 stripe_not_configured',
+    post('/api/payments/stripe/create-checkout', { email: 'buy@nokfi.local', plan: 'pro' }),
+    r => r.status === 500 && r.data.error === 'stripe_not_configured'
+  );
+  // plan inválido se coacciona a 'mini' (no 400) — aquí la falta de key corta antes
+  await checkAsync('stripe create-checkout plan inválido → coerción (no 400)',
+    post('/api/payments/stripe/create-checkout', { email: 'buy@nokfi.local', plan: 'garbage' }),
+    r => r.status === 500 && r.data.error === 'stripe_not_configured' // pasó validación de plan
+  );
+
+  // — 3.e Proveedores alternativos → 410 lifetime_discontinued —
+  await checkAsync('paypal create-order → 410 lifetime_discontinued',
+    post('/api/payments/paypal/create-order', { email: 'x@nokfi.local', plan: 'mini' }),
+    r => r.status === 410 && r.data.error === 'lifetime_discontinued'
+  );
+  await checkAsync('coinbase create-charge → 410 lifetime_discontinued',
+    post('/api/payments/coinbase/create-charge', { email: 'x@nokfi.local', plan: 'mini' }),
+    r => r.status === 410 && r.data.error === 'lifetime_discontinued'
+  );
+  await checkAsync('revolut create-order → 410 lifetime_discontinued',
+    post('/api/payments/revolut/create-order', { email: 'x@nokfi.local', plan: 'mini' }),
+    r => r.status === 410 && r.data.error === 'lifetime_discontinued'
+  );
+
+  // — 3.f Portal: sin auth → 401 —
+  await checkAsync('stripe create-portal-session sin auth → 401',
+    post('/api/payments/stripe/create-portal-session', null),
+    r => r.status === 401
+  );
+  // — 3.g Portal: licencia legacy (sin stripe_customer_id) → 400 not_stripe_customer —
+  await checkAsync('stripe create-portal-session legacy → 400 not_stripe_customer',
+    post('/api/payments/stripe/create-portal-session', null, token),
+    r => r.status === 400 && r.data.error === 'not_stripe_customer'
+  );
+
+  // — 3.h Helpers de suscripción a nivel BD (simulan webhook) —
+  const subLicense = dbCreateLicense({
+    email: 'sub@nokfi.local', plan: 'pro', payment_provider: 'stripe',
+    payment_ref: 'cs_sub_test', amount_eur: 25, billing_model: 'subscription',
+    stripe_customer_id: 'cus_test_pro', stripe_subscription_id: 'sub_test_pro',
+    current_period_ends_at: '2026-08-19T00:00:00Z', created_by: 'webhook_stripe_sub'
+  });
+  check('createLicense sub → billing=subscription + stripe fields',
+    () => subLicense.billing_model === 'subscription'
+       && subLicense.stripe_customer_id === 'cus_test_pro'
+       && subLicense.stripe_subscription_id === 'sub_test_pro'
+       && subLicense.current_period_ends_at === '2026-08-19T00:00:00Z'
+  );
+  check('getLicenseByStripeSubscriptionId localiza la licencia',
+    () => { const f = getLicenseByStripeSubscriptionId('sub_test_pro'); return !!f && f.id === subLicense.id; }
+  );
+  // simulate customer.subscription.updated: cancel programado
+  const cancelled = updateSubscription(subLicense.id, {
+    plan: 'max', cancel_at_period_end: 1, current_period_ends_at: '2026-09-19T00:00:00Z'
+  });
+  check('updateSubscription → plan change + cancel_at_period_end=1',
+    () => cancelled.plan === 'max' && cancelled.cancel_at_period_end === 1
+       && cancelled.current_period_ends_at === '2026-09-19T00:00:00Z'
+  );
+  // simulate customer.subscription.deleted → expired
+  const expired = updateSubscription(subLicense.id, { status: 'expired' });
+  check('updateSubscription → status=expired',
+    () => expired.status === 'expired'
+  );
+
+  // — 3.i requireLicense bloquea licencia 'expired' (vía /auth/verify) —
+  // sesión creada directamente en BD sobre la licencia expirada:
+  const { createSession } = require('../db/database');
+  const expSess = createSession(subLicense.id, '127.0.0.1');
+  // Añadimos un getLicenseByEmailAndKey? no hace falta: usamos verify con el token
+  await checkAsync('verify licencia expired → 403 license_inactive',
+    post('/api/auth/verify', null, expSess.token),
+    r => r.status === 403 && r.data.error === 'license_inactive'
+  );
+
+  // — 3.j Admin PUT updateLicense acepta plan mini/pro/max + status expired —
+  // Reusamos la licencia principal (id=licenseId, plan era 'mini').
+  // `post` siempre envía POST; para PUT usamos `call` directamente.
+  await checkAsync('admin PUT plan=pro → 200 + plan=pro',
+    call('PUT', `/api/admin/licenses/${licenseId}`, { body: { plan: 'pro' }, auth: 'admin' }),
+    r => r.status === 200 && r.data.plan === 'pro'
+  );
+  await checkAsync('admin PUT plan=basic (rechazado) → 400 invalid_plan',
+    call('PUT', `/api/admin/licenses/${licenseId}`, { body: { plan: 'basic' }, auth: 'admin' }),
+    r => r.status === 400 && r.data.error === 'invalid_plan'
+  );
+  await checkAsync('admin PUT status=expired → 200 + expired',
+    call('PUT', `/api/admin/licenses/${licenseId}`, { body: { status: 'expired' }, auth: 'admin' }),
+    r => r.status === 200 && r.data.status === 'expired'
+  );
+  // revierte a mini/active para no romper tests siguientes si los hubiera
+  call('PUT', `/api/admin/licenses/${licenseId}`, { body: { status: 'active', plan: 'mini' }, auth: 'admin' });
+
+  // — 3.k getStats MRR (revenue recurrente) — la única suscripción activa es
+  //    la creada en 3.h (plan pro, pero la marcamos expired en 3.h). La "reactivamos"
+  //    como pro/subscription/active para que aporte 25€ al MRR.
+  updateSubscription(subLicense.id, { status: 'active', plan: 'pro', billing_model: 'subscription', stripe_customer_id: 'cus_test_pro' });
+  await checkAsync('admin stats (Fase 3) → MRR pro 25€ + plans/billing desglose',
+    get('/api/admin/stats', 'admin'),
+    r => r.status === 200
+      && typeof r.data.revenue.mrr_eur === 'number'
+      && r.data.revenue.mrr_eur >= 25               // el pro subscription cuenta
+      && r.data.billing && r.data.billing.subscription >= 1
+      && r.data.plans && r.data.plans.pro && r.data.plans.pro.active >= 1
+      && typeof r.data.licenses.expired === 'number'
   );
 
   } catch (e) {

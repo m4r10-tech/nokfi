@@ -7,12 +7,20 @@
  *   - Una licencia = un email + una clave XXXX-XXXX-XXXX-XXXX + UNA contraseña
  *     elegida por el usuario (scrypt). No hay device-fingerprint.
  *   - El anti-sharing que aportaba el fingerprint se delega en la cuota diaria
- *     de IA por licencia (50 análisis/día en backend/routes/proxy.js).
+ *     de IA por licencia, ahora **tiered por plan** (mini 30 / pro 80 / max 200
+ *     análisis/día — ver aiQuotaForPlan) en backend/routes/proxy.js.
  *   - El reseteo de CONTRASEÑA por email está limitado a 1 vez/año
  *     (campo last_password_reset) como anti-abuso del flujo por email.
+ *   - Modelo de billing (Fase 3): suscripción mensual mini/pro/max vía Stripe,
+ *     con Stripe Customer Portal para cancelar/mejorar plan. Las licencias
+ *     lifetime previas se migran a plan='max', billing_model='legacy' (active,
+ *     sin cobro ni expiración). status añade 'expired' para suscripciones fin.
  *
  * Tablas:
- *   licenses        → clave, email, estado, plan, password_hash (scrypt)
+ *   licenses        → clave, email, estado (active|suspended|revoked|expired),
+ *                     plan (mini|pro|max), billing_model (subscription|legacy),
+ *                     password_hash (scrypt), campos stripe (customer_id /
+ *                     subscription_id / current_period_ends_at / cancel_at_period_end)
  *   sessions        → tokens de sesión activos (ya sin fingerprint)
  *   payment_events  → eventos de pago recibidos por webhook (idempotencia + histórico)
  *   audit_log       → registro de eventos de seguridad (fingerprint conservado para
@@ -49,23 +57,29 @@ function initDB() {
 
       db.exec(`
         CREATE TABLE IF NOT EXISTS licenses (
-          id                   INTEGER PRIMARY KEY AUTOINCREMENT,
-          key                  TEXT    NOT NULL UNIQUE,
-          email                TEXT    NOT NULL,
-          status               TEXT    NOT NULL DEFAULT 'active'
-                                        CHECK(status IN ('active','suspended','revoked')),
-          plan                 TEXT    NOT NULL DEFAULT 'basic'
-                                        CHECK(plan IN ('basic','pro')),
-          password_hash        TEXT    DEFAULT NULL,
-          device_name          TEXT    DEFAULT NULL,
-          last_password_reset  TEXT    DEFAULT NULL,
-          payment_provider     TEXT    DEFAULT NULL
-                                        CHECK(payment_provider IN ('stripe','paypal','coinbase','revolut',NULL)),
-          payment_ref          TEXT    DEFAULT NULL,
-          amount_eur           REAL    DEFAULT NULL,
-          notes                TEXT    DEFAULT '',
-          created_at           TEXT    NOT NULL DEFAULT (datetime('now')),
-          created_by           TEXT    DEFAULT 'system'
+          id                        INTEGER PRIMARY KEY AUTOINCREMENT,
+          key                       TEXT    NOT NULL UNIQUE,
+          email                     TEXT    NOT NULL,
+          status                    TEXT    NOT NULL DEFAULT 'active'
+                                              CHECK(status IN ('active','suspended','revoked','expired')),
+          plan                      TEXT    NOT NULL DEFAULT 'mini'
+                                              CHECK(plan IN ('mini','pro','max')),
+          billing_model             TEXT    NOT NULL DEFAULT 'subscription'
+                                              CHECK(billing_model IN ('subscription','legacy')),
+          password_hash            TEXT    DEFAULT NULL,
+          device_name               TEXT    DEFAULT NULL,
+          last_password_reset       TEXT    DEFAULT NULL,
+          stripe_customer_id        TEXT    DEFAULT NULL,
+          stripe_subscription_id    TEXT    DEFAULT NULL,
+          current_period_ends_at    TEXT    DEFAULT NULL,
+          cancel_at_period_end      INTEGER NOT NULL DEFAULT 0,
+          payment_provider          TEXT    DEFAULT NULL
+                                              CHECK(payment_provider IN ('stripe','paypal','coinbase','revolut',NULL)),
+          payment_ref               TEXT    DEFAULT NULL,
+          amount_eur                REAL    DEFAULT NULL,
+          notes                     TEXT    DEFAULT '',
+          created_at                TEXT    NOT NULL DEFAULT (datetime('now')),
+          created_by                TEXT    DEFAULT 'system'
         );
 
         CREATE TABLE IF NOT EXISTS sessions (
@@ -131,6 +145,7 @@ function initDB() {
          garantizado por better-sqlite3 ^11.3.0 (SQLite 3.43+).
       ────────────────────────────────────────────────────────── */
       runFingerprintMigration(db);
+      runSubscriptionMigration(db);
 
       console.log('✅  Base de datos inicializada en', DB_PATH);
       resolve(db);
@@ -222,6 +237,138 @@ function runFingerprintMigration(database) {
   migrate();
 }
 
+/**
+ * Migración Fase 3 (pago único lifetime → suscripción mensual mini/pro/max).
+ * Idempotente y guardada por detección: inspecciona el DDL almacenado de
+ * `licenses` y solo actúa si el esquema sigue siendo el viejo (CHECK de plan
+ * con 'basic', CHECK de status sin 'expired') o si faltan columnas de stripe.
+ * En un install fresco (el `CREATE TABLE IF NOT EXISTS` ya crea el esquema
+ * nuevo) es un completo no-op.
+ *
+ * El cambio de CHECK no se puede hacer con ALTER TABLE (SQLite no permite
+ * modificar una constraint): se reconstruye la tabla — renombrar la vieja,
+ * crear la nueva con los CHECK ampliados, copiar las filas mapeando `plan` y
+ * `billing_model`, borrar la vieja y recrear sus índices. `foreign_keys` se
+ * desactiva durante el rebuild — la pragma es no-op dentro de una transacción,
+ * por eso se togglea fuera de ella — y se valida con `PRAGMA foreign_key_check`
+ * antes de commit (lanza si algo quedó huérfano).
+ *
+ * Migración de datos: las licencias lifetime existentes (plan 'basic' o 'pro')
+ * se "grandfather" al tier más alto — plan='max', billing_model='legacy',
+ * status se mantiene, SIN stripe_customer_id → no se cobran ni expiran. Si más
+ * adelante se enlazan a una suscripción real de Stripe, el webhook actualiza
+ * los campos stripe y billing_model='subscription'.
+ */
+function runSubscriptionMigration(database) {
+  const columnsOf = (table) => database.prepare(`PRAGMA table_info(${table})`).all().map(c => c.name);
+
+  const row = database
+    .prepare(`SELECT sql FROM sqlite_master WHERE type='table' AND name='licenses'`)
+    .get();
+  if (!row || !row.sql) return; // la tabla no existe (no debería pasar)
+
+  const schema = row.sql;
+  const hasNewPlanCheck   = /plan\s+IN\s*\(\s*'mini'\s*,\s*'pro'\s*,\s*'max'\s*\)/i.test(schema);
+  const hasNewStatusCheck = /status\s+IN\s*\(\s*'active'\s*,\s*'suspended'\s*,\s*'revoked'\s*,\s*'expired'\s*\)/i.test(schema);
+  const cols = columnsOf('licenses');
+  const missingColumns = ['billing_model', 'stripe_customer_id', 'stripe_subscription_id', 'current_period_ends_at', 'cancel_at_period_end']
+    .filter(c => !cols.includes(c));
+
+  // Esquema ya al día y con todas las columnas → no-op (fresco o ya migrado)
+  if (hasNewPlanCheck && hasNewStatusCheck && missingColumns.length === 0) return;
+
+  database.pragma('foreign_keys = OFF');
+  try {
+    const migrate = database.transaction(() => {
+      if (!hasNewPlanCheck || !hasNewStatusCheck) {
+        // ── Rebuild completo: CHECKs viejos → nuevos, con columnas stripe ──
+        // Patrón canónico de SQLite para cambiar un CHECK (ALTER no lo permite):
+        // crear la tabla nueva bajo un nombre TEMPORAL, copiar, DROP la original
+        // y RENAME temp→original. Lo importante de este orden (frente al naive
+        // RENAME old→temp primero) es que las FK hijas (sessions, reset_tokens,
+        // payment_events) referencian a `licenses` por NOMBRE — nunca renombramos
+        // su target, así que con foreign_keys=OFF aguantan el momento en que el
+        // nombre `licenses` no existe y, tras el RENAME, resuelven a la nueva.
+        // (Si renombráramos licenses→temp primero, SQLite con legacy_alter_table=OFF
+        // —el default— auto-reescribiría las FK hijas para apuntar a `temp`, y al
+        // borrar `temp` quedarían colgadas → foreign_key_check falla.)
+        database.exec(`
+          CREATE TABLE licenses_new_sub (
+            id                        INTEGER PRIMARY KEY AUTOINCREMENT,
+            key                       TEXT    NOT NULL UNIQUE,
+            email                     TEXT    NOT NULL,
+            status                    TEXT    NOT NULL DEFAULT 'active'
+                                                    CHECK(status IN ('active','suspended','revoked','expired')),
+            plan                      TEXT    NOT NULL DEFAULT 'mini'
+                                                    CHECK(plan IN ('mini','pro','max')),
+            billing_model             TEXT    NOT NULL DEFAULT 'subscription'
+                                                    CHECK(billing_model IN ('subscription','legacy')),
+            password_hash             TEXT    DEFAULT NULL,
+            device_name               TEXT    DEFAULT NULL,
+            last_password_reset       TEXT    DEFAULT NULL,
+            stripe_customer_id        TEXT    DEFAULT NULL,
+            stripe_subscription_id    TEXT    DEFAULT NULL,
+            current_period_ends_at    TEXT    DEFAULT NULL,
+            cancel_at_period_end      INTEGER NOT NULL DEFAULT 0,
+            payment_provider          TEXT    DEFAULT NULL
+                                                    CHECK(payment_provider IN ('stripe','paypal','coinbase','revolut',NULL)),
+            payment_ref               TEXT    DEFAULT NULL,
+            amount_eur                REAL    DEFAULT NULL,
+            notes                     TEXT    DEFAULT '',
+            created_at                TEXT    NOT NULL DEFAULT (datetime('now')),
+            created_by                TEXT    DEFAULT 'system'
+          )
+        `);
+        // Copiar todas las filas. Las lifetime viejas (plan basic/pro) → max/legacy.
+        // Los nuevos campos stripe se inicializan a NULL/0 (sin suscripción real).
+        // El `id` se copia explícito para preservar las FK de sessions/audit/etc.
+        database.exec(`
+          INSERT INTO licenses_new_sub (
+            id, key, email, status, plan, billing_model, password_hash, device_name,
+            last_password_reset, stripe_customer_id, stripe_subscription_id,
+            current_period_ends_at, cancel_at_period_end, payment_provider,
+            payment_ref, amount_eur, notes, created_at, created_by
+          )
+          SELECT
+            id, key, email, status,
+            CASE WHEN plan IN ('basic','pro') THEN 'max' ELSE plan END,
+            CASE WHEN plan IN ('basic','pro') THEN 'legacy' ELSE 'subscription' END,
+            password_hash, device_name, last_password_reset,
+            NULL, NULL, NULL, 0,
+            payment_provider, payment_ref, amount_eur, notes, created_at, created_by
+          FROM licenses
+        `);
+        database.exec(`DROP TABLE licenses`);
+        database.exec(`ALTER TABLE licenses_new_sub RENAME TO licenses`);
+        // Recrear índices — DROP TABLE los elimina y CREATE TABLE no los recrea
+        database.exec(`CREATE INDEX IF NOT EXISTS idx_licenses_key ON licenses(key)`);
+        database.exec(`CREATE INDEX IF NOT EXISTS idx_licenses_email ON licenses(email)`);
+        // Validar integridad referencial tras el rebuild
+        const fkProblems = database.prepare('PRAGMA foreign_key_check').all();
+        if (fkProblems.length) {
+          throw new Error('foreign_key_check falló tras rebuild de licenses: ' + JSON.stringify(fkProblems));
+        }
+        console.log('✅  Migración licenses (Fase 3): plan→mini/pro/max, status+expired, columnas stripe; lifetime→max/legacy');
+      } else {
+        // ── CHECKs ya nuevos pero faltan columnas (estado parcial) → ALTER ──
+        for (const col of missingColumns) {
+          if (col === 'billing_model') {
+            database.exec(`ALTER TABLE licenses ADD COLUMN billing_model TEXT NOT NULL DEFAULT 'subscription' CHECK(billing_model IN ('subscription','legacy'))`);
+          } else if (col === 'cancel_at_period_end') {
+            database.exec(`ALTER TABLE licenses ADD COLUMN cancel_at_period_end INTEGER NOT NULL DEFAULT 0`);
+          } else {
+            database.exec(`ALTER TABLE licenses ADD COLUMN ${col} TEXT DEFAULT NULL`);
+          }
+        }
+        console.log('✅  Migración licenses (Fase 3): añadidas columnas de suscripción');
+      }
+    });
+    migrate();
+  } finally {
+    database.pragma('foreign_keys = ON');
+  }
+}
+
 function getDB() {
   if (!db) throw new Error('Base de datos no inicializada — llama a initDB() primero');
   return db;
@@ -240,9 +387,18 @@ function generateLicenseKey() {
 /**
  * Crea una licencia nueva. Setea password_hash opcional si llega `password`
  * (para créditos manuales del admin con contraseña ya asignada). Se invoca
- * tras la confirmación de un pago (webhook) o manualmente desde el admin.
+ * tras la confirmación de un pago (webhook de suscripción) o manualmente desde
+ * el admin. Los campos stripe_* / billing_model / current_period_ends_at se
+ * rellenan cuando la licencia nace de una suscripción real de Stripe (webhook);
+ * las creadas a mano por el admin se marcan billing_model='legacy' (cortesías,
+ * sin cobro recurrente ni expiración).
  */
-function createLicense({ email, plan = 'basic', payment_provider = null, payment_ref = null, amount_eur = null, notes = '', created_by = 'system', password = null }) {
+function createLicense({
+  email, plan = 'mini', payment_provider = null, payment_ref = null,
+  amount_eur = null, notes = '', created_by = 'system', password = null,
+  billing_model = 'subscription', stripe_customer_id = null,
+  stripe_subscription_id = null, current_period_ends_at = null
+}) {
   if (!email || typeof email !== 'string') {
     throw new Error('email es obligatorio para crear una licencia');
   }
@@ -256,9 +412,13 @@ function createLicense({ email, plan = 'basic', payment_provider = null, payment
     : null;
 
   const result = db.prepare(`
-    INSERT INTO licenses (key, email, plan, password_hash, payment_provider, payment_ref, amount_eur, notes, created_by)
-    VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)
-  `).run(key.toUpperCase(), email.trim().toLowerCase(), plan, password_hash, payment_provider, payment_ref, amount_eur, notes, created_by);
+    INSERT INTO licenses (key, email, plan, billing_model, password_hash,
+                          stripe_customer_id, stripe_subscription_id, current_period_ends_at,
+                          payment_provider, payment_ref, amount_eur, notes, created_by)
+    VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+  `).run(key.toUpperCase(), email.trim().toLowerCase(), plan, billing_model, password_hash,
+         stripe_customer_id, stripe_subscription_id, current_period_ends_at,
+         payment_provider, payment_ref, amount_eur, notes, created_by);
 
   return getLicenseById(result.lastInsertRowid);
 }
@@ -503,6 +663,7 @@ function getStats(periodDays = 30) {
   const active = db.prepare("SELECT COUNT(*) c FROM licenses WHERE status = 'active'").get().c;
   const suspended = db.prepare("SELECT COUNT(*) c FROM licenses WHERE status = 'suspended'").get().c;
   const revoked = db.prepare("SELECT COUNT(*) c FROM licenses WHERE status = 'revoked'").get().c;
+  const expired = db.prepare("SELECT COUNT(*) c FROM licenses WHERE status = 'expired'").get().c;
 
   const activationsToday = db.prepare(
     "SELECT COUNT(*) c FROM licenses WHERE date(created_at) = date('now')"
@@ -514,6 +675,37 @@ function getStats(periodDays = 30) {
     "SELECT COUNT(*) c FROM licenses WHERE created_at >= datetime('now', '-30 days')"
   ).get().c;
 
+  // ── Desglose por plan + billing_model (Fase 3) ──
+  const planCounts = db.prepare(`
+    SELECT plan,
+           SUM(CASE WHEN status='active' THEN 1 ELSE 0 END) AS active,
+           COUNT(*) AS total
+    FROM licenses GROUP BY plan
+  `).all().reduce((acc, r) => { acc[r.plan] = { active: r.active, total: r.total }; return acc; }, {});
+  const legacyCount = db.prepare("SELECT COUNT(*) c FROM licenses WHERE billing_model='legacy'").get().c;
+  const subscriptionCount = db.prepare("SELECT COUNT(*) c FROM licenses WHERE billing_model='subscription'").get().c;
+
+  // ── MRR: revenue recurrente mensual esperado = Σ(plan_price_mensual) sobre
+  //    suscripciones ACTIVAS (billing_model='subscription' AND status='active').
+  //    Las legacy no aportan MRR (ya pagadas, no recurrentes). Precios en EUR.
+  const PLAN_PRICES = { mini: 10, pro: 25, max: 40 };
+  const mrrRows = db.prepare(`
+    SELECT plan, COUNT(*) c FROM licenses
+    WHERE billing_model='subscription' AND status='active'
+    GROUP BY plan
+  `).all();
+  let mrr_eur = 0;
+  for (const r of mrrRows) mrr_eur += (PLAN_PRICES[r.plan] || 0) * r.c;
+  const payingSubscribers = mrrRows.reduce((s, r) => s + r.c, 0);
+
+  //历史的: suscripciones creadas en el periodo (nuevas altas recurrentes)
+  const newSubscriptionsPeriod = db.prepare(
+    `SELECT COUNT(*) c FROM licenses WHERE billing_model='subscription' AND created_at >= ${since}`
+  ).get().c;
+
+  // Revenue one-shot histórico (amount_eur) — conserva licencias legacy/pago
+  // único viejo + el primer cobro registerado por webhook. Se mantiene para
+  // retro-compatibilidad del panel; la métrica de negocio viva ahora es MRR.
   const revenueTotal = db.prepare(
     'SELECT COALESCE(SUM(amount_eur), 0) s FROM licenses WHERE amount_eur IS NOT NULL'
   ).get().s;
@@ -530,9 +722,11 @@ function getStats(periodDays = 30) {
   `).all();
 
   return {
-    licenses: { total: total_licenses, active, suspended, revoked },
-    activations: { today: activationsToday, week: activationsWeek, month: activationsMonth },
-    revenue: { total_eur: revenueTotal, period_eur: revenuePeriod },
+    licenses: { total: total_licenses, active, suspended, revoked, expired },
+    plans: planCounts,
+    billing: { legacy: legacyCount, subscription: subscriptionCount, paying_subscribers: payingSubscribers },
+    activations: { today: activationsToday, week: activationsWeek, month: activationsMonth, new_subscriptions_period: newSubscriptionsPeriod },
+    revenue: { total_eur: revenueTotal, period_eur: revenuePeriod, mrr_eur: mrr_eur },
     daily_series: dailySeries,
     recent_events: db.prepare('SELECT * FROM audit_log ORDER BY ts DESC LIMIT 25').all()
   };
@@ -555,6 +749,56 @@ function countAiAnalysesToday(license_id) {
       AND date(ts) = date('now')
   `).get(license_id);
   return row.c;
+}
+
+/**
+ * Cuota diaria de análisis IA por plan — el anti-sharing delegado del viejo
+ * fingerprint. Tiered para dar valor a los planes altos: mini 30 / pro 80 /
+ * max 200 análisis/día. Un plan desconocido (legacy mal migrado, datos sucios)
+ * cae al mínimo de mini, que es lo conservador (denegar antes que sobre-usar).
+ */
+const AI_QUOTAS = { mini: 30, pro: 80, max: 200 };
+function aiQuotaForPlan(plan) {
+  const q = AI_QUOTAS[plan];
+  return typeof q === 'number' && q > 0 ? q : AI_QUOTAS.mini;
+}
+
+/* ── Suscripciones (Fase 3) ── */
+
+/** Busca la licencia asociada a una suscripción de Stripe (usado en webhooks recurrentes). */
+function getLicenseByStripeSubscriptionId(subscription_id) {
+  if (!subscription_id) return null;
+  return getDB().prepare('SELECT * FROM licenses WHERE stripe_subscription_id = ?').get(subscription_id);
+}
+
+/**
+ * Actualiza los campos de suscripción de una licencia. Sólo setea los campos que
+ * lleguen definidos — el resto se preserva. Usado por los webhooks recurrentes
+ * (invoice.paid renueva current_period_ends_at, customer.subscription.updated
+ * cambia plan/cancel_at_period_end, etc.).
+ */
+function updateSubscription(id, {
+  plan, status, billing_model, stripe_customer_id, stripe_subscription_id,
+  current_period_ends_at, cancel_at_period_end, amount_eur
+}) {
+  const db = getDB();
+  const setClauses = [];
+  const vals = [];
+  const setIf = (col, val) => {
+    if (val !== undefined) { setClauses.push(`${col} = ?`); vals.push(val); }
+  };
+  setIf('plan', plan);
+  setIf('status', status);
+  setIf('billing_model', billing_model);
+  setIf('stripe_customer_id', stripe_customer_id);
+  setIf('stripe_subscription_id', stripe_subscription_id);
+  setIf('current_period_ends_at', current_period_ends_at);
+  setIf('cancel_at_period_end', cancel_at_period_end);
+  setIf('amount_eur', amount_eur);
+  if (!setClauses.length) return getLicenseById(id);
+  vals.push(id);
+  db.prepare(`UPDATE licenses SET ${setClauses.join(', ')} WHERE id = ?`).run(...vals);
+  return getLicenseById(id);
 }
 
 module.exports = {
@@ -583,6 +827,9 @@ module.exports = {
   isPaymentEventProcessed,
   recordPaymentEvent,
   countAiAnalysesToday,
+  aiQuotaForPlan,
+  getLicenseByStripeSubscriptionId,
+  updateSubscription,
   audit,
   getStats
 };

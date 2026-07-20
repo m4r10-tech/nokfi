@@ -1,10 +1,10 @@
 import { useState } from 'react';
 import { useOutletContext } from 'react-router-dom';
-import { Moon, Sun, LogOut, KeyRound, Copy, Check, Eye, EyeOff, Loader2 } from 'lucide-react';
+import { Moon, Sun, LogOut, KeyRound, Copy, Check, Eye, EyeOff, Loader2, CreditCard } from 'lucide-react';
 import { useTheme } from '../context/ThemeContext';
 import { useLang } from '../context/LangContext';
 import { useAuth } from '../context/AuthContext';
-import { authApi } from '../middleware/api';
+import { authApi, paymentsApi } from '../middleware/api';
 import PasswordGenerator from '../components/PasswordGenerator';
 
 export default function Configuracion() {
@@ -47,6 +47,8 @@ export default function Configuracion() {
         <Field label={t('config.sector')} value={profile.sector} onChange={(v) => updateProfile({ sector: v })} />
       </Section>
 
+      <SubscriptionSection />
+
       <RevealKeySection />
 
       <ChangePasswordSection />
@@ -65,6 +67,92 @@ export default function Configuracion() {
           </button>
         </div>
       </Section>
+    </div>
+  );
+}
+
+/* ── Suscripción (Fase 3) — plan, estado, cuota IA, gestión vía Stripe Portal ── */
+function SubscriptionSection() {
+  const { t } = useLang();
+  const { license } = useAuth();
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState(null);
+
+  if (!license) return null;
+
+  const plan = (license.plan || 'mini').toUpperCase();
+  const isActive = license.status === 'active';
+  const hasSubscription = license.has_subscription;
+  const cancelled = license.cancel_at_period_end;
+  const renewal = license.current_period_ends_at
+    ? new Date(license.current_period_ends_at).toLocaleDateString()
+    : null;
+  const aiQuota = license.ai_quota;
+
+  const openPortal = async () => {
+    setError(null);
+    setLoading(true);
+    const { ok, data } = await paymentsApi.stripePortal();
+    setLoading(false);
+    if (ok && data.url) {
+      window.location.href = data.url;
+    } else {
+      setError(data.message || t('config.portalError'));
+    }
+  };
+
+  return (
+    <Section title={t('config.subscriptionSection')}>
+      <div className="flex flex-col gap-2.5">
+        <Row label={t('config.subscriptionPlan')}>
+          <span className="font-medium" style={{ color: 'var(--text-primary)' }}>{plan}</span>
+        </Row>
+        <Row label={t('config.subscriptionStatus')}>
+          <span className="capitalize" style={{
+            color: isActive ? 'var(--positive)' : 'var(--negative)'
+          }}>
+            {license.status}
+          </span>
+        </Row>
+        {aiQuota != null && (
+          <Row label={t('config.aiQuota')}>
+            <span style={{ color: 'var(--text-primary)' }}>{aiQuota} {t('config.aiQuotaPerDay')}</span>
+          </Row>
+        )}
+        {(hasSubscription || renewal) && (
+          <Row label={t('config.subscriptionRenews')}>
+            <span style={{ color: 'var(--text-secondary)' }}>
+              {cancelled && renewal
+                ? `${t('config.subscriptionCancelled')} (${renewal})`
+                : (renewal || t('config.subscriptionNoRenewal'))}
+            </span>
+          </Row>
+        )}
+      </div>
+
+      {hasSubscription ? (
+        <>
+          <p className="text-xs mt-1" style={{ color: 'var(--text-muted)' }}>{t('config.manageHint')}</p>
+          <button onClick={openPortal} disabled={loading}
+            className="mt-2 rounded-lg py-2 text-sm font-medium flex items-center justify-center gap-2 disabled:opacity-60"
+            style={{ background: 'var(--surface-2)', color: 'var(--text-primary)', border: '0.5px solid var(--border-strong)' }}>
+            {loading ? <Loader2 size={15} className="animate-spin" /> : <CreditCard size={15} />}
+            {t('config.manageSubscription')}
+          </button>
+          {error && <p className="text-sm rounded-lg px-3 py-2" style={{ background: 'var(--negative-soft)', color: 'var(--negative)' }}>{error}</p>}
+        </>
+      ) : (
+        <p className="text-xs mt-1" style={{ color: 'var(--text-muted)' }}>{t('config.legacyNote')}</p>
+      )}
+    </Section>
+  );
+}
+
+function Row({ label, children }) {
+  return (
+    <div className="flex items-center justify-between">
+      <span className="text-sm" style={{ color: 'var(--text-secondary)' }}>{label}</span>
+      {children}
     </div>
   );
 }

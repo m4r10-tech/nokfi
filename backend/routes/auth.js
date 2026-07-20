@@ -37,6 +37,7 @@ const {
 
 const { hashPassword, verifyPassword, isPasswordSet } = require('../utils/password');
 const { sendPasswordResetEmail } = require('../utils/mailer');
+const { aiQuotaForPlan } = require('../db/database');
 
 const KEY_REGEX = /^[A-F0-9]{4}-[A-F0-9]{4}-[A-F0-9]{4}-[A-F0-9]{4}$/i;
 const EMAIL_REGEX = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
@@ -379,7 +380,10 @@ router.post('/confirm-password-reset', (req, res) => {
 
 /* ──────────────────────────────────────────────────────────
    Helper: vista pública de la licencia — nunca exponer password_hash
-   ni campos internos sensibles.
+   ni campos internos sensibles (stripe_customer_id queda oculto: basta un
+   booleano has_subscription para que el frontend sepa si hay portal que
+   gestionar). Incluye los campos de suscripción relevantes para la sección
+   "Suscripción" de Configuracion (Fase 3) y la cuota IA del plan.
 ────────────────────────────────────────────────────────── */
 function publicLicenseView(license) {
   return {
@@ -387,8 +391,13 @@ function publicLicenseView(license) {
     email: license.email,
     plan: license.plan,
     status: license.status,
+    billing_model: license.billing_model || 'subscription',
+    has_subscription: !!license.stripe_customer_id,
+    current_period_ends_at: license.current_period_ends_at || null,
+    cancel_at_period_end: !!license.cancel_at_period_end,
     device_name: license.device_name || null,
-    created_at: license.created_at
+    created_at: license.created_at,
+    ai_quota: aiQuotaForPlan(license.plan)
   };
 }
 

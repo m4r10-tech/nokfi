@@ -70,10 +70,10 @@ export const aiApi = {
 };
 
 export const paymentsApi = {
+  // Suscripción mensual (Fase 3) — solo Stripe para recurring.
   stripeCheckout: (email, plan) => request('/payments/stripe/create-checkout', { method: 'POST', body: { email, plan } }),
-  paypalOrder: (email, plan) => request('/payments/paypal/create-order', { method: 'POST', body: { email, plan } }),
-  coinbaseCharge: (email, plan) => request('/payments/coinbase/create-charge', { method: 'POST', body: { email, plan } }),
-  revolutOrder: (email, plan) => request('/payments/revolut/create-order', { method: 'POST', body: { email, plan } }),
+  // Customer Portal de Stripe: cancelar / mejorar plan / actualizar método de pago.
+  stripePortal: () => request('/payments/stripe/create-portal-session', { method: 'POST', auth: true }),
   reveal: (session_id) => request('/payments/stripe/reveal?session_id=' + encodeURIComponent(session_id))
 };
 

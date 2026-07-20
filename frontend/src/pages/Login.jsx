@@ -152,6 +152,10 @@ export default function Login() {
             {mode === 'login' ? t('login.firstTime') : t('login.alreadyActivated')}
           </button>
         </div>
+
+        <Link to="/pricing" className="mt-5 text-sm text-center hover:underline block" style={{ color: 'var(--text-secondary)' }}>
+          {t('login.noLicense')} →
+        </Link>
       </div>
     </div>
   );

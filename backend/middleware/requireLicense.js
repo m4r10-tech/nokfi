@@ -53,9 +53,11 @@ function requireLicense(req, res, next) {
       ip: req.ip,
       detail: `status=${license.status}`
     });
-    const message = license.status === 'revoked'
-      ? 'Esta licencia ha sido revocada. Contacta con soporte si crees que es un error.'
-      : 'Esta licencia está suspendida temporalmente. Contacta con soporte.';
+    const message =
+      license.status === 'revoked'   ? 'Esta licencia ha sido revocada. Contacta con soporte si crees que es un error.'
+      : license.status === 'expired' ? 'Tu suscripción ha finalizado. Reactiva tu plan para volver a usar Nokfi.'
+      : license.status === 'suspended' ? 'Esta licencia está suspendida temporalmente. Contacta con soporte.'
+      : 'Esta licencia no está activa. Contacta con soporte.';
     return res.status(403).json({ error: 'license_inactive', message });
   }
 

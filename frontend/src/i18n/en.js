@@ -25,7 +25,8 @@ export default {
     notActivated: 'This license has no password yet. Use the initial activation.',
     alreadyActivatedMsg: 'This license already has a password. Log in or reset it.',
     passwordMismatch: 'Passwords do not match.',
-    weakPassword: 'Password must be at least 8 characters.'
+    weakPassword: 'Password must be at least 8 characters.',
+    noLicense: 'No license yet? See plans and pricing'
   },
   resetPassword: {
     title: 'Reset password', email: 'Email', licenseKey: 'License key',
@@ -50,7 +51,30 @@ export default {
     revealKeyHint: 'Your key is hidden. Enter your password to reveal it.',
     showKey: 'Show', hideKey: 'Hide',
     changePasswordSection: 'Password', currentPassword: 'Current password', newPassword: 'New password',
-    changePasswordBtn: 'Change password', passwordChanged: 'Password updated successfully.'
+    changePasswordBtn: 'Change password', passwordChanged: 'Password updated successfully.',
+    subscriptionSection: 'Subscription',
+    subscriptionPlan: 'Current plan', subscriptionStatus: 'Status', subscriptionRenews: 'Next renewal',
+    subscriptionCancelled: 'Cancelled — access until end of period',
+    subscriptionNoRenewal: 'No renewal scheduled',
+    aiQuota: 'AI analysis quota', aiQuotaPerDay: 'analyses/day',
+    manageSubscription: 'Manage subscription',
+    manageHint: 'Cancel or upgrade your plan from the Stripe portal. Upgrades are prorated automatically.',
+    legacyNote: 'This is a legacy (lifetime) license. There is no Stripe subscription to manage.',
+    portalError: 'Could not open the management portal. Please try again later.'
+  },
+  pricing: {
+    title: 'Choose your plan', subtitle: 'Monthly subscription. Cancel anytime.',
+    perMonth: '/mo', emailPlaceholder: 'Your email',
+    cta: 'Subscribe', goLogin: 'I already have a license — log in',
+    features: {
+      mini: ['30 AI analyses per day', 'Full diagnosis', '6 Excel analyses', 'History'],
+      pro: ['80 AI analyses per day', 'Everything in Mini', 'Advanced calculators', 'Reports'],
+      max: ['200 AI analyses per day', 'Everything in Pro', 'Priority support', 'Early access to new features']
+    },
+    aiBadge: 'AI analyses/day',
+    monthSuffix: '/mo',
+    invalidEmail: 'Please enter a valid email.',
+    checkoutError: 'Could not start checkout. Please try again.'
   },
   onboarding: {
     welcome: 'Welcome to Nokfi', subtitle: 'Tell us a bit about your business to personalize your analyses',

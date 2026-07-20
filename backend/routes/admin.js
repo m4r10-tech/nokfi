@@ -14,6 +14,10 @@
  *   POST   /api/admin/licenses/:id/reset-password        → forzar reset de contraseña (limpia sesiones)
  *   POST   /api/admin/licenses/:id/set-password          → asignar contraseña a una licencia (D3=b)
  *   GET    /api/admin/audit-log                         → últimos eventos de auditoría
+ *
+ * Modelo de planes (Fase 3): mini / pro / max (suscripción mensual). Las
+ * licencias lifetime legacy migradas se marcan billing_model='legacy'. status
+ * admite además 'expired' (suscripción cancelada/borrada en Stripe).
  */
 
 'use strict';
@@ -147,9 +151,19 @@ router.get('/licenses/:id', (req, res) => {
    No envía email automáticamente; el admin decide si comunicarla a mano o
    usando el flag `notify: true`.
 ────────────────────────────────────────────────────────── */
+/* Planes válidos (Fase 3): mini / pro / max (suscripción mensual). La
+   convención "basic" del modelo viejo sobrevive sólo como dato histórico ya
+   migrado a max/legacy — nunca se acepta en escritura. */
+const VALID_PLANS = ['mini', 'pro', 'max'];
+const VALID_STATUSES = ['active', 'suspended', 'revoked', 'expired'];
+
+function coercePlan(plan) {
+  return VALID_PLANS.includes(plan) ? plan : 'mini';
+}
+
 router.post('/licenses', async (req, res) => {
   const email = (req.body?.email || '').trim().toLowerCase();
-  const plan = req.body?.plan === 'pro' ? 'pro' : 'basic';
+  const plan = coercePlan(req.body?.plan);
   const notes = sanitizeFreeText(req.body?.notes || '').slice(0, 500);
   const notify = req.body?.notify === true;
   const password = req.body?.password;
@@ -164,9 +178,12 @@ router.post('/licenses', async (req, res) => {
   }
 
   try {
+    // Licencia creada a mano por el admin → billing_model='legacy' (no hay
+    // suscripción real de Stripe detrás, sin cobro recurrente ni expiración).
     const license = createLicense({
       email, plan, notes,
       password: password || null,
+      billing_model: 'legacy',
       created_by: 'admin_manual'
     });
     audit('LICENSE_CREATED_MANUAL', { license_id: license.id, ip: req.ip, detail: `email=${email}` });
@@ -196,10 +213,10 @@ router.put('/licenses/:id', (req, res) => {
   const { status, plan, email } = req.body || {};
   const notes = req.body?.notes !== undefined ? sanitizeFreeText(req.body.notes).slice(0, 500) : undefined;
 
-  if (status && !['active', 'suspended', 'revoked'].includes(status)) {
+  if (status && !VALID_STATUSES.includes(status)) {
     return res.status(400).json({ error: 'invalid_status' });
   }
-  if (plan && !['basic', 'pro'].includes(plan)) {
+  if (plan && !VALID_PLANS.includes(plan)) {
     return res.status(400).json({ error: 'invalid_plan' });
   }
   if (email && !EMAIL_REGEX.test(email)) {
