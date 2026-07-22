@@ -6,12 +6,20 @@
  * (sección 4 del proyecto: "la clave nunca existe antes del pago confirmado").
  *
  * Modelo de billing (Fase 3): suscripción mensual de 3 tiers vía Stripe.
- *   mini  €10/mes  → 1000 céntimos
- *   pro   €25/mes  → 2500 céntimos
- *   max   €40/mes  → 4000 céntimos
+ *   mini  €5/mes   → 500 céntimos    (+ trial gratis de 14 días con tarjeta)
+ *   pro   €20/mes  → 2000 céntimos
+ *   max   €50/mes  → 5000 céntimos
+ * Precios, céntimos y planes válidos se leen de config/plans.js (fuente única;
+ * antes eran literales duplicados aquí + database.js + webhooks.js + admin.js).
  * El viejo pago único lifetime (€150) queda ELIMINADO. Cancelar y mejorar plan
  * se gestionan vía el Stripe Customer Portal (endpoint create-portal-session),
  * que cálcula las prorratas de forma nativa.
+ *
+ * Trial (solo mini): el checkout incluye subscription_data[trial_period_days]
+ * = TRIAL_DAYS y trial_settings[end_behavior][type]=release. Stripe exige
+ * tarjeta en el checkout (no cobra al instante) y bloquea reusar la misma
+ * tarjeta para un 2º trial → anti-farmeo. Al día 14 cobra la tarjeta; si falla,
+ * los webhooks existentes (past_due→suspended→expired) lo gestionan sin scheduler.
  *
  * Endpoints:
  *   POST /api/payments/stripe/create-checkout         → Checkout de suscripción
@@ -30,15 +38,12 @@ const router = express.Router();
 const { getLicenseByPaymentRef } = require('../db/database');
 const { requireLicense } = require('../middleware/requireLicense');
 
-/* Precios de los planes de suscripción mensual, en céntimos de EUR (Stripe usa
-   la unidad menor). Mismo mapa que getStats() en db/database.js para MRR. */
-const PLAN_PRICES = {
-  mini: { amount: 1000, name: 'Mini' },   // €10/mes
-  pro:  { amount: 2500, name: 'Pro' },    // €25/mes
-  max:  { amount: 4000, name: 'Max' }     // €40/mes
-};
-const VALID_PLANS = Object.keys(PLAN_PRICES);
-function coercePlan(plan) { return VALID_PLANS.includes(plan) ? plan : 'mini'; }
+// Fuente única de planes: precios (céntimos + EUR + nombre), planes válidos,
+// saneamiento, y configuración del trial. Sustituye a los literales locales
+// PLAN_PRICES / VALID_PLANS / coercePlan que vivían aquí antes (drift-prone).
+const { PLANS, coercePlan, planHasTrial, TRIAL_DAYS } = require('../config/plans');
+// Misma versión de API que routes/webhooks.js (un sólo declarador).
+const STRIPE_API_VERSION = require('../config/stripe-version');
 
 const EMAIL_REGEX = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
 
@@ -79,7 +84,7 @@ router.get('/stripe/reveal', (req, res) => {
 router.post('/stripe/create-checkout', async (req, res) => {
   const email = (req.body?.email || '').trim().toLowerCase();
   const plan = coercePlan(req.body?.plan);
-  const price = PLAN_PRICES[plan];
+  const price = PLANS[plan];
 
   if (!email || !EMAIL_REGEX.test(email)) {
     return res.status(400).json({ error: 'invalid_email' });
@@ -97,7 +102,7 @@ router.post('/stripe/create-checkout', async (req, res) => {
       'line_items[0][price_data][currency]': 'eur',
       'line_items[0][price_data][recurring][interval]': 'month',
       'line_items[0][price_data][product_data][name]': `Nokfi — Plan ${price.name}`,
-      'line_items[0][price_data][unit_amount]': String(price.amount),
+      'line_items[0][price_data][unit_amount]': String(price.cents),
       'line_items[0][quantity]': '1',
       'subscription_data[metadata][plan]': plan,
       'subscription_data[metadata][email]': email,
@@ -105,11 +110,21 @@ router.post('/stripe/create-checkout', async (req, res) => {
       'metadata[email]': email
     });
 
+    // Trial de 14 días CON TARJETA — solo el plan mini. No payment_behavior:
+    // hay cobro al final del trial, no cobro inmediato. end_behavior=release
+    // deja que la suscripción pase a 'active' y se cobre al día 14 (en vez de
+    // 'pause', que dejaría la suscripción en estado de cobro indefinitely).
+    if (planHasTrial(plan)) {
+      params.set('subscription_data[trial_period_days]', String(TRIAL_DAYS));
+      params.set('subscription_data[trial_settings][end_behavior][type]', 'release');
+    }
+
     const stripeRes = await fetch('https://api.stripe.com/v1/checkout/sessions', {
       method: 'POST',
       headers: {
         'Authorization': `Bearer ${process.env.STRIPE_SECRET_KEY}`,
-        'Content-Type': 'application/x-www-form-urlencoded'
+        'Content-Type': 'application/x-www-form-urlencoded',
+        'Stripe-Version': STRIPE_API_VERSION
       },
       body: params.toString()
     });
@@ -162,7 +177,8 @@ router.post('/stripe/create-portal-session', requireLicense, async (req, res) =>
       method: 'POST',
       headers: {
         'Authorization': `Bearer ${process.env.STRIPE_SECRET_KEY}`,
-        'Content-Type': 'application/x-www-form-urlencoded'
+        'Content-Type': 'application/x-www-form-urlencoded',
+        'Stripe-Version': STRIPE_API_VERSION
       },
       body: new URLSearchParams({
         'customer': license.stripe_customer_id,

@@ -13,9 +13,9 @@ import Logo from '../components/Logo';
  */
 
 const PLANS = [
-  { id: 'mini', name: 'Mini', price: '10', highlight: false },
-  { id: 'pro',  name: 'Pro',  price: '25', highlight: true },
-  { id: 'max',  name: 'Max',  price: '40', highlight: false }
+  { id: 'mini', name: 'Mini', price: '5', highlight: false },
+  { id: 'pro',  name: 'Pro',  price: '20', highlight: true },
+  { id: 'max',  name: 'Max',  price: '50', highlight: false }
 ];
 
 export default function Pricing() {
@@ -70,6 +70,12 @@ export default function Pricing() {
                 <span className="text-[10px] font-medium uppercase tracking-wide rounded-full px-2 py-0.5"
                       style={{ background: 'var(--accent)', color: '#fff' }}>·</span>}
             </div>
+            {plan.id === 'mini' && (
+              <span className="text-[11px] font-medium rounded-full px-2 py-0.5 self-start"
+                    style={{ color: 'var(--accent)', background: 'var(--surface-2)', border: '0.5px solid var(--accent)' }}>
+                {t('pricing.trialBadge')}
+              </span>
+            )}
             <div className="flex items-baseline gap-1">
               <span className="text-3xl font-bold" style={{ color: 'var(--text-primary)' }}>€{plan.price}</span>
               <span className="text-xs" style={{ color: 'var(--text-muted)' }}>{t('pricing.monthSuffix')}</span>

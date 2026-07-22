@@ -416,19 +416,20 @@ async function main() {
     r => {
       if (r.status === 200) token = r.data.token;
       return r.status === 200
-        && r.data.license.ai_quota === 30          // mini → 30
+        && r.data.license.ai_quota === 10          // mini → 10
         && r.data.license.has_subscription === false
         && r.data.license.billing_model === 'legacy'
         && r.data.license.cancel_at_period_end === false
         && r.data.license.current_period_ends_at === null
+        && r.data.license.trial_ends_at === null   // sin trial → null expuesto
         && r.data.license.password_hash === undefined; // nunca expuesto
     }
   );
 
-  // — 3.c aiQuotaForPlan tiered (mini 30 / pro 80 / max 200) —
-  check('aiQuotaForPlan tiered mini=30 pro=80 max=200 unknown=30',
-    () => aiQuotaForPlan('mini') === 30 && aiQuotaForPlan('pro') === 80
-       && aiQuotaForPlan('max') === 200 && aiQuotaForPlan('???') === 30
+  // — 3.c aiQuotaForPlan tiered (mini 10 / pro 50 / max 130) —
+  check('aiQuotaForPlan tiered mini=10 pro=50 max=130 unknown=10',
+    () => aiQuotaForPlan('mini') === 10 && aiQuotaForPlan('pro') === 50
+       && aiQuotaForPlan('max') === 130 && aiQuotaForPlan('???') === 10
   );
 
   // — 3.d Stripe checkout sin STRIPE_SECRET_KEY → 500 stripe_not_configured —
@@ -470,7 +471,7 @@ async function main() {
   // — 3.h Helpers de suscripción a nivel BD (simulan webhook) —
   const subLicense = dbCreateLicense({
     email: 'sub@nokfi.local', plan: 'pro', payment_provider: 'stripe',
-    payment_ref: 'cs_sub_test', amount_eur: 25, billing_model: 'subscription',
+    payment_ref: 'cs_sub_test', amount_eur: 20, billing_model: 'subscription',
     stripe_customer_id: 'cus_test_pro', stripe_subscription_id: 'sub_test_pro',
     current_period_ends_at: '2026-08-19T00:00:00Z', created_by: 'webhook_stripe_sub'
   });
@@ -525,18 +526,66 @@ async function main() {
   // revierte a mini/active para no romper tests siguientes si los hubiera
   call('PUT', `/api/admin/licenses/${licenseId}`, { body: { status: 'active', plan: 'mini' }, auth: 'admin' });
 
-  // — 3.k getStats MRR (revenue recurrente) — la única suscripción activa es
-  //    la creada en 3.h (plan pro, pero la marcamos expired en 3.h). La "reactivamos"
-  //    como pro/subscription/active para que aporte 25€ al MRR.
   updateSubscription(subLicense.id, { status: 'active', plan: 'pro', billing_model: 'subscription', stripe_customer_id: 'cus_test_pro' });
-  await checkAsync('admin stats (Fase 3) → MRR pro 25€ + plans/billing desglose',
+  await checkAsync('admin stats (Fase 3) → MRR pro 20€ + plans/billing desglose',
     get('/api/admin/stats', 'admin'),
     r => r.status === 200
       && typeof r.data.revenue.mrr_eur === 'number'
-      && r.data.revenue.mrr_eur >= 25               // el pro subscription cuenta
+      && r.data.revenue.mrr_eur >= 20               // el pro subscription cuenta (20€)
       && r.data.billing && r.data.billing.subscription >= 1
       && r.data.plans && r.data.plans.pro && r.data.plans.pro.active >= 1
       && typeof r.data.licenses.expired === 'number'
+  );
+
+  // ═══════════════════════════════════════════════════════════
+  // 3.l Trial de 14 días (plan mini) — trial_ends_at se persiste/expone, se
+  //     cuenta en billing.trialing, y NO suma al MRR ni a paying_subscribers.
+  //     Simula el flujo real del webhook: alta con trial futuro → primer cobro
+  //     (invoice.paid amount>0) limpia trial_ends_at a null.
+  // ═══════════════════════════════════════════════════════════
+  const before = await get('/api/admin/stats', 'admin');
+  const mrrBefore = before.data.revenue.mrr_eur;
+  const payingBefore = before.data.billing.paying_subscribers;
+  const trialingBefore = before.data.billing.trialing ?? 0;
+
+  // Alta con trial (como la que haría handleStripeCheckoutCompleted del mini)
+  const trialEndISO = new Date(Date.now() + 14 * 86400000).toISOString();
+  const trialLicense = dbCreateLicense({
+    email: 'trial@nokfi.local', plan: 'mini', payment_provider: 'stripe',
+    payment_ref: 'cs_trial_test', billing_model: 'subscription',
+    stripe_customer_id: 'cus_trial', stripe_subscription_id: 'sub_trial',
+    current_period_ends_at: trialEndISO, trial_ends_at: trialEndISO,
+    password: 'TrialP4ss!', created_by: 'webhook_stripe_sub'
+  });
+  check('createLicense con trial → trial_ends_at persistido (ISO futuro)',
+    () => trialLicense.trial_ends_at === trialEndISO
+  );
+
+  // Stats: la licencia en trial cuenta como trialing, NO como paying, NO suma 5€
+  await checkAsync('stats con trial → billing.trialing +1, MRR sin 5€ del trial, paying sin cambiar',
+    get('/api/admin/stats', 'admin'),
+    r => r.status === 200
+      && r.data.billing.trialing === trialingBefore + 1
+      && r.data.revenue.mrr_eur === mrrBefore              // el trial (5€) NO se suma al MRR
+      && r.data.billing.paying_subscribers === payingBefore // el trial NO es paying subscriber
+  );
+
+  // login expone trial_ends_at (publicLicenseView — cambio Layer 2 en auth.js)
+  await checkAsync('login licencia en trial → 200 + license.trial_ends_at expuesto',
+    post('/api/auth/login', { email: 'trial@nokfi.local', license_key: trialLicense.key, password: 'TrialP4ss!' }),
+    r => r.status === 200 && r.data.license.trial_ends_at === trialEndISO
+  );
+
+  // Simula invoice.paid con cobro real (día 14): clear trial_ends_at → null.
+  // updateSubscription con null explícito (bug C) → setIf escribe NULL.
+  const trialCleared = updateSubscription(trialLicense.id, { status: 'active', trial_ends_at: null });
+  check('updateSubscription trial_ends_at=null → limpia el flag (fin de trial)',
+    () => trialCleared.trial_ends_at === null
+  );
+  // Y stats vuelve a sin trialing (el trial ya no cuenta)
+  await checkAsync('stats tras fin de trial → billing.trialing vuelve al valor previo',
+    get('/api/admin/stats', 'admin'),
+    r => r.status === 200 && r.data.billing.trialing === trialingBefore
   );
 
   } catch (e) {

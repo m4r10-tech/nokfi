@@ -395,6 +395,7 @@ function publicLicenseView(license) {
     has_subscription: !!license.stripe_customer_id,
     current_period_ends_at: license.current_period_ends_at || null,
     cancel_at_period_end: !!license.cancel_at_period_end,
+    trial_ends_at: license.trial_ends_at || null,
     device_name: license.device_name || null,
     created_at: license.created_at,
     ai_quota: aiQuotaForPlan(license.plan)

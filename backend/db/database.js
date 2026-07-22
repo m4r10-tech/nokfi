@@ -7,8 +7,10 @@
  *   - Una licencia = un email + una clave XXXX-XXXX-XXXX-XXXX + UNA contraseña
  *     elegida por el usuario (scrypt). No hay device-fingerprint.
  *   - El anti-sharing que aportaba el fingerprint se delega en la cuota diaria
- *     de IA por licencia, ahora **tiered por plan** (mini 30 / pro 80 / max 200
- *     análisis/día — ver aiQuotaForPlan) en backend/routes/proxy.js.
+ *     de IA por licencia, ahora **tiered por plan** (mini 10 / pro 50 / max 130
+ *     análisis/día — ver aiQuotaForPlan, y config/plans.js) en backend/routes/proxy.js.
+ *     El plan mini lleva además una prueba gratis de 14 días con tarjeta
+ *     (campo trial_ends_at; ver runTrialMigration y config/plans.js TRIAL_*).
  *   - El reseteo de CONTRASEÑA por email está limitado a 1 vez/año
  *     (campo last_password_reset) como anti-abuso del flujo por email.
  *   - Modelo de billing (Fase 3): suscripción mensual mini/pro/max vía Stripe,
@@ -34,6 +36,8 @@ const Database = require('better-sqlite3');
 const path = require('path');
 const fs = require('fs');
 const crypto = require('crypto');
+
+const { PLANS, AI_QUOTAS } = require('../config/plans');
 
 const DB_PATH = process.env.DB_PATH || path.join(__dirname, 'nokfi.db');
 
@@ -73,6 +77,7 @@ function initDB() {
           stripe_subscription_id    TEXT    DEFAULT NULL,
           current_period_ends_at    TEXT    DEFAULT NULL,
           cancel_at_period_end      INTEGER NOT NULL DEFAULT 0,
+          trial_ends_at             TEXT    DEFAULT NULL,
           payment_provider          TEXT    DEFAULT NULL
                                               CHECK(payment_provider IN ('stripe','paypal','coinbase','revolut',NULL)),
           payment_ref               TEXT    DEFAULT NULL,
@@ -146,6 +151,7 @@ function initDB() {
       ────────────────────────────────────────────────────────── */
       runFingerprintMigration(db);
       runSubscriptionMigration(db);
+      runTrialMigration(db);
 
       console.log('✅  Base de datos inicializada en', DB_PATH);
       resolve(db);
@@ -310,6 +316,7 @@ function runSubscriptionMigration(database) {
             stripe_subscription_id    TEXT    DEFAULT NULL,
             current_period_ends_at    TEXT    DEFAULT NULL,
             cancel_at_period_end      INTEGER NOT NULL DEFAULT 0,
+            trial_ends_at             TEXT    DEFAULT NULL,
             payment_provider          TEXT    DEFAULT NULL
                                                     CHECK(payment_provider IN ('stripe','paypal','coinbase','revolut',NULL)),
             payment_ref               TEXT    DEFAULT NULL,
@@ -369,6 +376,33 @@ function runSubscriptionMigration(database) {
   }
 }
 
+/**
+ * Migración Trial — añade la columna `trial_ends_at` a `licenses` si no existe.
+ * Idempotente y guardada por detección (PRAGMA table_info). En un install fresco
+ * la columna ya la crea el `CREATE TABLE IF NOT EXISTS` (con TRIAL_DAYS de
+ * config/plans.js) → este ALTER no se ejecuta. En la BD del VPS (esquema Fase 3
+ * sin la col) añade una simple columna nullable: SQLite permite `ALTER TABLE
+ * ADD COLUMN` sin reconstruir la tabla para una col sin constraint → no hay
+ * riesgo para las FK hijas. Registra NULL en todas las filas existentes, lo que
+ * es correcto: legacy y suscripciones ya cobradas no están en trial.
+ *
+ * El trial de 14 días (solo plan mini) se gestiona en los webhooks de Stripe:
+ * checkout.session.completed crea la licencia con trial_ends_at = sub.trial_end
+ * (14 días en el futuro); customer.subscription.updated / invoice.paid lo
+ * limpian a NULL cuando el trial termina o se cobra el primer periodo (ver el
+ * bug C en routes/webhooks.js: la coerción explícita a null es necesaria porque
+ * isoFromUnix(null) devolvería undefined y setIf lo saltaría, dejando el estado
+ * stale en trialing para siempre).
+ */
+function runTrialMigration(database) {
+  const columnsOf = (table) => database.prepare(`PRAGMA table_info(${table})`).all().map(c => c.name);
+  const cols = columnsOf('licenses');
+  if (!cols.includes('trial_ends_at')) {
+    database.exec(`ALTER TABLE licenses ADD COLUMN trial_ends_at TEXT DEFAULT NULL`);
+    console.log('✅  Migración Trial: añadida columna licenses.trial_ends_at');
+  }
+}
+
 function getDB() {
   if (!db) throw new Error('Base de datos no inicializada — llama a initDB() primero');
   return db;
@@ -397,7 +431,8 @@ function createLicense({
   email, plan = 'mini', payment_provider = null, payment_ref = null,
   amount_eur = null, notes = '', created_by = 'system', password = null,
   billing_model = 'subscription', stripe_customer_id = null,
-  stripe_subscription_id = null, current_period_ends_at = null
+  stripe_subscription_id = null, current_period_ends_at = null,
+  trial_ends_at = null
 }) {
   if (!email || typeof email !== 'string') {
     throw new Error('email es obligatorio para crear una licencia');
@@ -414,11 +449,11 @@ function createLicense({
   const result = db.prepare(`
     INSERT INTO licenses (key, email, plan, billing_model, password_hash,
                           stripe_customer_id, stripe_subscription_id, current_period_ends_at,
-                          payment_provider, payment_ref, amount_eur, notes, created_by)
-    VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+                          trial_ends_at, payment_provider, payment_ref, amount_eur, notes, created_by)
+    VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
   `).run(key.toUpperCase(), email.trim().toLowerCase(), plan, billing_model, password_hash,
          stripe_customer_id, stripe_subscription_id, current_period_ends_at,
-         payment_provider, payment_ref, amount_eur, notes, created_by);
+         trial_ends_at, payment_provider, payment_ref, amount_eur, notes, created_by);
 
   return getLicenseById(result.lastInsertRowid);
 }
@@ -686,17 +721,27 @@ function getStats(periodDays = 30) {
   const subscriptionCount = db.prepare("SELECT COUNT(*) c FROM licenses WHERE billing_model='subscription'").get().c;
 
   // ── MRR: revenue recurrente mensual esperado = Σ(plan_price_mensual) sobre
-  //    suscripciones ACTIVAS (billing_model='subscription' AND status='active').
-  //    Las legacy no aportan MRR (ya pagadas, no recurrentes). Precios en EUR.
-  const PLAN_PRICES = { mini: 10, pro: 25, max: 40 };
+  //    suscripciones ACTIVAS y YA FUERA DEL TRIAL (billing_model='subscription'
+  //    AND status='active' AND trial_ends_at IS NULL). Las licencias en trial
+  //    de mini tienen status='active' pero generan 0€ hasta el primer cobro a
+  //    los 14 días; contarlas inflaría el MRR. Las legacy no aportan MRR (ya
+  //    pagadas, no recurrentes). Precios en EUR desde config/plans.js (fuente
+  //    única; antes era un literal {mini:10,pro:25,max:40} duplicado aquí).
+  const PLAN_PRICES_EUR = Object.fromEntries(Object.keys(PLANS).map(p => [p, PLANS[p].eur]));
   const mrrRows = db.prepare(`
     SELECT plan, COUNT(*) c FROM licenses
-    WHERE billing_model='subscription' AND status='active'
+    WHERE billing_model='subscription' AND status='active' AND trial_ends_at IS NULL
     GROUP BY plan
   `).all();
   let mrr_eur = 0;
-  for (const r of mrrRows) mrr_eur += (PLAN_PRICES[r.plan] || 0) * r.c;
+  for (const r of mrrRows) mrr_eur += (PLAN_PRICES_EUR[r.plan] || 0) * r.c;
   const payingSubscribers = mrrRows.reduce((s, r) => s + r.c, 0);
+  // Suscripciones en periodo de prueba (status='active', trial_ends_at en el
+  // futuro): métrica aparte para que el panel distinga "ensayan" de "pagan".
+  const trialingCount = db.prepare(`
+    SELECT COUNT(*) c FROM licenses
+    WHERE billing_model='subscription' AND status='active' AND trial_ends_at IS NOT NULL
+  `).get().c;
 
   //历史的: suscripciones creadas en el periodo (nuevas altas recurrentes)
   const newSubscriptionsPeriod = db.prepare(
@@ -724,7 +769,7 @@ function getStats(periodDays = 30) {
   return {
     licenses: { total: total_licenses, active, suspended, revoked, expired },
     plans: planCounts,
-    billing: { legacy: legacyCount, subscription: subscriptionCount, paying_subscribers: payingSubscribers },
+    billing: { legacy: legacyCount, subscription: subscriptionCount, paying_subscribers: payingSubscribers, trialing: trialingCount },
     activations: { today: activationsToday, week: activationsWeek, month: activationsMonth, new_subscriptions_period: newSubscriptionsPeriod },
     revenue: { total_eur: revenueTotal, period_eur: revenuePeriod, mrr_eur: mrr_eur },
     daily_series: dailySeries,
@@ -753,11 +798,14 @@ function countAiAnalysesToday(license_id) {
 
 /**
  * Cuota diaria de análisis IA por plan — el anti-sharing delegado del viejo
- * fingerprint. Tiered para dar valor a los planes altos: mini 30 / pro 80 /
- * max 200 análisis/día. Un plan desconocido (legacy mal migrado, datos sucios)
- * cae al mínimo de mini, que es lo conservador (denegar antes que sobre-usar).
+ * fingerprint. Tiered para dar valor a los planes altos: mini 10 / pro 50 /
+ * max 130 análisis/día (definidos en config/plans.js, fuente única; antes era
+ * un literal {mini:30,pro:80,max:200} duplicado aquí). Un plan desconocido
+ * (legacy mal migrado, datos sucios) cae al mínimo de mini, que es lo
+ * conservador (denegar antes que sobre-usar).
+ *
+ * AI_QUOTAS se importa de config/plans.js. No la redeclaramos localmente.
  */
-const AI_QUOTAS = { mini: 30, pro: 80, max: 200 };
 function aiQuotaForPlan(plan) {
   const q = AI_QUOTAS[plan];
   return typeof q === 'number' && q > 0 ? q : AI_QUOTAS.mini;
@@ -779,11 +827,17 @@ function getLicenseByStripeSubscriptionId(subscription_id) {
  */
 function updateSubscription(id, {
   plan, status, billing_model, stripe_customer_id, stripe_subscription_id,
-  current_period_ends_at, cancel_at_period_end, amount_eur
+  current_period_ends_at, cancel_at_period_end, amount_eur, trial_ends_at
 }) {
   const db = getDB();
   const setClauses = [];
   const vals = [];
+  // setIf escribe cuando val !== undefined. Esto es deliberado y clave para el
+  // trial: un trial terminado COBRADO debe dejar trial_ends_at = NULL (ya no
+  // está en prueba), y los callers pasan `null` explícito (no undefined) para
+  // forzar el WRITE. Si pasaran undefined (p.ej. isoFromUnix(null)) setIf lo
+  // saltaría y la licencia quedaría marcada en trial para siempre (bug C). Ver
+  // la coerción `sub.trial_end ? isoFromUnix(sub.trial_end) : null` en webhooks.
   const setIf = (col, val) => {
     if (val !== undefined) { setClauses.push(`${col} = ?`); vals.push(val); }
   };
@@ -795,6 +849,7 @@ function updateSubscription(id, {
   setIf('current_period_ends_at', current_period_ends_at);
   setIf('cancel_at_period_end', cancel_at_period_end);
   setIf('amount_eur', amount_eur);
+  setIf('trial_ends_at', trial_ends_at);
   if (!setClauses.length) return getLicenseById(id);
   vals.push(id);
   db.prepare(`UPDATE licenses SET ${setClauses.join(', ')} WHERE id = ?`).run(...vals);

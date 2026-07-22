@@ -88,6 +88,12 @@ function SubscriptionSection() {
     ? new Date(license.current_period_ends_at).toLocaleDateString()
     : null;
   const aiQuota = license.ai_quota;
+  // Trial de 14 días (plan mini): license.trial_ends_at es un ISO futuro mientras
+  // dure la prueba. translate() no interpola {n}, así que lo sustituimos aquí.
+  const trialEnd = license.trial_ends_at ? new Date(license.trial_ends_at) : null;
+  const trialDaysLeft = trialEnd && trialEnd > new Date()
+    ? Math.ceil((trialEnd - new Date()) / 86400000)
+    : null;
 
   const openPortal = async () => {
     setError(null);
@@ -117,6 +123,13 @@ function SubscriptionSection() {
         {aiQuota != null && (
           <Row label={t('config.aiQuota')}>
             <span style={{ color: 'var(--text-primary)' }}>{aiQuota} {t('config.aiQuotaPerDay')}</span>
+          </Row>
+        )}
+        {trialDaysLeft != null && (
+          <Row label={t('config.trialRow')}>
+            <span style={{ color: 'var(--text-secondary)' }}>
+              {t('config.trialDaysLeft').replace('{n}', trialDaysLeft)}
+            </span>
           </Row>
         )}
         {(hasSubscription || renewal) && (

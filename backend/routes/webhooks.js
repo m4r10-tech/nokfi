@@ -55,7 +55,11 @@ const {
 const { sendLicenseKeyEmail, sendLicenseRevokedEmail } = require('../utils/mailer');
 const { paypalApiBase, getPaypalAccessToken } = require('../utils/paypalAuth');
 
-const VALID_PLANS = ['mini', 'pro', 'max'];
+// Fuente única de planes válidos (config/plans.js). Antes era un literal local
+// ['mini','pro','max'] duplicado en payments.js/admin.js/database.js → drift.
+const { VALID_PLANS } = require('../config/plans');
+
+/** Coerce un plan entrante a un id conocido, con 'mini' como conservador. */
 function coerceStripePlan(plan) { return VALID_PLANS.includes(plan) ? plan : 'mini'; }
 
 /** Mapa price-id → plan (para inferir el plan tras una mejora vía Customer Portal). */
@@ -161,18 +165,27 @@ async function handleStripeCheckoutCompleted(event, ip) {
     return;
   }
 
-  // Traer la suscripción para current_period_end + cancel_at_period_end.
+  // Traer la suscripción para current_period_end + cancel_at_period_end + trial_end.
   // No es fatal si falla: la licencia se crea igual y invoice.paid/subscription.updated
   // rellenarán el periodo más adelante.
   let current_period_ends_at = null;
   let cancel_at_period_end = 0;
   let confirmedPlan = plan;
+  // trial_ends_at: ISO del fin del trial de 14 días (solo plan mini, si el
+  // checkout lo pidió con trial). pro/max y cualquier suscripción sin trial
+  // tienen sub.trial_end === null → dejamos trial_ends_at en null (no en trial).
+  let trial_ends_at = null;
   if (subId) {
     try {
       const sub = await fetchStripeSubscription(subId);
       current_period_ends_at = isoFromUnix(sub.current_period_end) || null;
       cancel_at_period_end = sub.cancel_at_period_end ? 1 : 0;
       confirmedPlan = planFromSubscription(sub) || plan;
+      // Bug C: coerción explícita a null (no undefined). isoFromUnix(null) es
+      // undefined y createLicense/updateSubscription saltarían el INSERT/write
+      // del campo → la licencia NUNCA llevaría el flag de trial al alta. null ≠
+      // undefined → se persiste NULL (o la fecha futura) según corresponda.
+      trial_ends_at = sub.trial_end ? isoFromUnix(sub.trial_end) : null;
     } catch (e) {
       console.error('[WEBHOOK STRIPE] no se pudo fetch la suscripción %s: %s', subId, e.message);
     }
@@ -185,7 +198,7 @@ async function handleStripeCheckoutCompleted(event, ip) {
     email, plan: confirmedPlan, payment_provider: 'stripe', payment_ref: session.id,
     amount_eur, billing_model: 'subscription',
     stripe_customer_id: customerId, stripe_subscription_id: subId,
-    current_period_ends_at, created_by: 'webhook_stripe_sub'
+    current_period_ends_at, trial_ends_at, created_by: 'webhook_stripe_sub'
   });
 
   if (cancel_at_period_end) {
@@ -198,7 +211,7 @@ async function handleStripeCheckoutCompleted(event, ip) {
   });
   audit('LICENSE_CREATED_STRIPE_SUB', {
     license_id: license.id, ip,
-    detail: `email=${email} plan=${confirmedPlan} sub=${subId}`
+    detail: `email=${email} plan=${confirmedPlan} sub=${subId} trial=${trial_ends_at ? '14d' : 'no'}`
   });
 
   sendLicenseKeyEmail({ to: email, licenseKey: license.key, plan: confirmedPlan }).catch(e =>
@@ -231,11 +244,24 @@ async function handleStripeInvoicePaid(event, ip) {
   // impago a 'active'). NO tocamos cancel_at_period_end aquí: su fuente de
   // verdad es customer.subscription.updated (si lo reseteáramos aquí, un
   // cancel programado que llegase después borraríamos la bandera por orden).
+  //
+  // Trial: un invoice.paid = cobro. OJO al trial de mini: Stripe emite un primer
+  // invoice de 0€ (billing_reason='subscription_create', amount_paid=0) justo al
+  // aperturar la suscripción — NO es un cobro, es la validación de la tarjeta
+  // para el trial. Limpiar trial_ends_at ahí sacaría la licencia del trial a
+  // los 0 días: el banner "te quedan 14 días" se evaporaría al instante y la
+  // licencia pasaría a contar 5€ en el MRR cobrando 0€. Por eso SOLO limpiamos
+  // trial_ends_at cuando hubo cobro real (amount_paid > 0): el primer cobro a
+  // los 14 días o cualquier renovación posterior. subscription.updated (trialing
+  // → active) también lo limpia → defensa por duplicado consistente.
+  const actuallyPaid = (typeof invoice.amount_paid === 'number' && invoice.amount_paid > 0);
   updateSubscription(license.id, {
     status: 'active',
     current_period_ends_at,
     stripe_customer_id: customerId || undefined,
-    amount_eur: amount_eur ?? undefined
+    amount_eur: amount_eur ?? undefined,
+    // null explícito fuerza el WRITE (ver bug C). Solo cuando cobró de verdad.
+    ...(actuallyPaid ? { trial_ends_at: null } : {})
   });
 
   recordPaymentEvent({
@@ -263,6 +289,12 @@ async function handleStripeSubscriptionUpdated(event, ip) {
   const plan = planFromSubscription(sub);
   const current_period_ends_at = isoFromUnix(sub.current_period_end);
   const cancel_at_period_end = sub.cancel_at_period_end ? 1 : 0;
+  // Bug C (defensa por duplicado): trial_end llega null cuando el trial ha
+  // terminado (Stripe lo pone así al pasar trialing→active). Coercemos null
+  // explícito para que updateSubscription lo persista; isoFromUnix(null) sería
+  // undefined → setIf lo saltaría → trial Ends_at quedaría stale, la licencia
+  // no dejaría nunca de ser "en trial" y el MRR/HUD la contarían mal.
+  const trial_ends_at = sub.trial_end ? isoFromUnix(sub.trial_end) : null;
 
   // Mapeo de stripe subscription.status → status interno Nokfi.
   let status;
@@ -280,7 +312,8 @@ async function handleStripeSubscriptionUpdated(event, ip) {
     plan, status,
     current_period_ends_at,
     cancel_at_period_end,
-    stripe_customer_id: sub.customer || undefined
+    stripe_customer_id: sub.customer || undefined,
+    trial_ends_at
   });
 
   const prevPlan = license.plan;
@@ -345,11 +378,17 @@ async function handleStripeInvoicePaymentFailed(event, ip) {
   recordPaymentEvent({ provider: 'stripe', event_id: event.id, event_type: event.type, license_id: license.id, processed: true });
 }
 
-/** Trae la suscripción de Stripe (para current_period_end / items en checkout.created). */
+/** Trae la suscripción de Stripe (para current_period_end / items / trial_end
+ *  en checkout.created y subscription.updated). Fija la misma versión de API que
+ *  routes/payments.js (STRIPE_API_VERSION) para que `trial_end` y el behavior del
+ *  trial sean consistentes entre la creación y la lectura. */
 async function fetchStripeSubscription(subId) {
   if (!process.env.STRIPE_SECRET_KEY) throw new Error('STRIPE_SECRET_KEY no configurado');
   const res = await fetch(`https://api.stripe.com/v1/subscriptions/${subId}`, {
-    headers: { 'Authorization': `Bearer ${process.env.STRIPE_SECRET_KEY}` }
+    headers: {
+      'Authorization': `Bearer ${process.env.STRIPE_SECRET_KEY}`,
+      'Stripe-Version': require('../config/stripe-version')
+    }
   });
   if (!res.ok) throw new Error(`Stripe devolvió ${res.status}`);
   return res.json();

@@ -56,6 +56,8 @@ export default {
     subscriptionPlan: 'Plan actual', subscriptionStatus: 'Estado', subscriptionRenews: 'Próxima renovación',
     subscriptionCancelled: 'Cancelada — acceso hasta el fin de periodo',
     subscriptionNoRenewal: 'Sin renovación programada',
+    trialRow: 'Período de prueba',
+    trialDaysLeft: 'Quedan {n} días',
     aiQuota: 'Cuota de análisis IA', aiQuotaPerDay: 'análisis/día',
     manageSubscription: 'Gestionar suscripción',
     manageHint: 'Cancela o mejora tu plan desde el portal de Stripe. La mejora se prorratea automáticamente.',
@@ -67,11 +69,12 @@ export default {
     perMonth: '/mes', emailPlaceholder: 'Tu email',
     cta: 'Suscribirme', goLogin: 'Ya tengo licencia — iniciar sesión',
     features: {
-      mini: ['30 análisis IA al día', 'Diagnóstico completo', '6 análisis Excel', 'Historial'],
-      pro: ['80 análisis IA al día', 'Todo lo de Mini', 'Calculadoras avanzadas', 'Informes'],
-      max: ['200 análisis IA al día', 'Todo lo de Pro', 'Soporte prioritario', 'Acceso anticipado a novedades']
+      mini: ['10 análisis IA al día', 'Diagnóstico completo', '6 análisis Excel', 'Historial'],
+      pro: ['50 análisis IA al día', 'Todo lo de Mini', 'Calculadoras avanzadas', 'Informes'],
+      max: ['130 análisis IA al día', 'Todo lo de Pro', 'Soporte prioritario', 'Acceso anticipado a novedades']
     },
     aiBadge: 'análisis IA/día',
+    trialBadge: '14 días gratis',
     monthSuffix: '/mes',
     invalidEmail: 'Introduce un email válido.',
     checkoutError: 'No se pudo iniciar el pago. Inténtalo de nuevo.'

@@ -56,6 +56,8 @@ export default {
     subscriptionPlan: 'Current plan', subscriptionStatus: 'Status', subscriptionRenews: 'Next renewal',
     subscriptionCancelled: 'Cancelled — access until end of period',
     subscriptionNoRenewal: 'No renewal scheduled',
+    trialRow: 'Trial period',
+    trialDaysLeft: '{n} days left',
     aiQuota: 'AI analysis quota', aiQuotaPerDay: 'analyses/day',
     manageSubscription: 'Manage subscription',
     manageHint: 'Cancel or upgrade your plan from the Stripe portal. Upgrades are prorated automatically.',
@@ -67,11 +69,12 @@ export default {
     perMonth: '/mo', emailPlaceholder: 'Your email',
     cta: 'Subscribe', goLogin: 'I already have a license — log in',
     features: {
-      mini: ['30 AI analyses per day', 'Full diagnosis', '6 Excel analyses', 'History'],
-      pro: ['80 AI analyses per day', 'Everything in Mini', 'Advanced calculators', 'Reports'],
-      max: ['200 AI analyses per day', 'Everything in Pro', 'Priority support', 'Early access to new features']
+      mini: ['10 AI analyses per day', 'Full diagnosis', '6 Excel analyses', 'History'],
+      pro: ['50 AI analyses per day', 'Everything in Mini', 'Advanced calculators', 'Reports'],
+      max: ['130 AI analyses per day', 'Everything in Pro', 'Priority support', 'Early access to new features']
     },
     aiBadge: 'AI analyses/day',
+    trialBadge: '14-day free trial',
     monthSuffix: '/mo',
     invalidEmail: 'Please enter a valid email.',
     checkoutError: 'Could not start checkout. Please try again.'

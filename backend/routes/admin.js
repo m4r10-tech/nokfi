@@ -153,13 +153,10 @@ router.get('/licenses/:id', (req, res) => {
 ────────────────────────────────────────────────────────── */
 /* Planes válidos (Fase 3): mini / pro / max (suscripción mensual). La
    convención "basic" del modelo viejo sobrevive sólo como dato histórico ya
-   migrado a max/legacy — nunca se acepta en escritura. */
-const VALID_PLANS = ['mini', 'pro', 'max'];
+   migrado a max/legacy — nunca se acepta en escritura. VALID_PLANS y coercePlan
+   vienen de config/plans.js (fuente única; antes era un literal duplicado). */
+const { VALID_PLANS, coercePlan } = require('../config/plans');
 const VALID_STATUSES = ['active', 'suspended', 'revoked', 'expired'];
-
-function coercePlan(plan) {
-  return VALID_PLANS.includes(plan) ? plan : 'mini';
-}
 
 router.post('/licenses', async (req, res) => {
   const email = (req.body?.email || '').trim().toLowerCase();
