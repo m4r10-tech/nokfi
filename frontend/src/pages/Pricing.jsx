@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
 import { Loader2, Check } from 'lucide-react';
 import { paymentsApi } from '../middleware/api';
@@ -10,19 +10,36 @@ import Logo from '../components/Logo';
  * El usuario entra su email, elige uno de los 3 planes y se le redirige al
  * Checkout de Stripe (modo subscription). Tras pagar, Stripe lo devuelve a
  * /reveal, donde ve su clave recién creada (el webhook la genera).
+ *
+ * Los precios NO se hardcodean aquí: se fetchan de GET /api/payments/plans, que
+ * los lee del .env del backend (PLAN_PRICE_*_EUR) → SIEMPRE mostramos lo que
+ * Stripe cobra. Si el catálogo no carga, el botón se deshabilita (no dejamos
+ * mostrar precios que no sabemos que se cobran).
  */
 
-const PLANS = [
-  { id: 'mini', name: 'Mini', price: '5', highlight: false },
-  { id: 'pro',  name: 'Pro',  price: '20', highlight: true },
-  { id: 'max',  name: 'Max',  price: '50', highlight: false }
-];
-
+// highlight / orden vienen siempre del backend; el catálogo va en este orden.
 export default function Pricing() {
   const { t } = useLang();
   const [email, setEmail] = useState('');
   const [loadingPlan, setLoadingPlan] = useState(null); // plan id en curso, o null
   const [error, setError] = useState(null);
+  const [plans, setPlans] = useState([]);       // catálogo desde el backend
+  const [planLoadFailed, setPlanLoadFailed] = useState(false);
+
+  useEffect(() => {
+    let cancelled = false;
+    paymentsApi.getPlans().then(({ ok, data }) => {
+      if (cancelled) return;
+      if (ok && Array.isArray(data.plans) && data.plans.length) {
+        setPlans(data.plans.map(p => ({
+          id: p.id, name: p.name, price: String(p.price_eur), highlight: p.id === 'pro', trial: !!p.trial
+        })));
+      } else {
+        setPlanLoadFailed(true);
+      }
+    });
+    return () => { cancelled = true; };
+  }, []);
 
   const subscribe = async (planId) => {
     setError(null);
@@ -58,7 +75,7 @@ export default function Pricing() {
       </div>
 
       <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 w-full max-w-2xl">
-        {PLANS.map(plan => (
+        {plans.map(plan => (
           <div key={plan.id} className="rounded-xl p-5 flex flex-col gap-3"
                style={{
                  background: 'var(--surface-1)',
@@ -70,7 +87,7 @@ export default function Pricing() {
                 <span className="text-[10px] font-medium uppercase tracking-wide rounded-full px-2 py-0.5"
                       style={{ background: 'var(--accent)', color: '#fff' }}>·</span>}
             </div>
-            {plan.id === 'mini' && (
+            {plan.trial && (
               <span className="text-[11px] font-medium rounded-full px-2 py-0.5 self-start"
                     style={{ color: 'var(--accent)', background: 'var(--surface-2)', border: '0.5px solid var(--accent)' }}>
                 {t('pricing.trialBadge')}
@@ -88,7 +105,7 @@ export default function Pricing() {
                 </li>
               ))}
             </ul>
-            <button onClick={() => subscribe(plan.id)} disabled={loadingPlan !== null}
+            <button onClick={() => subscribe(plan.id)} disabled={loadingPlan !== null || plans.length === 0}
               className="mt-1 rounded-lg py-2 text-sm font-medium flex items-center justify-center gap-2 disabled:opacity-60 transition-opacity"
               style={{ background: plan.highlight ? 'var(--accent)' : 'var(--surface-2)', color: plan.highlight ? '#fff' : 'var(--text-primary)', border: plan.highlight ? 'none' : '0.5px solid var(--border-strong)' }}>
               {loadingPlan === plan.id && <Loader2 size={15} className="animate-spin" />}
@@ -97,6 +114,13 @@ export default function Pricing() {
           </div>
         ))}
       </div>
+
+      {plans.length === 0 && !planLoadFailed && (
+        <p className="mt-5 text-sm" style={{ color: 'var(--text-secondary)' }}>{t('pricing.loading')}</p>
+      )}
+      {planLoadFailed && (
+        <p className="mt-5 text-sm rounded-lg px-3 py-2 max-w-2xl w-full text-center" style={{ background: 'var(--negative-soft)', color: 'var(--negative)' }}>{t('pricing.plansLoadError')}</p>
+      )}
 
       {error && <p className="mt-5 text-sm rounded-lg px-3 py-2 max-w-2xl w-full text-center" style={{ background: 'var(--negative-soft)', color: 'var(--negative)' }}>{error}</p>}
 

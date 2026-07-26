@@ -48,6 +48,28 @@ const STRIPE_API_VERSION = require('../config/stripe-version');
 const EMAIL_REGEX = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
 
 /* ──────────────────────────────────────────────────────────
+   GET /api/payments/plans
+
+   Catálogo público de planes — único punto de verdad del FRONTEND para precios,
+   cuotas y trial. El operador define el precio en .env (PLAN_PRICE_*_EUR) y al
+   reiniciar el backend este endpoint refleja el cambio; Pricing.jsx lo fetcha y
+   así SIEMPRE muestra el precio que Stripe va a cobrar (anti-drift: nada de
+   hardcodear precios en el frontend). No requiere auth ni claves de Stripe.
+
+   Devuelve: { plans: [{ id, name, price_eur, quota, trial }, ...] }
+────────────────────────────────────────────────────────── */
+router.get('/plans', (req, res) => {
+  const plans = Object.keys(PLANS).map(id => ({
+    id,
+    name: PLANS[id].name,
+    price_eur: PLANS[id].eur,
+    quota: PLANS[id].quota,
+    trial: planHasTrial(id)
+  }));
+  res.json({ plans });
+});
+
+/* ──────────────────────────────────────────────────────────
    GET /api/payments/stripe/reveal?session_id=...
 
    Página /reveal al volver de Stripe Checkout: muestra la clave recién

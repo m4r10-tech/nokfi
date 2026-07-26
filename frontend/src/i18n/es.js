@@ -77,7 +77,9 @@ export default {
     trialBadge: '14 días gratis',
     monthSuffix: '/mes',
     invalidEmail: 'Introduce un email válido.',
-    checkoutError: 'No se pudo iniciar el pago. Inténtalo de nuevo.'
+    checkoutError: 'No se pudo iniciar el pago. Inténtalo de nuevo.',
+    plansLoadError: 'No se pudieron cargar los precios. Revisa tu conexión y recarga la página.',
+    loading: 'Cargando planes…'
   },
   onboarding: {
     welcome: 'Bienvenido a Nokfi', subtitle: 'Cuéntanos un poco sobre tu negocio para personalizar tus análisis',

@@ -70,6 +70,9 @@ export const aiApi = {
 };
 
 export const paymentsApi = {
+  // Catálogo público de planes (precio, cuota, trial) — fuente única del frontend
+  // para que SIEMPRE muestre lo que Stripe cobra (anti-drift vs .env del backend).
+  getPlans: () => request('/payments/plans'),
   // Suscripción mensual (Fase 3) — solo Stripe para recurring.
   stripeCheckout: (email, plan) => request('/payments/stripe/create-checkout', { method: 'POST', body: { email, plan } }),
   // Customer Portal de Stripe: cancelar / mejorar plan / actualizar método de pago.

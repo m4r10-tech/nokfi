@@ -77,7 +77,9 @@ export default {
     trialBadge: '14-day free trial',
     monthSuffix: '/mo',
     invalidEmail: 'Please enter a valid email.',
-    checkoutError: 'Could not start checkout. Please try again.'
+    checkoutError: 'Could not start checkout. Please try again.',
+    plansLoadError: 'Couldn’t load the prices. Check your connection and reload the page.',
+    loading: 'Loading plans…'
   },
   onboarding: {
     welcome: 'Welcome to Nokfi', subtitle: 'Tell us a bit about your business to personalize your analyses',

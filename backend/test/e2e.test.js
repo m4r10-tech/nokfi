@@ -15,6 +15,12 @@ process.env.PORT = '3999';               // fijo: server.js auto-listen al reque
 process.env.DB_PATH = __dirname + '/test-e2e.db';
 process.env.ADMIN_SECRET = 'a1b2c3d4e5f6a1b2c3d4e5f6a1b2c3d4e5f6a1b2c3d4e5f6a1b2c3d4e5f6a1b2c3d4';
 process.env.BASE_URL = 'http://localhost:3999';
+// Determinismo: forzamos los precios del catálogo /plans a los defaults 5/20/50
+// ANTES de que server.js corra dotenv.config() (sin override, no nos pisa). Así el
+// smoke de /plans no depende de un .env local con valores distintos.
+process.env.PLAN_PRICE_MINI_EUR = '5';
+process.env.PLAN_PRICE_PRO_EUR = '20';
+process.env.PLAN_PRICE_MAX_EUR = '50';
 
 const fs = require('fs');
 const http = require('http');
@@ -586,6 +592,25 @@ async function main() {
   await checkAsync('stats tras fin de trial → billing.trialing vuelve al valor previo',
     get('/api/admin/stats', 'admin'),
     r => r.status === 200 && r.data.billing.trialing === trialingBefore
+  );
+
+  // ═══════════════════════════════════════════════════════════
+  // 3.m Catálogo público GET /api/payments/plans (anti-drift env-driven)
+  //     Público (sin auth), no depende de Stripe. Debe devolver los 3 planes con
+  //     price_eur 5/20/50 (los defaults forzados arriba en el entorno) y trial
+  //     ===true solo en mini. Pricing.jsx consume este endpoint.
+  // ═══════════════════════════════════════════════════════════
+  await checkAsync('GET /api/payments/plans → 200 + 3 planes + price_eur 5/20/50 + trial solo mini',
+    get('/api/payments/plans'),
+    r => {
+      if (r.status !== 200 || !Array.isArray(r.data.plans) || r.data.plans.length !== 3) return false;
+      const byId = Object.fromEntries(r.data.plans.map(p => [p.id, p]));
+      return Boolean(byId.mini && byId.pro && byId.max)
+        && byId.mini.price_eur === 5 && byId.mini.trial === true
+        && byId.pro.price_eur === 20 && byId.pro.trial === false
+        && byId.max.price_eur === 50 && byId.max.trial === false
+        && typeof byId.mini.quota === 'number' && byId.mini.quota === 10;
+    }
   );
 
   } catch (e) {
