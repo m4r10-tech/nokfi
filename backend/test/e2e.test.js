@@ -449,18 +449,19 @@ async function main() {
     r => r.status === 500 && r.data.error === 'stripe_not_configured' // pasó validación de plan
   );
 
-  // — 3.e Proveedores alternativos → 410 lifetime_discontinued —
-  await checkAsync('paypal create-order → 410 lifetime_discontinued',
+  // — 3.e Proveedores alternativos eliminados al pasar a Stripe-only →
+  //     sus rutas ya no existen; Express cae al 404 global del backend —
+  await checkAsync('paypal create-order → 404 (ruta retirada)',
     post('/api/payments/paypal/create-order', { email: 'x@nokfi.local', plan: 'mini' }),
-    r => r.status === 410 && r.data.error === 'lifetime_discontinued'
+    r => r.status === 404 && r.data.error === 'not_found'
   );
-  await checkAsync('coinbase create-charge → 410 lifetime_discontinued',
+  await checkAsync('coinbase create-charge → 404 (ruta retirada)',
     post('/api/payments/coinbase/create-charge', { email: 'x@nokfi.local', plan: 'mini' }),
-    r => r.status === 410 && r.data.error === 'lifetime_discontinued'
+    r => r.status === 404 && r.data.error === 'not_found'
   );
-  await checkAsync('revolut create-order → 410 lifetime_discontinued',
+  await checkAsync('revolut create-order → 404 (ruta retirada)',
     post('/api/payments/revolut/create-order', { email: 'x@nokfi.local', plan: 'mini' }),
-    r => r.status === 410 && r.data.error === 'lifetime_discontinued'
+    r => r.status === 404 && r.data.error === 'not_found'
   );
 
   // — 3.f Portal: sin auth → 401 —

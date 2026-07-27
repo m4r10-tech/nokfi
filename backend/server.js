@@ -5,18 +5,15 @@
  * ORDEN DE MIDDLEWARES — CRÍTICO, no reordenar sin entender por qué:
  *
  *   1. helmet() y cors()              → seguridad base, debe ir primero
- *   2. express.raw() en /api/webhooks/{stripe,coinbase,revolut}
- *                                      → estas tres rutas necesitan el body
- *                                        SIN parsear para verificar la firma
- *                                        HMAC (ver routes/webhooks.js). Si
- *                                        express.json() las tocara antes,
- *                                        el body ya vendría transformado a
- *                                        objeto JS y la firma no coincidiría
- *                                        nunca, rompiendo el webhook por completo.
- *   3. express.json() global          → para TODO lo demás (incluido el
- *                                        webhook de PayPal, que verifica su
- *                                        firma vía API REST, no HMAC local,
- *                                        así que sí puede recibir JSON parseado).
+ *   2. express.raw() en /api/webhooks/stripe
+ *                                      → esta ruta necesita el body SIN parsear
+ *                                        para verificar la firma HMAC (ver
+ *                                        routes/webhooks.js). Si express.json()
+ *                                        la tocara antes, el body ya vendría
+ *                                        transformado a objeto JS y la firma
+ *                                        no coincidiría nunca, rompiendo el
+ *                                        webhook por completo.
+ *   3. express.json() global          → para TODO lo demás.
  *   4. Rate limiters                  → después de poder leer el body si hiciera falta
  *   5. Rutas de la aplicación
  */
@@ -155,10 +152,8 @@ app.use(morgan(process.env.NODE_ENV === 'production' ? 'combined' : 'dev'));
 // Límite explícito (antes se confiaba en el default de Express de 100kb sin
 // documentarlo — un payload de webhook legítimo nunca supera unos pocos KB).
 app.use('/api/webhooks/stripe', express.raw({ type: 'application/json', limit: '512kb' }));
-app.use('/api/webhooks/coinbase', express.raw({ type: 'application/json', limit: '512kb' }));
-app.use('/api/webhooks/revolut', express.raw({ type: 'application/json', limit: '512kb' }));
 
-/* 3. JSON global para el resto (incluye /api/webhooks/paypal) */
+/* 3. JSON global para el resto */
 app.use(express.json({ limit: '2mb' }));
 
 /* ════════════════════════════════════════════════════════════
@@ -228,8 +223,8 @@ const webhooksRoutes = require('./routes/webhooks');
 app.use('/api/auth', authRoutes);
 app.use('/api/admin', adminRoutes);
 app.use('/api/proxy', proxyRoutes);
-app.use('/api/payments', paymentsRoutes);   // checkout: /api/payments/{stripe,paypal,coinbase,revolut}/...
-app.use('/api/webhooks', webhooksRoutes);   // confirmación: /api/webhooks/{stripe,paypal,coinbase,revolut}
+app.use('/api/payments', paymentsRoutes);   // checkout: /api/payments/stripe/*
+app.use('/api/webhooks', webhooksRoutes);   // confirmación: /api/webhooks/stripe
 
 /* ════════════════════════════════════════════════════════════
    Health check — usado por monitorización externa si se añade en el futuro

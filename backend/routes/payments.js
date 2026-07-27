@@ -25,9 +25,7 @@
  *   POST /api/payments/stripe/create-checkout         → Checkout de suscripción
  *   POST /api/payments/stripe/create-portal-session   → Customer Portal (cancel/upgrade), auth Bearer
  *   GET  /api/payments/stripe/reveal                  → muestra la clave recién comprada en /reveal
- *   POST /api/payments/paypal/create-order            → 410 (lifetime discontinued)
- *   POST /api/payments/coinbase/create-charge         → 410 (lifetime discontinued)
- *   POST /api/payments/revolut/create-order           → 410 (lifetime discontinued)
+ *   GET  /api/payments/plans                          → catálogo público de planes (anti-drift, sin auth)
  */
 
 'use strict';
@@ -221,29 +219,5 @@ router.post('/stripe/create-portal-session', requireLicense, async (req, res) =>
     res.status(500).json({ error: 'internal_error' });
   }
 });
-
-/* ──────────────────────────────────────────────────────────
-   Proveedores alternativos (PayPal / Coinbase / Revolut) — 410 GONE
-
-   Estos tres endpoints vendían el pago ÚNICO lifetime de €150, eliminado en
-   Fase 3. Como las suscripciones recurrentes solo se soportan vía Stripe en
-   esta fase (PayPal/Revolut/Coinbase para recurring añadiría mucha
-   complejidad; se reabrirá más adelante), estos endpoints se dejan registrados
-   para no romper posibles referencias, pero responden 410 Gone con un mensaje
-   claro en vez de crear un cobro de un producto que ya no existe.
-
-   NOTA: los WEBHOOKS de estos proveedores siguen activos en routes/webhooks.js
-   para procesar eventos históricos (idempotentes vía payment_events).
-────────────────────────────────────────────────────────── */
-function lifetimeDiscontinued(provider, req, res) {
-  return res.status(410).json({
-    error: 'lifetime_discontinued',
-    message: `El pago único de por vida ha sido reemplazado por suscripciones mensuales vía Stripe. ${provider} para suscripciones volverá en una próxima fase.`
-  });
-}
-
-router.post('/paypal/create-order', (req, res) => lifetimeDiscontinued('PayPal', req, res));
-router.post('/coinbase/create-charge', (req, res) => lifetimeDiscontinued('Coinbase', req, res));
-router.post('/revolut/create-order', (req, res) => lifetimeDiscontinued('Revolut', req, res));
 
 module.exports = router;
