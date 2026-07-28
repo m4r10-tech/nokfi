@@ -1,5 +1,11 @@
 # Nokfi — Documento de Definición del Proyecto
-> Estado: definición completa · Backend implementado (pendiente de despliegue y pruebas reales) · Frontend y landing pendientes · Última actualización: junio 2026
+> Estado: **Fase 3 desplegada en producción** (VPS `191.44.112.86`).
+> Modelo de billing: **suscripción mensual** vía **Stripe** (mini / pro / max), con
+> **trial de 14 días** en el plan mini. Auth por **email + clave + contraseña**
+> (el device-fingerprint se eliminó en `f9385af`). Backend completo + desplegado
+> y probado; **frontend construido y compilando** (no servido por VPS todavía —
+> Nginx pendiente); landing en diseño. PayPal / Coinbase / Revolut retirados.
+> Última actualización: julio 2026.
 
 ---
 
@@ -25,66 +31,115 @@ Desarrollado por un equipo de 3 personas con perfiles complementarios: programac
 - Un ejecutable de escritorio se puede decompilar; una web app con lógica de validación en servidor no
 - El software requiere conexión a internet de todas formas (llama a la IA), así que no hay ventaja en trabajar offline
 
-### Planes de precio
-| Plan | Precio | Dispositivos | Funciones |
-|------|--------|--------------|-----------|
-| Básico | Por definir | 1 | Cuestionario + análisis Excel + informe PDF/Excel |
-| Pro | Por definir | 1 | Todo lo anterior + historial + calculadoras + exportación avanzada |
+### Planes de precio (suscripción mensual)
+| Plan | Precio/mes | Cuota IA/día | Trial | Funciones |
+|------|-----------|--------------|-------|-----------|
+| **mini** | **5 €** | 10 análisis | **14 días gratis** (tarjeta obligatoria) | Cuestionario + análisis Excel/PDF + informe + calculadoras |
+| **pro** | **20 €** | 50 análisis | — | Todo mini + más cuota |
+| **max** | **50 €** | 130 análisis | — | Todo pro + más cuota |
 
-> Los precios exactos se definen en una fase posterior. Una clave = un dispositivo fijo, sin excepciones.
+- Los **precios (5/20/50 €)** son env-driven: se definen en `PLAN_PRICE_MINI_EUR` / `_PRO_EUR` / `_MAX_EUR` del `.env` del backend. Cambiarlos y reiniciar PM2 mueve a la vez lo que **cobra Stripe** y lo que **muestra la web** (vía `GET /api/payments/plans`) — anti-drift. Defaults 5/20/50.
+- Las **cuotas de IA (10/50/130 análisis/día)** son decisión de producto, **no** env-driven — viven en `backend/config/plans.js` (`PLAN_QUOTAS`). Es el mecanismo anti-sharing: una sola clave compartida agota su cuota diaria entre todos los que la usen.
+- **Una clave = una contraseña**, no un dispositivo fijo. El login es email + clave + contraseña (sección 5); el dispositivo ya no se fija.
 
 ---
 
 ## 3. Flujo completo de venta
 
 ```
-Landing page pública
+Landing page pública  (nokfi.app, pendiente de servir en el VPS)
         ↓
-[Comprar ahora] → selección de plan
+[Comprar ahora] → selección de plan (mini / pro / max)
         ↓
-Pasarela de pago (Stripe / PayPal)
+POST /api/payments/stripe/create-checkout → Checkout Session de Stripe
         ↓
-Webhook del servidor → genera clave → vincula email del comprador
+Stripe Checkout (suscripción mensual; mini pide tarjeta y muestra "14-day trial")
         ↓
-Pantalla de revelación de clave (token de un solo uso, válido 15 minutos)
+Webhook checkout.session.completed → servidor genera clave + crea suscripción
+        ↓
+Página /reveal?session_id=... → muestra la clave recién comprada en la web
         ↓
 Email automático de respaldo con la clave al email del comprador
         ↓
-Usuario accede a app.vuestrodominio.com
+Usuario accede a app.nokfi.app
         ↓
-Pantalla de login (Email + Clave + Device fingerprint)
+Pantalla de login (Email + Clave + Contraseña)
         ↓
-Servidor valida los 3 factores → sesión activa → Dashboard
+Servidor valida → sesión activa → Dashboard
 ```
 
+> **Ya no hay "token de un solo uso de 15 minutos"** para la revelación de clave.
+> El buyer vuelve de Stripe a la página `/reveal?session_id={CHECKOUT_SESSION_ID}`:
+> el `session_id` es la URL-secreta que Stripe solo entrega al navegador del comprador
+> (va en el `success_url`). El endpoint `GET /api/payments/stripe/reveal` la busca por
+> `payment_ref` y, si el webhook ya llegó, devuelve `{ key, email, plan }`. No expone
+> nada que el comprador no tenga ya en su bandeja de entrada.
+
 ### Qué es el email automático de respaldo
-Cuando el usuario compra, introduce su email en el checkout. El servidor, sin intervención manual de vuestro equipo, le envía automáticamente un correo con su clave `XXXX-XXXX-XXXX-XXXX`. Sirve como seguro por si el usuario cierra la pestaña de revelación antes de copiar la clave o le falla la conexión. Lo envía el servidor via **SendGrid** o **Resend** con vuestro dominio como remitente.
+Cuando el usuario compra, introduce su email en el checkout. El servidor, sin
+intervención manual de vuestro equipo, le envía automáticamente un correo con su
+clave `XXXX-XXXX-XXXX-XXXX`. Sirve como seguro por si el usuario cierra la pestaña
+de revelación antes de copiar la clave o le falla la conexión. Lo envía el servidor
+vía **SendGrid** o **Resend** con vuestro dominio como remitente.
 
 ---
 
-## 4. Pasarelas de pago
+## 4. Pasarela de pago
 
-### Métodos implementados (fase inicial)
-- **Stripe** — tarjeta de crédito/débito, Apple Pay, Google Pay. Comisión: ~1.5% + 0.25€ en tarjetas europeas. El dinero llega a vuestra cuenta bancaria automáticamente cada 7 días.
-- **PayPal** — cuenta PayPal Business (gratuita). Comisión: ~3.4% + 0.35€ por transacción en Europa.
-- **Revolut Business (Merchant API)** — tarjeta, Apple Pay, Google Pay. Comisión: ~1% + 0.20€ en tarjetas europeas de particulares (la más baja de las cuatro opciones). Requiere cuenta Revolut Business y solicitar acceso a Merchant API. El dinero llega al saldo de la cuenta Revolut, desde donde se transfiere al banco manual o automáticamente (transferencias programadas disponibles).
+### Único proveedor: Stripe (suscripción mensual)
+El proyecto nació planteando 4 pasarelas (Stripe, PayPal, Revolut, Coinbase Commerce),
+pero **solo Stripe se probó de extremo a extremo**. Al pasar al modelo de **suscripción
+mensual** (Fase 3) se tomó la decisión de quedarse **solo con Stripe** y retirar las
+otras tres: PayPal/Coinbase/Revolut no soportan cobro recurrente tan limpio como
+Stripe, y mantener 4 proveedores solo para el viejo pago único era deuda sin contrapartida.
 
-### Métodos para fases posteriores
-- **Crypto (Coinbase Commerce)** — BTC, ETH, USDC, LTC. Sin comisión de plataforma, solo fees de red. Se deja para más adelante por complejidad fiscal.
+- **Stripe** — tarjeta de crédito/débito, Apple Pay, Google Pay. Comisión ~1.5% + 0.25€
+  en tarjetas europeas. El dinero llega a vuestra cuenta bancaria automáticamente.
+- **Modo suscripción** (`mode=subscription`), **intervalo mensual**, precio en céntimos
+  derivado del `.env` (`unit_amount = Math.round(eur*100)`).
+- **Trial de 14 días solo en mini** con tarjeta obligatoria (Stripe bloquea reusar la
+  misma tarjeta para un 2º trial → anti-farmeo). Al día 14 cobra; si falla, los webhooks
+  existentes gestionan `past_due→suspended→expired` sin scheduler.
+- **Gestión de suscripción** (cancelar a fin de periodo, mejorar de plan con prorrata,
+  actualizar tarjeta): se delega al **Stripe Customer Portal nativo**
+  (`POST /api/payments/stripe/create-portal-session`), nunca a endpoints custom — el
+  Portal ya resuelve prorratas, currencies y dunning. Mejorar de plan (mini→pro→max)
+  usa un Stripe Price por plan (`STRIPE_PRICE_*`) para que el Portal infiera el plan
+  tras un upgrade; si faltan, cae a `subscription.metadata.plan`.
 
-### Transferencia bancaria — descartada
-Se evaluó y se descartó deliberadamente como método de pago. Una transferencia bancaria normal no tiene webhook — no hay forma de que el banco notifique automáticamente al servidor que un pago se ha completado. Todo el sistema de generación de licencias se apoya en que el proveedor de pago confirma la transacción al servidor en tiempo real mediante firma criptográfica verificable; un banco no ofrece ese mecanismo. Aceptarla habría requerido un proceso manual de verificación por parte del equipo, incompatible con el principio de "0 intervención manual" del flujo de venta.
+### Proveedores retirados (PayPal / Coinbase / Revolut)
+Los antiguos endpoints `POST /api/payments/paypal/create-order`,
+`/coinbase/create-charge` y `/revolut/create-order` **fueron eliminados** al pasar a
+Stripe-only. Ya no están montados → devuelven `404 { error: "not_found" }` al caer al
+404 global del backend. Lo mismo con los webhooks `/api/webhooks/paypal`, `/coinbase` y
+`/revolut`. `backend/utils/paypalAuth.js` se borró. **El frontend no debe tener botones
+de PayPal/Coinbase/Revolut.**
 
-### Lo que necesita hacer el equipo (fuera del código)
-- Abrir una cuenta **Stripe Business** (DNI + datos bancarios + descripción del negocio)
-- Abrir una cuenta **PayPal Business** (datos personales o de empresa + cuenta bancaria)
-- Abrir una cuenta **Revolut Business** y solicitar acceso a la Merchant API (puede requerir unos días de revisión)
-- Proporcionar las API keys al desarrollador para meterlas en el `.env` del servidor
+> El `CHECK(payment_provider IN ('stripe','paypal','coinbase','revolut',NULL))` de la
+> tabla `licenses` se **conserva deliberadamente**: documenta el universo histórico de
+> proveedores y no cuesta nada (0 licencias reales en el VPS). No es deuda a limpiar.
+
+### Configurar Stripe (fuera del código)
+- Abrir una cuenta **Stripe Business** (DNI + datos bancarios + descripción del
+  negocio — el usuario está a la espera de la verificación de empresa para obtener
+  las claves; mientras, `create-checkout` responde `stripe_not_configured`).
+- **API version ≥ `2024-04-10`** en el dashboard — el backend la fija en
+  `backend/config/stripe-version.js` (`Stripe-Version` header); el
+  `trial_settings[end_behavior][type]=release` del trial de mini lo exige.
+- API keys + webhook secret → pegar en `STRIPE_SECRET_KEY` / `STRIPE_WEBHOOK_SECRET`
+  del `.env` del backend. Endpoint del webhook: `https://app.nokfi.app/api/webhooks/stripe`
+  (mientras no haya dominio, la IP del VPS).
+- Eventos a escuchar como mínimo: `checkout.session.completed`,
+  `invoice.paid`, `customer.subscription.updated`,
+  `customer.subscription.deleted`, `invoice.payment_failed`, `charge.dispute.created`.
 
 ### Seguridad anti-bypass del pago
-- La clave **nunca existe antes del pago confirmado** — se genera solo cuando el webhook del proveedor llega al servidor con firma criptográfica válida
-- La URL de revelación funciona exactamente una vez con un token temporal de 15 minutos
-- No hay ningún endpoint que devuelva una clave sin haber validado el pago previamente en el servidor
+- La clave **nunca existe antes del pago confirmado** — se genera solo cuando el
+  webhook de Stripe llega al servidor con firma HMAC-SHA256 válida (con prevención de
+  replay: rechaza timestamps fuera de ±5 min).
+- No hay ningún endpoint que devuelva una clave sin haber validado el pago previamente
+  en el servidor. `/reveal` solo entrega la clave que **ya** existe porque el webhook
+  la creó; el `session_id` que pide es el secreto que Stripe entrega solo al comprador.
 
 ---
 
@@ -94,49 +149,74 @@ Se evaluó y se descartó deliberadamente como método de pago. Una transferenci
 ```
 XXXX-XXXX-XXXX-XXXX
 ```
-Ejemplo: `A3F2-9C1E-B847-D205`
-Generada criptográficamente con `crypto.randomBytes`, unicidad garantizada en base de datos.
+Ejemplo: `A3F2-9C1E-B847-D205` — generada con `crypto.randomBytes`, hex, unicidad
+garantizada en base de datos. Insensible a mayúsculas.
 
-### Login — triple factor obligatorio
-Los tres elementos deben coincidir exactamente con la base de datos:
-1. **Email** — el introducido en el checkout en el momento del pago
+### Login — 3 factores: email + clave + contraseña
+Los tres deben coincidir con la base de datos:
+1. **Email** — el introducido en el checkout
 2. **Clave** `XXXX-XXXX-XXXX-XXXX`
-3. **Device fingerprint** — huella digital del dispositivo generada en el navegador
+3. **Contraseña** — elegida por el usuario al activar; almacenada como hash scrypt (mín. 8 caracteres)
 
-Fallo en cualquiera de los tres = acceso denegado.
+Fallo en cualquiera de los tres = acceso denegado (`401 invalid_credentials`,
+mensaje **siempre** genérico para no revelar si la cuenta existe — anti-enumeración).
 
-### Device fingerprint — cómo funciona
-Se genera en el navegador combinando: User-Agent, resolución de pantalla, timezone, idioma del sistema, canvas fingerprint y número de núcleos CPU. Se hashea con SHA-256 en el cliente y se envía al servidor. La primera vez que se activa una clave, ese fingerprint queda grabado en la base de datos y es inmutable. En cada login posterior se recalcula y se compara. Si el dispositivo cambia → bloqueado aunque tenga email y clave correctos.
+> **Cambió el modelo de auth (commit `f9385af`):** el proyecto original usaba **device
+> fingerprint del navegador** como tercer factor (la licencia se vinculaba a un
+> dispositivo fijo). **Se eliminó.** Ahora el tercer factor es una **contraseña**.
+> El anti-sharing delega en la **cuota diaria de IA por licencia** (mini 10 / pro 50 /
+> max 130): una clave compartida se agota entre todos los que la usan. El campo
+> `device_name` sigue existiendo solo como etiqueta legible que el usuario ve en
+> Configuración — **no** participa en la autenticación.
 
-### Una clave = un dispositivo
-Sin opción de 1-5 dispositivos. Cada clave está vinculada a exactamente un device fingerprint. Esto elimina el sharing de forma estructural.
+### Dos puertas de entrada a la contraseña
+- **`/activate`** (primer acceso) — la licencia nueva de Stripe aún no tiene contraseña;
+  el usuario la elige aquí. `201` devuelve sesión activa directamente.
+- **`/login`** (siguientes accesos) — ya con contraseña. Si la licencia existe pero no
+  tiene contraseña → `409 not_activated` (el frontend redirige al flujo `/activate`).
+
+### Olvido de contraseña — reset por email
+`/request-password-reset` recibe `{ email, license_key }`: si la licencia existe y no
+ha agotado su reseteo anual, genera un token de 30 min y lo envía por email. Responde
+**siempre** 200 con mensaje genérico (existen o no los datos) salvo si se pasó el
+límite anual (`429 reset_limit_reached`). `/confirm-password-reset` recibe el token del
+email + la nueva contraseña: la setea y **crea sesión inmediata** (no hace falta login).
+El reset por email **no** revoca sesiones previas (el usuario puede tener otra pestaña).
 
 ### Capas de seguridad anti-bypass del login
 
 **Capa 1 — Frontend sin rutas accesibles**
-La app arranca siempre en la pantalla de login. No existe ruta, parámetro URL ni botón que salte esa pantalla. El dashboard solo se monta en memoria si existe una sesión válida verificada por el servidor.
+La app arranca siempre en login. El dashboard solo se monta en memoria si existe una
+sesión válida verificada por el servidor.
 
 **Capa 2 — Validación en cada petición**
-Cada llamada al backend (análisis IA, carga de datos, exportar PDF, calculadoras...) requiere un token de sesión válido. Sin token válido → 401, la app no muestra nada.
+Cada llamada al backend (análisis IA, Customer Portal…) requiere un token de sesión
+válido (`requireLicense`). Sin token → `401`, la app no muestra nada.
 
-**Capa 3 — Device fingerprint en cada sesión**
-El token de sesión está vinculado al device fingerprint. Aunque alguien robe el token, no puede usarlo desde otro dispositivo.
+**Capa 3 — Contraseña con hash scrypt**
+La contraseña nunca viaja al frontend ni se guarda en claro. Scrypt (salada) resiste
+fuerza bruta offline si la DB se filtra. `reveal-key` y `change-password` exigen
+re-introducir la contraseña actual.
 
-**Capa 4 — Tokens con rotación**
-Los tokens de sesión expiran cada 30 días y se rotan en cada verificación activa.
+**Capa 4 — Tokens de sesión con expiración**
+Los tokens de sesión expiran (se limpian los expirados cada hora) y van en la cabecera
+`Authorization: Bearer`, no en cookies — por eso CSRF no aplica (ver `server.js`).
 
 **Capa 5 — Rate limiting agresivo**
-Máximo 5 intentos fallidos de login por IP en 15 minutos → bloqueo temporal automático. Previene fuerza bruta.
+Máximo ~5 intentos fallidos de login por IP en 15 min → bloqueo temporal
+(`authLimiter`, 10/15min incluyendo éxitos; en desarrollo se relaja). Previene fuerza
+bruta.
 
-**Capa 6 — Token de revelación de un solo uso**
-La URL donde aparece la clave tras el pago funciona exactamente una vez durante 15 minutos. Después, la clave solo aparece parcialmente enmascarada en el perfil del usuario autenticado: `••••-••••-••••-AB3F`.
+**Capa 6 — Revelación de clave limitada**
+La clave sale completa **una sola vez**: en `/reveal` tras el checkout, y a pedido en
+`/reveal-key` (Configuración, re-introduciendo contraseña). Fuera de ahí, enmascarada
+`••••-••••-••••-AB3F`.
 
-### Pantalla de revelación de clave
-- Aparece únicamente tras webhook de pago confirmado
-- Toggle para mostrar/ocultar la clave completa
-- Botón de copiar al portapapeles
-- Aviso de que es la única vez que se muestra completa
-- Timer visible de 15 minutos hasta que expira el token de revelación
+### Pantalla de revelación de clave (`/reveal`)
+- Aparece tras volver de Stripe Checkout (`?session_id={CHECKOUT_SESSION_ID}`)
+- Polling a `GET /api/payments/stripe/reveal` hasta que el webhook crea la licencia (200)
+- Toggle para mostrar/ocultar la clave completa, botón de copiar
+- Aviso: esta es la única vez que se muestra completa en la web (el email de respaldo la lleva también)
 
 ---
 
@@ -144,142 +224,154 @@ La URL donde aparece la clave tras el pago funciona exactamente una vez durante 
 
 ### Stack
 - **Frontend** — React (Vite) · PWA · Tailwind CSS
-- **Backend** — Node.js + Express
-- **Base de datos** — SQLite (con better-sqlite3) en el VPS
-- **Servidor** — VPS propio ya preparado
-- **Email transaccional** — SendGrid o Resend
-- **Pasarela de pago** — Stripe + PayPal + Revolut (+ Coinbase Commerce en fase 2)
+- **Backend** — Node.js 22 + Express
+- **Base de datos** — SQLite (con better-sqlite3) en el VPS (`./db/nokfi.db`)
+- **Servidor** — VPS Ubuntu 24.04, PM2 (fork mode), `191.44.112.86`
+- **Email transaccional** — SendGrid o Resend (el operador elige uno)
+- **Pasarela de pago** — **Stripe** (suscripción mensual); PayPal/Revolut/Coinbase **retirados**
+- **IA** — Google Gemini (`gemini-flash-latest` / `gemini-2.5-flash`), free tier
 
 ### Estructura real del proyecto
 
-> Actualizado tras la implementación del backend. Difiere ligeramente de la planificación inicial: `payments.js` (creación de checkout) y `webhooks.js` (confirmación de pago) se separaron en dos routers independientes para que `server.js` pueda aplicar `express.raw()` solo donde es estrictamente necesario sin ambigüedad de montaje. También se añadió una carpeta `utils/` con lógica compartida que no encajaba ni en rutas ni en acceso a datos.
+> Estado real verificado en el repo. `backend/` está completo, testeado (e2e 61/61) y
+> desplegado en el VPS. `frontend/` está construido y compila con `npm run build`
+> (no servido por el VPS todavía). `landing/` no existe todavía. La carpeta `config/`
+> se añadió en Fase 3 como **fuente única de planes** (antes había 4 copias de
+> precios/cuotas dispersas → drift).
 
 ```
 /
-├── backend/                           ✅ IMPLEMENTADO
-│   ├── server.js                      ← servidor Express, ensambla todo, orden crítico de middlewares
-│   ├── package.json                   ← dependencias reales: express, better-sqlite3, cors, helmet,
-│   │                                     express-rate-limit, morgan, dotenv
-│   ├── .env.example                   ← plantilla documentada de las 22 variables de entorno reales
-│   ├── .gitignore                     ← protege .env, node_modules y la base de datos local
+├── backend/                          ✅ IMPLEMENTADO + DESPLEGADO (VPS)
+│   ├── server.js                     ← Express: helmets, CORS, raw webhook, rate limiters, rutas
+│   ├── package.json                  ← express, better-sqlite3, cors, helmet, express-rate-limit, morgan, dotenv
+│   ├── .env.example                  ← plantilla documentada (Stripe-only; PAYPAL/REVOLUT/COINBASE fuera)
+│   │
+│   ├── config/                       ← Fase 3: fuente única
+│   │   ├── plans.js                  ← PLANS (precios env-driven via PLAN_PRICE_*_EUR, cuotas 10/50/130, trial)
+│   │   └── stripe-version.js         ← '2024-04-10' fijada para todos los fetch a Stripe (antidrift del trial)
 │   │
 │   ├── db/
-│   │   └── database.js                ← esquema SQLite completo + toda la capa de acceso a datos
-│   │                                     (licencias, sesiones, pagos, reset tokens, audit log, stats)
+│   │   └── database.js                ← esquema + migraciones + acceso a datos (licencias, sesiones, webhooks, stats)
 │   │
 │   ├── middleware/
-│   │   └── requireLicense.js          ← verifica sesión + licencia activa + fingerprint en rutas protegidas
+│   │   └── requireLicense.js          ← valida sesión + licencia activa (sin fingerprint, ya no existe)
 │   │
 │   ├── routes/
-│   │   ├── auth.js                    ← activate, login, verify, logout, request/confirm-device-reset
-│   │   ├── admin.js                   ← CRUD de licencias, stats, audit log (protegido con ADMIN_SECRET)
-│   │   ├── proxy.js                   ← proxy seguro hacia Google Gemini API (requiere sesión válida)
-│   │   ├── payments.js                ← creación de checkout: Stripe, PayPal, Coinbase Commerce, Revolut
-│   │   └── webhooks.js                ← confirmación de pago → genera licencia; gestión de chargebacks
+│   │   ├── auth.js                   ← activate, login, verify, logout, reveal-key, change-password, request/confirm-password-reset
+│   │   ├── proxy.js                  ← proxy a Gemini + cuota diaria por licencia (requireLicense)
+│   │   ├── payments.js                ← /plans, /stripe/create-checkout, /stripe/create-portal-session, /stripe/reveal (solo Stripe)
+│   │   ├── webhooks.js               ← webhook Stripe (HMAC + anti-replay) → alta/renovación/cancel/chargeback
+│   │   └── admin.js                  ← CRUD licencias, stats (con bloque billing), audit log (ADMIN_SECRET)
 │   │
-│   └── utils/
-│       ├── fingerprint.js             ← validación y derivación server-side del device fingerprint
-│       ├── mailer.js                  ← envío de emails (SendGrid/Resend): clave, reset, revocación
-│       └── paypalAuth.js              ← autenticación OAuth2 de PayPal, compartida entre checkout y webhooks
+│   ├── utils/
+│   │   ├── password.js               ← hash scrypt (salt) + verificación + reset coherente (reemplaza a fingerprint.js)
+│   │   └── mailer.js                 ← SendGrid/Resend: clave, reset, revocación
+│   │
+│   └── test/
+│       └── e2e.test.js               ← 61/61 PASS (incluye /plans, cuotas 10/50/130, MRR, trial)
 │
-├── frontend/                          ⏳ PENDIENTE DE IMPLEMENTAR
+├── frontend/                         ✅ CONSTRUIDO (compila) · ⏳ no servido por VPS todavía
 │   └── src/
-│       ├── pages/
-│       │   ├── Login.jsx              ← pantalla de activación de clave
-│       │   ├── Dashboard.jsx          ← app principal
-│       │   └── Admin.jsx              ← panel admin interno
-│       ├── components/                ← componentes reutilizables
-│       ├── middleware/
-│       │   └── api.js                 ← comunicación con el servidor
-│       ├── hooks/
-│       └── context/
+│       ├── pages/                    ← Login, Reveal, ResetPassword, Pricing, Home, Cuestionario,
+│       │   │                            ExcelHub, excel/ (6 subapartados), Historial, Calculadoras,
+│       │   │                            Informes, Configuracion
+│       ├── middleware/api.js         ← cliente HTTP centralizado (Bearer, manejo de error codes)
+│       ├── middleware/exportUtils.{js,...}  ← PDF/Excel + neutralización de formula/CSV injection
+│       ├── middleware/sanitize.js    ← DOMPurify contra XSS del HTML de la IA
+│       ├── context/                  ← Auth, Theme, Lang (Context API, sin Redux)
+│       ├── hooks/  components/  layouts/  i18n/
 │
-└── landing/                           ⏳ PENDIENTE DE IMPLEMENTAR
-                                          página web pública de venta
+├── *.md  (nokfi_proyecto.md, nokfi_api_contract.md, nokfi_contexto_claude_code.md, handoff.md)
+│          ↑ ahora en la raíz del repo (antes en md/)
+│
+└── (landing no existe todavía — diseño definido en sección 13)
 ```
 
 ### Mapa de endpoints del backend implementado
 
+> Fuente de verdad detallada (shapes de request/response, códigos de error): `nokfi_api_contract.md`.
+
 | Método | Ruta | Protección | Función |
 |--------|------|------------|---------|
-| POST | `/api/auth/activate` | Pública | Primera vinculación de dispositivo a una licencia |
-| POST | `/api/auth/login` | Pública | Login en dispositivo ya vinculado |
-| POST | `/api/auth/verify` | Bearer token | Comprobar validez de sesión |
-| POST | `/api/auth/logout` | Bearer token | Cerrar sesión actual |
-| POST | `/api/auth/request-device-reset` | Pública | Solicitar email de reseteo de dispositivo |
-| POST | `/api/auth/confirm-device-reset` | Token de un solo uso | Confirmar y vincular nuevo dispositivo |
-| POST | `/api/proxy/ai` | Bearer token (requireLicense) | Proxy hacia Google Gemini API |
-| POST | `/api/payments/stripe/create-checkout` | Pública | Crear sesión de pago Stripe |
-| POST | `/api/payments/paypal/create-order` | Pública | Crear orden de pago PayPal |
-| POST | `/api/payments/coinbase/create-charge` | Pública | Crear charge de Coinbase Commerce |
-| POST | `/api/payments/revolut/create-order` | Pública | Crear order de Revolut Merchant API |
-| POST | `/api/webhooks/stripe` | Firma HMAC (raw body) | Confirma pago Stripe → genera licencia |
-| POST | `/api/webhooks/paypal` | Verificación API REST | Confirma pago PayPal → genera licencia |
-| POST | `/api/webhooks/coinbase` | Firma HMAC (raw body) | Confirma pago Coinbase → genera licencia |
-| POST | `/api/webhooks/revolut` | Firma HMAC (raw body) | Confirma pago Revolut → genera licencia |
-| GET | `/api/admin/stats` | ADMIN_SECRET | Métricas de negocio (sección 16) |
+| POST | `/api/auth/activate` | Pública | Primer acceso: elegir contraseña y activar la licencia |
+| POST | `/api/auth/login` | Pública | Login con email + clave + contraseña |
+| POST | `/api/auth/verify` | Bearer | Comprobar validez de sesión (devuelve `valid`, no `success`) |
+| POST | `/api/auth/logout` | Bearer | Cerrar sesión actual |
+| POST | `/api/auth/reveal-key` | Bearer | Revelar la clave re-introduciendo la contraseña (Configuración) |
+| POST | `/api/auth/change-password` | Bearer | Cambiar contraseña (requiere la actual) |
+| POST | `/api/auth/request-password-reset` | Pública | Solicitar email de reseteo de contraseña (anti-enumeración) |
+| POST | `/api/auth/confirm-password-reset` | Token del email | Confirmar + setear nueva contraseña (crea sesión inmediata) |
+| POST | `/api/proxy/ai` | Bearer (requireLicense) | Proxy a Gemini + cuota diaria por licencia |
+| GET | `/api/payments/plans` | Pública | Catálogo público de planes (anti-drift, lo fetchea Pricing.jsx) |
+| POST | `/api/payments/stripe/create-checkout` | Pública | Checkout Session de suscripción mensual (mini con trial 14 días) |
+| POST | `/api/payments/stripe/create-portal-session` | Bearer (requireLicense) | Stripe Customer Portal (cancelar / mejorar plan / actualizar tarjeta) |
+| GET | `/api/payments/stripe/reveal` | Pública (`?session_id=`) | Página /reveal: muestra la clave recién comprada |
+| POST | `/api/webhooks/stripe` | Firma HMAC-SHA256 + anti-replay (raw body) | Alta/renovación/cambio/cancelación/chargeback de suscripción |
+| GET | `/api/admin/stats` | ADMIN_SECRET | Métricas de negocio + bloque `billing` (sección 16) |
 | GET | `/api/admin/licenses` | ADMIN_SECRET | Listar todas las licencias |
 | GET | `/api/admin/licenses/:id` | ADMIN_SECRET | Detalle de una licencia |
-| POST | `/api/admin/licenses` | ADMIN_SECRET | Crear licencia manualmente |
-| PUT | `/api/admin/licenses/:id` | ADMIN_SECRET | Editar estado/plan/notas |
+| POST | `/api/admin/licenses` | ADMIN_SECRET | Crear licencia manualmente (`billing_model='legacy'`) |
+| PUT | `/api/admin/licenses/:id` | ADMIN_SECRET | Editar estado/plan/notas/email (revocar → cierra sesiones + email) |
 | DELETE | `/api/admin/licenses/:id` | ADMIN_SECRET | Eliminar licencia permanentemente |
-| POST | `/api/admin/licenses/:id/reset-device` | ADMIN_SECRET | Reseteo forzado sin límite anual |
+| POST | `/api/admin/licenses/:id/reset-password` | ADMIN_SECRET | Reseteo forzado (limpia pass + sesiones, sin límite anual) |
+| POST | `/api/admin/licenses/:id/set-password` | ADMIN_SECRET | Asignar contraseña a una legacy sin contraseña |
 | GET | `/api/admin/audit-log` | ADMIN_SECRET | Últimos eventos de auditoría |
 | GET | `/health` | Pública | Health check |
 
+**Rutas retiradas (ya no montadas → `404 not_found`):** `/api/payments/paypal/create-order`,
+`/api/payments/coinbase/create-charge`, `/api/payments/revolut/create-order`,
+`/api/webhooks/paypal`, `/api/webhooks/coinbase`, `/api/webhooks/revolut`.
+**Renombradas:** `/request-device-reset` + `/confirm-device-reset` → `/request-password-reset` +
+`/confirm-password-reset`; `/admin/licenses/:id/reset-device` → `/reset-password`.
+
 ### Variables de entorno del servidor (.env)
 
-> Lista completa real, extraída directamente del código (22 variables). Plantilla documentada disponible en `backend/.env.example`.
+> Lista extraída directamente del código. Plantilla documentada disponible en `backend/.env.example` (mismos textos explicativos, ahí están los pasos para conseguir cada clave). Los bloques PayPal/Revolut/Coinbase **ya no existen** en `.env.example`.
 
 ```bash
 # Servidor
 PORT=3001
 NODE_ENV=production
 
-# Base de datos
+# Base de datos (RELATIVA — el proceso debe arrancar con cwd = backend/)
 DB_PATH=./db/nokfi.db
 
 # Seguridad
-ADMIN_SECRET=                          # generar con crypto.randomBytes(32).toString('hex')
-ALLOWED_ORIGINS=https://app.nokfi.app,https://nokfi.app
+ADMIN_SECRET=                          # ≥32 chars, crypto.randomBytes(32).toString('hex'); en prod el backend se niega a arrancar si es más corta
+ALLOWED_ORIGINS=https://app.nokfi.app,https://nokfi.app   # nunca "*" en prod (el backend aborta el arranque)
 
-# URLs públicas
+# URLs públicas (se usan en emails y en las redirecciones de pago)
 APP_PUBLIC_URL=https://app.nokfi.app
 LANDING_PUBLIC_URL=https://nokfi.app
 
-# Precio de licencia (checkout + métricas)
-LICENSE_PRICE_EUR=150
+# Precios de planes (suscripción mensual, EUR) — lo que cobra Stripe Y lo que muestra /plans
+PLAN_PRICE_MINI_EUR=5
+PLAN_PRICE_PRO_EUR=20
+PLAN_PRICE_MAX_EUR=50
 
 # IA — nunca expuesta al frontend (ver justificación abajo)
 GEMINI_API_KEY=...
-GEMINI_MODEL=gemini-2.5-flash
+GEMINI_MODEL=gemini-2.5-flash          # fallback a gemini-flash-latest; gemini-2.5-flash retirado por Google 07/2026
 
 # Email transaccional — elegir un proveedor
-EMAIL_PROVIDER=sendgrid
+EMAIL_PROVIDER=sendgrid                # 'sendgrid' o 'resend'
 EMAIL_FROM=no-reply@nokfi.app
 EMAIL_FROM_NAME=Nokfi
 SENDGRID_API_KEY=SG....
 RESEND_API_KEY=
 
-# Stripe
+# Stripe (única pasarela)
 STRIPE_SECRET_KEY=sk_live_...
 STRIPE_WEBHOOK_SECRET=whsec_...
-
-# PayPal
-PAYPAL_ENV=sandbox                     # 'live' en producción
-PAYPAL_CLIENT_ID=...
-PAYPAL_CLIENT_SECRET=...
-PAYPAL_WEBHOOK_ID=...
-
-# Revolut Business (Merchant API) — comisión más baja de las cuatro pasarelas
-REVOLUT_ENV=sandbox                    # 'live' en producción
-REVOLUT_API_KEY=...
-REVOLUT_WEBHOOK_SIGNING_SECRET=...
-
-# Coinbase Commerce (fase 2)
-COINBASE_COMMERCE_API_KEY=
-COINBASE_COMMERCE_WEBHOOK_SECRET=
+# Opcionales (mejora de plan por Customer Portal — ver sección 4):
+STRIPE_PRICE_MINI=price_...
+STRIPE_PRICE_PRO=price_...
+STRIPE_PRICE_MAX=price_...
 ```
+
+> ⚠️ **`DB_PATH` es relativa** (`./db/nokfi.db`): el proceso de PM2 arranca con cwd = dir del
+> backend, y `dotenv.config()` (sin path) carga `process.cwd()/.env`. Nunca arrancar el backend
+> desde otro directorio o la DB y el `.env` no se resolverían. Ver `handoff.md` (topología VPS).
 
 ### Por qué la API key de la IA está en el servidor
 La clave de Google Gemini nunca sale del servidor. El frontend manda los datos al proxy del backend (`POST /api/proxy/ai`, protegido por `requireLicense`), el backend llama a la IA, y devuelve la respuesta. Si la API key estuviera en el frontend cualquier usuario podría inspeccionarla con las herramientas del navegador y usarla por su cuenta.
@@ -297,18 +389,19 @@ El backend ya contempla este segundo caso de forma explícita: cuando Gemini dev
 
 ### Estado de verificación del backend
 
-El backend se escribió completo y se sometió a una revisión exhaustiva sin poder ejecutarlo en un entorno con red real (limitación del entorno de desarrollo usado durante la definición). La revisión aplicada a cada archivo fue:
+El backend está **desplegado en producción** (VPS `191.44.112.86`, PM2) con funcionalidad
+verificada: `node --check` limpio en todos los `.js`, **61/61 tests e2e pasando**
+(`backend/test/e2e.test.js`), todos los endpoints evaluados con curl real en el VPS
+(health, login, proxy/ai con Gemini real, webhook de Stripe sandbox completo E2E,
+CORS y headers de Helmet verificados con curl, administración de licencias completa).
 
-1. **Sintaxis** — verificada con `node --check` en los 11 archivos `.js` (parsea el código sin ejecutarlo ni requerir dependencias instaladas)
-2. **Consistencia de imports/exports** — verificación cruzada manual confirmando que cada función importada en cada archivo existe realmente con ese nombre exacto en el módulo de origen
-3. **Lógica de flujos críticos** — revisión manual paso a paso de los flujos de activación, login, reseteo de dispositivo y webhooks de pago
-4. **Seguridad** — auditoría de que ningún secreto está hardcodeado y todas las claves sensibles se leen de `process.env`
-
-Lo que **falta** antes de considerar el backend production-ready:
-- [ ] `npm install` real en un entorno con red (VPS) para confirmar que las versiones de dependencias declaradas en `package.json` son compatibles entre sí
-- [ ] Arranque real del servidor y prueba manual de cada endpoint (con Postman, curl o similar)
-- [ ] Pruebas con claves de sandbox de Stripe/PayPal/Coinbase/Revolut para validar el flujo de checkout → webhook → licencia de principio a fin
-- [ ] Carga de un volumen de prueba de licencias para validar el rendimiento de las queries de `getStats()`
+Lo pendiente **no es código** — son claves de producción:
+- [ ] Pegar `STRIPE_SECRET_KEY` + `STRIPE_WEBHOOK_SECRET` reales en el `.env` del VPS
+  (el usuario está bloqueado a la espera de la verificación de empresa en Stripe; mientras,
+  `create-checkout` responde `stripe_not_configured`)
+- [ ] Verificar API version ≥ `2024-04-10` en el dashboard de Stripe (el backend la fija en `config/stripe-version.js`)
+- [ ] Comprar dominio y desplegar Nginx + HTTPS (SSL con Certbot) + cabeceras de seguridad (documentada en sección 17)
+- [x] Corrección de CSP (IP del VPS actualizada en `frontend/index.html` tras el cambio de VPS)
 
 
 
@@ -316,18 +409,30 @@ Lo que **falta** antes de considerar el backend production-ready:
 
 ## 7. Base de datos — esquema real implementado
 
-> Actualizado tras la implementación. Cambio respecto al plan inicial: no existe una tabla `devices` separada — el modelo real es **un dispositivo fijo por licencia** (sección 5), así que el fingerprint vive directamente como columna en `licenses` en vez de en una tabla aparte de muchos-a-uno. Se añadió `reset_tokens` para los enlaces de un solo uso de revelación de clave y reseteo de dispositivo.
+> Columnas actualizadas tras Fase 3 (suscripción + contraseña). El viejo modelo de
+> device-fingerprint se eliminó: columnas `device_fingerprint`, `device_registered_at`
+> y `last_device_reset` fuero DROPeadas en la migración de contraseña, y
+> `sessions.fingerprint` también se eliminó. La migración de suscripción (Fase 3)
+> añadió los campos de Stripe + `billing_model`; la migración de trial añadió
+> `trial_ends_at`.
 
 | Tabla | Propósito | Columnas clave |
 |-------|-----------|-----------------|
-| `licenses` | Clave, email, estado, plan, dispositivo vinculado, datos de pago | `key`, `email`, `status`, `plan`, `device_fingerprint`, `last_device_reset`, `payment_provider`, `payment_ref`, `amount_eur` |
-| `sessions` | Tokens de sesión activos | `token`, `license_id`, `fingerprint`, `expires_at` |
-| `payment_events` | Idempotencia de webhooks — evita procesar el mismo evento dos veces | `provider`, `event_id` (único por proveedor), `processed` |
-| `reset_tokens` | Tokens de un solo uso (revelación de clave / reseteo de dispositivo) | `token`, `purpose`, `license_id`, `used`, `expires_at` |
-| `audit_log` | Registro de todos los eventos de seguridad | `event`, `license_id`, `fingerprint`, `ip`, `ts` |
+| `licenses` | Clave, email, contraseña (scrypt), plan, estado, datos de suscripción de Stripe | `key`, `email`, `password_hash`, `status`, `plan`, `billing_model`, `stripe_customer_id`, `stripe_subscription_id`, `current_period_ends_at`, `cancel_at_period_end`, `trial_ends_at`, `payment_provider`, `payment_ref`, `amount_eur` |
+| `sessions` | Tokens de sesión activos | `token`, `license_id`, `expires_at` |
+| `payment_events` | Idempotencia de webhooks — evita procesar el mismo evento dos veces | `provider`, `event_id` (único por proveedor), `amount_eur`, `processed` |
+| `reset_tokens` | Tokens de un solo uso (reset de contraseña) | `token`, `purpose`, `license_id`, `used`, `expires_at` |
+| `audit_log` | Registro de todos los eventos de seguridad | `event`, `license_id`, `ip`, `ts` |
 
-### Por qué no hay tabla `devices` separada
-El modelo de negocio (sección 5) es **una licencia = un dispositivo fijo**, no una relación uno-a-muchos. Guardar el fingerprint directamente en `licenses.device_fingerprint` simplifica las queries más frecuentes (verificar si una licencia ya tiene dispositivo, comparar el fingerprint en cada login) sin necesidad de joins, y refleja con más fidelidad la regla de negocio real: no puede haber "varios dispositivos pendientes de aprobar" para una misma licencia, solo existe `NULL` (sin vincular) o un valor (vinculado).
+Campos relevantes de `licenses` (detalle):
+- `billing_model`: `'subscription'` (creada por webhook de Stripe) o `'legacy'` (creada a mano por admin)
+- `stripe_customer_id` / `stripe_subscription_id`: IDs de Stripe; `customer_id` habilita el Customer Portal
+- `current_period_ends_at` / `cancel_at_period_end`: fecha fin de periodo actual y flag de cancelación programada
+- `trial_ends_at`: ISO si está en trial de 14 días (mini), `NULL` si no aplica o el trial ya terminó
+- `payment_provider`: `'stripe'` (único activo; el CHECK admite también paypal/coinbase/revolut como documentación histórica)
+- `amount_eur`: importe exacto de Stripe para métricas (no hardcodeado al precio del plan — renovaciones pueden tener prorrata)
+- `password_hash`: scrypt salteado; `NULL` = licencia sin activar (recién creada por webhook)
+- `device_name`: solo etiqueta legible; **no** participa en la autenticación
 
 ---
 
@@ -336,14 +441,15 @@ El modelo de negocio (sección 5) es **una licencia = un dispositivo fijo**, no 
 Accesible solo con `ADMIN_SECRET` (comparación en tiempo constante para evitar timing attacks). Implementado en `routes/admin.js`. Funciones reales:
 
 - Ver todas las licencias (`GET /api/admin/licenses`) y el detalle de una concreta (`GET /api/admin/licenses/:id`)
-- Crear licencia manualmente (`POST /api/admin/licenses`) — por ejemplo, para cortesías o reposiciones tras soporte. Con flag opcional `notify: true` para enviar el email de la clave automáticamente
+- Crear licencia manualmente (`POST /api/admin/licenses`) — `billing_model='legacy'`, sin suscripción de Stripe. Con flag opcional `notify: true` para enviar el email de la clave. Opcional `password` para setear contraseña inicial (sin `activate`)
 - Editar licencia (`PUT /api/admin/licenses/:id`) — cambiar `status`, `plan`, `notes` o `email`. Si se cambia a `revoked`, se limpian automáticamente las sesiones activas y se envía el email de revocación
 - Eliminar licencia permanentemente (`DELETE /api/admin/licenses/:id`)
-- Forzar reseteo de dispositivo (`POST /api/admin/licenses/:id/reset-device`) — sin el límite de 1 vez/año que aplica al usuario, para los casos de un segundo reseteo gestionado por soporte (sección 15.2)
-- Ver métricas globales (`GET /api/admin/stats?period=30`) — activaciones, ingresos, estado de licencias (sección 16)
+- Forzar reseteo de contraseña (`POST /api/admin/licenses/:id/reset-password`) — limpia contraseña + sesiones, sin el límite de 1/año que aplica al reseteo por email
+- Asignar contraseña (`POST /api/admin/licenses/:id/set-password`) — para licencias legacy migradas sin contraseña, sin tocar sesiones
+- Ver métricas globales (`GET /api/admin/stats?period=30`) — activaciones, ingresos, estado de licencias + **bloque `billing`** (sección 16)
 - Ver registro de auditoría (`GET /api/admin/audit-log?limit=50`)
 
-> **Nota:** la creación de licencias en lote (bulk) y la gestión de fecha de expiración no se implementaron en esta versión — el modelo de negocio acordado en la sección 15 es pago único de por vida sin caducidad, por lo que el campo de expiración no aplica. Si en el futuro se necesita generar licencias en lote (p. ej. para una campaña de partners), se puede añadir como extensión sin tocar el resto del sistema.
+> **Nota:** la creación de licencias en lote (bulk) no se implementó en esta versión. Si en el futuro se necesita generar licencias en lote (p. ej. para una campaña de partners), se puede añadir como extensión sin tocar el resto del sistema.
 
 ---
 
@@ -472,8 +578,8 @@ Cuando se completa el cuestionario o se sube un Excel, la IA genera un informe c
 - [x] Estrategia de soporte al cliente — Tawk.to (chat en vivo) ✓
 - [x] Métricas de negocio a monitorizar (activaciones, ingresos, estado licencias) ✓
 - [x] Hoja de reparto de beneficios entre los 3 socios — ver documento aparte `nokfi_reparto_beneficios.md` ✓
-- [x] Configuración del VPS (dominio, SSL, PM2, Nginx) ✓
-- [x] Crypto como método de pago (fase 2) ✓
+- [x] Configuración del VPS (PM2, resurrect — dominio, SSL y Nginx pendientes)
+- [~] Crypto como método de pago (RETIRADO — Fase 3, Stripe-only)
 
 ---
 
@@ -489,7 +595,12 @@ Cuando se completa el cuestionario o se sube un Excel, la IA genera un informe c
 Bilingüe ES / EN desde el lanzamiento. Selector de idioma visible en el navbar. La elección se guarda en localStorage del visitante.
 
 ### Modelo de precio en landing
-Pago único — acceso de por vida. Sin suscripciones, sin cuotas mensuales. Una sola tarjeta de precio centrada y clara. El precio exacto se define en una fase posterior.
+Suscripción mensual de 3 tiers (mini 5 € / pro 20 € / max 50 €). Sin permanencia:
+se puede cancelar a fin de periodo. Tres tarjetas de plan con sus cuotas de IA y el
+badge "14 días gratis" en mini. Los precios se obtienen dinámicamente vía
+`GET /api/payments/plans` — **nunca hardcodearlos** en la landing ni en el frontend
+(anti-drift: la web y Stripe deben cobrar lo mismo). El badge de trial depende del
+campo `trial` del catálogo (hoy solo mini), no de un `id` hardcoded.
 
 ### Soporte / chat
 Widget de **Tawk.to** (gratuito) flotante en esquina inferior derecha, activo en toda la página.
@@ -513,8 +624,8 @@ Ninguno en el lanzamiento. La sección de testimonios se añade cuando haya clie
 **2. Hero**
 - Titular directo al dolor: *"¿Sabes realmente a dónde va el dinero de tu negocio?"*
 - Subtítulo explicativo en 2 líneas: qué hace Nokfi y para quién
-- Botón CTA principal: "Comprar acceso"
-- Texto secundario bajo el botón: "Pago único · Acceso de por vida · Sin suscripciones"
+- Botón CTA principal: "Empezar ahora"
+- Texto secundario bajo el botón: "Prueba gratis 14 días · Sin permanencia · Cancela cuando quieras"
 - Visual a la derecha: mock o screenshot del dashboard
 - Sin testimonios, sin logos de clientes, sin distracciones
 
@@ -536,18 +647,16 @@ Ninguno en el lanzamiento. La sección de testimonios se añade cuando haya clie
 
 **5. Cómo funciona**
 - 3 pasos numerados, muy visual y limpio:
-  1. **Compra tu acceso** — pago único, recibes tu clave en segundos
+  1. **Suscríbete** — eliges plan (mini/pro/max), pagas con Stripe. El mini lleva 14 días de prueba gratis
   2. **Activa tu clave** — introduce tu email y clave en la app, queda vinculada a tu dispositivo
   3. **Analiza tu negocio** — sube tus datos o responde el cuestionario, la IA hace el resto
 - Mensaje de cierre: "Sin instalaciones. Sin cuotas. Sin complicaciones."
 
 **6. Precio**
-- Una sola tarjeta centrada con diseño limpio y destacado
-- Badge superior: "Pago único · Sin cuotas mensuales"
-- Precio grande y visible
-- Lista de todo lo incluido con checkmarks
-- Botón CTA: "Comprar ahora"
-- Texto de confianza bajo el botón: "Pago seguro con Stripe, PayPal o Revolut · Clave entregada al instante"
+- Tres tarjetas (mini / pro / max) con los precios y cuotas del catálogo `/plans`
+- Badge superior en mini: "14 días gratis"
+- Cada tarjeta: precio grande, lista de todo lo incluido con checkmarks, botón "Suscribirme"
+- Texto de confianza bajo: "Pago seguro con Stripe · Sin permanencia · Cancela en tu cuenta"
 
 **7. FAQ**
 - Acordeón expandible con 7 preguntas:
@@ -672,69 +781,74 @@ Las primeras veces que el usuario entra a cada sección del menú lateral y aún
 
 ## 15. Política de licencias y gestión de incidencias de pago
 
-### Modelo de licencia
-**Pago único de por vida.** El usuario paga una vez y tiene acceso para siempre, sin renovaciones, sin cuotas mensuales, sin fechas de caducidad. Una licencia activa permanece activa indefinidamente mientras no se produzca una incidencia de pago o una violación de los términos de uso.
+### Modelo de licencia (suscripción mensual)
+**Suscripción mensual** (mini 5 € / pro 20 € / max 50 €). El acceso se mantiene
+mientras la suscripción de Stripe esté activa y se cobre correctamente cada mes. La
+gestión de la suscripción (cancelar a fin de periodo, mejorar de plan, actualizar
+tarjeta) queda en manos del **Stripe Customer Portal**, al que el usuario accede desde
+Configuración — Nokfi no implementa cancelaciones custom.
 
-No existe gestión de impagos recurrentes porque no hay pagos recurrentes. Los únicos escenarios que pueden afectar a una licencia activa son los descritos a continuación.
+El anti-sharing no se basa en fijar un dispositivo, sino en la **cuota diaria de IA por
+licencia** (mini 10 / pro 50 / max 130 análisis/día): una clave compartida se agota
+entre todos los usuarios que la estén usando ese día.
 
 ---
 
 ### Escenario 1 — Chargeback (reclamación del pago al banco)
 
-**Qué es:** el usuario contacta con su banco o PayPal y reclama la devolución del cargo alegando que no autorizó el pago o que el producto no fue entregado.
+**Qué es:** el usuario contacta con su banco y reclama la devolución del cargo alegando que no autorizó el pago o que el producto no fue entregado.
 
 **Comportamiento del sistema:**
-- Stripe, PayPal y Revolut notifican al servidor vía webhook en el momento en que se abre la disputa
-- El servidor revoca la licencia **automáticamente e instantáneamente** al recibir el webhook
-- La sesión activa se invalida en el mismo momento — el usuario queda bloqueado sin previo aviso
+- Stripe notifica al servidor vía webhook (`charge.dispute.created`) al abrirse la disputa
+- El servidor revoca la licencia **automáticamente** al recibir el webhook: `status='revoked'`
+- Se cierran todas las sesiones activas de esa licencia (`deleteSessionsForLicense`)
 - Se registra el evento en el `audit_log` con todos los detalles (fecha, IP, motivo)
 - Se envía un email automático al email vinculado a la licencia informando de la revocación y el motivo
 
-**Por qué automático y sin periodo de gracia:** el chargeback implica que el pago ha sido revertido, por lo que el acceso al software ya no está respaldado por ningún pago válido. Permitir acceso durante 48h adicionales tras un chargeback sería dar acceso gratuito. La revocación inmediata es la única respuesta técnicamente coherente.
+**Por qué automático y sin periodo de gracia:** el chargeback implica que el pago ha sido revertido, por lo que el acceso al software ya no está respaldado por ningún pago válido. La revocación inmediata es la única respuesta técnicamente coherente.
 
 **Resolución:** si el usuario considera que fue un error, puede contactar con soporte. Si retira la disputa y el pago se confirma de nuevo, la licencia se reactiva manualmente desde el panel admin.
 
 ---
 
-### Escenario 2 — Cambio de dispositivo (reseteo de device fingerprint)
+### Escenario 2 — Olvido de contraseña (reseteo por email)
 
-**Qué es:** el usuario cambia de ordenador, reinstala el sistema operativo, o su device fingerprint cambia por cualquier motivo técnico. Al hacer login, el fingerprint no coincide con el registrado → acceso denegado.
+**Qué es:** el usuario pierde u olvida su contraseña. Como el login es email + clave + contraseña, sin la contraseña no puede entrar. Ya **no existe** el reseteo de "device fingerprint": cambiar de ordenador ahora solo significa iniciar sesión normal desde el nuevo dispositivo — no hay nada que resetear.
 
 **Comportamiento del sistema:**
-- El usuario ve un mensaje claro en la pantalla de login: "Este dispositivo no coincide con el registrado para tu licencia. Puedes resetear tu dispositivo desde tu perfil si has cambiado de equipo."
-- El usuario puede solicitar el reseteo **desde su perfil dentro de la app** via token temporal enviado a su email (válido 30 minutos, un solo uso)
-- Dentro de la app, confirma el reseteo desde Configuración → Sesión → "Vincular nuevo dispositivo"
-- El servidor elimina el fingerprint anterior y registra el nuevo en el siguiente login
-- **Límite:** 1 reseteo por año por licencia. Si necesita un segundo reseteo en el mismo año, debe contactar con soporte para que lo hagan manualmente desde el panel admin
-- El límite anual queda registrado en la base de datos con fecha del último reseteo
+- El usuario solicita el reseteo desde la pantalla de login (`POST /api/auth/request-password-reset` con `{ email, license_key }`)
+- Si la licencia existe y no ha agotado su reseteo anual, el servidor genera un `reset_token` de 30 minutos y lo envía por email. La respuesta es **siempre** genérica (anti-enumeración: 200 exista o no la licencia), salvo `429 reset_limit_reached` si ya usó su reseteo anual
+- El usuario confirma desde el enlace del email (`POST /api/auth/confirm-password-reset` con `{ token, new_password, device_name? }`): setea la nueva contraseña y **crea sesión inmediata** — no hace falta login adicional
+- El reseteo por email **no** revoca sesiones previas (el usuario puede tener otra pestaña abierta legítimamente)
 
-**Por qué 1 vez al año:** es suficiente para cubrir cambios legítimos de equipo sin abrir la puerta al sharing. Si alguien comparte su clave, el primer usuario que resetee "roba" el dispositivo al otro, lo que genera fricción suficiente para desincentivar el sharing.
+**Reseteo forzado por admin:** `POST /api/admin/licenses/:id/reset-password` limpia contraseña + sesiones, sin el límite anual, para los casos gestionados por soporte o por seguridad.
 
 ---
 
-### Escenario 3 — Política de reembolsos
+### Escenario 3 — Política de reembolsos (suscripción)
 
-**Sin reembolsos bajo ninguna circunstancia.**
+**Trial del plan mini:** los 14 días de prueba gratis con tarjeta permiten cancelar antes
+del cobro sin coste — no hay nada que reembolsar en ese periodo.
 
-Esta política debe estar claramente visible en:
-- La página de precios de la landing (texto pequeño bajo el botón de compra)
-- Los Términos y Condiciones (sección dedicada)
-- El email de confirmación de compra y revelación de clave
+**Reembolsos tras cobro (mensualidades y planes pro/max sin trial):** política a definir
+por el negocio. Cualquier devolución se tramita desde el **dashboard de Stripe** (no
+desde el backend), y los eventos de reembolso / chargeback sincronizan el estado de la
+licencia automáticamente vía webhook (`charge.dispute.created`).
 
-**Texto legal recomendado para los T&C:**
-> "Dado que Nokfi es un producto digital de acceso inmediato, una vez que la clave de licencia ha sido generada y entregada, no se realizarán devoluciones bajo ninguna circunstancia. Al completar la compra, el usuario acepta expresamente esta política y renuncia a su derecho de desistimiento conforme al artículo 103.a) del Real Decreto Legislativo 1/2007."
-
-**Por qué sin reembolsos:** el acceso al software es inmediato tras el pago. En el momento en que la clave se genera y se entrega, el servicio ya ha sido prestado. La política de no reembolso es estándar en software B2B de este tipo y está respaldada legalmente por la excepción de contenido digital de la directiva europea.
+> Esta decisión concreta (reembolso sí / no / prorrata) debe fijarse en los T&C antes del
+> lanzamiento. La base legal para "sin reembolso" amparable es la excepción de contenido
+> digital de la directiva europea (artículo 103.a) del RDL 1/2007). Es una decisión
+> legal/comercial, no de código.
 
 ---
 
 ### Escenario 4 — Licencia revocada por abuso o fraude
 
-Si desde el panel admin se detecta uso fraudulento (múltiples IPs simultáneas sospechosas, intentos de bypass documentados, uso comercial no autorizado):
-- Revocación manual desde el panel admin
-- Email automático al usuario informando del motivo
-- El evento queda registrado en `audit_log`
-- No hay reembolso en caso de revocación por abuso
+Si desde el panel admin se detecta uso fraudulento (cuota diaria agotada sistemáticamente por múltiples IPs, intentos de bypass documentados, uso comercial no autorizado):
+- Revocación manual desde el panel admin (`PUT` a `status='revoked'`)
+- Se limpian sesiones y se envía el email de revocación automáticamente
+- El evento queda en `audit_log`
+- Cancelar la suscripción de Stripe desde el dashboard para que no se siga cobrando
 
 ---
 
@@ -742,24 +856,33 @@ Si desde el panel admin se detecta uso fraudulento (múltiples IPs simultáneas 
 
 | Estado | Descripción | Acceso a la app |
 |--------|-------------|-----------------|
-| `active` | Licencia válida y en regla | Completo |
-| `suspended` | Suspensión temporal por el admin | Bloqueado con mensaje |
+| `active` | Suscripción activa (en trial si `trial_ends_at` no es nulo) | Completo |
+| `suspended` | Cobro fallido tras reintentos o suspensión manual del admin | Bloqueado con mensaje |
 | `revoked` | Revocada por chargeback o abuso | Bloqueado con mensaje |
+| `expired` | Suscripción cancelada definitivamente (`subscription.deleted`) | Bloqueado con mensaje |
+
+> `trialing` no es un `status` aparte: una licencia en trial sigue siendo `status='active'`
+> con `trial_ends_at` futuro. La distinción se hace por campos, no por `status`. Es el caso
+> que el filtro de MRR excluye de los ingresos (sección 16).
 
 ---
 
 ### Implementación técnica
 
-> Sección actualizada tras la implementación real en `routes/webhooks.js`, `routes/auth.js` y `db/database.js`.
+> Implementación real en `routes/webhooks.js`, `routes/auth.js`, `routes/admin.js` y `db/database.js`. El webhook de Stripe verifica la firma HMAC-SHA256 y rechaza replays (timestamps fuera de ±5 min). Eventos gestionados:
 
-- El webhook de chargeback de Stripe llega a `POST /api/webhooks/stripe` (evento `charge.dispute.created`), busca la licencia por `payment_ref` con `getLicenseByPaymentRef()`, y dispara `updateLicense(id, { status: 'revoked' })` + `deleteSessionsForLicense(id)` (cierra **todas** las sesiones de esa licencia, no solo una) + `sendLicenseRevokedEmail()`
-- El webhook equivalente de PayPal llega a `POST /api/webhooks/paypal` (evento `CUSTOMER.DISPUTE.CREATED`) con la misma lógica común, compartida en la función `handleChargebackByPaymentRef()`
-- El reseteo de dispositivo usa **dos** endpoints separados, no uno solo:
-  - `POST /api/auth/request-device-reset` — recibe `{ email, license_key }`, verifica `canResetDevice()` (límite de 1/año), genera un `reset_token` de 30 minutos y lo envía por email. Responde siempre con un mensaje genérico exista o no la licencia, para evitar enumeración
-  - `POST /api/auth/confirm-device-reset` — recibe `{ token, client_fingerprint, device_name }` desde el enlace del email, consume el token (un solo uso), libera el dispositivo anterior con `resetDevice()` y vincula el nuevo con `bindDevice()` en el mismo flujo, devolviendo una sesión ya activa
-- El campo `licenses.last_device_reset` controla el límite anual — se compara la fecha actual contra `last_device_reset + 1 año` en `canResetDevice()`
-- El panel admin puede forzar un reseteo sin este límite vía `POST /api/admin/licenses/:id/reset-device`, para los casos de segundo reseteo gestionado manualmente por soporte
-- Todos los eventos quedan en `audit_log` con timestamp, IP y detalle del motivo (`ACTIVATION_SUCCESS`, `LOGIN_FAILED_DEVICE_MISMATCH`, `DEVICE_RESET_CONFIRMED`, `LICENSE_REVOKED_CHARGEBACK`, etc.)
+- `checkout.session.completed` → crea la licencia (`status='active'`, `billing_model='subscription'`, guarda `stripe_customer_id`/`stripe_subscription_id`, `trial_ends_at` si aplica)
+- `invoice.paid` → renovación o primer cobro real; limpia `trial_ends_at` **solo si `invoice.amount_paid > 0`** (el invoice de 0 € al aperturar el trial no debe apagar el banner de "14 días")
+- `customer.subscription.updated` → cambio de plan / cancelación programada (`cancel_at_period_end`) / transición `trialing→active` (limpia `trial_ends_at`)
+- `customer.subscription.deleted` → `status='expired'`, sesiones cerradas
+- `invoice.payment_failed` → cobro fallido tras reintentos → `status='suspended'`
+- `charge.dispute.created` → chargeback → revocación vía `handleChargebackByPaymentRef` (`status='revoked'` + `deleteSessionsForLicense` + email)
+
+- El reseteo de contraseña por email usa **dos** endpoints:
+  - `POST /api/auth/request-password-reset` — `{ email, license_key }`, verifica el límite anual, genera `reset_token` de 30 min, envío por email. Respuesta genérica anti-enumeración
+  - `POST /api/auth/confirm-password-reset` — `{ token, new_password, device_name? }`, consume el token (un solo uso), setea la contraseña y crea sesión inmediata
+- El panel admin fuerza reseteo sin límite vía `POST /api/admin/licenses/:id/reset-password` (limpia pass + sesiones)
+- Todos los eventos quedan en `audit_log` con timestamp, IP y motivo
 
 ---
 
@@ -783,7 +906,7 @@ La landing tendrá **Plausible Analytics** (privado, sin cookies, compatible con
 - Ingresos totales acumulados (desde el lanzamiento)
 - Ingresos este mes
 - Ingresos esta semana
-- Ingreso medio por licencia (precio total / licencias vendidas)
+- Ingreso medio por suscripción activa (MRR / suscripciones activas)
 - Gráfico de línea: ingresos diarios en los últimos 30 días
 
 **Bloque 3 — Estado de licencias**
@@ -800,7 +923,7 @@ La landing tendrá **Plausible Analytics** (privado, sin cookies, compatible con
 **Seguridad y uso**
 - Intentos de login fallidos por día (últimos 7 días)
 - Chargebacks recibidos (total histórico + últimos 30 días)
-- Reseteos de dispositivo solicitados (total + últimos 30 días)
+- Reseteos de contraseña solicitados (total + últimos 30 días)
 - Sesiones activas en este momento
 - IPs con más intentos fallidos (top 5) — para detectar ataques
 
@@ -825,10 +948,11 @@ La landing tendrá **Plausible Analytics** (privado, sin cookies, compatible con
 
 ### Implementación técnica
 
-- Endpoint real implementado: `GET /api/admin/stats?period=30` (no `metrics` — corregido tras la implementación) — devuelve todos los datos agregados en un solo objeto JSON: `licenses`, `activations`, `revenue`, `daily_series`, `recent_events`
-- Las agregaciones se hacen con queries SQLite directas (COUNT, SUM, GROUP BY fecha) — eficiente para los volúmenes esperados
-- El precio por licencia se define en `LICENSE_PRICE_EUR` para que el cálculo de ingresos sea automático
-- **Ya implementado:** los ingresos reales provienen directamente de `licenses.amount_eur`, que se rellena con el importe exacto confirmado por cada webhook de Stripe/PayPal/Coinbase/Revolut (`payment_events` registra el evento bruto para idempotencia; `licenses.amount_eur` es la fuente de verdad para las métricas)
+- Endpoint real implementado: `GET /api/admin/stats?period=30` — devuelve los agregados en un solo objeto JSON: `licenses`, `activations`, `revenue`, `daily_series`, `recent_events` **y un bloque `billing`** (Fase 3)
+- Las agregaciones se hacen con queries SQLite directas (COUNT, SUM, GROUP BY fecha) — eficientes para los volúmenes esperados
+- **Bloque `billing` (Fase 3):** `subscription` (nº de suscripciones activas), `legacy` (creadas por admin, sin Stripe), `trialing` (activas en trial de 14 días), `paying_subscribers` (suscripción activa y **no** en trial) y `mrr_eur` (ingresos recurrentes mensuales estimados)
+- **Discriminador de MRR:** `billing_model='subscription' AND status='active' AND trial_ends_at IS NULL`. Las licencias en trial (`trialing`) **no** suman al MRR — todavía no se les ha cobrado; el primer `invoice.paid` real las saca del trial y pasan a sumar. Las `legacy` del admin no son recurrentes y no suman al MRR
+- Los ingresos reales provienen de `licenses.amount_eur` (importe exacto de cada webhook de Stripe; renovaciones y prorratas incluidas), no de un precio hardcoded — ya no existe `LICENSE_PRICE_EUR` (era del modelo lifetime, hoy los precios viven en `PLAN_PRICE_*_EUR` solo para fijar lo que cobra Stripe)
 
 ---
 
@@ -858,19 +982,28 @@ Antes de tocar el VPS, hay que comprar el dominio. Recomendación: `nokfi.app` o
 
 ---
 
-### Estructura de despliegue en el VPS
+### Estructura de despliegue en el VPS (estado real)
 
 ```
-/var/www/
-├── landing/              ← build estático de la landing (HTML/CSS/JS)
-├── app/                  ← build de producción del frontend React
-└── backend/              ← código del servidor Node.js + Express
-    ├── server.js
-    ├── .env               ← NUNCA en git, permisos 600
-    ├── db/
-    │   └── licenses.db    ← base de datos SQLite
-    └── node_modules/
+/home/deploy/
+├── nokfi-fase3/                  ← clone de git, HEAD == origin/main
+│   ├── backend/                  ← código del servidor (Node.js + Express)
+│   │   ├── server.js
+│   │   ├── .env                  ← el ÚNICO .env; permisos 600; nunca en git
+│   │   ├── db/
+│   │   │   └── nokfi.db          ← base de datos SQLite
+│   │   └── node_modules/
+│   ├── frontend/                 ← (en el repo; AÚN NO se sirve en el VPS)
+│   └── *.md                      ← docs en la raíz del repo
+└── (no hay /var/www/ — el backend se sirve vía PM2 en :3001, proxy Nginx pendiente)
 ```
+
+> El backend no está bajo `/var/www/`, sino en `/home/deploy/nokfi-fase3/backend`
+> y se ejecuta con **PM2** (`pm2 start server.js --name nokfi-backend`, fork mode,
+> cwd = el dir del backend — crítico porque `DB_PATH=./db/nokfi.db` y `dotenv.config()`
+> son relativos al cwd). No existe un duplicado `/home/deploy/.env` (se borró para
+> evitar drift). El frontend y la landing aún no se sirven desde el VPS — falta
+> desplegar Nginx (SSL + cabeceras de seguridad).
 
 ---
 
@@ -936,6 +1069,11 @@ Nginx recibe todo el tráfico en los puertos 80/443 y redirige cada subdominio a
 > la ignoran ahí, solo es efectiva como cabecera HTTP real. Se añaden abajo
 > las cabeceras que cierran ese hueco.
 
+> **Plantilla PENDIENTE — no desplegada todavía.** Nginx aún no está en el VPS; el
+> backend hoy se sirve solo en `localhost:3001` (sin proxy ni SSL). Cuando el equipo
+> compre el dominio y despliegue Nginx, los builds estáticos de `landing/` y
+> `frontend/` se colocarán en `/var/www/` y esta config los servirá + proxyará `/api/`.
+
 ```nginx
 # /etc/nginx/sites-available/nokfi
 
@@ -943,7 +1081,7 @@ Nginx recibe todo el tráfico en los puertos 80/443 y redirige cada subdominio a
 server {
     listen 80;
     server_name nokfi.app www.nokfi.app;
-    root /var/www/landing;
+    root /var/www/landing;   # build estático de la landing (cuando exista)
     index index.html;
 
     # Cabeceras de seguridad — ver nota de auditoría arriba
@@ -1002,15 +1140,19 @@ Certbot configura HTTPS automáticamente y renueva los certificados cada 90 día
 ### Arrancar el backend con PM2
 
 ```bash
-cd /var/www/backend
+cd /home/deploy/nokfi-fase3/backend
 npm install --production
 pm2 start server.js --name nokfi-backend
-pm2 save                    # persiste el proceso tras reinicios
+pm2 save                    # persiste el proceso en ~/.pm2/dump.pm2 (lleva el cwd)
 pm2 logs nokfi-backend      # ver logs en tiempo real
 ```
 
-**Comandos útiles de PM2 para el día a día:**
-- `pm2 restart nokfi-backend` — reiniciar tras un despliegue nuevo
+**Resurrect tras reinicio del VPS:** systemd `pm2-deploy.service` (enabled) ejecuta
+`pm2 resurrect` en el boot → lee el dump → reinicia `nokfi-backend` desde el cwd
+guardado (`nokfi-fase3/backend`). Verificado que el dump apunta a la ruta actual.
+
+**Comandos útiles de PM2:**
+- `pm2 restart nokfi-backend --update-env` — reiniciar y recargar el `.env` (tras cambiar precios/claves)
 - `pm2 status` — ver si el proceso está corriendo
 - `pm2 logs nokfi-backend --lines 100` — ver últimas 100 líneas de logs
 - `pm2 monit` — monitor de CPU/memoria en tiempo real
@@ -1020,13 +1162,13 @@ pm2 logs nokfi-backend      # ver logs en tiempo real
 ### Seguridad adicional del VPS
 
 - **Fail2ban** instalado para bloquear IPs con intentos de fuerza bruta por SSH
-- **Backups automáticos** de la base de datos SQLite con un cron diario que copia `licenses.db` a almacenamiento externo (ej. backup del propio proveedor del VPS o un bucket S3-compatible)
-- El archivo `.env` con las claves API nunca se sube a git — se transfiere manualmente por SCP la primera vez y se edita directamente en el servidor
+- **Backups automáticos** de la base de datos SQLite con un cron diario que copia `nokfi.db` a almacenamiento externo
+- El archivo `.env` con las claves API nunca se sube a git — se genera/edita directamente en el servidor (no hay `/home/deploy/.env` maestro; copiar del `.env` del backend vivo si se redepliega en un dir nuevo)
 - Permisos del `.env` restringidos: `chmod 600 .env` para que solo el usuario `deploy` pueda leerlo
 
 ```bash
 # Cron diario de backup (ejemplo, a las 3 AM)
-0 3 * * * cp /var/www/backend/db/licenses.db /var/backups/licenses_$(date +\%Y\%m\%d).db
+0 3 * * * cp /home/deploy/nokfi-fase3/backend/db/nokfi.db /var/backups/nokfi_$(date +\%Y\%m\%d).db
 ```
 
 ---
@@ -1037,82 +1179,26 @@ pm2 logs nokfi-backend      # ver logs en tiempo real
 - [ ] Crear VPS con Ubuntu 24.04 LTS
 - [ ] Hardening inicial: usuario no-root, firewall, SSH sin root
 - [ ] Instalar Node.js 22 LTS, PM2, Nginx, Certbot
-- [ ] Subir código de landing, frontend y backend al VPS
-- [ ] Configurar `.env` del backend con todas las claves (Google Gemini, Stripe, PayPal, Revolut, SendGrid, ADMIN_SECRET)
-- [ ] Configurar Nginx con los 3 subdominios
-- [ ] Generar certificados SSL con Certbot
-- [ ] Arrancar backend con PM2 y verificar `pm2 status`
+- [ ] Subir código de backend al VPS (y, cuando exista, frontend + landing)
+- [ ] Configurar `.env` del backend con todas las claves (ADMIN_SECRET ≥32 chars, Gemini, Stripe, SendGrid/Resend, `PLAN_PRICE_*_EUR`)
+- [ ] Configurar Nginx con los subdominios (`nokfi.app`, `app.nokfi.app`) + cabeceras de seguridad + SSL con Certbot
+- [ ] Arrancar backend con PM2 y verificar `pm2 status`; `pm2 save` + systemd `pm2-deploy.service` para survive-reboot
+- [ ] Pegar claves reales de Stripe + verificar API version ≥ `2024-04-10` en el dashboard (sin esto, `create-checkout` responde `stripe_not_configured`)
 - [ ] Configurar Fail2ban
 - [ ] Configurar cron de backups diarios de la base de datos
 - [ ] Probar el flujo completo de principio a fin en producción antes de anunciar el lanzamiento
 
 ---
 
-## 18. Crypto como método de pago (fase 2)
+## 18. Crypto como método de pago — RETIRADO
 
-### Cuándo se activa
-Esta fase se implementa después del lanzamiento inicial con Stripe + PayPal + Revolut, una vez que el negocio esté rodando y el equipo tenga capacidad para gestionar la complejidad fiscal adicional que implica aceptar criptomonedas.
-
----
-
-### Proveedor elegido
-**Coinbase Commerce** — pasarela de pago cripto diseñada específicamente para negocios. Sin comisión de plataforma (solo fees de red de cada blockchain), integración vía API con webhooks igual que las demás pasarelas, y panel propio para ver todos los pagos recibidos.
-
-### ⚠️ Importante: elegir Commerce "gestionado", no "autogestionado"
-Coinbase Commerce ofrece dos modalidades de cuenta:
-- **Gestionada por Coinbase** (recomendada para Nokfi): el dinero entra a la cuenta normal de Coinbase.com del equipo, desde donde se puede convertir a euros dentro de la propia plataforma y transferir al banco, igual que con las demás pasarelas.
-- **Autogestionada (self-custody)**: el equipo tiene control total del saldo mediante una frase semilla de 12 palabras propia — si se pierde, ni el equipo ni Coinbase pueden recuperar los fondos. Más importante aún: **los retiros en euros a una cuenta bancaria de empresa no están disponibles actualmente con esta modalidad** — solo permite mover la cripto a otra wallet o a una cuenta de Coinbase.com vinculada, no directo al banco.
-
-Dado que el plan es "mantener en crypto y convertir manualmente cuando se quiera" (ver más abajo), **hay que asegurarse de elegir la opción gestionada al crear la cuenta**, no la autogestionada, o el equipo se encontrará sin forma simple de convertir a euros.
-
-### Criptomonedas aceptadas
-Las que soporta Coinbase Commerce por defecto: **Bitcoin (BTC), Ethereum (ETH), USD Coin (USDC), Litecoin (LTC)** y otras que Coinbase vaya añadiendo a su catálogo estándar. No se restringe a un subconjunto — se acepta todo lo que la pasarela soporte de fábrica, sin configuración adicional por nuestra parte.
-
-### Gestión del dinero recibido
-**El equipo mantiene el saldo en criptomoneda** tras cada pago, sin conversión automática a euros. La conversión a EUR se hace manualmente desde el panel de Coinbase Commerce cuando el equipo lo decida (por ejemplo, mensualmente, o según la evolución del mercado).
-
-**Importante a tener en cuenta:**
-- Esto implica exposición a la volatilidad del precio de la criptomoneda entre el momento del cobro y el momento de la conversión
-- Recomendable revisar con un asesor fiscal cómo declarar estos ingresos en España — Hacienda considera el cripto como ganancia patrimonial y el momento de conversión a EUR puede generar una plusvalía o minusvalía adicional a declarar, separada del ingreso original por la venta del software
-- El apartado de finanzas del equipo debería llevar un registro simple de: fecha de cada pago en crypto, cantidad recibida, valor en EUR en ese momento (para declarar el ingreso correctamente), y fecha/valor de la conversión posterior
-
----
-
-### Integración técnica
-
-**Flujo idéntico al resto de pasarelas:**
-```
-Usuario elige "Pagar con crypto" en el checkout
-        ↓
-Redirección a Coinbase Commerce Checkout
-        ↓
-Usuario paga con su wallet (BTC, ETH, USDC...)
-        ↓
-Coinbase confirma la transacción en la blockchain
-        ↓
-Webhook → POST /api/webhooks/coinbase
-        ↓
-Servidor verifica firma del webhook (HMAC) → genera clave → vincula email
-        ↓
-Mismo flujo de revelación de clave que con las demás pasarelas
-```
-
-**Diferencia clave respecto a Stripe/PayPal/Revolut:** las confirmaciones de blockchain tardan más que una tarjeta (de unos segundos a varios minutos según la red y el número de confirmaciones requeridas). La pantalla de espera tras el pago debe indicarlo claramente: *"Esperando confirmación en la blockchain. Esto puede tardar unos minutos."* con un spinner y polling al servidor cada 10 segundos hasta que el webhook llegue y la clave se genere.
-
-### Variables de entorno adicionales
-```
-COINBASE_COMMERCE_API_KEY=...
-COINBASE_COMMERCE_WEBHOOK_SECRET=...
-```
-
-### Seguridad del webhook
-Igual que con Stripe, cada webhook entrante se verifica criptográficamente con la firma HMAC que Coinbase incluye en la cabecera `X-CC-Webhook-Signature`. Sin firma válida, el servidor descarta la petición y no genera ninguna clave. Esto cierra cualquier intento de simular un pago falso enviando una petición directa al endpoint del webhook.
-
-### Consideración legal pendiente
-Antes de activar esta fase, revisar con un gestor o asesor fiscal:
-- Cómo se factura una venta pagada en criptomoneda en España
-- Si aplica IVA de la misma forma que en pagos en euros
-- Cómo declarar la ganancia o pérdida patrimonial derivada del cambio de valor entre el cobro y la conversión a EUR
+Coinbase Commerce estaba previsto como fase 2 para aceptar pagos en BTC/ETH/USDC,
+pero **se retiró** al pasar el proyecto a **Stripe-only** (Fase 3, suscripción mensual).
+El código del webhook y el endpoint de checkout se eliminaron; las variables
+`COINBASE_COMMERCE_*` ya no existen en `.env.example`. Si en el futuro el proyecto
+quisiera aceptar crypto, sería más sencillo hacerlo a través del propio **Stripe
+Crypto Payout** (Stripe ya acepta USDC vía su producto de payouts para negocios en
+EE. UU., y está expandiéndolo — sin el sobrecoste fiscal de mantener Coinbase aparte).
 
 ---
 
@@ -1134,7 +1220,9 @@ Antes de activar esta fase, revisar con un gestor o asesor fiscal:
 
 ```
 /login                          → activación + login
-/reset-device                   → confirmación reseteo dispositivo (desde email)
+/reveal                         → revelación de clave tras checkout (desde Stripe)
+/reset-password                 → confirmación reseteo de contraseña (desde email)
+/pricing                        → página de selección de plan (precompra)
 
 /app/home                       → dashboard principal
 /app/cuestionario               → diagnóstico por preguntas
@@ -1148,7 +1236,7 @@ Antes de activar esta fase, revisar con un gestor o asesor fiscal:
 /app/historial                  → análisis anteriores y comparativas
 /app/calculadoras               → calculadoras financieras (3 pestañas)
 /app/informes                   → exportación PDF/Excel
-/app/configuracion              → tema, idioma, perfil, sesión
+/app/configuracion              → tema, idioma, perfil, suscripción, sesión
 ```
 
 ---
@@ -1159,8 +1247,11 @@ Módulo central que gestiona TODAS las llamadas al servidor. Ningún componente 
 - Token de sesión en cada petición (`Authorization: Bearer`)
 - Errores `401/403` → limpia sesión y redirige al login
 - Error `ai_quota_exceeded` → mensaje claro "inténtalo más tarde"
-- Error `device_mismatch` → ofrece flujo de reseteo de dispositivo
+- Error `ai_quota_exceeded` (503) → mensaje claro "inténtalo más tarde" (cuota de Gemini agotada a nivel proyecto)
+- Error `license_daily_limit_reached` (429) → "mejora tu plan o inténtalo mañana" (cuota diaria por licencia agotada)
 - Error `internal_error` → mensaje genérico de fallback
+
+> Ya no existe `device_mismatch` — ese error era del viejo modelo de fingerprint, eliminado.
 
 ---
 
@@ -1170,10 +1261,15 @@ Módulo central que gestiona TODAS las llamadas al servidor. Ningún componente 
 |---|---|
 | `201 success` (activate) | Primera activación completada → onboarding |
 | `200 success` (login) | Login correcto → dashboard |
-| `409 not_activated` | Redirigir al flujo de activación inicial |
-| `401 device_mismatch` | Mostrar opción de reseteo de dispositivo |
-| `403 license_inactive` | Pantalla específica de licencia revocada/suspendida |
-| `404 not_found` | "Email o clave incorrectos" — mensaje genérico |
+| `409 not_activated` | Redirigir al flujo de activación (la licencia no tiene contraseña todavía) |
+| `401 invalid_credentials` | "Datos incorrectos" — mensaje genérico (NO revela si existe la cuenta) |
+| `403 license_inactive` | Pantalla específica de licencia revocada/suspendida/expired |
+| `400 invalid_input` | "Formato de email o clave inválido" |
+
+> Ya **no existe** el caso `device_mismatch` ni `404 not_found` con mensaje — el 401
+> ahora devuelve siempre `invalid_credentials` (genérico), sin dar pistas de si la
+> licencia existe. El `404 not_found` solo aplica a rutas inexistentes (ej. los viejos
+> endpoints de PayPal/Coinbase/Revolut).
 
 ---
 
