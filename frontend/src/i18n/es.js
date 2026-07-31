@@ -100,5 +100,18 @@ export default {
     convertToExcel: 'Convertir a Excel', continueAnyway: 'Continuar igualmente',
     aiAnalysis: 'Análisis de la IA', exportResult: 'Exportar resultado'
   },
+  history: {
+    title: 'Historial',
+    loading: 'Cargando historial...', loadError: 'No se pudo cargar el historial.',
+    emptyTitle: 'Aún no has generado ningún análisis',
+    emptyDesc: 'Aquí aparecerán tus análisis anteriores (cuestionario y subapartados de Excel) una vez que hagas el primero.',
+    emptyCta: 'Ir al cuestionario',
+    listDesc: 'Tus análisis anteriores, los más recientes primero.',
+    typeCuestionario: 'Cuestionario', typeExcel: 'Excel', typeAnalysis: 'Análisis',
+    backToList: 'Volver al historial',
+    detailPromptChars: 'Caracteres analizados',
+    exportPdf: 'PDF',
+    loadDetailError: 'No se pudo cargar este análisis.'
+  },
   footer: { rights: 'Todos los derechos reservados' }
 };

@@ -102,7 +102,7 @@ Tono profesional, directo, accionable. Sin emojis. Responde en español.`;
   const runAnalysis = async () => {
     setPhase('loading');
     setErrorMsg(null);
-    const { ok, data, quotaExceeded } = await aiApi.analyze(buildPrompt(), 1800);
+    const { ok, data, quotaExceeded } = await aiApi.analyze(buildPrompt(), 1800, { kind: 'cuestionario', title: 'Diagnóstico de negocio' });
 
     if (ok && data.text) {
       setReport(data.text);

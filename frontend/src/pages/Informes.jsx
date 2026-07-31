@@ -1,27 +1,17 @@
-import { FileOutput } from 'lucide-react';
+import HistoryBrowser from '../components/HistoryBrowser';
+import { useLang } from '../context/LangContext';
 
 /**
- * Estado vacío (sección 14 del proyecto). La exportación real ya está
- * implementada dentro de cada subapartado de Excel y del Cuestionario
- * (middleware/exportUtils.js) — esta pantalla central de "Informes" queda
- * como hub para cuando el backend tenga persistencia de análisis
- * (ver limitación documentada en Historial.jsx).
+ * Informes (sección 14 del proyecto).
+ *
+ * Antes era un empty-state con la LIMITACIÓN CONOCIDA de que el backend no
+ * persistía análisis para exportar "más tarde". Con la deuda G2 resuelta, esta
+ * página reutiliza el mismo historial (components/HistoryBrowser) que
+ * Historial: cada análisis guardado se puede abrir y re-exportar a PDF. La
+ * lógica compartida evita duplicar la lista+detalle; aquí solo cambia el
+ * propósito de navegación.
  */
 export default function Informes() {
-  return (
-    <div>
-      <h1 className="text-2xl font-semibold mb-6" style={{ color: 'var(--text-primary)' }}>Informes</h1>
-      <div className="rounded-xl p-10 flex flex-col items-center text-center gap-3"
-        style={{ background: 'var(--surface-1)', border: '0.5px solid var(--border)' }}>
-        <FileOutput size={28} style={{ color: 'var(--text-muted)' }} />
-        <p className="text-sm" style={{ color: 'var(--text-secondary)' }}>
-          Genera tu primer análisis para poder exportar un informe.
-        </p>
-        <a href="/app/cuestionario" className="text-sm font-medium rounded-lg px-4 py-2"
-          style={{ background: 'var(--accent)', color: '#fff' }}>
-          Ir al cuestionario
-        </a>
-      </div>
-    </div>
-  );
+  const { t } = useLang();
+  return <HistoryBrowser title={t('nav.reports')} t={t} />;
 }

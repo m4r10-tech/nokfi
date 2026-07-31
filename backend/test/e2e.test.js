@@ -614,6 +614,141 @@ async function main() {
     }
   );
 
+  // ═══════════════════════════════════════════════════════════
+  // 3.n Historial de análisis (G2): GET /api/analyses y GET /api/analyses/:id
+  //     Persistencia scopeada por licencia. Se crean análisis VÍA DB DIRECTA
+  //     (createAnalysis) para aislar de Gemini (que no está en el e2e). Se
+  //     usan DOS licencias DEDICADAS y frescas (no la licencia principal del
+  //     suite, que ya fue mutada por los tests de password-reset/change) para
+  //     que el login sea determinista: una licencia solo ve su propio
+  //     historial y obtiene 404 al pedir el análisis de otra.
+  // ═══════════════════════════════════════════════════════════
+  const { createAnalysis, listAnalyses, getAnalysis } = require('../db/database');
+
+  // Licencia A (historial propia): fresca, password conocida y estable.
+  let licenseKeyA = null, licenseIdA = null, tokenA = null;
+  await checkAsync('admin createLicense A (historial, mini) → 201',
+    post('/api/admin/licenses', { email: 'historial-a@nokfi.local', plan: 'mini', password: 'HistoryP4ss!' }, 'admin'),
+    r => {
+      if (r.status !== 201) return false;
+      licenseKeyA = r.data.key; licenseIdA = r.data.id;
+      return !!r.data.key && r.data.plan === 'mini';
+    }
+  );
+  await checkAsync('login de licencia A → 200 (para tests de historial)',
+    post('/api/auth/login', { email: 'historial-a@nokfi.local', license_key: licenseKeyA, password: 'HistoryP4ss!' }),
+    r => { if (r.status === 200) tokenA = r.data.token; return r.status === 200; }
+  );
+
+  // Licencia B (ajena): para verificar el scoping.
+  let licenseKeyB = null, licenseIdB = null;
+  await checkAsync('admin createLicense B (ajena, para scoping) → 201',
+    post('/api/admin/licenses', { email: 'historial-b@nokfi.local', plan: 'pro', password: 'OtherP4ss!' }, 'admin'),
+    r => {
+      if (r.status !== 201) return false;
+      licenseKeyB = r.data.key; licenseIdB = r.data.id;
+      return !!r.data.key && r.data.plan === 'pro';
+    }
+  );
+
+  // Análisis de A (2) y de B (1) — vía DB directa, aislando de Gemini.
+  const idA1 = createAnalysis({ license_id: licenseIdA, kind: 'excel', title: 'Stock / Almacén', result_html: '<h3>Resumen A1</h3>', prompt_chars: 123 });
+  const idA2 = createAnalysis({ license_id: licenseIdA, kind: 'cuestionario', title: 'Diagnóstico', result_html: '<h3>Resumen A2</h3>', prompt_chars: 456 });
+  const idB1 = createAnalysis({ license_id: licenseIdB, kind: 'excel', title: 'Caja B', result_html: '<h3>Resumen B1</h3>', prompt_chars: 789 });
+  check('createAnalysis devuelve Number ids', () => [idA1, idA2, idB1].every(x => Number.isInteger(x)));
+
+  checkAsync('GET /api/analyses SIN auth → 401',
+    get('/api/analyses'),
+    r => r.status === 401
+  );
+
+  await checkAsync('GET /api/analyses (A) → 200 + lista ligera (sin result_html) solo de A, recientes primero',
+    get('/api/analyses', tokenA),
+    r => {
+      if (r.status !== 200 || !Array.isArray(r.data.analyses) || r.data.analyses.length !== 2) return false;
+      const rows = r.data.analyses;
+      // No expone result_html en la lista (ligera)
+      if (rows.some(r => 'result_html' in r)) return false;
+      // Orden DESC: el último insertado (idA2) primero. Campos presentes.
+      return rows[0].id === idA2 && rows[1].id === idA1
+        && rows[0].title === 'Diagnóstico' && rows[1].kind === 'excel'
+        && typeof rows[0].created_at === 'string';
+    }
+  );
+
+  await checkAsync('GET /api/analyses/:id propio (A) → 200 + result_html',
+    get(`/api/analyses/${idA1}`, tokenA),
+    r => r.status === 200 && r.data.id === idA1 && r.data.result_html === '<h3>Resumen A1</h3>' && r.data.title === 'Stock / Almacén'
+  );
+
+  await checkAsync('GET /api/analyses/:id AJENO (id de B con token de A) → 404 (scoping)',
+    get(`/api/analyses/${idB1}`, tokenA),
+    r => r.status === 404 && r.data.error === 'not_found'
+  );
+
+  await checkAsync('GET /api/analyses/:id inexistente → 404',
+    get('/api/analyses/999999', tokenA),
+    r => r.status === 404 && r.data.error === 'not_found'
+  );
+
+  await checkAsync('GET /api/analyses/:id no-numérico → 400',
+    get('/api/analyses/abc', tokenA),
+    r => r.status === 400 && r.data.error === 'invalid_id'
+  );
+
+  // getAnalysis/listAnalyses a nivel DB confirman el scoping (defensa directa).
+  // (better-sqlite3 .get() devuelve undefined, no null, cuando no hay fila — por
+  //  eso comparamos con !…, igual que hace routes/analyses.js con !analysis.)
+  check('getAnalysis scoping: idB1 con licenseIdA → vacío, con licenseIdB → row',
+    () => !getAnalysis(licenseIdA, idB1) && !!getAnalysis(licenseIdB, idB1)
+  );
+  check('listAnalyses: A tiene 2, B tiene 1 (listas separadas)',
+    () => listAnalyses(licenseIdA).length === 2 && listAnalyses(licenseIdB).length === 1
+  );
+
+  // ── Integración REAL del path de captura (no aislada): stub de Gemini →
+  //    POST /api/proxy/ai (routes/proxy.js real) → createAnalysis → history.
+  //    Sustituye global.fetch por una respuesta canned con la forma real de
+  //    Gemini (data.candidates[0].content.parts[].text) — aisla de red/claves
+  //    y es determinista. Ningún otro test del suite usa fetch (usan http a
+  //    localhost), así que el stub es local y se restaura. Comprueba que el
+  //    análisis generado queda visible en el historial de SU licencia.
+  const savedFetch = global.fetch;
+  const origGeminiKey = process.env.GEMINI_API_KEY;
+  const fakeGeminiHtml = '<h3>Diagnóstico fake</h3><p>Recomendación de prueba.</p>';
+  const promptText = 'Analiza este negocio de prueba.';
+  global.fetch = async () => ({
+    ok: true, status: 200,
+    json: async () => ({ candidates: [{ content: { parts: [{ text: fakeGeminiHtml }] } }] }),
+    text: async () => ''
+  });
+  process.env.GEMINI_API_KEY = 'fake-key-for-test';
+
+  await checkAsync('POST /api/proxy/ai (stub Gemini) → 200 + texto de la IA',
+    post('/api/proxy/ai', { prompt: promptText, max_tokens: 100, kind: 'cuestionario', title: 'Diagnóstico de prueba' }, tokenA),
+    r => r.status === 200 && r.data.text === fakeGeminiHtml
+  );
+
+  const capturedId = listAnalyses(licenseIdA)[0].id; // más recientes primero → recién capturado
+  await checkAsync('GET /api/analyses incluye el análisis capturado (kind/title/prompt_chars correctos, lista ligera)',
+    get('/api/analyses', tokenA),
+    r => {
+      if (r.status !== 200 || !Array.isArray(r.data.analyses)) return false;
+      const last = r.data.analyses[0];
+      return last.id === capturedId && last.kind === 'cuestionario'
+        && last.title === 'Diagnóstico de prueba' && last.prompt_chars === promptText.length
+        && !('result_html' in last); // lista ligera: sin result_html
+    }
+  );
+
+  await checkAsync('GET /api/analyses/:id del capturado → 200 + result_html persistido',
+    get(`/api/analyses/${capturedId}`, tokenA),
+    r => r.status === 200 && r.data.result_html === fakeGeminiHtml && r.data.id === capturedId
+  );
+
+  global.fetch = savedFetch;
+  if (origGeminiKey === undefined) delete process.env.GEMINI_API_KEY; else process.env.GEMINI_API_KEY = origGeminiKey;
+
   } catch (e) {
     console.error('TEST CRASH:', e.message);
     failed++;

@@ -178,16 +178,20 @@ El usuario llega desde el enlace del email. **Setea la nueva contraseña y crea 
 
 **Request body:**
 ```json
-{ "prompt": "texto a analizar...", "max_tokens": 1500 }
+{ "prompt": "texto a analizar...", "max_tokens": 1500, "kind": "excel", "title": "Stock / Almacén" }
 ```
 - `prompt`: obligatorio, string no vacío, máximo 50.000 caracteres
 - `max_tokens`: opcional, default 1500, se fuerza al rango `[100, 4000]`
+- `kind`: opcional, etiqueta para el historial (`'excel'` | `'cuestionario'` | libre, se trunca a 40). `ExcelSubModule` pasa `'excel'`; `Cuestionario` pasa `'cuestionario'`
+- `title`: opcional, etiqueta legible para el historial (se trunca a 120). `ExcelSubModule` pasa el título del subapartado; `Cuestionario` pasa `"Diagnóstico de negocio"`
+
+**Efecto lateral (200):** además de devolver `{ text }`, el backend persiste el análisis recién generado en la tabla `analyses` (vinculado a `req.license.id`) — **best-effort**: un fallo de escritura nunca bloquea la respuesta al usuario. Solo se guarda `kind`, `title`, el `result_html` (la `text` devuelta) y `prompt_chars` (el conteo, **no** el prompt — los datos financieros no se duplican en otra tabla). Las pantallas Historial/Informes los listan y abren (ver §2.5).
 
 **Respuestas:**
 
 | Status | Body | Cuándo |
 |--------|------|--------|
-| 200 | `{ text: "respuesta generada por Gemini" }` | Éxito |
+| 200 | `{ text: "respuesta generada por Gemini" }` | Éxito (y persistencia best-effort en el historial) |
 | 400 | `{ error: "invalid_prompt" \| "prompt_too_long", message }` | Prompt vacío o >50.000 |
 | 429 | `{ error: "license_daily_limit_reached", message }` | **Esta licencia** superó su cuota diaria (mini 10 / pro 50 / max 130). El frontend debe mostrar "mejora tu plan" o "inténtalo mañana" — es un caso esperado y distinguible |
 | 500 | `{ error: "ai_not_configured" }` | Falta `GEMINI_API_KEY` en el servidor |
@@ -195,6 +199,43 @@ El usuario llega desde el enlace del email. **Setea la nueva contraseña y crea 
 | 502 | `{ error: "ai_empty_response" }` | Gemini respondió sin texto (lo bloquearon sus filtros de seguridad) |
 | 503 | `{ error: "ai_quota_exceeded", message }` | **Cuota del free tier de Gemini** (~1.500/día para todo el proyecto) agotada — distinto del 429 anterior, que es por licencia. Mostrar "inténtalo más tarde" |
 | 401/403 | *(ver tabla de `requireLicense` en §6)* | Sesión inválida o licencia inactiva |
+
+---
+
+## 2.5. Historial de análisis (`/api/analyses`)  *(auth: Bearer, requireLicense — scopeado por licencia)*
+
+Lista y abre los análisis persistidos al generarlos en `/api/proxy/ai` (§2). **Todo se scopea por `req.license.id`**: una licencia solo ve y abre SU historial. El frontend no envía `license_id` — el backend ya sabe a quién pertenece por la sesión. `Historial.jsx` e `Informes.jsx` comparten `components/HistoryBrowser.jsx` (la lista es la vista por defecto de ambas).
+
+### `GET /api/analyses`  *(auth: Bearer)*
+Lista **ligera** del historial de la licencia, más recientes primero.
+
+**Respuesta 200:**
+```json
+{
+  "analyses": [
+    { "id": 4, "kind": "cuestionario", "title": "Diagnóstico de negocio", "prompt_chars": 312, "created_at": "2026-07-29 21:55:06" },
+    { "id": 1, "kind": "excel", "title": "Stock / Almacén", "prompt_chars": 1234, "created_at": "2026-07-29 20:10:02" }
+  ]
+}
+```
+La respuesta NO incluye `result_html` (ligera — el HTML completo se carga al abrir un análisis con `/:id`). `created_at` sale de `datetime('now')` de SQLite (UTC, formato `YYYY-MM-DD HH:MM:SS`).
+
+### `GET /api/analyses/:id`  *(auth: Bearer)*
+Análisis completo (con `result_html`).
+
+**Respuesta 200:**
+```json
+{ "id": 4, "kind": "cuestionario", "title": "Diagnóstico de negocio", "result_html": "<h3>Puntos fuertes</h3>...", "prompt_chars": 312, "created_at": "2026-07-29 21:55:06" }
+```
+
+| Status | Body | Cuándo |
+|--------|------|--------|
+| 200 | `{ id, kind, title, result_html, prompt_chars, created_at }` | Éxito (y es de esta licencia) |
+| 400 | `{ error: "invalid_id", message }` | `:id` no es un entero |
+| 404 | `{ error: "not_found", message }` | No existe, **o existe pero es de otra licencia** — mismo cuerpo, sin leakage de si un id ajeno existe |
+| 401/403 | *(ver tabla de `requireLicense` en §6)* | Sesión inválida o licencia inactiva |
+
+> **Seguridad en el frontend:** el `result_html` devuelto debe rendirse SIEMPRE vía `sanitizeAiHtml` (`middleware/sanitize.js`), igual que en `ExcelSubModule`/`Cuestionario`. Aunque venga de nuestra propia BD, se generó a partir de datos del usuario y no se confía en él.
 
 ---
 
@@ -303,7 +344,7 @@ Notas del panel admin:
 
 ## 6. Comportamiento común de `requireLicense` (middleware)
 
-Cualquier ruta protegida con este middleware (actualmente `/api/proxy/ai` y `/api/payments/stripe/create-portal-session`) puede devolver:
+Cualquier ruta protegida con este middleware (actualmente `/api/proxy/ai`, `/api/analyses` y `/api/payments/stripe/create-portal-session`) puede devolver:
 
 | Status | Body | Significado para el frontend |
 |--------|------|-------------------------------|
@@ -327,6 +368,9 @@ Cualquier ruta protegida con este middleware (actualmente `/api/proxy/ai` y `/ap
 - [ ] `Pricing.jsx` fetchea `GET /api/payments/plans` al montar — **no** hardcodea precios; si el catálogo no carga, deshabilita los botones de suscribir
 - [ ] El badge de trial (14 días) se muestra en la card del plan que tenga `trial===true` en el catálogo (hoy solo `mini`), no hardcoded a un `id`
 - [ ] Configuración — sección Suscripción: si `license.has_subscription` → botón a `create-portal-session`; si `license.trial_ends_at` futuro → Row "Período de prueba — quedan X días"
+- [ ] `aiApi.analyze(prompt, max_tokens, { kind, title })` — `ExcelSubModule` pasa `{ kind:'excel', title }` (su título de subapartado) y `Cuestionario` pasa `{ kind:'cuestionario', title:'Diagnóstico de negocio' }`, para que el backend etiquete el historial
+- [ ] `Historial.jsx` e `Informes.jsx` comparten `components/HistoryBrowser.jsx`: listan vía `GET /api/analyses` (ligera) y abren `GET /api/analyses/:id`; el `result_html` se rendiza SIEMPRE vía `sanitizeAiHtml`, nunca `dangerouslySetInnerHTML` directo
+- [ ] El frontend no envía `license_id` en `/api/analyses` — el backend scopea por la sesión (Bearer)
 - [ ] Ninguna pantalla intenta llamar a `/api/webhooks/*`
 - [ ] Ninguna pantalla tiene botones de PayPal / Coinbase / Revolut (retirados → 404)
 - [ ] Panel de administración (si se construye) en bundle/ruta completamente separado del login de usuario

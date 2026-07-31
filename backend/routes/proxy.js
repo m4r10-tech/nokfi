@@ -28,7 +28,7 @@
 const express = require('express');
 const router = express.Router();
 const { requireLicense } = require('../middleware/requireLicense');
-const { audit, countAiAnalysesToday, aiQuotaForPlan } = require('../db/database');
+const { audit, countAiAnalysesToday, aiQuotaForPlan, createAnalysis } = require('../db/database');
 
 const MAX_PROMPT_LENGTH = 50000; // protección básica contra abuso/prompts gigantes
 const DEFAULT_MAX_TOKENS = 1500;
@@ -37,7 +37,7 @@ const HARD_MAX_TOKENS = 4000;
 // ⚠️ AUDITORÍA DE SEGURIDAD — límite diario por licencia (ver countAiAnalysesToday
 // en db/database.js). Protege la cuota compartida de Gemini (~1.500/día para
 // todo el proyecto) de que un solo cliente la agote para el resto. La cuota es
-// ahora TIERED por plan (mini 30 / pro 80 / max 200 análisis/día — ver
+// ahora TIERED por plan (mini 10 / pro 50 / max 130 análisis/día — ver
 // aiQuotaForPlan en db/database.js), lo que da valor a los planes altos y
 // sigue dejando margen amplio para muchos clientes simultáneos sin arriesgar
 // la cuota global. Para planes legacy migrados (billing_model='legacy', plan
@@ -133,6 +133,27 @@ router.post('/ai', requireLicense, async (req, res) => {
       ip: req.ip,
       detail: `prompt_chars=${prompt.length}, provider=gemini`
     });
+
+    // G2 — Historial de análisis (sección 14, pantallas Historial / Informes).
+    // Best-effort: un fallo de escritura NUNCA debe bloquear el análisis al
+    // usuario — el historial es un nice-to-have, no crítico. kind/title son
+    // etiquetas opcionales que aporta el cliente (ExcelSubModule pasa su
+    // `title` de subapartado; Cuestionario pasa kind='cuestionario'); el contenido
+    // sensible de los datos originales NO se persiste (solo el conteo
+    // prompt_chars y el result_html, que el frontend ya rendiza vía
+    // sanitizeAiHtml de cualquier modo). El historial queda scopeado a la
+    // licencia propia (createAnalysis vincula req.license.id).
+    try {
+      createAnalysis({
+        license_id: req.license.id,
+        kind: req.body?.kind,
+        title: req.body?.title,
+        result_html: text,
+        prompt_chars: prompt.length
+      });
+    } catch (persistErr) {
+      console.error('[PROXY AI] No se pudo persistir el análisis en el historial:', persistErr.message);
+    }
 
     res.json({ text });
   } catch (e) {

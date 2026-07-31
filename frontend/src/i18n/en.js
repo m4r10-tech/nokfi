@@ -100,5 +100,18 @@ export default {
     convertToExcel: 'Convert to Excel', continueAnyway: 'Continue anyway',
     aiAnalysis: 'AI analysis', exportResult: 'Export result'
   },
+  history: {
+    title: 'History',
+    loading: 'Loading history...', loadError: 'Could not load the history.',
+    emptyTitle: "You haven't generated any analysis yet",
+    emptyDesc: 'Your past analyses (questionnaire and Excel sections) will appear here once you run your first one.',
+    emptyCta: 'Go to questionnaire',
+    listDesc: 'Your past analyses, most recent first.',
+    typeCuestionario: 'Questionnaire', typeExcel: 'Excel', typeAnalysis: 'Analysis',
+    backToList: 'Back to history',
+    detailPromptChars: 'Characters analyzed',
+    exportPdf: 'PDF',
+    loadDetailError: 'Could not load this analysis.'
+  },
   footer: { rights: 'All rights reserved' }
 };

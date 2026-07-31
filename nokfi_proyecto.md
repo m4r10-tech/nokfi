@@ -510,6 +510,15 @@ Métricas combinadas visibles nada más entrar:
 - Comparativa entre dos análisis: qué ha mejorado, qué ha empeorado
 - Evolución temporal de la puntuación de salud financiera
 
+> **Estado de implementación (deuda G-b, resuelta):** la tabla `analyses` y el endpoint
+> `GET /api/analyses` (+ `/:id`, scoped por licencia) ya existen; `routes/proxy.js`
+> persiste cada análisis generado (best-effort — `kind`, `title`, `result_html`,
+> `prompt_chars`; **sin** el prompt, por privacidad) y `Historial.jsx`/`Informes.jsx`
+> los listan, abren y re-exportan a PDF vía `components/HistoryBrowser.jsx`.
+> **No implementado todavía:** la puntuación numérica por análisis, la comparativa
+> entre dos análisis y la evolución temporal (requieren persistir más que el HTML —
+> p.ej. un `score` derivado); queda como roadmap.
+
 ---
 
 ### Sección 5 — Calculadoras financieras

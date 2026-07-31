@@ -59,14 +59,24 @@ export const authApi = {
 };
 
 export const aiApi = {
-  analyze: async (prompt, max_tokens) => {
-    const result = await request('/proxy/ai', { method: 'POST', auth: true, body: { prompt, max_tokens } });
+  analyze: async (prompt, max_tokens, { kind, title } = {}) => {
+    // kind/title son etiquetas opcionales que el backend persiste para etiquetar
+    // el historial del análisis (sección 14 — pantallas Historial / Informes).
+    // ExcelSubModule pasa su `title` de subapartado; Cuestionario pasa kind.
+    const result = await request('/proxy/ai', { method: 'POST', auth: true, body: { prompt, max_tokens, kind, title } });
     // ⚠️ Auditoría de seguridad: además del límite global de Gemini, el backend
     // ahora aplica un límite diario POR LICENCIA (license_daily_limit_reached)
     // para proteger la cuota compartida de un solo cliente con uso intensivo.
     const quotaExceeded = ['ai_quota_exceeded', 'license_daily_limit_reached'].includes(result.data?.error);
     return { ...result, quotaExceeded };
   }
+};
+
+// Historial de análisis (G2 — sección 14). El backend scopea todo por la
+// licencia de la sesión (Bearer); el frontend no envía license_id.
+export const analysesApi = {
+  list: () => request('/analyses', { auth: true }),
+  get: (id) => request(`/analyses/${encodeURIComponent(id)}`, { auth: true })
 };
 
 export const paymentsApi = {

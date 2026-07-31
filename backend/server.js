@@ -217,12 +217,14 @@ app.use('/api/', generalLimiter);
 const authRoutes = require('./routes/auth');
 const adminRoutes = require('./routes/admin');
 const proxyRoutes = require('./routes/proxy');
+const analysesRoutes = require('./routes/analyses');
 const paymentsRoutes = require('./routes/payments');
 const webhooksRoutes = require('./routes/webhooks');
 
 app.use('/api/auth', authRoutes);
 app.use('/api/admin', adminRoutes);
 app.use('/api/proxy', proxyRoutes);
+app.use('/api/analyses', analysesRoutes);   // historial de análisis (sección 14)
 app.use('/api/payments', paymentsRoutes);   // checkout: /api/payments/stripe/*
 app.use('/api/webhooks', webhooksRoutes);   // confirmación: /api/webhooks/stripe
 

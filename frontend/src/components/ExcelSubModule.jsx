@@ -97,7 +97,7 @@ export default function ExcelSubModule({ title, description, promptBase, chartTy
     if (!files.length) return;
     setLoading(true);
     setErrorMsg(null);
-    const { ok, data, quotaExceeded } = await aiApi.analyze(buildPrompt(), 1500);
+    const { ok, data, quotaExceeded } = await aiApi.analyze(buildPrompt(), 1500, { kind: 'excel', title });
     setLoading(false);
 
     if (ok && data.text) {

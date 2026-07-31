@@ -130,6 +130,16 @@ function initDB() {
           ts          TEXT    NOT NULL DEFAULT (datetime('now'))
         );
 
+        CREATE TABLE IF NOT EXISTS analyses (
+          id           INTEGER PRIMARY KEY AUTOINCREMENT,
+          license_id   INTEGER NOT NULL REFERENCES licenses(id) ON DELETE CASCADE,
+          kind         TEXT    NOT NULL DEFAULT 'analysis',
+          title        TEXT    NOT NULL DEFAULT 'Análisis',
+          result_html  TEXT    NOT NULL,
+          prompt_chars INTEGER NOT NULL DEFAULT 0,
+          created_at   TEXT    NOT NULL DEFAULT (datetime('now'))
+        );
+
         CREATE INDEX IF NOT EXISTS idx_licenses_key          ON licenses(key);
         CREATE INDEX IF NOT EXISTS idx_licenses_email        ON licenses(email);
         CREATE INDEX IF NOT EXISTS idx_sessions_token        ON sessions(token);
@@ -140,6 +150,7 @@ function initDB() {
         CREATE INDEX IF NOT EXISTS idx_audit_ts               ON audit_log(ts);
 
         CREATE INDEX IF NOT EXISTS idx_sessions_license  ON sessions(license_id);
+        CREATE INDEX IF NOT EXISTS idx_analyses_recent   ON analyses(license_id, created_at);
       `);
 
       /* ──────────────────────────────────────────────────────────
@@ -856,6 +867,55 @@ function updateSubscription(id, {
   return getLicenseById(id);
 }
 
+/* ── Historial de análisis (G2) ── */
+
+/**
+ * Persiste un análisis generado (HTML de la IA) vinculado a una licencia —
+ * el historial de análisis de la sección 14 (pantallas Historial / Informes).
+ * Solo se llama tras una respuesta válida de la IA (routes/proxy.js); quien
+ * llama lo envuelve en try/catch para que un fallo de escritura NUNCA bloquee
+ * el análisis al usuario (el historial es un nice-to-have, no crítico).
+ *
+ * Privacidad: NO persistimos el prompt (lleva los datos financieros del
+ * cliente); solo guardamos prompt_chars (conteo) y el result_html (el HTML
+ * que la IA genera y que el frontend ya rendiza vía sanitizeAiHtml de todos
+ * modos). kind/title son etiquetas que aporta el cliente (ExcelSubModule pasa
+ * su `title` de subapartado; Cuestionario pasa `kind='cuestionario'`); se
+ * truncan por higiene — no son críticos de seguridad: solo etiquetan el
+ * historial PROPIO de cada licencia (requireLicense scopea todo por
+ * req.license.id, no se puede escribir en el historial de otro).
+ */
+function createAnalysis({ license_id, kind = 'analysis', title = 'Análisis', result_html, prompt_chars = 0 }) {
+  const db = getDB();
+  const k = String(kind || 'analysis').slice(0, 40);
+  const t = String(title || 'Análisis').slice(0, 120);
+  const info = db.prepare(`
+    INSERT INTO analyses (license_id, kind, title, result_html, prompt_chars)
+    VALUES (?, ?, ?, ?, ?)
+  `).run(license_id, k, t, result_html, Number(prompt_chars) || 0);
+  return Number(info.lastInsertRowid);
+}
+
+/** Lista LIGERA del historial de una licencia (sin result_html), más recientes primero. */
+function listAnalyses(license_id, limit = 50) {
+  return getDB().prepare(`
+    SELECT id, kind, title, prompt_chars, created_at
+    FROM analyses
+    WHERE license_id = ?
+    ORDER BY created_at DESC, id DESC
+    LIMIT ?
+  `).all(license_id, limit);
+}
+
+/** Devuelve un análisis completo (con result_html), scopeado por license_id → null si no es tuyo. */
+function getAnalysis(license_id, id) {
+  return getDB().prepare(`
+    SELECT id, kind, title, result_html, prompt_chars, created_at
+    FROM analyses
+    WHERE id = ? AND license_id = ?
+  `).get(id, license_id);
+}
+
 module.exports = {
   initDB,
   getDB,
@@ -885,6 +945,9 @@ module.exports = {
   aiQuotaForPlan,
   getLicenseByStripeSubscriptionId,
   updateSubscription,
+  createAnalysis,
+  listAnalyses,
+  getAnalysis,
   audit,
   getStats
 };

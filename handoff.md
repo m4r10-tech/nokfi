@@ -1,6 +1,6 @@
 # Nokfi — Handoff / Estado de la última sesión
 
-> Última actualización: **2026-07-28**.
+> Última actualización: **2026-07-30**.
 > Documento de "por dónde retomo el proyecto". Si solo lees un archivo, que sea este;
 > luego `nokfi_contexto_claude_code.md` (panorama) y `nokfi_api_contract.md` (contrato).
 
@@ -8,7 +8,7 @@
 
 ## 0. TL;DR
 
-- **Backend:** completo, **61/61 e2e PASS**, desplegado en el VPS (`191.44.112.86`)
+- **Backend:** completo, **76/76 e2e PASS**, desplegado en el VPS (`191.44.112.86`)
   y funcional **salvo Stripe** (claves vacías en el `.env` del VPS).
 - **Modelo de billing (Fase 3):** suscripción mensual Stripe-only (mini 5 € /
   pro 20 € / max 50 €), cuotas de IA 10/50/130 por licencia/día, **trial de 14 días
@@ -18,8 +18,10 @@
 - **Frontend:** construido y compila, **no servido por el VPS** (falta Nginx).
   **Landing:** en diseño, no implementada.
 - **Proveedores retirados:** PayPal / Revolut / Coinbase → `404` (Stripe-only).
-- **Documentación (`*.md`):** movida de `md/` a la raíz del repo y reescrita al estado
-  real. **Los cambios están sin commitear** todavía (ver §3).
+- **Deudas F y G-b resueltas esta sesión:** comentario stale de `proxy.js` (F) e
+  historial de análisis persistido (G-b). Detalle en §4.
+- **Documentación (`*.md`):** movida de `md/` a la raíz del repo y al día. Los cambios
+  de esta sesión (codígo + docs) **están sin commitear** todavía (ver §3).
 
 ---
 
@@ -71,19 +73,27 @@
 
 ---
 
-## 3. Estado de git / NO commiteado
+## 3. Estado de git
 
-- **`git mv` de los 3 docs** (`md/nokfi_*.md` → `nokfi_*.md`) está **staged como renames
-  (R/RM) pero sin commitear**.
-- **El contenido de esos 3 docs se acaba de reescribir** al estado real (suscripción,
-  Stripe-only, auth contraseña, rutas reales, schema real, paths VPS reales, etc.) —
-  también **sin commitear**.
-- **NUEVO `handoff.md` (este archivo)** — sin commitear (sin trackear todavía).
-- Acción pendiente: cuando el usuario quiera, preparar un commit conjunto de la
-  movida + las 3 reescrituras + el nuevo `handoff.md`. **El usuario hace `git push`**
-  **fuera de Claude Code** (no pegar tokens en el chat — corrían por un gateway que
-  pudo verlos). Tras push: `git pull --ff-only` + `pm2 restart nokfi-backend --update-env`
-  en el VPS, smoke de `/health` y `/api/payments/plans`.
+- **`origin/main` está en `794a0a8`** y el VPS también (docs movidos + README +
+  handoff ya empujados y desplegados en una sesión anterior).
+- **SIN commitear (esta sesión) — deudas F + G-b:**
+  - `backend/routes/proxy.js`: comentario stale corregido (F) + captura de análisis
+    al generar (best-effort) → `createAnalysis`.
+  - `backend/db/database.js`: tabla `analyses` + `createAnalysis`/`listAnalyses`/`getAnalysis`.
+  - `backend/routes/analyses.js` (nuevo) + mount en `backend/server.js` (`/api/analyses`).
+  - `backend/test/e2e.test.js`: suites de historial (DB-direct + integración con stub Gemini) → 76/76.
+  - Frontend: `middleware/api.js` (`aiApi.analyze({kind,title})` + `analysesApi`),
+    `components/ExcelSubModule.jsx` + `pages/Cuestionario.jsx` (pasan etiquetas),
+    `components/HistoryBrowser.jsx` (nuevo) + `pages/EmptyState.jsx` (nuevo),
+    `pages/Historial.jsx` + `pages/Informes.jsx` (wrappers), i18n `es.js`/`en.js` (sección `history`).
+  - Docs: `nokfi_api_contract.md` (§2 body + nueva §2.5 + §6/§7), `handoff.md` (§0/§3/§4/§5),
+    `nokfi_contexto_claude_code.md` (§6/§7/§8/§10), `nokfi_proyecto.md` (§14).
+- Acción pendiente: preparar un commit conjunto del código + docs cuando el usuario
+  quiera. **El usuario hace `git push` fuera de Claude Code** (no pegar tokens en el
+  chat). Tras push: `git pull --ff-only` + `pm2 restart nokfi-backend --update-env` en
+  el VPS (la tabla `analyses` se autocrea por `CREATE TABLE IF NOT EXISTS`), smoke de
+  `/health` y `/api/analyses`.
 
 ---
 
@@ -96,27 +106,30 @@
 | C | **Frontend/landing no servidos; Nginx + SSL pendientes** | acceso por navegador, lanzamiento | Comprar dominio; desplegar Nginx sirviendo `landing/`+`frontend/` y proxeando `/api/`; Certbot; cabeceras de seguridad (hallazgo #14). Plantilla de Nginx en `nokfi_proyecto.md` §17. |
 | D | **CSP del `index.html` con la IP del VPS hardcodeada** | cambiará al poner dominio | Actualizar `connect-src` al nuevo dominio/IP (hallazgo #8; ya causó un bloqueo real antes). |
 | E | **Gemini 503 transitorio** | nada (se autocale) | Mapea `non-2xx/non-429 → 502`. Si persiste → cuota/disponibilidad de Google, no bug. `GEMINI_API_KEY` válida (53 chars). |
-| F | **`routes/proxy.js` comentario stale** (~líneas 40-44) "mini 30/pro 80/max 200" | nada (deuda de comentario) | Real vía `aiQuotaForPlan` = 10/50/130. Corregir al pasar por ahí. |
-| G | `/api/profile` y tabla `analyses` no existen | perfil de empresa e historial no persisten entre dispositivos | Pendiente (limitaciones `nokfi_contexto_claude_code.md` §6.1/§6.2). Implementar si el negocio lo pide antes de lanzar. |
+| F | ✅ **RESUELTO** — `routes/proxy.js` comentario stale | — | Decía "mini 30/pro 80/max 200"; corregido a `10/50/130` (lo real vía `aiQuotaForPlan`). |
+| G-a | `/api/profile` no existe | perfil de empresa (onboarding) no persiste entre dispositivos | Sigue abierto (limitación `nokfi_contexto_claude_code.md` §6.1). El hook `useCompanyProfile.js` guarda en localStorage; sustituir por API cuando el negocio lo pida — los componentes no cambian (mismo shape). |
+| G-b | ✅ **RESUELTO** — tabla `analyses` + `/api/analyses` | — | Historial de análisis persistido: captura en `routes/proxy.js` (best-effort, no bloquea), tabla `analyses` (autocreada por `CREATE TABLE IF NOT EXISTS`), `GET /api/analyses` (lista ligera) + `GET /api/analyses/:id` (scoped por licencia → 404 ajeno). Frontend: `HistoryBrowser.jsx` compartido por `Historial`/`Informes` (lista + detalle + re-export PDF), `sanitizeAiHtml` obligatorio. e2e **76/76** (incluye path real con stub de Gemini). |
+| H | **Cuota diaria de IA vulnerable a overshoot por concurrencia** (TOCTOU) | nada en staging; allows scripted abuse to exceed the per-license daily cap | `countAiAnalysesToday` se lee en `routes/proxy.js` (línea ~65) pero solo se incrementa vía `audit('AI_ANALYSIS_GENERATED')` *después* del `await fetch` a Gemini → el `await` cede el event loop y N requests concurrentes de una misma licencia pasan el check leyendo el mismo conteo (todos <límite) antes de que se escriba el audit. Preexistente (no introducido por G-b); el backstop es el cap global de Gemini. Fix sería una reserva atómica (p.ej. tabla `ai_usage_daily` con `UNIQUE(license_id, day, slot)` o un contador transaccional) — cambio aparte con sus propios tests. |
 
-`e2e.test.js` refleja lo correcto (10/50/130, `/plans`, MRR con trial excluido), ver §2.
+`e2e.test.js` refleja lo correcto (10/50/130, `/plans`, MRR con trial excluido, `/api/analyses` + scoping), ver §2.
 
 ---
 
 ## 5. Cómo continuar (sugerido)
 
-1. **Confirmar el commit de la documentación** (§3) con el usuario; `push` fuera de
-   Claude Code; pull + restart en el VPS; smoke (`/health`, `/plans`, 3 rutas muertas
-   → 404).
+1. **Commit + push de esta sesión** (F + G-b, ver §3) — el usuario hace `git push`
+   fuera de Claude Code; pull + restart en el VPS (tabla `analyses` autocreada);
+   smoke (`/health`, `/api/analyses` con y sin auth → 200/401).
 2. **Stripe** (deuda A): claves reales + verificar API version. Dry-run del trial de
    mini (tarjeta test `4242…` para trial; `4000…0341` para forzar fallo de cobro al
-   día 14). Confirmar `trial_ends_at` y el banner "quedan X días".
+   día 14). Confirmar `trial_ends_at` y el banner "quedan X días". Con claves en medio
+   se puede probar el path real de historial (checkout → análisis → aparece en historial).
 3. **Dominio + Nginx + SSL** (deudas C, D): servir landing + frontend, proxeary
    `/api/`, poner cabeceras de seguridad, mover la CSP al dominio.
 4. **Pruebas de navegador reales**: login/activación, los 6 subapartados de Excel,
-   el cuestionario, exportación PDF/Excel, envío de email (Resend).
-5. (Opcional) `/api/profile` + `analyses` (deuda G); corregir el comentario de
-   `proxy.js` (deuda F).
+   el cuestionario, exportación PDF/Excel, envío de email (Resend). Probar que un
+   análisis generado aparece en Historial/Informes y re-exporta a PDF.
+5. (Opcional) `/api/profile` (deuda G-a) — el único resto de la antigua deuda G.
 
 ---
 

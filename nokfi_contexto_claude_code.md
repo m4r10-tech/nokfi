@@ -141,17 +141,21 @@ transitivas (`dompurify` vía `jspdf`, `esbuild` vía `vite` [solo dev server],
 1. **Perfil de empresa (onboarding) no persiste en backend** — no hay endpoint
    `/api/profile`. Se guarda en `localStorage` (`hooks/useCompanyProfile.js`), no
    viaja entre dispositivos. Marcado `LIMITACIÓN CONOCIDA` en el código.
-2. **Historial de análisis no persiste** — no hay tabla `analyses` ni endpoints.
-   `Historial.jsx` / `Informes.jsx` muestran estado vacío. La exportación SÍ funciona
-   justo tras generar el análisis; lo que falta es recuperarlo más tarde.
+2. **~~Historial de análisis no persiste~~ → RESUELTO (deuda G-b)** — la tabla
+   `analyses` y `GET /api/analyses` (+ `/:id`, scoped por licencia) ya existen;
+   `routes/proxy.js` persiste cada análisis generado (best-effort, no bloquea la
+   respuesta); `Historial.jsx`/`Informes.jsx` los listan, abren y re-exportan vía
+   `components/HistoryBrowser.jsx` (con `sanitizeAiHtml` obligatorio). Solo persiste
+   `result_html` + `prompt_chars` (conteo), **no** el prompt (privacidad — los datos
+   financieros no se duplican en otra tabla). e2e cubre scoping (404 ajeno) + path real
+   con stub de Gemini.
 3. **Gemini free tier** — Google puede usar los prompts para entrenar (decisión de
    negocio consciente, `nokfi_proyecto.md` §6-sobre-IA) y hay límite de ~1.500
    peticiones/día para todo el proyecto (mitigado con la cuota 10/50/130 por licencia).
 4. **Transferencia bancaria descartada** como método de pago (sin webhook;
    incompatible con el flujo 100% automático de licencias).
-5. **Comentario de código stale en `routes/proxy.js`** (~líneas 40-44) que dice
-   "mini 30 / pro 80 / max 200 análisis/día" — las cuotas reales vía `aiQuotaForPlan`
-   son 10/50/130. Deuda de comentario, no runtime; corregir al pasar por ahí.
+5. **~~Comentario stale de `routes/proxy.js`~~ → RESUELTO (deuda F)** — decía
+   "mini 30 / pro 80 / max 200"; corregido a `10/50/130` (lo real vía `aiQuotaForPlan`).
 
 ---
 
@@ -168,8 +172,9 @@ transitivas (`dompurify` vía `jspdf`, `esbuild` vía `vite` [solo dev server],
 - `GET /api/payments/plans` vivo (mini 5€·10·trial, pro 20€·50, max 50€·130)
 - CORS verificado con curl; headers de Helmet en respuesta real
 - `npm install` frontend (482 paquetes) + `npm run build` sin errores
-- **e2e backend 61/61 PASS** (`backend/test/e2e.test.js`) — incluye `/plans`, cuotas,
-  MRR (trial excluido), `billing.trialing`
+- **e2e backend 76/76 PASS** (`backend/test/e2e.test.js`) — incluye `/plans`, cuotas,
+  MRR (trial excluido), `billing.trialing`, y (deuda G-b) `/api/analyses` + scoping
+  (404 ajeno, 400 no-numérico) + path real de captura con stub de Gemini
 
 ### ❌ Pendiente de probar / sin claves reales
 - **Stripe en VPS está vacío** (`STRIPE_SECRET_KEY`/`STRIPE_WEBHOOK_SECRET` en blanco)
@@ -190,10 +195,12 @@ transitivas (`dompurify` vía `jspdf`, `esbuild` vía `vite` [solo dev server],
 
 ## 8. Estado actual — dónde está el proyecto
 
-- **Backend:** completo, testeado (61/61), desplegado en el VPS y funcional (salvo
-  Stripe, que necesita claves reales). Último deploy: limpieza de proveedores
-  muertos (`bbf10cb`, Stripe-only), ya en `origin/main` y en el VPS.
+- **Backend:** completo, testeado (76/76), desplegado en el VPS y funcional (salvo
+  Stripe, que necesita claves reales). Último deploy en `origin/main`+VPS: `794a0a8`
+  (docs). El código de las deudas F + G-b (comentario `proxy.js` + historial de análisis)
+  está **sin commitear** todavía (ver `handoff.md` §3).
 - **Frontend:** construido y compilando; no servido por el VPS (falta Nginx).
+  `Historial`/`Informes` ya listan y abren análisis reales (deuda G-b resuelta).
 - **Landing:** en diseño (definido en `nokfi_proyecto.md` §13), no implementada.
 - **Documentación:** acaba de moverse de `md/` a la raíz y actualizarse al estado real.
 
@@ -233,6 +240,9 @@ comprar dominio y desplegar Nginx + SSL. Ver `handoff.md` para el orden y los细
 4. Probar login/activación completos desde el navegador, los 6 subapartados de Excel
    y el cuestionario con datos reales.
 5. Probar envío real de emails (Resend) y event-driven del webhook de Stripe en vivo.
-6. (Opcional, si el negocio lo pide) implementar `/api/profile` y la tabla `analyses`
-   para persistir perfil de empresa e historial (limitaciones §6.1 y §6.2); y corregir
-   el comentario stale de `proxy.js` (§6.5) al pasar por ahí.
+   En cuanto haya frontend en el VPS, probar que un análisis generado aparece en
+   Historial/Informes y re-exporta a PDF (deuda G-b ya resuelta en código, falta
+   verificación en navegador real).
+6. (Opcional, si el negocio lo pide) implementar `/api/profile` (deuda G-a — el único
+   resto de la antigua deuda G; la tabla `analyses` y el comentario de `proxy.js` ya
+   están resueltos, ver §6).
