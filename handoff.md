@@ -8,7 +8,7 @@
 
 ## 0. TL;DR
 
-- **Backend:** completo, **76/76 e2e PASS**, desplegado en el VPS (`191.44.112.86`)
+- **Backend:** completo, **93/93 e2e PASS**, desplegado en el VPS (`191.44.112.86`)
   y funcional **salvo Stripe** (claves vacías en el `.env` del VPS).
 - **Modelo de billing (Fase 3):** suscripción mensual Stripe-only (mini 5 € /
   pro 20 € / max 50 €), cuotas de IA 10/50/130 por licencia/día, **trial de 14 días
@@ -18,16 +18,27 @@
 - **Frontend:** construido y compila, **no servido por el VPS** (falta Nginx).
   **Landing:** en diseño, no implementada.
 - **Proveedores retirados:** PayPal / Revolut / Coinbase → `404` (Stripe-only).
-- **Deudas F y G-b resueltas esta sesión:** comentario stale de `proxy.js` (F) e
-  historial de análisis persistido (G-b). Detalle en §4.
-- **Documentación (`*.md`):** movida de `md/` a la raíz del repo y al día. Los cambios
-  de esta sesión (codígo + docs) **están sin commitear** todavía (ver §3).
+- **Deudas resueltas:** F (comentario stale `proxy.js`) + G-b (historial de análisis)
+  → **commiteadas, pusheadas y desplegadas** (`8376fcc`, VPS en ese HEAD). **G-a**
+  (`/api/profile` del onboarding) resuelta esta sesión, **sin commitear todavía**
+  (ver §3). Detalle de las tres en §4.
+- **VPS deploy autónomo por llave SSH** desde el 2026-07-31 (ver §6).
+- **Documentación (`*.md`):** en la raíz del repo y al día.
 
 ---
 
 ## 1. Qué se hizo en las últimas sesiones (reciente → antiguo)
 
-1. **Limpieza de proveedores muertos (Stripe-only)** — `bbf10cb`.
+0. **G-a `/api/profile` (perfil de empresa del onboarding)** — SIN commitear.
+   Tabla `company_profiles` + `routes/profile.js` (GET vacío-inicial / PUT
+   enum-validado y merge-parcial) + `useCompanyProfile` como puente API (PUT
+   debounced acumulando partials, `loading` para evitar flash de modal). Refactor:
+   `sanitizeFreeText` → `utils/sanitize.js`. e2e **93/93** (17 nuevos). Ver §4/§3.
+1. **G-b historial + F comentario (commiteado `8376fcc`, desplegado)** — VPS en
+   ese HEAD; tabla `analyses` autocreada en boot, `/api/analyses` vivo (401 sin
+   auth). Revisión pre-Stripe aplicó 3 fixes (locale fecha, índice redundante,
+   i18n muertas) y documentó la deuda H (cuota IA TOCTOU).
+2. **Limpieza de proveedores muertos (Stripe-only)** — `bbf10cb`.
    Quitó PayPal/Coinbase/Revolut de `routes/payments.js` (3 endpoints → eliminados),
    `routes/webhooks.js` (handlers + verify helpers), borró `utils/paypalAuth.js`,
    limpió `server.js` (solo `express.raw()` para stripe), recortó `.env.example`
@@ -58,42 +69,47 @@
 
 ## 2. Estado de despliegue (VPS `191.44.112.86`)
 
-- `origin/main` **y** el VPS están en `bbf10cb` (cleanup). Local y origin en sync
-  (`git rev-list origin/main...HEAD` = `0 0`).
+- `origin/main` **y** el VPS están en `8376fcc` (G-b historial + F comentario).
+  Local y origin en sync (`git rev-list origin/main...HEAD` = `0 0`).
 - Backend PM2 `nokfi-backend` (fork, cwd `nokfi-fase3/backend`), `:3001`. Resurrect
   vía systemd `pm2-deploy.service`. Verificado online y healthy.
 - DB `./db/nokfi.db` vacía (staging: 0 licencias). Migraciones Fase 2 + Fase 3
-  (`trial_ends_at` = columna 19) corrieron schema-only en primer boot.
+  (`trial_ends_at` = columna 19) corrieron schema-only en primer boot. La tabla
+  `analyses` se **autocrea** en boot (`CREATE TABLE IF NOT EXISTS`, sin migración).
 - `/api/payments/plans` vivo: mini 5€·10·trial / pro 20€·50 / max 50€·130.
+  `/api/analyses` vivo (401 sin auth → ruta montada y `requireLicense` aplicado).
 - **No hay frontend ni landing servidos** (Nginx pendiente). **No hay dominio ni SSL.**
 
 > Topología detallada (paths, resurrect, gotcha de `DB_PATH` relativa, rollback
 > artifacts ya borrados): ver memoria `vps-deploy-topology`. Gaps de config del VPS:
-> ver memoria `vps-config-gaps`.
+> ver memoria `vps-config-gaps`. **Deploy autónomo por llave SSH**: ver memoria
+> `vps-deploy-ssh-key` (Claude deploya solo; el archivo de credenciales se borró).
 
 ---
 
 ## 3. Estado de git
 
-- **`origin/main` está en `794a0a8`** y el VPS también (docs movidos + README +
-  handoff ya empujados y desplegados en una sesión anterior).
-- **SIN commitear (esta sesión) — deudas F + G-b:**
-  - `backend/routes/proxy.js`: comentario stale corregido (F) + captura de análisis
-    al generar (best-effort) → `createAnalysis`.
-  - `backend/db/database.js`: tabla `analyses` + `createAnalysis`/`listAnalyses`/`getAnalysis`.
-  - `backend/routes/analyses.js` (nuevo) + mount en `backend/server.js` (`/api/analyses`).
-  - `backend/test/e2e.test.js`: suites de historial (DB-direct + integración con stub Gemini) → 76/76.
-  - Frontend: `middleware/api.js` (`aiApi.analyze({kind,title})` + `analysesApi`),
-    `components/ExcelSubModule.jsx` + `pages/Cuestionario.jsx` (pasan etiquetas),
-    `components/HistoryBrowser.jsx` (nuevo) + `pages/EmptyState.jsx` (nuevo),
-    `pages/Historial.jsx` + `pages/Informes.jsx` (wrappers), i18n `es.js`/`en.js` (sección `history`).
-  - Docs: `nokfi_api_contract.md` (§2 body + nueva §2.5 + §6/§7), `handoff.md` (§0/§3/§4/§5),
-    `nokfi_contexto_claude_code.md` (§6/§7/§8/§10), `nokfi_proyecto.md` (§14).
-- Acción pendiente: preparar un commit conjunto del código + docs cuando el usuario
-  quiera. **El usuario hace `git push` fuera de Claude Code** (no pegar tokens en el
-  chat). Tras push: `git pull --ff-only` + `pm2 restart nokfi-backend --update-env` en
-  el VPS (la tabla `analyses` se autocrea por `CREATE TABLE IF NOT EXISTS`), smoke de
-  `/health` y `/api/analyses`.
+- **`origin/main` y el VPS están en `8376fcc`** (G-b historial + F comentario +
+  3 fixes de la revisión pre-Stripe) — commiteado, pusheado y desplegado.
+- **SIN commitear (esta sesión) — deuda G-a (`/api/profile`):**
+  - `backend/db/database.js`: tabla `company_profiles` (FK CASCADE, `license_id`
+    UNIQUE = PK) + `getCompanyProfile`/`upsertCompanyProfile` (merge parcial en el
+    DB layer, UPSERT `ON CONFLICT`).
+  - `backend/routes/profile.js` (nuevo) + mount en `backend/server.js` (`/api/profile`):
+    `GET` (200 vacío si no existe) + `PUT` (enum-validado, `companyName` saneado,
+    scoping por `req.license.id`).
+  - `backend/utils/sanitize.js` (nuevo): `sanitizeFreeText` extraído (3º uso);
+    refactor `routes/auth.js` + `routes/admin.js` para importarlo (sin la copia local).
+  - `backend/test/e2e.test.js`: helper `put` + suite de perfil (17 tests) → 93/93.
+  - Frontend: `middleware/api.js` (`profileApi.get/put`), `hooks/useCompanyProfile.js`
+    (puente API: load async + `loading`, PUT debounced **acumulando** partials),
+    `layouts/DashboardLayout.jsx` + `pages/Home.jsx` + `pages/Configuracion.jsx`
+    (consumen `loading` → sin flash de modal/tarjeta, sin keystroke-loss).
+  - Docs: `handoff.md` (§0/§1/§2/§3/§4), más abajo.
+- Acción pendiente: preparar el commit conjunto de G-a + deploy por llave SSH.
+  **El usuario hace `git push` fuera de Claude Code** (no pegar tokens en el chat).
+  Tras push: `git pull --ff-only` + `pm2 restart nokfi-backend --update-env` (la
+  tabla `company_profiles` se autocrea), smoke `/health` + `/api/profile` (401 sin auth).
 
 ---
 
@@ -107,7 +123,7 @@
 | D | **CSP del `index.html` con la IP del VPS hardcodeada** | cambiará al poner dominio | Actualizar `connect-src` al nuevo dominio/IP (hallazgo #8; ya causó un bloqueo real antes). |
 | E | **Gemini 503 transitorio** | nada (se autocale) | Mapea `non-2xx/non-429 → 502`. Si persiste → cuota/disponibilidad de Google, no bug. `GEMINI_API_KEY` válida (53 chars). |
 | F | ✅ **RESUELTO** — `routes/proxy.js` comentario stale | — | Decía "mini 30/pro 80/max 200"; corregido a `10/50/130` (lo real vía `aiQuotaForPlan`). |
-| G-a | `/api/profile` no existe | perfil de empresa (onboarding) no persiste entre dispositivos | Sigue abierto (limitación `nokfi_contexto_claude_code.md` §6.1). El hook `useCompanyProfile.js` guarda en localStorage; sustituir por API cuando el negocio lo pida — los componentes no cambian (mismo shape). |
+| G-a | ✅ **RESUELTO** — `/api/profile` (perfil de empresa del onboarding) | — | Tabla `company_profiles` (1 fila/licencia, FK CASCADE, PK `license_id` UNIQUE) + `getCompanyProfile`/`upsertCompanyProfile` (merge parcial en el DB layer, UPSERT `ON CONFLICT`). Rutas `routes/profile.js`: `GET /api/profile` (200, vacío si no existe — no 404) + `PUT /api/profile` (enum-validado contra los valores del `OnboardingModal.jsx`, `companyName` saneado vía `sanitizeFreeText`, scoping por `req.license.id`). Frontend: `useCompanyProfile.js` ahora es puente API (load async + `loading`, PUT debounced 600 ms **acumulando** partials para no perder edits de campos distintos); `profileApi` en `api.js`; `DashboardLayout`/`Home`/`Configuracion` consumen `loading` (sin flash del modal/tarjeta ni keystroke-loss). Refactor: `sanitizeFreeText` extraído a `utils/sanitize.js` (3º uso — auth/admin/profile). e2e **93/93** (17 tests nuevos: scoping 2 licencias, merge parcial, filtro enum, saneado, guards 400). |
 | G-b | ✅ **RESUELTO** — tabla `analyses` + `/api/analyses` | — | Historial de análisis persistido: captura en `routes/proxy.js` (best-effort, no bloquea), tabla `analyses` (autocreada por `CREATE TABLE IF NOT EXISTS`), `GET /api/analyses` (lista ligera) + `GET /api/analyses/:id` (scoped por licencia → 404 ajeno). Frontend: `HistoryBrowser.jsx` compartido por `Historial`/`Informes` (lista + detalle + re-export PDF), `sanitizeAiHtml` obligatorio. e2e **76/76** (incluye path real con stub de Gemini). |
 | H | **Cuota diaria de IA vulnerable a overshoot por concurrencia** (TOCTOU) | nada en staging; allows scripted abuse to exceed the per-license daily cap | `countAiAnalysesToday` se lee en `routes/proxy.js` (línea ~65) pero solo se incrementa vía `audit('AI_ANALYSIS_GENERATED')` *después* del `await fetch` a Gemini → el `await` cede el event loop y N requests concurrentes de una misma licencia pasan el check leyendo el mismo conteo (todos <límite) antes de que se escriba el audit. Preexistente (no introducido por G-b); el backstop es el cap global de Gemini. Fix sería una reserva atómica (p.ej. tabla `ai_usage_daily` con `UNIQUE(license_id, day, slot)` o un contador transaccional) — cambio aparte con sus propios tests. |
 

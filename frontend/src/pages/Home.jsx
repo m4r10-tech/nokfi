@@ -1,12 +1,20 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { useOutletContext, Link } from 'react-router-dom';
 import { X, TrendingUp, AlertTriangle, Activity } from 'lucide-react';
 import { useLang } from '../context/LangContext';
 
 export default function Home() {
-  const { profile, updateProfile } = useOutletContext();
+  const { profile, updateProfile, loading } = useOutletContext();
   const { t } = useLang();
-  const [cardVisible, setCardVisible] = useState(!profile.welcomeCardDismissed);
+  // El perfil llega async (API); `useState(!welcomeCardDismissed)` leería EMPTY
+  // en el primer render y NO se re-inicializaría al llegar el GET → un usuario
+  // que ya lo descartó vería la tarjeta reaparecer. Derivamos la visibilidad del
+  // perfil una vez cargado (efecto sobre welcomeCardDismissed), y la ocultamos
+  // durante `loading` para evitar el flash de la tarjeta para usuarios de vuelta.
+  const [cardVisible, setCardVisible] = useState(false);
+  useEffect(() => {
+    if (!loading) setCardVisible(!profile.welcomeCardDismissed);
+  }, [loading, profile.welcomeCardDismissed]);
 
   const dismissCard = () => {
     setCardVisible(false);

@@ -138,9 +138,16 @@ transitivas (`dompurify` vía `jspdf`, `esbuild` vía `vite` [solo dev server],
 
 ## 6. Limitaciones conocidas (alcance pendiente, no bugs)
 
-1. **Perfil de empresa (onboarding) no persiste en backend** — no hay endpoint
-   `/api/profile`. Se guarda en `localStorage` (`hooks/useCompanyProfile.js`), no
-   viaja entre dispositivos. Marcado `LIMITACIÓN CONOCIDA` en el código.
+1. **~~Perfil de empresa (onboarding) no persiste~~ → RESUELTO (deuda G-a)** — ya
+   existe `GET/PUT /api/profile`: la tabla `company_profiles` (1 fila por licencia,
+   FK CASCADE) + `routes/profile.js` (escopado por `req.license.id`, GET vacío-inicial,
+   PUT enum-validado con merge parcial). El frontend `hooks/useCompanyProfile.js` es
+   ahora el puente (antes guardaba en `localStorage`): `GET` al montar (`loading`,
+   sin flash del `OnboardingModal`/welcome-card) + `PUT` debounced 600 ms **acumulando
+   partials** (no pierde edits de campos distintos hecho en la misma ventana). Refactor:
+   `sanitizeFreeText` extraído a `utils/sanitize.js` (3º uso). e2e **93/93** (17 tests
+   nuevos de perfil: scoping entre 2 licencias, merge parcial, filtro de enum, saneado
+   de texto libre, guards 400).
 2. **~~Historial de análisis no persiste~~ → RESUELTO (deuda G-b)** — la tabla
    `analyses` y `GET /api/analyses` (+ `/:id`, scoped por licencia) ya existen;
    `routes/proxy.js` persiste cada análisis generado (best-effort, no bloquea la
@@ -242,7 +249,6 @@ comprar dominio y desplegar Nginx + SSL. Ver `handoff.md` para el orden y los细
 5. Probar envío real de emails (Resend) y event-driven del webhook de Stripe en vivo.
    En cuanto haya frontend en el VPS, probar que un análisis generado aparece en
    Historial/Informes y re-exporta a PDF (deuda G-b ya resuelta en código, falta
-   verificación en navegador real).
-6. (Opcional, si el negocio lo pide) implementar `/api/profile` (deuda G-a — el único
-   resto de la antigua deuda G; la tabla `analyses` y el comentario de `proxy.js` ya
-   están resueltos, ver §6).
+   verificación en navegador real) Y que el onboarding (modal) se persiste y recupera
+   al recargar (deuda G-a resuelta, falta verificación en navegador real — el perfil
+   ahora viaja por `/api/profile`, no localStorage).

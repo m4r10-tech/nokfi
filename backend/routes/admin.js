@@ -41,17 +41,10 @@ const {
 
 const { hashPassword } = require('../utils/password');
 const { sendLicenseKeyEmail, sendLicenseRevokedEmail } = require('../utils/mailer');
+const { sanitizeFreeText } = require('../utils/sanitize');
 
 const EMAIL_REGEX = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
 const MIN_PASSWORD_LENGTH = 8;
-
-/** Ver razón en routes/auth.js — misma sanitización defensiva de texto libre */
-function sanitizeFreeText(text) {
-  return String(text)
-    .replace(/[\x00-\x08\x0B\x0C\x0E-\x1F\x7F]/g, '')
-    .replace(/\s+/g, ' ')
-    .trim();
-}
 
 /* ── Middleware de autenticación admin — aplica a TODAS las rutas de este router ── */
 

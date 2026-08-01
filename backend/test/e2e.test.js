@@ -60,6 +60,7 @@ function call(method, path, opts = {}) {
 }
 
 async function post(path, body, auth) { return call('POST', path, { body, auth }); }
+async function put(path, body, auth) { return call('PUT', path, { body, auth }); }
 async function get(path, auth) { return call('GET', path, { auth }); }
 
 let passed = 0;
@@ -748,6 +749,150 @@ async function main() {
 
   global.fetch = savedFetch;
   if (origGeminiKey === undefined) delete process.env.GEMINI_API_KEY; else process.env.GEMINI_API_KEY = origGeminiKey;
+
+  // ═══════════════════════════════════════════════════════════
+  // 3.o Perfil de empresa (G-a): GET /api/profile + PUT /api/profile
+  //     Persistencia del onboarding (sección 14), 1 fila por licencia,
+  //     scoped por req.license.id. Licencia DEDICADA y fresca (no la principal
+  //     del suite, mutada por password-change) para login determinista.
+  //     Cubre: 401 sin auth, GET vacío inicial, PUT onboarding, merge parcial
+  //     (un campo omitido no se vacía), filtro de enum invalid (omiti + preserve),
+  //     saneado de texto libre, scoping entre dos licencias.
+  // ═══════════════════════════════════════════════════════════
+  const { getCompanyProfile } = require('../db/database');
+
+  // Licencia P (perfil propia): fresca, password conocida y estable.
+  let licenseKeyP = null, licenseIdP = null, tokenP = null;
+  await checkAsync('admin createLicense P (perfil, mini) → 201',
+    post('/api/admin/licenses', { email: 'perfil-a@nokfi.local', plan: 'mini', password: 'ProfileP4ss!' }, 'admin'),
+    r => {
+      if (r.status !== 201) return false;
+      licenseKeyP = r.data.key; licenseIdP = r.data.id;
+      return !!r.data.key && r.data.plan === 'mini';
+    }
+  );
+  await checkAsync('login de licencia P → 200 (para tests de perfil)',
+    post('/api/auth/login', { email: 'perfil-a@nokfi.local', license_key: licenseKeyP, password: 'ProfileP4ss!' }),
+    r => { if (r.status === 200) tokenP = r.data.token; return r.status === 200; }
+  );
+  // Licencia Q (ajena): para verificar scoping.
+  let licenseKeyQ = null, licenseIdQ = null, tokenQ = null;
+  await checkAsync('admin createLicense Q (ajena, para scoping) → 201',
+    post('/api/admin/licenses', { email: 'perfil-b@nokfi.local', plan: 'pro', password: 'OtherP4ss!' }, 'admin'),
+    r => {
+      if (r.status !== 201) return false;
+      licenseKeyQ = r.data.key; licenseIdQ = r.data.id;
+      return !!r.data.key && r.data.plan === 'pro';
+    }
+  );
+  await checkAsync('login de licencia Q → 200 (para scoping)',
+    post('/api/auth/login', { email: 'perfil-b@nokfi.local', license_key: licenseKeyQ, password: 'OtherP4ss!' }),
+    r => { if (r.status === 200) tokenQ = r.data.token; return r.status === 200; }
+  );
+
+  await checkAsync('GET /api/profile SIN auth → 401',
+    get('/api/profile'),
+    r => r.status === 401
+  );
+
+  await checkAsync('GET /api/profile (P) inicial → 200 + perfil vacío (no 404)',
+    get('/api/profile', tokenP),
+    r => r.status === 200 && r.data.profile
+      && r.data.profile.companyName === '' && r.data.profile.onboardingCompleted === false
+      && Array.isArray(r.data.profile.mainExpenses) && r.data.profile.mainExpenses.length === 0
+  );
+
+  await checkAsync('PUT /api/profile SIN auth → 401',
+    put('/api/profile', { companyName: 'X' }, null),
+    r => r.status === 401
+  );
+
+  // Guard 400: body no es objeto (array) → invalid_body
+  await checkAsync('PUT /api/profile con body array → 400 invalid_body',
+    put('/api/profile', ['no', 'es', 'objeto'], tokenP),
+    r => r.status === 400 && r.data.error === 'invalid_body'
+  );
+
+  // Guard 400: objeto sin campos válidos → empty_profile
+  await checkAsync('PUT /api/profile con {} (sin campos) → 400 empty_profile',
+    put('/api/profile', {}, tokenP),
+    r => r.status === 400 && r.data.error === 'empty_profile'
+  );
+
+  // PUT onboarding completo (texto libre con control chars/espacios → saneado).
+  await checkAsync('PUT /api/profile onboarding completo → 200 + guardado saneado',
+    put('/api/profile', {
+      companyName: '\x07   Taller García   \x07',   // BEL + espacios → 'Taller García'
+      sector: 'Comercio',
+      size: '2-5',
+      mainExpenses: ['Alquiler', 'Personal'],
+      onboardingCompleted: true,
+      welcomeCardDismissed: false
+    }, tokenP),
+    r => r.status === 200 && r.data.profile
+      && r.data.profile.companyName === 'Taller García'   // saneado: control chars fuera, espacios colapsados
+      && r.data.profile.sector === 'Comercio'
+      && r.data.profile.size === '2-5'
+      && r.data.profile.mainExpenses.length === 2
+      && r.data.profile.onboardingCompleted === true
+  );
+
+  // GET refleja el onboarding persistido (scoping: P solo ve el suyo).
+  await checkAsync('GET /api/profile (P) tras onboarding → 200 + persistido',
+    get('/api/profile', tokenP),
+    r => r.status === 200 && r.data.profile.companyName === 'Taller García'
+      && r.data.profile.sector === 'Comercio' && r.data.profile.onboardingCompleted === true
+  );
+
+  // MERGE PARCIAL: PUT que solo envía welcomeCardDismissed → el resto se PRESERVA.
+  await checkAsync('PUT /api/profile merge parcial (solo welcomeCardDismissed) → resto preservado',
+    put('/api/profile', { welcomeCardDismissed: true }, tokenP),
+    r => r.status === 200 && r.data.profile
+      && r.data.profile.welcomeCardDismissed === true
+      && r.data.profile.companyName === 'Taller García'    // preservado (no enviado)
+      && r.data.profile.sector === 'Comercio'              // preservado
+      && r.data.profile.size === '2-5'                     // preservado
+      && r.data.profile.mainExpenses.length === 2           // preservado
+      && r.data.profile.onboardingCompleted === true        // preservado
+  );
+
+  // ENUM INVÁLIDO se OMITE (no se blankealiza) → merge preserva el valor actual;
+  // mainExpenses se filtra (solo valida queda):
+  //   sector='Sector Hackeado' → fuera de VALID_SECTORS → omitido → preserva 'Comercio'
+  //   size='XXL'               → fuera de VALID_SIZES   → omitido → preserva '2-5'
+  //   mainExpenses con 'Inválido' → filtrado → queda solo ['Personal']
+  await checkAsync('PUT /api/profile enum inválido → omitido (preserva) + expenses filtradas',
+    put('/api/profile', { sector: 'Sector Hackeado', size: 'XXL', mainExpenses: ['Inválido', 'Personal'] }, tokenP),
+    r => r.status === 200 && r.data.profile
+      && r.data.profile.sector === 'Comercio'              // preservado (el enviado era invalid)
+      && r.data.profile.size === '2-5'                     // preservado (el enviado era invalid)
+      && r.data.profile.mainExpenses.length === 1
+      && r.data.profile.mainExpenses[0] === 'Personal'     // el invalid 'Inválido' filtrado
+      && r.data.profile.companyName === 'Taller García'    // preservado (no estaba en este PUT)
+  );
+
+  // SCOPING: Q (ajena) lee su propio perfil → vacío (no leakage del de P).
+  await checkAsync('GET /api/profile (Q ajena) → 200 + vacío (no leak del de P)',
+    get('/api/profile', tokenQ),
+    r => r.status === 200 && r.data.profile.companyName === '' && r.data.profile.sector === ''
+  );
+
+  // Q intenta leer/escribir el perfil de P con su propio token → solo afecta a Q (no hay license_id en body).
+  await checkAsync('PUT /api/profile (Q) → 200 + su propio perfil (no toca el de P)',
+    put('/api/profile', { companyName: 'Empresa Q', sector: 'Salud', size: 'solo', mainExpenses: ['Marketing'], onboardingCompleted: true }, tokenQ),
+    r => r.status === 200 && r.data.profile.companyName === 'Empresa Q' && r.data.profile.sector === 'Salud'
+  );
+
+  // Defensa directa a nivel DB: el perfil de P NO fue tocado por el PUT de Q.
+  check('getCompanyProfile scoping: P sigue intacto tras PUT de Q (DB-direct)',
+    () => { const p = getCompanyProfile(licenseIdP); return p && p.company_name === 'Taller García' && p.sector === 'Comercio'; }
+  );
+
+  // Numeric/string edge: companyName solo con control chars/espacios → '' tras saneado; aún válido (no vacía la guard empty_profile porque el campo estaba presente y string).
+  await checkAsync('PUT companyName solo-control-espacios → 200 con company_name saneado a vacío',
+    put('/api/profile', { companyName: '   \x07\x08   ' }, tokenQ),
+    r => r.status === 200 && r.data.profile.companyName === ''
+  );
 
   } catch (e) {
     console.error('TEST CRASH:', e.message);

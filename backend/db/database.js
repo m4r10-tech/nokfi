@@ -140,6 +140,22 @@ function initDB() {
           created_at   TEXT    NOT NULL DEFAULT (datetime('now'))
         );
 
+        -- 1 fila por licencia: el perfil de empresa del onboarding (sección 14).
+        -- license_id es PK + UNIQUE implícito (sirve de índice de búsqueda — no
+        -- hace falta un índice separado). Campos snake_case, JSON nativo para
+        -- main_expenses (array de etiquetas). FK ON DELETE CASCADE → se borra
+        -- con la licencia (igual que sessions/analyses).
+        CREATE TABLE IF NOT EXISTS company_profiles (
+          license_id           INTEGER PRIMARY KEY REFERENCES licenses(id) ON DELETE CASCADE,
+          company_name         TEXT    NOT NULL DEFAULT '',
+          sector               TEXT    NOT NULL DEFAULT '',
+          size                 TEXT    NOT NULL DEFAULT '',
+          main_expenses        TEXT    NOT NULL DEFAULT '[]',
+          onboarding_completed INTEGER NOT NULL DEFAULT 0,
+          welcome_card_dismissed INTEGER NOT NULL DEFAULT 0,
+          updated_at           TEXT    NOT NULL DEFAULT (datetime('now'))
+        );
+
         CREATE INDEX IF NOT EXISTS idx_licenses_key          ON licenses(key);
         CREATE INDEX IF NOT EXISTS idx_licenses_email        ON licenses(email);
         CREATE INDEX IF NOT EXISTS idx_sessions_token        ON sessions(token);
@@ -916,6 +932,88 @@ function getAnalysis(license_id, id) {
   `).get(id, license_id);
 }
 
+/* ── Perfil de empresa (G-a — onboarding, sección 14) ── */
+
+/**
+ * Lee el perfil de empresa de una licencia. Devuelve null si aún no existe
+ * (licencia nueva que no ha hecho onboarding). El llamador (routes/profile.js)
+ * responde con el perfil vacío en ese caso — nunca con error.
+ *
+ * Los ints onboarding_completed / welcome_card_dismissed se devuelven como
+ * están (0/1); la capa de presentación (hook del frontend) los mapea a bool.
+ * main_expenses es un JSON string → se desparsea aquí a array.
+ */
+function getCompanyProfile(license_id) {
+  const row = getDB().prepare(`
+    SELECT license_id, company_name, sector, size, main_expenses,
+           onboarding_completed, welcome_card_dismissed, updated_at
+    FROM company_profiles
+    WHERE license_id = ?
+  `).get(license_id);
+  if (!row) return null;
+  let expenses = [];
+  try { expenses = Array.isArray(JSON.parse(row.main_expenses)) ? JSON.parse(row.main_expenses) : []; } catch { expenses = []; }
+  return {
+    license_id: row.license_id,
+    company_name: row.company_name,
+    sector: row.sector,
+    size: row.size,
+    main_expenses: expenses,
+    onboarding_completed: !!row.onboarding_completed,
+    welcome_card_dismissed: !!row.welcome_card_dismissed,
+    updated_at: row.updated_at
+  };
+}
+
+/**
+ * Upsert del perfil de empresa con MERGE PARCIAL — INSERT si no existe, UPDATE
+ * si ya existe, vía `ON CONFLICT(license_id) DO UPDATE` (license_id es la PK →
+ * UNIQUE). El merge vive AQUÍ (en la capa de persistencia), no en la ruta:
+ * cualquier caller de upsertCompanyProfile recibe el mismo contrato — un
+ * campo ausente en `partial` se PRESERVA del perfil actual; un campo presente
+ * se sobreescribe. Así un PUT que omita un campo no lo vacía, venga de la ruta
+ * o de cualquier otro llamador futuro.
+ *
+ * El llamador (routes/profile.js) ya sanea/valida/filtra enum los valores
+ * antes de pasarlos; aquí solo persistencia atómica + merge. main_expenses
+ * (Array) se serializa a JSON string para la columna TEXT. Devuelve el perfil
+ * completo leído tras el upsert (shape de getCompanyProfile).
+ */
+function upsertCompanyProfile(license_id, partial) {
+  const db = getDB();
+  const current = getCompanyProfile(license_id) || {};
+  const merged = {
+    company_name: partial.company_name !== undefined ? partial.company_name : (current.company_name ?? ''),
+    sector:       partial.sector       !== undefined ? partial.sector       : (current.sector ?? ''),
+    size:         partial.size         !== undefined ? partial.size         : (current.size ?? ''),
+    main_expenses: Array.isArray(partial.main_expenses) ? partial.main_expenses : (current.main_expenses || []),
+    onboarding_completed:
+      partial.onboarding_completed    !== undefined ? !!partial.onboarding_completed    : (current.onboarding_completed ?? false),
+    welcome_card_dismissed:
+      partial.welcome_card_dismissed   !== undefined ? !!partial.welcome_card_dismissed : (current.welcome_card_dismissed ?? false)
+  };
+  db.prepare(`
+    INSERT INTO company_profiles
+      (license_id, company_name, sector, size, main_expenses,
+       onboarding_completed, welcome_card_dismissed, updated_at)
+    VALUES (?, ?, ?, ?, ?, ?, ?, datetime('now'))
+    ON CONFLICT(license_id) DO UPDATE SET
+      company_name          = excluded.company_name,
+      sector                = excluded.sector,
+      size                  = excluded.size,
+      main_expenses         = excluded.main_expenses,
+      onboarding_completed  = excluded.onboarding_completed,
+      welcome_card_dismissed = excluded.welcome_card_dismissed,
+      updated_at            = datetime('now')
+  `).run(
+    license_id, merged.company_name, merged.sector, merged.size,
+    JSON.stringify(merged.main_expenses),
+    merged.onboarding_completed ? 1 : 0,
+    merged.welcome_card_dismissed ? 1 : 0
+  );
+  return getCompanyProfile(license_id);
+}
+
 module.exports = {
   initDB,
   getDB,
@@ -948,6 +1046,8 @@ module.exports = {
   createAnalysis,
   listAnalyses,
   getAnalysis,
+  getCompanyProfile,
+  upsertCompanyProfile,
   audit,
   getStats
 };

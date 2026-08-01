@@ -79,6 +79,14 @@ export const analysesApi = {
   get: (id) => request(`/analyses/${encodeURIComponent(id)}`, { auth: true })
 };
 
+// Perfil de empresa del onboarding (G-a — sección 14). El backend scopea por
+// la licencia de la sesión (PUT/GET no aceptan license_id en el body). El hook
+// useCompanyProfile.js es el único consumidor (vía DashboardLayout).
+export const profileApi = {
+  get: () => request('/profile', { auth: true }),
+  put: (partial) => request('/profile', { method: 'PUT', auth: true, body: partial })
+};
+
 export const paymentsApi = {
   // Catálogo público de planes (precio, cuota, trial) — fuente única del frontend
   // para que SIEMPRE muestre lo que Stripe cobra (anti-drift vs .env del backend).

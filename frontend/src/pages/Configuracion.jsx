@@ -8,7 +8,7 @@ import { authApi, paymentsApi } from '../middleware/api';
 import PasswordGenerator from '../components/PasswordGenerator';
 
 export default function Configuracion() {
-  const { profile, updateProfile } = useOutletContext();
+  const { profile, updateProfile, loading } = useOutletContext();
   const { theme, toggleTheme } = useTheme();
   const { lang, setLang, t } = useLang();
   const { license, logout } = useAuth();
@@ -43,8 +43,8 @@ export default function Configuracion() {
       </Section>
 
       <Section title={t('config.profile')}>
-        <Field label={t('config.companyName')} value={profile.companyName} onChange={(v) => updateProfile({ companyName: v })} />
-        <Field label={t('config.sector')} value={profile.sector} onChange={(v) => updateProfile({ sector: v })} />
+        <Field label={t('config.companyName')} value={profile.companyName} onChange={(v) => updateProfile({ companyName: v })} disabled={loading} />
+        <Field label={t('config.sector')} value={profile.sector} onChange={(v) => updateProfile({ sector: v })} disabled={loading} />
       </Section>
 
       <SubscriptionSection />
@@ -314,12 +314,12 @@ function Section({ title, children }) {
   );
 }
 
-function Field({ label, value, onChange }) {
+function Field({ label, value, onChange, disabled }) {
   return (
     <div className="flex items-center justify-between gap-4">
       <span className="text-sm shrink-0" style={{ color: 'var(--text-secondary)' }}>{label}</span>
-      <input value={value} onChange={(e) => onChange(e.target.value)}
-        className="rounded-lg px-3 py-1.5 text-sm outline-none text-right"
+      <input value={value} onChange={(e) => onChange(e.target.value)} disabled={disabled}
+        className="rounded-lg px-3 py-1.5 text-sm outline-none text-right disabled:opacity-50"
         style={{ background: 'var(--surface-2)', border: '0.5px solid var(--border-strong)', color: 'var(--text-primary)' }} />
     </div>
   );

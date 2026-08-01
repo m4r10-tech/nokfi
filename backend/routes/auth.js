@@ -36,6 +36,8 @@ const {
 } = require('../db/database');
 
 const { hashPassword, verifyPassword, isPasswordSet } = require('../utils/password');
+
+const { sanitizeFreeText } = require('../utils/sanitize'); // antes definido aquí abajo
 const { sendPasswordResetEmail } = require('../utils/mailer');
 const { aiQuotaForPlan } = require('../db/database');
 
@@ -59,13 +61,6 @@ function validatePassword(plain) {
  * Sanitización defensiva de texto libre (device_name viaja al frontend como
  * texto y a emails ya escapados). Mismo razonamiento que antes.
  */
-function sanitizeFreeText(text) {
-  return String(text)
-    .replace(/[\x00-\x08\x0B\x0C\x0E-\x1F\x7F]/g, '')
-    .replace(/\s+/g, ' ')
-    .trim();
-}
-
 /* ──────────────────────────────────────────────────────────
    Helper interno: valida email + clave (sin fingerprint).
    Devuelve { email, license_key, password, device_name } o { error }.

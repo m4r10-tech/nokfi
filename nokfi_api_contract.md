@@ -239,6 +239,53 @@ Análisis completo (con `result_html`).
 
 ---
 
+## 2.6. Perfil de empresa (`/api/profile`)  *(auth: Bearer, requireLicense — scopeado por licencia)*
+
+Perfil de empresa del onboarding (sección 14). **1 fila por licencia**; todo se scopea por `req.license.id` — el frontend **no envía `license_id`** en el cuerpo; el backend ya sabe a quién pertenece por la sesión. Único consumidor del frontend: `hooks/useCompanyProfile.js` (vía `layouts/DashboardLayout.jsx`, que pasa `{ profile, updateProfile, loading }` por `Outlet context`).
+
+**Shape:** el cuerpo del PUT y la respuesta del GET usan **camelCase** (el shape del hook del frontend): `companyName`, `sector`, `size`, `mainExpenses` (array), `onboardingCompleted`, `welcomeCardDismissed`. El backend mapea snake_case internamente; el frontend nunca ve snake.
+
+### `GET /api/profile`  *(auth: Bearer)*
+Perfil de la licencia. **Si no existe** (licencia nueva sin onboarding) devuelve el perfil **vacío** con 200 (no 404) — el frontend arranca con el mismo shape.
+
+**Respuesta 200:**
+```json
+{ "profile": { "companyName": "", "sector": "", "size": "", "mainExpenses": [], "onboardingCompleted": false, "welcomeCardDismissed": false } }
+```
+
+### `PUT /api/profile`  *(auth: Bearer)*
+Upsert del perfil con **merge parcial**: un campo omitido **no se vacía** (se preserva el valor actual). Solo se sobreescribe con un valor **válido**.
+
+**Body (partial, todos opcionales):**
+```json
+{ "companyName": "Taller García", "sector": "Comercio", "size": "2-5",
+  "mainExpenses": ["Alquiler", "Personal"], "onboardingCompleted": true, "welcomeCardDismissed": false }
+```
+
+**Validación server-side:**
+- `companyName` → texto libre saneado (`sanitizeFreeText`: quita control chars, colapsa espacios, `trim`, máx 120).
+- `sector` → enum exacto de `OnboardingModal.jsx` (`Comercio/Hostelería/Salud/Legal/Construcción/Tecnología/Consultoría/Diseño/Educación/Otro`). Valor fuera de lista → **omitido** (preserva el actual).
+- `size` → enum (`solo/2-5/6-20/20+`). Inválido → omitido.
+- `mainExpenses` → array; se filtran los que no estén en el enum (`Alquiler/Personal/Proveedores/Marketing/Suministros/Tecnología/Transporte/Otro`), máx 8.
+- `onboardingCompleted` / `welcomeCardDismissed` → booleanos.
+
+**Respuesta 200:** el perfil ya persistido (mismo shape camel que el GET).
+```json
+{ "profile": { "companyName": "Taller García", "sector": "Comercio", "size": "2-5",
+  "mainExpenses": ["Alquiler", "Personal"], "onboardingCompleted": true, "welcomeCardDismissed": false } }
+```
+
+| Status | Body | Cuándo |
+|--------|------|--------|
+| 200 | `{ profile: {…camel…} }` | GET (vacío si no existe), o PUT ok |
+| 400 | `{ error: "invalid_body", message }` | El body no es un objeto (p.ej. array) |
+| 400 | `{ error: "empty_profile", message }` | Objeto sin ningún campo válido |
+| 401/403 | *(ver tabla de `requireLicense` en §6)* | Sesión inválida o licencia inactiva |
+
+> **Frontend:** el hook hace `GET` al montar (`loading` hasta que cae) y `PUT` **debounced 600 ms acumulando partials** (edición por keystroke en `Configuracion` → un solo PUT por ventana, no por tecla; los campos distintos editados en la misma ventana van juntos, no se pierden). El `loading` se expone para evitar el flash del `OnboardingModal`/welcome-card en usuarios ya registrados.
+
+---
+
 ## 3. Pagos — checkout (`/api/payments`)
 
 ### `GET /api/payments/plans`  *(público, sin auth)*
@@ -344,7 +391,7 @@ Notas del panel admin:
 
 ## 6. Comportamiento común de `requireLicense` (middleware)
 
-Cualquier ruta protegida con este middleware (actualmente `/api/proxy/ai`, `/api/analyses` y `/api/payments/stripe/create-portal-session`) puede devolver:
+Cualquier ruta protegida con este middleware (actualmente `/api/proxy/ai`, `/api/analyses`, `/api/profile` y `/api/payments/stripe/create-portal-session`) puede devolver:
 
 | Status | Body | Significado para el frontend |
 |--------|------|-------------------------------|
@@ -371,6 +418,9 @@ Cualquier ruta protegida con este middleware (actualmente `/api/proxy/ai`, `/api
 - [ ] `aiApi.analyze(prompt, max_tokens, { kind, title })` — `ExcelSubModule` pasa `{ kind:'excel', title }` (su título de subapartado) y `Cuestionario` pasa `{ kind:'cuestionario', title:'Diagnóstico de negocio' }`, para que el backend etiquete el historial
 - [ ] `Historial.jsx` e `Informes.jsx` comparten `components/HistoryBrowser.jsx`: listan vía `GET /api/analyses` (ligera) y abren `GET /api/analyses/:id`; el `result_html` se rendiza SIEMPRE vía `sanitizeAiHtml`, nunca `dangerouslySetInnerHTML` directo
 - [ ] El frontend no envía `license_id` en `/api/analyses` — el backend scopea por la sesión (Bearer)
+- [ ] `useCompanyProfile.js` es el puente con `GET/PUT /api/profile`: `GET` al montar (`loading` hasta que cae), `updateProfile(partial)` manda `PUT **debounced acumulando partials**` (no un PUT por keystroke); shape camelCase (`companyName`/`sector`/`size`/`mainExpenses`/`onboardingCompleted`/`welcomeCardDismissed`)
+- [ ] `DashboardLayout` no muestra el `OnboardingModal` durante `loading` (evita el flash para usuarios ya registrados); `Home` deriva la visibilidad de la welcome-card de `profile.welcomeCardDismissed` **tras** `loading`, no en el mount (no se re-inicaliza cuando llega el GET)
+- [ ] El frontend no envía `license_id` en `/api/profile` — el backend scopea por la sesión (Bearer)
 - [ ] Ninguna pantalla intenta llamar a `/api/webhooks/*`
 - [ ] Ninguna pantalla tiene botones de PayPal / Coinbase / Revolut (retirados → 404)
 - [ ] Panel de administración (si se construye) en bundle/ruta completamente separado del login de usuario
