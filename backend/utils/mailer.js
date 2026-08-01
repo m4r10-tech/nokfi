@@ -15,7 +15,7 @@
 
 'use strict';
 
-const APP_URL = process.env.APP_PUBLIC_URL || 'https://app.nokfi.app';
+const APP_URL = process.env.APP_PUBLIC_URL || 'https://nokfi.app';
 const FROM_EMAIL = process.env.EMAIL_FROM || 'no-reply@nokfi.app';
 const FROM_NAME = process.env.EMAIL_FROM_NAME || 'Nokfi';
 

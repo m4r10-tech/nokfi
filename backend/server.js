@@ -43,14 +43,16 @@ app.set('trust proxy', 1); // necesario detrás de Nginx para que req.ip sea el 
  * usar solo los defaults:
  *   - HSTS reforzado a 1 año + subdominios. Los defaults de helmet (180
  *     días, sin includeSubDomains) son razonables pero cortos para un
- *     dominio que va a servir tanto la API (api.nokfi.app) como el resto
- *     de subdominios bajo HTTPS de forma permanente.
- *   - crossOriginResourcePolicy en 'cross-origin': esta API la consume
- *     el frontend desde OTRO origen (app.nokfi.app vs api.nokfi.app), así
- *     que el valor por defecto de helmet ('same-origin') bloquearía en
- *     algunos navegadores la lectura de las respuestas — no es un fallo
- *     de seguridad tenerlo en 'same-origin', pero rompe la funcionalidad
- *     real de este proyecto, así que se ajusta con conocimiento de causa.
+ *     dominio que va a servir Nokfi bajo HTTPS de forma permanente.
+ *   - crossOriginResourcePolicy en 'cross-origin': decisión histórica de
+ *     cuando frontend y API vivían en subdominios distintos (app. vs
+ *     api.nokfi.app) y el frontend leía la API cross-origin; el default
+ *     'same-origin' de helmet bloqueaba esa lectura. Hoy el dominio es
+ *     único (nokfi.app) y frontend y API comparten origen (Nginx proxyea
+ *     /api → :3001), así que 'same-origin' ya sería seguro y algo más
+ *     estricto — se MANTIENE 'cross-origin' como margen seguro y por si
+ *     en el futuro se sirve desde un CDN/en otro origen; endurecerlo a
+ *     'same-origin' es un cambio opcional fuera de este deploy.
  *   - contentSecurityPolicy desactivada aquí a propósito: esta app es una
  *     API JSON pura, no sirve HTML — la CSP real que protege al usuario
  *     vive en el FRONTEND (frontend/index.html), donde sí se renderiza
