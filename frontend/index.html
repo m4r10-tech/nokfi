@@ -14,10 +14,11 @@
     inline no autorizados y restringe a qué dominios puede conectarse la
     página para exfiltrar datos.
 
-    IMPORTANTE PARA EL DESPLIEGUE: `connect-src` debe incluir la URL real
-    del backend en cada entorno. Aquí se listan tanto la IP del VPS actual
-    como el futuro dominio con SSL — actualiza esta lista si cambia la
-    infraestructura. Nota técnica: la etiqueta <meta> de CSP NO soporta la
+    IMPORTANTE PARA EL DESPLIEGUE: en producción el frontend y el backend
+    comparten origen (Nginx proxyea /api → backend :3001; build con
+    VITE_API_URL=/api), así que `connect-src 'self'` basta (se mantiene
+    `http://localhost:3001` solo para dev local: Vite en :5173 → backend :3001).
+    Nota técnica: la etiqueta <meta> de CSP NO soporta la
     directiva `frame-ancestors` (los navegadores la ignoran ahí) — cuando
     se configure Nginx (sección 17 del proyecto), añadir también la
     cabecera HTTP real `Content-Security-Policy` con `frame-ancestors 'none'`
@@ -29,7 +30,7 @@
     style-src 'self' 'unsafe-inline' https://fonts.googleapis.com;
     font-src 'self' https://fonts.gstatic.com;
     img-src 'self' data:;
-    connect-src 'self' http://191.44.112.86:3001 https://api.nokfi.app https://generativelanguage.googleapis.com;
+    connect-src 'self' http://localhost:3001;
     object-src 'none';
     base-uri 'self';
     form-action 'self';
