@@ -80,7 +80,7 @@ Cuando el usuario compra, introduce su email en el checkout. El servidor, sin
 intervención manual de vuestro equipo, le envía automáticamente un correo con su
 clave `XXXX-XXXX-XXXX-XXXX`. Sirve como seguro por si el usuario cierra la pestaña
 de revelación antes de copiar la clave o le falla la conexión. Lo envía el servidor
-vía **SendGrid** o **Resend** con vuestro dominio como remitente.
+vía **Resend** con vuestro dominio como remitente.
 
 ---
 
@@ -227,7 +227,7 @@ La clave sale completa **una sola vez**: en `/reveal` tras el checkout, y a pedi
 - **Backend** — Node.js 22 + Express
 - **Base de datos** — SQLite (con better-sqlite3) en el VPS (`./db/nokfi.db`)
 - **Servidor** — VPS Ubuntu 24.04, PM2 (fork mode), `191.44.112.86`
-- **Email transaccional** — SendGrid o Resend (el operador elige uno)
+- **Email transaccional** — Resend (único proveedor)
 - **Pasarela de pago** — **Stripe** (suscripción mensual); PayPal/Revolut/Coinbase **retirados**
 - **IA** — Google Gemini (`gemini-flash-latest` / `gemini-2.5-flash`), free tier
 
@@ -265,7 +265,7 @@ La clave sale completa **una sola vez**: en `/reveal` tras el checkout, y a pedi
 │   │
 │   ├── utils/
 │   │   ├── password.js               ← hash scrypt (salt) + verificación + reset coherente (reemplaza a fingerprint.js)
-│   │   └── mailer.js                 ← SendGrid/Resend: clave, reset, revocación
+│   │   └── mailer.js                 ← Resend: clave, reset, revocación
 │   │
 │   └── test/
 │       └── e2e.test.js               ← 61/61 PASS (incluye /plans, cuotas 10/50/130, MRR, trial)
@@ -353,11 +353,9 @@ PLAN_PRICE_MAX_EUR=50
 GEMINI_API_KEY=...
 GEMINI_MODEL=gemini-2.5-flash          # fallback a gemini-flash-latest; gemini-2.5-flash retirado por Google 07/2026
 
-# Email transaccional — elegir un proveedor
-EMAIL_PROVIDER=sendgrid                # 'sendgrid' o 'resend'
+# Email transaccional — Resend (único proveedor)
 EMAIL_FROM=no-reply@nokfi.app
 EMAIL_FROM_NAME=Nokfi
-SENDGRID_API_KEY=SG....
 RESEND_API_KEY=
 
 # Stripe (única pasarela)
@@ -1189,7 +1187,7 @@ guardado (`nokfi-fase3/backend`). Verificado que el dump apunta a la ruta actual
 - [ ] Hardening inicial: usuario no-root, firewall, SSH sin root
 - [ ] Instalar Node.js 22 LTS, PM2, Nginx, Certbot
 - [ ] Subir código de backend al VPS (y, cuando exista, frontend + landing)
-- [ ] Configurar `.env` del backend con todas las claves (ADMIN_SECRET ≥32 chars, Gemini, Stripe, SendGrid/Resend, `PLAN_PRICE_*_EUR`)
+- [ ] Configurar `.env` del backend con todas las claves (ADMIN_SECRET ≥32 chars, Gemini, Stripe, Resend, `PLAN_PRICE_*_EUR`)
 - [ ] Configurar Nginx con los subdominios (`nokfi.app`, `app.nokfi.app`) + cabeceras de seguridad + SSL con Certbot
 - [ ] Arrancar backend con PM2 y verificar `pm2 status`; `pm2 save` + systemd `pm2-deploy.service` para survive-reboot
 - [ ] Pegar claves reales de Stripe + verificar API version ≥ `2024-04-10` en el dashboard (sin esto, `create-checkout` responde `stripe_not_configured`)

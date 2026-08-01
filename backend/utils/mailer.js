@@ -1,8 +1,7 @@
 /**
  * utils/mailer.js
  *
- * Envío de emails transaccionales. Soporta SendGrid o Resend según la
- * variable de entorno EMAIL_PROVIDER ('sendgrid' | 'resend').
+ * Envío de emails transaccionales vía Resend (único proveedor).
  *
  * Emails que envía el sistema (ver secciones 3, 5, 15 del proyecto):
  *   - sendLicenseKeyEmail        → respaldo de la clave tras el pago
@@ -19,45 +18,18 @@
 const APP_URL = process.env.APP_PUBLIC_URL || 'https://app.nokfi.app';
 const FROM_EMAIL = process.env.EMAIL_FROM || 'no-reply@nokfi.app';
 const FROM_NAME = process.env.EMAIL_FROM_NAME || 'Nokfi';
-const PROVIDER = (process.env.EMAIL_PROVIDER || 'sendgrid').toLowerCase();
 
 /* ════════════════════════════════════════════════════════════
-   DISPATCH — único punto de contacto con la API externa
+   DISPATCH — único punto de contacto con la API externa (Resend)
 ════════════════════════════════════════════════════════════ */
 
 async function dispatch({ to, subject, html }) {
-  if (!process.env.SENDGRID_API_KEY && !process.env.RESEND_API_KEY) {
-    // En desarrollo sin claves configuradas, no rompemos el flujo: solo avisamos.
-    console.warn(`[MAILER] Sin API key configurada — email NO enviado a ${to}. Asunto: "${subject}"`);
+  if (!process.env.RESEND_API_KEY) {
+    // En desarrollo sin clave configurada, no rompemos el flujo: solo avisamos.
+    console.warn(`[MAILER] Sin RESEND_API_KEY — email NO enviado a ${to}. Asunto: "${subject}"`);
     return { skipped: true };
   }
-
-  if (PROVIDER === 'resend') {
-    return dispatchViaResend({ to, subject, html });
-  }
-  return dispatchViaSendGrid({ to, subject, html });
-}
-
-async function dispatchViaSendGrid({ to, subject, html }) {
-  const res = await fetch('https://api.sendgrid.com/v3/mail/send', {
-    method: 'POST',
-    headers: {
-      'Authorization': `Bearer ${process.env.SENDGRID_API_KEY}`,
-      'Content-Type': 'application/json'
-    },
-    body: JSON.stringify({
-      personalizations: [{ to: [{ email: to }] }],
-      from: { email: FROM_EMAIL, name: FROM_NAME },
-      subject,
-      content: [{ type: 'text/html', value: html }]
-    })
-  });
-
-  if (!res.ok) {
-    const body = await res.text().catch(() => '');
-    throw new Error(`SendGrid respondió ${res.status}: ${body}`);
-  }
-  return { sent: true, provider: 'sendgrid' };
+  return dispatchViaResend({ to, subject, html });
 }
 
 async function dispatchViaResend({ to, subject, html }) {

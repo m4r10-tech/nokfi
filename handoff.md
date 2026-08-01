@@ -1,6 +1,6 @@
 # Nokfi — Handoff / Estado de la última sesión
 
-> Última actualización: **2026-07-30**.
+> Última actualización: **2026-08-01**.
 > Documento de "por dónde retomo el proyecto". Si solo lees un archivo, que sea este;
 > luego `nokfi_contexto_claude_code.md` (panorama) y `nokfi_api_contract.md` (contrato).
 
@@ -8,8 +8,8 @@
 
 ## 0. TL;DR
 
-- **Backend:** completo, **93/93 e2e PASS**, desplegado en el VPS (`191.44.112.86`)
-  y funcional **salvo Stripe** (claves vacías en el `.env` del VPS).
+- **Backend:** completo, **93/93 e2e PASS**, desplegado en el VPS (`191.44.112.86`,
+  HEAD `ce00f9d`) y funcional **salvo Stripe** (claves vacías en el `.env` del VPS).
 - **Modelo de billing (Fase 3):** suscripción mensual Stripe-only (mini 5 € /
   pro 20 € / max 50 €), cuotas de IA 10/50/130 por licencia/día, **trial de 14 días
   solo en mini** con tarjeta. Precios env-driven (`PLAN_PRICE_*_EUR`).
@@ -19,9 +19,13 @@
   **Landing:** en diseño, no implementada.
 - **Proveedores retirados:** PayPal / Revolut / Coinbase → `404` (Stripe-only).
 - **Deudas resueltas:** F (comentario stale `proxy.js`) + G-b (historial de análisis)
-  → **commiteadas, pusheadas y desplegadas** (`8376fcc`, VPS en ese HEAD). **G-a**
-  (`/api/profile` del onboarding) resuelta esta sesión, **sin commitear todavía**
-  (ver §3). Detalle de las tres en §4.
+  + G-a (`/api/profile` del onboarding) → **las tres commiteadas, pusheadas y
+  desplegadas** (VPS en `ce00f9d`). Detalle en §4.
+- **Sin commitear (esta sesión):** refactor **Resend-only** del `mailer.js` —
+  retirada de la rama SendGrid + el switch `EMAIL_PROVIDER||'sendgrid'` (footgun
+  latente: caía al proveedor muerto si faltaba la var) + limpieza de `.env.example`
+  y docs. e2e 93/93. Ver §3. **No tocar el `.env` del VPS hasta deployear el nuevo
+  mailer** (el código vivo aún lee `EMAIL_PROVIDER=resend`).
 - **VPS deploy autónomo por llave SSH** desde el 2026-07-31 (ver §6).
 - **Documentación (`*.md`):** en la raíz del repo y al día.
 
@@ -29,7 +33,8 @@
 
 ## 1. Qué se hizo en las últimas sesiones (reciente → antiguo)
 
-0. **G-a `/api/profile` (perfil de empresa del onboarding)** — SIN commitear.
+0. **G-a `/api/profile` (perfil de empresa del onboarding)** — DESPLEGADO en
+   `ce00f9d` (VPS verificado: 401 sin auth, tabla `company_profiles` autocreada).
    Tabla `company_profiles` + `routes/profile.js` (GET vacío-inicial / PUT
    enum-validado y merge-parcial) + `useCompanyProfile` como puente API (PUT
    debounced acumulando partials, `loading` para evitar flash de modal). Refactor:
@@ -69,15 +74,18 @@
 
 ## 2. Estado de despliegue (VPS `191.44.112.86`)
 
-- `origin/main` **y** el VPS están en `8376fcc` (G-b historial + F comentario).
-  Local y origin en sync (`git rev-list origin/main...HEAD` = `0 0`).
+- `origin/main` **y** el VPS están en `ce00f9d` (G-a `/api/profile` + G-b
+  historial + F comentario). Local y origin en sync (`git rev-list origin/main...HEAD`
+  = `0 0`).
 - Backend PM2 `nokfi-backend` (fork, cwd `nokfi-fase3/backend`), `:3001`. Resurrect
   vía systemd `pm2-deploy.service`. Verificado online y healthy.
 - DB `./db/nokfi.db` vacía (staging: 0 licencias). Migraciones Fase 2 + Fase 3
-  (`trial_ends_at` = columna 19) corrieron schema-only en primer boot. La tabla
-  `analyses` se **autocrea** en boot (`CREATE TABLE IF NOT EXISTS`, sin migración).
+  (`trial_ends_at` = columna 19) corrieron schema-only en primer boot. Las tablas
+  `analyses` y `company_profiles` se **autocrea**n en boot (`CREATE TABLE IF NOT
+  EXISTS`, sin migración).
 - `/api/payments/plans` vivo: mini 5€·10·trial / pro 20€·50 / max 50€·130.
-  `/api/analyses` vivo (401 sin auth → ruta montada y `requireLicense` aplicado).
+  `/api/analyses` y `/api/profile` vivos (401 sin auth → rutas montadas y
+  `requireLicense` aplicado).
 - **No hay frontend ni landing servidos** (Nginx pendiente). **No hay dominio ni SSL.**
 
 > Topología detallada (paths, resurrect, gotcha de `DB_PATH` relativa, rollback
@@ -89,27 +97,28 @@
 
 ## 3. Estado de git
 
-- **`origin/main` y el VPS están en `8376fcc`** (G-b historial + F comentario +
-  3 fixes de la revisión pre-Stripe) — commiteado, pusheado y desplegado.
-- **SIN commitear (esta sesión) — deuda G-a (`/api/profile`):**
-  - `backend/db/database.js`: tabla `company_profiles` (FK CASCADE, `license_id`
-    UNIQUE = PK) + `getCompanyProfile`/`upsertCompanyProfile` (merge parcial en el
-    DB layer, UPSERT `ON CONFLICT`).
-  - `backend/routes/profile.js` (nuevo) + mount en `backend/server.js` (`/api/profile`):
-    `GET` (200 vacío si no existe) + `PUT` (enum-validado, `companyName` saneado,
-    scoping por `req.license.id`).
-  - `backend/utils/sanitize.js` (nuevo): `sanitizeFreeText` extraído (3º uso);
-    refactor `routes/auth.js` + `routes/admin.js` para importarlo (sin la copia local).
-  - `backend/test/e2e.test.js`: helper `put` + suite de perfil (17 tests) → 93/93.
-  - Frontend: `middleware/api.js` (`profileApi.get/put`), `hooks/useCompanyProfile.js`
-    (puente API: load async + `loading`, PUT debounced **acumulando** partials),
-    `layouts/DashboardLayout.jsx` + `pages/Home.jsx` + `pages/Configuracion.jsx`
-    (consumen `loading` → sin flash de modal/tarjeta, sin keystroke-loss).
-  - Docs: `handoff.md` (§0/§1/§2/§3/§4), más abajo.
-- Acción pendiente: preparar el commit conjunto de G-a + deploy por llave SSH.
-  **El usuario hace `git push` fuera de Claude Code** (no pegar tokens en el chat).
-  Tras push: `git pull --ff-only` + `pm2 restart nokfi-backend --update-env` (la
-  tabla `company_profiles` se autocrea), smoke `/health` + `/api/profile` (401 sin auth).
+- **`origin/main` y el VPS están en `ce00f9d`** (G-a `/api/profile` + G-b historial
+  + F comentario + 3 fixes de la revisión pre-Stripe) — commiteado, pusheado y
+  desplegado (VPS verificado: HEAD `ce00f9d`, `/health` 200, `/api/profile` 401 sin
+  auth, tabla `company_profiles` autocreada).
+- **SIN commitear (esta sesión) — refactor Resend-only del mailer:** retirar la
+  rama SendGrid (`dispatchViaSendGrid` + el switch `EMAIL_PROVIDER||'sendgrid'`).
+  El VPS ya va por Resend y ni siquiera tiene `SENDGRID_API_KEY`; SendGrid era
+  código muerto + un footgun (el `||'sendgrid'` caía al proveedor muerto si faltaba
+  la var, rompiendo emails silenciosamente). Cambios:
+  - `backend/utils/mailer.js`: `dispatch()` solo Resend; fuera `dispatchViaSendGrid`
+    y `EMAIL_PROVIDER`.
+  - `backend/.env.example`: fuera `EMAIL_PROVIDER=`, bloque "Si usas SendGrid" y
+    `SENDGRID_API_KEY=`.
+  - `nokfi_proyecto.md` + `README.md`: menciones SendGrid → Resend.
+  - e2e **93/93** (no toca callers: `auth.js`/`admin.js`/`webhooks.js` solo usan
+    `send*Email` con interfaz intacta). `node --check` OK. 0 menciones SendGrid en
+    toda la repo.
+- Acción: commit atómico "chore(mailer): retirar SendGrid (Resend-only)" + push
+  (usuario) + deploy. **En el deploy, paso aparte con sudo-env**: borrar
+  `EMAIL_PROVIDER=resend` del `.env` del VPS (el código vivo `ce00f9d` aún lo lee
+  para rutear a Resend → quitarlo ANTES de deployear el nuevo mailer rompería el
+  envío). Tras `pm2 restart --update-env`, smoke `/health`.
 
 ---
 
@@ -133,19 +142,29 @@
 
 ## 5. Cómo continuar (sugerido)
 
-1. **Commit + push de esta sesión** (F + G-b, ver §3) — el usuario hace `git push`
-   fuera de Claude Code; pull + restart en el VPS (tabla `analyses` autocreada);
-   smoke (`/health`, `/api/analyses` con y sin auth → 200/401).
-2. **Stripe** (deuda A): claves reales + verificar API version. Dry-run del trial de
-   mini (tarjeta test `4242…` para trial; `4000…0341` para forzar fallo de cobro al
-   día 14). Confirmar `trial_ends_at` y el banner "quedan X días". Con claves en medio
-   se puede probar el path real de historial (checkout → análisis → aparece en historial).
-3. **Dominio + Nginx + SSL** (deudas C, D): servir landing + frontend, proxeary
-   `/api/`, poner cabeceras de seguridad, mover la CSP al dominio.
+1. **Commit + push del refactor Resend-only** (ver §3) — el usuario hace `git push`
+   fuera de Claude Code. Deploy autónomo (llave SSH): `git pull --ff-only` +
+   `pm2 restart --update-env`. **Paso aparte (env, no código):** borrar
+   `EMAIL_PROVIDER=resend` del `.env` del VPS solo tras reiniciar con el nuevo
+   mailer (el `ce00f9d` vivo aún lo lee). Smoke `/health`.
+2. **Dominio + Nginx + SSL** (deudas C, D) — **prerrequisito de Stripe LIVE**: el
+   webhook que crea la licencia (`webhooks.js:193`) requiere HTTPS, y hoy solo hay
+   IP+HTTP `:3001` → un cobro real no generaría licencia. Single-subdomain
+   `app.nokfi.app` (serves `dist/` + proxea `/api/` → `:3001`), Certbot, cabeceras
+   de seguridad (#14), CSP al dominio (#8). Build frontend con `VITE_API_URL=/api`.
+   División: Claude (sin sudo) build + configs + `.env` (ALLOWED_ORIGINS,
+   APP_PUBLIC_URL); usuario (sudo+dinero+Stripe) dominio+A-records+`apt
+   install nginx certbot`+`ufw 80,443`+`certbot`+pegar LIVE keys+registrar endpoint
+   `https://app.nokfi.app/api/webhooks/stripe`.
+3. **Stripe** (deuda A — tras dominio+SSL): claves LIVE + verificar API version ≥
+   `2024-04-10`. Dry-run del trial de mini (`4242…` trial; `4000…0341` fallo de cobro
+   al día 14). Confirmar `trial_ends_at` + banner "quedan X días". Con claves en
+   medio se prueba el path real de historial (checkout → análisis → Historial).
 4. **Pruebas de navegador reales**: login/activación, los 6 subapartados de Excel,
    el cuestionario, exportación PDF/Excel, envío de email (Resend). Probar que un
-   análisis generado aparece en Historial/Informes y re-exporta a PDF.
-5. (Opcional) `/api/profile` (deuda G-a) — el único resto de la antigua deuda G.
+   análisis generado aparece en Historial/Informes y re-exporta a PDF, y que el
+   onboarding (modal) se persiste y recupera al recargar (G-a, ya en código+falta
+   ver en navegador).
 
 ---
 

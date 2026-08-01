@@ -45,7 +45,7 @@ nokfi/
 │   ├── db/             # database.js (esquema, migraciones, acceso a datos)
 │   ├── middleware/     # requireLicense.js
 │   ├── routes/         # auth.js, proxy.js, payments.js, webhooks.js, admin.js
-│   ├── utils/          # password.js (scrypt), mailer.js (Resend/SendGrid)
+│   ├── utils/          # password.js (scrypt), mailer.js (Resend)
 │   └── test/           # e2e.test.js (61/61 PASS)
 ├── frontend/           # PWA — React + Vite + Tailwind
 │   ├── src/
