@@ -113,5 +113,25 @@ export default {
     exportPdf: 'PDF',
     loadDetailError: 'No se pudo cargar este análisis.'
   },
-  footer: { rights: 'Todos los derechos reservados' }
+  footer: { rights: 'Todos los derechos reservados' },
+  landing: {
+    login: 'Iniciar sesión',
+    heroTitle: '¿Sabes realmente a dónde va el dinero de tu negocio?',
+    heroSubtitle: 'Nokfi analiza tus finanzas con IA y te dice qué cortar, qué reforzar y dónde está el margen. Para autónomos y pymes.',
+    heroCta: 'Empezar ahora',
+    heroTrialHint: 'Prueba gratis 14 días · Sin permanencia · Cancela cuando quieras',
+    aboutHeading: 'Qué es Nokfi',
+    aboutBody: 'Diagnóstico financiero y análisis de datos con IA en lenguaje claro, sin instalar nada. Pensado para autónomos, freelancers y pymes que gestionan su negocio en Excel y no quieren perder horas clasificando números.',
+    aboutFeatures: [
+      { t: 'Cuestionario de diagnóstico', d: '5 bloques de preguntas rápidas; la IA devuelve tu salud financiera y qué priorizar.' },
+      { t: '6 análisis de Excel con IA', d: 'Stock, ventas, servicios, entradas, caja y profit total. Sube tu archivo y obtén conclusiones.' },
+      { t: 'Informe estilo consultoría', d: 'Recomendaciones concretas accionables, no gráficos sin contexto.' },
+      { t: 'Calculadoras e historial', d: 'Punto de equilibrio, margen y ROI; revisa análisis anteriores y expórtalos a PDF o Excel.' }
+    ],
+    plansHeading: 'Planes y precios',
+    choosePlan: 'Suscribirme',
+    finalTitle: 'Tu negocio, bajo control.',
+    finalCta: 'Empezar ahora',
+    finalLogin: 'Ya tengo licencia — iniciar sesión'
+  }
 };

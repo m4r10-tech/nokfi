@@ -33,6 +33,15 @@
 
 ## 1. Qué se hizo en las últimas sesiones (reciente → antiguo)
 
+0. **Landing pública en `/` (home de la SPA)** — SIN commitear todavía (ver §3).
+   `pages/Landing.jsx` (ruta `/`, antes redirigía a `/login`): top bar (logo +
+   selector ES/EN + toggle tema + link "Iniciar sesión"), Hero, Info de empresa /
+   qué es Nokfi, Planes y precios, CTA final, footer. Extracción reutilizable:
+   `components/PlanCards.jsx` + `hooks/usePlans.js` (GET `/api/payments/plans`,
+   anti-drift) consumidos por `Landing` Y `Pricing` (rewired). Namespace i18n
+   `landing.*` (es+en). Gating SIN tocar: app sigue en `/app/*` bajo `ProtectedRoute`
+   (solo licencia activa/trial). `npm run build` verde, 0 precios hardcodeados en
+   el bundle. Pendiente: build en el VPS con `VITE_API_URL=/api` (tarea dominio+SSL).
 0. **G-a `/api/profile` (perfil de empresa del onboarding)** — DESPLEGADO en
    `ce00f9d` (VPS verificado: 401 sin auth, tabla `company_profiles` autocreada).
    Tabla `company_profiles` + `routes/profile.js` (GET vacío-inicial / PUT
@@ -87,6 +96,9 @@
   `/api/analyses` y `/api/profile` vivos (401 sin auth → rutas montadas y
   `requireLicense` aplicado).
 - **No hay frontend ni landing servidos** (Nginx pendiente). **No hay dominio ni SSL.**
+  La landing pública (`pages/Landing.jsx`) ya existe en código (commit esta sesión);
+  entra en producción con el build del frontend (`VITE_API_URL=/api`) en la tarea
+  dominio+SSL.
 
 > Topología detallada (paths, resurrect, gotcha de `DB_PATH` relativa, rollback
 > artifacts ya borrados): ver memoria `vps-deploy-topology`. Gaps de config del VPS:
@@ -101,6 +113,15 @@
   + F comentario + 3 fixes de la revisión pre-Stripe) — commiteado, pusheado y
   desplegado (VPS verificado: HEAD `ce00f9d`, `/health` 200, `/api/profile` 401 sin
   auth, tabla `company_profiles` autocreada).
+- **SIN commitear (esta sesión) — landing pública en `/`:** `frontend/src/pages/Landing.jsx`
+  (ruta `/` antes → `/login`, ahora renderiza la home pública: top bar + Hero +
+  Info de empresa + Planes + CTA + footer), `components/PlanCards.jsx` +
+  `hooks/usePlans.js` (extracción reutilizable de Pricing, anti-drift vía
+  `/api/payments/plans`), rewiring de `Pricing.jsx` para reusarlos, namespace i18n
+  `landing.*` (es+en), wiring en `App.jsx`. `npm run build` verde, 0 precios
+  hardcodeados en el bundle. **No se toca el gating** (app en `/app/*` bajo
+  `ProtectedRoute`). Entra en producción con el build del frontend en la tarea
+  dominio+SSL.
 - **SIN commitear (esta sesión) — refactor Resend-only del mailer:** retirar la
   rama SendGrid (`dispatchViaSendGrid` + el switch `EMAIL_PROVIDER||'sendgrid'`).
   El VPS ya va por Resend y ni siquiera tiene `SENDGRID_API_KEY`; SendGrid era

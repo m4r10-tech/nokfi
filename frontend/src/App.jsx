@@ -9,6 +9,7 @@ import Login from './pages/Login';
 import ResetPassword from './pages/ResetPassword';
 import Reveal from './pages/Reveal';
 import Pricing from './pages/Pricing';
+import Landing from './pages/Landing';
 import Home from './pages/Home';
 import Cuestionario from './pages/Cuestionario';
 import ExcelHub from './pages/ExcelHub';
@@ -29,7 +30,7 @@ export default function App() {
       <LangProvider>
         <AuthProvider>
           <Routes>
-            <Route path="/" element={<Navigate to="/login" replace />} />
+            <Route path="/" element={<Landing />} />
             <Route path="/login" element={<Login />} />
             <Route path="/reset-password" element={<ResetPassword />} />
             <Route path="/reveal" element={<Reveal />} />

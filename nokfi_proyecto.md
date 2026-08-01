@@ -592,6 +592,17 @@ Cuando se completa el cuestionario o se sube un Excel, la IA genera un informe c
 
 ## 13. Landing page pública — Nokfi
 
+> **Implementada (2026-08-01)** como home de la SPA en `/` (`pages/Landing.jsx`):
+> las **4 secciones** que pedía el producto (Hero, Info de empresa/qué es Nokfi,
+> Planes y precios, CTA final). Se reusan los componentes `PlanCards`/`usePlans`
+> (anti-drift: precios desde `/api/payments/plans`, nunca hardcodeados). Quedan
+> PENDIENTES de §13 más abajo (Problema, Cómo funciona, FAQ, CTA medio, social
+> proof, Tawk.to, Plausible, links legales). **Nota de drift corregida:** el
+> "tema visual" de abajo propone acento esmeralda `#10B981` para la landing —
+> descartado; la landing usa el azul `--accent` implementado (consistencia con la
+> app + regla de contraste #21). Las funciones de la app siguen en `/app/*`
+> protegidas por `ProtectedRoute` (solo licencia activa/trial).
+
 ### Nombre y marca
 **Nokfi** — corto, memorable, funciona en español e inglés, fácil de pronunciar en ambos idiomas.
 - Subtítulo ES: *"Tu negocio, bajo control."*

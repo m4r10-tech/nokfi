@@ -113,5 +113,25 @@ export default {
     exportPdf: 'PDF',
     loadDetailError: 'Could not load this analysis.'
   },
-  footer: { rights: 'All rights reserved' }
+  footer: { rights: 'All rights reserved' },
+  landing: {
+    login: 'Sign in',
+    heroTitle: 'Do you really know where your business money goes?',
+    heroSubtitle: 'Nokfi analyses your finances with AI and tells you what to cut, what to reinforce and where the margin is. For freelancers and small businesses.',
+    heroCta: 'Get started',
+    heroTrialHint: '14-day free trial · No lock-in · Cancel anytime',
+    aboutHeading: 'What Nokfi is',
+    aboutBody: 'AI-powered financial diagnosis and data analysis in plain language, nothing to install. Built for freelancers and small businesses that run on Excel and don\'t want to spend hours sorting numbers.',
+    aboutFeatures: [
+      { t: 'Diagnosis questionnaire', d: '5 quick blocks of questions; the AI returns your financial health and what to prioritise.' },
+      { t: '6 Excel analyses with AI', d: 'Stock, sales, services, inputs, cash and total profit. Upload your file and get conclusions.' },
+      { t: 'Consultancy-style report', d: 'Concrete, actionable recommendations — not contextless charts.' },
+      { t: 'Calculators & history', d: 'Break-even, margin and ROI; revisit past analyses and export them to PDF or Excel.' }
+    ],
+    plansHeading: 'Plans & pricing',
+    choosePlan: 'Subscribe',
+    finalTitle: 'Your business, under control.',
+    finalCta: 'Get started',
+    finalLogin: 'I already have a license — sign in'
+  }
 };

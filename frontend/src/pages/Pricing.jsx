@@ -1,9 +1,10 @@
-import { useState, useEffect } from 'react';
+import { useState } from 'react';
 import { Link } from 'react-router-dom';
-import { Loader2, Check } from 'lucide-react';
 import { paymentsApi } from '../middleware/api';
 import { useLang } from '../context/LangContext';
 import Logo from '../components/Logo';
+import PlanCards from '../components/PlanCards';
+import { usePlans } from '../hooks/usePlans';
 
 /**
  * Página pública de precios — flujo de ALTA de una suscripción (Fase 3).
@@ -23,23 +24,7 @@ export default function Pricing() {
   const [email, setEmail] = useState('');
   const [loadingPlan, setLoadingPlan] = useState(null); // plan id en curso, o null
   const [error, setError] = useState(null);
-  const [plans, setPlans] = useState([]);       // catálogo desde el backend
-  const [planLoadFailed, setPlanLoadFailed] = useState(false);
-
-  useEffect(() => {
-    let cancelled = false;
-    paymentsApi.getPlans().then(({ ok, data }) => {
-      if (cancelled) return;
-      if (ok && Array.isArray(data.plans) && data.plans.length) {
-        setPlans(data.plans.map(p => ({
-          id: p.id, name: p.name, price: String(p.price_eur), highlight: p.id === 'pro', trial: !!p.trial
-        })));
-      } else {
-        setPlanLoadFailed(true);
-      }
-    });
-    return () => { cancelled = true; };
-  }, []);
+  const { plans, failed, notLoaded } = usePlans(); // catálogo desde /plans (anti-drift)
 
   const subscribe = async (planId) => {
     setError(null);
@@ -74,53 +59,8 @@ export default function Pricing() {
           style={{ background: 'var(--surface-2)', border: '0.5px solid var(--border-strong)', color: 'var(--text-primary)' }} />
       </div>
 
-      <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 w-full max-w-2xl">
-        {plans.map(plan => (
-          <div key={plan.id} className="rounded-xl p-5 flex flex-col gap-3"
-               style={{
-                 background: 'var(--surface-1)',
-                 border: plan.highlight ? '0.5px solid var(--accent)' : '0.5px solid var(--border)'
-               }}>
-            <div className="flex items-center justify-between">
-              <span className="text-sm font-semibold" style={{ color: 'var(--text-primary)' }}>{plan.name}</span>
-              {plan.highlight &&
-                <span className="text-[10px] font-medium uppercase tracking-wide rounded-full px-2 py-0.5"
-                      style={{ background: 'var(--accent)', color: '#fff' }}>·</span>}
-            </div>
-            {plan.trial && (
-              <span className="text-[11px] font-medium rounded-full px-2 py-0.5 self-start"
-                    style={{ color: 'var(--accent)', background: 'var(--surface-2)', border: '0.5px solid var(--accent)' }}>
-                {t('pricing.trialBadge')}
-              </span>
-            )}
-            <div className="flex items-baseline gap-1">
-              <span className="text-3xl font-bold" style={{ color: 'var(--text-primary)' }}>€{plan.price}</span>
-              <span className="text-xs" style={{ color: 'var(--text-muted)' }}>{t('pricing.monthSuffix')}</span>
-            </div>
-            <ul className="flex flex-col gap-1.5 text-sm" style={{ color: 'var(--text-secondary)' }}>
-              {t(`pricing.features.${plan.id}`).map((f, i) => (
-                <li key={i} className="flex items-start gap-2">
-                  <Check size={14} className="mt-0.5 shrink-0" style={{ color: 'var(--positive)' }} />
-                  <span>{f}</span>
-                </li>
-              ))}
-            </ul>
-            <button onClick={() => subscribe(plan.id)} disabled={loadingPlan !== null || plans.length === 0}
-              className="mt-1 rounded-lg py-2 text-sm font-medium flex items-center justify-center gap-2 disabled:opacity-60 transition-opacity"
-              style={{ background: plan.highlight ? 'var(--accent)' : 'var(--surface-2)', color: plan.highlight ? '#fff' : 'var(--text-primary)', border: plan.highlight ? 'none' : '0.5px solid var(--border-strong)' }}>
-              {loadingPlan === plan.id && <Loader2 size={15} className="animate-spin" />}
-              {t('pricing.cta')}
-            </button>
-          </div>
-        ))}
-      </div>
-
-      {plans.length === 0 && !planLoadFailed && (
-        <p className="mt-5 text-sm" style={{ color: 'var(--text-secondary)' }}>{t('pricing.loading')}</p>
-      )}
-      {planLoadFailed && (
-        <p className="mt-5 text-sm rounded-lg px-3 py-2 max-w-2xl w-full text-center" style={{ background: 'var(--negative-soft)', color: 'var(--negative)' }}>{t('pricing.plansLoadError')}</p>
-      )}
+      <PlanCards plans={plans} notLoaded={notLoaded} failed={failed}
+        ctaLabel={t('pricing.cta')} onChoose={subscribe} loadingId={loadingPlan} />
 
       {error && <p className="mt-5 text-sm rounded-lg px-3 py-2 max-w-2xl w-full text-center" style={{ background: 'var(--negative-soft)', color: 'var(--negative)' }}>{error}</p>}
 
