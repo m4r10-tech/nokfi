@@ -4,8 +4,11 @@
 > **trial de 14 días** en el plan mini. Auth por **email + clave + contraseña**
 > (el device-fingerprint se eliminó en `f9385af`). Backend completo + desplegado
 > y probado; **frontend construido y compilando** (no servido por VPS todavía —
-> Nginx pendiente); landing en diseño. PayPal / Coinbase / Revolut retirados.
-> Última actualización: julio 2026.
+> Nginx pendiente, paso `sudo` del usuario). **Stripe LIVE** (claves en el VPS); el
+> webhook LIVE exige HTTPS → dominio+SSL = prerrequisito de los cobros reales.
+> **Landing pública implementada** (`5810ae9`, ruta `/`: Hero/Info/Planes/CTA; en
+> disco del VPS, render real abre tras Nginx). PayPal / Coinbase / Revolut retirados.
+> Última actualización: agosto 2026.
 
 ---
 
@@ -233,7 +236,7 @@ La clave sale completa **una sola vez**: en `/reveal` tras el checkout, y a pedi
 
 ### Estructura real del proyecto
 
-> Estado real verificado en el repo. `backend/` está completo, testeado (e2e 61/61) y
+> Estado real verificado en el repo. `backend/` está completo, testeado (e2e 93/93) y
 > desplegado en el VPS. `frontend/` está construido y compila con `npm run build`
 > (no servido por el VPS todavía). `landing/` no existe todavía. La carpeta `config/`
 > se añadió en Fase 3 como **fuente única de planes** (antes había 4 copias de
@@ -268,7 +271,7 @@ La clave sale completa **una sola vez**: en `/reveal` tras el checkout, y a pedi
 │   │   └── mailer.js                 ← Resend: clave, reset, revocación
 │   │
 │   └── test/
-│       └── e2e.test.js               ← 61/61 PASS (incluye /plans, cuotas 10/50/130, MRR, trial)
+│       └── e2e.test.js               ← 93/93 PASS (incluye /plans, cuotas 10/50/130, MRR, trial, /api/analyses, /api/profile)
 │
 ├── frontend/                         ✅ CONSTRUIDO (compila) · ⏳ no servido por VPS todavía
 │   └── src/
@@ -388,7 +391,7 @@ El backend ya contempla este segundo caso de forma explícita: cuando Gemini dev
 ### Estado de verificación del backend
 
 El backend está **desplegado en producción** (VPS `191.44.112.86`, PM2) con funcionalidad
-verificada: `node --check` limpio en todos los `.js`, **61/61 tests e2e pasando**
+verificada: `node --check` limpio en todos los `.js`, **93/93 tests e2e pasando**
 (`backend/test/e2e.test.js`), todos los endpoints evaluados con curl real en el VPS
 (health, login, proxy/ai con Gemini real, webhook de Stripe sandbox completo E2E,
 CORS y headers de Helmet verificados con curl, administración de licencias completa).

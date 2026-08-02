@@ -179,16 +179,19 @@ transitivas (`dompurify` vía `jspdf`, `esbuild` vía `vite` [solo dev server],
 - `GET /api/payments/plans` vivo (mini 5€·10·trial, pro 20€·50, max 50€·130)
 - CORS verificado con curl; headers de Helmet en respuesta real
 - `npm install` frontend (482 paquetes) + `npm run build` sin errores
-- **e2e backend 76/76 PASS** (`backend/test/e2e.test.js`) — incluye `/plans`, cuotas,
-  MRR (trial excluido), `billing.trialing`, y (deuda G-b) `/api/analyses` + scoping
-  (404 ajeno, 400 no-numérico) + path real de captura con stub de Gemini
+- **e2e backend 93/93 PASS** (`backend/test/e2e.test.js`) — incluye `/plans`, cuotas,
+  MRR (trial excluido), `billing.trialing`, `/api/analyses` + scoping (404 ajeno,
+  400 no-numérico), path real de captura con stub de Gemini, y `/api/profile`
+  (scoping 2 licencias, merge parcial, filtro enum, saneado, guards 400).
 
-### ❌ Pendiente de probar / sin claves reales
-- **Stripe en VPS está vacío** (`STRIPE_SECRET_KEY`/`STRIPE_WEBHOOK_SECRET` en blanco)
-  → `create-checkout` responde `stripe_not_configured`. El flujo del trial de 14 días
-  **no se puede probar en vivo** hasta pegar claves reales + verificar API version ≥
-  `2024-04-10` en el dashboard (lo fija `backend/config/stripe-version.js`). El
-  usuario está bloqueado a la espera de la verificación de empresa en Stripe.
+### ❌ Pendiente de probar en vivo (bloqueado por dominio+SSL)
+- **Stripe LIVE: claves pegadas**, pero el **webhook no entrega** sin HTTPS. Hasta
+  tener dominio+SSL + registrar el endpoint `https://nokfi.app/api/webhooks/stripe`
+  y copiar su `whsec_` LIVE, un cobro real **no crea licencia** (el handler
+  `webhooks.js:193 createLicense` solo se dispara por webhook). `create-checkout` ya
+  responde con las claves (no `stripe_not_configured`); falta confirmar la cadena
+  completa checkout → webhook → licencia. API version ≥ `2024-04-10` (fija
+  `backend/config/stripe-version.js`).
 - Envío real de emails con Resend (API key configurada, no se ha disparado ninguno real)
 - Login/activación completos **desde el navegador** de principio a fin
   (frontend compila pero no está servido por el VPS)
@@ -202,17 +205,30 @@ transitivas (`dompurify` vía `jspdf`, `esbuild` vía `vite` [solo dev server],
 
 ## 8. Estado actual — dónde está el proyecto
 
-- **Backend:** completo, testeado (76/76), desplegado en el VPS y funcional (salvo
-  Stripe, que necesita claves reales). Último deploy en `origin/main`+VPS: `794a0a8`
-  (docs). El código de las deudas F + G-b (comentario `proxy.js` + historial de análisis)
-  está **sin commitear** todavía (ver `handoff.md` §3).
-- **Frontend:** construido y compilando; no servido por el VPS (falta Nginx).
-  `Historial`/`Informes` ya listan y abren análisis reales (deuda G-b resuelta).
-- **Landing:** en diseño (definido en `nokfi_proyecto.md` §13), no implementada.
-- **Documentación:** acaba de moverse de `md/` a la raíz y actualizarse al estado real.
+- **Backend:** completo, testeado (**93/93**), desplegado en el VPS (`191.44.112.86`,
+  HEAD `5810ae9`) y funcional. Deudas F + G-a (`/api/profile`) + G-b (historial de
+  análisis) + SendGrid retirado (Resend-only) + landing pública → todas commiteadas,
+  pusheadas y desplegadas. **Stripe LIVE**: `STRIPE_SECRET_KEY` (`sk_live_`) +
+  `STRIPE_WEBHOOK_SECRET` (`whsec_`) pegadas y verificadas en el `.env` del VPS
+  (GET `/v1/balance` → 200). ⚠️ **El webhook LIVE aún NO entrega**: Stripe exige
+  HTTPS y no hay dominio+SSL → un cobro real hoy no generaría licencia (el handler
+  `webhooks.js:193 createLicense` solo se dispara por webhook). Dominio+Nginx+SSL =
+  prerrequisito (ver `handoff.md` §5). 3 commits de infra+docs (`d07996d`, `ba4f4d2`,
+  `5c1a714`) están 3 ahead de `origin/main` a la espera del `git push` del usuario.
+- **Frontend:** compila, bundle limpio (same-origin `/api`, sin IP). **No servido por
+  el VPS** (falta Nginx — paso `sudo` del usuario). La plantilla Nginx real está en
+  `deploy/nginx-nokfi.conf` (`d07996d`). `Historial`/`Informes` ya listan y abren
+  análisis reales (deuda G-b resuelta).
+- **Landing:** **implementada + commiteada + desplegada** (`5810ae9`, en disco del
+  VPS, aún no servida hasta Nginx). `pages/Landing.jsx` en ruta `/` (antes redirigía
+  a `/login`): Hero + Info empresa + Planes + CTA. Definición en `nokfi_proyecto.md`
+  §13 (4 de las 8 secciones previstas; el resto para el futuro).
+- **Documentación:** en la raíz del repo y al día (`handoff.md` como fuente de estado).
 
-**Tareas inmediatas de configuración (no código):** pegar claves reales de Stripe,
-comprar dominio y desplegar Nginx + SSL. Ver `handoff.md` para el orden y los细节.
+**Tareas inmediatas de configuración (no código):** push de los 3 commits ahead,
+comprar dominio + desplegar Nginx + SSL (desbloquea el webhook LIVE de Stripe),
+registrar el endpoint `https://nokfi.app/api/webhooks/stripe`. Ver `handoff.md` §5
+para el orden y los detalles (división Claude sin-sudo / usuario con-sudo).
 
 ---
 

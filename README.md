@@ -46,7 +46,7 @@ nokfi/
 │   ├── middleware/     # requireLicense.js
 │   ├── routes/         # auth.js, proxy.js, payments.js, webhooks.js, admin.js
 │   ├── utils/          # password.js (scrypt), mailer.js (Resend)
-│   └── test/           # e2e.test.js (61/61 PASS)
+│   └── test/           # e2e.test.js (93/93 PASS)
 ├── frontend/           # PWA — React + Vite + Tailwind
 │   ├── src/
 │   │   ├── pages/      # Login, Reveal, ResetPassword, Pricing, Home, Cuestionario,
@@ -75,7 +75,7 @@ npm install
 npm run dev            # o: node server.js  → http://localhost:3001
 ```
 
-Para verificar: `cd backend && node test/e2e.test.js` (61/61 PASS offline).
+Para verificar: `cd backend && node test/e2e.test.js` (93/93 PASS offline).
 
 ### Frontend
 
@@ -93,11 +93,11 @@ Auditoría OWASP Top 10 + ASVS completada con **14 hallazgos corregidos**. `npm 
 
 ## Estado del proyecto
 
-- ✅ Backend completo, **61/61 e2e PASS**, desplegado en VPS de pruebas (PM2) y funcional
-- ✅ Frontend con build exitoso y PWA configurada (no servido por el VPS todavía)
-- ✅ Webhook de Stripe probado end-to-end en sandbox; anti-sharing por cuota diaria
-- ⏳ **Stripe en el VPS necesita claves reales** (verificación de empresa pendiente)
-- ⏳ Dominio + Nginx + SSL pendientes de desplegar
+- ✅ Backend completo, **93/93 e2e PASS**, desplegado en el VPS (PM2, `:3001`) y funcional
+- ✅ Frontend con build exitoso y PWA configurada (bundle same-origin `/api`, sin IP; no servido por el VPS todavía — Nginx pendiente)
+- ✅ **Stripe LIVE**: `sk_live_` + `whsec_` pegadas y verificadas en el VPS; anti-sharing por cuota diaria
+- ⏳ **Webhook LIVE de Stripe no entrega** sin HTTPS → dominio + Nginx + SSL = prerrequisito de los cobros reales
+- ⏳ Dominio + Nginx + SSL pendientes de desplegar (plantilla en `deploy/nginx-nokfi.conf`)
 - 🪹 PayPal / Revolut / Coinbase retirados (Stripe-only)
 
 Para el detalle de deudas y siguientes pasos ver `handoff.md`.
