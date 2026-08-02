@@ -61,7 +61,7 @@ Página /reveal?session_id=... → muestra la clave recién comprada en la web
         ↓
 Email automático de respaldo con la clave al email del comprador
         ↓
-Usuario accede a app.nokfi.app
+Usuario accede a nokfi.app
         ↓
 Pantalla de login (Email + Clave + Contraseña)
         ↓
@@ -127,7 +127,7 @@ de PayPal/Coinbase/Revolut.**
   `backend/config/stripe-version.js` (`Stripe-Version` header); el
   `trial_settings[end_behavior][type]=release` del trial de mini lo exige.
 - API keys + webhook secret → pegar en `STRIPE_SECRET_KEY` / `STRIPE_WEBHOOK_SECRET`
-  del `.env` del backend. Endpoint del webhook: `https://app.nokfi.app/api/webhooks/stripe`
+  del `.env` del backend. Endpoint del webhook: `https://nokfi.app/api/webhooks/stripe`
   (mientras no haya dominio, la IP del VPS).
 - Eventos a escuchar como mínimo: `checkout.session.completed`,
   `invoice.paid`, `customer.subscription.updated`,
@@ -338,10 +338,10 @@ DB_PATH=./db/nokfi.db
 
 # Seguridad
 ADMIN_SECRET=                          # ≥32 chars, crypto.randomBytes(32).toString('hex'); en prod el backend se niega a arrancar si es más corta
-ALLOWED_ORIGINS=https://app.nokfi.app,https://nokfi.app   # nunca "*" en prod (el backend aborta el arranque)
+ALLOWED_ORIGINS=https://nokfi.app   # nunca "*" en prod (el backend aborta el arranque)
 
 # URLs públicas (se usan en emails y en las redirecciones de pago)
-APP_PUBLIC_URL=https://app.nokfi.app
+APP_PUBLIC_URL=https://nokfi.app
 LANDING_PUBLIC_URL=https://nokfi.app
 
 # Precios de planes (suscripción mensual, EUR) — lo que cobra Stripe Y lo que muestra /plans
@@ -993,10 +993,15 @@ La landing tendrá **Plausible Analytics** (privado, sin cookies, compatible con
 Antes de tocar el VPS, hay que comprar el dominio. Recomendación: `nokfi.app` o `getnokfi.com` en **Namecheap**, **Cloudflare Registrar** (precio de coste, sin margen) o **OVH**. Una vez comprado:
 
 1. Apuntar los DNS del dominio al **Cloudflare** (gratis) para tener proxy, protección DDoS básica y SSL gestionado de forma más sencilla
-2. Crear 2 registros tipo A apuntando a la IP del VPS:
-   - `nokfi.app` → landing pública
-   - `app.nokfi.app` → web app protegida (subdominio)
-3. Opcional pero recomendado: `admin.nokfi.app` → panel de administración interno, con acceso restringido por IP además del `ADMIN_SECRET`
+2. Crear 1 registro tipo A apuntando a la IP del VPS:
+   - `nokfi.app` (`@`) → todo Nokfi (landing pública + web app protegida + `/api`)
+   
+   **Arquitectura de dominio único** (decisión final): el frontend y el backend
+   viven en el mismo origen `https://nokfi.app`. La landing pública (qué es Nokfi,
+   planes, CTA — ruta `/`) y la web app protegida (`/app/*` tras login) comparten
+   dominio; Nginx proxyea `/api/` → backend `:3001`. **Sin subdominios** `app.` /
+   `api.` (descartados). El panel de administración, si se necesita, vive bajo
+   `/app/admin/*` con `ADMIN_SECRET` (no requiere subdominio propio).
 
 ---
 
@@ -1075,82 +1080,44 @@ sudo apt install -y certbot python3-certbot-nginx
 
 ### Configuración de Nginx — proxy reverso
 
-Nginx recibe todo el tráfico en los puertos 80/443 y redirige cada subdominio a su destino correspondiente:
+Nginx recibe todo el tráfico en 80/443 y sirve el frontend (SPA) y hace proxy de
+`/api/` → backend en `localhost:3001`. **Dominio único `nokfi.app`** (sin
+subdominios): frontend y backend comparten origen, así que no hay CORS y el bundle
+no lleva IP/dominio hardcodeado (se compila con `VITE_API_URL=/api`).
 
-> **⚠️ Auditoría de seguridad:** la configuración original no incluía cabeceras
-> de seguridad HTTP para el frontend estático. Helmet (en el backend) solo
+> **⚠️ Auditoría de seguridad (#14):** la configuración original no incluía
+> cabeceras de seguridad HTTP para el frontend estático. Helmet (backend) solo
 > protege las respuestas de la API — los archivos que sirve Nginx directamente
-> para `app.nokfi.app` no llevaban ninguna cabecera propia. Esto dejaba la
-> app expuesta a **clickjacking** (se podía embeber en un `<iframe>` de un
-> sitio malicioso) porque la directiva `frame-ancestors` de la CSP **no
-> funciona en absoluto** puesta como `<meta>` tag en el HTML — los navegadores
-> la ignoran ahí, solo es efectiva como cabecera HTTP real. Se añaden abajo
-> las cabeceras que cierran ese hueco.
+> no llevaban ninguna cabecera propia. Eso dejaba la app expuesta a
+> **clickjacking** (embebible en un `<iframe>` malicioso) porque la directiva
+> `frame-ancestors` de la CSP **no funciona** como `<meta>` tag en el HTML — los
+> navegadores la ignoran ahí; solo es efectiva como cabecera HTTP real. La config
+> real añade esa cabecera (y `X-Frame-Options DENY` de respaldo).
 
-> **Plantilla PENDIENTE — no desplegada todavía.** Nginx aún no está en el VPS; el
-> backend hoy se sirve solo en `localhost:3001` (sin proxy ni SSL). Cuando el equipo
-> compre el dominio y despliegue Nginx, los builds estáticos de `landing/` y
-> `frontend/` se colocarán en `/var/www/` y esta config los servirá + proxyará `/api/`.
-
-```nginx
-# /etc/nginx/sites-available/nokfi
-
-# Landing pública — archivos estáticos
-server {
-    listen 80;
-    server_name nokfi.app www.nokfi.app;
-    root /var/www/landing;   # build estático de la landing (cuando exista)
-    index index.html;
-
-    # Cabeceras de seguridad — ver nota de auditoría arriba
-    add_header X-Frame-Options "DENY" always;
-    add_header X-Content-Type-Options "nosniff" always;
-    add_header Referrer-Policy "no-referrer" always;
-    add_header Permissions-Policy "geolocation=(), microphone=(), camera=()" always;
-
-    location / {
-        try_files $uri $uri/ /index.html;
-    }
-}
-
-# Web app — proxy al frontend servido + backend API
-server {
-    listen 80;
-    server_name app.nokfi.app;
-
-    # Cabeceras de seguridad para el frontend estático (ver nota de auditoría arriba).
-    # frame-ancestors 'none' es la protección REAL contra clickjacking — la que
-    # va en el <meta> de index.html es solo defensa complementaria, no suficiente.
-    add_header X-Frame-Options "DENY" always;
-    add_header X-Content-Type-Options "nosniff" always;
-    add_header Referrer-Policy "no-referrer" always;
-    add_header Permissions-Policy "geolocation=(), microphone=(), camera=()" always;
-    add_header Content-Security-Policy "default-src 'self'; script-src 'self'; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; font-src 'self' https://fonts.gstatic.com; img-src 'self' data:; connect-src 'self' https://api.nokfi.app https://generativelanguage.googleapis.com; object-src 'none'; base-uri 'self'; form-action 'self'; frame-ancestors 'none';" always;
-
-    location / {
-        root /var/www/app;
-        try_files $uri $uri/ /index.html;
-    }
-
-    location /api/ {
-        proxy_pass http://localhost:3001/api/;
-        proxy_set_header Host $host;
-        proxy_set_header X-Real-IP $remote_addr;
-        proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
-        proxy_set_header X-Forwarded-Proto $scheme;
-    }
-}
-```
+> **La plantilla REAL está en el repo** en `deploy/nginx-nokfi.conf` (server
+> block único `nokfi.app`: sirve `frontend/dist`, proxy `/api/` → `:3001`,
+> cabeceras #14, CSP con `frame-ancestors 'none'`, cache inmutable de assets con
+> hash, fallback SPA, deny de dotfiles). **Estado: en el repo, Nginx aún NO
+> instalado en el VPS** (es un paso `sudo` del usuario; ver `§5` de `handoff.md`
+> y la cabecera del propio `.conf`). Nginx sirve directamente
+> `~/nokfi-fase3/frontend/dist` (sin copiar a `/var/www`) — el reddploy del
+> frontend es `git pull --ff-only && cd frontend && VITE_API_URL=/api npm run build`.
 
 Activar la configuración y obtener certificados SSL:
 ```bash
-sudo ln -s /etc/nginx/sites-available/nokfi /etc/nginx/sites-enabled/
+sudo apt install -y nginx certbot python3-certbot-nginx
+sudo cp deploy/nginx-nokfi.conf /etc/nginx/sites-available/nokfi
+sudo ln -s /etc/nginx/sites-available/nokfi /etc/nginx/sites-enabled/nokfi
+sudo rm /etc/nginx/sites-enabled/default
 sudo nginx -t                              # verificar sintaxis
 sudo systemctl reload nginx
-sudo certbot --nginx -d nokfi.app -d www.nokfi.app -d app.nokfi.app
+sudo ufw allow 'Nginx Full'                # 80+443
+sudo certbot --nginx -d nokfi.app --redirect
 ```
 
-Certbot configura HTTPS automáticamente y renueva los certificados cada 90 días sin intervención manual. Una vez activo el certificado, Certbot añade además la redirección automática HTTP→HTTPS, que junto al HSTS ya configurado en Helmet (backend) y en las cabeceras de arriba (frontend), fuerza tráfico cifrado en todo el sistema.
+Certbot configura HTTPS automáticamente, añade el redirect 80→443 y renueva los
+certificados cada 90 días sin intervención. Junto al HSTS de Helmet (backend) y a
+las cabeceras del `.conf`, fuerza tráfico cifrado en todo el sistema.
 
 ---
 
@@ -1199,7 +1166,7 @@ guardado (`nokfi-fase3/backend`). Verificado que el dump apunta a la ruta actual
 - [ ] Instalar Node.js 22 LTS, PM2, Nginx, Certbot
 - [ ] Subir código de backend al VPS (y, cuando exista, frontend + landing)
 - [ ] Configurar `.env` del backend con todas las claves (ADMIN_SECRET ≥32 chars, Gemini, Stripe, Resend, `PLAN_PRICE_*_EUR`)
-- [ ] Configurar Nginx con los subdominios (`nokfi.app`, `app.nokfi.app`) + cabeceras de seguridad + SSL con Certbot
+- [ ] Configurar Nginx con dominio único `nokfi.app` (plantilla `deploy/nginx-nokfi.conf`) + cabeceras de seguridad + SSL con Certbot
 - [ ] Arrancar backend con PM2 y verificar `pm2 status`; `pm2 save` + systemd `pm2-deploy.service` para survive-reboot
 - [ ] Pegar claves reales de Stripe + verificar API version ≥ `2024-04-10` en el dashboard (sin esto, `create-checkout` responde `stripe_not_configured`)
 - [ ] Configurar Fail2ban

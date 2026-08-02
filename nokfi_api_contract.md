@@ -16,7 +16,7 @@
 
 ## Convenciones generales
 
-- Base URL en producción: `https://app.nokfi.app/api` (vía proxy Nginx hacia el backend en `localhost:3001`)
+- Base URL en producción: `https://nokfi.app/api` (Nginx proxyea `/api` → backend en `localhost:3001`; frontend y backend mismo origen)
 - Todas las rutas autenticadas usan cabecera `Authorization: Bearer <token>` (sesión de usuario) o `Authorization: Bearer <ADMIN_SECRET>` (panel admin)
 - Todas las respuestas son JSON
 - Formato de error estándar: `{ "error": "código_snake_case", "message"?: "texto legible" }` — `message` no siempre está presente, especialmente en errores genéricos
