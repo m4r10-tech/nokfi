@@ -16,10 +16,13 @@
  * que cálcula las prorratas de forma nativa.
  *
  * Trial (solo mini): el checkout incluye subscription_data[trial_period_days]
- * = TRIAL_DAYS y trial_settings[end_behavior][type]=release. Stripe exige
- * tarjeta en el checkout (no cobra al instante) y bloquea reusar la misma
- * tarjeta para un 2º trial → anti-farmeo. Al día 14 cobra la tarjeta; si falla,
- * los webhooks existentes (past_due→suspended→expired) lo gestionan sin scheduler.
+ * = TRIAL_DAYS. NO se manda trial_settings[end_behavior][type]: Checkout Sessions
+ * no admite ese campo (es de la API de Subscriptions) y Stripe lo rechaza con
+ * "unknown parameter"; el comportamiento por defecto al acabar el trial es
+ * empezar a cobrar (= el "release" que se quiere). Stripe exige tarjeta en el
+ * checkout (no cobra al instante) y bloquea reusar la misma tarjeta para un 2º
+ * trial → anti-farmeo. Al día 14 cobra la tarjeta; si falla, los webhooks
+ * existentes (past_due→suspended→expired) lo gestionan sin scheduler.
  *
  * Endpoints:
  *   POST /api/payments/stripe/create-checkout         → Checkout de suscripción
@@ -130,13 +133,16 @@ router.post('/stripe/create-checkout', async (req, res) => {
       'metadata[email]': email
     });
 
-    // Trial de 14 días CON TARJETA — solo el plan mini. No payment_behavior:
-    // hay cobro al final del trial, no cobro inmediato. end_behavior=release
-    // deja que la suscripción pase a 'active' y se cobre al día 14 (en vez de
-    // 'pause', que dejaría la suscripción en estado de cobro indefinitely).
+    // Trial de 14 días CON TARJETA — solo el plan mini. Solo
+    // subscription_data[trial_period_days]: el comportamiento por defecto al
+    // acabar el trial es empezar a cobrar (la suscripción pasa a 'active' y se
+    // cobra el día 14), que es justo el "release" que queremos. NO mandar
+    // subscription_data[trial_settings][end_behavior][type]: NO existe en
+    // subscription_data de Checkout Sessions (existe en la API de Subscriptions,
+    // no aquí) — Stripe lo rechaza con "unknown parameter" (visto en prod,
+    // 2026-08-04, API 2024-04-10).
     if (planHasTrial(plan)) {
       params.set('subscription_data[trial_period_days]', String(TRIAL_DAYS));
-      params.set('subscription_data[trial_settings][end_behavior][type]', 'release');
     }
 
     const stripeRes = await fetch('https://api.stripe.com/v1/checkout/sessions', {
