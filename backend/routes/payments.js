@@ -42,7 +42,7 @@ const { requireLicense } = require('../middleware/requireLicense');
 // Fuente única de planes: precios (céntimos + EUR + nombre), planes válidos,
 // saneamiento, y configuración del trial. Sustituye a los literales locales
 // PLAN_PRICES / VALID_PLANS / coercePlan que vivían aquí antes (drift-prone).
-const { PLANS, coercePlan, planHasTrial, TRIAL_DAYS } = require('../config/plans');
+const { PLANS, coercePlan, planHasTrial, TRIAL_DAYS, VALID_PLANS } = require('../config/plans');
 // Misma versión de API que routes/webhooks.js (un sólo declarador).
 const STRIPE_API_VERSION = require('../config/stripe-version');
 
@@ -106,12 +106,19 @@ router.get('/stripe/reveal', (req, res) => {
 ────────────────────────────────────────────────────────── */
 router.post('/stripe/create-checkout', async (req, res) => {
   const email = (req.body?.email || '').trim().toLowerCase();
-  const plan = coercePlan(req.body?.plan);
-  const price = PLANS[plan];
 
   if (!email || !EMAIL_REGEX.test(email)) {
     return res.status(400).json({ error: 'invalid_email' });
   }
+  // Deuda I: validar plan ANTES de tocar Stripe. coercePlan() cae a 'mini' para un
+  // plan no-válido → sin este guard, una API call directa con plan:"bogus" (+email
+  // válido) crearía una sesión mini LIVE huérfana en Stripe en vez de 400.
+  if (!VALID_PLANS.includes(req.body?.plan)) {
+    return res.status(400).json({ error: 'invalid_plan' });
+  }
+  const plan = req.body?.plan;
+  const price = PLANS[plan];
+
   if (!process.env.STRIPE_SECRET_KEY) {
     return res.status(500).json({ error: 'stripe_not_configured' });
   }

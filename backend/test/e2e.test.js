@@ -444,10 +444,10 @@ async function main() {
     post('/api/payments/stripe/create-checkout', { email: 'buy@nokfi.local', plan: 'pro' }),
     r => r.status === 500 && r.data.error === 'stripe_not_configured'
   );
-  // plan inválido se coacciona a 'mini' (no 400) — aquí la falta de key corta antes
-  await checkAsync('stripe create-checkout plan inválido → coerción (no 400)',
+  // Deuda I: plan inválido → 400 invalid_plan ANTES de tocar Stripe (no coercionar).
+  await checkAsync('stripe create-checkout plan inválido → 400 invalid_plan',
     post('/api/payments/stripe/create-checkout', { email: 'buy@nokfi.local', plan: 'garbage' }),
-    r => r.status === 500 && r.data.error === 'stripe_not_configured' // pasó validación de plan
+    r => r.status === 400 && r.data.error === 'invalid_plan'
   );
 
   // — 3.e Proveedores alternativos eliminados al pasar a Stripe-only →
