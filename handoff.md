@@ -36,6 +36,20 @@
   mismo update de docs; los dos commits de infra (`d07996d` Nginx+CSP, `ba4f4d2`
   cleanup subdominio) están listos para `push` del usuario (2 ahead de origin).
 - **VPS deploy autónomo por llave SSH** desde el 2026-07-31 (ver §6).
+- **Cloudflare (en curso, 2026-08-07):** plan aprobado para poner CF delante de
+  `nokfi.app` en modo **Full (strict)** (anti-DDoS/WAF/edge TLS; cert Let's
+  Encrypt se mantiene y sigue renovándose vía certbot). Repo-prep lista y
+  commiteada: `deploy/nginx-cloudflare-realip.conf` (real-IP anti-spoof) +
+  comentario en `server.js:39` (trust proxy:1 sigue correcto — 0 código
+  ejecutable cambia). **Pendientes del usuario en el dashboard de CF**:
+  Add site + revisar records (importar MX/TXT de Resend o vuelve el 403 del
+  mailer), Full (strict) TLS, A @/www Proxied (nube naranja), **Bot Fight Mode
+  OFF** (si no, mata el UA `Stripe/1.0` del webhook → `createLicense` no
+  recibiría), Cache Rules (bypass `/api/*` y shell SPA, cache `/assets/*`),
+  Redirect Rule www→nokfi 301, Configuration Rule acme (Always-HTTPS off para
+  `/.well-known/acme-challenge/`), y al final NS switch Namecheap→CF + luego
+  `sudo certbot renew --dry-run`. Detalle y verificación en
+  `~/.claude/plans/bubbly-wibbling-riddle.md`.
 - **Documentación (`*.md`):** en la raíz del repo y al día.
 
 ---

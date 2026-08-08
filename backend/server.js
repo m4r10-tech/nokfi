@@ -36,7 +36,15 @@ const PORT = process.env.PORT || 3001;
 /* ════════════════════════════════════════════════════════════
    1. Seguridad base
 ════════════════════════════════════════════════════════════ */
-app.set('trust proxy', 1); // necesario detrás de Nginx para que req.ip sea el real (sección 17 del proyecto)
+// Nivel 1 = un solo proxy entre Express e Internet. Hoy Nginx es ese proxy;
+// Cloudflare está delante de Nginx pero Express NO lo ve: Nginx reescribe su
+// $remote_addr con la IP real (cabecera CF-Connecting-IP) en
+// deploy/nginx-cloudflare-realip.conf (módulo realip, anti-spoof) y reenvía la
+// IP real al backend vía X-Real-IP/X-Forwarded-For. Así req.ip sigue siendo la
+// IP del visitante real y los rate-limiters de server.js no banean el sitio por
+// colisionar todos con la IP del edge CF. Si Cloudflare se quitara, Express
+// sigue viendo solo a Nginx → trust proxy:1 sigue correcto.
+app.set('trust proxy', 1);
 
 /**
  * ⚠️ AUDITORÍA DE SEGURIDAD — helmet configurado explícitamente en vez de
