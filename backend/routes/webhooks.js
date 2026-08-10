@@ -224,6 +224,24 @@ async function handleStripeInvoicePaid(event, ip) {
 
   const license = subId ? getLicenseByStripeSubscriptionId(subId) : null;
   if (!license) {
+    // Deuda K: el 1er invoice.paid de un trial (billing_reason='subscription_create',
+    // 0€, sin invoice.subscription) es un invoice de apertura que no aporta nada: la
+    // licencia ya la creó checkout.session.completed, e invoice.paid NO crea
+    // licencias (solo renueva). Antes quedaba como processed:false -> fila "sin
+    // procesar" eterna en payment_events + warn en cada alta con trial. Ahora es un
+    // no-op reconocido (processed:true + audit), SIN tocar el caso genuino de abajo.
+    if (invoice.billing_reason === 'subscription_create' && Number(invoice.amount_paid) === 0) {
+      recordPaymentEvent({
+        provider: 'stripe', event_id: event.id, event_type: event.type,
+        amount_eur: 0, processed: true
+      });
+      audit('INVOICE_PAID_TRIAL_OPEN_NOOP', {
+        ip, detail: `customer=${customerId || '?'} 0€ - apertura trial, licencia ya creada`
+      });
+      return;
+    }
+    // Caso genuino (no apertura de trial): sin licencia mapeada -> flagear
+    // processed:false para que quede visible en reconciliacion.
     // Puede llegar antes que checkout.session.completed (orden no garantizado):
     // lo registramos sin procesar para que Stripe reintente.
     console.warn('[WEBHOOK STRIPE] invoice.paid sin licencia (sub=%s) — %s',
