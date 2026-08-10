@@ -36,20 +36,46 @@
   mismo update de docs; los dos commits de infra (`d07996d` Nginx+CSP, `ba4f4d2`
   cleanup subdominio) están listos para `push` del usuario (2 ahead de origin).
 - **VPS deploy autónomo por llave SSH** desde el 2026-07-31 (ver §6).
-- **Cloudflare (en curso, 2026-08-07):** plan aprobado para poner CF delante de
-  `nokfi.app` en modo **Full (strict)** (anti-DDoS/WAF/edge TLS; cert Let's
-  Encrypt se mantiene y sigue renovándose vía certbot). Repo-prep lista y
-  commiteada: `deploy/nginx-cloudflare-realip.conf` (real-IP anti-spoof) +
-  comentario en `server.js:39` (trust proxy:1 sigue correcto — 0 código
-  ejecutable cambia). **Pendientes del usuario en el dashboard de CF**:
-  Add site + revisar records (importar MX/TXT de Resend o vuelve el 403 del
-  mailer), Full (strict) TLS, A @/www Proxied (nube naranja), **Bot Fight Mode
-  OFF** (si no, mata el UA `Stripe/1.0` del webhook → `createLicense` no
-  recibiría), Cache Rules (bypass `/api/*` y shell SPA, cache `/assets/*`),
-  Redirect Rule www→nokfi 301, Configuration Rule acme (Always-HTTPS off para
-  `/.well-known/acme-challenge/`), y al final NS switch Namecheap→CF + luego
-  `sudo certbot renew --dry-run`. Detalle y verificación en
-  `~/.claude/plans/bubbly-wibbling-riddle.md`.
+- **🟢 Cloudflare EN PROD (Full strict, 2026-08-08/10) — COMPLETO Y VERIFICADO.**
+  CF ya es el edge de `nokfi.app` (origen `191.44.112.86` oculto tras anycast
+  `104.21.6.208`/`172.67.135.69`). Todo el plan ejecutado:
+  - **Paso 0 (repo+VPS)**: `deploy/nginx-cloudflare-realip.conf` (real-IP
+    anti-spoof, 15 v4+7 v6 `set_real_ip_from` CF, `real_ip_header
+    CF-Connecting-IP`) → commit `74d9060`; usuario sudo-deploy (`git pull` +
+    `cp` a `/etc/nginx/conf.d/cloudflare.conf` + `nginx -t` ok + reload).
+    Comentario en `server.js:39` de `trust proxy:1` (CF invisible para Express —
+    Nginx reescribe `$remote_addr`, el único proxy que Express ve). 0 código
+    ejecutable cambia.
+  - **Dashboard CF (usuario)**: Add site `nokfi.app` Free — importó 6 records
+    correctos (A `@`+`www` Proxied 🟠, MX `send`→amazonses, TXT `_dmarc`/
+    `resend._domainkey`/`send` SPF — todos DNS only 🔘 → mailer Resend intacto).
+    SSL/TLS **Full (strict)**. **Bot Fight Mode OFF** 🔴 (mata UA `Stripe/1.0`
+    del webhook → `createLicense`). WAF Custom rule `Skip WAF — Stripe
+    webhook` (`uri.path eq "/api/webhooks/stripe"`). 3 Cache Rules (bypass
+    `/api/*`, cache `/assets/*` Apply-origin-TTL, bypass SPA shell `not /api/
+    and not /assets/`). Redirect Rule `Canonicalize www→nokfi` — expression
+    `(http.host eq "www.nokfi.app" and not starts_with(uri.path,
+    "/.well-known/acme-challenge/"))` + Dynamic `concat("https://nokfi.app",
+    uri.path)` + Preserve query + 301. La exclusión acme es VITAL: sin ella el
+    redirect agarraría el reto HTTP-01 de www (cambio de host, LE no sigue) →
+    el SAN www dejaría de renovar → cert caduca 2026-11-01.
+  - **Paso 9 (NS switch)**: Namecheap Nameservers → Custom DNS →
+    `terry.ns.cloudflare.com` + `tina.ns.cloudflare.com`. Propagó a 1.1.1.1/
+    8.8.8.8. Los A quedaron Proxied (CF responde anycast, no el origin).
+  - **Paso 10**: `sudo certbot renew --dry-run` → **`Congratulations, all
+    simulated renewals succeeded`** renovando el SAN único `nokfi.app`+
+    `www.nokfi.app` (los 2 retos HTTP-01 pasaron por CF → la exclusión acme
+    del redirect funciona). Cert seguro hasta 2026-11-01, `certbot.timer`
+    autorenueva por CF.
+  - **Verificación edge live** (Claude sandbox, `curl --resolve` a la anycast,
+    saltando cache DNS): apex `HTTP/2 200 / server: cloudflare /
+    cf-cache-status: DYNAMIC / cf-ray …-CDG` (Bypass API + edge confirmados);
+    www `HTTP/2 301 / location: https://nokfi.app/... / cf-ray` (Redirect
+    Rule confirmada). Nota: el cache DNS local del usuario/sandbox seguirá
+    dando `Server: nginx` hasta expirar la A vieja — cosmético, no fallo.
+  - Detalle y verificación end-to-end en `~/.claude/plans/bubbly-wibbling-riddle.md`.
+  - **Pendiente cosmético**: forwarding `info@/help@/soporte@nokfi.app` vía
+    Namecheap (gratuito; CF no proxy MX/TXT).
 - **Documentación (`*.md`):** en la raíz del repo y al día.
 
 ---
