@@ -117,10 +117,17 @@ router.post('/stripe/create-checkout', async (req, res) => {
     return res.status(400).json({ error: 'invalid_plan' });
   }
   const plan = req.body?.plan;
-  const price = PLANS[plan];
 
   if (!process.env.STRIPE_SECRET_KEY) {
     return res.status(500).json({ error: 'stripe_not_configured' });
+  }
+  // Deuda B: precio estable de Stripe por plan. Sin él no hay sesión — el
+  // Stripe Customer Portal solo permite upgrade/downgrade limpio (y prorrata
+  // None a fin de periodo) sobre price_id persistentes, no sobre price_data
+  // inline efímeros que se recrean en cada checkout.
+  const priceId = process.env[`STRIPE_PRICE_${plan.toUpperCase()}`];
+  if (!priceId) {
+    return res.status(500).json({ error: 'stripe_price_not_configured' });
   }
 
   try {
@@ -129,10 +136,10 @@ router.post('/stripe/create-checkout', async (req, res) => {
       'success_url': `${process.env.APP_PUBLIC_URL}/reveal?session_id={CHECKOUT_SESSION_ID}`,
       'cancel_url': `${process.env.LANDING_PUBLIC_URL}/?cancelled=true`,
       'customer_email': email,
-      'line_items[0][price_data][currency]': 'eur',
-      'line_items[0][price_data][recurring][interval]': 'month',
-      'line_items[0][price_data][product_data][name]': `Nokfi — Plan ${price.name}`,
-      'line_items[0][price_data][unit_amount]': String(price.cents),
+      // Deuda B: referencia al price_id estable de Stripe (3 Prices del Product
+      // "Nokfi"). Antes era price_data inline efímero — Stripe lo recreaba cada
+      // checkout y no servía para intercambio de plan por el Portal.
+      'line_items[0][price]': priceId,
       'line_items[0][quantity]': '1',
       'subscription_data[metadata][plan]': plan,
       'subscription_data[metadata][email]': email,

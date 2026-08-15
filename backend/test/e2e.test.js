@@ -449,6 +449,19 @@ async function main() {
     post('/api/payments/stripe/create-checkout', { email: 'buy@nokfi.local', plan: 'garbage' }),
     r => r.status === 400 && r.data.error === 'invalid_plan'
   );
+  // Deuda B: con key pero sin STRIPE_PRICE_<PLAN> → 500 stripe_price_not_configured.
+  // El guard va DESPUÉS del de STRIPE_SECRET_KEY. Simulamos una key presente (el
+  // resto del suite borra la key para forzar stripe_not_configured) y ausencia de
+  // price_id → debe fallar con el mensaje específico, sin tocar Stripe.
+  process.env.STRIPE_SECRET_KEY = 'sk_test_fake_000000000000';
+  delete process.env.STRIPE_PRICE_MINI;
+  delete process.env.STRIPE_PRICE_PRO;
+  delete process.env.STRIPE_PRICE_MAX;
+  await checkAsync('stripe create-checkout sin price_id → 500 stripe_price_not_configured',
+    post('/api/payments/stripe/create-checkout', { email: 'buy@nokfi.local', plan: 'pro' }),
+    r => r.status === 500 && r.data.error === 'stripe_price_not_configured'
+  );
+  delete process.env.STRIPE_SECRET_KEY;
 
   // — 3.e Proveedores alternativos eliminados al pasar a Stripe-only →
   //     sus rutas ya no existen; Express cae al 404 global del backend —
