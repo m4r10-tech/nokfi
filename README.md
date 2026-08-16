@@ -1,15 +1,22 @@
 # Nokfi — Análisis financiero con IA para autónomos y pymes
 
-SaaS de diagnóstico financiero que combina un cuestionario interactivo con análisis de archivos Excel/PDF mediante inteligencia artificial, generando informes estilo consultoría con recomendaciones concretas.
+SaaS de diagnóstico financiero que combina un cuestionario interactivo con el
+análisis de archivos Excel/PDF mediante IA, generando informes estilo consultoría
+con recomendaciones concretas y exportables a PDF/Excel.
+
+**En producción** 🟢 — `https://nokfi.app/` (HTTPS, Cloudflare edge, cobros
+reales Stripe).
 
 ## Qué hace Nokfi
 
-- **Cuestionario de diagnóstico** — 5 bloques × 6 preguntas Sí/No sobre la salud financiera del negocio
-- **Análisis de Excel/PDF con IA** — 6 subapartados: stock, ventas, servicios, entrada de productos, caja y profit total
+- **Cuestionario de diagnóstico** — 5 bloques × 6 preguntas Sí/No sobre la salud
+  financiera del negocio
+- **Análisis de Excel/PDF con IA** — 6 subapartados: stock, ventas, servicios,
+  entrada de productos, caja y profit total
 - **Informes exportables** — PDF y Excel con cifras, gráficas y recomendaciones
 - **Calculadoras financieras** — punto de equilibrio, margen, ROI
 
-## Modelo de negocio (Fase 3)
+## Modelo de negocio
 
 **Suscripción mensual** vía Stripe (sin permanencia, cancelable a fin de periodo):
 
@@ -19,10 +26,15 @@ SaaS de diagnóstico financiero que combina un cuestionario interactivo con aná
 | **pro** | 20 € | 50 | — |
 | **max** | 50 € | 130 | — |
 
-- Precios env-driven (`PLAN_PRICE_MINI_EUR` / `_PRO_EUR` / `_MAX_EUR`). El frontend los obtiene del endpoint público `GET /api/payments/plans` — nunca hardcodeados (anti-drift: la web y Stripe cobran lo mismo).
-- **Auth: email + clave (`XXXX-XXXX-XXXX-XXXX`) + contraseña** (hash scrypt). El viejo modelo de device-fingerprint se eliminó; el anti-sharing es la **cuota diaria de IA por licencia** (una clave compartida se agota entre sus usuarios).
+- Modelo de billing Stripe: **3 Products separados** (Mini/Pro/Max), un Price
+  recurrente mensual EUR cada uno, Customer Portal con prorrateo a fin de periodo
+  (cambiar de plan = €0 hoy, se aplica al terminar el periodo en curso).
+- Precios env-driven **y** vía catálogo público `GET /api/payments/plans` — el
+  frontend nunca hardcodea precios (anti-drift: la web y Stripe cobran lo mismo).
+- **Auth**: email + clave de licencia (`XXXX-XXXX-XXXX-XXXX`) + contraseña (hash
+  scrypt). Anti-sharing por **cuota diaria de IA por licencia**.
 
-## Stack técnico
+## Stack
 
 | Capa | Tecnología |
 |------|------------|
@@ -31,80 +43,68 @@ SaaS de diagnóstico financiero que combina un cuestionario interactivo con aná
 | Frontend | React + Vite + Tailwind CSS + PWA |
 | Gráficas | Recharts |
 | Excel/PDF | `xlsx` (SheetJS), `jspdf`, `pdfjs-dist` |
-| Pagos | **Stripe** (suscripción mensual; PayPal/Revolut/Coinbase retirados) |
+| Pagos | **Stripe** (PayPal/Revolut/Coinbase retirados) |
 | Email | Resend |
-| Despliegue | Ubuntu 24.04 + PM2 + Nginx (pendiente) |
+| Infra | Ubuntu 24.04 · PM2 · Nginx · Cloudflare (edge, Full strict) |
 
-## Estructura del proyecto
+## Estructura
 
 ```
 nokfi/
-├── backend/            # API REST — Express + SQLite + Gemini
-│   ├── server.js       # Punto de entrada: Helmet, CORS, rate limiters, raw webhook
-│   ├── config/         # plans.js (precios/cuotas/trial) + stripe-version.js
-│   ├── db/             # database.js (esquema, migraciones, acceso a datos)
-│   ├── middleware/     # requireLicense.js
-│   ├── routes/         # auth.js, proxy.js, payments.js, webhooks.js, admin.js
-│   ├── utils/          # password.js (scrypt), mailer.js (Resend)
-│   └── test/           # e2e.test.js (93/93 PASS)
-├── frontend/           # PWA — React + Vite + Tailwind
-│   ├── src/
-│   │   ├── pages/      # Login, Reveal, ResetPassword, Pricing, Home, Cuestionario,
-│   │   │               # ExcelHub + excel/ (6 subapartados), Historial, Calculadoras,
-│   │   │               # Informes, Configuracion
-│   │   ├── middleware/ # api.js (cliente HTTP), sanitize.js, exportUtils.js, pdfExtract.js
-│   │   ├── context/    # AuthContext, ThemeContext, LangContext
-│   │   └── hooks/      # useApi, useCompanyProfile...
-│   └── public/icons/   # Iconos PWA (192, 512, favicon, apple-touch)
-├── *.md                # Documentación (en la raíz del repo)
-│   ├── nokfi_proyecto.md     # Documento maestro (21 secciones)
-│   ├── nokfi_api_contract.md # Contrato de API (fuente de verdad backend↔frontend)
-│   ├── nokfi_contexto_claude_code.md # Panorama para retomar el trabajo
-│   └── handoff.md           # Estado de la última sesión + deudas abiertas
-└── README.md          # Este documento
+├── backend/            # API REST — Express + SQLite + Gemini (e2e 94/94)
+├── frontend/           # PWA — React + Vite + Tailwind (build same-origin /api)
+├── deploy/             # nginx-nokfi.conf (site) + nginx-cloudflare-realip.conf
+├── docs/               # documentación (proyecto, API, deploy)
+└── README.md           # este archivo
 ```
+
+## Documentación
+
+| Doc | Contenido |
+|-----|-----------|
+| [`docs/proyecto.md`](docs/proyecto.md) | Visión de producto, modelo de negocio, esquema de DB, seguridad, diseño |
+| [`docs/api.md`](docs/api.md) | **Contrato Backend↔Frontend** (fuente de verdad técnica) |
+| [`docs/deploy.md`](docs/deploy.md) | Despliegue, Cloudflare, Stripe, operación del VPS, deudas |
+| [`frontend/README.md`](frontend/README.md) | Frontend: instalar, build, auditoría `xlsx` |
 
 ## Arranque rápido (desarrollo local)
 
 ### Backend
-
 ```bash
 cd backend
-cp .env.example .env   # Editar .env: ADMIN_SECRET (≥32), Gemini, Stripe, email, PLAN_PRICE_*_EUR
+cp .env.example .env   # editar: ADMIN_SECRET(≥32), Gemini, Stripe, email, PLAN_PRICE_*_EUR
 npm install
-npm run dev            # o: node server.js  → http://localhost:3001
+npm run dev            # → http://localhost:3001
 ```
-
-Para verificar: `cd backend && node test/e2e.test.js` (93/93 PASS offline).
+Verifica: `cd backend && node test/e2e.test.js` (**94/94 PASS offline**).
 
 ### Frontend
-
 ```bash
 cd frontend
 npm install
 npm run dev            # → http://localhost:5173
 ```
 
-> **Importante:** El `.env` nunca se sube al repositorio (`.gitignore`). Usa `.env.example` como referencia de las variables necesarias. **`DB_PATH=./db/nokfi.db` es relativa** — arranca el backend desde su directorio.
+> El `.env` nunca se sube al repositorio (gitignore). Usa `.env.example` como
+> referencia. **`DB_PATH=./db/nokfi.db` es relativa** — arranca el backend desde
+> su directorio.
 
-## Seguridad
+## Estado
 
-Auditoría OWASP Top 10 + ASVS completada con **14 hallazgos corregidos**. `npm audit` del backend: **0 vulnerabilidades**. Detalles y estado del frontend en `nokfi_contexto_claude_code.md` (sección 5).
+- ✅ Backend completo, **94/94 e2e PASS**, desplegado y funcional
+- ✅ Frontend con build exitoso y PWA (bundle same-origin `/api`, sin IP fija)
+- ✅ **Producción HTTPS viva** con Cloudflare (Full strict) y Let's Encrypt
+- ✅ **Stripe LIVE cobrando de verdad** (pago real verificado, trial 14d)
+- ✅ Mailer Resend funcionando (`noreply@nokfi.app`)
+- ✅ Deudas I (validar plan) y K (invoice del trial) resueltas
 
-## Estado del proyecto
-
-- ✅ Backend completo, **93/93 e2e PASS**, desplegado en el VPS (PM2, `:3001`) y funcional
-- ✅ Frontend con build exitoso y PWA configurada (bundle same-origin `/api`, sin IP; no servido por el VPS todavía — Nginx pendiente)
-- ✅ **Stripe LIVE**: `sk_live_` + `whsec_` pegadas y verificadas en el VPS; anti-sharing por cuota diaria
-- ⏳ **Webhook LIVE de Stripe no entrega** sin HTTPS → dominio + Nginx + SSL = prerrequisito de los cobros reales
-- ⏳ Dominio + Nginx + SSL pendientes de desplegar (plantilla en `deploy/nginx-nokfi.conf`)
-- 🪹 PayPal / Revolut / Coinbase retirados (Stripe-only)
-
-Para el detalle de deudas y siguientes pasos ver `handoff.md`.
+Deudas abiertas (opcionales, no bloqueantes) y operación: ver
+[`docs/deploy.md`](docs/deploy.md).
 
 ## Donaciones — Apoya el proyecto
 
-Si Nokfi te resulta útil y quieres contribuir al desarrollo, aceptamos donaciones en cripto *(direcciones personales, no relacionadas con el producto de pago)*:
+Si Nokfi te resulta útil y quieres contribuir al desarrollo, aceptamos donaciones
+en cripto *(direcciones personales, no relacionadas con el producto de pago)*:
 
 | Cripto | Red | Dirección |
 |--------|-----|-----------|
@@ -114,4 +114,5 @@ Si Nokfi te resulta útil y quieres contribuir al desarrollo, aceptamos donacion
 
 ## Licencia
 
-Software propietario. Todos los derechos reservados. Ver `nokfi_proyecto.md` (sección 15) para la política de licencias y `handoff.md` para el estado actual.
+Software propietario. Todos los derechos reservados. Política de licencias y
+estado en [`docs/proyecto.md`](docs/proyecto.md).

@@ -1,0 +1,12 @@
+# Entornos / secretos — nunca en el repo (cada subproyecto también tiene el suyo)
+.env
+.env.*
+!.env.example
+
+# Dependencias y builds
+node_modules/
+dist/
+
+# Artefactos de sesión de desarrollo / capturas
+claude-photos/
+md/
