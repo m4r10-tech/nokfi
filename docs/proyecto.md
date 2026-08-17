@@ -301,6 +301,7 @@ zonas 4 para identificar secciones de la hoja.
 - ✅ **Deuda I** (validar plan antes de llamar a Stripe) — `400 invalid_plan`.
 - ✅ **Deuda K** (1er `invoice.paid` del trial huérfano ya no queda `processed:false`).
 - ✅ **Deuda B** (billing 3 Products con `price_id` + Portal proration=None).
+- ✅ **Deuda H** (cuota IA ATOMICA anti-TOCTOU, 2026-08-17) — detalle en `deploy.md`.
 - ✅ **Mailer Resend** — dominio `nokfi.app` verificado, `noreply@nokfi.app`
   funcionando (probe real `sent:true`).
 - ✅ **Historial de análisis** (`/api/analyses`), **perfil de empresa**

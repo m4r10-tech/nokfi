@@ -26,7 +26,9 @@
   `EMAIL_FROM=noreply@nokfi.app`; probe real `{sent:true}`.
 - **Modelo billing (Deuda B)**: 3 Products separados + un Price recurrente mensual
   EUR cada uno; Portal con proration `None`. Migrado y desplegado.
-- **Backend**: 94/94 e2e PASS, PM2 `nokfi-backend` `:3001`.
+- **Deuda H (cuota IA TOCTOU)**: **resuelta** — cuota atómica por slots en
+  `ai_usage` (ver `api.md` §2).
+- **Backend**: 107/107 e2e PASS, PM2 `nokfi-backend` `:3001`.
 
 **Pendiente (no bloqueante, cosmético):** forwarding `info@/help@/soporte@nokfi.app`
 vía Namecheap (gratis; CF no proxya MX/TXT).
@@ -155,7 +157,7 @@ Todo lo crítico está resuelto. Restos **no bloqueantes / opcionales**:
 | A | Stripe LIVE — webhook + cobros reales | — | ✅ **RESUELTO** (pago real verificado end-to-end, 6 eventos, entrega por CF). |
 | B | `STRIPE_PRICE_{MINI,PRO,MAX}` + 3 Products + Portal proration=None | — | ✅ **RESUELTO / DESPLEGADO** (Deuda B). |
 | C | Dominio + Nginx + SSL | — | ✅ **RESUELTO** (HTTPS vivo, cert LE, Cloudflare Full strict). |
-| H | Cuota diaria de IA vulnerable a overshoot por concurrencia (**TOCTOU**) | nada en staging; permite abuso scripted | ⏳ `countAiAnalysesToday` se lee en `routes/proxy.js` (~65) pero solo se incrementa vía `audit('AI_ANALYSIS_GENERATED')` DESPUÉS del `await fetch` a Gemini → N requests concurrentes de una licencia pasan el check. Backstop: cap global de Gemini. Fix = reserva atómica (tabla `ai_usage_daily` con `UNIQUE(license_id, day, slot)` o contador transaccional). |
+| H | Cuota diaria de IA vulnerable a overshoot por concurrencia (**TOCTOU**) | — | ✅ **RESUELTO (2026-08-17)** — cuota atómica vía tabla `ai_usage` (PK `license_id+day+slot`). `reserveAiSlot` inserta el slot ANTES del `await` a Gemini (INSERT atómico de mejor-sqlite3 → sin ventana TOCTOU); si la IA falla, `releaseAiSlot` lo libera y el fallo NO consume cuota. El `429` responde con mensaje específico. Detalle en `api.md` §2. |
 | I | `create-checkout` validaba plan tarde (coerción a mini) | — | ✅ **RESUELTO** (`400 invalid_plan` antes de tocar Stripe). |
 | K | 1er `invoice.paid` del trial huérfano (`processed:false`) | — | ✅ **RESUELTO** (no-op reconocido `INVOICE_PAID_TRIAL_OPEN_NOOP`). |
 | ⟶ | Forwarding `info@/help@/soporte@nokfi.app` | — | ⏳ Cosmético, Namecheap forwarding gratis; el backend no lo usa. |

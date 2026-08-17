@@ -147,14 +147,25 @@ Desde el enlace del email. **Setea contraseña y crea sesión** (no hace falta l
 `analyses` (best-effort; un fallo de escritura nunca bloquea la respuesta). Solo
 guarda `kind`, `title`, `result_html`, `prompt_chars` (el conteo, **no** el prompt).
 
+**Cuota diaria por licencia (Deuda H, ATOMICA):** el límite se aplica reservando
+un slot en la tabla `ai_usage` (PK `license_id+day+slot`) mediante `reserveAiSlot`
+**antes** de llamar a Gemini. Como el INSERT es atómico (mejor-sqlite3 síncrono),
+no hay ventana TOCTOU: dos peticiones concurrentes nunca consiguen el mismo slot
+ni "ven" la cuota más vacía de lo que está. Si una petición **falla tras
+reservar** (502/503 o excepción), se llama a `releaseAiSlot` y el slot se libera
+→ el análisis fallido **NO consume cuota**. Solo un `200` mantiene el slot.
+
+Todos los errores incluyen `message` (texto en español para mostrar al usuario);
+el `error` (snake_case) sigue siendo el código estable para la lógica del frontend.
+
 | Status | Body | Cuándo |
 |--------|------|--------|
 | 200 | `{ text }` | Éxito (+ persistencia best-effort) |
 | 400 | `{ error: "invalid_prompt" \| "prompt_too_long" }` | Vacío o >50.000 |
-| 429 | `{ error: "license_daily_limit_reached" }` | **Esta licencia** superó su cuota (mini 10 / pro 50 / max 130) |
-| 500 | `{ error: "ai_not_configured" }` | Falta `GEMINI_API_KEY` |
-| 502 | `{ error: "ai_provider_error" \| "ai_empty_response" }` | Gemini error / respuesta vacía |
-| 503 | `{ error: "ai_quota_exceeded" }` | Cuota free-tier global de Gemini (~1.500/día) — distinto del 429 |
+| 429 | `{ error: "license_daily_limit_reached", message: "Has agotado tu cuota diaria de N análisis…" }` | **Esta licencia** no tiene más slots hoy (cuota mini 10 / pro 50 / max 130) |
+| 500 | `{ error: "ai_not_configured", message }` | Falta `GEMINI_API_KEY` (o error interno genérico) |
+| 502 | `{ error: "ai_provider_error" \| "ai_empty_response", message }` | Gemini error / respuesta vacía (slot se libera) |
+| 503 | `{ error: "ai_quota_exceeded", message }` | Cuota free-tier global de Gemini (~1.500/día) — distinto del 429 (slot se libera) |
 
 ---
 

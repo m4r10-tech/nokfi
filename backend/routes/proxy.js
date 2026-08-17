@@ -28,20 +28,22 @@
 const express = require('express');
 const router = express.Router();
 const { requireLicense } = require('../middleware/requireLicense');
-const { audit, countAiAnalysesToday, aiQuotaForPlan, createAnalysis } = require('../db/database');
+const { audit, countAiAnalysesToday, aiQuotaForPlan, reserveAiSlot, releaseAiSlot, createAnalysis } = require('../db/database');
 
 const MAX_PROMPT_LENGTH = 50000; // protección básica contra abuso/prompts gigantes
 const DEFAULT_MAX_TOKENS = 1500;
 const HARD_MAX_TOKENS = 4000;
 
-// ⚠️ AUDITORÍA DE SEGURIDAD — límite diario por licencia (ver countAiAnalysesToday
-// en db/database.js). Protege la cuota compartida de Gemini (~1.500/día para
-// todo el proyecto) de que un solo cliente la agote para el resto. La cuota es
-// ahora TIERED por plan (mini 10 / pro 50 / max 130 análisis/día — ver
-// aiQuotaForPlan en db/database.js), lo que da valor a los planes altos y
-// sigue dejando margen amplio para muchos clientes simultáneos sin arriesgar
-// la cuota global. Para planes legacy migrados (billing_model='legacy', plan
-// ya mapeado a 'max') aplica la cuota de max.
+// ⚠️ AUDITORÍA DE SEGURIDAD — límite diario por licencia ATOMICO (Deuda H).
+// Protege la cuota compartida de Gemini (~1.500/día para todo el proyecto) de
+// que un solo cliente la agote para el resto — es el anti-abuso del plan
+// (mini 10 / pro 50 / max 130 análisis/día, ver aiQuotaForPlan en db/database.js).
+// La reserva se hace con reserveAiSlot (INSERT en `ai_usage` con PK
+// `(license_id, day, slot)`), que es atómica y cierra el TOCTOU: el incremento
+// ocurre ANTES del await a Gemini, no después. Si Gemini falla, releaseAiSlot
+// devuelve el slot y el análisis fallido NO cuenta contra la cuota.
+// Para planes legacy migrados (billing_model='legacy', plan mapeado a 'max')
+// aplica la cuota de max.
 
 router.post('/ai', requireLicense, async (req, res) => {
   const prompt = req.body?.prompt;
@@ -59,18 +61,13 @@ router.post('/ai', requireLicense, async (req, res) => {
   }
   if (!process.env.GEMINI_API_KEY) {
     console.error('⚠️  GEMINI_API_KEY no configurada en el servidor');
-    return res.status(500).json({ error: 'ai_not_configured' });
-  }
-
-  const usedToday = countAiAnalysesToday(req.license.id);
-  const dailyLimit = aiQuotaForPlan(req.license.plan);
-  if (usedToday >= dailyLimit) {
-    audit('AI_LICENSE_DAILY_LIMIT_REACHED', { license_id: req.license.id, ip: req.ip, detail: `used=${usedToday}/${dailyLimit} plan=${req.license.plan}` });
-    return res.status(429).json({
-      error: 'license_daily_limit_reached',
-      message: 'Has alcanzado el límite diario de análisis de tu plan. Inténtalo de nuevo mañana o mejora tu suscripción para más análisis.'
+    return res.status(500).json({
+      error: 'ai_not_configured',
+      message: 'El servicio de análisis no está disponible ahora mismo. Contacta con soporte si esto continúa.'
     });
   }
+
+  const dailyLimit = aiQuotaForPlan(req.license.plan);
 
   // `gemini-flash-latest` es un alias de Google que siempre resuelve al
   // modelo flash actual. Migración desde gemini-2.5-flash, retirado por
@@ -80,7 +77,31 @@ router.post('/ai', requireLicense, async (req, res) => {
   // lleva GEMINI_MODEL=gemini-flash-latest; este es el fallback por si falta.
   const model = process.env.GEMINI_MODEL || 'gemini-flash-latest';
 
+  // Si la IA falla tras reservar, se libera el slot: el análisis fallido NO
+  // cuenta contra la cuota. Declarada aquí (ámbito del handler) para poder hacer
+  // el rollback también desde el `catch`, no solo en los caminos de `!aiRes.ok`.
+  let releaseUsage = null;
+
   try {
+    // Deuda H — reserva atómica ANTES de llamar a Gemini. reserveAiSlot inserta
+    // la fila en `ai_usage` (PK license_id+day+slot); si el slot ya estaba
+    // ocupado prueba el siguiente. Devuelve null si no queda ninguno libre hoy
+    // (cuota agotada) → 429 sin gastar nada. Al reservar antes del await se
+    // elimina la ventana TOCTOU: ninguna petición concurrente puede ver la
+    // cuota "más vacía" de lo que está. `usedToday` (qué slot usó) solo sirve
+    // del mensaje/auditoría, no para decidir el corte — la reserva decide.
+    const reservation = reserveAiSlot(req.license.id, dailyLimit);
+    if (!reservation) {
+      const usedToday = countAiAnalysesToday(req.license.id);
+      audit('AI_LICENSE_DAILY_LIMIT_REACHED', { license_id: req.license.id, ip: req.ip, detail: `used=${usedToday}/${dailyLimit} plan=${req.license.plan}` });
+      return res.status(429).json({
+        error: 'license_daily_limit_reached',
+        message: `Has agotado tu cuota diaria de ${dailyLimit} análisis. Inténtalo de nuevo mañana o mejora tu plan para disponer de más análisis diarios.`
+      });
+    }
+    const { day: usageDay, slot: reservedSlot } = reservation;
+    releaseUsage = () => releaseAiSlot(req.license.id, usageDay, reservedSlot);
+
     const aiRes = await fetch(
       `https://generativelanguage.googleapis.com/v1beta/models/${model}:generateContent`,
       {
@@ -105,13 +126,18 @@ router.post('/ai', requireLicense, async (req, res) => {
       console.error('[PROXY AI] Gemini respondió con error:', aiRes.status, errBody);
 
       // 429 de Gemini casi siempre significa cuota diaria del free tier agotada
+      // → liberar el slot: no es culpa del usuario y no debe gastar su cuota.
+      releaseUsage();
       if (aiRes.status === 429) {
         return res.status(503).json({
           error: 'ai_quota_exceeded',
-          message: 'El servicio de análisis ha alcanzado su límite diario. Inténtalo de nuevo más tarde.'
+          message: 'El servicio de análisis ha alcanzado su límite diario global. Inténtalo de nuevo en unas horas.'
         });
       }
-      return res.status(502).json({ error: 'ai_provider_error' });
+      return res.status(502).json({
+        error: 'ai_provider_error',
+        message: 'Ha fallado la conexión con el servicio de análisis. Inténtalo de nuevo en unos minutos.'
+      });
     }
 
     const data = await aiRes.json();
@@ -125,7 +151,11 @@ router.post('/ai', requireLicense, async (req, res) => {
       // Puede ocurrir si el contenido fue bloqueado por los filtros de seguridad de Gemini
       // (data.candidates[0].finishReason === 'SAFETY', por ejemplo)
       console.error('[PROXY AI] Gemini devolvió respuesta vacía. finishReason:', data.candidates?.[0]?.finishReason);
-      return res.status(502).json({ error: 'ai_empty_response' });
+      releaseUsage(); // respuesta vacía (bloqueo de seguridad) = análisis no generado → devolver el slot
+      return res.status(502).json({
+        error: 'ai_empty_response',
+        message: 'El análisis no pudo generarse ahora mismo (la IA devolvió una respuesta vacía). Inténtalo de nuevo.'
+      });
     }
 
     audit('AI_ANALYSIS_GENERATED', {
@@ -157,8 +187,15 @@ router.post('/ai', requireLicense, async (req, res) => {
 
     res.json({ text });
   } catch (e) {
+    // Rollback de la reserva si algo rompió tras reservar (excepción, timeout de
+    // Gemini, parseo...) — que un error del servidor/proveedor no consuma la
+    // cuota del usuario. releaseUsage es null si aún no se reservó.
+    if (releaseUsage) { try { releaseUsage(); } catch (_) { /* el rollback no debe enmascarar el error real */ } }
     console.error('[PROXY AI] Excepción:', e.message);
-    res.status(500).json({ error: 'internal_error' });
+    res.status(500).json({
+      error: 'internal_error',
+      message: 'Ha ocurrido un error inesperado. Inténtalo de nuevo en unos minutos.'
+    });
   }
 });
 

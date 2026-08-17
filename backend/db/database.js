@@ -156,6 +156,24 @@ function initDB() {
           updated_at           TEXT    NOT NULL DEFAULT (datetime('now'))
         );
 
+        -- Deuda H — cuota diaria de IA ATOMICA (anti-TOCTOU). Cada análisis
+        -- "reserva" un slot (license_id, day, slot) vía INSERT; el PK evita que
+        -- dos peticiones concurrentes consigan el mismo asiento aunque el fetch
+        -- a Gemini de una siga en vuelo cuando otra reserva (mejor-sqlite3 es
+        -- síncrono → la reserva es atómica). slot ∈ [0, quotaMax=130). Si Gemini
+        -- falla, la fila se borra (rollback) y el análisis no cuenta. El conteo
+        -- de "usados hoy" sale de aquí (countAiAnalysesToday → ai_usage), no del
+        -- audit_log, que sigue siendo solo el histórico. Sin FK: si la licencia
+        -- se borra, sus slots se limpian en un barrido de ADMIN/uso (filas con
+        -- day viejo son inocuas y caducan solas).
+        CREATE TABLE IF NOT EXISTS ai_usage (
+          license_id  INTEGER NOT NULL,
+          day         TEXT    NOT NULL,                 -- 'YYYY-MM-DD' (UTC, igual que date('now'))
+          slot        INTEGER NOT NULL,                 -- 0..(cuota-1); el máximo plan es max=130
+          created_at  TEXT    NOT NULL DEFAULT (datetime('now')),
+          PRIMARY KEY (license_id, day, slot)
+        );
+
         CREATE INDEX IF NOT EXISTS idx_licenses_key          ON licenses(key);
         CREATE INDEX IF NOT EXISTS idx_licenses_email        ON licenses(email);
         CREATE INDEX IF NOT EXISTS idx_sessions_token        ON sessions(token);
@@ -805,22 +823,65 @@ function getStats(periodDays = 30) {
 }
 
 /**
- * ⚠️ AUDITORÍA DE SEGURIDAD — protege la cuota compartida de Gemini.
- * El free tier de Gemini es ~1.500 peticiones/día para TODO el proyecto,
- * compartida entre todos los clientes de Nokfi. Sin un límite por
- * licencia, un solo cliente con uso intensivo (malicioso o no) podría
- * agotar la cuota del día para el resto. Se usa el propio audit_log,
- * que ya registra cada análisis generado (evento AI_ANALYSIS_GENERATED),
- * así que no hace falta una tabla nueva.
+ * Deuda H — cuota diaria de IA ATOMICA (anti-TOCTOU).
+ *
+ * El problema anterior (ver git / deploy.md §7): el límite se aplicaba con
+ * "comprobar (countAiAnalysesToday) → await fetch a Gemini → registrar (audit)".
+ * Node suelta el hilo en el `await`, así que N peticiones concurrentes de una
+ * licencia veían todas `used < limit` antes de que ninguna registrara → el
+ * día terminaba con análisis por encima del tier y un cliente scripted podía
+ * colarse delante del resto.
+ *
+ * La solución: la tabla `ai_usage` reserva un slot por análisis vía INSERT
+ * con PRIMARY KEY (license_id, day, slot). La reserva es ATÓMICA (mejor-sqlite3
+ * es síncrono; aunque dos peticiones se entrelazaran, el PK haría que el segundo
+ * INSERT al mismo slot fallara y pasara al siguiente). Si no hay slot libre,
+ * la cuota está agotada y NO se llama a Gemini. Si Gemini falla después de
+ * reservar, `releaseAiSlot` borra la fila → el análisis fallido NO cuenta.
+ *
+ * El `audit_log` queda SOLO como histórico/auditoría; el conteo de "usados hoy"
+ * sale del propio `ai_usage` para que sea coherente con la reserva.
  */
+
+/** Día natural en UTC; coincide con `date('now')` de SQLite (corte a medianoche UTC). */
+function aiUsageDay() {
+  return new Date().toISOString().slice(0, 10);
+}
+
+/** Slots reservados hoy por la licencia (su "uso" del día). */
 function countAiAnalysesToday(license_id) {
-  const row = getDB().prepare(`
-    SELECT COUNT(*) c FROM audit_log
-    WHERE event = 'AI_ANALYSIS_GENERATED'
-      AND license_id = ?
-      AND date(ts) = date('now')
-  `).get(license_id);
-  return row.c;
+  return getDB().prepare(
+    'SELECT COUNT(*) c FROM ai_usage WHERE license_id = ? AND day = ?'
+  ).get(license_id, aiUsageDay()).c;
+}
+
+/**
+ * Reserva un slot hoy para la licencia. Devuelve `{ day, slot }` si lo consigue
+ * o `null` si la cuota del plan está agotada (todo `[0, dailyLimit)` ocupado).
+ * Sólo relanza errores que NO sean de conflicto de PK (los de PK se ignoran y
+ * se prueba el siguiente slot). `dailyLimit` se espera ya resuelto por
+ * `aiQuotaForPlan(plan)`.
+ */
+function reserveAiSlot(license_id, dailyLimit) {
+  const db = getDB();
+  const day = aiUsageDay();
+  const insert = db.prepare('INSERT INTO ai_usage (license_id, day, slot) VALUES (?, ?, ?)');
+  for (let i = 0; i < dailyLimit; i++) {
+    try {
+      insert.run(license_id, day, i);
+      return { day, slot: i };
+    } catch (e) {
+      if (e.code !== 'SQLITE_CONSTRAINT_PRIMARYKEY') throw e; // slot ocupado → siguiente
+    }
+  }
+  return null;
+}
+
+/** Rollback de una reserva: libera el slot cuando la IA falla (no cuenta para la cuota). */
+function releaseAiSlot(license_id, day, slot) {
+  getDB().prepare(
+    'DELETE FROM ai_usage WHERE license_id = ? AND day = ? AND slot = ?'
+  ).run(license_id, day, slot);
 }
 
 /**
@@ -1040,6 +1101,8 @@ module.exports = {
   isPaymentEventProcessed,
   recordPaymentEvent,
   countAiAnalysesToday,
+  reserveAiSlot,
+  releaseAiSlot,
   aiQuotaForPlan,
   getLicenseByStripeSubscriptionId,
   updateSubscription,

@@ -764,6 +764,102 @@ async function main() {
   if (origGeminiKey === undefined) delete process.env.GEMINI_API_KEY; else process.env.GEMINI_API_KEY = origGeminiKey;
 
   // ═══════════════════════════════════════════════════════════
+  // Deuda H — cuota diaria de IA ATOMICA (tabla `ai_usage`, slots UNIQUE).
+  // Mini tiene cuota 10 (config/plans.js). Verificamos en vivo contra el endpoint
+  // real POST /api/proxy/ai + stub de global.fetch determinista:
+  //   (1) las 10 primeras pasan (200); la 11.ª → 429 con mensaje específico.
+  //   (2) rollback: si Gemini falla (502/503), el slot se LIBERA → no cuenta.
+  // Licencias frescas minis (ai_usage vacía hoy) para determinismo.
+  // ═══════════════════════════════════════════════════════════
+  {
+    const { countAiAnalysesToday, aiQuotaForPlan } = require('../db/database');
+    check('Deuda H: cuotas por plan = mini 10 / pro 50 / max 130 (aiQuotaForPlan)',
+      () => aiQuotaForPlan('mini') === 10 && aiQuotaForPlan('pro') === 50 && aiQuotaForPlan('max') === 130
+    );
+
+    const savedFetch2 = global.fetch;
+    const origGeminiKey2 = process.env.GEMINI_API_KEY;
+    process.env.GEMINI_API_KEY = 'fake-key-for-quota-test';
+    // Stub de éxito para las 10 llamadas que llenan la cuota (misma forma real
+    // de la respuesta de Gemini que el test del proxy de arriba). Sin esto las
+    // llamadas irían a Gemini real con la key falsa → 400.
+    global.fetch = async () => ({
+      ok: true, status: 200,
+      json: async () => ({ candidates: [{ content: { parts: [{ text: '<p>ok</p>' }] } }] }),
+      text: async () => ''
+    });
+    const quotaPrompt = { prompt: 'Análisis para la prueba de cuota.', max_tokens: 100 };
+    const quotaEmail = 'quota-h@nokfi.local', quotaPass = 'QuotaPass12!';
+    let quotaKey = null, quotaId = null, quotaToken = null;
+
+    await checkAsync('Deuda H: admin createLicense mini (cuota) → 201',
+      post('/api/admin/licenses', { email: quotaEmail, plan: 'mini', password: quotaPass }, 'admin'),
+      r => { if (r.status === 201) { quotaKey = r.data.key; quotaId = r.data.id; } return r.status === 201; }
+    );
+    await checkAsync('Deuda H: login cuota → 200 + token',
+      post('/api/auth/login', { email: quotaEmail, license_key: quotaKey, password: quotaPass }),
+      r => { if (r.status === 200) quotaToken = r.data.token; return r.status === 200; }
+    );
+
+    // La cuota NO está agotada: una peticion que falle debe responder 502 y
+    // liberar el slot ANTES de haber reservado (éxito no puede tambalear).
+    // (comprobación del rollback en una licencia distinta, más abajo)
+
+    // (1) Llenar la cuota: resolver todas las promesas secuencialmente (mejor-sqlite3
+    //     serializa, así el orden es determinista). Cada 200 reserva y CONSERVA su slot.
+    let tenOk = true;
+    for (let i = 0; i < 10; i++) {
+      const r = await post('/api/proxy/ai', quotaPrompt, quotaToken);
+      if (r.status !== 200) tenOk = false;
+    }
+    check('Deuda H: 10 análisis mini (cuota 10) → los 10 fueron 200', () => tenOk);
+    check('Deuda H: countAiAnalysesToday(id) == 10 tras los 10 usos', () => countAiAnalysesToday(quotaId) === 10);
+
+    await checkAsync('Deuda H: 11.ª petición (cuota 10) → 429 + mensaje "Has agotado tu cuota diaria"',
+      post('/api/proxy/ai', quotaPrompt, quotaToken),
+      r => r.status === 429
+        && r.data.error === 'license_daily_limit_reached'
+        && typeof r.data.message === 'string'
+        && r.data.message.includes('Has agotado tu cuota diaria')
+        && r.data.message.includes('10') // menciona la cuota concreta
+    );
+    check('Deuda H: tras el 429, countAiAnalysesToday sigue == 10 (no se infló)', () => countAiAnalysesToday(quotaId) === 10);
+
+    // (2) Rollback en una licencia fresca: Gemini falla → 502 → slot liberado.
+    const rollEmail = 'quota-r@nokfi.local', rollPass = 'RollPass12!';
+    let rKey = null, rId = null, rToken = null;
+    await checkAsync('Deuda H: admin createLicense mini (rollback) → 201',
+      post('/api/admin/licenses', { email: rollEmail, plan: 'mini', password: rollPass }, 'admin'),
+      r => { if (r.status === 201) { rKey = r.data.key; rId = r.data.id; } return r.status === 201; }
+    );
+    await checkAsync('Deuda H: login rollback → 200 + token',
+      post('/api/auth/login', { email: rollEmail, license_key: rKey, password: rollPass }),
+      r => { if (r.status === 200) rToken = r.data.token; return r.status === 200; }
+    );
+
+    // error de proveedor (500) → 502 ai_provider_error y slot devuelto
+    global.fetch = async () => ({ ok: false, status: 500, json: async () => ({}), text: async () => 'boom' });
+    await checkAsync('Deuda H: Gemini falla (500) → 502 ai_provider_error + mensaje',
+      post('/api/proxy/ai', quotaPrompt, rToken),
+      r => r.status === 502 && r.data.error === 'ai_provider_error' && typeof r.data.message === 'string' && r.data.message.length > 0
+    );
+    check('Deuda H: tras 502, countAiAnalysesToday(rId) == 0 (slot liberado, no cuenta)',
+      () => countAiAnalysesToday(rId) === 0);
+
+    // cuota global del free tier agotada (429 de Gemini) → 503 ai_quota_exceeded y slot devuelto
+    global.fetch = async () => ({ ok: false, status: 429, json: async () => ({}), text: async () => 'quota' });
+    await checkAsync('Deuda H: Gemini 429 (cuota global) → 503 ai_quota_exceeded + mensaje',
+      post('/api/proxy/ai', quotaPrompt, rToken),
+      r => r.status === 503 && r.data.error === 'ai_quota_exceeded' && typeof r.data.message === 'string' && r.data.message.length > 0
+    );
+    check('Deuda H: tras 503, countAiAnalysesToday(rId) == 0 (slot liberado, no cuenta)',
+      () => countAiAnalysesToday(rId) === 0);
+
+    global.fetch = savedFetch2;
+    if (origGeminiKey2 === undefined) delete process.env.GEMINI_API_KEY; else process.env.GEMINI_API_KEY = origGeminiKey2;
+  }
+
+  // ═══════════════════════════════════════════════════════════
   // 3.o Perfil de empresa (G-a): GET /api/profile + PUT /api/profile
   //     Persistencia del onboarding (sección 14), 1 fila por licencia,
   //     scoped por req.license.id. Licencia DEDICADA y fresca (no la principal
