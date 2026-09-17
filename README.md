@@ -51,7 +51,7 @@ reales Stripe).
 
 ```
 nokfi/
-├── backend/            # API REST — Express + SQLite + Gemini (e2e 94/94)
+├── backend/            # API REST — Express + SQLite + Gemini (e2e 107/107)
 ├── frontend/           # PWA — React + Vite + Tailwind (build same-origin /api)
 ├── deploy/             # nginx-nokfi.conf (site) + nginx-cloudflare-realip.conf
 ├── docs/               # documentación (proyecto, API, deploy)
@@ -76,7 +76,7 @@ cp .env.example .env   # editar: ADMIN_SECRET(≥32), Gemini, Stripe, email, PLA
 npm install
 npm run dev            # → http://localhost:3001
 ```
-Verifica: `cd backend && node test/e2e.test.js` (**94/94 PASS offline**).
+Verifica: `cd backend && node test/e2e.test.js` (**107/107 PASS offline**).
 
 ### Frontend
 ```bash
@@ -91,7 +91,7 @@ npm run dev            # → http://localhost:5173
 
 ## Estado
 
-- ✅ Backend completo, **94/94 e2e PASS**, desplegado y funcional
+- ✅ Backend completo, **107/107 e2e PASS**, desplegado y funcional
 - ✅ Frontend con build exitoso y PWA (bundle same-origin `/api`, sin IP fija)
 - ✅ **Producción HTTPS viva** con Cloudflare (Full strict) y Let's Encrypt
 - ✅ **Stripe LIVE cobrando de verdad** (pago real verificado, trial 14d)

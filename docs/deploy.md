@@ -148,6 +148,21 @@ records MX/TXT SPF/DKIM/DMARC en Namecheap). SendGrid retirado (rama + switch
   **navegador del usuario** (el backend nunca procesa Excel) → riesgo aceptado.
   Detalle en `frontend/README.md`.
 
+### Endurecimientos de seguridad (2026-09-14)
+
+Aplicados y verificados (**107/107 e2e PASS**), detalle en `proyecto.md` §7 y §21:
+
+- **Tokens hasheados en reposo** (`database.js`): sesiones y reset-tokens se
+  persisten como SHA-256, no en texto plano. Migración `hashTokensAtRest()`
+  idempotente y NO destructiva (no revoca nada); en el primer arranque en prod
+  tras el deploy, hashearà las filas planas existentes — las sesiones activas
+  siguen funcionando (el cliente manda el token crudo, que se hashea al lookup).
+- **scrypt a N=2^16** (`password.js`): hash de contraseña endurecido. ⚠️ Requiere
+  `maxmem` a `scryptSync` (Node v24/OpenSSL 3 necesita >64MB; tope 256MB). Hashes
+  viejos siguen verificando. Latencia por hash ~0.3-0.6s (aceptable en auth de
+  bajo volumen).
+- **Rate-limiter dedicado a `create-checkout`** (`payments.js`): 10 req/min por IP.
+
 ## 7. Deudas abiertas (al 2026-08-16)
 
 Todo lo crítico está resuelto. Restos **no bloqueantes / opcionales**:

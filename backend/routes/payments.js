@@ -38,6 +38,7 @@ const router = express.Router();
 
 const { getLicenseByPaymentRef } = require('../db/database');
 const { requireLicense } = require('../middleware/requireLicense');
+const rateLimit = require('express-rate-limit');
 
 // Fuente única de planes: precios (céntimos + EUR + nombre), planes válidos,
 // saneamiento, y configuración del trial. Sustituye a los literales locales
@@ -47,6 +48,21 @@ const { PLANS, coercePlan, planHasTrial, TRIAL_DAYS, VALID_PLANS } = require('..
 const STRIPE_API_VERSION = require('../config/stripe-version');
 
 const EMAIL_REGEX = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+
+/* ═─────────────────────────────────────────────────────────
+   Rate-limit propio para create-checkout (defensa en profundidad).
+   create-checkout no está detrás de requireLicense (es pre-pago, solo email+plan)
+   y solo cae bajo el limiter general (200/15min) → un abuso podría crear muchas
+   Checkout Sessions de Stripe (coste/ruido). Este limiter más estricto por IP
+   (10 por minuto) cubre ese hueco sin tocar el resto de pagos.
+────────────────────────────────────────────────────────── */
+const checkoutLimiter = rateLimit({
+  windowMs: 60 * 1000,
+  max: 10,
+  standardHeaders: true,
+  legacyHeaders: false,
+  message: { error: 'rate_limited', message: 'Demasiados intentos de pago. Espera un momento.' }
+});
 
 /* ──────────────────────────────────────────────────────────
    GET /api/payments/plans
@@ -104,7 +120,7 @@ router.get('/stripe/reveal', (req, res) => {
    para el plan elegido. La licencia se crea en el webhook al recibir el
    `checkout.session.completed` (modo subscription).
 ────────────────────────────────────────────────────────── */
-router.post('/stripe/create-checkout', async (req, res) => {
+router.post('/stripe/create-checkout', checkoutLimiter, async (req, res) => {
   const email = (req.body?.email || '').trim().toLowerCase();
 
   if (!email || !EMAIL_REGEX.test(email)) {

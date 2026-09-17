@@ -25,7 +25,17 @@
 
 const crypto = require('crypto');
 
-const SCRYPT_N = 16384; // 2^14 — equilibrio razonable entre coste y latencia (~50-100ms por hash)
+// ⚠️ AUDITORÍA DE SEGURIDAD — coste de scrypt endurecido. N sube de 2^14 a 2^16
+// (~65536): la clave de licencia es SEMI-pública (va en el email de bienvenida),
+// así que ante una fuga de BD el hash de la contraseña es el único secreto. 2^16
+// exige ~64-128MB de memoria por hash (128·r·N, con margen para OpenSSL 3 de Node
+// v24), con una latencia por hash de ~0.3-0.6s (aceptable para auth de bajo volumen:
+// solo login/activate/change-password, nunca por-análisis). Requiere pasar maxmem a
+// scryptSync (Node limita por defecto a 32MB → "memory limit exceeded"). Los hashes
+// viejos siguen verificando: verifyPassword lee N/r/p del propio hash, no de estas
+// constantes. Solo los hashes NUEVOS (próximo login, activación, cambio de
+// contraseña) se generan con el coste alto.
+const SCRYPT_N = 65536; // 2^16
 const SCRYPT_R = 8;
 const SCRYPT_P = 1;
 const KEYLEN = 32;       // 256 bits de salida
@@ -42,7 +52,17 @@ function hashPassword(plain) {
     throw new Error('hashPassword: la contraseña no puede estar vacía');
   }
   const salt = crypto.randomBytes(SALTLEN);
-  const derived = crypto.scryptSync(plain, salt, KEYLEN, { N: SCRYPT_N, r: SCRYPT_R, p: SCRYPT_P });
+  // maxmem: límite de memoria para scryptSync. La fórmula teórica 128*r*N da
+  // 64MB para N=65536/r=8, pero Node v24 + OpenSSL 3 usa MÁS memoria interna y
+  // 64MB falla con "memory limit exceeded" (verificado). Se deja en 256MB (doble
+  // del mínimo real) para que funcione en cualquier entorno (el default de Node
+  // es 32MB, insuficiente para el coste endurecido).
+  const derived = crypto.scryptSync(plain, salt, KEYLEN, {
+    N: SCRYPT_N,
+    r: SCRYPT_R,
+    p: SCRYPT_P,
+    maxmem: 256 * 1024 * 1024
+  });
   return [
     'scrypt', SCRYPT_N, SCRYPT_R, SCRYPT_P,
     salt.toString('base64'),
@@ -69,7 +89,14 @@ function verifyPassword(plain, stored) {
   if (!Number.isFinite(N) || !Number.isFinite(r) || !Number.isFinite(p)) return false;
 
   try {
-    const derived = crypto.scryptSync(plain, salt, expected.length, { N, r, p });
+    // maxmem se deriva de los parámetros que el propio hash guarda (N, r), no de
+    // las constantes del módulo, para que los hashes ANTIGUOS (N menor) verifiquen
+    // igual. Se usa 256MB como tope (cómodo para N=65536 en Node v24/OpenSSL 3) y
+    // un mínimo equivalente para N altos; ante params inválidos/absurdos scrypt
+    // lanza y el catch devuelve false (sin DoS por memoria).
+    const derived = crypto.scryptSync(plain, salt, expected.length, {
+      N, r, p, maxmem: Math.max(256 * 1024 * 1024, 128 * r * N)
+    });
     return derived.length === expected.length && crypto.timingSafeEqual(derived, expected);
   } catch {
     return false;

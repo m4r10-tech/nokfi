@@ -1,6 +1,6 @@
 # Nokfi — Documento maestro del producto
 
-> Última actualización: **2026-08-16**. Estado: **producción en vivo bajo HTTPS con
+> Última actualización: **2026-09-14**. Estado: **producción en vivo bajo HTTPS con
 > Cloudflare (Full strict) y cobros reales Stripe**.
 >
 > Este es el documento de referencia del producto Nokfi. Para el contrato técnico
@@ -115,7 +115,7 @@ nokfi/
 │   ├── middleware/     # requireLicense.js
 │   ├── routes/         # auth.js, proxy.js, payments.js, webhooks.js, admin.js, profile.js, analyses
 │   ├── utils/          # password.js (scrypt), mailer.js (Resend), sanitize.js
-│   └── test/           # e2e.test.js (94/94 PASS)
+│   └── test/           # e2e.test.js (107/107 PASS)
 ├── frontend/           # PWA — React + Vite + Tailwind
 │   └── src/
 │       ├── pages/      # Landing, Login, Reveal, ResetPassword, Pricing, Home,
@@ -176,6 +176,21 @@ ASVS completada con **14 hallazgos corregidos**. `npm audit` del backend:
 Cabeceras de seguridad servidas por Nginx (HSTS, CSP con `frame-ancestors 'none'`,
 X-Frame-Options DENY, nosniff, Referrer-Policy, Permissions-Policy). En el edge,
 Cloudflare aporta anti-DDoS + WAF (ver `deploy.md`).
+
+**Auditoría de seguridad (2026-09) — endurecimientos aplicados:**
+- **Tokens hasheados en reposo**: las sesiones y los reset-tokens se persisten en
+  la BD SOLO como su **SHA-256** (64 hex minúsculas), nunca en texto plano. El
+  token crudo (64 hex MAYÚSCULAS) viaja solo una vez en la respuesta y vive en
+  memoria del cliente. Migración in-place de las filas preexistentes
+  (`hashTokensAtRest`) — idempotente y NO destructiva: no revoca sesiones activas
+  ni enlaces de reset pendientes.
+- **scrypt endurecido a N=2^16** (~65536): el hash de la contraseña es el único
+  secreto real (la clave es semi-pública, va en el email de bienvenida). Requiere
+  `maxmem` a scryptSync (Node v24/OpenSSL 3 usa >64MB; 256MB de tope). Los hashes
+  viejos (N=2^14) siguen verificando — `verifyPassword` lee N/r/p del propio hash.
+- **Rate-limiter dedicado a `create-checkout`** (10/min por IP): defensa en
+  profundidad sobre el limiter general, evita abusar creando Checkout Sessions de
+  Stripe (coste/ruido) en un endpoint pre-pago sin `requireLicense`.
 
 Detalle de cada endpoint y sus códigos de error: ver [`api.md`](api.md).
 
@@ -305,7 +320,58 @@ zonas 4 para identificar secciones de la hoja.
 - ✅ **Mailer Resend** — dominio `nokfi.app` verificado, `noreply@nokfi.app`
   funcionando (probe real `sent:true`).
 - ✅ **Historial de análisis** (`/api/analyses`), **perfil de empresa**
-  (`/api/profile`), e2e **94/94 PASS**.
+  (`/api/profile`), e2e **107/107 PASS**.
+- ✅ **Auditoría de seguridad (2026-09)** — 3 endurecimientos aplicados y
+  verificados (107/107 PASS): tokens hasheados en reposo (sesión + reset),
+  scrypt a N=2^16, y rate-limiter dedicado a `create-checkout`. Detalle en §7.
 - ⏳ **Opcional / no bloqueante (cosmético)**: forwarding de
   `info@/help@/soporte@nokfi.app` vía Namecheap (gratis, CF no proxya MX/TXT).
   Deuda H (cuota IA TOCTOU bajo concurrencia) documentada en `deploy.md` §Deudas.
+
+---
+
+## 21. Últimos cambios realizados (handoff 2026-09-14)
+
+**Trabajo en curso**: auditoría de seguridad del backend. Estado: **COMPLETADO y
+verificado (107/107 e2e PASS)**. Todo lo de abajo está aplicado en el working tree
+y validado con el suite completo; falta commit/deploy (decisión del usuario).
+
+**Cambios (3 archivos backend):**
+
+1. **`backend/db/database.js` — tokens hasheados en reposo (sesión + reset).**
+   - `hashToken()`: SHA-256 del token → 64 hex minúsculas.
+   - `createSession`, `createResetToken`: persisten `hashToken(token)`, devuelven
+     el token crudo una sola vez.
+   - `getSession`, `deleteSession`, `consumeResetToken`: hashean el token entrante
+     antes del lookup (los clientes siguen enviando el token crudo).
+   - Migración `hashTokensAtRest()` (idempotente, NO destructiva): hashea in-place
+     las filas planas preexistentes. Discriminador plano vs hasheado: 64 hex
+     MAYÚSCULAS = plano; minúsculas = ya hasheado (`GLOB '*[A-Z]*'`).
+2. **`backend/utils/password.js` — scrypt endurecido a N=2^16 (65536).**
+   - `SCRYPT_N = 16384 → 65536`. `hashPassword` y `verifyPassword` pasan
+     `maxmem` a `scryptSync`.
+   - ⚠️ **Gotcha de Node v24/OpenSSL 3**: `128*r*N` (64MB) NO basta → "memory
+     limit exceeded". Usar 256MB de tope (`Math.max(256MB, 128*r*N)` en verify).
+   - Hashes viejos siguen verificando (leen N/r/p del propio hash).
+3. **`backend/routes/payments.js` — rate-limiter dedicado a `create-checkout`.**
+   - `checkoutLimiter`: 10 req/min por IP, aplicado al POST de `create-checkout`
+     (endpoint pre-pago sin `requireLicense`, abusable para crear Checkout
+     Sessions de Stripe). Mensaje `rate_limited` en español, consistente con la API.
+
+**Nota de entorno (no es cambio de código)**: hubo que `npm rebuild better-sqlite3`
+en `backend/` porque el `better_sqlite3.node` estaba compilado para Node 22 (ABI
+127) y el Node activo ahora es v24 (ABI 137) → la carga fallaba con
+`ERR_DLOPEN_FAILED`. Tras el rebuild carga OK. Esto es un artefacto local de la
+máquina de dev, no un cambio que haya que deployar.
+
+**Cómo validar en la próxima sesión:**
+```bash
+cd backend && node test/e2e.test.js   # esperado: 107 OK / 0 FAIL
+```
+
+**Pendiente (decisión del usuario, no bloqueante):**
+- Commit + push de los 3 archivos (+ este doc).
+- Deploy al VPS (flujo estándar de `deploy.md` §8): `git pull` + `pm2 restart`.
+  ⚠️ En producción, al reiniciar el backend correrá `hashTokensAtRest()` la
+  primera vez → hasheará las sesiones/reset-tokens planos existentes (no revoca
+  nada). El scrypt N=2^16 es ~0.3-0.6s por hash, aceptable en auth de bajo volumen.

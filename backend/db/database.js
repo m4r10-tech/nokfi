@@ -44,6 +44,18 @@ const DB_PATH = process.env.DB_PATH || path.join(__dirname, 'nokfi.db');
 /** @type {import('better-sqlite3').Database} */
 let db = null;
 
+/**
+ * ⚠️ AUDITORÍA DE SEGURIDAD — hash de tokens en reposo.
+ * Tanto las sesiones como los reset-tokens se guardan en la BD SOLO como su
+ * SHA-256 (64 hex minúsculas), nunca en texto plano. El token crudo (64 hex
+ * MAYÚSCULAS, generado con crypto.randomBytes(32)) viaja solo en la respuesta
+ * de creación y en memoria del cliente. Así, una fuga de la base de datos no
+ * expone sesiones activas ni enlaces de reset reutilizables.
+ */
+function hashToken(token) {
+  return crypto.createHash('sha256').update(token).digest('hex');
+}
+
 /* ════════════════════════════════════════════════════════════
    INICIALIZACIÓN
 ════════════════════════════════════════════════════════════ */
@@ -197,6 +209,7 @@ function initDB() {
       runFingerprintMigration(db);
       runSubscriptionMigration(db);
       runTrialMigration(db);
+      hashTokensAtRest(db); // ⚠️ auditoría: hashear tokens planos preexistentes
 
       console.log('✅  Base de datos inicializada en', DB_PATH);
       resolve(db);
@@ -448,6 +461,42 @@ function runTrialMigration(database) {
   }
 }
 
+/**
+ * ⚠️ AUDITORÍA DE SEGURIDAD — migración "tokens hasheados en reposo".
+ * Antes, sessions.token y reset_tokens.token se guardaban en PLAINTEXT. Desde
+ * este cambio la app solo escribe el SHA-256 del token (hashToken). Esta
+ * migración hashea in-place las filas preexistentes para que el endurecimiento
+ * cubra también la historia, no solo las filas nuevas.
+ *
+ * Discriminador fiable entre plano y ya-hasheado: un token plano es 64 hex en
+ * MAYÚSCULAS (crypto.randomBytes(32).toString('hex') → A-F mayúsculas);
+ * un token ya hasheado (digest('hex')) es 64 hex en minúsculas. `token GLOB
+ * '*[A-Z]*'` solo casa los planos → idempotente y NO destructivo: no revoca
+ * sesiones activas ni enlaces de reset pendientes — el cliente conserva su
+ * token crudo, que al buscarlo se hashea y sigue coincidiendo.
+ */
+function hashTokensAtRest(database) {
+  const updS = database.prepare('UPDATE sessions SET token = ? WHERE id = ?');
+  const plaintextSessions = database
+    .prepare("SELECT id, token FROM sessions WHERE token GLOB '*[A-Z]*' AND length(token) = 64")
+    .all();
+  database.transaction(() => {
+    for (const r of plaintextSessions) updS.run(hashToken(r.token), r.id);
+  })();
+
+  const updR = database.prepare('UPDATE reset_tokens SET token = ? WHERE id = ?');
+  const plaintextReset = database
+    .prepare("SELECT id, token FROM reset_tokens WHERE token GLOB '*[A-Z]*' AND length(token) = 64")
+    .all();
+  database.transaction(() => {
+    for (const r of plaintextReset) updR.run(hashToken(r.token), r.id);
+  })();
+
+  if (plaintextSessions.length || plaintextReset.length) {
+    console.log(`✅  Migración tokens: hasheados ${plaintextSessions.length} sesiones y ${plaintextReset.length} reset-tokens`);
+  }
+}
+
 function getDB() {
   if (!db) throw new Error('Base de datos no inicializada — llama a initDB() primero');
   return db;
@@ -591,10 +640,12 @@ function createSession(license_id, ip = '') {
   const expires = new Date();
   expires.setDate(expires.getDate() + SESSION_TTL_DAYS);
 
+  // ⚠️ Auditoría: se persiste HASHED(token), no el token crudo (ver hashToken).
+  // El `token` crudo solo vuelve al cliente en la respuesta, una vez.
   getDB().prepare(`
     INSERT INTO sessions (token, license_id, expires_at, ip)
     VALUES (?, ?, ?, ?)
-  `).run(token, license_id, expires.toISOString(), ip);
+  `).run(hashToken(token), license_id, expires.toISOString(), ip);
 
   return { token, expires_at: expires.toISOString() };
 }
@@ -614,16 +665,18 @@ function createSession(license_id, ip = '') {
  */
 function getSession(token) {
   const db = getDB();
+  // Hashear el token entrante para casar con la columna en reposo (hashToken).
+  const hashed = hashToken(token);
   const session = db.prepare(
     "SELECT * FROM sessions WHERE token = ? AND expires_at > datetime('now')"
-  ).get(token);
+  ).get(hashed);
   if (!session) return null;
-  db.prepare("UPDATE sessions SET last_used = datetime('now') WHERE token = ?").run(token);
+  db.prepare("UPDATE sessions SET last_used = datetime('now') WHERE token = ?").run(hashed);
   return session;
 }
 
 function deleteSession(token) {
-  return getDB().prepare('DELETE FROM sessions WHERE token = ?').run(token);
+  return getDB().prepare('DELETE FROM sessions WHERE token = ?').run(hashToken(token));
 }
 
 function deleteSessionsForLicense(license_id) {
@@ -643,10 +696,11 @@ function createResetToken(license_id, purpose, ttlMinutes = 15) {
   const expires = new Date();
   expires.setMinutes(expires.getMinutes() + ttlMinutes);
 
+  // ⚠️ Auditoría: se persiste HASHED(token), no el crudo (ver hashToken).
   getDB().prepare(`
     INSERT INTO reset_tokens (token, purpose, license_id, expires_at)
     VALUES (?, ?, ?, ?)
-  `).run(token, purpose, license_id, expires.toISOString());
+  `).run(hashToken(token), purpose, license_id, expires.toISOString());
 
   return { token, expires_at: expires.toISOString() };
 }
@@ -656,7 +710,7 @@ function consumeResetToken(token, purpose) {
   const row = db.prepare(`
     SELECT * FROM reset_tokens
     WHERE token = ? AND purpose = ? AND used = 0 AND expires_at > datetime('now')
-  `).get(token, purpose);
+  `).get(hashToken(token), purpose);
   if (!row) return null;
   db.prepare('UPDATE reset_tokens SET used = 1 WHERE id = ?').run(row.id);
   return row;

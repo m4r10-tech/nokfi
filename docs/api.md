@@ -19,6 +19,11 @@
   en `localhost:3001`; frontend y backend mismo origen; Cloudflare en el edge).
 - Todas las rutas autenticadas usan `Authorization: Bearer <token>` (sesión de
   usuario) o `Authorization: Bearer <ADMIN_SECRET>` (panel admin).
+- **Seguridad de tokens (auditoría 2026-09)**: la sesión (`sessions.token`) y los
+  reset-tokens (`reset_tokens.token`) se guardan en la BD **hasheados con SHA-256**
+  (64 hex minúsculas), nunca en texto plano. El token crudo viaja una sola vez en
+  la respuesta de creación. La API es transparente a esto: el cliente siempre
+  envía el token crudo en el header `Authorization: Bearer`.
 - Todas las respuestas son JSON.
 - Formato de error estándar: `{ "error": "código_snake_case", "message"?: "texto" }`.
   El campo `error` es estable y pensado para lógica del frontend (switch/if). El
@@ -257,6 +262,7 @@ Crea una Checkout Session en modo **suscripción** mensual.
 | 500 | `{ error: "stripe_price_not_configured" }` | Falta `STRIPE_PRICE_<PLAN>` (**Deuda B** — price_id no configurado) |
 | 502 | `{ error: "stripe_error" }` | Stripe devolvió error |
 | 500 | `{ error: "internal_error" }` | Excepción |
+| 429 | `{ error: "rate_limited" }` | **Rate-limit propio** (10 req/min por IP) — defensa en profundidad sobre el limiter general (**auditoría 2026-09**) |
 
 El plan **mini** lleva `subscription_data[trial_period_days]=14` (tarjeta
 obligatoria, no cobra al instante; cobra el día 14). pro/max sin trial. El
