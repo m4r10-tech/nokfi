@@ -50,6 +50,7 @@ const {
 } = require('../db/database');
 
 const { sendLicenseKeyEmail, sendLicenseRevokedEmail } = require('../utils/mailer');
+const { fetchWithTimeout } = require('../utils/http');
 
 // Fuente única de planes válidos (config/plans.js). Antes era un literal local
 // ['mini','pro','max'] duplicado en payments.js/admin.js/database.js → drift.
@@ -398,12 +399,14 @@ async function handleStripeInvoicePaymentFailed(event, ip) {
  *  trial sean consistentes entre la creación y la lectura. */
 async function fetchStripeSubscription(subId) {
   if (!process.env.STRIPE_SECRET_KEY) throw new Error('STRIPE_SECRET_KEY no configurado');
-  const res = await fetch(`https://api.stripe.com/v1/subscriptions/${subId}`, {
+  // Timeout 30s: si la API de Stripe cuelga, el webhook falla rápido y Stripe
+  // reintenta el evento — mejor que un worker de PM2 con el socket colgado.
+  const res = await fetchWithTimeout(`https://api.stripe.com/v1/subscriptions/${subId}`, {
     headers: {
       'Authorization': `Bearer ${process.env.STRIPE_SECRET_KEY}`,
       'Stripe-Version': require('../config/stripe-version')
     }
-  });
+  }, 30000);
   if (!res.ok) throw new Error(`Stripe devolvió ${res.status}`);
   return res.json();
 }

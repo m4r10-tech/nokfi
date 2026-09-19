@@ -132,6 +132,61 @@ export default {
     choosePlan: 'Suscribirme',
     finalTitle: 'Tu negocio, bajo control.',
     finalCta: 'Empezar ahora',
-    finalLogin: 'Ya tengo licencia — iniciar sesión'
+    finalLogin: 'Ya tengo licencia — iniciar sesión',
+    faqHeading: 'Preguntas frecuentes',
+    faqItems: [
+      { q: '¿Qué es Nokfi?', a: 'Una aplicación web de diagnóstico financiero para autónomos y pymes: un cuestionario guiado, análisis de tus hojas de Excel y PDF con IA, calculadoras financieras e informes exportables a PDF y Excel.' },
+      { q: '¿Tengo que instalar algo o subir mis archivos?', a: 'No. Funciona en el navegador, sin instalar nada. Tus archivos Excel y PDF se leen localmente en tu propio dispositivo: nunca se suben a nuestros servidores.' },
+      { q: '¿Cómo funciona la prueba gratuita?', a: 'El plan Mini incluye 14 días gratis. Se pide una tarjeta al registrarte, pero no se cobra nada hasta que termina la prueba. Si cancelas antes, no pagas.' },
+      { q: '¿Puedo cambiar de plan o cancelar cuando quiera?', a: 'Sí, sin permanencia. Desde Configuración accedes al portal de Stripe para cambiar de plan o cancelar; los cambios se aplican al final del periodo en curso.' },
+      { q: '¿En qué se diferencian los planes?', a: 'Todos incluyen las mismas funciones; cambia la cuota diaria de análisis con IA: 10 al día en Mini, 50 en Pro y 130 en Max.' }
+    ],
+    faqPrivacyLink: '¿Qué hacemos con tus datos? Lee la política de privacidad',
+    privacyLink: 'Privacidad'
+  },
+  notFound: {
+    title: 'Página no encontrada',
+    desc: 'La página que buscas no existe o ha cambiado de dirección.',
+    cta: 'Volver al inicio'
+  },
+  meta: {
+    landingTitle: 'Nokfi — Tu negocio, bajo control',
+    landingDesc: 'Nokfi — Diagnóstico financiero y análisis de datos con IA para autónomos y pymes.',
+    pricingTitle: 'Planes y precios — Nokfi',
+    pricingDesc: 'Planes de suscripción de Nokfi: Mini, Pro y Max. Prueba gratis 14 días, sin permanencia.',
+    loginTitle: 'Iniciar sesión — Nokfi',
+    resetTitle: 'Restablecer contraseña — Nokfi',
+    revealTitle: 'Tu licencia — Nokfi',
+    privacyTitle: 'Política de privacidad — Nokfi',
+    privacyDesc: 'Cómo trata Nokfi tus datos: qué guardamos, qué no, y qué servicios intervienen.'
+  },
+  privacy: {
+    title: 'Política de privacidad',
+    updated: 'Última actualización: septiembre de 2026',
+    intro: 'Esta política describe, sin letra pequeña, qué datos trata Nokfi (nokfi.app), para qué y qué servicios de terceros intervienen. Refleja exactamente cómo funciona la aplicación.',
+    sections: [
+      { h: 'Responsable y contacto', ps: ['El responsable del tratamiento es Nokfi (nokfi.app). Para cualquier cuestión de privacidad o para ejercer tus derechos, escribe a info@nokfi.app.'] },
+      { h: 'Qué datos tratamos', list: [
+        'Cuenta: tu email, tu clave de licencia y tu contraseña. La contraseña se almacena únicamente como hash criptográfico (scrypt); nunca en texto plano.',
+        'Perfil de empresa (opcional): nombre, sector, tamaño y principales gastos, usados para personalizar los análisis.',
+        'Historial de análisis: guardamos el informe generado por la IA y el tamaño del contenido analizado — no el contenido completo de tus archivos.',
+        'Suscripción: identificadores de cliente y suscripción de Stripe, plan y estado. Nunca vemos ni almacenamos los datos de tu tarjeta.',
+        'Registros técnicos: dirección IP y eventos de seguridad (inicios de sesión, errores) para proteger el servicio.'
+      ] },
+      { h: 'Tus archivos no se suben a nuestros servidores', ps: [
+        'Los archivos Excel y PDF que analizas se leen localmente, en tu propio navegador. Nunca se suben ni se almacenan en nuestros servidores.',
+        'Para generar el análisis, el texto extraído de tu archivo se envía, a través de nuestro servidor, al servicio de inteligencia artificial.'
+      ] },
+      { h: 'Servicios de terceros que intervienen', list: [
+        'Stripe: procesa los pagos y gestiona las suscripciones.',
+        'Google Gemini: genera los análisis con IA. Con el plan actual de este servicio, Google puede utilizar los contenidos enviados según sus propios términos; evita incluir datos especialmente sensibles en los análisis.',
+        'Resend: envía los emails transaccionales (tu clave de licencia, recuperación de contraseña).',
+        'Cloudflare: red de distribución y seguridad que protege el acceso a la web.'
+      ] },
+      { h: 'Cookies y analítica', ps: ['Nokfi no utiliza cookies de seguimiento ni herramientas de analítica de terceros. Tu sesión se guarda en el almacenamiento local de tu navegador.'] },
+      { h: 'Conservación y eliminación', ps: ['Conservamos tus datos mientras tu licencia esté activa. Si la licencia se elimina, se borran con ella tu perfil, tu historial de análisis y tus sesiones.'] },
+      { h: 'Tus derechos', ps: ['Puedes ejercer tus derechos de acceso, rectificación, supresión, portabilidad y oposición escribiendo a info@nokfi.app. También puedes reclamar ante la Agencia Española de Protección de Datos (aepd.es).'] },
+      { h: 'Seguridad', ps: ['Aplicamos HTTPS en todo el servicio, contraseñas hasheadas con scrypt, tokens de sesión y de recuperación almacenados como hash, y copias de seguridad periódicas de la base de datos en el servidor.'] }
+    ]
   }
 };

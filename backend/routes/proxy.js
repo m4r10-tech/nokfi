@@ -29,6 +29,7 @@ const express = require('express');
 const router = express.Router();
 const { requireLicense } = require('../middleware/requireLicense');
 const { audit, countAiAnalysesToday, aiQuotaForPlan, reserveAiSlot, releaseAiSlot, createAnalysis } = require('../db/database');
+const { fetchWithTimeout } = require('../utils/http');
 
 const MAX_PROMPT_LENGTH = 50000; // protección básica contra abuso/prompts gigantes
 const DEFAULT_MAX_TOKENS = 1500;
@@ -102,7 +103,10 @@ router.post('/ai', requireLicense, async (req, res) => {
     const { day: usageDay, slot: reservedSlot } = reservation;
     releaseUsage = () => releaseAiSlot(req.license.id, usageDay, reservedSlot);
 
-    const aiRes = await fetch(
+    // fetchWithTimeout (60s): si Gemini acepta la conexión pero no responde
+    // nunca, el request aborta y el catch libera el slot de cuota — sin el
+    // timeout el slot quedaría retenido hasta reiniciar el proceso.
+    const aiRes = await fetchWithTimeout(
       `https://generativelanguage.googleapis.com/v1beta/models/${model}:generateContent`,
       {
         method: 'POST',

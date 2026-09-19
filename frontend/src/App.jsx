@@ -1,4 +1,4 @@
-import { Routes, Route, Navigate } from 'react-router-dom';
+import { Routes, Route } from 'react-router-dom';
 import { AuthProvider } from './context/AuthContext';
 import { ThemeProvider } from './context/ThemeContext';
 import { LangProvider } from './context/LangContext';
@@ -23,6 +23,8 @@ import Historial from './pages/Historial';
 import Calculadoras from './pages/Calculadoras';
 import Informes from './pages/Informes';
 import Configuracion from './pages/Configuracion';
+import Privacidad from './pages/Privacidad';
+import NotFound from './pages/NotFound';
 
 export default function App() {
   return (
@@ -35,6 +37,7 @@ export default function App() {
             <Route path="/reset-password" element={<ResetPassword />} />
             <Route path="/reveal" element={<Reveal />} />
             <Route path="/pricing" element={<Pricing />} />
+            <Route path="/privacidad" element={<Privacidad />} />
 
             <Route
               path="/app"
@@ -59,7 +62,8 @@ export default function App() {
               <Route path="configuracion" element={<Configuracion />} />
             </Route>
 
-            <Route path="*" element={<Navigate to="/login" replace />} />
+            {/* 404 real (antes redirigía a /login = soft 404 para crawlers) */}
+            <Route path="*" element={<NotFound />} />
           </Routes>
         </AuthProvider>
       </LangProvider>

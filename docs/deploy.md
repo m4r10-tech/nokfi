@@ -203,3 +203,40 @@ Todo lo crítico está resuelto. Restos **no bloqueantes / opcionales**:
   `active` con `trial_ends_at` futuro. El MRR la excluye por campos.
 - El `CHECK(payment_provider IN (...))` se conserva como documentación histórica,
   no es deuda a limpiar.
+## 10. Backups de la base de datos (2026-09-19)
+
+Script `backend/scripts/backup-db.sh` (en el repo): copia consistente en caliente
+vía `sqlite3 .backup` (seguro con WAL), verificación `PRAGMA integrity_check`
+(borra la copia si falla, exit 1) y retención de 14 días. Destino:
+`backend/db/backups/` (git-ignored).
+
+Para activarlo en el VPS, añadir al cron de `deploy` (`crontab -e`):
+
+```cron
+30 3 * * * /home/deploy/nokfi-fase3/backend/scripts/backup-db.sh >> /home/deploy/nokfi-fase3/backend/db/backups/backup.log 2>&1
+```
+
+Notas:
+- El script acepta `DB_PATH` como override; por defecto resuelve
+  `backend/db/nokfi.db` relativo a su propia ubicación.
+- Requiere el binario `sqlite3` en el VPS (`sudo apt install sqlite3` si falta).
+- Las copias viven en el mismo disco: no sustituyen un backup off-box, pero
+  cubren corrupción/borrado accidental de la DB.
+
+## 11. Monitor externo (pendiente, requiere cuenta del usuario)
+
+UptimeRobot (free) o similar apuntando a `https://nokfi.app/health` cada 5 min,
+con alerta por email. No se puede crear desde Claude Code (necesita cuenta).
+
+## 12. Notas post-auditoría before-deploy (2026-09-19)
+
+- Tras el próximo `git pull` en el VPS, ejecutar `npm audit fix` en
+  `backend/` (el `package-lock.json` actualizado ya va en el repo; el fix
+  asegura node_modules alineado). Frontend: **no** aplicar `npm audit fix
+  --force` — los fixes restantes son majors breaking (react-router 7, vite 8,
+  jspdf 4); ver `proyecto.md` §22.
+- Redirect `www.nokfi.app → nokfi.app` (301): anotado como pendiente en
+  `deploy/nginx-nokfi.conf`; requiere editar el server block y recargar Nginx
+  (sudo, usuario).
+- `robots.txt` y `og-image.png` se sirven desde `frontend/dist` (los copia el
+  build de Vite desde `public/`); sin config extra de Nginx.

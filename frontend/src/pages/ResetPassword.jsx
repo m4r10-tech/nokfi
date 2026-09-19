@@ -5,6 +5,7 @@ import { authApi } from '../middleware/api';
 import { useAuth } from '../context/AuthContext';
 import { useLang } from '../context/LangContext';
 import Logo from '../components/Logo';
+import { usePageMeta } from '../hooks/usePageMeta';
 
 /**
  * /reset-password (?token=... en el paso de confirmación)
@@ -17,6 +18,8 @@ import Logo from '../components/Logo';
 export default function ResetPassword() {
   const [searchParams] = useSearchParams();
   const token = searchParams.get('token');
+  const { t } = useLang();
+  usePageMeta(t('meta.resetTitle'));
   return token ? <ConfirmStep token={token} /> : <RequestStep />;
 }
 

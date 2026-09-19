@@ -46,6 +46,7 @@ const rateLimit = require('express-rate-limit');
 const { PLANS, coercePlan, planHasTrial, TRIAL_DAYS, VALID_PLANS } = require('../config/plans');
 // Misma versión de API que routes/webhooks.js (un sólo declarador).
 const STRIPE_API_VERSION = require('../config/stripe-version');
+const { fetchWithTimeout } = require('../utils/http');
 
 const EMAIL_REGEX = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
 
@@ -175,7 +176,9 @@ router.post('/stripe/create-checkout', checkoutLimiter, async (req, res) => {
       params.set('subscription_data[trial_period_days]', String(TRIAL_DAYS));
     }
 
-    const stripeRes = await fetch('https://api.stripe.com/v1/checkout/sessions', {
+    // Timeout 30s: una API de pagos colgada no debe retener el request del
+    // usuario indefinidamente (antes: fetch sin límite de tiempo).
+    const stripeRes = await fetchWithTimeout('https://api.stripe.com/v1/checkout/sessions', {
       method: 'POST',
       headers: {
         'Authorization': `Bearer ${process.env.STRIPE_SECRET_KEY}`,
@@ -183,7 +186,7 @@ router.post('/stripe/create-checkout', checkoutLimiter, async (req, res) => {
         'Stripe-Version': STRIPE_API_VERSION
       },
       body: params.toString()
-    });
+    }, 30000);
 
     if (!stripeRes.ok) {
       const errBody = await stripeRes.text();
@@ -229,7 +232,7 @@ router.post('/stripe/create-portal-session', requireLicense, async (req, res) =>
 
   const returnUrl = `${process.env.APP_PUBLIC_URL}/app/configuracion`;
   try {
-    const portalRes = await fetch('https://api.stripe.com/v1/billing_portal/sessions', {
+    const portalRes = await fetchWithTimeout('https://api.stripe.com/v1/billing_portal/sessions', {
       method: 'POST',
       headers: {
         'Authorization': `Bearer ${process.env.STRIPE_SECRET_KEY}`,
@@ -240,7 +243,7 @@ router.post('/stripe/create-portal-session', requireLicense, async (req, res) =>
         'customer': license.stripe_customer_id,
         'return_url': returnUrl
       }).toString()
-    });
+    }, 30000);
 
     if (!portalRes.ok) {
       const errBody = await portalRes.text();

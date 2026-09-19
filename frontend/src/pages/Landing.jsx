@@ -5,6 +5,7 @@ import { useLang } from '../context/LangContext';
 import Logo from '../components/Logo';
 import PlanCards from '../components/PlanCards';
 import { usePlans } from '../hooks/usePlans';
+import { usePageMeta } from '../hooks/usePageMeta';
 
 /**
  * Landing pública — la home de Nokfi en nokfi.app (sección 13 del proyecto).
@@ -46,6 +47,8 @@ export default function Landing() {
   const navigate = useNavigate();
   const { plans, failed, notLoaded } = usePlans();
   const features = t('landing.aboutFeatures');
+  const faqItems = t('landing.faqItems');
+  usePageMeta(t('meta.landingTitle'), t('meta.landingDesc'));
 
   return (
     <div className="min-h-screen flex flex-col" style={{ background: 'var(--bg-base)' }}>
@@ -118,6 +121,27 @@ export default function Landing() {
             ctaLabel={t('landing.choosePlan')} onChoose={() => navigate('/pricing')} loadingId={null} />
         </section>
 
+        {/* FAQ — solo información real del producto (planes, trial, cuotas,
+            procesado local de archivos). Las respuestas viven en i18n. */}
+        <section className="max-w-3xl mx-auto px-4 py-12 w-full">
+          <h2 className="text-xl font-semibold mb-6 text-center" style={{ color: 'var(--text-primary)' }}>{t('landing.faqHeading')}</h2>
+          <div className="flex flex-col gap-3">
+            {Array.isArray(faqItems) && faqItems.map((f, i) => (
+              <details key={i} className="rounded-xl px-5 py-4"
+                       style={{ background: 'var(--surface-1)', border: '0.5px solid var(--border)' }}>
+                <summary className="text-sm font-medium cursor-pointer select-none"
+                         style={{ color: 'var(--text-primary)' }}>{f.q}</summary>
+                <p className="mt-2 text-sm" style={{ color: 'var(--text-secondary)' }}>{f.a}</p>
+              </details>
+            ))}
+          </div>
+          <p className="mt-5 text-center text-sm">
+            <Link to="/privacidad" className="hover:underline" style={{ color: 'var(--accent)' }}>
+              {t('landing.faqPrivacyLink')} →
+            </Link>
+          </p>
+        </section>
+
         {/* CTA final */}
         <section className="max-w-5xl mx-auto px-4 py-12">
           <div className="rounded-2xl p-8 text-center flex flex-col items-center gap-4"
@@ -137,9 +161,14 @@ export default function Landing() {
 
       {/* Footer */}
       <footer className="border-t" style={{ borderColor: 'var(--border)' }}>
-        <div className="max-w-5xl mx-auto px-4 h-16 flex items-center justify-between">
+        <div className="max-w-5xl mx-auto px-4 h-16 flex items-center justify-between gap-3">
           <Logo variant="icon" />
-          <p className="text-xs" style={{ color: 'var(--text-muted)' }}>© Nokfi · {t('footer.rights')}</p>
+          <div className="flex items-center gap-4">
+            <Link to="/privacidad" className="text-xs hover:underline" style={{ color: 'var(--text-muted)' }}>
+              {t('landing.privacyLink')}
+            </Link>
+            <p className="text-xs" style={{ color: 'var(--text-muted)' }}>© Nokfi · {t('footer.rights')}</p>
+          </div>
           <LangSwitch />
         </div>
       </footer>

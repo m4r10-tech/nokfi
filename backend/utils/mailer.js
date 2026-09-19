@@ -33,7 +33,10 @@ async function dispatch({ to, subject, html }) {
 }
 
 async function dispatchViaResend({ to, subject, html }) {
-  const res = await fetch('https://api.resend.com/emails', {
+  // Timeout 15s: el envío es fire-and-forget (los callers ya capturan el fallo),
+  // pero sin límite un Resend colgado retendría el socket para siempre.
+  const { fetchWithTimeout } = require('./http');
+  const res = await fetchWithTimeout('https://api.resend.com/emails', {
     method: 'POST',
     headers: {
       'Authorization': `Bearer ${process.env.RESEND_API_KEY}`,
@@ -45,7 +48,7 @@ async function dispatchViaResend({ to, subject, html }) {
       subject,
       html
     })
-  });
+  }, 15000);
 
   if (!res.ok) {
     const body = await res.text().catch(() => '');

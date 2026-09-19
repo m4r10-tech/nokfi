@@ -5,6 +5,7 @@ import { useLang } from '../context/LangContext';
 import Logo from '../components/Logo';
 import PlanCards from '../components/PlanCards';
 import { usePlans } from '../hooks/usePlans';
+import { usePageMeta } from '../hooks/usePageMeta';
 
 /**
  * Página pública de precios — flujo de ALTA de una suscripción (Fase 3).
@@ -25,6 +26,7 @@ export default function Pricing() {
   const [loadingPlan, setLoadingPlan] = useState(null); // plan id en curso, o null
   const [error, setError] = useState(null);
   const { plans, failed, notLoaded } = usePlans(); // catálogo desde /plans (anti-drift)
+  usePageMeta(t('meta.pricingTitle'), t('meta.pricingDesc'));
 
   const subscribe = async (planId) => {
     setError(null);

@@ -6,6 +6,7 @@ import { useAuth } from '../context/AuthContext';
 import { useLang } from '../context/LangContext';
 import PasswordGenerator from '../components/PasswordGenerator';
 import Logo from '../components/Logo';
+import { usePageMeta } from '../hooks/usePageMeta';
 
 const KEY_REGEX = /^[A-Fa-f0-9]{4}-[A-Fa-f0-9]{4}-[A-Fa-f0-9]{4}-[A-Fa-f0-9]{4}$/;
 
@@ -24,6 +25,7 @@ export default function Login() {
   const { applySession } = useAuth();
   const { t } = useLang();
   const navigate = useNavigate();
+  usePageMeta(t('meta.loginTitle'));
 
   const validate = () => {
     if (!email.trim() || !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) {

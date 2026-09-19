@@ -3,6 +3,7 @@ import { useSearchParams, useNavigate } from 'react-router-dom';
 import { Loader2, CheckCircle2, KeyRound, Copy, Check, AlertCircle } from 'lucide-react';
 import { paymentsApi } from '../middleware/api';
 import { useLang } from '../context/LangContext';
+import { usePageMeta } from '../hooks/usePageMeta';
 import Logo from '../components/Logo';
 
 /**
@@ -18,6 +19,8 @@ import Logo from '../components/Logo';
 export default function Reveal() {
   const [searchParams] = useSearchParams();
   const session_id = searchParams.get('session_id');
+  const { t } = useLang();
+  usePageMeta(t('meta.revealTitle'));
   return <RevealStep session_id={session_id} />;
 }
 

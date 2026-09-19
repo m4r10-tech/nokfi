@@ -7,6 +7,13 @@
 node_modules/
 dist/
 
+# Base de datos local y backups — datos reales, nunca en el repo
+backend/db/*.db
+backend/db/*.db-journal
+backend/db/*.db-wal
+backend/db/*.db-shm
+backend/db/backups/
+
 # Artefactos de sesión de desarrollo / capturas
 claude-photos/
 md/

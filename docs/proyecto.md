@@ -375,3 +375,70 @@ cd backend && node test/e2e.test.js   # esperado: 107 OK / 0 FAIL
   ⚠️ En producción, al reiniciar el backend correrá `hashTokensAtRest()` la
   primera vez → hasheará las sesiones/reset-tokens planos existentes (no revoca
   nada). El scrypt N=2^16 es ~0.3-0.6s por hash, aceptable en auth de bajo volumen.
+## 22. Handoff 2026-09-19 — auditoría before-deploy (60 puntos)
+
+**Trabajo en curso**: auditoría pre-deploy de 60 puntos (20 seguridad / 20
+performance-APIs-robustez / 20 SEO-páginas). Estado: **COMPLETADO y verificado**
+(backend e2e 107/107 PASS, `npm run build` frontend OK). Falta commit/deploy
+(decisión del usuario). El informe completo punto a punto se entregó en la sesión;
+aquí queda el resumen operativo.
+
+**Cambios aplicados:**
+
+1. **`backend/utils/http.js` (nuevo) — `fetchWithTimeout(url, opts, ms)`.**
+   Wrapper de `fetch` con `AbortSignal.timeout`. Sin él, una llamada colgada a
+   Gemini/Stripe/Resend podía retener el socket de Express y (en el caso de
+   Gemini) un slot de cuota IA indefinidamente.
+   - `routes/proxy.js`: Gemini → 60s (default; el timeout libera el slot de
+     cuota reservado al abortar).
+   - `routes/payments.js`: `checkout/sessions` y `billing_portal/sessions` → 30s.
+   - `routes/webhooks.js`: `fetchStripeSubscription` → 30s.
+   - `utils/mailer.js`: Resend → 15s.
+2. **`backend/scripts/backup-db.sh` (nuevo, +x)** — backup consistente en caliente
+   con `sqlite3 "$DB" ".backup ..."`, verificación `PRAGMA integrity_check`
+   (borra la copia si falla), retención 14 días. Listo para cron:
+   `30 3 * * * /home/deploy/nokfi-fase3/backend/scripts/backup-db.sh >> /home/deploy/nokfi-fase3/backend/db/backups/backup.log 2>&1`
+3. **`.gitignore`** — ignorados `backend/db/*.db`, `*.db-wal/-shm/-journal` y
+   `backend/db/backups/` (antes ni tracked ni ignorados → riesgo de commitear
+   datos reales).
+4. **`backend`: `npm audit fix`** → 0 vulnerabilidades (morgan ≥1.12, qs vía
+   body-parser/express).
+5. **SEO/páginas públicas (frontend):**
+   - `src/hooks/usePageMeta.js` (nuevo): `document.title` + meta description por
+     página. Aplicado en Landing, Pricing, Login, ResetPassword, Reveal.
+   - `src/pages/NotFound.jsx` (nuevo): 404 real en vez de redirect a `/login`
+     (soft-404). Ruta `*` en `App.jsx`.
+   - `src/pages/Privacidad.jsx` (nuevo) + ruta `/privacidad`: política de
+     privacidad con contenido **solo real** (datos que sí se guardan, parseo
+     local de archivos, terceros Stripe/Gemini/Resend/Cloudflare, RGPD).
+   - `Landing.jsx`: sección FAQ (5 Q&A reales, i18n) + enlace a privacidad en
+     footer.
+   - `index.html`: canonical + OG/Twitter card (`og-image.png` 1200×630 generado
+     del favicon real, sin inventar imagen de marca).
+   - `public/robots.txt`: permite `/`, `/pricing`, `/privacidad`; disallow
+     `/app`, `/login`, `/reset-password`, `/reveal`, `/api/`.
+   - i18n `es.js`/`en.js`: claves `meta.*`, `landing.faq*`, `privacy.*`,
+     `notFound.*`.
+
+**Regla respetada**: nada inventado (sin métricas, testimonios, equipo, fotos,
+tiempos de respuesta ni datos de contacto que no existan).
+
+**Cómo validar:**
+```bash
+cd backend && node test/e2e.test.js   # 107 OK / 0 FAIL
+cd frontend && npm run build          # build OK; dist incluye robots.txt y og-image.png
+```
+
+**Pendiente tras este handoff (no bloqueante):**
+- Commit + push (usuario) → VPS: `git pull --ff-only`, `pm2 restart nokfi-backend --update-env`,
+  rebuild frontend, y opcional `npm audit fix` en el backend del VPS.
+- Activar el cron de backup en el VPS (línea de arriba).
+- Upgrades de majors del frontend (breaking, NO aplicados a propósito):
+  react-router-dom 6→7.18, vite 5→8 + vite-plugin-pwa, jspdf 2→4 +
+  jspdf-autotable 3→5. La DOMPurify vulnerable es la **nested de jspdf 2.5.2**
+  (solo la usa `jspdf.html()`, que Nokfi no usa); la DOMPurify directa ya es
+  3.4.15 (parcheada). xlsx sigue sin fix (riesgo aceptado, client-side only).
+- Forwarding `info@nokfi.app` (la página de privacidad lo cita como contacto
+  RGPD) — Namecheap gratis, ya en backlog.
+- Monitor externo (UptimeRobot free) sobre `/health` — requiere cuenta del usuario.
+- Redirect `www → apex` 301 en Nginx (anotado en `deploy/nginx-nokfi.conf`).
