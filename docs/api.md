@@ -118,6 +118,54 @@ Desde el enlace del email. **Setea contraseña y crea sesión** (no hace falta l
 > El reset por email **no** revoca sesiones previas. El reset forzado por admin
 > (ver §5) sí limpia sesiones.
 
+### Recuperación de acceso con OTP (olvido de clave y/o contraseña)
+
+Flujo de 3 pasos para quien **no recuerda su clave** (el reset clásico la exige).
+Prueba de identidad: posesión del buzón de email (OTP de 6 dígitos, 10 min,
+máx. 5 intentos, máx. 3 solicitudes/hora por email). El email NUNCA lleva la
+clave; esta solo se muestra en pantalla tras verificar el OTP. Todos bajo el
+`authLimiter` global de `/api/auth/*`.
+
+**Multi-licencia:** un email puede tener varias licencias activas. El
+`recovery_token` se ancla a la primera (FK obligatoria), pero
+`confirm-recovery` recibe `license_key` y aplica la nueva contraseña SOLO a
+esa licencia (validando que pertenece al email verificado).
+
+#### `POST /api/auth/request-recovery`
+**Body:** `{ email }`
+
+| Status | Body | Cuándo |
+|--------|------|--------|
+| 200 | `{ success: true, message }` | **Siempre** que el formato sea válido (anti-enumeración) |
+| 400 | `{ error: "invalid_input" }` | Email mal formado |
+| 429 | `{ error: "otp_limit_reached" }` | >3 OTP en la última hora para ese email |
+
+#### `POST /api/auth/verify-recovery-otp`
+**Body:** `{ email, code }` (code = 6 dígitos)
+
+| Status | Body | Cuándo |
+|--------|------|--------|
+| 200 | `{ success, recovery_token, keys: [{key, plan}] }` | OTP correcto; `recovery_token` vive 15 min |
+| 400 | `{ error: "invalid_code" }` | Código incorrecto, inexistente o expirado (misma respuesta) |
+| 429 | `{ error: "code_burned" }` | 5 intentos fallidos → código inutilizado, hay que pedir otro |
+
+#### `POST /api/auth/resend-recovered-keys`
+Reenvía las claves por email SIN consumir el token (acción repetible mientras viva).
+
+**Body:** `{ recovery_token }` → `200 { success, message }` | `400 invalid_or_expired_token` | `403 license_inactive`
+
+#### `POST /api/auth/confirm-recovery`
+Cambia la contraseña SOLO de la licencia indicada (del email verificado) y
+**crea sesión** en ella.
+
+**Body:** `{ recovery_token, license_key, new_password, device_name? }`
+
+| Status | Body | Cuándo |
+|--------|------|--------|
+| 200 | `{ success: true, token, expires_at, license }` | Contraseña cambiada, sesión activa |
+| 400 | `{ error: "missing_token" \| "invalid_input" \| "weak_password" \| "invalid_or_expired_token" \| "license_key_mismatch" }` | `license_key_mismatch`: la clave no pertenece al email verificado |
+| 403 | `{ error: "license_inactive" }` | revocada/suspendida en el ínterin |
+
 ### Shape del objeto `license` (`publicLicenseView`, común a activate/login/verify/confirm-password-reset)
 ```json
 {

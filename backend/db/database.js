@@ -125,8 +125,18 @@ function initDB() {
         CREATE TABLE IF NOT EXISTS reset_tokens (
           id          INTEGER PRIMARY KEY AUTOINCREMENT,
           token       TEXT    NOT NULL UNIQUE,
-          purpose     TEXT    NOT NULL CHECK(purpose IN ('reveal_key','password_reset')),
+          purpose     TEXT    NOT NULL CHECK(purpose IN ('reveal_key','password_reset','recovery')),
           license_id  INTEGER NOT NULL REFERENCES licenses(id) ON DELETE CASCADE,
+          used        INTEGER NOT NULL DEFAULT 0,
+          created_at  TEXT    NOT NULL DEFAULT (datetime('now')),
+          expires_at  TEXT    NOT NULL
+        );
+
+        CREATE TABLE IF NOT EXISTS otp_codes (
+          id          INTEGER PRIMARY KEY AUTOINCREMENT,
+          email       TEXT    NOT NULL,
+          code_hash   TEXT    NOT NULL,
+          attempts    INTEGER NOT NULL DEFAULT 0,
           used        INTEGER NOT NULL DEFAULT 0,
           created_at  TEXT    NOT NULL DEFAULT (datetime('now')),
           expires_at  TEXT    NOT NULL
@@ -192,6 +202,7 @@ function initDB() {
         CREATE INDEX IF NOT EXISTS idx_sessions_exp          ON sessions(expires_at);
         CREATE INDEX IF NOT EXISTS idx_payment_provider_evt  ON payment_events(provider, event_id);
         CREATE INDEX IF NOT EXISTS idx_reset_tokens_token     ON reset_tokens(token);
+        CREATE INDEX IF NOT EXISTS idx_otp_codes_email        ON otp_codes(email);
         CREATE INDEX IF NOT EXISTS idx_audit_license          ON audit_log(license_id);
         CREATE INDEX IF NOT EXISTS idx_audit_ts               ON audit_log(ts);
 
@@ -209,6 +220,7 @@ function initDB() {
       runFingerprintMigration(db);
       runSubscriptionMigration(db);
       runTrialMigration(db);
+      runRecoveryPurposeMigration(db);
       hashTokensAtRest(db); // ⚠️ auditoría: hashear tokens planos preexistentes
 
       console.log('✅  Base de datos inicializada en', DB_PATH);
@@ -299,6 +311,46 @@ function runFingerprintMigration(database) {
   });
 
   migrate();
+}
+
+/**
+ * Migración: ampliar el CHECK de reset_tokens.purpose con 'recovery'
+ * (flujo de recuperación de acceso con OTP — ver routes/auth.js).
+ * SQLite no permite ALTER de un CHECK → se reconstruye la tabla copiando
+ * TODAS las filas (a diferencia de la migración device_reset→password_reset,
+ * aquí no se descarta ninguna: los purposes existentes son todos válidos).
+ * Idempotente: si el DDL ya contiene 'recovery' es un no-op.
+ */
+function runRecoveryPurposeMigration(database) {
+  const row = database
+    .prepare(`SELECT sql FROM sqlite_master WHERE type='table' AND name='reset_tokens'`)
+    .get();
+  if (!row || !row.sql || row.sql.includes("'recovery'")) return; // ya migrado
+
+  const migrate = database.transaction(() => {
+    database.exec(`ALTER TABLE reset_tokens RENAME TO reset_tokens_old`);
+    database.exec(`
+      CREATE TABLE reset_tokens (
+        id          INTEGER PRIMARY KEY AUTOINCREMENT,
+        token       TEXT    NOT NULL UNIQUE,
+        purpose     TEXT    NOT NULL CHECK(purpose IN ('reveal_key','password_reset','recovery')),
+        license_id  INTEGER NOT NULL REFERENCES licenses(id) ON DELETE CASCADE,
+        used        INTEGER NOT NULL DEFAULT 0,
+        created_at  TEXT    NOT NULL DEFAULT (datetime('now')),
+        expires_at  TEXT    NOT NULL
+      )
+    `);
+    database.exec(`
+      INSERT INTO reset_tokens (id, token, purpose, license_id, used, created_at, expires_at)
+      SELECT id, token, purpose, license_id, used, created_at, expires_at
+      FROM reset_tokens_old
+    `);
+    database.exec(`DROP TABLE reset_tokens_old`);
+    database.exec(`CREATE INDEX IF NOT EXISTS idx_reset_tokens_token ON reset_tokens(token)`);
+  });
+
+  migrate();
+  console.log("✅  Migración reset_tokens: CHECK ampliado con 'recovery'");
 }
 
 /**
@@ -714,6 +766,109 @@ function consumeResetToken(token, purpose) {
   if (!row) return null;
   db.prepare('UPDATE reset_tokens SET used = 1 WHERE id = ?').run(row.id);
   return row;
+}
+
+/**
+ * Valida un reset-token SIN consumirlo (para acciones repetibles mientras el
+ * token vive — p.ej. reenviar las claves por email en el flujo de recuperación).
+ * Devuelve la fila o null. El consumo real lo hace consumeResetToken.
+ */
+function peekResetToken(token, purpose) {
+  return getDB().prepare(`
+    SELECT * FROM reset_tokens
+    WHERE token = ? AND purpose = ? AND used = 0 AND expires_at > datetime('now')
+  `).get(hashToken(token), purpose);
+}
+
+/* ════════════════════════════════════════════════════════════
+   OTP DE RECUPERACIÓN DE ACCESO (olvido de clave / contraseña)
+   Códigos de 6 dígitos, 10 min de validez, máx. 5 intentos,
+   máx. 3 solicitudes/hora por email. Se guardan SOLO hasheados
+   (mismo hashToken SHA-256 que sesiones y reset-tokens) y solo
+   puede haber un OTP vivo por email (el nuevo invalida al viejo).
+════════════════════════════════════════════════════════════ */
+
+const OTP_TTL_MINUTES = 10;
+const OTP_MAX_ATTEMPTS = 5;
+const OTP_MAX_PER_HOUR = 3;
+
+/** ¿Cuántos OTP se han generado para este email en la última hora? (límite anti-spam) */
+function countRecentOtps(email) {
+  const row = getDB().prepare(`
+    SELECT COUNT(*) AS n FROM otp_codes
+    WHERE email = ? AND created_at > datetime('now', '-1 hour')
+  `).get(String(email).trim().toLowerCase());
+  return row.n;
+}
+
+/**
+ * Genera un OTP de 6 dígitos para el email. Invalida los OTP previos no
+ * usados (solo uno vivo por email) y limpia los expirados (borrado perezoso).
+ * Devuelve el código EN CLARO (solo para enviarlo por email) + expires_at;
+ * en la tabla queda únicamente su SHA-256.
+ */
+function createOtp(email) {
+  const db = getDB();
+  const normalized = String(email).trim().toLowerCase();
+  const code = String(crypto.randomInt(0, 1000000)).padStart(6, '0');
+  const expires = new Date();
+  expires.setMinutes(expires.getMinutes() + OTP_TTL_MINUTES);
+
+  const tx = db.transaction(() => {
+    db.prepare(`DELETE FROM otp_codes WHERE expires_at <= datetime('now')`).run();
+    db.prepare(`UPDATE otp_codes SET used = 1 WHERE email = ? AND used = 0`).run(normalized);
+    db.prepare(`INSERT INTO otp_codes (email, code_hash, expires_at) VALUES (?, ?, ?)`)
+      .run(normalized, hashToken(code), expires.toISOString());
+  });
+  tx();
+
+  return { code, expires_at: expires.toISOString() };
+}
+
+/**
+ * Verifica un OTP. Devuelve { ok: true } si era correcto (y lo consume), o
+ * { ok: false, reason: 'no_code' | 'burned' | 'mismatch' }.
+ * - 'no_code': no hay OTP vivo para ese email (nunca se pidió o ya se usó).
+ * - 'burned': se llegó a OTP_MAX_ATTEMPTS intentos → el código queda inutilizado.
+ * - 'mismatch': código incorrecto (attempts++).
+ */
+function verifyOtp(email, code) {
+  const db = getDB();
+  const normalized = String(email).trim().toLowerCase();
+  const row = db.prepare(`
+    SELECT * FROM otp_codes
+    WHERE email = ? AND used = 0 AND expires_at > datetime('now')
+    ORDER BY id DESC LIMIT 1
+  `).get(normalized);
+
+  if (!row) return { ok: false, reason: 'no_code' };
+
+  if (row.attempts >= OTP_MAX_ATTEMPTS) {
+    db.prepare('UPDATE otp_codes SET used = 1 WHERE id = ?').run(row.id);
+    return { ok: false, reason: 'burned' };
+  }
+
+  if (row.code_hash !== hashToken(String(code).trim())) {
+    const attempts = row.attempts + 1;
+    db.prepare('UPDATE otp_codes SET attempts = ? WHERE id = ?').run(attempts, row.id);
+    if (attempts >= OTP_MAX_ATTEMPTS) {
+      db.prepare('UPDATE otp_codes SET used = 1 WHERE id = ?').run(row.id);
+      return { ok: false, reason: 'burned' };
+    }
+    return { ok: false, reason: 'mismatch' };
+  }
+
+  db.prepare('UPDATE otp_codes SET used = 1 WHERE id = ?').run(row.id);
+  return { ok: true };
+}
+
+/** Todas las licencias activas de un email (para mostrar sus claves tras el OTP). */
+function getActiveLicensesByEmail(email) {
+  return getDB().prepare(`
+    SELECT id, key, plan, status FROM licenses
+    WHERE email = ? AND status = 'active'
+    ORDER BY created_at ASC
+  `).all(String(email).trim().toLowerCase());
 }
 
 /* ════════════════════════════════════════════════════════════
@@ -1152,6 +1307,12 @@ module.exports = {
   cleanExpiredSessions,
   createResetToken,
   consumeResetToken,
+  peekResetToken,
+  createOtp,
+  verifyOtp,
+  countRecentOtps,
+  getActiveLicensesByEmail,
+  OTP_MAX_PER_HOUR,
   isPaymentEventProcessed,
   recordPaymentEvent,
   countAiAnalysesToday,

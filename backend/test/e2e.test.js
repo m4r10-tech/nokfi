@@ -1003,6 +1003,127 @@ async function main() {
     r => r.status === 200 && r.data.profile.companyName === ''
   );
 
+  // ═══════════════════════════════════════════════════════════
+  // RECUPERACIÓN DE ACCESO CON OTP (olvido de clave/contraseña)
+  // Emails dedicados para no chocar con el límite 3 OTP/hora de
+  // otras licencias del test. El mailer no envía emails reales en
+  // test (sin RESEND_API_KEY → skip silencioso).
+  // ═══════════════════════════════════════════════════════════
+  const { createOtp, countRecentOtps } = require('../db/database');
+
+  const recA = dbCreateLicense({ email: 'recovery-a@nokfi.local', plan: 'mini', password: 'RecoveryPass1!' });
+
+  // R1. request-recovery con email inexistente → 200 genérico (anti-enumeración)
+  await checkAsync('recovery: request email inexistente → 200 genérico',
+    post('/api/auth/request-recovery', { email: 'nadie-xyz@nokfi.local' }),
+    r => r.status === 200 && r.data.success === true
+  );
+  check('recovery: email inexistente NO crea OTP',
+    () => countRecentOtps('nadie-xyz@nokfi.local') === 0
+  );
+
+  // R2. request-recovery con email real → 200 genérico + OTP creado
+  await checkAsync('recovery: request email real → 200 genérico',
+    post('/api/auth/request-recovery', { email: 'recovery-a@nokfi.local' }),
+    r => r.status === 200 && r.data.success === true
+  );
+  check('recovery: email real crea 1 OTP',
+    () => countRecentOtps('recovery-a@nokfi.local') === 1
+  );
+
+  // R3. verify con código incorrecto → 400 invalid_code (attempts=1)
+  await checkAsync('recovery: verify código malo → 400 invalid_code',
+    post('/api/auth/verify-recovery-otp', { email: 'recovery-a@nokfi.local', code: '999998' }),
+    r => r.status === 400 && r.data.error === 'invalid_code'
+  );
+
+  // R4. 4 fallos más → en el 5º el código se quema → 429 code_burned
+  await post('/api/auth/verify-recovery-otp', { email: 'recovery-a@nokfi.local', code: '999998' });
+  await post('/api/auth/verify-recovery-otp', { email: 'recovery-a@nokfi.local', code: '999998' });
+  await post('/api/auth/verify-recovery-otp', { email: 'recovery-a@nokfi.local', code: '999998' });
+  await checkAsync('recovery: 5º intento fallido → 429 code_burned',
+    post('/api/auth/verify-recovery-otp', { email: 'recovery-a@nokfi.local', code: '999998' }),
+    r => r.status === 429 && r.data.error === 'code_burned'
+  );
+
+  // R5. OTP hasheado en reposo: createOtp devuelve el código en claro,
+  //     pero en la tabla solo hay SHA-256 (64 hex).
+  const otpReal = createOtp('recovery-a@nokfi.local');
+  check('recovery: OTP hasheado en reposo (no en claro en la tabla)',
+    () => {
+      const row = getDB().prepare('SELECT code_hash FROM otp_codes WHERE email = ? ORDER BY id DESC LIMIT 1')
+        .get('recovery-a@nokfi.local');
+      return row && row.code_hash !== otpReal.code && /^[0-9a-f]{64}$/.test(row.code_hash);
+    }
+  );
+
+  // R6. verify con el código correcto → 200 + recovery_token + keys
+  let recoveryToken = null;
+  await checkAsync('recovery: verify código correcto → 200 + recovery_token + keys',
+    post('/api/auth/verify-recovery-otp', { email: 'recovery-a@nokfi.local', code: otpReal.code }),
+    r => {
+      if (r.status === 200) recoveryToken = r.data.recovery_token;
+      return r.status === 200
+        && !!r.data.recovery_token
+        && Array.isArray(r.data.keys)
+        && r.data.keys.some(k => k.key === recA.key);
+    }
+  );
+
+  // R7. resend-recovered-keys con token vivo → 200 (no consume el token)
+  await checkAsync('recovery: resend keys con token vivo → 200',
+    post('/api/auth/resend-recovered-keys', { recovery_token: recoveryToken }),
+    r => r.status === 200 && r.data.success === true
+  );
+
+  // R8. confirm-recovery → cambia contraseña SOLO de la licencia elegida
+  //     (segunda licencia con el mismo email para probar el aislamiento)
+  const recA2 = dbCreateLicense({ email: 'recovery-a@nokfi.local', plan: 'pro', password: 'SecondLicense1!' });
+  await checkAsync('recovery: confirm-recovery sin license_key → 400 invalid_input',
+    post('/api/auth/confirm-recovery', { recovery_token: recoveryToken, new_password: 'NewRecoveryPass2!' }),
+    r => r.status === 400 && r.data.error === 'invalid_input'
+  );
+  await checkAsync('recovery: confirm-recovery con license_key → 200 + sesión',
+    post('/api/auth/confirm-recovery', { recovery_token: recoveryToken, license_key: recA.key, new_password: 'NewRecoveryPass2!' }),
+    r => r.status === 200 && r.data.success && !!r.data.token
+  );
+  await checkAsync('recovery: login con la nueva contraseña → 200',
+    post('/api/auth/login', { email: 'recovery-a@nokfi.local', license_key: recA.key, password: 'NewRecoveryPass2!' }),
+    r => r.status === 200
+  );
+  await checkAsync('recovery: la OTRA licencia del mismo email conserva su contraseña',
+    post('/api/auth/login', { email: 'recovery-a@nokfi.local', license_key: recA2.key, password: 'SecondLicense1!' }),
+    r => r.status === 200
+  );
+
+  // R9. confirm-recovery reusando el token → 400 (un solo uso)
+  await checkAsync('recovery: confirm-recovery token reusado → 400',
+    post('/api/auth/confirm-recovery', { recovery_token: recoveryToken, license_key: recA.key, new_password: 'AnotherPass3!' }),
+    r => r.status === 400 && r.data.error === 'invalid_or_expired_token'
+  );
+
+  // R9b. license_key que no pertenece al email verificado → 400 license_key_mismatch
+  const otpForMismatch = createOtp('recovery-a@nokfi.local');
+  const verifyMismatch = await post('/api/auth/verify-recovery-otp', { email: 'recovery-a@nokfi.local', code: otpForMismatch.code });
+  await checkAsync('recovery: license_key ajena al email → 400 license_key_mismatch',
+    post('/api/auth/confirm-recovery', {
+      recovery_token: verifyMismatch.data.recovery_token,
+      license_key: licenseKey, // clave de OTRA cuenta (testEmail)
+      new_password: 'AnotherPass3!'
+    }),
+    r => r.status === 400 && r.data.error === 'license_key_mismatch'
+  );
+
+  // R10. Límite 3 OTP/hora por email → el 4º request devuelve 429
+  dbCreateLicense({ email: 'recovery-b@nokfi.local', plan: 'mini' });
+  await post('/api/auth/request-recovery', { email: 'recovery-b@nokfi.local' });
+  await post('/api/auth/request-recovery', { email: 'recovery-b@nokfi.local' });
+  await post('/api/auth/request-recovery', { email: 'recovery-b@nokfi.local' });
+  await checkAsync('recovery: 4º OTP en una hora → 429 otp_limit_reached',
+    post('/api/auth/request-recovery', { email: 'recovery-b@nokfi.local' }),
+    r => r.status === 429 && r.data.error === 'otp_limit_reached'
+  );
+
   } catch (e) {
     console.error('TEST CRASH:', e.message);
     failed++;

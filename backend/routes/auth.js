@@ -12,6 +12,10 @@
  *   POST /api/auth/logout                → cerrar sesión actual
  *   POST /api/auth/request-password-reset → solicitar token de reset (envía email)
  *   POST /api/auth/confirm-password-reset → confirmar reset con el token + nueva contraseña
+ *   POST /api/auth/request-recovery       → recuperación por email: envía OTP de 6 dígitos
+ *   POST /api/auth/verify-recovery-otp    → verifica el OTP y revela las claves + recovery_token
+ *   POST /api/auth/resend-recovered-keys  → reenvía las claves por email (recovery_token vivo)
+ *   POST /api/auth/confirm-recovery       → cambio de contraseña opcional tras el OTP
  *   POST /api/auth/reveal-key            → (auth) revelar la clave sabiendo la contraseña
  *   POST /api/auth/change-password       → (auth) cambiar la contraseña
  */
@@ -32,13 +36,19 @@ const {
   deleteSession,
   createResetToken,
   consumeResetToken,
+  peekResetToken,
+  createOtp,
+  verifyOtp,
+  countRecentOtps,
+  getActiveLicensesByEmail,
+  OTP_MAX_PER_HOUR,
   audit
 } = require('../db/database');
 
 const { hashPassword, verifyPassword, isPasswordSet } = require('../utils/password');
 
 const { sanitizeFreeText } = require('../utils/sanitize'); // antes definido aquí abajo
-const { sendPasswordResetEmail } = require('../utils/mailer');
+const { sendPasswordResetEmail, sendRecoveryOtpEmail, sendRecoveredKeysEmail } = require('../utils/mailer');
 const { aiQuotaForPlan } = require('../db/database');
 
 const KEY_REGEX = /^[A-F0-9]{4}-[A-F0-9]{4}-[A-F0-9]{4}-[A-F0-9]{4}$/i;
@@ -396,5 +406,201 @@ function publicLicenseView(license) {
     ai_quota: aiQuotaForPlan(license.plan)
   };
 }
+
+/* ════════════════════════════════════════════════════════════
+   RECUPERACIÓN DE ACCESO CON OTP (olvido de clave y/o contraseña)
+   Flujo: request-recovery (email) → verify-recovery-otp (código
+   de 6 dígitos) → pantalla muestra las claves + opción de cambiar
+   la contraseña (confirm-recovery). El email NUNCA lleva la clave;
+   esta solo se muestra tras verificar el OTP (prueba de posesión
+   del buzón, equivalente a la del reset por enlace ya existente).
+
+   Nota sobre multi-licencia: un email puede tener varias licencias
+   activas. El recovery_token se ancla a la primera (FK obligatoria
+   en reset_tokens), pero confirm-recovery recibe `license_key` y
+   aplica la nueva contraseña SOLO a esa licencia (tras comprobar que
+   pertenece al email verificado) — un comprador puede gestionar
+   licencias de terceros y no debemos tocar contraseñas ajenas.
+════════════════════════════════════════════════════════════ */
+
+/* ──────────────────────────────────────────────────────────
+   POST /api/auth/request-recovery
+   Body: { email }. Respuesta SIEMPRE genérica (anti-enumeración).
+   Si el email tiene licencias activas, envía un OTP de 6 dígitos
+   (10 min de validez). Límite: OTP_MAX_PER_HOUR por email/hora
+   (además del authLimiter global de la ruta).
+────────────────────────────────────────────────────────── */
+router.post('/request-recovery', async (req, res) => {
+  const email = (req.body?.email || '').trim().toLowerCase();
+
+  const genericResponse = {
+    success: true,
+    message: 'Si el email corresponde a una cuenta, recibirás un código de verificación.'
+  };
+
+  if (!email || !EMAIL_REGEX.test(email)) {
+    return res.status(400).json({ error: 'invalid_input', message: 'Email inválido.' });
+  }
+
+  if (countRecentOtps(email) >= OTP_MAX_PER_HOUR) {
+    audit('RECOVERY_OTP_RATE_LIMITED', { ip: req.ip, detail: `email=${email}` });
+    return res.status(429).json({
+      error: 'otp_limit_reached',
+      message: 'Has solicitado demasiados códigos. Espera una hora e inténtalo de nuevo.'
+    });
+  }
+
+  const licenses = getActiveLicensesByEmail(email);
+  if (licenses.length === 0) {
+    audit('RECOVERY_OTP_REQUEST_INVALID', { ip: req.ip, detail: `email=${email}` });
+    return res.json(genericResponse);
+  }
+
+  const { code, expires_at } = createOtp(email);
+
+  try {
+    await sendRecoveryOtpEmail({ to: email, code, expires_at });
+  } catch (e) {
+    console.error('[EMAIL ERROR]', e.message);
+  }
+
+  audit('RECOVERY_OTP_REQUESTED', { license_id: licenses[0].id, ip: req.ip });
+  res.json(genericResponse);
+});
+
+/* ──────────────────────────────────────────────────────────
+   POST /api/auth/verify-recovery-otp
+   Body: { email, code }. Si el OTP es válido, devuelve las claves
+   activas del email + un recovery_token (15 min) para la acción
+   final (reenviar claves y/o cambiar contraseña).
+────────────────────────────────────────────────────────── */
+router.post('/verify-recovery-otp', (req, res) => {
+  const email = (req.body?.email || '').trim().toLowerCase();
+  const code = String(req.body?.code || '').trim();
+
+  if (!email || !EMAIL_REGEX.test(email) || !/^\d{6}$/.test(code)) {
+    return res.status(400).json({ error: 'invalid_input', message: 'Email o código inválidos.' });
+  }
+
+  const result = verifyOtp(email, code);
+  if (!result.ok) {
+    audit('RECOVERY_OTP_FAILED', { ip: req.ip, detail: `email=${email} reason=${result.reason}` });
+    if (result.reason === 'burned') {
+      return res.status(429).json({
+        error: 'code_burned',
+        message: 'Demasiados intentos fallidos. Solicita un nuevo código.'
+      });
+    }
+    // 'no_code' y 'mismatch' dan la misma respuesta (no pistas al atacante)
+    return res.status(400).json({
+      error: 'invalid_code',
+      message: 'El código no es válido o ha expirado.'
+    });
+  }
+
+  const licenses = getActiveLicensesByEmail(email);
+  if (licenses.length === 0) {
+    // OTP válido pero la licencia se desactivó entre medias — caso rarísimo
+    return res.status(403).json({ error: 'license_inactive', message: 'Licencia no disponible.' });
+  }
+
+  // Anclado a la primera licencia activa (ver nota multi-licencia arriba)
+  const { token: recovery_token } = createResetToken(licenses[0].id, 'recovery', 15);
+
+  audit('RECOVERY_OTP_VERIFIED', { license_id: licenses[0].id, ip: req.ip });
+  res.json({
+    success: true,
+    recovery_token,
+    keys: licenses.map(l => ({ key: l.key, plan: l.plan }))
+  });
+});
+
+/* ──────────────────────────────────────────────────────────
+   POST /api/auth/resend-recovered-keys
+   Body: { recovery_token }. Reenvía las claves por email SIN
+   consumir el token (el usuario puede querer además cambiar la
+   contraseña después). Solo funciona mientras el token vive.
+────────────────────────────────────────────────────────── */
+router.post('/resend-recovered-keys', async (req, res) => {
+  const token = (req.body?.recovery_token || '').trim();
+  if (!token) return res.status(400).json({ error: 'missing_token' });
+
+  const row = peekResetToken(token, 'recovery');
+  if (!row) {
+    return res.status(400).json({
+      error: 'invalid_or_expired_token',
+      message: 'La sesión de recuperación ha expirado. Vuelve a empezar.'
+    });
+  }
+
+  const license = getLicenseById(row.license_id);
+  if (!license || license.status !== 'active') {
+    return res.status(403).json({ error: 'license_inactive', message: 'Licencia no disponible.' });
+  }
+
+  const licenses = getActiveLicensesByEmail(license.email);
+  try {
+    await sendRecoveredKeysEmail({ to: license.email, keys: licenses.map(l => l.key) });
+  } catch (e) {
+    console.error('[EMAIL ERROR]', e.message);
+  }
+
+  audit('RECOVERY_KEYS_RESENT', { license_id: license.id, ip: req.ip });
+  res.json({ success: true, message: 'Te hemos enviado las claves por email.' });
+});
+
+/* ──────────────────────────────────────────────────────────
+   POST /api/auth/confirm-recovery
+   Body: { recovery_token, license_key, new_password, device_name? }.
+   Consume el recovery_token y setea la nueva contraseña SOLO en la
+   licencia indicada (que debe estar activa y pertenecer al email
+   verificado con el OTP). Devuelve sesión iniciada en esa licencia.
+────────────────────────────────────────────────────────── */
+router.post('/confirm-recovery', (req, res) => {
+  const token = (req.body?.recovery_token || '').trim();
+  const license_key = (req.body?.license_key || '').trim().toUpperCase();
+  const new_password = req.body?.new_password;
+  const device_name = sanitizeFreeText(req.body?.device_name || '').slice(0, 120);
+
+  if (!token) return res.status(400).json({ error: 'missing_token' });
+  if (!license_key || !KEY_REGEX.test(license_key)) {
+    return res.status(400).json({ error: 'invalid_input', message: 'Clave de licencia inválida.' });
+  }
+  const pwdCheck = validatePassword(new_password);
+  if (!pwdCheck.ok) return res.status(pwdCheck.status).json(pwdCheck.body);
+
+  const consumed = consumeResetToken(token, 'recovery');
+  if (!consumed) {
+    return res.status(400).json({
+      error: 'invalid_or_expired_token',
+      message: 'La sesión de recuperación ha expirado o ya se ha usado. Vuelve a empezar.'
+    });
+  }
+
+  const anchor = getLicenseById(consumed.license_id);
+  if (!anchor || anchor.status !== 'active') {
+    return res.status(403).json({ error: 'license_inactive', message: 'Licencia no disponible.' });
+  }
+
+  // La clave elegida debe ser una de las licencias activas del email verificado
+  const target = getActiveLicensesByEmail(anchor.email).find(l => l.key === license_key);
+  if (!target) {
+    return res.status(400).json({
+      error: 'license_key_mismatch',
+      message: 'La clave indicada no pertenece a este email.'
+    });
+  }
+
+  setPasswordHash(target.id, hashPassword(new_password), device_name || null);
+  markPasswordReset(target.id);
+
+  // Sesión para la licencia elegida (la que devuelve el login al usuario)
+  const { token: sessionToken, expires_at } = createSession(target.id, req.ip);
+
+  audit('PASSWORD_RESET_VIA_RECOVERY', { license_id: target.id, ip: req.ip });
+
+  const updatedLicense = getLicenseById(target.id);
+  res.json({ success: true, token: sessionToken, expires_at, license: publicLicenseView(updatedLicense) });
+});
 
 module.exports = router;

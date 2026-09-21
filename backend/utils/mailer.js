@@ -7,6 +7,8 @@
  *   - sendLicenseKeyEmail        → respaldo de la clave tras el pago
  *   - sendPasswordResetEmail     → enlace de un solo uso para restablecer la contraseña
  *   - sendLicenseRevokedEmail    → aviso de revocación (chargeback / abuso)
+ *   - sendRecoveryOtpEmail       → código OTP de 6 dígitos para recuperar el acceso
+ *   - sendRecoveredKeysEmail     → reenvío de las claves tras verificar el OTP
  *
  * Diseño: cada función arma el HTML del email y delega el envío real a
  * `dispatch()`, que es el único punto que habla con la API externa.
@@ -162,8 +164,61 @@ async function sendLicenseRevokedEmail({ to, reason }) {
   return dispatch({ to, subject: 'Tu licencia Nokfi ha sido revocada', html });
 }
 
+/**
+ * Código OTP de recuperación de acceso (olvido de clave y/o contraseña).
+ * El email lleva SOLO el código — nunca la clave de licencia: la clave se
+ * muestra en pantalla tras verificar el OTP (y se puede reenviar aparte
+ * con sendRecoveredKeysEmail si el usuario lo pide explícitamente).
+ */
+async function sendRecoveryOtpEmail({ to, code, expires_at }) {
+  const html = baseTemplate({
+    title: 'Tu código de recuperación de Nokfi',
+    bodyHtml: `
+      <h2 style="margin-top:0;color:#F5F5F5;">Recuperación de acceso</h2>
+      <p style="color:#c9c9c5;line-height:1.6;">
+        Hemos recibido una solicitud para recuperar el acceso a tu licencia Nokfi.
+        Introduce este código en la página de recuperación:
+      </p>
+      <div style="background:#0F0F0F;border:1px solid #2A2A28;border-radius:8px;padding:16px;text-align:center;
+                  font-family:monospace;font-size:28px;letter-spacing:8px;color:#10B981;margin:20px 0;">
+        ${escapeHtml(code)}
+      </div>
+      <p style="color:#6b6b67;font-size:13px;line-height:1.6;">
+        El código caduca el ${escapeHtml(new Date(expires_at).toLocaleString('es-ES'))} y solo es válido
+        durante 10 minutos. Si no has sido tú, ignora este email — nadie puede acceder a tu cuenta sin este código.
+      </p>
+    `
+  });
+  return dispatch({ to, subject: 'Tu código de recuperación — Nokfi', html });
+}
+
+/** Reenvío de las claves activas, solo si el usuario lo pide tras verificar el OTP. */
+async function sendRecoveredKeysEmail({ to, keys }) {
+  const list = keys.map(k => `
+      <div style="background:#0F0F0F;border:1px solid #2A2A28;border-radius:8px;padding:14px;text-align:center;
+                  font-family:monospace;font-size:16px;letter-spacing:2px;color:#10B981;margin:10px 0;">
+        ${escapeHtml(k)}
+      </div>`).join('');
+  const html = baseTemplate({
+    title: 'Tus claves de licencia Nokfi',
+    bodyHtml: `
+      <h2 style="margin-top:0;color:#F5F5F5;">Tus claves de licencia</h2>
+      <p style="color:#c9c9c5;line-height:1.6;">
+        Nos has pedido que te reenviemos tus claves de licencia activas. Aquí las tienes:
+      </p>
+      ${list}
+      <p style="color:#6b6b67;font-size:13px;line-height:1.6;">
+        Guárdalas en un lugar seguro. Si no has solicitado este reenvío, contacta con soporte.
+      </p>
+    `
+  });
+  return dispatch({ to, subject: 'Tus claves de licencia — Nokfi', html });
+}
+
 module.exports = {
   sendLicenseKeyEmail,
   sendPasswordResetEmail,
-  sendLicenseRevokedEmail
+  sendLicenseRevokedEmail,
+  sendRecoveryOtpEmail,
+  sendRecoveredKeysEmail
 };

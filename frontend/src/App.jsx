@@ -7,6 +7,7 @@ import DashboardLayout from './layouts/DashboardLayout';
 
 import Login from './pages/Login';
 import ResetPassword from './pages/ResetPassword';
+import Recuperar from './pages/Recuperar';
 import Reveal from './pages/Reveal';
 import Pricing from './pages/Pricing';
 import Landing from './pages/Landing';
@@ -35,6 +36,7 @@ export default function App() {
             <Route path="/" element={<Landing />} />
             <Route path="/login" element={<Login />} />
             <Route path="/reset-password" element={<ResetPassword />} />
+            <Route path="/recuperar" element={<Recuperar />} />
             <Route path="/reveal" element={<Reveal />} />
             <Route path="/pricing" element={<Pricing />} />
             <Route path="/privacidad" element={<Privacidad />} />

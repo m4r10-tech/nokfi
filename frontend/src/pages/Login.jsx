@@ -158,6 +158,9 @@ export default function Login() {
         <Link to="/pricing" className="mt-5 text-sm text-center hover:underline block" style={{ color: 'var(--text-secondary)' }}>
           {t('login.noLicense')} →
         </Link>
+        <Link to="/recuperar" className="mt-2 text-sm text-center hover:underline block" style={{ color: 'var(--text-secondary)' }}>
+          {t('login.forgotKey')} →
+        </Link>
       </div>
     </div>
   );

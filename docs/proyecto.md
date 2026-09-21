@@ -442,3 +442,65 @@ cd frontend && npm run build          # build OK; dist incluye robots.txt y og-i
   RGPD) — Namecheap gratis, ya en backlog.
 - Monitor externo (UptimeRobot free) sobre `/health` — requiere cuenta del usuario.
 - Redirect `www → apex` 301 en Nginx (anotado en `deploy/nginx-nokfi.conf`).
+
+## 23. Handoff 2026-09-21 — Recuperación de acceso con OTP
+
+**Trabajo en curso**: flujo de recuperación para usuarios que olvidan la clave
+de licencia (y/o la contraseña). Estado: **COMPLETADO y verificado (120/120 e2e
+PASS, build frontend OK)**. Falta commit/deploy (decisión del usuario).
+
+**Motivación**: el reset de contraseña clásico exige la clave de licencia;
+quien la olvida queda bloqueado sin vía de recuperación.
+
+**Diseño** (aprobado por el usuario, decisiones 1-4):
+- Un solo punto de entrada: `/recuperar` pide solo el **email**.
+- Backend envía **OTP de 6 dígitos** (10 min, máx. 5 intentos, máx. 3
+  solicitudes/hora por email, hasheado SHA-256 en reposo, un solo OTP vivo por
+  email). Respuesta siempre genérica (anti-enumeración).
+- Tras verificar: pantalla muestra **todas las claves activas del email** +
+  botón "reenviar por email" + cambio de contraseña **opcional** en el mismo
+  viaje (el OTP ya demuestra posesión del buzón). El email NUNCA lleva la clave.
+- El flujo clásico (`/reset-password`, email+clave+enlace) queda **intacto**.
+
+**Multi-licencia** (decisión 2026-09-21, opción 2 del usuario): un email puede
+tener varias licencias activas. El `recovery_token` se ancla a la primera (FK
+obligatoria en `reset_tokens`), pero `confirm-recovery` recibe `license_key` y
+aplica la nueva contraseña SOLO a esa licencia (validando que pertenece al
+email verificado). Si hay varias, la UI muestra un selector de clave.
+
+**Cambios:**
+
+1. **`backend/db/database.js`** (aditivo):
+   - Tabla `otp_codes` (email, code_hash, attempts, used, expires_at) + índice.
+   - Migración `runRecoveryPurposeMigration`: amplía el CHECK de
+     `reset_tokens.purpose` con `'recovery'` (patrón RENAME/copy ya usado;
+     copia TODAS las filas). En DBs frescas el CREATE ya lo incluye.
+   - Helpers: `createOtp`, `verifyOtp` (reasons: no_code/burned/mismatch),
+     `countRecentOtps`, `getActiveLicensesByEmail`, `peekResetToken`
+     (validar sin consumir — para el reenvío de claves).
+2. **`backend/utils/mailer.js`**: `sendRecoveryOtpEmail` (solo el código) y
+   `sendRecoveredKeysEmail` (solo a petición tras verificar).
+3. **`backend/routes/auth.js`**: 4 endpoints nuevos (`request-recovery`,
+   `verify-recovery-otp`, `resend-recovered-keys`, `confirm-recovery`), todos
+   bajo el `authLimiter` existente. Ningún endpoint existente tocado.
+4. **`backend/test/e2e.test.js`**: 13 tests nuevos (anti-enumeración, intentos,
+   quemado, hash en reposo, flujo completo, token de un solo uso, límite 3/hora,
+   aislamiento por licencia y license_key ajena → 400).
+   **107 → 123 tests, todos PASS.**
+5. **Frontend**:
+   - `src/pages/Recuperar.jsx` (nueva): 3 pasos (email → código → claves +
+     cambio opcional de contraseña), estilo Shell de Login/Reveal.
+   - `src/middleware/api.js`: 4 métodos nuevos en `authApi`.
+   - `src/App.jsx`: ruta `/recuperar`. `Login.jsx`: enlace "¿Olvidaste tu clave
+     o contraseña?". i18n `recovery.*` + `meta.recoveryTitle` + `login.forgotKey`
+     en es/en. `robots.txt`: Disallow `/recuperar`.
+
+**Cómo validar:**
+```bash
+cd backend && node test/e2e.test.js   # 123 OK / 0 FAIL
+cd frontend && npm run build          # OK
+```
+
+**Nota de deploy**: al arrancar en el VPS, `runRecoveryPurposeMigration`
+reconstruirá `reset_tokens` (copia íntegra de filas, no destructivo). Los
+emails de OTP salen por Resend con el dominio ya verificado — sin config nueva.

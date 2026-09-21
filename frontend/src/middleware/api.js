@@ -53,6 +53,15 @@ export const authApi = {
     request('/auth/request-password-reset', { method: 'POST', body: { email, license_key } }),
   confirmPasswordReset: (token, new_password, device_name) =>
     request('/auth/confirm-password-reset', { method: 'POST', body: { token, new_password, device_name } }),
+  // Recuperación de acceso con OTP (olvido de clave y/o contraseña) — página /recuperar
+  requestRecovery: (email) =>
+    request('/auth/request-recovery', { method: 'POST', body: { email } }),
+  verifyRecoveryOtp: (email, code) =>
+    request('/auth/verify-recovery-otp', { method: 'POST', body: { email, code } }),
+  resendRecoveredKeys: (recovery_token) =>
+    request('/auth/resend-recovered-keys', { method: 'POST', body: { recovery_token } }),
+  confirmRecovery: (recovery_token, license_key, new_password, device_name) =>
+    request('/auth/confirm-recovery', { method: 'POST', body: { recovery_token, license_key, new_password, device_name } }),
   revealKey: (password) => request('/auth/reveal-key', { method: 'POST', auth: true, body: { password } }),
   changePassword: (current_password, new_password) =>
     request('/auth/change-password', { method: 'POST', auth: true, body: { current_password, new_password } })

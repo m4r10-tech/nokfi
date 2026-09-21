@@ -1,7 +1,7 @@
 # Nokfi — robots.txt
 # Zonas públicas indexables: / (landing), /pricing, /privacidad.
 # Zonas privadas o sin valor de indexación: /app/* (requiere sesión),
-# /login, /reset-password, /reveal (lleva la clave de licencia del comprador).
+# /login, /reset-password, /recuperar, /reveal (lleva la clave del comprador).
 
 User-agent: *
 Allow: /$
@@ -10,5 +10,6 @@ Allow: /privacidad
 Disallow: /app
 Disallow: /login
 Disallow: /reset-password
+Disallow: /recuperar
 Disallow: /reveal
 Disallow: /api/
