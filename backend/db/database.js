@@ -93,6 +93,7 @@ function initDB() {
           payment_provider          TEXT    DEFAULT NULL
                                               CHECK(payment_provider IN ('stripe','paypal','coinbase','revolut',NULL)),
           payment_ref               TEXT    DEFAULT NULL,
+          payment_intent_ref        TEXT    DEFAULT NULL,
           amount_eur                REAL    DEFAULT NULL,
           notes                     TEXT    DEFAULT '',
           created_at                TEXT    NOT NULL DEFAULT (datetime('now')),
@@ -220,6 +221,7 @@ function initDB() {
       runFingerprintMigration(db);
       runSubscriptionMigration(db);
       runTrialMigration(db);
+      runPaymentIntentRefMigration(db);
       runRecoveryPurposeMigration(db);
       hashTokensAtRest(db); // ⚠️ auditoría: hashear tokens planos preexistentes
 
@@ -430,6 +432,7 @@ function runSubscriptionMigration(database) {
             payment_provider          TEXT    DEFAULT NULL
                                                     CHECK(payment_provider IN ('stripe','paypal','coinbase','revolut',NULL)),
             payment_ref               TEXT    DEFAULT NULL,
+            payment_intent_ref        TEXT    DEFAULT NULL,
             amount_eur                REAL    DEFAULT NULL,
             notes                     TEXT    DEFAULT '',
             created_at                TEXT    NOT NULL DEFAULT (datetime('now')),
@@ -514,6 +517,26 @@ function runTrialMigration(database) {
 }
 
 /**
+ * Migración payment_intent_ref — añade la columna `payment_intent_ref` a
+ * `licenses` si no existe. Guarda el `pi_…` (PaymentIntent) del cobro de
+ * Stripe junto al `cs_…` de payment_ref: los eventos `charge.dispute.created`
+ * (chargebacks) llegan referenciados por payment_intent, no por la Checkout
+ * Session, y sin esta columna la revocación por contracargo nunca encontraba
+ * la licencia (sesión 2, hallazgo #1). Idempotente por detección (PRAGMA);
+ * en install fresco la columna ya la crea el CREATE TABLE. Las filas
+ * existentes quedan a NULL: sus cobros futuros la rellenan vía invoice.paid,
+ * y para disputas de cobros antiguos el webhook resuelve vía Stripe API
+ * (charge → invoice → subscription).
+ */
+function runPaymentIntentRefMigration(database) {
+  const cols = database.prepare(`PRAGMA table_info(licenses)`).all().map(c => c.name);
+  if (!cols.includes('payment_intent_ref')) {
+    database.exec(`ALTER TABLE licenses ADD COLUMN payment_intent_ref TEXT DEFAULT NULL`);
+    console.log('✅  Migración payment_intent_ref: añadida columna licenses.payment_intent_ref');
+  }
+}
+
+/**
  * ⚠️ AUDITORÍA DE SEGURIDAD — migración "tokens hasheados en reposo".
  * Antes, sessions.token y reset_tokens.token se guardaban en PLAINTEXT. Desde
  * este cambio la app solo escribe el SHA-256 del token (hashToken). Esta
@@ -575,6 +598,7 @@ function generateLicenseKey() {
  */
 function createLicense({
   email, plan = 'mini', payment_provider = null, payment_ref = null,
+  payment_intent_ref = null,
   amount_eur = null, notes = '', created_by = 'system', password = null,
   billing_model = 'subscription', stripe_customer_id = null,
   stripe_subscription_id = null, current_period_ends_at = null,
@@ -595,11 +619,12 @@ function createLicense({
   const result = db.prepare(`
     INSERT INTO licenses (key, email, plan, billing_model, password_hash,
                           stripe_customer_id, stripe_subscription_id, current_period_ends_at,
-                          trial_ends_at, payment_provider, payment_ref, amount_eur, notes, created_by)
-    VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+                          trial_ends_at, payment_provider, payment_ref, payment_intent_ref,
+                          amount_eur, notes, created_by)
+    VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
   `).run(key.toUpperCase(), email.trim().toLowerCase(), plan, billing_model, password_hash,
          stripe_customer_id, stripe_subscription_id, current_period_ends_at,
-         trial_ends_at, payment_provider, payment_ref, amount_eur, notes, created_by);
+         trial_ends_at, payment_provider, payment_ref, payment_intent_ref, amount_eur, notes, created_by);
 
   return getLicenseById(result.lastInsertRowid);
 }
@@ -617,10 +642,23 @@ function getLicenseByEmailAndKey(email, key) {
     .get(String(email).trim().toLowerCase(), String(key).trim().toUpperCase());
 }
 
-/** Busca una licencia por su referencia de pago (usado en gestión de chargebacks) */
+/** Busca una licencia por su referencia de pago (cs_… de Checkout Session; usado en /reveal y como fallback en chargebacks) */
 function getLicenseByPaymentRef(payment_provider, payment_ref) {
+  if (!payment_ref) return null;
   return getDB().prepare('SELECT * FROM licenses WHERE payment_provider = ? AND payment_ref = ?')
     .get(payment_provider, payment_ref);
+}
+
+/**
+ * Busca una licencia por el PaymentIntent de Stripe (pi_…). Es la referencia
+ * que llega en los eventos charge.dispute.created (chargebacks): sin ella el
+ * contracargo nunca casaba con el cs_… guardado en payment_ref y la licencia
+ * quedaba activa pese al dinero devuelto (sesión 2, hallazgo #1).
+ */
+function getLicenseByPaymentIntent(payment_provider, payment_intent_ref) {
+  if (!payment_intent_ref) return null;
+  return getDB().prepare('SELECT * FROM licenses WHERE payment_provider = ? AND payment_intent_ref = ?')
+    .get(payment_provider, payment_intent_ref);
 }
 
 function getAllLicenses() {
@@ -1124,7 +1162,8 @@ function getLicenseByStripeSubscriptionId(subscription_id) {
  */
 function updateSubscription(id, {
   plan, status, billing_model, stripe_customer_id, stripe_subscription_id,
-  current_period_ends_at, cancel_at_period_end, amount_eur, trial_ends_at
+  current_period_ends_at, cancel_at_period_end, amount_eur, trial_ends_at,
+  payment_intent_ref
 }) {
   const db = getDB();
   const setClauses = [];
@@ -1147,6 +1186,7 @@ function updateSubscription(id, {
   setIf('cancel_at_period_end', cancel_at_period_end);
   setIf('amount_eur', amount_eur);
   setIf('trial_ends_at', trial_ends_at);
+  setIf('payment_intent_ref', payment_intent_ref);
   if (!setClauses.length) return getLicenseById(id);
   vals.push(id);
   db.prepare(`UPDATE licenses SET ${setClauses.join(', ')} WHERE id = ?`).run(...vals);
@@ -1293,6 +1333,7 @@ module.exports = {
   getLicenseById,
   getLicenseByEmailAndKey,
   getLicenseByPaymentRef,
+  getLicenseByPaymentIntent,
   getAllLicenses,
   updateLicense,
   deleteLicense,

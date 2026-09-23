@@ -30,14 +30,41 @@ export function AuthProvider({ children }) {
     const stored = sessionStorage.getItem(SESSION_STORAGE_KEY);
     if (!stored) { setStatus('unauthenticated'); return; }
     setSessionToken(stored);
-    authApi.verify().then(({ ok, data }) => {
-      if (ok && data.valid) {
-        setLicense(data.license);
-        setStatus('authenticated');
-      } else {
-        handleLogout();
-      }
-    });
+
+    // #2 (sesión 2): solo un rechazo DEFINITIVO del servidor (401/403) cierra
+    // la sesión. Un error de red (status 0) o un 5xx (backend caído, 502 de
+    // Cloudflare) NO deben tumbarla: antes cualquier corte de 1s de wifi
+    // borraba la sesión local del usuario. Ante fallo transitorio se reintenta
+    // una vez a los 2.5s y se vuelve a intentar cuando el navegador recupera
+    // conectividad (evento 'online'); el token se conserva mientras tanto
+    // (ProtectedRoute muestra el spinner de 'checking').
+    let cancelled = false;
+    let retried = false;
+
+    const attempt = () => {
+      authApi.verify().then(({ ok, status: st, data }) => {
+        if (cancelled) return;
+        if (ok && data.valid) {
+          setLicense(data.license);
+          setStatus('authenticated');
+          return;
+        }
+        if (st === 401 || st === 403) { handleLogout(); return; }
+        if (!retried) {
+          retried = true;
+          setTimeout(() => { if (!cancelled) attempt(); }, 2500);
+        }
+      });
+    };
+
+    const onOnline = () => { retried = false; attempt(); };
+    window.addEventListener('online', onOnline);
+    attempt();
+
+    return () => {
+      cancelled = true;
+      window.removeEventListener('online', onOnline);
+    };
   }, [handleLogout]);
 
   const applySession = (token, licenseData) => {

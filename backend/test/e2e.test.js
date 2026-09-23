@@ -610,6 +610,101 @@ async function main() {
   );
 
   // ═══════════════════════════════════════════════════════════
+  // 3.k2 Chargebacks (sesión 2, #1/#16) — charge.dispute.created
+  //     Webhook FIRMADO de verdad (HMAC-SHA256 como Stripe) contra la ruta
+  //     real. El bug: la disputa llega referenciada por payment_intent (pi_…)
+  //     y en DB se guardaba solo el cs_… de la Checkout Session → nunca había
+  //     match y el evento se marcaba procesado → contracargo perdido.
+  //     Ahora: match local por payment_intent_ref → revoca; sin match → 500
+  //     para que Stripe reintente (y el evento queda processed=0).
+  // ═══════════════════════════════════════════════════════════
+  const crypto = require('crypto');
+  const { getLicenseByPaymentIntent } = require('../db/database');
+  process.env.STRIPE_WEBHOOK_SECRET = 'whsec_e2e_test_secret';
+
+  function postStripeWebhook(payload, { badSig = false } = {}) {
+    const secret = badSig ? 'whsec_WRONG' : process.env.STRIPE_WEBHOOK_SECRET;
+    const rawBody = JSON.stringify(payload);
+    const tsec = Math.floor(Date.now() / 1000);
+    const sig = crypto.createHmac('sha256', secret).update(`${tsec}.${rawBody}`).digest('hex');
+    return new Promise((resolve, reject) => {
+      const req = http.request(`${baseUrl}/api/webhooks/stripe`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json', 'Stripe-Signature': `t=${tsec},v1=${sig}` }
+      }, (res) => {
+        let data = '';
+        res.on('data', d => data += d);
+        res.on('end', () => {
+          let parsed; try { parsed = JSON.parse(data); } catch { parsed = data; }
+          resolve({ status: res.statusCode, data: parsed });
+        });
+      });
+      req.on('error', reject);
+      req.setTimeout(5000, () => { req.destroy(); reject(new Error('timeout')); });
+      req.write(rawBody);
+      req.end();
+    });
+  }
+
+  const cbLicense = dbCreateLicense({
+    email: 'cb@nokfi.local', plan: 'pro', payment_provider: 'stripe',
+    payment_ref: 'cs_cb_test', payment_intent_ref: 'pi_cb_ok', billing_model: 'subscription',
+    stripe_customer_id: 'cus_cb', stripe_subscription_id: 'sub_cb',
+    password: 'CbP4ssword!', created_by: 'webhook_stripe_sub'
+  });
+  check('createLicense persiste payment_intent_ref (pi_…)',
+    () => cbLicense.payment_intent_ref === 'pi_cb_ok'
+  );
+  check('getLicenseByPaymentIntent localiza la licencia por pi_…',
+    () => getLicenseByPaymentIntent('stripe', 'pi_cb_ok')?.id === cbLicense.id
+  );
+
+  const cbSession = createSession(cbLicense.id, '127.0.0.1');
+  check('sesión viva de la licencia antes de la disputa',
+    () => !!getDB().prepare('SELECT id FROM sessions WHERE token = ?')
+      .get(crypto.createHash('sha256').update(cbSession.token).digest('hex'))
+  );
+
+  const disputeOk = {
+    id: 'evt_dispute_ok_1', type: 'charge.dispute.created',
+    data: { object: { id: 'dp_test_1', object: 'dispute', charge: 'ch_cb_1', payment_intent: 'pi_cb_ok' } }
+  };
+  await checkAsync('webhook charge.dispute.created con pi conocido → 200 received',
+    postStripeWebhook(disputeOk),
+    r => r.status === 200 && r.data.received === true
+  );
+  check('la disputa revoca la licencia (status=revoked)',
+    () => getDB().prepare('SELECT status FROM licenses WHERE id = ?').get(cbLicense.id).status === 'revoked'
+  );
+  check('la disputa cierra las sesiones de la licencia',
+    () => getDB().prepare('SELECT COUNT(*) c FROM sessions WHERE license_id = ?').get(cbLicense.id).c === 0
+  );
+  check('el evento de disputa queda registrado processed=1',
+    () => getDB().prepare("SELECT processed FROM payment_events WHERE provider='stripe' AND event_id='evt_dispute_ok_1'").get().processed === 1
+  );
+
+  // Disputa irresoluble: pi desconocido y sin STRIPE_SECRET_KEY (borrada al
+  // inicio del suite) no hay resolución vía API → 500 para reintento de Stripe.
+  const disputeUnknown = {
+    id: 'evt_dispute_unknown_1', type: 'charge.dispute.created',
+    data: { object: { id: 'dp_test_2', object: 'dispute', charge: 'ch_x', payment_intent: 'pi_desconocido' } }
+  };
+  await checkAsync('webhook dispute sin match → 500 dispute_unresolved (Stripe reintentará)',
+    postStripeWebhook(disputeUnknown),
+    r => r.status === 500 && r.data.error === 'dispute_unresolved'
+  );
+  check('el evento irresoluble queda processed=0 (visible en reconciliación)',
+    () => getDB().prepare("SELECT processed FROM payment_events WHERE provider='stripe' AND event_id='evt_dispute_unknown_1'").get().processed === 0
+  );
+
+  await checkAsync('webhook con firma inválida → 400 invalid_signature',
+    postStripeWebhook(disputeOk, { badSig: true }),
+    r => r.status === 400 && r.data.error === 'invalid_signature'
+  );
+
+  delete process.env.STRIPE_WEBHOOK_SECRET;
+
+  // ═══════════════════════════════════════════════════════════
   // 3.m Catálogo público GET /api/payments/plans (anti-drift env-driven)
   //     Público (sin auth), no depende de Stripe. Debe devolver los 3 planes con
   //     price_eur 5/20/50 (los defaults forzados arriba en el entorno) y trial

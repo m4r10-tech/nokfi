@@ -35,34 +35,47 @@ export default function ExcelSubModule({ title, description, promptBase, chartTy
   const handleFiles = useCallback(async (fileList) => {
     setErrorMsg(null);
     const arr = Array.from(fileList).slice(0, MAX_FILES);
+    const processedNames = [];
 
     for (const file of arr) {
-      if (file.size > MAX_FILE_SIZE) {
-        setErrorMsg(`"${file.name}" supera el límite de 5MB.`);
-        continue;
-      }
-
-      if (file.name.toLowerCase().endsWith('.pdf')) {
-        // Capa 1 y 2 del sistema de PDFs (sección 20)
-        const { text, looksScanned } = await extractPdfText(file);
-        if (looksScanned) {
-          setScannedWarning({ fileName: file.name, text });
+      // #3 (sesión 2): try/catch POR ARCHIVO — un PDF protegido/corrupto o un
+      // Excel ilegible rechazaba la promesa y abortaba el bucle entero con una
+      // rejection silenciosa (el usuario veía que "no pasaba nada"). Ahora el
+      // archivo fallido se marca con un mensaje y el resto se procesa igual.
+      try {
+        if (file.size > MAX_FILE_SIZE) {
+          setErrorMsg(`"${file.name}" supera el límite de 5MB.`);
           continue;
         }
-        const truncated = text.slice(0, MAX_EXTRACTED_CHARS);
-        setFiles(prev => [...prev, { name: file.name, type: 'pdf', text: truncated, rows: null }]);
-      } else {
-        // Excel/CSV vía SheetJS
-        const buffer = await file.arrayBuffer();
-        const workbook = XLSX.read(buffer, { type: 'array' });
-        const firstSheet = workbook.Sheets[workbook.SheetNames[0]];
-        const rows = XLSX.utils.sheet_to_json(firstSheet, { defval: '' });
-        setFiles(prev => [...prev, { name: file.name, type: 'excel', rows, text: null }]);
-        updateChartFromRows(rows);
+
+        if (file.name.toLowerCase().endsWith('.pdf')) {
+          // Capa 1 y 2 del sistema de PDFs (sección 20)
+          const { text, looksScanned } = await extractPdfText(file);
+          if (looksScanned) {
+            setScannedWarning({ fileName: file.name, text });
+            continue;
+          }
+          const truncated = text.slice(0, MAX_EXTRACTED_CHARS);
+          setFiles(prev => [...prev, { name: file.name, type: 'pdf', text: truncated, rows: null }]);
+        } else {
+          // Excel/CSV vía SheetJS
+          const buffer = await file.arrayBuffer();
+          const workbook = XLSX.read(buffer, { type: 'array' });
+          const firstSheet = workbook.Sheets[workbook.SheetNames[0]];
+          const rows = XLSX.utils.sheet_to_json(firstSheet, { defval: '' });
+          setFiles(prev => [...prev, { name: file.name, type: 'excel', rows, text: null }]);
+          updateChartFromRows(rows);
+        }
+        processedNames.push(file.name);
+      } catch (e) {
+        console.error('[ExcelSubModule] No se pudo leer el archivo:', file.name, e);
+        setErrorMsg(`No se pudo leer "${file.name}" (corrupto, protegido o formato no soportado). El resto de archivos se han procesado.`);
       }
     }
 
-    setRecentFiles(prev => [...arr.map(f => ({ name: f.name, date: new Date().toLocaleString('es-ES') })), ...prev].slice(0, 5));
+    if (processedNames.length) {
+      setRecentFiles(prev => [...processedNames.map(name => ({ name, date: new Date().toLocaleString('es-ES') })), ...prev].slice(0, 5));
+    }
   }, []);
 
   const updateChartFromRows = (rows) => {

@@ -44,6 +44,7 @@ const {
   updateLicense,
   updateSubscription,
   getLicenseByPaymentRef,
+  getLicenseByPaymentIntent,
   getLicenseByStripeSubscriptionId,
   deleteSessionsForLicense,
   audit
@@ -123,10 +124,20 @@ router.post('/stripe', async (req, res) => {
       case 'invoice.payment_failed':
         await handleStripeInvoicePaymentFailed(event, req.ip);
         break;
-      case 'charge.dispute.created':
-        await handleChargebackByPaymentRef('stripe', event.data.object.payment_intent || event.data.object.id, req.ip);
-        recordPaymentEvent({ provider: 'stripe', event_id: event.id, event_type: event.type, processed: true });
+      case 'charge.dispute.created': {
+        // Sesión 2 (#1/#16): la revocación solo marca el evento como procesado
+        // si realmente encontró y revocó la licencia. Si no, 500 → Stripe
+        // reintenta el evento (antes se tragaba el contracargo en silencio).
+        const revoked = await handleChargebackByPaymentRef('stripe', event.data.object, req.ip);
+        recordPaymentEvent({
+          provider: 'stripe', event_id: event.id, event_type: event.type,
+          license_id: revoked ? revoked.id : null, processed: !!revoked
+        });
+        if (!revoked) {
+          return res.status(500).json({ error: 'dispute_unresolved' });
+        }
         break;
+      }
       default:
         // Eventos no manejados explícitamente: se registran como procesados
         // para no reintentarlos en bucle.
@@ -189,10 +200,15 @@ async function handleStripeCheckoutCompleted(event, ip) {
   }
 
   // payment_ref = session.id → compatible con el endpoint /reveal (Fase 1).
+  // payment_intent_ref = session.payment_intent (pi_…): en modo subscription
+  // suele venir null (el cobro lo hace el invoice, no la sesión); si viene, lo
+  // guardamos. La fuente fiable del pi_… es invoice.paid (ver abajo) — hace
+  // falta para localizar la licencia cuando llega un charge.dispute.created.
   const amount_eur = session.amount_total ? session.amount_total / 100 : null;
 
   const license = createLicense({
     email, plan: confirmedPlan, payment_provider: 'stripe', payment_ref: session.id,
+    payment_intent_ref: session.payment_intent || null,
     amount_eur, billing_model: 'subscription',
     stripe_customer_id: customerId, stripe_subscription_id: subId,
     current_period_ends_at, trial_ends_at, created_by: 'webhook_stripe_sub'
@@ -275,6 +291,10 @@ async function handleStripeInvoicePaid(event, ip) {
     current_period_ends_at,
     stripe_customer_id: customerId || undefined,
     amount_eur: amount_eur ?? undefined,
+    // pi_… del cobro: es la referencia por la que llegan los chargebacks
+    // (charge.dispute.created). En modo suscripción el checkout NO lo trae, así
+    // que invoice.paid es la fuente fiable que rellena payment_intent_ref.
+    payment_intent_ref: invoice.payment_intent || undefined,
     // null explícito fuerza el WRITE (ver bug C). Solo cuando cobró de verdad.
     ...(actuallyPaid ? { trial_ends_at: null } : {})
   });
@@ -444,24 +464,89 @@ function verifyStripeSignature(rawBody, signatureHeader, secret) {
 
 /**
  * Lógica común de revocación por chargeback (sección 15.1 del proyecto).
- * Busca la licencia por payment_ref, la revoca, limpia sesiones y notifica.
+ *
+ * Recibe el objeto DISPUTE completo (no un id suelto). El bug original
+ * (sesión 2, #1/#16): se buscaba la licencia haciendo coincidir el
+ * payment_intent (pi_…) o el id de disputa (dp_…) del evento contra
+ * `payment_ref`, donde se guarda el cs_… de la Checkout Session → jamás
+ * había match, se marcaba el evento como procesado y el contracargo se
+ * perdía en silencio (usuario con acceso gratis tras la devolución).
+ *
+ * Resolución en cadena:
+ *   1. Local por payment_intent_ref (pi_… — rellenado en invoice.paid).
+ *   2. Local por payment_ref (cubre filas antiguas/manual).
+ *   3. Stripe API: charge → invoice → subscription → licencia. Necesario
+ *      para disputas de cobros anteriores a esta columna.
+ * Devuelve la licencia revocada, o null si no se pudo localizar (el caller
+ * responde 500 para que Stripe reintente y audita la alerta).
  */
-async function handleChargebackByPaymentRef(provider, paymentRef, ip) {
-  const license = getLicenseByPaymentRef(provider, paymentRef);
+async function handleChargebackByPaymentRef(provider, dispute, ip) {
+  const pi = dispute.payment_intent || null;
+
+  let license = getLicenseByPaymentIntent(provider, pi)
+    || getLicenseByPaymentRef(provider, pi)
+    || getLicenseByPaymentRef(provider, dispute.id);
 
   if (!license) {
-    console.error(`[CHARGEBACK] No se encontró licencia para ${provider}/${paymentRef}`);
-    return;
+    license = await resolveLicenseForDisputeViaStripe(dispute);
+  }
+
+  if (!license) {
+    console.error(`[CHARGEBACK] No se encontró licencia para ${provider} dispute=${dispute.id} pi=${pi}`);
+    audit('CHARGEBACK_UNRESOLVED', { ip, detail: `provider=${provider} dispute=${dispute.id} pi=${pi}` });
+    return null;
   }
 
   updateLicense(license.id, { status: 'revoked' });
   deleteSessionsForLicense(license.id);
 
-  audit('LICENSE_REVOKED_CHARGEBACK', { license_id: license.id, ip, detail: `provider=${provider}` });
+  audit('LICENSE_REVOKED_CHARGEBACK', { license_id: license.id, ip, detail: `provider=${provider} dispute=${dispute.id}` });
 
   sendLicenseRevokedEmail({ to: license.email, reason: 'disputa de pago (chargeback)' }).catch(e =>
     console.error('[EMAIL] Fallo enviando aviso de revocación:', e.message)
   );
+
+  return license;
+}
+
+/**
+ * Último recurso para mapear una disputa a una licencia cuando el lookup
+ * local falla (cobros anteriores a la columna payment_intent_ref):
+ * dispute.charge → charge.invoice → invoice.subscription → suscripción en DB.
+ * Devuelve null si falta STRIPE_SECRET_KEY o cualquier eslabón no resuelve.
+ */
+async function resolveLicenseForDisputeViaStripe(dispute) {
+  if (!process.env.STRIPE_SECRET_KEY) return null;
+  try {
+    let chargeId = dispute.charge || null;
+    if (!chargeId && dispute.payment_intent) {
+      const piObj = await fetchStripeObject(`payment_intents/${dispute.payment_intent}`);
+      chargeId = piObj?.latest_charge || null;
+    }
+    if (!chargeId) return null;
+    const charge = await fetchStripeObject(`charges/${chargeId}`);
+    const invoiceId = charge?.invoice;
+    if (!invoiceId) return null;
+    const invoice = await fetchStripeObject(`invoices/${invoiceId}`);
+    const subId = invoice?.subscription;
+    if (!subId) return null;
+    return getLicenseByStripeSubscriptionId(subId) || null;
+  } catch (e) {
+    console.error('[CHARGEBACK] Resolución vía Stripe API falló:', e.message);
+    return null;
+  }
+}
+
+/** GET genérico a la API de Stripe (misma versión pineada que el resto). */
+async function fetchStripeObject(path) {
+  const res = await fetchWithTimeout(`https://api.stripe.com/v1/${path}`, {
+    headers: {
+      'Authorization': `Bearer ${process.env.STRIPE_SECRET_KEY}`,
+      'Stripe-Version': require('../config/stripe-version')
+    }
+  }, 30000);
+  if (!res.ok) throw new Error(`Stripe devolvió ${res.status} en ${path}`);
+  return res.json();
 }
 
 module.exports = router;
