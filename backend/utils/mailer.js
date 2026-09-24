@@ -9,6 +9,7 @@
  *   - sendLicenseRevokedEmail    → aviso de revocación (chargeback / abuso)
  *   - sendRecoveryOtpEmail       → código OTP de 6 dígitos para recuperar el acceso
  *   - sendRecoveredKeysEmail     → reenvío de las claves tras verificar el OTP
+ *   - sendPasswordResetLimitEmail→ aviso de límite anual de reset (sin oráculo HTTP, #6)
  *
  * Diseño: cada función arma el HTML del email y delega el envío real a
  * `dispatch()`, que es el único punto que habla con la API externa.
@@ -146,6 +147,34 @@ async function sendPasswordResetEmail({ to, token, expires_at }) {
   return dispatch({ to, subject: 'Restablece tu contraseña — Nokfi', html });
 }
 
+/**
+ * Aviso de "límite anual de reset alcanzado" (#6, sesión 2). El endpoint
+ * /request-password-reset ya NO revela por HTTP que el par email+clave es
+ * válido pero está al límite (oráculo de enumeración): responde la genérica
+ * de siempre y la explicación llega SOLO al buzón del titular con este email.
+ */
+async function sendPasswordResetLimitEmail({ to }) {
+  const html = baseTemplate({
+    title: 'Solicitud de restablecimiento de contraseña — Nokfi',
+    bodyHtml: `
+      <h2 style="margin-top:0;color:#F5F5F5;">Restablecimiento de contraseña</h2>
+      <p style="color:#c9c9c5;line-height:1.6;">
+        Hemos recibido una solicitud para restablecer la contraseña de tu licencia Nokfi,
+        pero esta licencia ya restableció su contraseña durante el último año y el límite
+        es de un restablecimiento anual.
+      </p>
+      <p style="color:#c9c9c5;line-height:1.6;">
+        Si necesitas una excepción, contacta con soporte a través de
+        <a href="${APP_URL}" style="color:#10B981;">${APP_URL}</a> y revisaremos tu caso.
+      </p>
+      <p style="color:#6b6b67;font-size:13px;line-height:1.6;">
+        Si no has sido tú, ignora este email — tu contraseña actual sigue funcionando con normalidad.
+      </p>
+    `
+  });
+  return dispatch({ to, subject: 'Solicitud de restablecimiento — Nokfi', html });
+}
+
 /** Aviso de revocación de licencia (chargeback o abuso — sección 15.1/15.4 del proyecto) */
 async function sendLicenseRevokedEmail({ to, reason }) {
   const html = baseTemplate({
@@ -218,6 +247,7 @@ async function sendRecoveredKeysEmail({ to, keys }) {
 module.exports = {
   sendLicenseKeyEmail,
   sendPasswordResetEmail,
+  sendPasswordResetLimitEmail,
   sendLicenseRevokedEmail,
   sendRecoveryOtpEmail,
   sendRecoveredKeysEmail

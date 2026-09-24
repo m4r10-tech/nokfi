@@ -39,16 +39,19 @@ const {
   peekResetToken,
   createOtp,
   verifyOtp,
-  countRecentOtps,
+  logAuthRequest,
+  countAuthRequests,
   getActiveLicensesByEmail,
   OTP_MAX_PER_HOUR,
+  OTP_MAX_PER_DAY,
+  RESET_MAX_PER_HOUR,
   audit
 } = require('../db/database');
 
 const { hashPassword, verifyPassword, isPasswordSet } = require('../utils/password');
 
 const { sanitizeFreeText } = require('../utils/sanitize'); // antes definido aquí abajo
-const { sendPasswordResetEmail, sendRecoveryOtpEmail, sendRecoveredKeysEmail } = require('../utils/mailer');
+const { sendPasswordResetEmail, sendPasswordResetLimitEmail, sendRecoveryOtpEmail, sendRecoveredKeysEmail } = require('../utils/mailer');
 const { aiQuotaForPlan } = require('../db/database');
 
 const KEY_REGEX = /^[A-F0-9]{4}-[A-F0-9]{4}-[A-F0-9]{4}-[A-F0-9]{4}$/i;
@@ -308,6 +311,19 @@ router.post('/request-password-reset', async (req, res) => {
     return res.status(400).json({ error: 'invalid_input', message: 'Email o clave inválidos.' });
   }
 
+  // #6 (sesión 2) — oráculo de enumeración por 429: el límite por email se
+  // comprueba ANTES de mirar si el par email+clave existe, contando TODAS las
+  // solicitudes (auth_request_log las registra siempre). Así el 429 salta
+  // igual para pares válidos e inventados y no delata qué cuentas existen.
+  if (countAuthRequests(email, 'password_reset', '-1 hour') >= RESET_MAX_PER_HOUR) {
+    audit('PASSWORD_RESET_REQUEST_RATE_LIMITED', { ip: req.ip, detail: `email=${email}` });
+    return res.status(429).json({
+      error: 'reset_limit_reached',
+      message: 'Has hecho demasiadas solicitudes. Espera una hora e inténtalo de nuevo.'
+    });
+  }
+  logAuthRequest(email, 'password_reset');
+
   const license = getLicenseByEmailAndKey(email, license_key);
 
   // Respuesta genérica siempre (anti-enumeración)
@@ -322,11 +338,16 @@ router.post('/request-password-reset', async (req, res) => {
   }
 
   if (!canResetPassword(license)) {
-    audit('PASSWORD_RESET_REQUEST_LIMIT_REACHED', { license_id: license.id, ip: req.ip });
-    return res.status(429).json({
-      error: 'reset_limit_reached',
-      message: 'Ya has restablecido tu contraseña este año. Contacta con soporte para una excepción manual.'
-    });
+    // #6: el límite anual ya NO se revela por HTTP (un 429 aquí delataría que
+    // el par email+clave es válido). La respuesta es la genérica y la
+    // explicación llega SOLO al buzón del titular (sendPasswordResetLimitEmail).
+    audit('PASSWORD_RESET_REQUEST_YEARLY_LIMIT', { license_id: license.id, ip: req.ip });
+    try {
+      await sendPasswordResetLimitEmail({ to: license.email });
+    } catch (e) {
+      console.error('[EMAIL ERROR]', e.message);
+    }
+    return res.json(genericResponse);
   }
 
   const { token, expires_at } = createResetToken(license.id, 'password_reset', 30);
@@ -427,9 +448,18 @@ function publicLicenseView(license) {
    POST /api/auth/request-recovery
    Body: { email }. Respuesta SIEMPRE genérica (anti-enumeración).
    Si el email tiene licencias activas, envía un OTP de 6 dígitos
-   (10 min de validez). Límite: OTP_MAX_PER_HOUR por email/hora
-   (además del authLimiter global de la ruta).
+   (10 min de validez).
+
+   #7 (sesión 2) — anti-enumeración reforzada:
+   · El límite (OTP_MAX_PER_HOUR/hora + OTP_MAX_PER_DAY/día, #14) se aplica
+     ANTES de consultar la DB y cuenta TODAS las solicitudes del email
+     (auth_request_log), así el 429 salta igual exista o no la cuenta.
+   · Si el email no existe se hace trabajo dummy (delay equivalente al envío
+     del email) para igualar la latencia y cerrar el oráculo de timing.
+   (Además del authLimiter global por IP de la ruta.)
 ────────────────────────────────────────────────────────── */
+const RECOVERY_DUMMY_DELAY_MS = 400; // ~ latencia típica del envío vía Resend
+
 router.post('/request-recovery', async (req, res) => {
   const email = (req.body?.email || '').trim().toLowerCase();
 
@@ -442,16 +472,22 @@ router.post('/request-recovery', async (req, res) => {
     return res.status(400).json({ error: 'invalid_input', message: 'Email inválido.' });
   }
 
-  if (countRecentOtps(email) >= OTP_MAX_PER_HOUR) {
+  if (countAuthRequests(email, 'recovery', '-1 hour') >= OTP_MAX_PER_HOUR
+      || countAuthRequests(email, 'recovery', '-24 hours') >= OTP_MAX_PER_DAY) {
     audit('RECOVERY_OTP_RATE_LIMITED', { ip: req.ip, detail: `email=${email}` });
     return res.status(429).json({
       error: 'otp_limit_reached',
-      message: 'Has solicitado demasiados códigos. Espera una hora e inténtalo de nuevo.'
+      message: 'Has solicitado demasiados códigos. Espera un rato e inténtalo de nuevo.'
     });
   }
+  logAuthRequest(email, 'recovery');
 
   const licenses = getActiveLicensesByEmail(email);
   if (licenses.length === 0) {
+    // Trabajo dummy: la rama con cuenta envía un email (llamada HTTPS a
+    // Resend); sin delay esta rama respondería mucho más rápido y delataría
+    // por timing qué emails tienen licencia (#7).
+    await new Promise(r => setTimeout(r, RECOVERY_DUMMY_DELAY_MS));
     audit('RECOVERY_OTP_REQUEST_INVALID', { ip: req.ip, detail: `email=${email}` });
     return res.json(genericResponse);
   }

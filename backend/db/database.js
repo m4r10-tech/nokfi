@@ -56,6 +56,22 @@ function hashToken(token) {
   return crypto.createHash('sha256').update(token).digest('hex');
 }
 
+/**
+ * #4 (sesión 2) — bug de fechas SQLite. Las columnas expires_at se escriben
+ * desde JS con toISOString() → '2026-09-22T18:24:32.180Z' (con 'T'), pero se
+ * comparaban con datetime('now') → '2026-09-22 18:24:32' (con ESPACIO). La
+ * comparación lexicográfica entre formatos distintos falla el mismo día UTC
+ * ('T' 0x54 > ' ' 0x20 → todo lo que expira el mismo día contaba como vigente
+ * hasta medianoche: OTPs de 10 min duraban horas, sesiones/tokens expirados
+ * seguían válidos).
+ *
+ * Convención única: los writers siguen guardando ISO-8601 con 'T' (formato
+ * canónico y lo que ya hay en las filas vivas) y TODAS las comparaciones usan
+ * NOW_ISO, que produce exactamente ese formato en SQL. No hace falta migrar
+ * filas antiguas: ya están en ISO (las anteriores a la auditoría también).
+ */
+const NOW_ISO = `strftime('%Y-%m-%dT%H:%M:%fZ','now')`;
+
 /* ════════════════════════════════════════════════════════════
    INICIALIZACIÓN
 ════════════════════════════════════════════════════════════ */
@@ -143,6 +159,20 @@ function initDB() {
           expires_at  TEXT    NOT NULL
         );
 
+        -- #6/#7/#14 (sesión 2): contador de SOLICITUDES de recuperación/reset
+        -- por email, registradas ANTES de comprobar si la cuenta existe. Es lo
+        -- que permite que el 429 sea uniforme (mismo comportamiento para emails
+        -- reales y ajenos → sin oráculo de enumeración) y poner un tope diario
+        -- al spam de OTPs. created_at con datetime('now') (formato espacio) y
+        -- siempre comparado con datetime('now', …) → misma convención, sin el
+        -- bug #4 (esa columna nunca se escribe desde JS).
+        CREATE TABLE IF NOT EXISTS auth_request_log (
+          id          INTEGER PRIMARY KEY AUTOINCREMENT,
+          email       TEXT    NOT NULL,
+          kind        TEXT    NOT NULL CHECK(kind IN ('password_reset','recovery')),
+          created_at  TEXT    NOT NULL DEFAULT (datetime('now'))
+        );
+
         CREATE TABLE IF NOT EXISTS audit_log (
           id          INTEGER PRIMARY KEY AUTOINCREMENT,
           event       TEXT    NOT NULL,
@@ -204,6 +234,7 @@ function initDB() {
         CREATE INDEX IF NOT EXISTS idx_payment_provider_evt  ON payment_events(provider, event_id);
         CREATE INDEX IF NOT EXISTS idx_reset_tokens_token     ON reset_tokens(token);
         CREATE INDEX IF NOT EXISTS idx_otp_codes_email        ON otp_codes(email);
+        CREATE INDEX IF NOT EXISTS idx_auth_request_log       ON auth_request_log(email, kind, created_at);
         CREATE INDEX IF NOT EXISTS idx_audit_license          ON audit_log(license_id);
         CREATE INDEX IF NOT EXISTS idx_audit_ts               ON audit_log(ts);
 
@@ -537,39 +568,47 @@ function runPaymentIntentRefMigration(database) {
 }
 
 /**
- * ⚠️ AUDITORÍA DE SEGURIDAD — migración "tokens hasheados en reposo".
+ * ⚠️ AUDITORÍA DE SEGURIDAD — migración "tokens hasheados en reposo" (v2).
  * Antes, sessions.token y reset_tokens.token se guardaban en PLAINTEXT. Desde
- * este cambio la app solo escribe el SHA-256 del token (hashToken). Esta
- * migración hashea in-place las filas preexistentes para que el endurecimiento
- * cubra también la historia, no solo las filas nuevas.
+ * la auditoría (commit 0aca8d3) la app solo escribe el SHA-256 del token
+ * (hashToken). Esta migración hashea in-place las filas preexistentes.
  *
- * Discriminador fiable entre plano y ya-hasheado: un token plano es 64 hex en
- * MAYÚSCULAS (crypto.randomBytes(32).toString('hex') → A-F mayúsculas);
- * un token ya hasheado (digest('hex')) es 64 hex en minúsculas. `token GLOB
- * '*[A-Z]*'` solo casa los planos → idempotente y NO destructivo: no revoca
- * sesiones activas ni enlaces de reset pendientes — el cliente conserva su
- * token crudo, que al buscarlo se hashea y sigue coincidiendo.
+ * #5 (sesión 2) — la v1 era un NO-OP silencioso: discriminaba por
+ * `token GLOB '*[A-Z]*'` asumiendo que el token plano era hex en MAYÚSCULAS,
+ * pero crypto.randomBytes(32).toString('hex') genera MINÚSCULAS — igual que
+ * el digest SHA-256. Token plano y hash son AMBOS 64 hex minúsculas:
+ * indistinguibles por formato. La v1 no tocó ninguna fila.
+ *
+ * v2 — como no existe discriminador de formato posible, se usa una marca de
+ * migración a nivel de esquema (PRAGMA user_version, persiste en la cabecera
+ * del archivo .db): con user_version < 1 se re-hashean TODAS las filas una
+ * única vez y se marca user_version = 1.
+ *
+ * Efecto conocido y aceptado: las sesiones creadas tras la auditoría (ya
+ * hasheadas) quedan doble-hasheadas → esas sesiones mueren y sus usuarios
+ * hacen login una vez más (flujo normal de sesión expirada, mismo resultado
+ * que si se hubieran borrado). Es el precio de una invariante demostrable por
+ * construcción: tras esta migración, TODA fila de sessions/reset_tokens es un
+ * hash SHA-256 — no queda nada en plano, ni viejo ni nuevo. Las filas en
+ * plano anteriores a la auditoría además ya estaban muertas (el lookup siempre
+ * hashea la entrada → jamás casaban).
  */
 function hashTokensAtRest(database) {
+  const version = database.pragma('user_version', { simple: true });
+  if (version >= 1) return; // migración v2 ya aplicada — no-op
+
   const updS = database.prepare('UPDATE sessions SET token = ? WHERE id = ?');
-  const plaintextSessions = database
-    .prepare("SELECT id, token FROM sessions WHERE token GLOB '*[A-Z]*' AND length(token) = 64")
-    .all();
-  database.transaction(() => {
-    for (const r of plaintextSessions) updS.run(hashToken(r.token), r.id);
-  })();
-
+  const sessions = database.prepare('SELECT id, token FROM sessions').all();
   const updR = database.prepare('UPDATE reset_tokens SET token = ? WHERE id = ?');
-  const plaintextReset = database
-    .prepare("SELECT id, token FROM reset_tokens WHERE token GLOB '*[A-Z]*' AND length(token) = 64")
-    .all();
+  const resetTokens = database.prepare('SELECT id, token FROM reset_tokens').all();
+
   database.transaction(() => {
-    for (const r of plaintextReset) updR.run(hashToken(r.token), r.id);
+    for (const r of sessions) updS.run(hashToken(r.token), r.id);
+    for (const r of resetTokens) updR.run(hashToken(r.token), r.id);
+    database.pragma('user_version = 1');
   })();
 
-  if (plaintextSessions.length || plaintextReset.length) {
-    console.log(`✅  Migración tokens: hasheados ${plaintextSessions.length} sesiones y ${plaintextReset.length} reset-tokens`);
-  }
+  console.log(`✅  Migración tokens v2: (re)hasheadas ${sessions.length} sesiones y ${resetTokens.length} reset-tokens (user_version=1)`);
 }
 
 function getDB() {
@@ -758,7 +797,7 @@ function getSession(token) {
   // Hashear el token entrante para casar con la columna en reposo (hashToken).
   const hashed = hashToken(token);
   const session = db.prepare(
-    "SELECT * FROM sessions WHERE token = ? AND expires_at > datetime('now')"
+    `SELECT * FROM sessions WHERE token = ? AND expires_at > ${NOW_ISO}`
   ).get(hashed);
   if (!session) return null;
   db.prepare("UPDATE sessions SET last_used = datetime('now') WHERE token = ?").run(hashed);
@@ -774,7 +813,7 @@ function deleteSessionsForLicense(license_id) {
 }
 
 function cleanExpiredSessions() {
-  return getDB().prepare("DELETE FROM sessions WHERE expires_at < datetime('now')").run().changes;
+  return getDB().prepare(`DELETE FROM sessions WHERE expires_at < ${NOW_ISO}`).run().changes;
 }
 
 /* ════════════════════════════════════════════════════════════
@@ -799,7 +838,7 @@ function consumeResetToken(token, purpose) {
   const db = getDB();
   const row = db.prepare(`
     SELECT * FROM reset_tokens
-    WHERE token = ? AND purpose = ? AND used = 0 AND expires_at > datetime('now')
+    WHERE token = ? AND purpose = ? AND used = 0 AND expires_at > ${NOW_ISO}
   `).get(hashToken(token), purpose);
   if (!row) return null;
   db.prepare('UPDATE reset_tokens SET used = 1 WHERE id = ?').run(row.id);
@@ -814,7 +853,7 @@ function consumeResetToken(token, purpose) {
 function peekResetToken(token, purpose) {
   return getDB().prepare(`
     SELECT * FROM reset_tokens
-    WHERE token = ? AND purpose = ? AND used = 0 AND expires_at > datetime('now')
+    WHERE token = ? AND purpose = ? AND used = 0 AND expires_at > ${NOW_ISO}
   `).get(hashToken(token), purpose);
 }
 
@@ -829,6 +868,42 @@ function peekResetToken(token, purpose) {
 const OTP_TTL_MINUTES = 10;
 const OTP_MAX_ATTEMPTS = 5;
 const OTP_MAX_PER_HOUR = 3;
+// #14 (sesión 2): además del límite por hora, tope diario por email — antes
+// podían pedirse 3 códigos/hora INDEFINIDAMENTE (24×3=72 emails/día a un
+// buzón ajeno) y cada nuevo código quemaba el del usuario legítimo.
+const OTP_MAX_PER_DAY = 10;
+// #6 (sesión 2): tope de solicitudes de reset de contraseña por email/hora,
+// aplicado ANTES de mirar si la cuenta existe (429 uniforme, sin oráculo).
+const RESET_MAX_PER_HOUR = 5;
+
+/**
+ * Registra una solicitud de recuperación/reset por email (tabla
+ * auth_request_log). Se llama SIEMPRE — exista o no la cuenta — para que el
+ * conteo (y el 429) sea uniforme y no delate qué emails tienen licencia.
+ * Incluye limpieza perezosa de filas de más de 2 días.
+ */
+function logAuthRequest(email, kind) {
+  const db = getDB();
+  const normalized = String(email).trim().toLowerCase();
+  const tx = db.transaction(() => {
+    db.prepare(`DELETE FROM auth_request_log WHERE created_at < datetime('now', '-2 days')`).run();
+    db.prepare(`INSERT INTO auth_request_log (email, kind) VALUES (?, ?)`).run(normalized, kind);
+  });
+  tx();
+}
+
+/**
+ * Cuántas solicitudes de un tipo ha hecho un email en una ventana deslizante
+ * SQLite (p.ej. '-1 hour', '-24 hours'). Uniforme entre emails reales y
+ * ajenos porque logAuthRequest se ejecuta siempre antes de consultar.
+ */
+function countAuthRequests(email, kind, windowSql = '-1 hour') {
+  const row = getDB().prepare(`
+    SELECT COUNT(*) AS n FROM auth_request_log
+    WHERE email = ? AND kind = ? AND created_at > datetime('now', ?)
+  `).get(String(email).trim().toLowerCase(), kind, windowSql);
+  return row.n;
+}
 
 /** ¿Cuántos OTP se han generado para este email en la última hora? (límite anti-spam) */
 function countRecentOtps(email) {
@@ -853,7 +928,7 @@ function createOtp(email) {
   expires.setMinutes(expires.getMinutes() + OTP_TTL_MINUTES);
 
   const tx = db.transaction(() => {
-    db.prepare(`DELETE FROM otp_codes WHERE expires_at <= datetime('now')`).run();
+    db.prepare(`DELETE FROM otp_codes WHERE expires_at <= ${NOW_ISO}`).run();
     db.prepare(`UPDATE otp_codes SET used = 1 WHERE email = ? AND used = 0`).run(normalized);
     db.prepare(`INSERT INTO otp_codes (email, code_hash, expires_at) VALUES (?, ?, ?)`)
       .run(normalized, hashToken(code), expires.toISOString());
@@ -875,7 +950,7 @@ function verifyOtp(email, code) {
   const normalized = String(email).trim().toLowerCase();
   const row = db.prepare(`
     SELECT * FROM otp_codes
-    WHERE email = ? AND used = 0 AND expires_at > datetime('now')
+    WHERE email = ? AND used = 0 AND expires_at > ${NOW_ISO}
     ORDER BY id DESC LIMIT 1
   `).get(normalized);
 
@@ -1327,6 +1402,7 @@ function upsertCompanyProfile(license_id, partial) {
 module.exports = {
   initDB,
   getDB,
+  hashTokensAtRest, // exportado para el test e2e de la migración v2 (#5)
   generateLicenseKey,
   createLicense,
   getLicenseByKey,
@@ -1352,8 +1428,12 @@ module.exports = {
   createOtp,
   verifyOtp,
   countRecentOtps,
+  logAuthRequest,
+  countAuthRequests,
   getActiveLicensesByEmail,
   OTP_MAX_PER_HOUR,
+  OTP_MAX_PER_DAY,
+  RESET_MAX_PER_HOUR,
   isPaymentEventProcessed,
   recordPaymentEvent,
   countAiAnalysesToday,

@@ -1219,6 +1219,110 @@ async function main() {
     r => r.status === 429 && r.data.error === 'otp_limit_reached'
   );
 
+  // ═══════════════════════════════════════════════════════════
+  // Sesión 2 — Tanda B (#4 fechas, #5 migración, #6/#7/#14 oráculos)
+  // ═══════════════════════════════════════════════════════════
+  const { verifyOtp, getSession, peekResetToken, hashTokensAtRest } = require('../db/database');
+
+  // ── #6: rate-limit uniforme por email, exista o no el par email+clave ──
+  const spamEmail = 'spam-pwreset@nokfi.local';
+  for (let i = 0; i < 5; i++) {
+    await post('/api/auth/request-password-reset', { email: spamEmail, license_key: 'AAAA-BBBB-CCCC-DDDD' });
+  }
+  await checkAsync('#6 6ª solicitud de reset en 1h con par INEXISTENTE → 429 uniforme (sin oráculo)',
+    post('/api/auth/request-password-reset', { email: spamEmail, license_key: 'AAAA-BBBB-CCCC-DDDD' }),
+    r => r.status === 429 && r.data.error === 'reset_limit_reached'
+  );
+
+  // ── #6: licencia al límite anual → 200 genérico + aviso por email, NUNCA 429 ──
+  // (testEmail ya consumió su reset anual en la sección 9: confirm-password-reset)
+  const unusedRtBefore = getDB().prepare(
+    "SELECT COUNT(*) AS c FROM reset_tokens WHERE license_id = ? AND purpose = 'password_reset' AND used = 0"
+  ).get(licenseId).c;
+  await checkAsync('#6 licencia al límite anual → 200 genérico (no 429 — el aviso va por email)',
+    post('/api/auth/request-password-reset', { email: testEmail, license_key: licenseKey }),
+    r => r.status === 200 && r.data.success === true
+  );
+  check('#6 …y NO se crea ningún reset_token nuevo para esa licencia',
+    () => getDB().prepare(
+      "SELECT COUNT(*) AS c FROM reset_tokens WHERE license_id = ? AND purpose = 'password_reset' AND used = 0"
+    ).get(licenseId).c === unusedRtBefore
+  );
+
+  // ── #7: recovery con email inexistente — mismo 429 que con uno real ──
+  // (cada request a email inexistente espera el dummy delay de 400ms → ~1.2s aquí)
+  const ghostEmail = 'ghost-recovery@nokfi.local';
+  await post('/api/auth/request-recovery', { email: ghostEmail });
+  await post('/api/auth/request-recovery', { email: ghostEmail });
+  await post('/api/auth/request-recovery', { email: ghostEmail });
+  await checkAsync('#7 4ª solicitud recovery con email INEXISTENTE → 429 uniforme (sin oráculo)',
+    post('/api/auth/request-recovery', { email: ghostEmail }),
+    r => r.status === 429 && r.data.error === 'otp_limit_reached'
+  );
+
+  // ── #14: tope diario de OTP (10/24h) aunque el contador horario esté libre ──
+  const dailyEmail = 'daily-cap@nokfi.local';
+  const insLog = getDB().prepare(
+    "INSERT INTO auth_request_log (email, kind, created_at) VALUES (?, 'recovery', datetime('now', '-2 hours'))"
+  );
+  for (let i = 0; i < 10; i++) insLog.run(dailyEmail);
+  await checkAsync('#14 con 10 solicitudes recovery en 24h (horario libre) → 429 otp_limit_reached',
+    post('/api/auth/request-recovery', { email: dailyEmail }),
+    r => r.status === 429 && r.data.error === 'otp_limit_reached'
+  );
+
+  // ── #4: expiración el MISMO DÍA UTC ya no cuenta como vigente ──
+  // Antes: expires_at ISO con 'T' comparado con datetime('now') con espacio
+  // → 'T'(0x54) > ' '(0x20) → lo que expiraba el mismo día seguía valiendo
+  // hasta medianoche. Ahora las comparaciones SQL usan NOW_ISO (mismo formato).
+  const pastIso = new Date(Date.now() - 60000).toISOString(); // hace 1 min, mismo día UTC
+
+  const otpExpired = createOtp('fecha-bug@nokfi.local');
+  getDB().prepare('UPDATE otp_codes SET expires_at = ? WHERE email = ?').run(pastIso, 'fecha-bug@nokfi.local');
+  check('#4 OTP expirado hace 1 minuto → verifyOtp lo rechaza (no_code)',
+    () => verifyOtp('fecha-bug@nokfi.local', otpExpired.code).ok === false
+  );
+
+  const rtExpired = createRT(licenseId, 'password_reset', 30);
+  const rtHash = crypto.createHash('sha256').update(rtExpired.token).digest('hex');
+  getDB().prepare('UPDATE reset_tokens SET expires_at = ? WHERE token = ?').run(pastIso, rtHash);
+  check('#4 reset token expirado hace 1 minuto → peekResetToken no lo devuelve',
+    () => !peekResetToken(rtExpired.token, 'password_reset')
+  );
+
+  const sessExpired = createSession(licenseId, '127.0.0.1');
+  check('#4 sesión recién creada SÍ es válida (control positivo)',
+    () => !!getSession(sessExpired.token)
+  );
+  const sessHash = crypto.createHash('sha256').update(sessExpired.token).digest('hex');
+  getDB().prepare('UPDATE sessions SET expires_at = ? WHERE token = ?').run(pastIso, sessHash);
+  check('#4 sesión expirada hace 1 minuto → getSession devuelve null',
+    () => getSession(sessExpired.token) === null
+  );
+
+  // ── #5: hashTokensAtRest v2 — ÚLTIMO test de la suite, a propósito ──
+  // Re-hashea TODAS las sesiones y reset_tokens (discriminar por formato es
+  // imposible: plano y SHA-256 son ambos 64 hex minúsculas). Después de este
+  // punto ningún token previo es válido, por eso va al final, tras R10.
+  const plainToken = 'abcdef0123456789'.repeat(4); // 64 hex minúsculas = token plano pre-auditoría
+  const plainHash = crypto.createHash('sha256').update(plainToken).digest('hex');
+  getDB().prepare(
+    "INSERT INTO reset_tokens (token, purpose, license_id, expires_at) VALUES (?, 'password_reset', ?, datetime('now', '+30 minutes'))"
+  ).run(plainToken, licenseId);
+  getDB().pragma('user_version = 0'); // simula una DB pre-v2
+  hashTokensAtRest(getDB());
+  check('#5 token plano (64 hex minúsculas) queda hasheado tras la migración v2',
+    () => !!getDB().prepare('SELECT id FROM reset_tokens WHERE token = ?').get(plainHash)
+      && !getDB().prepare('SELECT id FROM reset_tokens WHERE token = ?').get(plainToken)
+  );
+  check('#5 user_version queda en 1 y una segunda pasada es no-op',
+    () => {
+      hashTokensAtRest(getDB()); // no debe lanzar ni re-tocar nada
+      return getDB().pragma('user_version', { simple: true }) === 1
+        && !!getDB().prepare('SELECT id FROM reset_tokens WHERE token = ?').get(plainHash);
+    }
+  );
+
   } catch (e) {
     console.error('TEST CRASH:', e.message);
     failed++;

@@ -30,11 +30,26 @@ async function request(path, { method = 'GET', body, auth = false, isFormData = 
     return { ok: false, status: 0, data: { error: 'network_error', message: 'No se pudo conectar con el servidor.' } };
   }
 
+  // #8 (sesión 2): no parsear como JSON lo que no lo es. Si el backend (o un
+  // intermediario) devuelve HTML — 502 de Cloudflare, error de nginx — res.json()
+  // lanzaba y el catch lo tragaba como data={}, dejando estados de UI confusos
+  // (éxito vacío). Ahora se mira el content-type y se devuelve un error claro.
   let data = {};
-  try { data = await res.json(); } catch { /* respuestas vacías, ej. 204 */ }
+  const contentType = res.headers.get('content-type') || '';
+  if (res.status === 204) {
+    data = {};
+  } else if (contentType.includes('application/json')) {
+    try { data = await res.json(); } catch { data = {}; /* JSON malformado */ }
+  } else {
+    await res.text().catch(() => ''); // drenar el body
+    data = { error: 'non_json_response', message: 'El servidor no respondió correctamente. Inténtalo de nuevo en unos minutos.' };
+  }
 
-  const sessionErrors = ['session_invalid', 'auth_required', 'license_not_found'];
-  if (auth && res.status === 401 && sessionErrors.includes(data.error)) {
+  // #10 (sesión 2): añadidos no_token y license_inactive, y se acepta también
+  // 403 (verify devuelve 403 license_inactive) — antes esos códigos caían en
+  // mensajes genéricos en vez de cerrar la sesión con el motivo correcto.
+  const sessionErrors = ['session_invalid', 'auth_required', 'license_not_found', 'no_token', 'license_inactive'];
+  if (auth && (res.status === 401 || res.status === 403) && sessionErrors.includes(data.error)) {
     sessionToken = null;
     if (onSessionExpired) onSessionExpired(data.error);
   }
