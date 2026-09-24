@@ -44,7 +44,22 @@ export function exportAnalysisToPdf(title, analysisHtml) {
   doc.setFontSize(10);
   doc.setTextColor(60, 60, 60);
   const lines = doc.splitTextToSize(plainText, 180);
-  doc.text(lines, 14, 42);
+
+  // #11 (sesión 2): doc.text(lines, x, y) sin paginar escribía todo el
+  // análisis sobre la página 1 — con análisis largos el texto se salía del
+  // papel y se perdía. Ahora se recorre línea a línea y se salta de página.
+  const pageHeight = doc.internal.pageSize.getHeight();
+  const lineHeight = 5;   // mm por línea a fontSize 10
+  const bottomMargin = 15;
+  let y = 42;
+  for (const line of lines) {
+    if (y > pageHeight - bottomMargin) {
+      doc.addPage();
+      y = 20;
+    }
+    doc.text(line, 14, y);
+    y += lineHeight;
+  }
 
   doc.save(`${slug(title)}_nokfi.pdf`);
 }

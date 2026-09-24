@@ -74,6 +74,11 @@ export default function Login() {
         break;
       case 'invalid_credentials':
         setErrorMsg(t('login.invalidCredentials'));
+        // #19 (sesión 2): showResetHint existía pero nunca se activaba — si el
+        // par email+clave es válido pero la contraseña falla, el enlace directo
+        // a restablecerla es justo lo que el usuario necesita. Solo en modo
+        // login (en activate, invalid_credentials no apunta a un reset).
+        if (mode === 'login') setShowResetHint(true);
         break;
       case 'not_activated':
         setErrorMsg(t('login.notActivated'));

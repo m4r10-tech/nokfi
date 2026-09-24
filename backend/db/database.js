@@ -173,6 +173,17 @@ function initDB() {
           created_at  TEXT    NOT NULL DEFAULT (datetime('now'))
         );
 
+        -- #13 (sesión 2): audit_log.license_id NO lleva FK a licenses A PROPÓSITO.
+        -- El audit trail debe sobrevivir a la licencia: si se revoca/borra una
+        -- licencia (chargeback, abuso, GDPR), sus eventos de seguridad siguen
+        -- siendo la evidencia de lo que pasó. Una FK con CASCADE destruiría el
+        -- rastro justo cuando más hace falta; una FK sin CASCADE impediría
+        -- borrar licencias. Decisión deliberada, no descuido — no "arreglar".
+        -- #13 (sesión 2) — license_id SIN FK a licenses, a propósito: esta tabla
+        -- es el histórico forense. Con REFERENCES + CASCADE los eventos se
+        -- borrarían con la licencia (pierdes el rastro justo cuando más falta
+        -- hace: chargebacks, abuso); y sin acción, la FK bloquearía borrar
+        -- licencias con historial. Sin FK, la fila sobrevive con el id apagado.
         CREATE TABLE IF NOT EXISTS audit_log (
           id          INTEGER PRIMARY KEY AUTOINCREMENT,
           event       TEXT    NOT NULL,
@@ -473,12 +484,16 @@ function runSubscriptionMigration(database) {
         // Copiar todas las filas. Las lifetime viejas (plan basic/pro) → max/legacy.
         // Los nuevos campos stripe se inicializan a NULL/0 (sin suscripción real).
         // El `id` se copia explícito para preservar las FK de sessions/audit/etc.
+        // #12 (sesión 2): trial_ends_at se conserva si la tabla vieja ya la tenía
+        // (DB de una versión con trial pero CHECKs viejos); antes el INSERT no la
+        // listaba y el rebuild dejaba todos los trials a NULL.
+        const trialCol = cols.includes('trial_ends_at') ? 'trial_ends_at' : 'NULL';
         database.exec(`
           INSERT INTO licenses_new_sub (
             id, key, email, status, plan, billing_model, password_hash, device_name,
             last_password_reset, stripe_customer_id, stripe_subscription_id,
-            current_period_ends_at, cancel_at_period_end, payment_provider,
-            payment_ref, amount_eur, notes, created_at, created_by
+            current_period_ends_at, cancel_at_period_end, trial_ends_at,
+            payment_provider, payment_ref, amount_eur, notes, created_at, created_by
           )
           SELECT
             id, key, email, status,
@@ -486,6 +501,7 @@ function runSubscriptionMigration(database) {
             CASE WHEN plan IN ('basic','pro') THEN 'legacy' ELSE 'subscription' END,
             password_hash, device_name, last_password_reset,
             NULL, NULL, NULL, 0,
+            ${trialCol},
             payment_provider, payment_ref, amount_eur, notes, created_at, created_by
           FROM licenses
         `);

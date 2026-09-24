@@ -170,7 +170,13 @@ router.post('/login', (req, res) => {
     return res.status(401).json({ error: 'invalid_credentials', message: 'Email, clave o contraseña incorrectos.' });
   }
 
-  // Licencia migrada sin contraseña, o nunca activada → invita a activar
+  // Licencia migrada sin contraseña, o nunca activada → invita a activar.
+  // #15 (sesión 2) — decisión deliberada: este 409 es un mini-oráculo (delata
+  // que el par email+clave existe pero sin contraseña), pero se MANTIENE porque
+  // en este punto el caller ya demostró conocer el par válido — la única info
+  // nueva es "no hay contraseña puesta", que es justo lo que el usuario legítimo
+  // necesita para entrar por el flujo de activación. Cambiarlo a 401 genérico
+  // dejaría a esos usuarios sin camino de recuperación usable.
   if (!isPasswordSet(license)) {
     audit('LOGIN_FAILED_NOT_ACTIVATED', { license_id: license.id, ip });
     return res.status(409).json({
@@ -379,17 +385,27 @@ router.post('/confirm-password-reset', (req, res) => {
   const pwdCheck = validatePassword(new_password);
   if (!pwdCheck.ok) return res.status(pwdCheck.status).json(pwdCheck.body);
 
-  const consumed = consumeResetToken(token, 'password_reset');
-  if (!consumed) {
+  // #9 (sesión 2): peek ANTES de consumir. Si la licencia está inactiva se
+  // responde 403 SIN quemar el token — antes el consume quedaba hecho y el
+  // enlace moría aunque el admin reactivara la licencia un minuto después.
+  const peeked = peekResetToken(token, 'password_reset');
+  if (!peeked) {
     return res.status(400).json({
       error: 'invalid_or_expired_token',
       message: 'Este enlace ya no es válido. Puede haber expirado o haberse usado ya.'
     });
   }
 
-  const license = getLicenseById(consumed.license_id);
+  const license = getLicenseById(peeked.license_id);
   if (!license || license.status !== 'active') {
     return res.status(403).json({ error: 'license_inactive', message: 'Licencia no disponible.' });
+  }
+
+  // Token válido + licencia activa → ahora sí, consumir (un solo uso).
+  const consumed = consumeResetToken(token, 'password_reset');
+  if (!consumed) {
+    // Carrera imposible en SQLite (writes serializados), pero por higiene.
+    return res.status(400).json({ error: 'invalid_or_expired_token' });
   }
 
   setPasswordHash(license.id, hashPassword(new_password), device_name || null);

@@ -188,6 +188,7 @@ export default {
     resetTitle: 'Reset password — Nokfi',
     recoveryTitle: 'Recover access — Nokfi',
     revealTitle: 'Your license — Nokfi',
+    notFoundTitle: 'Page not found — Nokfi',
     privacyTitle: 'Privacy policy — Nokfi',
     privacyDesc: 'How Nokfi handles your data: what we store, what we don’t, and which services are involved.'
   },

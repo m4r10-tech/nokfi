@@ -1300,6 +1300,25 @@ async function main() {
     () => getSession(sessExpired.token) === null
   );
 
+  // ── #9: confirm-password-reset con licencia INACTIVA → 403 SIN quemar el token ──
+  // Antes el consume iba primero: el enlace moría aunque el admin reactivara
+  // la licencia un minuto después. Ahora peek → check → consume.
+  const lic9 = dbCreateLicense({ email: 'peek-reset@nokfi.local', plan: 'mini', password: 'PeekPass1!zz' });
+  const rt9 = createRT(lic9.id, 'password_reset', 30);
+  getDB().prepare("UPDATE licenses SET status = 'revoked' WHERE id = ?").run(lic9.id);
+  await checkAsync('#9 confirm-password-reset con licencia revocada → 403 license_inactive',
+    post('/api/auth/confirm-password-reset', { token: rt9.token, new_password: 'PeekNewPass2!zz' }),
+    r => r.status === 403 && r.data.error === 'license_inactive'
+  );
+  check('#9 …y el token NO se consumió (peek sigue devolviéndolo)',
+    () => !!peekResetToken(rt9.token, 'password_reset')
+  );
+  getDB().prepare("UPDATE licenses SET status = 'active' WHERE id = ?").run(lic9.id);
+  await checkAsync('#9 reactivada la licencia, el MISMO enlace ya funciona → 200',
+    post('/api/auth/confirm-password-reset', { token: rt9.token, new_password: 'PeekNewPass2!zz' }),
+    r => r.status === 200 && r.data.success === true && !!r.data.token
+  );
+
   // ── #5: hashTokensAtRest v2 — ÚLTIMO test de la suite, a propósito ──
   // Re-hashea TODAS las sesiones y reset_tokens (discriminar por formato es
   // imposible: plano y SHA-256 son ambos 64 hex minúsculas). Después de este

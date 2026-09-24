@@ -14,7 +14,11 @@ import Logo from '../components/Logo';
  * recién comprada en la web — además del email, que el webhook ya envió.
  *
  * El webhook puede tardar unos segundos en procesarse y crear la licencia,
- * así que si el primer GET devuelve 404 se reintenta una vez a los 3s.
+ * así que ante un 404 se reintenta con backoff: hasta 5 intentos con espera
+ * creciente (3s × intento → 3/6/9/12s entre intentos, ~30s de margen total).
+ * #20 (sesión 2): antes era UN solo reintento a los 3s — un webhook lento
+ * (cola de Stripe, cold start) dejaba al usuario en "not_found" con la clave
+ * ya creada unos segundos después.
  */
 export default function Reveal() {
   const [searchParams] = useSearchParams();
@@ -28,15 +32,19 @@ function RevealStep({ session_id }) {
   const [state, setState] = useState('loading'); // loading | success | pending | not_found
   const [data, setData] = useState(null);        // { key, email, plan }
   const [copied, setCopied] = useState(false);
-  const retried = useRef(false);
+  const attempts = useRef(0);
+  const timer = useRef(null);
   const { t } = useLang();
   const navigate = useNavigate();
+
+  const MAX_ATTEMPTS = 5; // #20: backoff 3s×intento → 3/6/9/12s entre intentos
 
   useEffect(() => {
     let cancelled = false;
     if (!session_id) { setState('not_found'); return; }
 
     const fetchOnce = async () => {
+      attempts.current += 1;
       const { ok, data } = await paymentsApi.reveal(session_id);
       if (cancelled) return;
       if (ok && data.key) {
@@ -44,18 +52,18 @@ function RevealStep({ session_id }) {
         setState('success');
         return;
       }
-      // 404: el webhook puede no haber llegado todavía → reintento único a los 3s
-      if (data.error === 'not_found' && !retried.current) {
-        retried.current = true;
+      // 404: el webhook puede no haber llegado todavía → reintenta con backoff
+      // creciente manteniendo el estado 'pending' (spinner + mensaje de espera).
+      if (data.error === 'not_found' && attempts.current < MAX_ATTEMPTS) {
         setState('pending');
-        setTimeout(() => { if (!cancelled) fetchOnce(); }, 3000);
+        timer.current = setTimeout(() => { if (!cancelled) fetchOnce(); }, 3000 * attempts.current);
         return;
       }
       setState('not_found');
     };
 
     fetchOnce();
-    return () => { cancelled = true; };
+    return () => { cancelled = true; clearTimeout(timer.current); };
   }, [session_id]);
 
   const copyKey = async () => {

@@ -55,7 +55,10 @@ export default function PlanCards({ plans = [], notLoaded = false, failed = fals
               <span className="text-xs" style={{ color: 'var(--text-muted)' }}>{t('pricing.monthSuffix')}</span>
             </div>
             <ul className="flex flex-col gap-1.5 text-sm" style={{ color: 'var(--text-secondary)' }}>
-              {t(`pricing.features.${plan.id}`).map((f, i) => (
+              {/* #18 (sesión 2): si la key de features no existe, t() devuelve la
+                  propia key (string) y .map reventaba la página entera de pricing.
+                  Guard Array.isArray → sin features simplemente no se listan. */}
+              {(Array.isArray(t(`pricing.features.${plan.id}`)) ? t(`pricing.features.${plan.id}`) : []).map((f, i) => (
                 <li key={i} className="flex items-start gap-2">
                   <Check size={14} className="mt-0.5 shrink-0" style={{ color: 'var(--positive)' }} />
                   <span>{f}</span>
