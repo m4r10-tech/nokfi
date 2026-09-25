@@ -32,6 +32,9 @@ const EMPTY_PROFILE = {
 export function useCompanyProfile() {
   const [profile, setProfile] = useState(EMPTY_PROFILE);
   const [loading, setLoading] = useState(true);
+  // Sesión 3: estado del autosave para que Configuración pueda decir la verdad
+  // ("Guardando…" / "Guardado" / "No se pudo guardar") en vez de nada.
+  const [saveState, setSaveState] = useState('idle'); // idle | saving | saved | error
   const timerRef = useRef(null);
   const pendingRef = useRef({}); // acumula los partials entre flushes del debounce
 
@@ -59,11 +62,21 @@ export function useCompanyProfile() {
     // todos los campos juntos. El campo repetido gana el valor más reciente
     // (overwrite, que es lo que queremos).
     pendingRef.current = { ...pendingRef.current, ...partial };
+    setSaveState('saving');
     if (timerRef.current) clearTimeout(timerRef.current);
-    timerRef.current = setTimeout(() => {
+    timerRef.current = setTimeout(async () => {
       const pending = pendingRef.current;
       pendingRef.current = {};
-      profileApi.put(pending).catch(() => { /* best-effort: el próximo GET re-sincroniza */ });
+      // request() nunca lanza: devuelve { ok:false } ante red caída / 5xx. Si
+      // falla, se re-encola lo no guardado (sin pisar ediciones más nuevas)
+      // para que el siguiente updateProfile lo reintente.
+      const { ok } = await profileApi.put(pending);
+      if (ok) {
+        setSaveState(Object.keys(pendingRef.current).length ? 'saving' : 'saved');
+      } else {
+        pendingRef.current = { ...pending, ...pendingRef.current };
+        setSaveState('error');
+      }
     }, 600);
   };
 
@@ -72,5 +85,5 @@ export function useCompanyProfile() {
   // reintento natural lo cubre).
   useEffect(() => () => { if (timerRef.current) clearTimeout(timerRef.current); }, []);
 
-  return { profile, updateProfile, loading };
+  return { profile, updateProfile, loading, saveState };
 }

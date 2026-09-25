@@ -31,20 +31,21 @@ export default function OnboardingModal({ onComplete }) {
   };
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center p-4" style={{ background: 'rgba(0,0,0,0.6)' }}>
-      <div className="w-full max-w-lg rounded-2xl p-8 max-h-[90vh] overflow-y-auto"
-        style={{ background: 'var(--surface-1)', border: '0.5px solid var(--border)' }}>
-        <h2 className="text-xl font-semibold mb-1" style={{ color: 'var(--text-primary)' }}>{t('onboarding.welcome')}</h2>
+    <div className="fixed inset-0 z-50 flex items-end sm:items-center justify-center sm:p-4 anim-fade" style={{ background: 'var(--overlay)' }}
+      role="dialog" aria-modal="true" aria-labelledby="onboarding-title">
+      <div className="w-full max-w-lg rounded-t-2xl sm:rounded-2xl p-5 sm:p-8 max-h-[92dvh] overflow-y-auto overscroll-contain safe-bottom"
+        style={{ background: 'var(--surface-1)', border: '1px solid var(--border)', animation: 'fade-up var(--dur-slow) var(--ease-out) both' }}>
+        <h2 id="onboarding-title" className="text-xl font-semibold mb-1" style={{ color: 'var(--text-primary)' }}>{t('onboarding.welcome')}</h2>
         <p className="text-sm mb-6" style={{ color: 'var(--text-secondary)' }}>{t('onboarding.subtitle')}</p>
 
         <form onSubmit={handleSubmit} className="flex flex-col gap-5">
           <Field label={t('onboarding.companyName')}>
             <input required value={companyName} onChange={(e) => setCompanyName(e.target.value)}
-              placeholder="Taller García" style={inputStyle} />
+              placeholder="Taller García" autoComplete="organization" className="input" />
           </Field>
 
           <Field label={t('onboarding.sector')}>
-            <select required value={sector} onChange={(e) => setSector(e.target.value)} style={inputStyle}>
+            <select required value={sector} onChange={(e) => setSector(e.target.value)} className="input">
               <option value="" disabled>Selecciona un sector</option>
               {SECTORS.map(s => <option key={s} value={s}>{s}</option>)}
             </select>
@@ -54,9 +55,10 @@ export default function OnboardingModal({ onComplete }) {
             <div className="grid grid-cols-2 gap-2">
               {SIZES.map(s => (
                 <button type="button" key={s.value} onClick={() => setSize(s.value)}
-                  className="rounded-lg py-2 text-sm font-medium transition-colors"
+                  aria-pressed={size === s.value}
+                  className="btn btn-sm !min-h-[44px] sm:!min-h-[38px] !whitespace-normal"
                   style={size === s.value
-                    ? { background: 'var(--accent)', color: '#fff' }
+                    ? { background: 'var(--accent)', color: 'var(--on-accent)' }
                     : { background: 'var(--surface-2)', color: 'var(--text-secondary)', border: '0.5px solid var(--border-strong)' }}>
                   {s.label}
                 </button>
@@ -68,9 +70,10 @@ export default function OnboardingModal({ onComplete }) {
             <div className="flex flex-wrap gap-2">
               {EXPENSES.map(exp => (
                 <button type="button" key={exp} onClick={() => toggleExpense(exp)}
-                  className="rounded-full px-3 py-1.5 text-xs font-medium transition-colors"
+                  aria-pressed={mainExpenses.includes(exp)}
+                  className="rounded-full px-3.5 py-2 text-sm sm:text-xs sm:py-1.5 font-medium transition-colors active:scale-95"
                   style={mainExpenses.includes(exp)
-                    ? { background: 'var(--accent-soft)', color: 'var(--accent)', border: '0.5px solid var(--accent)' }
+                    ? { background: 'var(--accent-soft)', color: 'var(--accent-text)', border: '0.5px solid var(--accent)' }
                     : { background: 'var(--surface-2)', color: 'var(--text-secondary)', border: '0.5px solid var(--border-strong)' }}>
                   {exp}
                 </button>
@@ -79,8 +82,7 @@ export default function OnboardingModal({ onComplete }) {
           </Field>
 
           <button type="submit" disabled={!isValid}
-            className="mt-2 rounded-lg py-2.5 text-sm font-medium disabled:opacity-40 transition-opacity"
-            style={{ background: 'var(--accent)', color: '#fff' }}>
+            className="btn btn-primary mt-2 w-full">
             {t('onboarding.start')}
           </button>
         </form>
@@ -99,8 +101,3 @@ function Field({ label, children }) {
     </div>
   );
 }
-
-const inputStyle = {
-  width: '100%', borderRadius: '8px', padding: '10px 12px', fontSize: '14px',
-  background: 'var(--surface-2)', border: '0.5px solid var(--border-strong)', color: 'var(--text-primary)', outline: 'none'
-};
