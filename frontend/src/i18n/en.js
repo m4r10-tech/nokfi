@@ -78,6 +78,11 @@ export default {
   pricing: {
     title: 'Choose your plan', subtitle: 'Monthly subscription. Cancel anytime.',
     perMonth: '/mo', emailPlaceholder: 'Your email',
+    choose: 'Choose plan', selected: 'Selected', recommended: 'Recommended',
+    step2: 'Last step', trialToday: 'Includes a 14-day free trial: nothing is charged today.', billedMonthly: 'Billed monthly. Cancel anytime.',
+    emailLabel: 'Your email', emailHint: 'We will send your license key here.',
+    continueToPayment: 'Continue to secure payment', stripeTrust: 'Payment processed by Stripe. Nokfi never sees your card details.',
+    faqLink: 'Frequently asked questions',
     cta: 'Subscribe', goLogin: 'I already have a license — log in',
     features: {
       mini: ['10 AI analyses per day', 'Full diagnosis', '6 Excel analyses', 'History'],
