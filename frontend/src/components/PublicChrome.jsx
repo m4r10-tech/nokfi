@@ -27,6 +27,17 @@ export function LangSwitch() {
   );
 }
 
+/** Anclas de la misma página con scroll suave (sin activar smooth global,
+ *  que animaría también el scroll-to-top de cada cambio de ruta). */
+function smoothTo(e, href) {
+  const el = document.getElementById(href.slice(1));
+  if (!el) return;
+  e.preventDefault();
+  const reduce = window.matchMedia?.('(prefers-reduced-motion: reduce)').matches;
+  el.scrollIntoView({ behavior: reduce ? 'auto' : 'smooth', block: 'start' });
+  history.replaceState(null, '', href);
+}
+
 export function PublicHeader({ links = [] }) {
   const { theme, toggleTheme } = useTheme();
   const { t } = useLang();
@@ -51,7 +62,7 @@ export function PublicHeader({ links = [] }) {
         {links.length > 0 && (
           <nav className="hidden md:flex items-center gap-1">
             {links.map(l => (
-              <a key={l.href} href={l.href} className="rounded-lg px-3 py-1.5 text-sm font-medium transition-colors hover:text-[var(--text-primary)]"
+              <a key={l.href} href={l.href} onClick={(e) => smoothTo(e, l.href)} className="rounded-lg px-3 py-1.5 text-sm font-medium transition-colors hover:text-[var(--text-primary)]"
                 style={{ color: 'var(--text-secondary)' }}>{l.label}</a>
             ))}
           </nav>

@@ -294,3 +294,13 @@ details[open] .details-chevron { transform: rotate(180deg); }
 }
 .bottom-nav-item:active { transform: scale(0.94); }
 .bottom-nav-item.active { color: var(--accent-text); }
+
+/* Landing (Tanda H): barras de la vista previa que crecen al entrar en pantalla. */
+.grow-bar {
+  transform: scaleY(0.04);
+  transform-origin: bottom;
+  transition: transform 900ms var(--ease-out);
+  transition-delay: calc(var(--i, 0) * 80ms + 250ms);
+}
+.is-visible .grow-bar { transform: none; }
+html { scroll-padding-top: 80px; }
