@@ -13,7 +13,18 @@ const SCANNED_THRESHOLD_CHARS = 100; // sección 20 del proyecto, Capa 2
  */
 export async function extractPdfText(file) {
   const buffer = await file.arrayBuffer();
-  const pdf = await pdfjsLib.getDocument({ data: buffer }).promise;
+  // Sesión 3 (bug subida PDFs): bajo la CSP estricta de index.html el worker de
+  // pdfjs podía no arrancar y getDocument() se colgaba SIN rechazar nunca — el
+  // usuario veía que "no pasaba nada". Doble defensa:
+  //  · isEvalSupported:false → pdfjs no usa eval (CSP-safe, evita un fallo más)
+  //  · timeout propio → si el worker no responde en 30s, error claro en vez de
+  //    cuelgue eterno (el caller ya tiene try/catch por archivo, sesión 2 #3).
+  const PDF_LOAD_TIMEOUT_MS = 30000;
+  const pdf = await Promise.race([
+    pdfjsLib.getDocument({ data: buffer, isEvalSupported: false }).promise,
+    new Promise((_, reject) =>
+      setTimeout(() => reject(new Error('PDF: el lector no respondió a tiempo')), PDF_LOAD_TIMEOUT_MS))
+  ]);
 
   let fullText = '';
   const maxPages = Math.min(pdf.numPages, 20); // límite razonable de páginas a procesar
