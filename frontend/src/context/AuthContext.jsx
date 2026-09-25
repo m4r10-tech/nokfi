@@ -1,5 +1,7 @@
 import { createContext, useContext, useEffect, useState, useCallback } from 'react';
 import { authApi, setSessionToken, setSessionExpiredHandler } from '../middleware/api';
+import { useToast } from './ToastContext';
+import { useLang } from './LangContext';
 
 const AuthContext = createContext(null);
 
@@ -11,6 +13,8 @@ export function AuthProvider({ children }) {
   const [license, setLicense] = useState(null);
   const [status, setStatus] = useState('checking'); // checking | authenticated | unauthenticated
   const [authError, setAuthError] = useState(null);
+  const toast = useToast();
+  const { t } = useLang();
 
   const handleLogout = useCallback(() => {
     setSessionToken(null);
@@ -23,8 +27,12 @@ export function AuthProvider({ children }) {
     setSessionExpiredHandler((errorCode) => {
       setAuthError(errorCode);
       handleLogout();
+      // Tanda T: antes la sesión se cerraba en silencio y el usuario aparecía
+      // en /login sin saber por qué. Mismo `key` → no se apilan si varias
+      // peticiones en vuelo fallan a la vez.
+      toast.info(t(errorCode === 'license_inactive' ? 'toast.licenseInactive' : 'toast.sessionExpired'), { key: 'session' });
     });
-  }, [handleLogout]);
+  }, [handleLogout, toast, t]);
 
   useEffect(() => {
     const stored = sessionStorage.getItem(SESSION_STORAGE_KEY);

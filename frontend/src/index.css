@@ -24,6 +24,10 @@ html.theme-dark {
   --accent: #1456A2;
   --accent-hover: #0F427D;
   --accent-soft: rgba(20, 86, 162, 0.12);
+  /* Texto/iconos en color de marca: #1456A2 sobre fondo oscuro no llega a AA
+     (~2.8:1); esta variante de la misma familia azul da ~6.5:1. El #1456A2
+     sigue siendo el de los FONDOS (botones), donde el texto blanco sí contrasta. */
+  --accent-text: #5B9BE6;
 
   --positive: #22C55E;
   --positive-soft: rgba(34, 197, 94, 0.12);
@@ -47,6 +51,7 @@ html.theme-light {
   --accent: #3B82F6;
   --accent-hover: #2563EB;
   --accent-soft: rgba(20, 86, 162, 0.08);
+  --accent-text: #2563EB;
 
   --positive: #16A34A;
   --positive-soft: rgba(34, 197, 94, 0.10);
@@ -54,10 +59,35 @@ html.theme-light {
   --negative-soft: rgba(239, 68, 68, 0.10);
   --warning: #D97706;
   --warning-soft: rgba(245, 158, 11, 0.10);
+
+  --overlay: rgba(15, 23, 42, 0.35);
+  --shadow-lg: 0 12px 32px -12px rgba(15, 23, 42, 0.18), 0 2px 6px rgba(15, 23, 42, 0.06);
+}
+
+/* Tokens comunes a ambos temas. --on-accent: texto sobre fondo accent (blanco
+   en los dos temas: contraste AA sobre #1456A2 y #3B82F6). */
+:root {
+  --on-accent: #FFFFFF;
+  --overlay: rgba(0, 0, 0, 0.6);
+  --shadow-lg: 0 16px 40px -12px rgba(0, 0, 0, 0.6), 0 2px 8px rgba(0, 0, 0, 0.3);
+
+  /* Tanda V (sesión 3) — tokens de movimiento. Entradas con ease-out (rápido
+     al principio, se posa suave), salidas con ease-in. */
+  --dur-fast: 150ms;
+  --dur-base: 250ms;
+  --dur-slow: 400ms;
+  --ease-out: cubic-bezier(0.16, 1, 0.3, 1);
+  --ease-in: cubic-bezier(0.7, 0, 0.84, 0);
+  --ease-std: cubic-bezier(0.4, 0, 0.2, 1);
+  --slide-sm: 6px;
+  --slide-md: 14px;
+
+  --bottom-nav-h: 64px;
 }
 
 * { box-sizing: border-box; }
 html, body, #root { height: 100%; }
+html { -webkit-tap-highlight-color: transparent; }
 
 body {
   margin: 0;
@@ -65,7 +95,160 @@ body {
   background: var(--bg-base);
   color: var(--text-primary);
   transition: background-color 0.15s ease, color 0.15s ease;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
 }
+
+/* Foco visible SOLO con teclado (no al hacer clic): anillo accent consistente. */
+:focus-visible {
+  outline: 2px solid var(--accent);
+  outline-offset: 2px;
+  border-radius: 6px;
+}
+.tabular { font-variant-numeric: tabular-nums; }
+
+/* ── Componentes base (inputs y botones) ─────────────────────────────────── */
+@layer components {
+  /* Input estándar. 16px en móvil: por debajo iOS Safari hace zoom al enfocar.
+     Altura mínima 44px (objetivo táctil de Apple/Google). */
+  .input {
+    width: 100%;
+    min-height: 44px;
+    border-radius: 10px;
+    padding: 10px 12px;
+    font-size: 16px;
+    background: var(--surface-2);
+    border: 1px solid var(--border-strong);
+    color: var(--text-primary);
+    outline: none;
+    transition: border-color var(--dur-fast) var(--ease-std), box-shadow var(--dur-fast) var(--ease-std);
+  }
+  @media (min-width: 768px) { .input { font-size: 14px; min-height: 40px; } }
+  .input::placeholder { color: var(--text-muted); }
+  .input:focus { border-color: var(--accent); box-shadow: 0 0 0 3px var(--accent-soft); }
+  .input[aria-invalid="true"] { border-color: var(--negative); }
+  .input[aria-invalid="true"]:focus { box-shadow: 0 0 0 3px var(--negative-soft); }
+  .input:disabled { opacity: 0.5; }
+
+  .field-label {
+    display: block;
+    font-size: 12px;
+    font-weight: 500;
+    margin-bottom: 6px;
+    color: var(--text-secondary);
+  }
+
+  /* Botones: pressed (scale .98) + hover + disabled consistentes. */
+  .btn {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+    min-height: 44px;
+    border-radius: 10px;
+    padding: 0 16px;
+    font-size: 14px;
+    font-weight: 500;
+    white-space: nowrap;
+    cursor: pointer;
+    user-select: none;
+    transition: background-color var(--dur-fast) var(--ease-std), border-color var(--dur-fast) var(--ease-std),
+      color var(--dur-fast) var(--ease-std), opacity var(--dur-fast) var(--ease-std), transform var(--dur-fast) var(--ease-std);
+  }
+  @media (min-width: 768px) { .btn { min-height: 40px; } }
+  .btn:active:not(:disabled) { transform: scale(0.98); }
+  .btn:disabled { opacity: 0.5; cursor: not-allowed; }
+  .btn-sm { min-height: 34px; padding: 0 12px; font-size: 13px; border-radius: 8px; }
+  @media (min-width: 768px) { .btn-sm { min-height: 32px; } }
+  .btn-primary { background: var(--accent); color: var(--on-accent); }
+  .btn-primary:hover:not(:disabled) { background: var(--accent-hover); }
+  .btn-secondary { background: var(--surface-2); color: var(--text-primary); border: 1px solid var(--border-strong); }
+  .btn-secondary:hover:not(:disabled) { border-color: var(--text-muted); }
+  .btn-ghost { background: transparent; color: var(--text-secondary); }
+  .btn-ghost:hover:not(:disabled) { background: var(--surface-2); color: var(--text-primary); }
+  .btn-danger { background: var(--negative-soft); color: var(--negative); }
+
+  /* Tarjeta base e interactiva (hover sutil: borde más fuerte + 1px arriba). */
+  .card { background: var(--surface-1); border: 1px solid var(--border); border-radius: 14px; }
+  .card-interactive {
+    transition: border-color var(--dur-base) var(--ease-std), transform var(--dur-base) var(--ease-out),
+      background-color var(--dur-base) var(--ease-std);
+  }
+  .card-interactive:hover { border-color: var(--border-strong); transform: translateY(-1px); }
+  .card-interactive:active { transform: translateY(0) scale(0.995); }
+
+  .link { color: var(--accent-text); text-underline-offset: 3px; }
+  .link:hover { text-decoration: underline; }
+
+  /* Esqueleto de carga (Tanda S). */
+  .skeleton {
+    background: var(--surface-2);
+    border-radius: 8px;
+    animation: skeleton-pulse 1.4s ease-in-out infinite;
+  }
+}
+
+/* ── Animaciones ─────────────────────────────────────────────────────────── */
+@keyframes skeleton-pulse { 0%, 100% { opacity: 1; } 50% { opacity: 0.45; } }
+@keyframes fade-up {
+  from { opacity: 0; transform: translateY(var(--slide-md)); }
+  to   { opacity: 1; transform: none; }
+}
+@keyframes fade-in { from { opacity: 0; } to { opacity: 1; } }
+@keyframes slide-down {
+  from { opacity: 0; transform: translateY(calc(var(--slide-sm) * -1)); }
+  to   { opacity: 1; transform: none; }
+}
+@keyframes sheet-up { from { transform: translateY(100%); } to { transform: none; } }
+@keyframes scale-in { from { opacity: 0; transform: scale(0.97); } to { opacity: 1; transform: none; } }
+@keyframes shake {
+  10%, 90% { transform: translateX(-1px); }
+  20%, 80% { transform: translateX(2px); }
+  30%, 50%, 70% { transform: translateX(-4px); }
+  40%, 60% { transform: translateX(4px); }
+}
+
+/* Entrada de pantalla / tarjetas. Stagger: style={{ '--i': n }} en cada hijo. */
+.anim-enter {
+  animation: fade-up var(--dur-slow) var(--ease-out) both;
+  animation-delay: calc(var(--i, 0) * 50ms);
+}
+.anim-fade { animation: fade-in var(--dur-base) var(--ease-out) both; }
+.anim-msg { animation: slide-down var(--dur-base) var(--ease-out) both; }
+.anim-scale { animation: scale-in var(--dur-base) var(--ease-out) both; }
+.anim-shake { animation: shake 0.4s var(--ease-std) both; }
+
+/* Revelado al hacer scroll (landing). La clase .is-visible la pone useReveal. */
+.reveal {
+  opacity: 0;
+  transform: translateY(18px);
+  transition: opacity 600ms var(--ease-out), transform 600ms var(--ease-out);
+  transition-delay: calc(var(--i, 0) * 70ms);
+}
+.reveal.is-visible { opacity: 1; transform: none; }
+
+/* prefers-reduced-motion: se apaga TODO lo animado (entradas, shake, skeleton,
+   revelados, transiciones). El contenido aparece directamente en su sitio. */
+@media (prefers-reduced-motion: reduce) {
+  *, *::before, *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    animation-delay: 0ms !important;
+    transition-duration: 0.01ms !important;
+    transition-delay: 0ms !important;
+    scroll-behavior: auto !important;
+  }
+  .reveal { opacity: 1; transform: none; }
+}
+
+/* Barra inferior móvil: respeta la zona segura del iPhone (home indicator). */
+.safe-bottom { padding-bottom: env(safe-area-inset-bottom); }
+
+/* Detalles/FAQ: chevron que rota al abrir. */
+details > summary { list-style: none; }
+details > summary::-webkit-details-marker { display: none; }
+details[open] .details-chevron { transform: rotate(180deg); }
+.details-chevron { transition: transform var(--dur-base) var(--ease-out); }
 
 ::-webkit-scrollbar { width: 8px; height: 8px; }
 ::-webkit-scrollbar-thumb { background: var(--border-strong); border-radius: 8px; }
@@ -75,5 +258,38 @@ body {
 .prose-report { font-size: 14px; line-height: 1.7; }
 .prose-report h3 { font-size: 15px; font-weight: 600; margin: 1.25rem 0 0.5rem; color: var(--text-primary); }
 .prose-report p { margin-bottom: 0.75rem; color: var(--text-secondary); }
-.prose-report ul { padding-left: 1.25rem; margin-bottom: 0.75rem; }
-.prose-report li { margin-bottom: 0.4rem; color: var(--text-secondary); }
+.prose-report > :first-child { margin-top: 0; }
+.prose-report ul { padding-left: 1.25rem; margin-bottom: 0.75rem; list-style: disc; }
+.prose-report ol { padding-left: 1.4rem; margin-bottom: 0.75rem; list-style: decimal; }
+.prose-report li { margin-bottom: 0.4rem; color: var(--text-secondary); padding-left: 0.15rem; }
+.prose-report li::marker { color: var(--text-muted); }
+.prose-report strong { color: var(--text-primary); font-weight: 600; }
+.prose-report h2 { font-size: 16px; font-weight: 600; margin: 1.5rem 0 0.5rem; color: var(--text-primary); }
+
+/* Toasts (context/ToastContext.jsx): en móvil suben por encima de la bottom nav. */
+@media (max-width: 767px) {
+  :root:has(.bottom-nav) .toaster { bottom: calc(var(--bottom-nav-h) + 12px + env(safe-area-inset-bottom)); }
+}
+@keyframes toast-in { from { opacity: 0; transform: translateY(10px) scale(0.98); } to { opacity: 1; transform: none; } }
+@keyframes toast-out { to { opacity: 0; transform: translateY(6px) scale(0.98); } }
+
+/* Navegación de la app (Sidebar + BottomNav): estado normal / hover / activo.
+   NavLink añade la clase .active a la ruta actual (y a sus subrutas). */
+.nav-item {
+  color: var(--text-secondary);
+  transition: background-color var(--dur-fast) var(--ease-std), color var(--dur-fast) var(--ease-std);
+}
+.nav-item:hover { background: var(--surface-2); color: var(--text-primary); }
+.nav-item.active { background: var(--accent-soft); color: var(--accent-text); }
+
+/* Hueco inferior del contenido: en móvil deja sitio a la bottom nav fija. */
+.app-main { padding: 16px 16px calc(var(--bottom-nav-h) + 28px + env(safe-area-inset-bottom)); }
+@media (min-width: 768px) { .app-main { padding: 32px 32px 48px; } }
+.bottom-nav-item {
+  display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 3px;
+  font-size: 11px; font-weight: 500; line-height: 1;
+  color: var(--text-muted);
+  transition: color var(--dur-fast) var(--ease-std), transform var(--dur-fast) var(--ease-std);
+}
+.bottom-nav-item:active { transform: scale(0.94); }
+.bottom-nav-item.active { color: var(--accent-text); }

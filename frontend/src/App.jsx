@@ -1,7 +1,8 @@
-import { Routes, Route } from 'react-router-dom';
+import { Routes, Route, Navigate } from 'react-router-dom';
 import { AuthProvider } from './context/AuthContext';
 import { ThemeProvider } from './context/ThemeContext';
 import { LangProvider } from './context/LangContext';
+import { ToastProvider } from './context/ToastContext';
 import ProtectedRoute from './components/ProtectedRoute';
 import DashboardLayout from './layouts/DashboardLayout';
 
@@ -21,8 +22,8 @@ import ExcelEntradaProductos from './pages/excel/ExcelEntradaProductos';
 import ExcelCaja from './pages/excel/ExcelCaja';
 import ExcelTotal from './pages/excel/ExcelTotal';
 import Historial from './pages/Historial';
+import HistorialDetalle from './pages/HistorialDetalle';
 import Calculadoras from './pages/Calculadoras';
-import Informes from './pages/Informes';
 import Configuracion from './pages/Configuracion';
 import Privacidad from './pages/Privacidad';
 import NotFound from './pages/NotFound';
@@ -31,6 +32,7 @@ export default function App() {
   return (
     <ThemeProvider>
       <LangProvider>
+        <ToastProvider>
         <AuthProvider>
           <Routes>
             <Route path="/" element={<Landing />} />
@@ -59,8 +61,10 @@ export default function App() {
               <Route path="excel/excel-caja" element={<ExcelCaja />} />
               <Route path="excel/excel-total" element={<ExcelTotal />} />
               <Route path="historial" element={<Historial />} />
+              <Route path="historial/:id" element={<HistorialDetalle />} />
               <Route path="calculadoras" element={<Calculadoras />} />
-              <Route path="informes" element={<Informes />} />
+              {/* Sesión 3: Informes se fusionó con Historial (eran la misma pantalla) */}
+              <Route path="informes" element={<Navigate to="/app/historial" replace />} />
               <Route path="configuracion" element={<Configuracion />} />
             </Route>
 
@@ -68,6 +72,7 @@ export default function App() {
             <Route path="*" element={<NotFound />} />
           </Routes>
         </AuthProvider>
+        </ToastProvider>
       </LangProvider>
     </ThemeProvider>
   );
