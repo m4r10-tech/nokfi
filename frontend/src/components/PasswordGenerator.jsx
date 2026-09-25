@@ -42,9 +42,7 @@ export default function PasswordGenerator({ onGenerate, label = 'Generar contras
   };
 
   return (
-    <button type="button" onClick={handleClick}
-      className="flex items-center justify-center gap-2 rounded-lg py-2 text-sm font-medium transition-colors"
-      style={{ background: 'var(--surface-2)', color: 'var(--text-secondary)', border: '0.5px solid var(--border-strong)' }}>
+    <button type="button" onClick={handleClick} className="btn btn-secondary !text-[var(--text-secondary)]">
       {justGenerated ? <Check size={15} style={{ color: 'var(--positive)' }} /> : <Wand2 size={15} />}
       {label}
     </button>

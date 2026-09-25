@@ -1,5 +1,7 @@
 import { Link } from 'react-router-dom';
-import { Package, ShoppingCart, Wrench, TruckIcon, Wallet, PieChart } from 'lucide-react';
+import { Package, ShoppingCart, Wrench, TruckIcon, Wallet, PieChart, ArrowRight } from 'lucide-react';
+import { useLang } from '../context/LangContext';
+import PageHeader from '../components/PageHeader';
 
 const MODULES = [
   { to: '/app/excel/excel-stock-almacen', icon: Package, title: 'Stock / Almacén', desc: 'Inventario actual del almacén' },
@@ -11,18 +13,27 @@ const MODULES = [
 ];
 
 export default function ExcelHub() {
+  const { t } = useLang();
   return (
     <div>
-      <h1 className="text-2xl font-semibold mb-1" style={{ color: 'var(--text-primary)' }}>Análisis Excel</h1>
-      <p className="text-sm mb-6" style={{ color: 'var(--text-secondary)' }}>Elige el tipo de datos que quieres analizar</p>
+      <PageHeader title={t('excel.hubTitle')} description={t('excel.hubDesc')} />
 
-      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
-        {MODULES.map(({ to, icon: Icon, title, desc }) => (
-          <Link key={to} to={to} className="rounded-xl p-5 transition-colors"
-            style={{ background: 'var(--surface-1)', border: '0.5px solid var(--border)' }}>
-            <Icon size={22} style={{ color: 'var(--accent)' }} />
-            <h3 className="text-sm font-medium mt-3" style={{ color: 'var(--text-primary)' }}>{title}</h3>
-            <p className="text-xs mt-1" style={{ color: 'var(--text-secondary)' }}>{desc}</p>
+      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3 md:gap-4">
+        {MODULES.map(({ to, icon: Icon, title, desc }, i) => (
+          <Link key={to} to={to} className="group card card-interactive anim-enter p-4 md:p-5 flex sm:flex-col items-center sm:items-start gap-3.5 sm:gap-0"
+            style={{ '--i': i }}>
+            <span className="shrink-0 w-10 h-10 rounded-xl grid place-items-center" style={{ background: 'var(--accent-soft)', color: 'var(--accent-text)' }}>
+              <Icon size={20} />
+            </span>
+            <div className="flex-1 min-w-0 sm:mt-4">
+              <h3 className="text-sm font-semibold" style={{ color: 'var(--text-primary)' }}>{title}</h3>
+              <p className="text-xs mt-1" style={{ color: 'var(--text-secondary)' }}>{desc}</p>
+            </div>
+            <ArrowRight size={16} className="shrink-0 sm:hidden" style={{ color: 'var(--text-muted)' }} />
+            <span className="hidden sm:flex items-center gap-1 mt-4 text-xs font-medium opacity-0 -translate-x-1 group-hover:opacity-100 group-hover:translate-x-0 transition-all duration-200"
+              style={{ color: 'var(--accent-text)' }}>
+              {t('common.open')} <ArrowRight size={13} />
+            </span>
           </Link>
         ))}
       </div>
