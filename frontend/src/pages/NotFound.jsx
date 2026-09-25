@@ -20,12 +20,10 @@ export default function NotFound() {
       <div className="mb-8"><Logo size="lg" /></div>
       <div className="rounded-2xl p-8 max-w-sm w-full text-center flex flex-col items-center gap-3"
            style={{ background: 'var(--surface-1)', border: '0.5px solid var(--border)' }}>
-        <Compass size={36} style={{ color: 'var(--accent)' }} />
+        <Compass size={36} style={{ color: 'var(--accent-text)' }} />
         <h1 className="text-xl font-semibold" style={{ color: 'var(--text-primary)' }}>{t('notFound.title')}</h1>
         <p className="text-sm" style={{ color: 'var(--text-secondary)' }}>{t('notFound.desc')}</p>
-        <Link to="/"
-          className="mt-2 rounded-lg px-5 py-2.5 text-sm font-medium"
-          style={{ background: 'var(--accent)', color: '#fff' }}>
+        <Link to="/home" className="btn btn-primary mt-2">
           {t('notFound.cta')}
         </Link>
       </div>

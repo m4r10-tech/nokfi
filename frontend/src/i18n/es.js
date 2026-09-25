@@ -25,6 +25,10 @@ export default {
     licenseInactive: 'Esta licencia no está activa. Contacta con soporte.',
     notActivated: 'Esta licencia aún no tiene contraseña. Usa la activación inicial.',
     alreadyActivatedMsg: 'Esta licencia ya tiene contraseña. Inicia sesión o restablécela.',
+    activateTitle: 'Activa tu licencia', activateSubtitle: 'Primera vez: elige la contraseña con la que entrarás a partir de ahora.',
+    emailPlaceholder: 'ejemplo@correo.com', choosePassword: 'Elige una contraseña', forgotShort: '¿La has olvidado?',
+    passwordPlaceholder: 'Tu contraseña', newPasswordPlaceholder: 'Mínimo 8 caracteres', confirmPlaceholder: 'Repite la contraseña',
+    devicePlaceholder: 'Ej.: Portátil de la oficina',
     passwordRequired: 'Introduce tu contraseña.', invalidEmail: 'Introduce un email válido.', showPassword: 'Mostrar contraseña', hidePassword: 'Ocultar contraseña',
     passwordMismatch: 'Las contraseñas no coinciden.',
     weakPassword: 'La contraseña debe tener al menos 8 caracteres.',
@@ -32,6 +36,8 @@ export default {
   },
   resetPassword: {
     title: 'Restablecer contraseña', email: 'Email', licenseKey: 'Clave de licencia',
+    requestDesc: 'Introduce tu email y tu clave de licencia y te enviaremos un enlace para elegir una contraseña nueva.',
+    noKeyHint: '¿No tienes a mano tu clave?', noKeyLink: 'Recupérala con tu email', requestNew: 'Pedir un enlace nuevo',
     submit: 'Enviar enlace', submitConfirm: 'Guardar contraseña',
     sent: 'Si los datos son correctos, recibirás un email con instrucciones.',
     confirmTitle: 'Elige una nueva contraseña',
@@ -237,6 +243,8 @@ export default {
   },
   recovery: {
     title: 'Recuperar acceso',
+    stepOf: 'Paso {n} de 3', changeEmail: 'Usar otro email',
+    sentTo: 'Enviado a',
     stepEmailTitle: '¿Olvidaste tu clave o tu contraseña?',
     stepEmailDesc: 'Introduce el email con el que compraste tu licencia. Te enviaremos un código de verificación de 6 dígitos.',
     emailPlaceholder: 'tu@email.com',

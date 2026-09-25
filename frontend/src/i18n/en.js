@@ -25,6 +25,10 @@ export default {
     licenseInactive: 'This license is not active. Contact support.',
     notActivated: 'This license has no password yet. Use the initial activation.',
     alreadyActivatedMsg: 'This license already has a password. Log in or reset it.',
+    activateTitle: 'Activate your license', activateSubtitle: 'First time: choose the password you will sign in with from now on.',
+    emailPlaceholder: 'name@example.com', choosePassword: 'Choose a password', forgotShort: 'Forgot it?',
+    passwordPlaceholder: 'Your password', newPasswordPlaceholder: 'At least 8 characters', confirmPlaceholder: 'Repeat the password',
+    devicePlaceholder: 'E.g. Office laptop',
     passwordRequired: 'Enter your password.', invalidEmail: 'Please enter a valid email.', showPassword: 'Show password', hidePassword: 'Hide password',
     passwordMismatch: 'Passwords do not match.',
     weakPassword: 'Password must be at least 8 characters.',
@@ -32,6 +36,8 @@ export default {
   },
   resetPassword: {
     title: 'Reset password', email: 'Email', licenseKey: 'License key',
+    requestDesc: 'Enter your email and license key and we will send you a link to choose a new password.',
+    noKeyHint: 'Don’t have your key at hand?', noKeyLink: 'Recover it with your email', requestNew: 'Request a new link',
     submit: 'Send link', submitConfirm: 'Save password',
     sent: 'If the details are correct, you will receive an email with instructions.',
     confirmTitle: 'Choose a new password',
@@ -237,6 +243,8 @@ export default {
   },
   recovery: {
     title: 'Recover access',
+    stepOf: 'Step {n} of 3', changeEmail: 'Use another email',
+    sentTo: 'Sent to',
     stepEmailTitle: 'Forgot your key or your password?',
     stepEmailDesc: 'Enter the email you used to purchase your license. We will send you a 6-digit verification code.',
     emailPlaceholder: 'you@email.com',

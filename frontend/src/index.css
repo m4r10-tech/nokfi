@@ -126,6 +126,7 @@ body {
   @media (min-width: 768px) { .input { font-size: 14px; min-height: 40px; } }
   .input::placeholder { color: var(--text-muted); }
   .input:focus { border-color: var(--accent); box-shadow: 0 0 0 3px var(--accent-soft); }
+  .input:focus-visible { outline: none; }
   .input[aria-invalid="true"] { border-color: var(--negative); }
   .input[aria-invalid="true"]:focus { box-shadow: 0 0 0 3px var(--negative-soft); }
   .input:disabled { opacity: 0.5; }

@@ -1,10 +1,14 @@
-import { useState, useEffect } from 'react';
-import { useSearchParams, useNavigate } from 'react-router-dom';
-import { Loader2, CheckCircle2, Lock, Eye, EyeOff, AlertCircle } from 'lucide-react';
+import { useState } from 'react';
+import { useSearchParams, useNavigate, Link } from 'react-router-dom';
+import { Loader2, CheckCircle2, Lock, Eye, EyeOff, AlertCircle, Mail, KeyRound } from 'lucide-react';
 import { authApi } from '../middleware/api';
+import { apiErrorMessage } from '../middleware/errors';
 import { useAuth } from '../context/AuthContext';
 import { useLang } from '../context/LangContext';
-import Logo from '../components/Logo';
+import AuthShell, { FormMessage } from '../components/AuthShell';
+import FormField from '../components/FormField';
+import { useShake } from '../hooks/useShake';
+import { formatLicenseKey, KEY_REGEX, EMAIL_REGEX } from '../utils/license';
 import { usePageMeta } from '../hooks/usePageMeta';
 
 /**
@@ -20,7 +24,13 @@ export default function ResetPassword() {
   const token = searchParams.get('token');
   const { t } = useLang();
   usePageMeta(t('meta.resetTitle'));
-  return token ? <ConfirmStep token={token} /> : <RequestStep />;
+  return (
+    <AuthShell footer={
+      <Link to="/login" className="hover:underline" style={{ color: 'var(--text-secondary)' }}>{t('recovery.backToLogin')} →</Link>
+    }>
+      {token ? <ConfirmStep token={token} /> : <RequestStep />}
+    </AuthShell>
+  );
 }
 
 function RequestStep() {
@@ -28,47 +38,60 @@ function RequestStep() {
   const [licenseKey, setLicenseKey] = useState('');
   const [loading, setLoading] = useState(false);
   const [sent, setSent] = useState(false);
-  const [errorMsg, setErrorMsg] = useState(null);
+  const [error, setError] = useState(null); // { msg, field }
+  const [formRef, shake] = useShake();
   const { t } = useLang();
 
   const handleSubmit = async (e) => {
     e.preventDefault();
+    if (loading) return;
+    setError(null);
+    if (!EMAIL_REGEX.test(email.trim())) { setError({ msg: t('login.invalidEmail'), field: 'email' }); shake(); return; }
+    if (!KEY_REGEX.test(licenseKey)) { setError({ msg: t('login.invalidKeyFormat'), field: 'key' }); shake(); return; }
     setLoading(true);
-    setErrorMsg(null);
-    const { status, data } = await authApi.requestPasswordReset(email, licenseKey);
+    const res = await authApi.requestPasswordReset(email.trim(), licenseKey);
     setLoading(false);
 
-    if (status === 429) { setErrorMsg(data.message); return; }
-    setSent(true); // respuesta siempre genérica por diseño anti-enumeración
+    // Respuesta siempre genérica por diseño anti-enumeración: solo los
+    // límites (429) y los fallos de red/servidor se muestran como error.
+    if (res.status === 429 || res.status === 0 || res.status >= 500) {
+      setError({ msg: apiErrorMessage(t, res) }); shake(); return;
+    }
+    setSent(true);
   };
 
   return (
-    <Shell>
-      <h1 className="text-xl font-semibold mb-1" style={{ color: 'var(--text-primary)' }}>{t('resetPassword.title')}</h1>
+    <>
+      <h1 className="text-xl font-semibold tracking-tight" style={{ color: 'var(--text-primary)' }}>{t('resetPassword.title')}</h1>
 
       {sent ? (
-        <div className="flex flex-col items-center gap-3 py-6 text-center">
-          <CheckCircle2 size={40} style={{ color: 'var(--positive)' }} />
+        <div className="flex flex-col items-center gap-3 py-6 text-center anim-scale">
+          <div className="rounded-full p-3" style={{ background: 'var(--positive-soft)', color: 'var(--positive)' }}><CheckCircle2 size={26} /></div>
           <p className="text-sm" style={{ color: 'var(--text-secondary)' }}>{t('resetPassword.sent')}</p>
         </div>
       ) : (
-        <form onSubmit={handleSubmit} className="flex flex-col gap-3 mt-4">
-          <input required type="email" placeholder={t('resetPassword.email')} value={email}
-            onChange={(e) => setEmail(e.target.value)} style={inputStyle} />
-          <input required type="text" placeholder="XXXX-XXXX-XXXX-XXXX" value={licenseKey}
-            onChange={(e) => setLicenseKey(e.target.value.toUpperCase())} style={inputStyle} />
-          {errorMsg && (
-            <div className="text-sm rounded-lg px-3 py-2" style={{ background: 'var(--negative-soft)', color: 'var(--negative)' }}>{errorMsg}</div>
-          )}
-          <button type="submit" disabled={loading}
-            className="mt-2 rounded-lg py-2.5 text-sm font-medium flex items-center justify-center gap-2 disabled:opacity-60"
-            style={{ background: 'var(--accent)', color: '#fff' }}>
-            {loading && <Loader2 size={16} className="animate-spin" />}
-            {t('resetPassword.submitConfirm')}
-          </button>
-        </form>
+        <>
+          <p className="text-sm mt-1 mb-5" style={{ color: 'var(--text-secondary)' }}>{t('resetPassword.requestDesc')}</p>
+          <form ref={formRef} onSubmit={handleSubmit} noValidate className="flex flex-col gap-4">
+            <FormField id="rp-email" label={t('login.email')} icon={Mail} type="email" inputMode="email" autoComplete="email"
+              autoCapitalize="none" spellCheck={false} placeholder={t('login.emailPlaceholder')}
+              value={email} onChange={(e) => setEmail(e.target.value)} invalid={error?.field === 'email'} />
+            <FormField id="rp-key" label={t('login.licenseKey')} icon={KeyRound} type="text" autoComplete="off"
+              autoCapitalize="characters" spellCheck={false} maxLength={19} placeholder="XXXX-XXXX-XXXX-XXXX"
+              inputClassName="font-mono tracking-wider" value={licenseKey}
+              onChange={(e) => setLicenseKey(formatLicenseKey(e.target.value))} invalid={error?.field === 'key'} />
+            {error && <FormMessage>{error.msg}</FormMessage>}
+            <button type="submit" disabled={loading} className="btn btn-primary w-full mt-1">
+              {loading && <Loader2 size={16} className="animate-spin" />}
+              {t('resetPassword.submit')}
+            </button>
+          </form>
+          <p className="text-xs mt-4 text-center" style={{ color: 'var(--text-muted)' }}>
+            {t('resetPassword.noKeyHint')} <Link to="/recuperar" className="link">{t('resetPassword.noKeyLink')}</Link>
+          </p>
+        </>
       )}
-    </Shell>
+    </>
   );
 }
 
@@ -76,100 +99,82 @@ function ConfirmStep({ token }) {
   const [newPassword, setNewPassword] = useState('');
   const [confirm, setConfirm] = useState('');
   const [showPwd, setShowPwd] = useState(false);
-  const [localError, setLocalError] = useState(null);
+  const [localError, setLocalError] = useState(null); // { msg, field }
   const [status, setStatus] = useState('idle'); // idle | confirming | success | error
   const [errorMsg, setErrorMsg] = useState(null);
+  const [formRef, shake] = useShake();
   const { applySession } = useAuth();
   const { t } = useLang();
   const navigate = useNavigate();
 
   const submit = async (e) => {
     e.preventDefault();
+    if (status === 'confirming') return;
     setLocalError(null);
-    if (!newPassword) { setLocalError(t('login.password')); return; }
-    if (newPassword !== confirm) { setLocalError(t('login.passwordMismatch')); return; }
+    if (newPassword.length < 8) { setLocalError({ msg: t('login.weakPassword'), field: 'pwd' }); shake(); return; }
+    if (newPassword !== confirm) { setLocalError({ msg: t('login.passwordMismatch'), field: 'confirm' }); shake(); return; }
     setStatus('confirming');
-    const { ok, data } = await authApi.confirmPasswordReset(token, newPassword, navigator.platform);
-    if (ok && data.success) {
-      applySession(data.token, data.license);
+    const res = await authApi.confirmPasswordReset(token, newPassword, navigator.platform);
+    if (res.ok && res.data.success) {
+      applySession(res.data.token, res.data.license);
       setStatus('success');
       setTimeout(() => navigate('/app/home'), 1500);
-    } else {
-      setStatus('error');
-      setErrorMsg(data.message || t('resetPassword.invalidToken'));
+      return;
     }
+    // Contraseña rechazada o fallo de red: el enlace sigue sirviendo → se
+    // queda en el formulario. Solo un token inválido/caducado es terminal.
+    if (res.data.error === 'weak_password') {
+      setStatus('idle'); setLocalError({ msg: res.data.message || t('login.weakPassword'), field: 'pwd' }); shake(); return;
+    }
+    if (res.status === 0 || res.status >= 500 || res.status === 429) {
+      setStatus('idle'); setLocalError({ msg: apiErrorMessage(t, res) }); shake(); return;
+    }
+    setStatus('error');
+    setErrorMsg(res.data.error === 'invalid_or_expired_token' ? t('resetPassword.invalidToken') : apiErrorMessage(t, res, 'resetPassword.invalidToken'));
   };
 
+  const eye = (
+    <button type="button" onClick={() => setShowPwd(s => !s)} aria-label={t(showPwd ? 'login.hidePassword' : 'login.showPassword')}
+      className="absolute right-1 top-1/2 -translate-y-1/2 w-9 h-9 grid place-items-center rounded-md" style={{ color: 'var(--text-muted)' }}>
+      {showPwd ? <EyeOff size={16} /> : <Eye size={16} />}
+    </button>
+  );
+
   return (
-    <Shell>
-      <h1 className="text-xl font-semibold mb-4" style={{ color: 'var(--text-primary)' }}>{t('resetPassword.confirmTitle')}</h1>
+    <>
+      <h1 className="text-xl font-semibold tracking-tight mb-5" style={{ color: 'var(--text-primary)' }}>{t('resetPassword.confirmTitle')}</h1>
 
       {status === 'success' && (
-        <div className="flex flex-col items-center gap-3 py-6 text-center">
-          <CheckCircle2 size={40} style={{ color: 'var(--positive)' }} />
+        <div className="flex flex-col items-center gap-3 py-6 text-center anim-scale">
+          <div className="rounded-full p-3" style={{ background: 'var(--positive-soft)', color: 'var(--positive)' }}><CheckCircle2 size={26} /></div>
           <p className="text-sm" style={{ color: 'var(--text-secondary)' }}>{t('resetPassword.success')}</p>
         </div>
       )}
 
       {status === 'error' && (
-        <div className="flex flex-col items-center gap-3 py-6 text-center">
-          <AlertCircle size={40} style={{ color: 'var(--negative)' }} />
-          <p className="text-sm rounded-lg px-3 py-2" style={{ background: 'var(--negative-soft)', color: 'var(--negative)' }}>{errorMsg}</p>
+        <div className="flex flex-col items-center gap-3 py-4 text-center anim-scale">
+          <div className="rounded-full p-3" style={{ background: 'var(--negative-soft)', color: 'var(--negative)' }}><AlertCircle size={26} /></div>
+          <p role="alert" className="text-sm" style={{ color: 'var(--text-secondary)' }}>{errorMsg}</p>
+          <Link to="/reset-password" className="btn btn-secondary btn-sm mt-1">{t('resetPassword.requestNew')}</Link>
         </div>
       )}
 
       {(status === 'idle' || status === 'confirming') && (
-        <form onSubmit={submit} className="flex flex-col gap-3 mt-4">
-          <PasswordInput icon placeholder={t('login.newPassword')} value={newPassword}
-            onChange={setNewPassword} show={showPwd} toggle={setShowPwd} />
-          <PasswordInput icon placeholder={t('login.confirmPassword')} value={confirm}
-            onChange={setConfirm} show={showPwd} toggle={setShowPwd} />
-          {localError && (
-            <div className="text-sm rounded-lg px-3 py-2" style={{ background: 'var(--negative-soft)', color: 'var(--negative)' }}>{localError}</div>
-          )}
+        <form ref={formRef} onSubmit={submit} noValidate className="flex flex-col gap-4">
+          <FormField id="rp-new" label={t('login.newPassword')} icon={Lock} type={showPwd ? 'text' : 'password'} autoComplete="new-password"
+            placeholder={t('login.newPasswordPlaceholder')} value={newPassword} onChange={(e) => setNewPassword(e.target.value)}
+            invalid={localError?.field === 'pwd'} trailing={eye} autoFocus />
+          <FormField id="rp-confirm" label={t('login.confirmPassword')} icon={Lock} type={showPwd ? 'text' : 'password'} autoComplete="new-password"
+            placeholder={t('login.confirmPlaceholder')} value={confirm} onChange={(e) => setConfirm(e.target.value)}
+            invalid={localError?.field === 'confirm'} />
+          {localError && <FormMessage>{localError.msg}</FormMessage>}
           <p className="text-xs" style={{ color: 'var(--text-muted)' }}>{t('resetPassword.noGeneratorHint')}</p>
-          <button type="submit" disabled={status === 'confirming'}
-            className="mt-2 rounded-lg py-2.5 text-sm font-medium flex items-center justify-center gap-2 disabled:opacity-60"
-            style={{ background: 'var(--accent)', color: '#fff' }}>
+          <button type="submit" disabled={status === 'confirming'} className="btn btn-primary w-full">
             {status === 'confirming' && <Loader2 size={16} className="animate-spin" />}
-            {t('resetPassword.submit')}
+            {t('resetPassword.submitConfirm')}
           </button>
         </form>
       )}
-    </Shell>
+    </>
   );
 }
-
-function PasswordInput({ placeholder, value, onChange, show, toggle }) {
-  return (
-    <div className="relative">
-      <Lock size={16} className="absolute left-3 top-1/2 -translate-y-1/2" style={{ color: 'var(--text-muted)' }} />
-      <input type={show ? 'text' : 'password'} placeholder={placeholder} value={value}
-        onChange={(e) => onChange(e.target.value)} required
-        className="w-full rounded-lg py-2.5 pl-9 pr-10 text-sm outline-none"
-        style={{ background: 'var(--surface-2)', border: '0.5px solid var(--border-strong)', color: 'var(--text-primary)' }} />
-      <button type="button" onClick={() => toggle(!show)}
-        className="absolute right-3 top-1/2 -translate-y-1/2" style={{ color: 'var(--text-muted)' }}>
-        {show ? <EyeOff size={16} /> : <Eye size={16} />}
-      </button>
-    </div>
-  );
-}
-
-function Shell({ children }) {
-  return (
-    <div className="min-h-screen flex items-center justify-center px-4" style={{ background: 'var(--bg-base)' }}>
-      <div className="w-full max-w-sm">
-        <div className="flex justify-center mb-8"><Logo size="lg" /></div>
-        <div className="rounded-2xl p-8" style={{ background: 'var(--surface-1)', border: '0.5px solid var(--border)' }}>
-          {children}
-        </div>
-      </div>
-    </div>
-  );
-}
-
-const inputStyle = {
-  width: '100%', borderRadius: '8px', padding: '10px 12px', fontSize: '14px',
-  background: 'var(--surface-2)', border: '0.5px solid var(--border-strong)', color: 'var(--text-primary)', outline: 'none'
-};

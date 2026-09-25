@@ -12,7 +12,7 @@ export default function ProtectedRoute({ children }) {
   if (status === 'checking') {
     return (
       <div className="min-h-screen flex items-center justify-center" style={{ background: 'var(--bg-base)' }}>
-        <Loader2 size={28} className="animate-spin" style={{ color: 'var(--accent)' }} />
+        <Loader2 size={28} className="animate-spin" style={{ color: 'var(--accent-text)' }} />
       </div>
     );
   }

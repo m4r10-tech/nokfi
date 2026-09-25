@@ -22,7 +22,7 @@ export default function Privacidad() {
       <header className="border-b" style={{ borderColor: 'var(--border)' }}>
         <div className="max-w-3xl mx-auto px-4 h-14 flex items-center justify-between">
           <Logo size="md" />
-          <Link to="/" className="text-sm hover:underline" style={{ color: 'var(--text-secondary)' }}>
+          <Link to="/home" className="text-sm hover:underline" style={{ color: 'var(--text-secondary)' }}>
             ← nokfi.app
           </Link>
         </div>

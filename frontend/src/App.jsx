@@ -1,4 +1,4 @@
-import { Routes, Route, Navigate } from 'react-router-dom';
+import { Routes, Route, Navigate, useLocation } from 'react-router-dom';
 import { AuthProvider } from './context/AuthContext';
 import { ThemeProvider } from './context/ThemeContext';
 import { LangProvider } from './context/LangContext';
@@ -35,7 +35,10 @@ export default function App() {
         <ToastProvider>
         <AuthProvider>
           <Routes>
-            <Route path="/" element={<Landing />} />
+            {/* Sesión 3 (Tanda H): la home pública vive en /home; "/" redirige
+                CONSERVANDO query y hash (Stripe vuelve a /?cancelled=true). */}
+            <Route path="/" element={<RootRedirect />} />
+            <Route path="/home" element={<Landing />} />
             <Route path="/login" element={<Login />} />
             <Route path="/reset-password" element={<ResetPassword />} />
             <Route path="/recuperar" element={<Recuperar />} />
@@ -76,4 +79,9 @@ export default function App() {
       </LangProvider>
     </ThemeProvider>
   );
+}
+
+function RootRedirect() {
+  const { search, hash } = useLocation();
+  return <Navigate to={`/home${search}${hash}`} replace />;
 }
