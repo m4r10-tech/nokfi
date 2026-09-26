@@ -478,7 +478,7 @@ export default {
     totalMismatch: 'Imponibile + IVA − ritenuta non corrisponde al totale. Controllalo.',
     duplicateEntry: 'Nel registro c’è già una fattura con questo numero e questo codice fiscale.',
     confirmDelete: 'Eliminare questa registrazione dal registro?', deleted: 'Registrazione eliminata', delete: 'Elimina',
-    incomeBase: 'Entrate (imponibile)', expenseBase: 'Uscite (imponibile)', vatBalance: 'IVA da versare', result: 'Risultato',
+    incomeBase: 'Entrate (imponibile)', expenseBase: 'Uscite (imponibile)', vatBalance: 'IVA da versare', vatBalanceNeg: 'IVA da compensare', result: 'Risultato',
     reviewCount: '{n} registrazioni non quadrano: controllale.', reviewCount_one: '{n} registrazione non quadra: controllala.', search: 'Cerca…', ledgerSheet: 'Registro di entrate e uscite',
     emptyTitle: 'Il tuo registro è vuoto', emptyDesc: 'Carica foto o PDF delle tue fatture (o una cartella intera) e l’IA le inserirà nel registro. Tu devi solo controllare.',
     days: '{n} giorni', days_one: '{n} giorno',
@@ -533,7 +533,7 @@ export default {
     taxes: {
       headline: 'Questo trimestre ({q}) dovrai pagare circa:', dueBy: 'Scadenza: entro il {date}',
       reserved: 'Hai accantonato {v}', missing: 'Mancano {v}', covered: 'Coperto', setAside: 'Quanto ho accantonato per le imposte (€)',
-      vatRefund: 'Questo trimestre l’IVA è a credito (rimborso o compensazione): {v}.',
+      vatRefund: 'Questo trimestre l’IVA è a credito (rimborso o compensazione): {v}.', vatCompensate: 'Questo trimestre l’IVA è a credito: {v} da compensare. Dal 1° al 3° trimestre non si chiede il rimborso; si scala nei trimestri successivi (il rimborso si chiede nel 4° trimestre, salvo iscrizione al REDEME).',
       vatTitle: 'IVA trimestrale (modello 303)', vatOutput: 'IVA a debito', vatInput: 'IVA a credito', result: 'Risultato',
       vatExplain: 'IVA delle fatture emesse meno l’IVA delle spese del trimestre.',
       irpfTitle: 'Acconto IRPF (modello 130)', accIncome: 'Entrate cumulate dell’anno', accExpense: 'Uscite cumulate dell’anno',

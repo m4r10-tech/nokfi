@@ -478,7 +478,7 @@ export default {
     totalMismatch: 'HT + TVA − retenue ne correspond pas au total. Vérifiez-le.',
     duplicateEntry: 'Une facture avec ce numéro et ce numéro fiscal figure déjà dans le registre.',
     confirmDelete: 'Supprimer cette écriture du registre ?', deleted: 'Écriture supprimée', delete: 'Supprimer',
-    incomeBase: 'Recettes (HT)', expenseBase: 'Dépenses (HT)', vatBalance: 'TVA à payer', result: 'Résultat',
+    incomeBase: 'Recettes (HT)', expenseBase: 'Dépenses (HT)', vatBalance: 'TVA à payer', vatBalanceNeg: 'TVA à reporter', result: 'Résultat',
     reviewCount: '{n} écritures ne sont pas cohérentes : vérifiez-les.', reviewCount_one: '{n} écriture n’est pas cohérente : vérifiez-la.', search: 'Rechercher…', ledgerSheet: 'Registre des recettes et dépenses',
     emptyTitle: 'Votre registre est vide', emptyDesc: 'Importez des photos ou des PDF de vos factures (ou un dossier entier) et l’IA les ajoutera au registre. Vous n’avez qu’à vérifier.',
     days: '{n} jours', days_one: '{n} jour',
@@ -533,7 +533,7 @@ export default {
     taxes: {
       headline: 'Ce trimestre ({q}), vous devrez payer environ :', dueBy: 'Échéance : {date}',
       reserved: 'Vous avez mis de côté {v}', missing: 'Il manque {v}', covered: 'Couvert', setAside: 'Ce que j’ai mis de côté pour les impôts (€)',
-      vatRefund: 'Ce trimestre, votre TVA est remboursable ou reportable : {v}.',
+      vatRefund: 'Ce trimestre, votre TVA est remboursable ou reportable : {v}.', vatCompensate: 'Ce trimestre, votre TVA est négative : {v} à reporter. Du 1T au 3T, on ne demande pas de remboursement ; elle se déduit des trimestres suivants (le remboursement se demande au 4T, sauf inscription au REDEME).',
       vatTitle: 'TVA trimestrielle (modèle 303)', vatOutput: 'TVA collectée', vatInput: 'TVA déductible', result: 'Résultat',
       vatExplain: 'TVA de vos factures émises moins la TVA de vos dépenses du trimestre.',
       irpfTitle: 'Acompte d’impôt sur le revenu (modèle 130)', accIncome: 'Recettes cumulées de l’année', accExpense: 'Dépenses cumulées de l’année',

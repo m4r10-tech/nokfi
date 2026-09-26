@@ -93,7 +93,7 @@ export default function Taxes() {
               </label>
               <button type="submit" disabled={saving} className="btn btn-secondary">{saving && <Loader2 size={14} className="animate-spin" />} {t('common.save')}</button>
             </form>
-            {s.vat_refund > 0 && <Notice tone="positive">{t('finance.taxes.vatRefund').replace('{v}', eur(s.vat_refund, lang))}</Notice>}
+            {s.vat_refund > 0 && <Notice tone="positive">{t(quarter === 4 ? 'finance.taxes.vatRefund' : 'finance.taxes.vatCompensate', { v: eur(s.vat_refund, lang) })}</Notice>}
           </section>
 
           <div className="grid md:grid-cols-2 gap-4">

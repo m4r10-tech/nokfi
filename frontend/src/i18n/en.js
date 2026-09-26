@@ -478,7 +478,7 @@ export default {
     totalMismatch: 'Net + VAT − withholding does not match the total. Please check it.',
     duplicateEntry: 'There is already an invoice with that number and tax ID in the ledger.',
     confirmDelete: 'Delete this ledger entry?', deleted: 'Entry deleted', delete: 'Delete',
-    incomeBase: 'Income (net)', expenseBase: 'Expenses (net)', vatBalance: 'VAT to pay', result: 'Result',
+    incomeBase: 'Income (net)', expenseBase: 'Expenses (net)', vatBalance: 'VAT to pay', vatBalanceNeg: 'VAT to offset', result: 'Result',
     reviewCount: '{n} entries do not add up: please review them.', reviewCount_one: '{n} entry does not add up: please review it.', search: 'Search…', ledgerSheet: 'Income and expense ledger',
     emptyTitle: 'Your ledger is empty', emptyDesc: 'Upload photos or PDFs of your invoices (or a whole folder) and the AI will add them to the ledger. You just review.',
     days: '{n} days', days_one: '{n} day',
@@ -533,7 +533,7 @@ export default {
     taxes: {
       headline: 'This quarter ({q}) you will have to pay approximately:', dueBy: 'Deadline: {date}',
       reserved: 'You have set aside {v}', missing: '{v} still missing', covered: 'Covered', setAside: 'What I have set aside for taxes (€)',
-      vatRefund: 'This quarter your VAT is refundable or can be offset: {v}.',
+      vatRefund: 'This quarter your VAT is refundable or can be offset: {v}.', vatCompensate: 'This quarter your VAT is negative: {v} to offset. In Q1–Q3 you cannot request a refund; it is deducted in the following quarters (refunds are requested in Q4, except for businesses in the REDEME scheme).',
       vatTitle: 'Quarterly VAT (form 303)', vatOutput: 'Output VAT', vatInput: 'Input VAT', result: 'Result',
       vatExplain: 'VAT on your issued invoices minus VAT on your expenses for the quarter.',
       irpfTitle: 'Income tax instalment (form 130)', accIncome: 'Income so far this year', accExpense: 'Expenses so far this year',

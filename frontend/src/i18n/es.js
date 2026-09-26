@@ -481,7 +481,7 @@ export default {
     totalMismatch: 'Base + IVA − retención no coincide con el total. Revísalo.',
     duplicateEntry: 'Ya hay una factura con ese número y ese NIF en el libro.',
     confirmDelete: '¿Borrar este apunte del libro?', deleted: 'Apunte borrado', delete: 'Borrar',
-    incomeBase: 'Ingresos (base)', expenseBase: 'Gastos (base)', vatBalance: 'IVA a pagar', result: 'Resultado',
+    incomeBase: 'Ingresos (base)', expenseBase: 'Gastos (base)', vatBalance: 'IVA a pagar', vatBalanceNeg: 'IVA a compensar', result: 'Resultado',
     reviewCount: '{n} apuntes no cuadran: revísalos.', reviewCount_one: '{n} apunte no cuadra: revísalo.', search: 'Buscar…', ledgerSheet: 'Libro de ingresos y gastos',
     emptyTitle: 'Tu libro está vacío', emptyDesc: 'Sube fotos o PDF de tus facturas (o una carpeta entera) y la IA las pasará al libro. Tú solo revisas.',
     days: '{n} días', days_one: '{n} día',
@@ -536,7 +536,7 @@ export default {
     taxes: {
       headline: 'Este trimestre ({q}) te tocará pagar, aproximadamente:', dueBy: 'Plazo: hasta el {date}',
       reserved: 'Llevas apartado {v}', missing: 'Te faltan {v}', covered: 'Cubierto', setAside: 'Lo que llevo apartado para Hacienda (€)',
-      vatRefund: 'Este trimestre el IVA te sale a devolver o compensar: {v}.',
+      vatRefund: 'Este trimestre el IVA te sale a devolver o compensar: {v}.', vatCompensate: 'Este trimestre el IVA te sale a compensar: {v}. En el 1T-3T no se pide la devolución; se descuenta en los próximos trimestres (la devolución se solicita en el 4T, salvo inscritos en el REDEME).',
       vatTitle: 'IVA trimestral (modelo 303)', vatOutput: 'IVA repercutido', vatInput: 'IVA soportado', result: 'Resultado',
       vatExplain: 'IVA de tus facturas emitidas menos el IVA de tus gastos del trimestre.',
       irpfTitle: 'Pago fraccionado IRPF (modelo 130)', accIncome: 'Ingresos acumulados del año', accExpense: 'Gastos acumulados del año',

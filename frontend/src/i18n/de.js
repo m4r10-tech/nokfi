@@ -478,7 +478,7 @@ export default {
     totalMismatch: 'Netto + USt. − Einbehalt entspricht nicht dem Gesamtbetrag. Bitte prüfen.',
     duplicateEntry: 'Im Journal gibt es bereits eine Rechnung mit dieser Nummer und Steuernummer.',
     confirmDelete: 'Diese Buchung aus dem Journal löschen?', deleted: 'Buchung gelöscht', delete: 'Löschen',
-    incomeBase: 'Einnahmen (netto)', expenseBase: 'Ausgaben (netto)', vatBalance: 'USt.-Zahllast', result: 'Ergebnis',
+    incomeBase: 'Einnahmen (netto)', expenseBase: 'Ausgaben (netto)', vatBalance: 'USt.-Zahllast', vatBalanceNeg: 'USt. zur Verrechnung', result: 'Ergebnis',
     reviewCount: '{n} Buchungen stimmen nicht: bitte prüfen.', reviewCount_one: '{n} Buchung stimmt nicht: bitte prüfen.', search: 'Suchen…', ledgerSheet: 'Einnahmen- und Ausgabenjournal',
     emptyTitle: 'Dein Journal ist leer', emptyDesc: 'Lade Fotos oder PDFs deiner Rechnungen hoch (oder einen ganzen Ordner) und die KI trägt sie ins Journal ein. Du prüfst nur noch.',
     days: '{n} Tage', days_one: '{n} Tag',
@@ -533,7 +533,7 @@ export default {
     taxes: {
       headline: 'In diesem Quartal ({q}) zahlst du voraussichtlich:', dueBy: 'Frist: bis {date}',
       reserved: 'Zurückgelegt: {v}', missing: 'Es fehlen {v}', covered: 'Gedeckt', setAside: 'Für Steuern zurückgelegt (€)',
-      vatRefund: 'In diesem Quartal ergibt sich ein USt.-Guthaben (Erstattung oder Verrechnung): {v}.',
+      vatRefund: 'In diesem Quartal ergibt sich ein USt.-Guthaben (Erstattung oder Verrechnung): {v}.', vatCompensate: 'In diesem Quartal ergibt sich ein USt.-Guthaben von {v} zur Verrechnung. Im 1.–3. Quartal kann keine Erstattung beantragt werden; es wird mit den Folgequartalen verrechnet (Erstattung im 4. Quartal, außer bei Eintragung im REDEME).',
       vatTitle: 'Quartals-Umsatzsteuer (Modelo 303)', vatOutput: 'Umsatzsteuer', vatInput: 'Vorsteuer', result: 'Ergebnis',
       vatExplain: 'USt. deiner ausgestellten Rechnungen minus Vorsteuer deiner Ausgaben im Quartal.',
       irpfTitle: 'Einkommensteuer-Vorauszahlung (Modelo 130)', accIncome: 'Einnahmen seit Jahresbeginn', accExpense: 'Ausgaben seit Jahresbeginn',

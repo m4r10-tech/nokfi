@@ -118,7 +118,7 @@ export default function Ledger() {
       <div className="grid grid-cols-2 lg:grid-cols-4 gap-2 sm:gap-3">
         <Kpi label={t('finance.incomeBase')} value={eur(totals.incomeBase, lang)} />
         <Kpi label={t('finance.expenseBase')} value={eur(totals.expenseBase, lang)} />
-        <Kpi label={t('finance.vatBalance')} value={eur(totals.vatOut - totals.vatIn, lang)} hint={`${eur(totals.vatOut, lang)} − ${eur(totals.vatIn, lang)}`} />
+        <Kpi label={t(totals.vatOut - totals.vatIn < 0 ? 'finance.vatBalanceNeg' : 'finance.vatBalance')} value={eur(totals.vatOut - totals.vatIn, lang)} hint={`${eur(totals.vatOut, lang)} − ${eur(totals.vatIn, lang)}`} />
         <Kpi label={t('finance.result')} value={eur(totals.incomeBase - totals.expenseBase, lang)}
           tone={totals.incomeBase - totals.expenseBase >= 0 ? 'var(--positive)' : 'var(--negative)'} />
       </div>

@@ -478,7 +478,7 @@ export default {
     totalMismatch: 'Netto + VAT − potrącenie nie zgadza się z kwotą razem. Sprawdź to.',
     duplicateEntry: 'W rejestrze jest już faktura o tym numerze i numerze podatkowym.',
     confirmDelete: 'Usunąć ten wpis z rejestru?', deleted: 'Wpis usunięty', delete: 'Usuń',
-    incomeBase: 'Przychody (netto)', expenseBase: 'Wydatki (netto)', vatBalance: 'VAT do zapłaty', result: 'Wynik',
+    incomeBase: 'Przychody (netto)', expenseBase: 'Wydatki (netto)', vatBalance: 'VAT do zapłaty', vatBalanceNeg: 'VAT do rozliczenia', result: 'Wynik',
     reviewCount: '{n} wpisu się nie zgadza: sprawdź.', reviewCount_one: '{n} wpis się nie zgadza: sprawdź go.', reviewCount_few: '{n} wpisy się nie zgadzają: sprawdź je.', reviewCount_many: '{n} wpisów się nie zgadza: sprawdź je.', search: 'Szukaj…', ledgerSheet: 'Rejestr przychodów i wydatków',
     emptyTitle: 'Twój rejestr jest pusty', emptyDesc: 'Wgraj zdjęcia lub PDF faktur (albo cały folder), a AI doda je do rejestru. Ty tylko sprawdzasz.',
     days: '{n} dnia', days_one: '{n} dzień', days_few: '{n} dni', days_many: '{n} dni',
@@ -533,7 +533,7 @@ export default {
     taxes: {
       headline: 'W tym kwartale ({q}) zapłacisz mniej więcej:', dueBy: 'Termin: do {date}',
       reserved: 'Odłożono {v}', missing: 'Brakuje {v}', covered: 'Pokryte', setAside: 'Ile odłożyłem na podatki (€)',
-      vatRefund: 'W tym kwartale VAT wychodzi do zwrotu lub rozliczenia: {v}.',
+      vatRefund: 'W tym kwartale VAT wychodzi do zwrotu lub rozliczenia: {v}.', vatCompensate: 'W tym kwartale VAT jest ujemny: {v} do rozliczenia. W 1.–3. kwartale nie wnioskuje się o zwrot; kwota pomniejsza kolejne kwartały (o zwrot wnioskuje się w 4. kwartale, chyba że firma jest w rejestrze REDEME).',
       vatTitle: 'Kwartalny VAT (modelo 303)', vatOutput: 'VAT należny', vatInput: 'VAT naliczony', result: 'Wynik',
       vatExplain: 'VAT z twoich wystawionych faktur minus VAT z wydatków w kwartale.',
       irpfTitle: 'Zaliczka na podatek dochodowy (modelo 130)', accIncome: 'Przychody narastająco w roku', accExpense: 'Wydatki narastająco w roku',

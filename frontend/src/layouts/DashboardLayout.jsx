@@ -5,7 +5,7 @@ import Sidebar from '../components/Sidebar';
 import BottomNav from '../components/BottomNav';
 import Logo from '../components/Logo';
 import OnboardingModal from '../components/OnboardingModal';
-import { parentOf } from '../components/navItems';
+import { parentOf, NAV_ITEMS } from '../components/navItems';
 import { useCompanyProfile } from '../hooks/useCompanyProfile';
 import { useLang } from '../context/LangContext';
 import { useToast } from '../context/ToastContext';
@@ -39,6 +39,13 @@ export default function DashboardLayout() {
   });
 
   useEffect(() => { window.scrollTo(0, 0); }, [pathname]);
+
+  // Título de la pestaña según la sección (antes se quedaba el de la última
+  // página pública, p.ej. "Iniciar sesión — Nokfi").
+  useEffect(() => {
+    const item = NAV_ITEMS.find(i => pathname.startsWith(i.to));
+    document.title = item ? `${t(item.key)} — Nokfi` : 'Nokfi';
+  }, [pathname, t]);
 
   const completeOnboarding = (data) => {
     updateProfile(data);
