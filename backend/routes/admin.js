@@ -327,4 +327,33 @@ router.get('/errors', (req, res) => {
   res.json({ errors: rows });
 });
 
+/* ──────────────────────────────────────────────────────────
+   GET /api/admin/ai-status   (sesión 4, cambio de IA)
+   Prueba cada proveedor configurado con una petición mínima (sin datos de
+   usuarios) y devuelve modelo, latencia y error. Las claves no salen del
+   servidor. Sirve para elegir modelos y detectar cuotas agotadas.
+────────────────────────────────────────────────────────── */
+router.get('/ai-status', async (_req, res) => {
+  const providers = require('../services/ai/providers');
+  const chat = require('../services/ai/chat');
+  const out = { analysis_order: providers.providerOrder(), chat_order: chat.providerOrder(), analysis: {}, chat: {} };
+  const schema = { type: 'OBJECT', properties: { ok: { type: 'BOOLEAN' }, idioma: { type: 'STRING' } }, required: ['ok'] };
+  for (const name of Object.keys(providers.PROVIDERS)) {
+    if (!providers.PROVIDERS[name].configured()) { out.analysis[name] = 'sin configurar'; continue; }
+    const t0 = Date.now();
+    try {
+      const r = await providers.PROVIDERS[name].generate({ system: 'Eres un comprobador de salud.', parts: [{ text: 'Devuelve ok=true e idioma="es".' }], schema, maxTokens: 100 });
+      out.analysis[name] = { ok: r.json?.ok === true, model: r.model, ms: Date.now() - t0 };
+    } catch (e) { out.analysis[name] = { error: e.message, ms: Date.now() - t0 }; }
+  }
+  for (const name of chat.providerOrder()) {
+    const t0 = Date.now();
+    try {
+      const r = await chat.testProvider(name);
+      out.chat[name] = { reply: String(r).slice(0, 60), ms: Date.now() - t0 };
+    } catch (e) { out.chat[name] = { error: e.message, ms: Date.now() - t0 }; }
+  }
+  res.json(out);
+});
+
 module.exports = router;

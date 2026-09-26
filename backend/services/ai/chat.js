@@ -5,13 +5,15 @@
  *   cuota diaria de análisis.
  * - Ningún free tier es "para siempre" → capa de proveedores intercambiable
  *   con respaldo: se prueban en orden (CHAT_PROVIDERS) solo los que tengan
- *   clave en el .env. Por defecto: groq → openrouter → cloudflare → gemini.
- *   Hoy basta GEMINI_API_KEY (Gemini Flash-Lite, free tier).
+ *   clave. Por defecto: cerebras → groq → cloudflare, porque sus condiciones
+ *   NO permiten entrenar con los datos (decisión 2026-09-26). gemini (su free
+ *   tier entrena) y openrouter (sus modelos gratis suelen entrenar) solo se
+ *   usan si se añaden a mano a CHAT_PROVIDERS.
  * - Anti-abuso: máx. CHAT_PER_MINUTE mensajes/min por licencia (10 por
  *   defecto) para que un usuario o un script no agote el free tier de todos.
  * - Privacidad: no se guarda la conversación; solo se envía lo necesario
- *   (últimos mensajes + resumen del informe + perfil). El aviso de que el
- *   proveedor gratuito puede usar los datos está en el chat y en /privacidad.
+ *   (últimos mensajes + resumen del informe + perfil). El aviso de privacidad
+ *   está en el chat (letra pequeña, siempre visible) y en /privacidad.
  */
 
 'use strict';
@@ -59,10 +61,15 @@ async function openAiCompatible(url, key, model, system, messages, extraHeaders 
 }
 
 const PROVIDERS = {
+  cerebras: {
+    configured: () => !!process.env.CEREBRAS_API_KEY,
+    call: (system, messages) => openAiCompatible('https://api.cerebras.ai/v1/chat/completions',
+      process.env.CEREBRAS_API_KEY, process.env.CEREBRAS_MODEL || 'gpt-oss-120b', system, messages)
+  },
   groq: {
     configured: () => !!process.env.GROQ_API_KEY,
     call: (system, messages) => openAiCompatible('https://api.groq.com/openai/v1/chat/completions',
-      process.env.GROQ_API_KEY, process.env.GROQ_MODEL || 'llama-3.3-70b-versatile', system, messages)
+      process.env.GROQ_API_KEY, process.env.GROQ_CHAT_MODEL || 'llama-3.3-70b-versatile', system, messages)
   },
   openrouter: {
     configured: () => !!process.env.OPENROUTER_API_KEY,
@@ -73,7 +80,7 @@ const PROVIDERS = {
   cloudflare: {
     configured: () => !!(process.env.CF_ACCOUNT_ID && process.env.CF_AI_TOKEN),
     call: (system, messages) => openAiCompatible(`https://api.cloudflare.com/client/v4/accounts/${process.env.CF_ACCOUNT_ID}/ai/v1/chat/completions`,
-      process.env.CF_AI_TOKEN, process.env.CF_AI_MODEL || '@cf/meta/llama-3.3-70b-instruct-fp8-fast', system, messages)
+      process.env.CF_AI_TOKEN, process.env.CF_AI_CHAT_MODEL || '@cf/meta/llama-3.3-70b-instruct-fp8-fast', system, messages)
   },
   gemini: {
     configured: () => !!process.env.GEMINI_API_KEY,
@@ -89,7 +96,7 @@ const PROVIDERS = {
 };
 
 function providerOrder() {
-  const list = (process.env.CHAT_PROVIDERS || 'groq,openrouter,cloudflare,gemini').split(',').map(s => s.trim()).filter(Boolean);
+  const list = (process.env.CHAT_PROVIDERS || 'cerebras,groq,cloudflare').split(',').map(s => s.trim()).filter(Boolean);
   return list.filter(p => PROVIDERS[p]?.configured());
 }
 
@@ -150,4 +157,9 @@ async function freeText({ system, prompt }) {
   throw err;
 }
 
-module.exports = { chat, freeText, allowMessage, sanitizeMessages, providerOrder, _hits: hits };
+/** Comprobación mínima de un proveedor de chat (admin /ai-status). */
+function testProvider(name) {
+  return PROVIDERS[name].call('Responde solo con la palabra OK.', [{ role: 'user', content: 'Di OK' }]);
+}
+
+module.exports = { chat, freeText, testProvider, allowMessage, sanitizeMessages, providerOrder, _hits: hits };

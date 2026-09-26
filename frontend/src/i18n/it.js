@@ -411,8 +411,8 @@ export default {
       ] },
       { h: 'Servizi di terze parti coinvolti', list: [
         'Stripe: elabora i pagamenti e gestisce gli abbonamenti.',
-        'Google Gemini: genera le analisi IA e legge le fatture. Con il piano attuale di questo servizio, Google può utilizzare i contenuti inviati secondo i propri termini; evita di includere dati particolarmente sensibili.',
-        'Assistente Nokfi: usa modelli di IA gratuiti (Google Gemini e, se attivati, Groq, OpenRouter o Cloudflare Workers AI). I loro piani gratuiti possono usare i messaggi per migliorare i modelli: non includere dati personali di terzi. Non conserviamo le tue conversazioni.',
+        'Groq e Cloudflare Workers AI: generano le analisi e leggono le fatture. I loro termini vietano di usare i tuoi dati per addestrare modelli e non li conservano (salvo log tecnici temporanei per indagare abusi). Groq li elabora negli Stati Uniti.',
+        'Assistente Nokfi: usa Cerebras, Groq o Cloudflare Workers AI, che non usano i tuoi messaggi per addestrare modelli. Non conserviamo le tue conversazioni.',
         'Resend: invia le email transazionali (la chiave di licenza, il recupero della password e, se li attivi, i promemoria del calendario fiscale).',
         'Cloudflare: rete di distribuzione e sicurezza che protegge l’accesso al sito. Usiamo il paese della tua connessione (indicato da Cloudflare) solo per scegliere la lingua iniziale del sito; non lo conserviamo.'
       ] },
@@ -450,7 +450,7 @@ export default {
     suggestions: ['Come calcolo il mio punto di pareggio?', 'Quali costi fissi dovrei rivedere per primi?', 'Quanto dovrei tenere nel fondo di riserva?'],
     suggestionsReport: ['Spiegami la priorità più grave con un esempio', 'Da dove comincio il piano d’azione?', 'Cosa significa questo termine del glossario?'],
     placeholder: 'Scrivi la tua domanda…', send: 'Invia',
-    privacyNote: 'Assistente con IA gratuita · può essere usato per migliorare il modello · non includere dati personali di terzi',
+    privacyNote: 'Assistente IA · i tuoi messaggi non vengono usati per addestrare modelli né conservati · non includere dati personali di terzi',
     privacyMore: 'Maggiori info'
   },
   fileErrors: {

@@ -411,8 +411,8 @@ export default {
       ] },
       { h: 'Usługi zewnętrzne', list: [
         'Stripe: obsługuje płatności i zarządza subskrypcjami.',
-        'Google Gemini: generuje analizy AI i czyta faktury. W obecnym planie tej usługi Google może wykorzystywać przesłane treści zgodnie z własnymi warunkami; unikaj szczególnie wrażliwych danych.',
-        'Asystent Nokfi: korzysta z darmowych modeli AI (Google Gemini oraz — jeśli są włączone — Groq, OpenRouter lub Cloudflare Workers AI). Ich darmowe plany mogą wykorzystywać wiadomości do ulepszania modeli: nie podawaj danych osobowych osób trzecich. Nie przechowujemy twoich rozmów.',
+        'Groq i Cloudflare Workers AI: generują analizy i czytają faktury. Ich warunki zabraniają używania twoich danych do trenowania modeli i ich nie przechowują (poza tymczasowymi logami technicznymi do badania nadużyć). Groq przetwarza je w USA.',
+        'Asystent Nokfi: korzysta z Cerebras, Groq lub Cloudflare Workers AI, które nie używają twoich wiadomości do trenowania modeli. Nie przechowujemy twoich rozmów.',
         'Resend: wysyła e-maile transakcyjne (twój klucz licencyjny, odzyskiwanie hasła oraz — jeśli je włączysz — przypomnienia z kalendarza podatkowego).',
         'Cloudflare: sieć dostarczania i bezpieczeństwa chroniąca dostęp do strony. Kraju twojego połączenia (podawanego przez Cloudflare) używamy tylko do wyboru początkowego języka strony; nie przechowujemy go.'
       ] },
@@ -450,7 +450,7 @@ export default {
     suggestions: ['Jak obliczyć próg rentowności?', 'Które koszty stałe przejrzeć najpierw?', 'Ile powinienem mieć w funduszu rezerwowym?'],
     suggestionsReport: ['Wyjaśnij najpoważniejszy priorytet na przykładzie', 'Od czego zacząć plan działania?', 'Co oznacza ten termin ze słowniczka?'],
     placeholder: 'Wpisz pytanie…', send: 'Wyślij',
-    privacyNote: 'Darmowy asystent AI · może służyć do ulepszania modelu · nie podawaj danych osobowych osób trzecich',
+    privacyNote: 'Asystent AI · twoje wiadomości nie służą do trenowania modeli i nie są przechowywane · nie podawaj danych osobowych osób trzecich',
     privacyMore: 'Więcej informacji'
   },
   fileErrors: {

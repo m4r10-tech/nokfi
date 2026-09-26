@@ -411,8 +411,8 @@ export default {
       ] },
       { h: 'Third-party services involved', list: [
         'Stripe: processes payments and manages subscriptions.',
-        'Google Gemini: generates the AI analyses and reads invoices. Under this service\'s current plan, Google may use the content sent according to its own terms; avoid including especially sensitive data.',
-        'Nokfi assistant: uses free AI models (Google Gemini and, if enabled, Groq, OpenRouter or Cloudflare Workers AI). Their free plans may use messages to improve their models: do not include third parties\' personal data. We do not store your conversations.',
+        'Groq and Cloudflare Workers AI: generate the analyses and read invoices. Their terms forbid using your data to train models and they do not keep it (except temporary technical logs to investigate abuse). Groq processes it in the United States.',
+        'Nokfi assistant: uses Cerebras, Groq or Cloudflare Workers AI, which do not use your messages to train models. We do not store your conversations.',
         'Resend: sends transactional emails (your license key, password recovery and, if you turn them on, tax calendar reminders).',
         'Cloudflare: delivery and security network protecting access to the website. We use your connection\'s country (provided by Cloudflare) only to choose the website\'s initial language; we do not store it.'
       ] },
@@ -450,7 +450,7 @@ export default {
     suggestions: ['How do I calculate my break-even point?', 'Which fixed costs should I review first?', 'How much should I keep in a reserve fund?'],
     suggestionsReport: ['Explain the most serious priority with an example', 'Where do I start with the action plan?', 'What does this glossary term mean?'],
     placeholder: 'Type your question…', send: 'Send',
-    privacyNote: 'Free AI assistant · may be used to improve the model · do not include third parties’ personal data',
+    privacyNote: 'AI assistant · your messages are not used to train models or stored · do not include third parties’ personal data',
     privacyMore: 'Learn more'
   },
   fileErrors: {

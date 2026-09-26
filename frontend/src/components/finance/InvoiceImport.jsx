@@ -3,7 +3,7 @@ import { Link } from 'react-router-dom';
 import { Loader2, Sparkles, AlertTriangle, Info, Check, X } from 'lucide-react';
 import { aiApi, ledgerApi } from '../../middleware/api';
 import { apiErrorMessage } from '../../middleware/errors';
-import { readPdf, imageToJpeg, fileToBase64, extOf, IMAGE_EXT } from '../../middleware/fileReaders';
+import { readPdf, imageToJpeg, extOf, IMAGE_EXT } from '../../middleware/fileReaders';
 import { fileErrorMessage } from '../../middleware/fileErrors';
 import { useLang } from '../../context/LangContext';
 import { useToast } from '../../context/ToastContext';
@@ -57,8 +57,10 @@ export default function InvoiceImport({ profile, onSaved, onCancel }) {
     const { text, looksScanned } = await readPdf(file, { maxPages: 6 });
     if (!looksScanned) return { name: file.name, text: text.slice(0, 12000), bytes: text.length };
     if (file.size > MAX_PDF_BYTES) throw Object.assign(new Error('big'), { code: 'ERR_FILE_TOO_BIG', fileName: file.name });
-    const data = await fileToBase64(file);
-    return { name: file.name, mime: 'application/pdf', data, bytes: data.length };
+    // PDF escaneado → imagen de la 1.ª página (los modelos sin entrenamiento leen imágenes, no PDF).
+    const { renderPdfFirstPage } = await import('../../middleware/pdfExtract');
+    const img = await renderPdfFirstPage(file);
+    return { name: file.name, mime: img.mime, data: img.data, bytes: img.data.length };
   };
 
   const toRow = (inv, i) => {

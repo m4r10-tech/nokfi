@@ -411,8 +411,8 @@ export default {
       ] },
       { h: 'Beteiligte Drittanbieter', list: [
         'Stripe: wickelt Zahlungen ab und verwaltet Abonnements.',
-        'Google Gemini: erstellt die KI-Analysen und liest Rechnungen. Im aktuellen Tarif dieses Dienstes kann Google die gesendeten Inhalte gemäß eigenen Bedingungen nutzen; vermeide besonders sensible Daten.',
-        'Nokfi-Assistent: nutzt kostenlose KI-Modelle (Google Gemini und, falls aktiviert, Groq, OpenRouter oder Cloudflare Workers AI). Deren Gratistarife können Nachrichten zur Verbesserung ihrer Modelle nutzen: Gib keine personenbezogenen Daten Dritter ein. Wir speichern deine Unterhaltungen nicht.',
+        'Groq und Cloudflare Workers AI: erstellen die Analysen und lesen Rechnungen. Ihre Bedingungen verbieten, deine Daten zum Training von Modellen zu nutzen, und sie speichern sie nicht (außer vorübergehenden technischen Protokollen zur Missbrauchsaufklärung). Groq verarbeitet sie in den USA.',
+        'Nokfi-Assistent: nutzt Cerebras, Groq oder Cloudflare Workers AI, die deine Nachrichten nicht zum Training von Modellen verwenden. Wir speichern deine Unterhaltungen nicht.',
         'Resend: versendet transaktionale E-Mails (deinen Lizenzschlüssel, die Passwortwiederherstellung und – falls aktiviert – Erinnerungen des Steuerkalenders).',
         'Cloudflare: Auslieferungs- und Sicherheitsnetz, das den Zugriff auf die Website schützt. Das Land deiner Verbindung (von Cloudflare übermittelt) nutzen wir nur, um die Anfangssprache der Website zu wählen; wir speichern es nicht.'
       ] },
@@ -450,7 +450,7 @@ export default {
     suggestions: ['Wie berechne ich meinen Break-even?', 'Welche Fixkosten sollte ich zuerst prüfen?', 'Wie viel sollte ich als Rücklage haben?'],
     suggestionsReport: ['Erkläre mir die dringendste Priorität mit einem Beispiel', 'Womit fange ich beim Maßnahmenplan an?', 'Was bedeutet dieser Begriff aus dem Glossar?'],
     placeholder: 'Schreib deine Frage…', send: 'Senden',
-    privacyNote: 'Kostenloser KI-Assistent · kann zur Verbesserung des Modells genutzt werden · keine personenbezogenen Daten Dritter eingeben',
+    privacyNote: 'KI-Assistent · deine Nachrichten werden weder zum Training genutzt noch gespeichert · keine personenbezogenen Daten Dritter eingeben',
     privacyMore: 'Mehr erfahren'
   },
   fileErrors: {

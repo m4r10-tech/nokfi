@@ -21,6 +21,10 @@ process.env.BASE_URL = 'http://localhost:3999';
 process.env.PLAN_PRICE_MINI_EUR = '5';
 process.env.PLAN_PRICE_PRO_EUR = '20';
 process.env.PLAN_PRICE_MAX_EUR = '50';
+// Los tests de análisis simulan la respuesta de Gemini; la capa de proveedores
+// (groq/cloudflare por defecto) se prueba aparte en session4.tests.js.
+process.env.AI_PROVIDERS = 'gemini';
+process.env.CHAT_PROVIDERS = 'gemini';
 
 const fs = require('fs');
 const http = require('http');

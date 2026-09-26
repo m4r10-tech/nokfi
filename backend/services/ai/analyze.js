@@ -16,7 +16,8 @@
 
 'use strict';
 
-const { generate, AiError } = require('./gemini');
+const { AiError } = require('./gemini');
+const { generate, providerOrder } = require('./providers');
 const P = require('./prompts');
 const { acquire, QuotaError, quotaMessage } = require('./quota');
 const { computeHealth, cleanAnswers } = require('../../utils/healthScore');
@@ -30,6 +31,8 @@ const MAX_FOLDER_BATCHES = 12;     // tope técnico por petición (≈ 200 docum
 const MAX_INVOICE_BATCHES = 12;    // 12 lotes × 5 = 60 facturas por petición
 const MAX_INVOICES_PER_CALL = 5;
 const MAX_INLINE_BYTES = 7 * 1024 * 1024; // base64 total por llamada
+// Los PDF escaneados se convierten a imagen en el navegador (los modelos
+// abiertos no leen PDF inline); se admite PDF solo si Gemini está activo.
 const INLINE_MIMES = ['image/jpeg', 'image/png', 'image/webp', 'application/pdf'];
 
 const DEFAULT_TITLES = {
@@ -135,8 +138,8 @@ function prepare(task, input, profile) {
  */
 async function runAnalysis({ license, task, input, lang, title, jobId, ip, source = 'web' }) {
   if (!ALL_TASKS.includes(task)) return bad('invalid_task', 'Tipo de análisis desconocido.');
-  if (!process.env.GEMINI_API_KEY) {
-    console.error('⚠️  GEMINI_API_KEY no configurada en el servidor');
+  if (!providerOrder().length) {
+    console.error('⚠️  Ningún proveedor de IA configurado (GROQ_API_KEY / CF_ACCOUNT_ID+CF_AI_TOKEN)');
     return { status: 500, body: { error: 'ai_not_configured', message: AI_ERROR_RESPONSES.ai_not_configured[1] } };
   }
 
@@ -163,7 +166,7 @@ async function runAnalysis({ license, task, input, lang, title, jobId, ip, sourc
       system: P.systemPrompt({ profile, lang }),
       parts: plan.parts,
       schema: plan.schema,
-      maxTokens: plan.maxTokens || 8192
+      maxTokens: plan.maxTokens || 8000
     });
   } catch (e) {
     permit.onFailure();
@@ -178,7 +181,7 @@ async function runAnalysis({ license, task, input, lang, title, jobId, ip, sourc
 
   audit('AI_ANALYSIS_GENERATED', {
     license_id: license.id, ip,
-    detail: `task=${task}, chars=${plan.chars}, source=${source}, provider=gemini`
+    detail: `task=${task}, chars=${plan.chars}, source=${source}, provider=${result.model}`
   });
 
   if (task === 'folder_map') {

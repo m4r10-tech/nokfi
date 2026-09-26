@@ -414,8 +414,8 @@ export default {
       ] },
       { h: 'Servicios de terceros que intervienen', list: [
         'Stripe: procesa los pagos y gestiona las suscripciones.',
-        'Google Gemini: genera los análisis con IA y lee las facturas. Con el plan actual de este servicio, Google puede utilizar los contenidos enviados según sus propios términos; evita incluir datos especialmente sensibles.',
-        'Asistente de Nokfi: usa modelos de IA gratuitos (Google Gemini y, si están activados, Groq, OpenRouter o Cloudflare Workers AI). Sus planes gratuitos pueden usar los mensajes para mejorar sus modelos: no incluyas datos personales de terceros. No guardamos tus conversaciones.',
+        'Groq y Cloudflare Workers AI: generan los análisis y leen las facturas. Sus condiciones prohíben usar tus datos para entrenar modelos y no los conservan (salvo registros técnicos temporales para investigar abusos). Groq los procesa en EE. UU.',
+        'Asistente de Nokfi: usa Cerebras, Groq o Cloudflare Workers AI, que no usan tus mensajes para entrenar modelos. No guardamos tus conversaciones.',
         'Resend: envía los emails transaccionales (tu clave de licencia, recuperación de contraseña y, si los activas, los avisos del calendario fiscal).',
         'Cloudflare: red de distribución y seguridad que protege el acceso a la web. Usamos el país de tu conexión (que Cloudflare nos indica) solo para elegir el idioma inicial de la web; no lo guardamos.'
       ] },
@@ -453,7 +453,7 @@ export default {
     suggestions: ['¿Cómo calculo mi punto de equilibrio?', '¿Qué gastos fijos debería revisar primero?', '¿Cuánto debería tener en el fondo de reserva?'],
     suggestionsReport: ['Explícame la prioridad más grave con un ejemplo', '¿Por dónde empiezo el plan de acción?', '¿Qué significa este término del glosario?'],
     placeholder: 'Escribe tu pregunta…', send: 'Enviar',
-    privacyNote: 'Asistente con IA gratuita · puede usarse para mejorar el modelo · no incluyas datos personales de terceros',
+    privacyNote: 'Asistente con IA · tus mensajes no se usan para entrenar modelos ni se guardan · no incluyas datos personales de terceros',
     privacyMore: 'Más info'
   },
   fileErrors: {

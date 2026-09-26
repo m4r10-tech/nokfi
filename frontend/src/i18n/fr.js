@@ -411,8 +411,8 @@ export default {
       ] },
       { h: 'Services tiers qui interviennent', list: [
         'Stripe : traite les paiements et gère les abonnements.',
-        'Google Gemini : génère les analyses IA et lit les factures. Avec l’offre actuelle de ce service, Google peut utiliser les contenus envoyés selon ses propres conditions ; évitez d’y inclure des données particulièrement sensibles.',
-        'Assistant Nokfi : utilise des modèles d’IA gratuits (Google Gemini et, s’ils sont activés, Groq, OpenRouter ou Cloudflare Workers AI). Leurs offres gratuites peuvent utiliser les messages pour améliorer leurs modèles : n’y incluez pas de données personnelles de tiers. Nous ne conservons pas vos conversations.',
+        'Groq et Cloudflare Workers AI : génèrent les analyses et lisent les factures. Leurs conditions interdisent d’utiliser vos données pour entraîner des modèles et ils ne les conservent pas (sauf journaux techniques temporaires pour enquêter sur des abus). Groq les traite aux États-Unis.',
+        'Assistant Nokfi : utilise Cerebras, Groq ou Cloudflare Workers AI, qui n’utilisent pas vos messages pour entraîner des modèles. Nous ne conservons pas vos conversations.',
         'Resend : envoie les e-mails transactionnels (votre clé de licence, la récupération du mot de passe et, si vous les activez, les rappels du calendrier fiscal).',
         'Cloudflare : réseau de distribution et de sécurité qui protège l’accès au site. Nous utilisons le pays de votre connexion (indiqué par Cloudflare) uniquement pour choisir la langue initiale du site ; nous ne le conservons pas.'
       ] },
@@ -450,7 +450,7 @@ export default {
     suggestions: ['Comment calculer mon seuil de rentabilité ?', 'Quelles charges fixes revoir en priorité ?', 'Combien devrais-je garder en fonds de réserve ?'],
     suggestionsReport: ['Explique-moi la priorité la plus grave avec un exemple', 'Par où commencer le plan d’action ?', 'Que veut dire ce terme du glossaire ?'],
     placeholder: 'Écrivez votre question…', send: 'Envoyer',
-    privacyNote: 'Assistant IA gratuit · peut servir à améliorer le modèle · n’incluez pas de données personnelles de tiers',
+    privacyNote: 'Assistant IA · vos messages ne servent pas à entraîner des modèles et ne sont pas conservés · n’incluez pas de données personnelles de tiers',
     privacyMore: 'En savoir plus'
   },
   fileErrors: {

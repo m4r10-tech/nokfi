@@ -9,6 +9,41 @@ module.exports = async function session4Tests({ post, put, get, call, check, che
   const patch = (path, body, auth) => call('PATCH', path, { body, auth });
   const del = (path, body, auth) => call('DELETE', path, { body, auth });
 
+  // ── Cambio de IA: capa de proveedores sin entrenamiento (groq → cloudflare) ──
+  {
+    const providers = require('../services/ai/providers');
+    const saved = { fetch: global.fetch, AI: process.env.AI_PROVIDERS, G: process.env.GROQ_API_KEY, A: process.env.CF_ACCOUNT_ID, T: process.env.CF_AI_TOKEN, GM: process.env.GEMINI_API_KEY };
+    process.env.AI_PROVIDERS = 'groq,cloudflare'; process.env.GROQ_API_KEY = 'gsk_test'; process.env.CF_ACCOUNT_ID = 'acc'; process.env.CF_AI_TOKEN = 'tok'; process.env.GEMINI_API_KEY = 'fake';
+    const calls = [];
+    const ok = (obj) => ({ ok: true, status: 200, json: async () => ({ choices: [{ message: { content: JSON.stringify(obj) }, finish_reason: 'stop' }] }), text: async () => '' });
+    global.fetch = async (url, o) => { calls.push({ url, body: JSON.parse(o.body) }); return ok({ summary: 'desde groq', priorities: [], action_plan: [] }); };
+    const r1 = await providers.generate({ system: 's', parts: [{ text: 'hola' }, { inlineData: { mimeType: 'image/jpeg', data: 'AAA' } }], schema: { type: 'OBJECT', properties: { summary: { type: 'STRING' } } } });
+    check('IA: groq primero, formato OpenAI, imagen como image_url y JSON mode', () =>
+      r1.model.startsWith('groq:') && r1.json.summary === 'desde groq' && calls[0].url.includes('api.groq.com')
+      && calls[0].body.response_format?.type === 'json_object' && calls[0].body.messages[1].content[1].type === 'image_url'
+      && calls[0].body.messages[0].content.includes('"type":"object"'));
+    calls.length = 0;
+    global.fetch = async (url, o) => { calls.push({ url }); return url.includes('groq') ? { ok: false, status: 429, text: async () => 'rate' } : ok({ summary: 'desde cloudflare' }); };
+    const r2 = await providers.generate({ system: 's', parts: [{ text: 'x' }], schema: { type: 'OBJECT' } });
+    check('IA: si Groq agota cuota (429) responde Cloudflare', () => r2.model.startsWith('cloudflare:') && r2.json.summary === 'desde cloudflare' && calls.length === 2);
+    check('IA: sin AI_PROVIDERS explícito, Gemini (free tier que entrena) NO está en el orden', () => {
+      delete process.env.AI_PROVIDERS; const o = providers.providerOrder(); process.env.AI_PROVIDERS = 'groq,cloudflare';
+      return !o.includes('gemini') && o[0] === 'groq';
+    });
+    let pdfErr = null;
+    global.fetch = async () => ok({});
+    try { await providers.generate({ system: 's', parts: [{ inlineData: { mimeType: 'application/pdf', data: 'AAA' } }], schema: { type: 'OBJECT' } }); } catch (e) { pdfErr = e; }
+    check('IA: PDF inline no se manda a modelos que no lo leen (error controlado)', () => !!pdfErr && pdfErr.code === 'ai_provider_error');
+    const chat = require('../services/ai/chat');
+    check('Chat: orden por defecto sin Gemini ni OpenRouter', () => {
+      const prev = process.env.CHAT_PROVIDERS; delete process.env.CHAT_PROVIDERS; process.env.CEREBRAS_API_KEY = 'c';
+      const o = chat.providerOrder(); if (prev !== undefined) process.env.CHAT_PROVIDERS = prev; delete process.env.CEREBRAS_API_KEY;
+      return o[0] === 'cerebras' && !o.includes('gemini') && !o.includes('openrouter');
+    });
+    global.fetch = saved.fetch;
+    for (const [k, v] of [['AI_PROVIDERS', saved.AI], ['GROQ_API_KEY', saved.G], ['CF_ACCOUNT_ID', saved.A], ['CF_AI_TOKEN', saved.T], ['GEMINI_API_KEY', saved.GM]]) { if (v === undefined) delete process.env[k]; else process.env[k] = v; }
+  }
+
   // §5.1 — país por cabecera de Cloudflare (sin guardar nada).
   await checkAsync('i18n: GET /api/geo sin CF-IPCountry → country null', get('/api/geo'), r => r.status === 200 && r.data.country === null);
 
