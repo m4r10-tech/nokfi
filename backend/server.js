@@ -173,7 +173,7 @@ app.use(express.json({ limit: '2mb' }));
 ════════════════════════════════════════════════════════════ */
 const generalLimiter = rateLimit({
   windowMs: 15 * 60 * 1000,
-  max: 200,
+  max: isProduction ? 200 : 2000,
   standardHeaders: true,
   legacyHeaders: false,
   message: { error: 'rate_limited', message: 'Demasiadas peticiones. Inténtalo en unos minutos.' }

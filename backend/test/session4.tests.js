@@ -163,6 +163,46 @@ module.exports = async function session4Tests({ post, put, get, call, check, che
     if (savedResend !== undefined) process.env.RESEND_API_KEY = savedResend;
   }
 
+  // ── Resumen mensual por email y reclamación automática de cobros ──
+  {
+    const savedResend = process.env.RESEND_API_KEY;
+    delete process.env.RESEND_API_KEY;
+    await checkAsync('Perfil: monthlySummary activado por defecto; autoCollections se guarda',
+      put('/api/profile', { autoCollections: true }, tok),
+      r => r.status === 200 && r.data.profile.monthlySummary === true && r.data.profile.autoCollections === true);
+    const { buildSummary, runMonthlySummaries } = require('../services/monthlySummary');
+    const sum = buildSummary(lid, '2026-02', '2026-03-02');
+    check('Resumen: febrero con ingresos 2000, gastos 100 y cobros pendientes', () =>
+      sum.income === 2000 && sum.expense === 100 && sum.result === 1900 && sum.receivables.count === 1 && sum.lang === 'fr');
+    const s1 = await runMonthlySummaries(new Date('2026-03-02T09:00:00Z'));
+    const s2 = await runMonthlySummaries(new Date('2026-03-02T15:00:00Z'));
+    const s3 = await runMonthlySummaries(new Date('2026-03-10T09:00:00Z'));
+    check('Resumen: se envía los días 1-3, una sola vez por mes', () => s1 >= 1 && s2 === 0 && s3 === 0
+      && !!getDB().prepare("SELECT 1 FROM reminders_sent WHERE license_id = ? AND deadline_key = 'summary-2026-02'").get(lid));
+
+    await checkAsync('Cobros: email del cliente inválido se descarta',
+      patch(`/api/ledger/${ids[1]}`, { party_email: 'no es un email' }, tok), r => r.status === 200 && r.data.entry.party_email === '');
+    await checkAsync('Cobros: email del cliente se guarda normalizado',
+      patch(`/api/ledger/${ids[1]}`, { party_email: ' Pagos@ClienteB.test ' }, tok), r => r.status === 200);
+    const { runAutoCollections } = require('../services/collections');
+    const c0 = await runAutoCollections(new Date('2026-03-15T09:00:00Z')); // vence (emisión+30) el 12-mar → 3 días
+    const c1 = await runAutoCollections(new Date('2026-03-20T09:00:00Z')); // +8 días → etapa 1
+    const c1b = await runAutoCollections(new Date('2026-03-25T09:00:00Z'));
+    const c2 = await runAutoCollections(new Date('2026-04-12T09:00:00Z')); // +31 → etapa 2
+    const cOld = await runAutoCollections(new Date('2026-10-01T09:00:00Z')); // >180 días → a mano
+    check('Cobros: recordatorios a +7 y +30 días, sin repetir ni reclamar lo muy antiguo', () =>
+      c0 === 0 && c1 === 1 && c1b === 0 && c2 === 1 && cOld === 0);
+    await checkAsync('Cobros: GET /api/finance/receivables → auto_stage 2 y email del cliente',
+      get('/api/finance/receivables', tok),
+      r => r.status === 200 && r.data.pending[0].auto_stage === 2 && r.data.pending[0].party_email === 'pagos@clienteb.test');
+    const { buildCollectionEmail } = require('../utils/mailer');
+    const mail = buildCollectionEmail({ lang: 'fr', stage: 3, company: 'Taller <b>X</b>', entry: { party_name: 'Cliente B', invoice_number: 'F-2', invoice_date: '2026-02-10', due_date: '2026-03-12', total: 2420 } });
+    check('Cobros: plantilla en el idioma del usuario, HTML escapado y sin marca Nokfi arriba', () =>
+      mail.subject.startsWith('Dernier avis') && mail.html.includes('Taller &lt;b&gt;X&lt;/b&gt;') && !mail.html.includes('<b>X</b>'));
+    await put('/api/profile', { autoCollections: false }, tok);
+    if (savedResend !== undefined) process.env.RESEND_API_KEY = savedResend;
+  }
+
   await checkAsync('V1: DELETE /api/ledger/:id → 200 y ya no está',
     del(`/api/ledger/${ids[6]}`, null, tok), r => r.status === 200);
 

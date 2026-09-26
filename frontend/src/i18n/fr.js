@@ -76,6 +76,7 @@ export default {
     portalError: 'Impossible d’ouvrir le portail de gestion. Réessayez plus tard.',
     legalForm: 'Forme juridique', legalAutonomo: 'Indépendant', legalSociedad: 'Société',
     taxId: 'N° fiscal (NIF / CIF)', taxIdHint: 'Il permet de distinguer vos factures émises de vos factures reçues lorsque l’IA les lit.',
+    monthlySummary: 'Résumé mensuel par email', monthlySummaryHint: 'Le 1er de chaque mois : clôture du mois, impôts du trimestre, qui vous doit de l’argent et votre trésorerie.',
     version: 'Version',
     api: {
       title: 'API pour automatisations', docs: 'Documentation',
@@ -470,6 +471,7 @@ export default {
     disclaimer: 'Estimations indicatives calculées à partir de votre registre (fiscalité espagnole). Ce n’est pas un conseil fiscal : confirmez toujours avec votre comptable.',
     year: 'Année', quarter: 'Trimestre', fullYear: 'Année', type: 'Type', income: 'Recette', expense: 'Dépense', incomes: 'Recettes', expenses: 'Dépenses',
     date: 'Date', dueDate: 'Échéance', client: 'Client', supplier: 'Fournisseur', party: 'Client / fournisseur', nif: 'N° fiscal',
+    clientEmail: 'Email du client', clientEmailHint: 'client@entreprise.com (pour les relances)',
     invoiceNumber: 'N° de facture', concept: 'Libellé', category: 'Catégorie', base: 'HT', vatRate: 'TVA %', vat: 'TVA',
     irpfRate: 'IRPF %', irpf: 'Retenue', total: 'Total', paidCol: 'Payée/encaissée',
     categories: { sales: 'Ventes', services: 'Services professionnels', suppliers: 'Fournisseurs', rent: 'Loyer', utilities: 'Énergie et fournitures', staff: 'Personnel', marketing: 'Marketing', tech: 'Technologie', transport: 'Transport', other: 'Autre' },
@@ -548,6 +550,8 @@ export default {
       claim: 'Relancer', claimTitle: 'E-mail de relance · {name}', toneFriendly: 'Aimable', toneFirm: 'Ferme', toneFormal: 'Formel',
       writing: 'Rédaction…', subject: 'Objet', body: 'Message', openMail: 'Ouvrir dans la messagerie',
       reviewNote: 'Relisez le texte avant de l’envoyer. Il est rédigé par l’assistant IA gratuit.',
+      autoTitle: 'Relancer automatiquement les factures échues', autoHint: 'Nokfi envoie une relance à votre client 7 jours après l’échéance (aimable), à 30 (ferme) et à 60 (formelle), en votre nom et avec réponse directe à votre email. Sans échéance, on compte 30 jours après l’émission. Uniquement les factures avec l’email du client.',
+      autoSent: 'Relance {n} sur 3 envoyée', autoNone: 'Aucune relance pour l’instant', addEmail: 'Ajouter l’email du client pour relancer', addEmailTitle: 'Email de {name}', addEmailNote: 'Les relances partent au nom de votre entreprise et les réponses arrivent sur votre email.',
       collectedToast: 'Facture marquée comme encaissée', emptyTitle: 'Personne ne vous doit rien', emptyDesc: 'Vous verrez ici les factures émises que vous n’avez pas encore encaissées.'
     },
     leaks: {

@@ -48,7 +48,12 @@ async function runFiscalReminders(now = new Date()) {
 
 function startReminderScheduler() {
   if (process.env.NODE_ENV === 'test') return;
-  const tick = () => runFiscalReminders().catch(e => console.error('[REMINDERS]', e.message));
+  const tick = async () => {
+    await runFiscalReminders().catch(e => console.error('[REMINDERS]', e.message));
+    // Resumen mensual (días 1-3 del mes) y reclamación automática de cobros.
+    await require('./monthlySummary').runMonthlySummaries().catch(e => console.error('[SUMMARY]', e.message));
+    await require('./collections').runAutoCollections().catch(e => console.error('[COLLECTIONS]', e.message));
+  };
   setTimeout(tick, 60 * 1000).unref();
   setInterval(tick, 6 * 60 * 60 * 1000).unref();
 }

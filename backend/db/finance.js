@@ -11,10 +11,11 @@
 const { getDB } = require('./database');
 const { sanitizeFreeText } = require('../utils/sanitize');
 
-const FIELDS = ['type', 'party_name', 'party_nif', 'invoice_number', 'invoice_date', 'due_date', 'concept', 'category',
+const FIELDS = ['type', 'party_name', 'party_nif', 'party_email', 'invoice_number', 'invoice_date', 'due_date', 'concept', 'category',
   'base', 'vat_rate', 'vat_amount', 'irpf_rate', 'irpf_amount', 'total', 'paid', 'paid_at', 'source', 'file_name'];
 
 const ISO = /^\d{4}-\d{2}-\d{2}$/;
+const EMAIL = /^[^\s@<>"',;]+@[^\s@<>"',;]+\.[a-z]{2,}$/;
 const num = (v) => { const n = Number(v); return Number.isFinite(n) ? Math.round(n * 100) / 100 : 0; };
 const txt = (v, max) => sanitizeFreeText(v ?? '').slice(0, max);
 
@@ -33,6 +34,10 @@ function normalizeEntry(raw, { partial = false } = {}) {
   if (has('due_date')) e.due_date = ISO.test(String(raw.due_date || '')) ? raw.due_date : null;
   if (has('party_name') || !partial) e.party_name = txt(raw.party_name, 160);
   if (has('party_nif') || !partial) e.party_nif = txt(raw.party_nif, 20).toUpperCase().replace(/[\s-]/g, '');
+  if (has('party_email') || !partial) {
+    const mail = String(raw.party_email ?? '').trim().toLowerCase().slice(0, 160);
+    e.party_email = EMAIL.test(mail) ? mail : '';
+  }
   if (has('invoice_number') || !partial) e.invoice_number = txt(raw.invoice_number, 60);
   if (has('concept') || !partial) e.concept = txt(raw.concept, 200);
   if (has('category') || !partial) e.category = txt(raw.category, 60);

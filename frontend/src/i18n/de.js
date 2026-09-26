@@ -76,6 +76,7 @@ export default {
     portalError: 'Das Verwaltungsportal konnte nicht geöffnet werden. Versuche es später erneut.',
     legalForm: 'Rechtsform', legalAutonomo: 'Selbstständig', legalSociedad: 'Gesellschaft',
     taxId: 'Steuernummer (NIF / CIF)', taxIdHint: 'Damit unterscheidet die KI beim Lesen deine ausgestellten von deinen erhaltenen Rechnungen.',
+    monthlySummary: 'Monatliche Zusammenfassung per E-Mail', monthlySummaryHint: 'Am 1. jedes Monats: Monatsabschluss, Quartalssteuern, wer dir Geld schuldet und deine Liquidität.',
     version: 'Version',
     api: {
       title: 'API für Automatisierungen', docs: 'Dokumentation',
@@ -470,6 +471,7 @@ export default {
     disclaimer: 'Unverbindliche Schätzungen auf Basis deines Journals (spanisches Steuerrecht). Keine Steuerberatung: Stimme dich immer mit deinem Steuerberater ab.',
     year: 'Jahr', quarter: 'Quartal', fullYear: 'Jahr', type: 'Art', income: 'Einnahme', expense: 'Ausgabe', incomes: 'Einnahmen', expenses: 'Ausgaben',
     date: 'Datum', dueDate: 'Fälligkeit', client: 'Kunde', supplier: 'Lieferant', party: 'Kunde / Lieferant', nif: 'Steuernr.',
+    clientEmail: 'E-Mail des Kunden', clientEmailHint: 'kunde@firma.de (für Zahlungserinnerungen)',
     invoiceNumber: 'Rechnungsnr.', concept: 'Beschreibung', category: 'Kategorie', base: 'Netto', vatRate: 'USt. %', vat: 'USt.',
     irpfRate: 'IRPF %', irpf: 'Einbehalt', total: 'Gesamt', paidCol: 'Bezahlt/erhalten',
     categories: { sales: 'Verkauf', services: 'Freiberufliche Leistungen', suppliers: 'Lieferanten', rent: 'Miete', utilities: 'Energie & Nebenkosten', staff: 'Personal', marketing: 'Marketing', tech: 'Technologie', transport: 'Transport', other: 'Sonstiges' },
@@ -548,6 +550,8 @@ export default {
       claim: 'Mahnen', claimTitle: 'Zahlungserinnerung · {name}', toneFriendly: 'Freundlich', toneFirm: 'Bestimmt', toneFormal: 'Formell',
       writing: 'Wird verfasst…', subject: 'Betreff', body: 'Nachricht', openMail: 'Im E-Mail-Programm öffnen',
       reviewNote: 'Prüfe den Text vor dem Senden. Er stammt vom kostenlosen KI-Assistenten.',
+      autoTitle: 'Überfällige Rechnungen automatisch anmahnen', autoHint: 'Nokfi schickt deinem Kunden 7 Tage nach Fälligkeit eine Erinnerung (freundlich), nach 30 (bestimmt) und nach 60 (formell) – in deinem Namen, Antworten gehen direkt an deine E-Mail. Ohne Fälligkeit gelten 30 Tage ab Ausstellung. Nur Rechnungen mit Kunden-E-Mail.',
+      autoSent: 'Erinnerung {n} von 3 gesendet', autoNone: 'Noch keine Erinnerungen', addEmail: 'Kunden-E-Mail hinzufügen, um zu mahnen', addEmailTitle: 'E-Mail von {name}', addEmailNote: 'Erinnerungen werden mit deinem Firmennamen gesendet, Antworten kommen an deine E-Mail.',
       collectedToast: 'Rechnung als erhalten markiert', emptyTitle: 'Niemand schuldet dir etwas', emptyDesc: 'Hier siehst du ausgestellte Rechnungen, die noch nicht bezahlt wurden.'
     },
     leaks: {

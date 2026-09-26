@@ -22,7 +22,7 @@ export const categoryLabel = (t, value) => {
 const r2 = (n) => Math.round((Number(n) || 0) * 100) / 100;
 
 export function emptyEntry(type = 'expense') {
-  return { type, invoice_date: todayIso(), due_date: '', party_name: '', party_nif: '', invoice_number: '', concept: '', category: '',
+  return { type, invoice_date: todayIso(), due_date: '', party_name: '', party_nif: '', party_email: '', invoice_number: '', concept: '', category: '',
     base: '', vat_rate: 21, vat_amount: '', irpf_rate: 0, irpf_amount: '', total: '', paid: type === 'expense' };
 }
 
@@ -78,6 +78,11 @@ export default function EntryForm({ initial, onSave, onClose, saving, error }) {
         <Field label={t('finance.dueDate')} htmlFor="ef-due_date">{input('due_date', { type: 'date' })}</Field>
         <Field label={e.type === 'income' ? t('finance.client') : t('finance.supplier')} htmlFor="ef-party_name">{input('party_name', { maxLength: 160 })}</Field>
         <Field label={t('finance.nif')} htmlFor="ef-party_nif">{input('party_nif', { maxLength: 20, autoCapitalize: 'characters' })}</Field>
+        {e.type === 'income' && (
+          <Field label={t('finance.clientEmail')} htmlFor="ef-party_email" className="sm:col-span-2">
+            {input('party_email', { type: 'email', maxLength: 160, autoComplete: 'off', placeholder: t('finance.clientEmailHint') })}
+          </Field>
+        )}
         <Field label={t('finance.invoiceNumber')} htmlFor="ef-invoice_number">{input('invoice_number', { maxLength: 60 })}</Field>
         <Field label={t('finance.category')} htmlFor="ef-category">
           <select id="ef-category" value={e.category} onChange={(ev) => set('category', ev.target.value)} className="input">

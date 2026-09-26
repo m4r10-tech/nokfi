@@ -76,6 +76,7 @@ export default {
     portalError: 'Impossibile aprire il portale di gestione. Riprova più tardi.',
     legalForm: 'Forma giuridica', legalAutonomo: 'Lavoratore autonomo', legalSociedad: 'Società',
     taxId: 'Codice fiscale (NIF / CIF)', taxIdHint: 'Serve a distinguere le fatture emesse da quelle ricevute quando l’IA le legge.',
+    monthlySummary: 'Riepilogo mensile via email', monthlySummaryHint: 'Il 1° di ogni mese: come si è chiuso il mese, imposte del trimestre, chi ti deve soldi e la tua cassa.',
     version: 'Versione',
     api: {
       title: 'API per automazioni', docs: 'Documentazione',
@@ -470,6 +471,7 @@ export default {
     disclaimer: 'Stime indicative calcolate con i dati del tuo registro (fiscalità spagnola). Non è consulenza fiscale: verifica sempre con il tuo commercialista.',
     year: 'Anno', quarter: 'Trimestre', fullYear: 'Anno', type: 'Tipo', income: 'Entrata', expense: 'Uscita', incomes: 'Entrate', expenses: 'Uscite',
     date: 'Data', dueDate: 'Scadenza', client: 'Cliente', supplier: 'Fornitore', party: 'Cliente / fornitore', nif: 'Cod. fiscale',
+    clientEmail: 'Email del cliente', clientEmailHint: 'cliente@azienda.com (per i solleciti di pagamento)',
     invoiceNumber: 'N. fattura', concept: 'Descrizione', category: 'Categoria', base: 'Imponibile', vatRate: 'IVA %', vat: 'IVA',
     irpfRate: 'IRPF %', irpf: 'Ritenuta', total: 'Totale', paidCol: 'Pagata/incassata',
     categories: { sales: 'Vendite', services: 'Servizi professionali', suppliers: 'Fornitori', rent: 'Affitto', utilities: 'Utenze', staff: 'Personale', marketing: 'Marketing', tech: 'Tecnologia', transport: 'Trasporti', other: 'Altro' },
@@ -548,6 +550,8 @@ export default {
       claim: 'Sollecita', claimTitle: 'Email di sollecito · {name}', toneFriendly: 'Cordiale', toneFirm: 'Deciso', toneFormal: 'Formale',
       writing: 'Scrittura in corso…', subject: 'Oggetto', body: 'Messaggio', openMail: 'Apri nella posta',
       reviewNote: 'Rileggi il testo prima di inviarlo. È scritto dall’assistente IA gratuito.',
+      autoTitle: 'Sollecita automaticamente le fatture scadute', autoHint: 'Nokfi invia un promemoria al tuo cliente 7 giorni dopo la scadenza (cordiale), a 30 (fermo) e a 60 (formale), a tuo nome e con risposta diretta alla tua email. Senza scadenza si contano 30 giorni dall’emissione. Solo fatture con email del cliente.',
+      autoSent: 'Promemoria {n} di 3 inviato', autoNone: 'Ancora nessun promemoria', addEmail: 'Aggiungi l’email del cliente per sollecitare', addEmailTitle: 'Email di {name}', addEmailNote: 'I promemoria partono con il nome della tua azienda e le risposte arrivano alla tua email.',
       collectedToast: 'Fattura segnata come incassata', emptyTitle: 'Nessuno ti deve nulla', emptyDesc: 'Qui vedrai le fatture emesse che non hai ancora incassato.'
     },
     leaks: {

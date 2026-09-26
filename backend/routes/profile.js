@@ -66,6 +66,8 @@ function toStorageShape(body) {
   if (body.taxId !== undefined) out.tax_id = sanitizeFreeText(body.taxId || '').toUpperCase().replace(/[\s-]/g, '').slice(0, 20);
   if (body.lang !== undefined && SUPPORTED_LANGS.includes(body.lang)) out.lang = body.lang;
   if (body.fiscalReminders !== undefined) out.fiscal_reminders = !!body.fiscalReminders;
+  if (body.monthlySummary !== undefined) out.monthly_summary = !!body.monthlySummary;
+  if (body.autoCollections !== undefined) out.auto_collections = !!body.autoCollections;
   if (body.cashBalance !== undefined) {
     const n = body.cashBalance === null || body.cashBalance === '' ? null : Number(body.cashBalance);
     if (n === null || Number.isFinite(n)) {
@@ -93,6 +95,8 @@ function toCamel(stored) {
     taxId: stored.tax_id || '',
     lang: stored.lang || '',
     fiscalReminders: !!stored.fiscal_reminders,
+    monthlySummary: stored.monthly_summary !== false,
+    autoCollections: !!stored.auto_collections,
     cashBalance: stored.cash_balance,
     cashBalanceDate: stored.cash_balance_date,
     cashAlertThreshold: stored.cash_alert_threshold || 0
@@ -104,7 +108,7 @@ function toCamel(stored) {
 const EMPTY_PROFILE_CAMEL = {
   companyName: '', sector: '', size: '', mainExpenses: [],
   onboardingCompleted: false, welcomeCardDismissed: false,
-  legalForm: '', taxId: '', lang: '', fiscalReminders: false,
+  legalForm: '', taxId: '', lang: '', fiscalReminders: false, monthlySummary: true, autoCollections: false,
   cashBalance: null, cashBalanceDate: null, cashAlertThreshold: 0
 };
 

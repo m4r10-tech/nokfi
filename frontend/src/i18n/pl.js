@@ -76,6 +76,7 @@ export default {
     portalError: 'Nie udało się otworzyć portalu zarządzania. Spróbuj później.',
     legalForm: 'Forma prawna', legalAutonomo: 'Jednoosobowa działalność', legalSociedad: 'Spółka',
     taxId: 'Numer podatkowy (NIF / CIF)', taxIdHint: 'Pozwala odróżnić faktury wystawione od otrzymanych, gdy czyta je AI.',
+    monthlySummary: 'Miesięczne podsumowanie e-mailem', monthlySummaryHint: '1. dnia każdego miesiąca: zamknięcie miesiąca, podatki kwartalne, kto jest ci winien pieniądze i twoja gotówka.',
     version: 'Wersja',
     api: {
       title: 'API do automatyzacji', docs: 'Dokumentacja',
@@ -470,6 +471,7 @@ export default {
     disclaimer: 'Orientacyjne szacunki wyliczone z twojego rejestru (hiszpańskie prawo podatkowe). To nie jest doradztwo podatkowe: zawsze potwierdzaj z księgowym.',
     year: 'Rok', quarter: 'Kwartał', fullYear: 'Rok', type: 'Rodzaj', income: 'Przychód', expense: 'Wydatek', incomes: 'Przychody', expenses: 'Wydatki',
     date: 'Data', dueDate: 'Termin płatności', client: 'Klient', supplier: 'Dostawca', party: 'Klient / dostawca', nif: 'Nr podatkowy',
+    clientEmail: 'E-mail klienta', clientEmailHint: 'klient@firma.pl (do przypomnień o płatności)',
     invoiceNumber: 'Nr faktury', concept: 'Opis', category: 'Kategoria', base: 'Netto', vatRate: 'VAT %', vat: 'VAT',
     irpfRate: 'IRPF %', irpf: 'Potrącenie', total: 'Razem', paidCol: 'Zapłacona/pobrana',
     categories: { sales: 'Sprzedaż', services: 'Usługi profesjonalne', suppliers: 'Dostawcy', rent: 'Czynsz', utilities: 'Media', staff: 'Personel', marketing: 'Marketing', tech: 'Technologia', transport: 'Transport', other: 'Inne' },
@@ -548,6 +550,8 @@ export default {
       claim: 'Upomnij', claimTitle: 'E-mail z przypomnieniem · {name}', toneFriendly: 'Uprzejmy', toneFirm: 'Stanowczy', toneFormal: 'Formalny',
       writing: 'Piszę…', subject: 'Temat', body: 'Treść', openMail: 'Otwórz w poczcie',
       reviewNote: 'Sprawdź tekst przed wysłaniem. Napisał go darmowy asystent AI.',
+      autoTitle: 'Automatycznie upominaj się o przeterminowane faktury', autoHint: 'Nokfi wysyła klientowi przypomnienie 7 dni po terminie (uprzejme), po 30 (stanowcze) i po 60 (formalne), w twoim imieniu, a odpowiedzi trafiają na twój e-mail. Bez terminu liczy się 30 dni od wystawienia. Tylko faktury z e-mailem klienta.',
+      autoSent: 'Wysłano przypomnienie {n} z 3', autoNone: 'Brak przypomnień', addEmail: 'Dodaj e-mail klienta, aby się upominać', addEmailTitle: 'E-mail: {name}', addEmailNote: 'Przypomnienia wychodzą z nazwą twojej firmy, a odpowiedzi trafiają na twój e-mail.',
       collectedToast: 'Faktura oznaczona jako pobrana', emptyTitle: 'Nikt nie jest ci nic winien', emptyDesc: 'Tu zobaczysz wystawione faktury, które nie zostały jeszcze opłacone.'
     },
     leaks: {

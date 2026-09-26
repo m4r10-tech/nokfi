@@ -25,6 +25,7 @@ const express = require('express');
 const { requireLicense } = require('../middleware/requireLicense');
 const { getCompanyProfile, getLatestAnalysisOfKind, audit } = require('../db/database');
 const F = require('../db/finance');
+const { sentStages } = require('../services/collections');
 const { taxSummary, receivables, leaks, forecast, quarterOf } = require('../utils/finance');
 const { deadlinesFor, upcoming, iso } = require('../utils/fiscalCalendar');
 const { listActions, actionStats } = require('../db/actions');
@@ -110,7 +111,11 @@ finance.put('/reserve', requireLicense, (req, res) => {
 
 /* ── V4: cobros ── */
 finance.get('/receivables', requireLicense, (req, res) => {
-  res.json(receivables(F.allEntries(req.license.id)));
+  const out = receivables(F.allEntries(req.license.id));
+  // Recordatorios automáticos ya enviados (etapa 1-3) por factura.
+  const sent = sentStages(req.license.id);
+  for (const p of out.pending) p.auto_stage = sent[p.id] || 0;
+  res.json(out);
 });
 
 const TONES = {

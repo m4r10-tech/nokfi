@@ -1397,6 +1397,8 @@ function getCompanyProfile(license_id) {
     tax_id: row.tax_id || '',
     lang: row.lang || '',
     fiscal_reminders: !!row.fiscal_reminders,
+    monthly_summary: row.monthly_summary == null ? true : !!row.monthly_summary,
+    auto_collections: !!row.auto_collections,
     cash_balance: row.cash_balance == null ? null : Number(row.cash_balance),
     cash_balance_date: row.cash_balance_date || null,
     cash_alert_threshold: Number(row.cash_alert_threshold) || 0,
@@ -1433,6 +1435,8 @@ function upsertCompanyProfile(license_id, partial) {
     tax_id:       pick('tax_id', ''),
     lang:         pick('lang', ''),
     fiscal_reminders: !!pick('fiscal_reminders', false),
+    monthly_summary: !!pick('monthly_summary', true),
+    auto_collections: !!pick('auto_collections', false),
     cash_balance: pick('cash_balance', null),
     cash_balance_date: pick('cash_balance_date', null),
     cash_alert_threshold: Number(pick('cash_alert_threshold', 0)) || 0
@@ -1441,9 +1445,9 @@ function upsertCompanyProfile(license_id, partial) {
     INSERT INTO company_profiles
       (license_id, company_name, sector, size, main_expenses,
        onboarding_completed, welcome_card_dismissed,
-       legal_form, tax_id, lang, fiscal_reminders, cash_balance, cash_balance_date, cash_alert_threshold,
+       legal_form, tax_id, lang, fiscal_reminders, monthly_summary, auto_collections, cash_balance, cash_balance_date, cash_alert_threshold,
        updated_at)
-    VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, datetime('now'))
+    VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, datetime('now'))
     ON CONFLICT(license_id) DO UPDATE SET
       company_name          = excluded.company_name,
       sector                = excluded.sector,
@@ -1455,6 +1459,8 @@ function upsertCompanyProfile(license_id, partial) {
       tax_id                = excluded.tax_id,
       lang                  = excluded.lang,
       fiscal_reminders      = excluded.fiscal_reminders,
+      monthly_summary       = excluded.monthly_summary,
+      auto_collections      = excluded.auto_collections,
       cash_balance          = excluded.cash_balance,
       cash_balance_date     = excluded.cash_balance_date,
       cash_alert_threshold  = excluded.cash_alert_threshold,
@@ -1466,6 +1472,8 @@ function upsertCompanyProfile(license_id, partial) {
     merged.welcome_card_dismissed ? 1 : 0,
     merged.legal_form, merged.tax_id, merged.lang,
     merged.fiscal_reminders ? 1 : 0,
+    merged.monthly_summary ? 1 : 0,
+    merged.auto_collections ? 1 : 0,
     merged.cash_balance, merged.cash_balance_date, merged.cash_alert_threshold
   );
   return getCompanyProfile(license_id);

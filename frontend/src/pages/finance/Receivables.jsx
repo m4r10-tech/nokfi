@@ -1,5 +1,6 @@
 import { useState, useEffect, useCallback } from 'react';
-import { HandCoins, Mail, Check, Loader2, Copy } from 'lucide-react';
+import { useOutletContext } from 'react-router-dom';
+import { HandCoins, Mail, Check, Loader2, Copy, BellRing, AtSign } from 'lucide-react';
 import { financeApi, ledgerApi } from '../../middleware/api';
 import { apiErrorMessage, isConnectivityError } from '../../middleware/errors';
 import { useLang } from '../../context/LangContext';
@@ -16,15 +17,20 @@ import { eur, isoDate } from '../../utils/money';
  * de reclamación redactado por la IA (tono: amable → firme → formal), listo
  * para copiar o abrir en el correo. El email lo genera el asistente gratuito
  * (no gasta cuota de análisis).
+ *
+ * Reclamación automática (opcional): con el email del cliente, Nokfi envía
+ * recordatorios fijos a los 7, 30 y 60 días del vencimiento (services/collections.js).
  */
 const LEVEL_TONE = { ok: 'muted', medium: 'warning', high: 'negative', critical: 'negative' };
 
 export default function Receivables() {
   const { t, lang } = useLang();
   const toast = useToast();
+  const { profile, updateProfile } = useOutletContext();
   const [data, setData] = useState(null);
   const [failure, setFailure] = useState(null);
   const [emailFor, setEmailFor] = useState(null);
+  const [addressFor, setAddressFor] = useState(null);
 
   const load = useCallback(async () => {
     setFailure(null);
@@ -49,6 +55,14 @@ export default function Receivables() {
         <Kpi className="col-span-2 lg:col-span-1" label={t('finance.receivables.avgDays')} value={data.avg_collection_days == null ? '—' : t('finance.days', { n: data.avg_collection_days })} />
       </div>
 
+      <label className="card p-4 flex items-start gap-3 cursor-pointer">
+        <input type="checkbox" checked={!!profile.autoCollections} onChange={(e) => updateProfile({ autoCollections: e.target.checked })} className="w-4 h-4 mt-0.5" />
+        <span className="min-w-0">
+          <span className="text-sm font-medium inline-flex items-center gap-1.5" style={{ color: 'var(--text-primary)' }}><BellRing size={14} /> {t('finance.receivables.autoTitle')}</span>
+          <span className="block text-xs mt-0.5 leading-relaxed" style={{ color: 'var(--text-muted)' }}>{t('finance.receivables.autoHint')}</span>
+        </span>
+      </label>
+
       {data.pending.length === 0 ? (
         <EmptyState icon={HandCoins} title={t('finance.receivables.emptyTitle')} description={t('finance.receivables.emptyDesc')} />
       ) : (
@@ -62,6 +76,15 @@ export default function Receivables() {
                     {p.invoice_number ? `${p.invoice_number} · ` : ''}{isoDate(p.invoice_date, lang)}
                     {p.client_avg_days != null && ` · ${t('finance.receivables.clientAvg').replace('{n}', p.client_avg_days)}`}
                   </p>
+                  {profile.autoCollections && (p.party_email ? (
+                    <p className="text-xs truncate" style={{ color: 'var(--text-muted)' }}>
+                      {p.party_email} · {p.auto_stage ? t('finance.receivables.autoSent', { n: p.auto_stage }) : t('finance.receivables.autoNone')}
+                    </p>
+                  ) : (
+                    <button onClick={() => setAddressFor(p)} className="text-xs inline-flex items-center gap-1 underline" style={{ color: 'var(--warning)' }}>
+                      <AtSign size={12} /> {t('finance.receivables.addEmail')}
+                    </button>
+                  ))}
                 </div>
                 <div className="flex items-center gap-2 flex-wrap">
                   <Badge tone={LEVEL_TONE[p.level]}>{t('finance.receivables.age', { n: p.days_outstanding })}</Badge>
@@ -76,6 +99,7 @@ export default function Receivables() {
       )}
 
       {emailFor && <ClaimEmail item={emailFor} onClose={() => setEmailFor(null)} />}
+      {addressFor && <ClientEmail item={addressFor} onClose={() => setAddressFor(null)} onSaved={() => { setAddressFor(null); load(); }} />}
     </div>
   );
 }
@@ -99,7 +123,7 @@ function ClaimEmail({ item, onClose }) {
   const copy = async () => {
     try { await navigator.clipboard.writeText(`${draft.subject}\n\n${draft.body}`); toast.success(t('common.copied')); } catch { /* sin portapapeles */ }
   };
-  const mailto = draft ? `mailto:?subject=${encodeURIComponent(draft.subject)}&body=${encodeURIComponent(draft.body)}` : '#';
+  const mailto = draft ? `mailto:${encodeURIComponent(item.party_email || '')}?subject=${encodeURIComponent(draft.subject)}&body=${encodeURIComponent(draft.body)}` : '#';
 
   return (
     <Modal title={t('finance.receivables.claimTitle').replace('{name}', item.party_name || '')} onClose={onClose} wide
@@ -123,6 +147,40 @@ function ClaimEmail({ item, onClose }) {
           </>
         )}
       </div>
+    </Modal>
+  );
+}
+
+function ClientEmail({ item, onClose, onSaved }) {
+  const { t } = useLang();
+  const [email, setEmail] = useState('');
+  const [saving, setSaving] = useState(false);
+  const [error, setError] = useState(null);
+  const valid = /^[^\s@]+@[^\s@]+\.[a-z]{2,}$/i.test(email.trim());
+
+  const save = async (ev) => {
+    ev.preventDefault();
+    if (!valid) return;
+    setSaving(true); setError(null);
+    const res = await ledgerApi.update(item.id, { party_email: email.trim() });
+    setSaving(false);
+    if (res.ok) onSaved(); else setError(apiErrorMessage(t, res));
+  };
+
+  return (
+    <Modal title={t('finance.receivables.addEmailTitle', { name: item.party_name || item.party_nif || '' })} onClose={onClose}
+      footer={<>
+        <button type="button" onClick={onClose} className="btn btn-secondary">{t('common.cancel')}</button>
+        <button type="submit" form="client-email-form" disabled={!valid || saving} className="btn btn-primary">
+          {saving && <Loader2 size={15} className="animate-spin" />} {t('common.save')}
+        </button>
+      </>}>
+      <form id="client-email-form" onSubmit={save} className="flex flex-col gap-2">
+        <input type="email" autoFocus value={email} onChange={(e) => setEmail(e.target.value)} className="input" maxLength={160}
+          placeholder={t('finance.clientEmailHint')} aria-label={t('finance.clientEmail')} />
+        <p className="text-xs" style={{ color: 'var(--text-muted)' }}>{t('finance.receivables.addEmailNote')}</p>
+        {error && <ErrorBox>{error}</ErrorBox>}
+      </form>
     </Modal>
   );
 }

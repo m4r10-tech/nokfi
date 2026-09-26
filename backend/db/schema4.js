@@ -126,6 +126,12 @@ function runSession4Schema(db) {
   ensureColumn(db, 'company_profiles', 'lang', "TEXT NOT NULL DEFAULT ''");
   ensureColumn(db, 'company_profiles', 'fiscal_reminders', 'INTEGER NOT NULL DEFAULT 0');
   ensureColumn(db, 'company_profiles', 'cash_balance', 'REAL DEFAULT NULL');
+  // Resumen mensual por email (activado por defecto, se desactiva en Configuración)
+  // y reclamación automática de cobros (desactivada hasta que el usuario la active).
+  ensureColumn(db, 'company_profiles', 'monthly_summary', 'INTEGER NOT NULL DEFAULT 1');
+  ensureColumn(db, 'company_profiles', 'auto_collections', 'INTEGER NOT NULL DEFAULT 0');
+  // Email del cliente para la reclamación automática de cobros.
+  ensureColumn(db, 'ledger_entries', 'party_email', "TEXT NOT NULL DEFAULT ''");
   ensureColumn(db, 'company_profiles', 'cash_balance_date', 'TEXT DEFAULT NULL');
   ensureColumn(db, 'company_profiles', 'cash_alert_threshold', 'REAL NOT NULL DEFAULT 0');
 }

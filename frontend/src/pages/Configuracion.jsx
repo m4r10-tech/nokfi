@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react';
 import { useOutletContext, Link } from 'react-router-dom';
-import { Moon, Sun, LogOut, KeyRound, Copy, Eye, EyeOff, Loader2, CreditCard, Check, CloudOff, Code2, Trash2, Download, Lock, BellRing, LifeBuoy, ExternalLink } from 'lucide-react';
+import { Moon, Sun, LogOut, KeyRound, Copy, Eye, EyeOff, Loader2, CreditCard, Check, CloudOff, Code2, Trash2, Download, Lock, BellRing, LifeBuoy, ExternalLink, Mail } from 'lucide-react';
 import { SECTORS, SIZES } from '../components/OnboardingModal';
 import { LANGUAGES } from '../i18n/languages';
 import { Modal, ErrorBox } from '../components/ui';
@@ -70,6 +70,11 @@ export default function Configuracion() {
           <input type="checkbox" checked={!!profile.fiscalReminders} onChange={(e) => updateProfile({ fiscalReminders: e.target.checked })} className="w-4 h-4 mt-0.5" />
           <span><span className="font-medium inline-flex items-center gap-1.5"><BellRing size={14} /> {t('finance.calendar.remind')}</span>
             <span className="block text-xs mt-0.5" style={{ color: 'var(--text-muted)' }}>{t('finance.calendar.remindHint')}</span></span>
+        </label>
+        <label className="flex items-start gap-2.5 text-sm cursor-pointer" style={{ color: 'var(--text-primary)' }}>
+          <input type="checkbox" checked={profile.monthlySummary !== false} onChange={(e) => updateProfile({ monthlySummary: e.target.checked })} className="w-4 h-4 mt-0.5" />
+          <span><span className="font-medium inline-flex items-center gap-1.5"><Mail size={14} /> {t('config.monthlySummary')}</span>
+            <span className="block text-xs mt-0.5" style={{ color: 'var(--text-muted)' }}>{t('config.monthlySummaryHint')}</span></span>
         </label>
       </Section>
 

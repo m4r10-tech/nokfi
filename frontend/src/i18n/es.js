@@ -76,6 +76,7 @@ export default {
     portalError: 'No se pudo abrir el portal de gestión. Inténtalo de nuevo más tarde.',
     legalForm: 'Forma jurídica', legalAutonomo: 'Autónomo', legalSociedad: 'Sociedad',
     taxId: 'NIF / CIF', taxIdHint: 'Sirve para distinguir tus facturas emitidas de las recibidas al leerlas con IA.',
+    monthlySummary: 'Resumen mensual por email', monthlySummaryHint: 'El día 1 de cada mes: cómo cerró el mes, impuestos del trimestre, quién te debe y tu caja.',
     version: 'Versión',
     api: {
       title: 'API para automatizaciones', docs: 'Documentación',
@@ -473,6 +474,7 @@ export default {
     disclaimer: 'Estimaciones orientativas calculadas con los datos de tu libro. No son asesoramiento fiscal: confirma siempre con tu gestoría.',
     year: 'Año', quarter: 'Trimestre', fullYear: 'Año', type: 'Tipo', income: 'Ingreso', expense: 'Gasto', incomes: 'Ingresos', expenses: 'Gastos',
     date: 'Fecha', dueDate: 'Vencimiento', client: 'Cliente', supplier: 'Proveedor', party: 'Cliente / proveedor', nif: 'NIF',
+    clientEmail: 'Email del cliente', clientEmailHint: 'cliente@empresa.com (para recordatorios de cobro)',
     invoiceNumber: 'Nº factura', concept: 'Concepto', category: 'Categoría', base: 'Base', vatRate: 'IVA %', vat: 'IVA',
     irpfRate: 'IRPF %', irpf: 'Retención', total: 'Total', paidCol: 'Pagada/cobrada',
     categories: { sales: 'Ventas', services: 'Servicios profesionales', suppliers: 'Proveedores', rent: 'Alquiler', utilities: 'Suministros', staff: 'Personal', marketing: 'Marketing', tech: 'Tecnología', transport: 'Transporte', other: 'Otro' },
@@ -551,6 +553,8 @@ export default {
       claim: 'Reclamar', claimTitle: 'Email de reclamación · {name}', toneFriendly: 'Amable', toneFirm: 'Firme', toneFormal: 'Formal',
       writing: 'Redactando…', subject: 'Asunto', body: 'Mensaje', openMail: 'Abrir en el correo',
       reviewNote: 'Revisa el texto antes de enviarlo. Lo redacta el asistente de IA gratuito.',
+      autoTitle: 'Reclamar automáticamente las facturas vencidas', autoHint: 'Nokfi envía un recordatorio a tu cliente a los 7 días del vencimiento (amable), a los 30 (firme) y a los 60 (formal), en tu nombre y con respuesta directa a tu email. Si no hay vencimiento, se cuenta 30 días desde la emisión. Solo a facturas con email del cliente.',
+      autoSent: 'Recordatorio {n} de 3 enviado', autoNone: 'Aún sin recordatorios', addEmail: 'Añadir email del cliente para reclamar', addEmailTitle: 'Email de {name}', addEmailNote: 'Los recordatorios salen con el nombre de tu empresa y las respuestas llegan a tu email.',
       collectedToast: 'Factura marcada como cobrada', emptyTitle: 'Nadie te debe nada', emptyDesc: 'Aquí verás las facturas emitidas que aún no has cobrado.'
     },
     leaks: {

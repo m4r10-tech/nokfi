@@ -107,7 +107,7 @@ function receivables(entries, refDate = today()) {
     const age = daysBetween(e.invoice_date, refDate);
     const overdue = e.due_date ? daysBetween(e.due_date, refDate) : age - 30;
     return {
-      id: e.id, party_name: e.party_name, party_nif: e.party_nif, invoice_number: e.invoice_number,
+      id: e.id, party_name: e.party_name, party_nif: e.party_nif, party_email: e.party_email || '', invoice_number: e.invoice_number,
       invoice_date: e.invoice_date, due_date: e.due_date, total: r2(e.total),
       days_outstanding: age, days_overdue: Math.max(0, overdue),
       level: age > 90 ? 'critical' : age > 60 ? 'high' : age > 30 ? 'medium' : 'ok',

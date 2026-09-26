@@ -76,6 +76,7 @@ export default {
     portalError: 'Could not open the management portal. Please try again later.',
     legalForm: 'Legal form', legalAutonomo: 'Self-employed', legalSociedad: 'Company',
     taxId: 'Tax ID (NIF / CIF)', taxIdHint: 'Used to tell your issued invoices from the ones you receive when the AI reads them.',
+    monthlySummary: 'Monthly summary by email', monthlySummaryHint: 'On the 1st of each month: how the month closed, quarterly taxes, who owes you and your cash.',
     version: 'Version',
     api: {
       title: 'API for automations', docs: 'Documentation',
@@ -470,6 +471,7 @@ export default {
     disclaimer: 'Approximate estimates calculated from your ledger. This is not tax advice: always confirm with your accountant.',
     year: 'Year', quarter: 'Quarter', fullYear: 'Year', type: 'Type', income: 'Income', expense: 'Expense', incomes: 'Income', expenses: 'Expenses',
     date: 'Date', dueDate: 'Due date', client: 'Client', supplier: 'Supplier', party: 'Client / supplier', nif: 'Tax ID',
+    clientEmail: 'Client email', clientEmailHint: 'client@company.com (for payment reminders)',
     invoiceNumber: 'Invoice no.', concept: 'Description', category: 'Category', base: 'Net', vatRate: 'VAT %', vat: 'VAT',
     irpfRate: 'IRPF %', irpf: 'Withholding', total: 'Total', paidCol: 'Paid/collected',
     categories: { sales: 'Sales', services: 'Professional services', suppliers: 'Suppliers', rent: 'Rent', utilities: 'Utilities', staff: 'Staff', marketing: 'Marketing', tech: 'Technology', transport: 'Transport', other: 'Other' },
@@ -548,6 +550,8 @@ export default {
       claim: 'Chase', claimTitle: 'Payment reminder · {name}', toneFriendly: 'Friendly', toneFirm: 'Firm', toneFormal: 'Formal',
       writing: 'Writing…', subject: 'Subject', body: 'Message', openMail: 'Open in email',
       reviewNote: 'Check the text before sending it. It is written by the free AI assistant.',
+      autoTitle: 'Chase overdue invoices automatically', autoHint: 'Nokfi sends your client a reminder 7 days after the due date (friendly), at 30 (firm) and at 60 (formal), on your behalf and with replies going straight to your email. With no due date, 30 days from issue are assumed. Only invoices with a client email.',
+      autoSent: 'Reminder {n} of 3 sent', autoNone: 'No reminders yet', addEmail: 'Add the client email to chase it', addEmailTitle: 'Email for {name}', addEmailNote: 'Reminders are sent with your company name and replies go to your email.',
       collectedToast: 'Invoice marked as collected', emptyTitle: 'Nobody owes you anything', emptyDesc: 'Here you will see issued invoices you have not collected yet.'
     },
     leaks: {
