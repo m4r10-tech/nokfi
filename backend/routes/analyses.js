@@ -23,6 +23,7 @@ const express = require('express');
 const router = express.Router();
 const { requireLicense } = require('../middleware/requireLicense');
 const { listAnalyses, getAnalysis } = require('../db/database');
+const { listActionsForAnalysis } = require('../db/actions');
 
 router.get('/', requireLicense, (req, res) => {
   const rows = listAnalyses(req.license.id);
@@ -32,6 +33,7 @@ router.get('/', requireLicense, (req, res) => {
       kind: r.kind,
       title: r.title,
       prompt_chars: r.prompt_chars,
+      format: r.format,
       created_at: r.created_at
     }))
   });
@@ -46,11 +48,19 @@ router.get('/:id', requireLicense, (req, res) => {
   if (!analysis) {
     return res.status(404).json({ error: 'not_found', message: 'Análisis no encontrado.' });
   }
+  // Sesión 4 (F1): los análisis nuevos son JSON estructurado (`report`) con
+  // sus tareas (C2); los antiguos siguen devolviendo result_html.
+  const meta = analysis.meta || null;
   res.json({
     id: analysis.id,
     kind: analysis.kind,
     title: analysis.title,
+    format: analysis.format,
     result_html: analysis.result_html,
+    report: analysis.result_json || null,
+    health: meta?.health || null,
+    meta: meta ? { task: meta.task, module: meta.module, folder_name: meta.folder_name, file_count: meta.file_count, stats: meta.stats } : null,
+    actions: analysis.format === 'json' ? listActionsForAnalysis(req.license.id, analysis.id) : [],
     prompt_chars: analysis.prompt_chars,
     created_at: analysis.created_at
   });

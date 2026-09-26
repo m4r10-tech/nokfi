@@ -1,7 +1,7 @@
 /**
  * Fechas de la BD → UI. SQLite guarda created_at como 'YYYY-MM-DD HH:MM:SS'
  * en UTC (sin zona): se parsea como UTC y se muestra en la hora local del
- * usuario, con el locale del idioma de la app (es|en).
+ * usuario, con el locale del idioma de la app.
  */
 export function parseDbDate(s) {
   if (!s) return null;
@@ -9,7 +9,9 @@ export function parseDbDate(s) {
   return isNaN(d.getTime()) ? null : d;
 }
 
-export const localeOf = (lang) => (lang === 'en' ? 'en-GB' : 'es-ES');
+// Sesión 4: mapa idioma → locale (fechas, números, €) para los 6 idiomas.
+const LOCALES = { es: 'es-ES', en: 'en-GB', fr: 'fr-FR', it: 'it-IT', de: 'de-DE', pl: 'pl-PL' };
+export const localeOf = (lang) => LOCALES[lang] || 'es-ES';
 
 export function formatDate(s, lang, opts = { year: 'numeric', month: 'short', day: 'numeric' }) {
   const d = parseDbDate(s);

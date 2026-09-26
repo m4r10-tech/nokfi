@@ -266,6 +266,7 @@ function initDB() {
       runPaymentIntentRefMigration(db);
       runRecoveryPurposeMigration(db);
       hashTokensAtRest(db); // ⚠️ auditoría: hashear tokens planos preexistentes
+      require('./schema4').runSession4Schema(db); // sesión 4: IA estructurada, libro, API keys…
 
       console.log('✅  Base de datos inicializada en', DB_PATH);
       resolve(db);
@@ -1302,21 +1303,34 @@ function updateSubscription(id, {
  * historial PROPIO de cada licencia (requireLicense scopea todo por
  * req.license.id, no se puede escribir en el historial de otro).
  */
-function createAnalysis({ license_id, kind = 'analysis', title = 'Análisis', result_html, prompt_chars = 0 }) {
+function createAnalysis({ license_id, kind = 'analysis', title = 'Análisis', result_html = '', result_json = null, meta = null, prompt_chars = 0 }) {
   const db = getDB();
   const k = String(kind || 'analysis').slice(0, 40);
   const t = String(title || 'Análisis').slice(0, 120);
+  // Sesión 4 (F1): los análisis nuevos guardan la salida ESTRUCTURADA en
+  // result_json (result_html queda ''); los antiguos siguen en result_html.
   const info = db.prepare(`
-    INSERT INTO analyses (license_id, kind, title, result_html, prompt_chars)
-    VALUES (?, ?, ?, ?, ?)
-  `).run(license_id, k, t, result_html, Number(prompt_chars) || 0);
+    INSERT INTO analyses (license_id, kind, title, result_html, result_json, meta_json, prompt_chars)
+    VALUES (?, ?, ?, ?, ?, ?, ?)
+  `).run(
+    license_id, k, t, result_html || '',
+    result_json ? JSON.stringify(result_json) : null,
+    meta ? JSON.stringify(meta) : null,
+    Number(prompt_chars) || 0
+  );
   return Number(info.lastInsertRowid);
+}
+
+function parseJsonColumn(value) {
+  if (!value) return null;
+  try { return JSON.parse(value); } catch { return null; }
 }
 
 /** Lista LIGERA del historial de una licencia (sin result_html), más recientes primero. */
 function listAnalyses(license_id, limit = 50) {
   return getDB().prepare(`
-    SELECT id, kind, title, prompt_chars, created_at
+    SELECT id, kind, title, prompt_chars, created_at,
+           CASE WHEN result_json IS NOT NULL THEN 'json' ELSE 'html' END AS format
     FROM analyses
     WHERE license_id = ?
     ORDER BY created_at DESC, id DESC
@@ -1324,13 +1338,31 @@ function listAnalyses(license_id, limit = 50) {
   `).all(license_id, limit);
 }
 
-/** Devuelve un análisis completo (con result_html), scopeado por license_id → null si no es tuyo. */
+/** Devuelve un análisis completo, scopeado por license_id → null/undefined si no es tuyo. */
 function getAnalysis(license_id, id) {
-  return getDB().prepare(`
-    SELECT id, kind, title, result_html, prompt_chars, created_at
+  const row = getDB().prepare(`
+    SELECT id, kind, title, result_html, result_json, meta_json, prompt_chars, created_at
     FROM analyses
     WHERE id = ? AND license_id = ?
   `).get(id, license_id);
+  if (!row) return row;
+  return {
+    ...row,
+    result_json: parseJsonColumn(row.result_json),
+    meta: parseJsonColumn(row.meta_json),
+    format: row.result_json ? 'json' : 'html'
+  };
+}
+
+/** Último análisis de un tipo con sus metadatos (C1: última nota de salud). */
+function getLatestAnalysisOfKind(license_id, kind) {
+  const row = getDB().prepare(`
+    SELECT id, title, meta_json, created_at FROM analyses
+    WHERE license_id = ? AND kind = ? AND meta_json IS NOT NULL
+    ORDER BY created_at DESC, id DESC LIMIT 1
+  `).get(license_id, kind);
+  if (!row) return null;
+  return { id: row.id, title: row.title, created_at: row.created_at, meta: parseJsonColumn(row.meta_json) };
 }
 
 /* ── Perfil de empresa (G-a — onboarding, sección 14) ── */
@@ -1346,8 +1378,7 @@ function getAnalysis(license_id, id) {
  */
 function getCompanyProfile(license_id) {
   const row = getDB().prepare(`
-    SELECT license_id, company_name, sector, size, main_expenses,
-           onboarding_completed, welcome_card_dismissed, updated_at
+    SELECT *
     FROM company_profiles
     WHERE license_id = ?
   `).get(license_id);
@@ -1362,6 +1393,13 @@ function getCompanyProfile(license_id) {
     main_expenses: expenses,
     onboarding_completed: !!row.onboarding_completed,
     welcome_card_dismissed: !!row.welcome_card_dismissed,
+    legal_form: row.legal_form || '',
+    tax_id: row.tax_id || '',
+    lang: row.lang || '',
+    fiscal_reminders: !!row.fiscal_reminders,
+    cash_balance: row.cash_balance == null ? null : Number(row.cash_balance),
+    cash_balance_date: row.cash_balance_date || null,
+    cash_alert_threshold: Number(row.cash_alert_threshold) || 0,
     updated_at: row.updated_at
   };
 }
@@ -1383,21 +1421,29 @@ function getCompanyProfile(license_id) {
 function upsertCompanyProfile(license_id, partial) {
   const db = getDB();
   const current = getCompanyProfile(license_id) || {};
+  const pick = (k, dflt) => (partial[k] !== undefined ? partial[k] : (current[k] ?? dflt));
   const merged = {
-    company_name: partial.company_name !== undefined ? partial.company_name : (current.company_name ?? ''),
-    sector:       partial.sector       !== undefined ? partial.sector       : (current.sector ?? ''),
-    size:         partial.size         !== undefined ? partial.size         : (current.size ?? ''),
+    company_name: pick('company_name', ''),
+    sector:       pick('sector', ''),
+    size:         pick('size', ''),
     main_expenses: Array.isArray(partial.main_expenses) ? partial.main_expenses : (current.main_expenses || []),
-    onboarding_completed:
-      partial.onboarding_completed    !== undefined ? !!partial.onboarding_completed    : (current.onboarding_completed ?? false),
-    welcome_card_dismissed:
-      partial.welcome_card_dismissed   !== undefined ? !!partial.welcome_card_dismissed : (current.welcome_card_dismissed ?? false)
+    onboarding_completed:   !!pick('onboarding_completed', false),
+    welcome_card_dismissed: !!pick('welcome_card_dismissed', false),
+    legal_form:   pick('legal_form', ''),
+    tax_id:       pick('tax_id', ''),
+    lang:         pick('lang', ''),
+    fiscal_reminders: !!pick('fiscal_reminders', false),
+    cash_balance: pick('cash_balance', null),
+    cash_balance_date: pick('cash_balance_date', null),
+    cash_alert_threshold: Number(pick('cash_alert_threshold', 0)) || 0
   };
   db.prepare(`
     INSERT INTO company_profiles
       (license_id, company_name, sector, size, main_expenses,
-       onboarding_completed, welcome_card_dismissed, updated_at)
-    VALUES (?, ?, ?, ?, ?, ?, ?, datetime('now'))
+       onboarding_completed, welcome_card_dismissed,
+       legal_form, tax_id, lang, fiscal_reminders, cash_balance, cash_balance_date, cash_alert_threshold,
+       updated_at)
+    VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, datetime('now'))
     ON CONFLICT(license_id) DO UPDATE SET
       company_name          = excluded.company_name,
       sector                = excluded.sector,
@@ -1405,12 +1451,22 @@ function upsertCompanyProfile(license_id, partial) {
       main_expenses         = excluded.main_expenses,
       onboarding_completed  = excluded.onboarding_completed,
       welcome_card_dismissed = excluded.welcome_card_dismissed,
+      legal_form            = excluded.legal_form,
+      tax_id                = excluded.tax_id,
+      lang                  = excluded.lang,
+      fiscal_reminders      = excluded.fiscal_reminders,
+      cash_balance          = excluded.cash_balance,
+      cash_balance_date     = excluded.cash_balance_date,
+      cash_alert_threshold  = excluded.cash_alert_threshold,
       updated_at            = datetime('now')
   `).run(
     license_id, merged.company_name, merged.sector, merged.size,
     JSON.stringify(merged.main_expenses),
     merged.onboarding_completed ? 1 : 0,
-    merged.welcome_card_dismissed ? 1 : 0
+    merged.welcome_card_dismissed ? 1 : 0,
+    merged.legal_form, merged.tax_id, merged.lang,
+    merged.fiscal_reminders ? 1 : 0,
+    merged.cash_balance, merged.cash_balance_date, merged.cash_alert_threshold
   );
   return getCompanyProfile(license_id);
 }
@@ -1461,6 +1517,7 @@ module.exports = {
   createAnalysis,
   listAnalyses,
   getAnalysis,
+  getLatestAnalysisOfKind,
   getCompanyProfile,
   upsertCompanyProfile,
   audit,

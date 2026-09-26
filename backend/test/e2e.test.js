@@ -759,6 +759,11 @@ async function main() {
       return !!r.data.key && r.data.plan === 'pro';
     }
   );
+  let tokenB = null;
+  await checkAsync('login de licencia B → 200 (sesión 4: scoping de tareas y jobs)',
+    post('/api/auth/login', { email: 'historial-b@nokfi.local', license_key: licenseKeyB, password: 'OtherP4ss!' }),
+    r => { if (r.status === 200) tokenB = r.data.token; return r.status === 200; }
+  );
 
   // Análisis de A (2) y de B (1) — vía DB directa, aislando de Gemini.
   const idA1 = createAnalysis({ license_id: licenseIdA, kind: 'excel', title: 'Stock / Almacén', result_html: '<h3>Resumen A1</h3>', prompt_chars: 123 });
@@ -824,36 +829,153 @@ async function main() {
   //    análisis generado queda visible en el historial de SU licencia.
   const savedFetch = global.fetch;
   const origGeminiKey = process.env.GEMINI_API_KEY;
-  const fakeGeminiHtml = '<h3>Diagnóstico fake</h3><p>Recomendación de prueba.</p>';
-  const promptText = 'Analiza este negocio de prueba.';
-  global.fetch = async () => ({
-    ok: true, status: 200,
-    json: async () => ({ candidates: [{ content: { parts: [{ text: fakeGeminiHtml }] } }] }),
-    text: async () => ''
-  });
+  // Sesión 4 (F1/F2): la IA devuelve JSON estructurado (responseSchema) y el
+  // backend arma el prompt. El stub captura el cuerpo enviado a Gemini para
+  // comprobar que lleva systemInstruction + responseSchema.
+  const fakeReport = {
+    summary: 'Negocio estable con margen mejorable.',
+    key_figures: [{ label: 'Total ventas', value: '12.000 €' }],
+    strengths: ['Buen control de stock'],
+    priorities: [
+      { title: 'Cobros lentos', detail: 'Hay facturas vencidas.', severity: 'medium' },
+      { title: 'Sin fondo de reserva', detail: 'Riesgo de caja.', severity: 'high' }
+    ],
+    action_plan: [{ title: 'Reclamar facturas vencidas', detail: 'Empieza por las de más de 60 días.', timeframe: 'Esta semana' }, { title: 'Abrir cuenta de reserva' }],
+    glossary: [{ term: 'Cash flow', definition: 'Dinero que entra y sale.' }]
+  };
+  let lastGeminiBody = null;
+  global.fetch = async (_url, opts) => {
+    try { lastGeminiBody = JSON.parse(opts.body); } catch { lastGeminiBody = null; }
+    return {
+      ok: true, status: 200,
+      json: async () => ({ candidates: [{ content: { parts: [{ text: JSON.stringify(fakeReport) }] } }] }),
+      text: async () => ''
+    };
+  };
   process.env.GEMINI_API_KEY = 'fake-key-for-test';
 
-  await checkAsync('POST /api/proxy/ai (stub Gemini) → 200 + texto de la IA',
-    post('/api/proxy/ai', { prompt: promptText, max_tokens: 100, kind: 'cuestionario', title: 'Diagnóstico de prueba' }, tokenA),
-    r => r.status === 200 && r.data.text === fakeGeminiHtml
+  await checkAsync('F2: POST /api/proxy/ai (prompt libre) → 410 client_outdated (ya no es un "Gemini gratis")',
+    post('/api/proxy/ai', { prompt: 'Escribe un poema', max_tokens: 100 }, tokenA),
+    r => r.status === 410 && r.data.error === 'client_outdated'
+  );
+
+  const excelInput = { module: 'ventas', context: 'enero', files: [{ name: 'ventas.xlsx', rows: [{ producto: 'A', unidades: 10 }, { producto: 'B', unidades: 3 }] }] };
+  await checkAsync('F1: POST /api/ai/analyze excel (stub Gemini) → 200 + informe estructurado normalizado',
+    post('/api/ai/analyze', { task: 'excel', input: excelInput, lang: 'en', title: 'Ventas enero' }, tokenA),
+    r => r.status === 200 && r.data.format === 'json' && r.data.report.summary === fakeReport.summary
+      && r.data.report.priorities[0].severity === 'high' // ordenadas por gravedad
+      && r.data.actions.length === 2 && typeof r.data.analysis_id === 'number'
+  );
+  check('F2: el backend manda systemInstruction (con idioma) + responseSchema JSON a Gemini',
+    () => !!lastGeminiBody?.systemInstruction?.parts?.[0]?.text?.includes('English')
+      && lastGeminiBody.generationConfig.responseMimeType === 'application/json'
+      && !!lastGeminiBody.generationConfig.responseSchema
+  );
+  await checkAsync('F2: tarea desconocida → 400 invalid_task',
+    post('/api/ai/analyze', { task: 'poema', input: {} }, tokenA),
+    r => r.status === 400 && r.data.error === 'invalid_task'
+  );
+  await checkAsync('F2: módulo Excel desconocido → 400 invalid_input',
+    post('/api/ai/analyze', { task: 'excel', input: { module: 'otro', files: excelInput.files } }, tokenA),
+    r => r.status === 400 && r.data.error === 'invalid_input'
   );
 
   const capturedId = listAnalyses(licenseIdA)[0].id; // más recientes primero → recién capturado
-  await checkAsync('GET /api/analyses incluye el análisis capturado (kind/title/prompt_chars correctos, lista ligera)',
+  await checkAsync('GET /api/analyses incluye el análisis capturado (kind/title/format json, lista ligera)',
     get('/api/analyses', tokenA),
     r => {
       if (r.status !== 200 || !Array.isArray(r.data.analyses)) return false;
       const last = r.data.analyses[0];
-      return last.id === capturedId && last.kind === 'cuestionario'
-        && last.title === 'Diagnóstico de prueba' && last.prompt_chars === promptText.length
-        && !('result_html' in last); // lista ligera: sin result_html
+      return last.id === capturedId && last.kind === 'excel' && last.title === 'Ventas enero'
+        && last.format === 'json' && last.prompt_chars > 0 && !('result_html' in last);
     }
   );
-
-  await checkAsync('GET /api/analyses/:id del capturado → 200 + result_html persistido',
+  let firstActionId = null;
+  await checkAsync('GET /api/analyses/:id del capturado → 200 + report + actions (C2)',
     get(`/api/analyses/${capturedId}`, tokenA),
-    r => r.status === 200 && r.data.result_html === fakeGeminiHtml && r.data.id === capturedId
+    r => {
+      if (r.status !== 200) return false;
+      firstActionId = r.data.actions?.[0]?.id;
+      return r.data.report?.summary === fakeReport.summary && r.data.actions.length === 2 && r.data.actions[0].done === false;
+    }
   );
+  await checkAsync('C2: PATCH /api/actions/:id {done:true} → 200 + stats',
+    call('PATCH', `/api/actions/${firstActionId}`, { body: { done: true }, auth: tokenA }),
+    r => r.status === 200 && r.data.stats.done === 1
+  );
+  await checkAsync('C2: PATCH de una tarea ajena → 404 (scoping)',
+    call('PATCH', `/api/actions/${firstActionId}`, { body: { done: false }, auth: tokenB }),
+    r => r.status === 404
+  );
+  await checkAsync('C2: GET /api/actions → pendientes primero',
+    get('/api/actions', tokenA),
+    r => r.status === 200 && r.data.actions[0].done === false && r.data.stats.total === 2
+  );
+
+  // C1 — nota de salud con reglas fijas (no la IA)
+  {
+    const { computeHealth } = require('../utils/healthScore');
+    const allYes = {}; const allNo = {};
+    for (const id of Object.keys(require('../utils/healthScore').WEIGHTS)) { allYes[id] = true; allNo[id] = false; }
+    check('C1: todo sí → 100; todo no → 0; desglose ordenado por puntos',
+      () => computeHealth(allYes).score === 100 && computeHealth(allNo).score === 0
+        && computeHealth(allNo).lost[0].points >= computeHealth(allNo).lost[29].points);
+    const half = { ...allNo, flujo_caja: true, fondo_reserva: true, control_cobros: true };
+    await checkAsync('C1: cuestionario → informe + health (score calculado en backend)',
+      post('/api/ai/analyze', { task: 'cuestionario', input: { answers: half }, lang: 'es' }, tokenA),
+      r => r.status === 200 && r.data.health && r.data.health.score === computeHealth(half).score && r.data.kind === 'cuestionario'
+    );
+    await checkAsync('C1: cuestionario con <10 respuestas → 400',
+      post('/api/ai/analyze', { task: 'cuestionario', input: { answers: { facturacion: true } } }, tokenA),
+      r => r.status === 400
+    );
+  }
+
+  // F3 — carpeta por lotes: 1 petición = 1 análisis aunque haya varios lotes
+  {
+    const { countAiAnalysesToday } = require('../db/database');
+    const before = countAiAnalysesToday(licenseIdB);
+    let job = null;
+    await checkAsync('F3: folder_map lote 1 (total_batches 2) → notas + job',
+      post('/api/ai/analyze', { task: 'folder_map', input: { instruction: 'resume', total_batches: 2, files: [{ name: 'f1.pdf', text: 'Factura 1 importe 100' }] } }, tokenB),
+      r => { job = r.data.job; return r.status === 200 && typeof r.data.notes === 'string' && !!job; }
+    );
+    await checkAsync('F3: folder_map lote 2 con job → 200 (no gasta cuota)',
+      post('/api/ai/analyze', { task: 'folder_map', job, input: { instruction: 'resume', files: [{ name: 'f2.pdf', text: 'Factura 2 importe 50' }] } }, tokenB),
+      r => r.status === 200
+    );
+    await checkAsync('F3: folder (resumen global) con job → informe',
+      post('/api/ai/analyze', { task: 'folder', job, title: 'facturas2026', input: { instruction: 'resume', folder_name: 'facturas2026', notes: ['a', 'b'], file_count: 2 } }, tokenB),
+      r => r.status === 200 && r.data.kind === 'folder' && r.data.title === 'facturas2026'
+    );
+    check('F3: los 3 pasos del trabajo consumen 1 solo análisis', () => countAiAnalysesToday(licenseIdB) === before + 1);
+    await checkAsync('F3: job de otra licencia → 409 invalid_job',
+      post('/api/ai/analyze', { task: 'folder', job, input: { notes: ['x'], file_count: 1 } }, tokenA),
+      r => r.status === 409 && r.data.error === 'invalid_job'
+    );
+  }
+
+  // V1 — extracción de facturas: normalización y validación base+IVA−IRPF=total
+  {
+    global.fetch = async () => ({
+      ok: true, status: 200,
+      json: async () => ({ candidates: [{ content: { parts: [{ text: JSON.stringify({ invoices: [
+        { file_name: 'a.pdf', is_invoice: true, issuer_name: 'Luz SA', issuer_nif: 'b-12345678', invoice_date: '2026-07-03', base: 100, vat_rate: 21, vat_amount: 21, irpf_amount: 0, total: 121 },
+        { file_name: 'b.pdf', is_invoice: true, issuer_name: 'Yo', invoice_date: '03/07/2026', base: 100, vat_amount: 21, irpf_rate: 15, irpf_amount: 15, total: 200 }
+      ] }) }] } }] }),
+      text: async () => ''
+    });
+    await checkAsync('V1: invoices → datos normalizados (NIF, fecha ISO) y check_ok por factura',
+      post('/api/ai/analyze', { task: 'invoices', input: { files: [{ name: 'a.pdf', text: 'Factura luz' }, { name: 'b.pdf', text: 'Factura mía' }] } }, tokenA),
+      r => r.status === 200 && r.data.invoices.length === 2
+        && r.data.invoices[0].issuer_nif === 'B12345678' && r.data.invoices[0].check_ok === true
+        && r.data.invoices[1].invoice_date === '' && r.data.invoices[1].check_ok === false
+    );
+    await checkAsync('V1: invoices con mime no soportado → 400',
+      post('/api/ai/analyze', { task: 'invoices', input: { files: [{ name: 'x.exe', mime: 'application/x-msdownload', data: 'AAAA' }] } }, tokenA),
+      r => r.status === 400
+    );
+  }
 
   global.fetch = savedFetch;
   if (origGeminiKey === undefined) delete process.env.GEMINI_API_KEY; else process.env.GEMINI_API_KEY = origGeminiKey;
@@ -880,10 +1002,10 @@ async function main() {
     // llamadas irían a Gemini real con la key falsa → 400.
     global.fetch = async () => ({
       ok: true, status: 200,
-      json: async () => ({ candidates: [{ content: { parts: [{ text: '<p>ok</p>' }] } }] }),
+      json: async () => ({ candidates: [{ content: { parts: [{ text: JSON.stringify({ summary: 'ok', priorities: [], action_plan: [] }) }] } }] }),
       text: async () => ''
     });
-    const quotaPrompt = { prompt: 'Análisis para la prueba de cuota.', max_tokens: 100 };
+    const quotaPrompt = { task: 'excel', input: { module: 'caja', files: [{ name: 'caja.csv', rows: [{ dia: 1, saldo: 100 }] }] } };
     const quotaEmail = 'quota-h@nokfi.local', quotaPass = 'QuotaPass12!';
     let quotaKey = null, quotaId = null, quotaToken = null;
 
@@ -904,14 +1026,14 @@ async function main() {
     //     serializa, así el orden es determinista). Cada 200 reserva y CONSERVA su slot.
     let tenOk = true;
     for (let i = 0; i < 10; i++) {
-      const r = await post('/api/proxy/ai', quotaPrompt, quotaToken);
+      const r = await post('/api/ai/analyze', quotaPrompt, quotaToken);
       if (r.status !== 200) tenOk = false;
     }
     check('Deuda H: 10 análisis mini (cuota 10) → los 10 fueron 200', () => tenOk);
     check('Deuda H: countAiAnalysesToday(id) == 10 tras los 10 usos', () => countAiAnalysesToday(quotaId) === 10);
 
     await checkAsync('Deuda H: 11.ª petición (cuota 10) → 429 + mensaje "Has agotado tu cuota diaria"',
-      post('/api/proxy/ai', quotaPrompt, quotaToken),
+      post('/api/ai/analyze', quotaPrompt, quotaToken),
       r => r.status === 429
         && r.data.error === 'license_daily_limit_reached'
         && typeof r.data.message === 'string'
@@ -935,7 +1057,7 @@ async function main() {
     // error de proveedor (500) → 502 ai_provider_error y slot devuelto
     global.fetch = async () => ({ ok: false, status: 500, json: async () => ({}), text: async () => 'boom' });
     await checkAsync('Deuda H: Gemini falla (500) → 502 ai_provider_error + mensaje',
-      post('/api/proxy/ai', quotaPrompt, rToken),
+      post('/api/ai/analyze', quotaPrompt, rToken),
       r => r.status === 502 && r.data.error === 'ai_provider_error' && typeof r.data.message === 'string' && r.data.message.length > 0
     );
     check('Deuda H: tras 502, countAiAnalysesToday(rId) == 0 (slot liberado, no cuenta)',
@@ -944,7 +1066,7 @@ async function main() {
     // cuota global del free tier agotada (429 de Gemini) → 503 ai_quota_exceeded y slot devuelto
     global.fetch = async () => ({ ok: false, status: 429, json: async () => ({}), text: async () => 'quota' });
     await checkAsync('Deuda H: Gemini 429 (cuota global) → 503 ai_quota_exceeded + mensaje',
-      post('/api/proxy/ai', quotaPrompt, rToken),
+      post('/api/ai/analyze', quotaPrompt, rToken),
       r => r.status === 503 && r.data.error === 'ai_quota_exceeded' && typeof r.data.message === 'string' && r.data.message.length > 0
     );
     check('Deuda H: tras 503, countAiAnalysesToday(rId) == 0 (slot liberado, no cuenta)',

@@ -9,6 +9,7 @@ import { parentOf } from '../components/navItems';
 import { useCompanyProfile } from '../hooks/useCompanyProfile';
 import { useLang } from '../context/LangContext';
 import { useToast } from '../context/ToastContext';
+import { ChatProvider } from '../context/ChatContext';
 
 const COLLAPSE_KEY = 'nokfi_sidebar_collapsed';
 
@@ -45,6 +46,7 @@ export default function DashboardLayout() {
   };
 
   return (
+    <ChatProvider>
     <div className="min-h-screen md:flex" style={{ background: 'var(--bg-base)' }}>
       <Sidebar collapsed={collapsed} onToggle={toggleCollapsed} companyName={profile.companyName} />
 
@@ -78,5 +80,6 @@ export default function DashboardLayout() {
         <OnboardingModal onComplete={completeOnboarding} />
       )}
     </div>
+    </ChatProvider>
   );
 }

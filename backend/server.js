@@ -127,7 +127,7 @@ function corsOriginValidator(origin, callback) {
 app.use(cors({
   origin: corsOriginValidator,
   credentials: false, // no usamos cookies de sesión — el token va en Authorization header, nunca ambient credentials
-  methods: ['GET', 'POST', 'PUT', 'DELETE'],
+  methods: ['GET', 'POST', 'PUT', 'PATCH', 'DELETE'],
   allowedHeaders: ['Content-Type', 'Authorization'],
 }));
 
@@ -163,7 +163,9 @@ app.use(morgan(process.env.NODE_ENV === 'production' ? 'combined' : 'dev'));
 // documentarlo — un payload de webhook legítimo nunca supera unos pocos KB).
 app.use('/api/webhooks/stripe', express.raw({ type: 'application/json', limit: '512kb' }));
 
-/* 3. JSON global para el resto */
+/* 3. JSON — /api/ai/ admite lotes de facturas en imagen (V1, base64 ya
+   comprimido en el navegador; Nginx corta en 10 MB). El resto, 2 MB. */
+app.use('/api/ai/', express.json({ limit: '9mb' }));
 app.use(express.json({ limit: '2mb' }));
 
 /* ════════════════════════════════════════════════════════════
@@ -186,9 +188,12 @@ const authLimiter = rateLimit({
   message: { error: 'rate_limited', message: 'Demasiados intentos. Espera 15 minutos.' }
 });
 
+// Sesión 4: 40/min en producción (una carpeta grande o un lote de facturas son
+// hasta 13 llamadas de UNA petición del usuario — la cuota diaria por licencia
+// sigue siendo el control de coste). Relajado fuera de producción (e2e).
 const aiLimiter = rateLimit({
   windowMs: 60 * 1000,
-  max: 20,
+  max: isProduction ? 40 : 1000,
   message: { error: 'rate_limited', message: 'Límite de análisis alcanzado. Espera un momento.' }
 });
 
@@ -217,6 +222,7 @@ const adminLimiter = rateLimit({
 
 app.use('/api/auth/', authLimiter);
 app.use('/api/proxy/', aiLimiter);
+app.use('/api/ai/', aiLimiter);
 app.use('/api/webhooks/', webhookLimiter);
 app.use('/api/admin/', adminLimiter);
 app.use('/api/', generalLimiter);
@@ -231,10 +237,15 @@ const analysesRoutes = require('./routes/analyses');
 const profileRoutes = require('./routes/profile');
 const paymentsRoutes = require('./routes/payments');
 const webhooksRoutes = require('./routes/webhooks');
+const { aiRouter, actionsRouter } = require('./routes/ai');
+const chatRoutes = require('./routes/chat');
 
 app.use('/api/auth', authRoutes);
 app.use('/api/admin', adminRoutes);
 app.use('/api/proxy', proxyRoutes);
+app.use('/api/ai', aiRouter);               // análisis con plantillas de backend (sesión 4, F1/F2)
+app.use('/api/actions', actionsRouter);     // plan de acción marcable (C2)
+app.use('/api/chat', chatRoutes);           // asistente con modelos gratuitos (C5)
 app.use('/api/analyses', analysesRoutes);   // historial de análisis (sección 14)
 app.use('/api/profile', profileRoutes);      // perfil de empresa del onboarding (sección 14)
 app.use('/api/payments', paymentsRoutes);   // checkout: /api/payments/stripe/*

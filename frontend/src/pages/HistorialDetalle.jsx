@@ -1,16 +1,19 @@
 import { useState, useEffect, useCallback } from 'react';
 import { useParams, Link } from 'react-router-dom';
-import { Download, Copy, SearchX, Sparkles } from 'lucide-react';
+import { Copy, SearchX, Sparkles } from 'lucide-react';
 import { analysesApi } from '../middleware/api';
 import { apiErrorMessage, isConnectivityError } from '../middleware/errors';
 import { sanitizeAiHtml } from '../middleware/sanitize';
-import { exportAnalysisToPdf } from '../middleware/exportUtils';
+import ReportView from '../components/ReportView';
+import ExportMenu from '../components/ExportMenu';
+import AskAssistant from '../components/AskAssistant';
+import { reportToPlainText } from '../middleware/exports/model';
 import { useLang } from '../context/LangContext';
 import { useToast } from '../context/ToastContext';
 import EmptyState from '../components/EmptyState';
 import ErrorState from '../components/ErrorState';
 import Skeleton, { SkeletonText } from '../components/Skeleton';
-import { formatDateTime } from '../utils/dates';
+import { formatDateTime, localeOf } from '../utils/dates';
 import { KIND_ICON, kindLabel } from './Historial';
 
 /**
@@ -59,13 +62,18 @@ export default function HistorialDetalle() {
   }
 
   const Icon = KIND_ICON[analysis.kind] || Sparkles;
-  const html = sanitizeAiHtml(analysis.result_html);
+  const html = analysis.report ? '' : sanitizeAiHtml(analysis.result_html);
 
   const copyText = async () => {
-    const div = document.createElement('div');
-    div.innerHTML = html;
+    let text;
+    if (analysis.report) text = reportToPlainText(analysis.report, t);
+    else {
+      const div = document.createElement('div');
+      div.innerHTML = html;
+      text = div.innerText || div.textContent || '';
+    }
     try {
-      await navigator.clipboard.writeText(div.innerText || div.textContent || '');
+      await navigator.clipboard.writeText(text);
       toast.success(t('history.textCopied'));
     } catch {
       toast.error(t('common.error'));
@@ -80,20 +88,21 @@ export default function HistorialDetalle() {
       </span>
       <h1 className="text-[22px] md:text-2xl font-semibold tracking-tight" style={{ color: 'var(--text-primary)' }}>{analysis.title}</h1>
       <p className="text-xs mt-1.5 mb-5" style={{ color: 'var(--text-muted)' }}>
-        {formatDateTime(analysis.created_at, lang)} · {t('history.detailPromptChars')}: {Number(analysis.prompt_chars || 0).toLocaleString(lang === 'en' ? 'en-GB' : 'es-ES')}
+        {formatDateTime(analysis.created_at, lang)} · {t('history.detailPromptChars')}: {Number(analysis.prompt_chars || 0).toLocaleString(localeOf(lang))}
       </p>
 
-      <div className="flex gap-2 mb-4">
-        <button onClick={() => exportAnalysisToPdf(analysis.title, analysis.result_html)} className="btn btn-secondary btn-sm">
-          <Download size={14} /> {t('history.exportPdf')}
-        </button>
+      <div className="flex flex-wrap gap-2 mb-4">
+        <ExportMenu doc={{
+          title: analysis.title, report: analysis.report, html: analysis.result_html, health: analysis.health,
+          actions: analysis.actions, fileBase: analysis.meta?.folder_name || analysis.title
+        }} />
+        {analysis.report && <AskAssistant analysisId={analysis.id} />}
         <button onClick={copyText} className="btn btn-ghost btn-sm">
           <Copy size={14} /> {t('history.copyText')}
         </button>
       </div>
 
-      <div className="card p-5 md:p-7 prose-report" style={{ color: 'var(--text-primary)' }}
-        dangerouslySetInnerHTML={{ __html: html }} />
+      <ReportView report={analysis.report} html={analysis.result_html} actions={analysis.actions} health={analysis.health} />
     </article>
   );
 }

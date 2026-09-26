@@ -9,6 +9,7 @@ import PasswordGenerator from '../components/PasswordGenerator';
 import PageHeader from '../components/PageHeader';
 import { useToast } from '../context/ToastContext';
 import { apiErrorMessage } from '../middleware/errors';
+import { localeOf } from '../utils/dates';
 
 export default function Configuracion() {
   const { profile, updateProfile, loading, saveState } = useOutletContext();
@@ -127,7 +128,7 @@ function SubscriptionSection() {
   const hasSubscription = license.has_subscription;
   const cancelled = license.cancel_at_period_end;
   const renewal = license.current_period_ends_at
-    ? new Date(license.current_period_ends_at).toLocaleDateString(lang === 'en' ? 'en-GB' : 'es-ES', { day: 'numeric', month: 'long', year: 'numeric' })
+    ? new Date(license.current_period_ends_at).toLocaleDateString(localeOf(lang), { day: 'numeric', month: 'long', year: 'numeric' })
     : null;
   const aiQuota = license.ai_quota;
   // Trial de 14 días (plan mini): license.trial_ends_at es un ISO futuro mientras

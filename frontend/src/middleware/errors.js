@@ -17,7 +17,10 @@ const KNOWN = [
   'ai_quota_exceeded', 'license_daily_limit_reached', 'ai_provider_error',
   'ai_empty_response', 'ai_not_configured', 'prompt_too_long',
   'stripe_not_configured', 'stripe_error', 'invalid_plan', 'internal_error',
-  'invalid_email', 'invalid_key_format'
+  'invalid_email', 'invalid_key_format',
+  // Sesión 4
+  'client_outdated', 'invalid_job', 'ai_bad_output', 'invalid_input', 'chat_rate_limited', 'chat_unavailable',
+  'api_plan_required', 'subscription_active', 'payload_too_large'
 ];
 
 export function apiErrorMessage(t, result, fallbackKey = 'common.error') {

@@ -304,3 +304,7 @@ details[open] .details-chevron { transform: rotate(180deg); }
 }
 .is-visible .grow-bar { transform: none; }
 html { scroll-padding-top: 80px; }
+
+/* C5 — botón del asistente: encima de la barra inferior en móvil. */
+.chat-launcher { bottom: calc(var(--bottom-nav-h) + 16px + env(safe-area-inset-bottom)); }
+@media (min-width: 768px) { .chat-launcher { bottom: 24px; } }

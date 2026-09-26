@@ -168,10 +168,14 @@ export default {
   },
   excel: {
     exportSheet: 'Análisis IA', exportColumn: 'Análisis',
+    modeSingle: 'Un periodo', periodA: 'Periodo A', periodB: 'Periodo B', periodLabel: 'Nombre del periodo (p. ej. Agosto)',
+    compareBtn: 'Comparar con IA', compareTitle: 'Comparación de periodos', kpiVariation: 'Variación', rowsShort: 'filas',
+    compareHint: 'Suma de «{value}» agrupada por «{label}» en cada periodo.',
+    compareNoNumbers: 'No encontramos una columna numérica común para calcular variaciones; la IA comparará el contenido igualmente.',
     hubTitle: 'Análisis Excel', hubDesc: 'Elige el tipo de datos que quieres analizar. Tus archivos se leen en tu navegador: nunca se suben a nuestros servidores.',
     importTitle: 'Importar archivos', importHint: 'Arrastra archivos o haz clic para seleccionar',
     importHintMobile: 'Toca para elegir archivos',
-    formats: '.xlsx, .xls, .csv, .pdf · Máx 5 MB · Hasta 3 archivos',
+    formats: '.xlsx, .xls, .csv, .ods, .pdf · Máx 5 MB · Hasta 3 archivos',
     contextLabel: 'Contexto (opcional)',
     contextPlaceholder: 'Ej.: ventas de enero a marzo; en febrero cerramos por obras',
     recentFiles: 'Archivos recientes', compareMode: 'Modo comparación',
@@ -196,7 +200,7 @@ export default {
     emptyTitle: 'Aún no has generado ningún análisis',
     emptyDesc: 'Aquí aparecerán tus análisis (diagnóstico y Excel) en cuanto hagas el primero. Quedan guardados para revisarlos y exportarlos cuando quieras.',
     emptyCta: 'Hacer el diagnóstico', emptyCtaExcel: 'Analizar un Excel',
-    typeCuestionario: 'Diagnóstico', typeExcel: 'Excel', typeAnalysis: 'Análisis',
+    typeCuestionario: 'Diagnóstico', typeExcel: 'Excel', typeFolder: 'Carpeta', typeAnalysis: 'Análisis',
     filterAll: 'Todos', searchPlaceholder: 'Buscar por título…', noResults: 'Ningún análisis coincide con tu búsqueda.',
     groupToday: 'Hoy', groupYesterday: 'Ayer', groupWeek: 'Últimos 7 días',
     backToList: 'Volver al historial',
@@ -227,6 +231,15 @@ export default {
     internal_error: 'Algo ha fallado por nuestra parte. Inténtalo de nuevo en unos minutos.',
     invalid_email: 'Introduce un email válido.',
     invalid_key_format: 'Formato de clave inválido. Usa XXXX-XXXX-XXXX-XXXX.',
+    client_outdated: 'Hay una versión nueva de Nokfi. Recarga la página para seguir.',
+    invalid_job: 'El análisis por lotes ha caducado. Vuelve a lanzarlo.',
+    ai_bad_output: 'La IA devolvió una respuesta incompleta. Inténtalo de nuevo: no se ha descontado de tu cuota.',
+    invalid_input: 'Faltan datos para hacer el análisis. Revisa lo que has subido.',
+    chat_rate_limited: 'Vas muy rápido. Espera un minuto y vuelve a preguntar.',
+    chat_unavailable: 'El asistente está saturado. Prueba en un minuto.',
+    api_plan_required: 'Las claves de API están disponibles en los planes Pro y Max.',
+    subscription_active: 'Primero cancela tu suscripción desde «Gestionar suscripción». Después podrás borrar la cuenta.',
+    payload_too_large: 'Los archivos pesan demasiado para un solo envío. Prueba con menos archivos.',
     offlineTitle: 'No podemos conectar con Nokfi',
     offlineDesc: 'Puede ser tu conexión o que el servidor se esté reiniciando. Vuelve a intentarlo en unos segundos.',
     genericTitle: 'No se pudo cargar'
@@ -371,5 +384,47 @@ export default {
       { h: 'Tus derechos', ps: ['Puedes ejercer tus derechos de acceso, rectificación, supresión, portabilidad y oposición escribiendo a info@nokfi.app. También puedes reclamar ante la Agencia Española de Protección de Datos (aepd.es).'] },
       { h: 'Seguridad', ps: ['Aplicamos HTTPS en todo el servicio, contraseñas hasheadas con scrypt, tokens de sesión y de recuperación almacenados como hash, y copias de seguridad periódicas de la base de datos en el servidor.'] }
     ]
+  },
+  report: {
+    summary: 'Resumen', keyFigures: 'Cifras clave', strengths: 'Puntos fuertes', priorities: 'Prioridades',
+    actionPlan: 'Plan de acción', glossary: 'Glosario', progress: '{n} de {total} hechas',
+    severity_high: 'Alta', severity_medium: 'Media', severity_low: 'Baja',
+    healthTitle: 'Salud financiera', healthScoreLabel: 'Nota de salud',
+    healthExplain: 'Nota calculada por Nokfi con reglas fijas a partir de tus respuestas. No la inventa la IA.',
+    healthLost: 'Pierdes puntos por', health_excellent: 'Salud financiera excelente', health_good: 'Buena salud financiera',
+    health_fair: 'Salud financiera mejorable', health_poor: 'Salud financiera en riesgo',
+    dataSheet: 'Datos', reportSheet: 'Informe', colSection: 'Sección', colItem: 'Elemento', colDetail: 'Detalle', colExtra: 'Extra'
+  },
+  export: {
+    error: 'No se pudo generar el archivo. Inténtalo de nuevo.',
+    pdf: 'PDF', pdfDesc: 'Para enviar, imprimir o archivar',
+    docx: 'Word (.docx)', docxDesc: 'Para editar o completar el informe',
+    xlsx: 'Excel (.xlsx)', xlsxDesc: 'Informe y datos en hojas',
+    csv: 'CSV', csvDesc: 'Para programas de contabilidad y gestorías',
+    ods: 'OpenDocument hoja (.ods)', odsDesc: 'LibreOffice Calc',
+    odt: 'OpenDocument texto (.odt)', odtDesc: 'LibreOffice Writer',
+    pptx: 'PowerPoint (.pptx)', pptxDesc: 'Resumen en diapositivas para socio, banco o inversor',
+    json: 'JSON', jsonDesc: 'Para automatizaciones'
+  },
+  chat: {
+    open: 'Abrir el asistente', title: 'Asistente Nokfi', subtitle: 'Pregunta sobre tus finanzas o sobre Nokfi',
+    aboutReport: 'Sobre:', clearContext: 'Olvidar el informe y empezar de cero', askReport: 'Preguntar al asistente',
+    empty: 'Hola. Pregúntame lo que quieras sobre las finanzas de tu negocio o sobre tus informes.',
+    suggestions: ['¿Cómo calculo mi punto de equilibrio?', '¿Qué gastos fijos debería revisar primero?', '¿Cuánto debería tener en el fondo de reserva?'],
+    suggestionsReport: ['Explícame la prioridad más grave con un ejemplo', '¿Por dónde empiezo el plan de acción?', '¿Qué significa este término del glosario?'],
+    placeholder: 'Escribe tu pregunta…', send: 'Enviar',
+    privacyNote: 'Asistente con IA gratuita · puede usarse para mejorar el modelo · no incluyas datos personales de terceros',
+    privacyMore: 'Más info'
+  },
+  fileErrors: {
+    ERR_FILE_TOO_BIG: '"{name}" supera el tamaño máximo permitido.',
+    ERR_FILE_TYPE: '"{name}" no es un formato admitido.',
+    ERR_PDF_TIMEOUT: 'El lector de PDF no respondió a tiempo con "{name}". Recarga la página e inténtalo de nuevo.',
+    ERR_PDF_PASSWORD: '"{name}" está protegido con contraseña. Quita la protección y vuelve a subirlo.',
+    ERR_PDF_INVALID: '"{name}" no es un PDF válido o está dañado.',
+    ERR_PDF_READ: 'No se pudo leer el PDF "{name}".',
+    ERR_XLSX_READ: 'No se pudo leer la hoja de cálculo "{name}" (dañada o formato no soportado).',
+    ERR_IMAGE_READ: 'No se pudo leer la imagen "{name}".',
+    ERR_FILE_READ: 'No se pudo leer "{name}".'
   }
 };

@@ -1,6 +1,6 @@
 import { useState, useEffect, useMemo, useCallback } from 'react';
 import { Link } from 'react-router-dom';
-import { History, ClipboardList, FileSpreadsheet, Sparkles, Search, ChevronRight } from 'lucide-react';
+import { History, ClipboardList, FileSpreadsheet, Sparkles, Search, ChevronRight, FolderOpen } from 'lucide-react';
 import { analysesApi } from '../middleware/api';
 import { apiErrorMessage, isConnectivityError } from '../middleware/errors';
 import { useLang } from '../context/LangContext';
@@ -8,7 +8,7 @@ import PageHeader from '../components/PageHeader';
 import EmptyState from '../components/EmptyState';
 import ErrorState from '../components/ErrorState';
 import Skeleton from '../components/Skeleton';
-import { parseDbDate, dayDiff, formatDate, formatTime } from '../utils/dates';
+import { parseDbDate, dayDiff, formatDate, formatTime, localeOf } from '../utils/dates';
 
 /**
  * Historial de análisis (sección 14) — sesión 3, Tanda N: Historial e Informes
@@ -18,11 +18,12 @@ import { parseDbDate, dayDiff, formatDate, formatTime } from '../utils/dates';
  * (/app/historial/:id → HistorialDetalle) para que el "atrás" del navegador y
  * los enlaces directos funcionen.
  */
-export const KIND_ICON = { cuestionario: ClipboardList, excel: FileSpreadsheet };
+export const KIND_ICON = { cuestionario: ClipboardList, excel: FileSpreadsheet, folder: FolderOpen };
 
 export function kindLabel(kind, t) {
   if (kind === 'cuestionario') return t('history.typeCuestionario');
   if (kind === 'excel') return t('history.typeExcel');
+  if (kind === 'folder') return t('history.typeFolder');
   return t('history.typeAnalysis');
 }
 
@@ -44,7 +45,7 @@ export default function Historial() {
   useEffect(() => { load(); }, [load]);
 
   const counts = useMemo(() => {
-    const c = { all: 0, cuestionario: 0, excel: 0 };
+    const c = { all: 0, cuestionario: 0, excel: 0, folder: 0 };
     (items || []).forEach(a => { c.all++; if (c[a.kind] != null) c[a.kind]++; });
     return c;
   }, [items]);
@@ -93,7 +94,8 @@ export default function Historial() {
   const FILTERS = [
     { id: 'all', label: t('history.filterAll') },
     { id: 'cuestionario', label: t('history.typeCuestionario') },
-    { id: 'excel', label: t('history.typeExcel') }
+    { id: 'excel', label: t('history.typeExcel') },
+    ...(counts.folder ? [{ id: 'folder', label: t('history.typeFolder') }] : [])
   ];
 
   return (
@@ -185,7 +187,7 @@ function groupByDate(list, t, lang) {
     else if (diff === 1) push(t('history.groupYesterday'), a, true);
     else if (diff < 7) push(t('history.groupWeek'), a, false);
     else {
-      const m = d.toLocaleDateString(lang === 'en' ? 'en-GB' : 'es-ES', { month: 'long', year: 'numeric' });
+      const m = d.toLocaleDateString(localeOf(lang), { month: 'long', year: 'numeric' });
       push(m.charAt(0).toUpperCase() + m.slice(1), a, false);
     }
   }

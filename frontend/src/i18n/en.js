@@ -167,11 +167,12 @@ export default {
     total: { title: 'Total (Profit)', desc: 'Total profit after taxes and expenses', description: 'Upload your income and expenses to calculate total profit after taxes.' }
   },
   excel: {
+    modeSingle: 'One period', periodA: 'Period A', periodB: 'Period B', periodLabel: 'Period name (e.g. August)', compareBtn: 'Compare with AI', compareTitle: 'Period comparison', kpiVariation: 'Change', rowsShort: 'rows', compareHint: 'Sum of “{value}” grouped by “{label}” in each period.', compareNoNumbers: 'We could not find a common numeric column to calculate changes; the AI will still compare the content.',
     exportSheet: 'AI analysis', exportColumn: 'Analysis',
     hubTitle: 'Excel analysis', hubDesc: 'Choose the type of data you want to analyse. Your files are read in your browser — they are never uploaded to our servers.',
     importTitle: 'Import files', importHint: 'Drag files here or click to select',
     importHintMobile: 'Tap to choose files',
-    formats: '.xlsx, .xls, .csv, .pdf · Max 5 MB · Up to 3 files',
+    formats: '.xlsx, .xls, .csv, .ods, .pdf · Max 5 MB · Up to 3 files',
     contextLabel: 'Context (optional)',
     contextPlaceholder: 'E.g. sales from January to March; closed in February for works',
     recentFiles: 'Recent files', compareMode: 'Compare mode',
@@ -196,7 +197,7 @@ export default {
     emptyTitle: "You haven't generated any analysis yet",
     emptyDesc: 'Your analyses (diagnosis and Excel) will show up here as soon as you run the first one. They stay saved so you can review and export them anytime.',
     emptyCta: 'Run the diagnosis', emptyCtaExcel: 'Analyse an Excel file',
-    typeCuestionario: 'Diagnosis', typeExcel: 'Excel', typeAnalysis: 'Analysis',
+    typeCuestionario: 'Diagnosis', typeExcel: 'Excel', typeFolder: 'Folder', typeAnalysis: 'Analysis',
     filterAll: 'All', searchPlaceholder: 'Search by title…', noResults: 'No analysis matches your search.',
     groupToday: 'Today', groupYesterday: 'Yesterday', groupWeek: 'Last 7 days',
     backToList: 'Back to history',
@@ -227,6 +228,15 @@ export default {
     internal_error: 'Something went wrong on our side. Please try again in a few minutes.',
     invalid_email: 'Please enter a valid email.',
     invalid_key_format: 'Invalid key format. Use XXXX-XXXX-XXXX-XXXX.',
+    client_outdated: 'There is a new version of Nokfi. Reload the page to continue.',
+    invalid_job: 'The batch analysis has expired. Please start it again.',
+    ai_bad_output: 'The AI returned an incomplete answer. Try again: it has not been deducted from your quota.',
+    invalid_input: 'Some data is missing for the analysis. Check what you uploaded.',
+    chat_rate_limited: 'You are going too fast. Wait a minute and ask again.',
+    chat_unavailable: 'The assistant is busy. Try again in a minute.',
+    api_plan_required: 'API keys are available on the Pro and Max plans.',
+    subscription_active: 'First cancel your subscription from “Manage subscription”. Then you can delete the account.',
+    payload_too_large: 'The files are too large for a single upload. Try with fewer files.',
     offlineTitle: 'We can’t reach Nokfi',
     offlineDesc: 'It may be your connection or the server restarting. Try again in a few seconds.',
     genericTitle: 'Couldn’t load'
@@ -371,5 +381,47 @@ export default {
       { h: 'Your rights', ps: ['You can exercise your rights of access, rectification, erasure, portability and objection by writing to info@nokfi.app. You may also lodge a complaint with the Spanish Data Protection Agency (aepd.es).'] },
       { h: 'Security', ps: ['We apply HTTPS across the service, scrypt-hashed passwords, session and recovery tokens stored as hashes, and periodic database backups on the server.'] }
     ]
+  },
+  report: {
+    summary: 'Summary', keyFigures: 'Key figures', strengths: 'Strengths', priorities: 'Priorities',
+    actionPlan: 'Action plan', glossary: 'Glossary', progress: '{n} of {total} done',
+    severity_high: 'High', severity_medium: 'Medium', severity_low: 'Low',
+    healthTitle: 'Financial health', healthScoreLabel: 'Health score',
+    healthExplain: 'Score calculated by Nokfi with fixed rules from your answers. It is not made up by the AI.',
+    healthLost: 'You lose points for', health_excellent: 'Excellent financial health', health_good: 'Good financial health',
+    health_fair: 'Financial health needs work', health_poor: 'Financial health at risk',
+    dataSheet: 'Data', reportSheet: 'Report', colSection: 'Section', colItem: 'Item', colDetail: 'Detail', colExtra: 'Extra'
+  },
+  export: {
+    error: 'The file could not be generated. Please try again.',
+    pdf: 'PDF', pdfDesc: 'To send, print or archive',
+    docx: 'Word (.docx)', docxDesc: 'To edit or complete the report',
+    xlsx: 'Excel (.xlsx)', xlsxDesc: 'Report and data in sheets',
+    csv: 'CSV', csvDesc: 'For accounting software and accountants',
+    ods: 'OpenDocument sheet (.ods)', odsDesc: 'LibreOffice Calc',
+    odt: 'OpenDocument text (.odt)', odtDesc: 'LibreOffice Writer',
+    pptx: 'PowerPoint (.pptx)', pptxDesc: 'Slide summary for a partner, bank or investor',
+    json: 'JSON', jsonDesc: 'For automations'
+  },
+  chat: {
+    open: 'Open the assistant', title: 'Nokfi assistant', subtitle: 'Ask about your finances or about Nokfi',
+    aboutReport: 'About:', clearContext: 'Forget the report and start over', askReport: 'Ask the assistant',
+    empty: 'Hi. Ask me anything about your business finances or your reports.',
+    suggestions: ['How do I calculate my break-even point?', 'Which fixed costs should I review first?', 'How much should I keep in a reserve fund?'],
+    suggestionsReport: ['Explain the most serious priority with an example', 'Where do I start with the action plan?', 'What does this glossary term mean?'],
+    placeholder: 'Type your question…', send: 'Send',
+    privacyNote: 'Free AI assistant · may be used to improve the model · do not include third parties’ personal data',
+    privacyMore: 'Learn more'
+  },
+  fileErrors: {
+    ERR_FILE_TOO_BIG: '"{name}" exceeds the maximum allowed size.',
+    ERR_FILE_TYPE: '"{name}" is not a supported format.',
+    ERR_PDF_TIMEOUT: 'The PDF reader did not respond in time with "{name}". Reload the page and try again.',
+    ERR_PDF_PASSWORD: '"{name}" is password-protected. Remove the protection and upload it again.',
+    ERR_PDF_INVALID: '"{name}" is not a valid PDF or is damaged.',
+    ERR_PDF_READ: 'The PDF "{name}" could not be read.',
+    ERR_XLSX_READ: 'The spreadsheet "{name}" could not be read (damaged or unsupported format).',
+    ERR_IMAGE_READ: 'The image "{name}" could not be read.',
+    ERR_FILE_READ: '"{name}" could not be read.'
   }
 };

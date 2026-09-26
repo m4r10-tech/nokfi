@@ -5,7 +5,6 @@ export default function ExcelSalidaServicios() {
     <ExcelSubModule
       moduleId="servicios"
       chartType="pie"
-      promptBase="Eres un consultor de operaciones para pymes españolas. Analiza qué parte del almacén se ha destinado a servicios: distribución por tipo de servicio y eficiencia de uso."
     />
   );
 }

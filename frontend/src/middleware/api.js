@@ -40,6 +40,10 @@ async function request(path, { method = 'GET', body, auth = false, isFormData = 
     data = {};
   } else if (contentType.includes('application/json')) {
     try { data = await res.json(); } catch { data = {}; /* JSON malformado */ }
+  } else if (res.status === 413) {
+    // Nginx corta cuerpos > 10 MB con HTML: lote de archivos demasiado grande.
+    await res.text().catch(() => '');
+    data = { error: 'payload_too_large' };
   } else {
     await res.text().catch(() => ''); // drenar el body
     data = { error: 'non_json_response', message: 'El servidor no respondió correctamente. Inténtalo de nuevo en unos minutos.' };
@@ -82,18 +86,28 @@ export const authApi = {
     request('/auth/change-password', { method: 'POST', auth: true, body: { current_password, new_password } })
 };
 
+// Sesión 4 (F2): el navegador manda el TIPO de análisis y los DATOS; el
+// backend arma el prompt (plantillas + perfil + idioma) y devuelve un informe
+// estructurado (F1). `job` encadena los lotes de una misma petición (carpeta,
+// facturas): 1 petición del usuario = 1 análisis de la cuota.
 export const aiApi = {
-  analyze: async (prompt, max_tokens, { kind, title } = {}) => {
-    // kind/title son etiquetas opcionales que el backend persiste para etiquetar
-    // el historial del análisis (sección 14 — pantallas Historial / Informes).
-    // ExcelSubModule pasa su `title` de subapartado; Cuestionario pasa kind.
-    const result = await request('/proxy/ai', { method: 'POST', auth: true, body: { prompt, max_tokens, kind, title } });
-    // ⚠️ Auditoría de seguridad: además del límite global de Gemini, el backend
-    // ahora aplica un límite diario POR LICENCIA (license_daily_limit_reached)
-    // para proteger la cuota compartida de un solo cliente con uso intensivo.
+  run: async (task, input, { lang, title, job } = {}) => {
+    const result = await request('/ai/analyze', { method: 'POST', auth: true, body: { task, input, lang, title, job } });
     const quotaExceeded = ['ai_quota_exceeded', 'license_daily_limit_reached'].includes(result.data?.error);
     return { ...result, quotaExceeded };
   }
+};
+
+// C2 — tareas del plan de acción (marcables, persistentes por licencia).
+export const actionsApi = {
+  list: () => request('/actions', { auth: true }),
+  setDone: (id, done) => request(`/actions/${encodeURIComponent(id)}`, { method: 'PATCH', auth: true, body: { done } })
+};
+
+// C5 — asistente (modelos gratuitos, no gasta cuota; no se guarda la conversación).
+export const chatApi = {
+  send: (messages, { analysisId, lang } = {}) =>
+    request('/chat', { method: 'POST', auth: true, body: { messages, analysis_id: analysisId, lang } })
 };
 
 // Historial de análisis (G2 — sección 14). El backend scopea todo por la

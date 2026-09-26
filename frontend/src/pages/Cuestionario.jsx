@@ -1,14 +1,14 @@
 import { useState } from 'react';
 import { useOutletContext, Link } from 'react-router-dom';
-import { Check, X, RefreshCw, RotateCw, ArrowLeft, ArrowRight, Download, Sparkles, AlertCircle, History } from 'lucide-react';
+import { Check, X, RefreshCw, RotateCw, ArrowLeft, ArrowRight, Sparkles, AlertCircle, History } from 'lucide-react';
 import { aiApi } from '../middleware/api';
-import { sanitizeAiHtml } from '../middleware/sanitize';
 import { apiErrorMessage } from '../middleware/errors';
-import { exportAnalysisToPdf } from '../middleware/exportUtils';
 import { useToast } from '../context/ToastContext';
 import { useLang } from '../context/LangContext';
 import PageHeader from '../components/PageHeader';
-import { aiLanguageDirective } from '../utils/aiLang';
+import ReportView from '../components/ReportView';
+import ExportMenu from '../components/ExportMenu';
+import AskAssistant from '../components/AskAssistant';
 import Skeleton, { SkeletonText } from '../components/Skeleton';
 
 // Textos en i18n (questionnaire.sections.<key> / questionnaire.items.<id>);
@@ -30,46 +30,21 @@ export default function Cuestionario() {
   const [step, setStep] = useState(0);
   const [answers, setAnswers] = useState({});
   const [phase, setPhase] = useState('form'); // form | loading | result | error
-  const [report, setReport] = useState('');
+  const [report, setReport] = useState(null); // respuesta de /api/ai/analyze
   const [errorMsg, setErrorMsg] = useState(null);
 
   const setAnswer = (id, val) => setAnswers(a => ({ ...a, [id]: val }));
   const isLast = step === SECTIONS.length - 1;
 
-  const buildPrompt = () => {
-    const yes = [], no = [];
-    SECTIONS.forEach(sec => sec.items.forEach(id => {
-      if (answers[id] === true) yes.push(itemName(id));
-      if (answers[id] === false) no.push(itemName(id));
-    }));
-    const h = (k) => t(`questionnaire.headings.${k}`);
-
-    return `Eres un consultor financiero experto en pymes y autónomos españoles. Analiza el negocio "${profile.companyName || 'sin nombre'}" (sector: ${profile.sector || 'no especificado'}, tamaño: ${profile.size || 'no especificado'}).
-
-ÁREAS QUE SÍ GESTIONA (${yes.length}):
-${yes.map(i => '- ' + i).join('\n') || '- Ninguna'}
-
-ÁREAS QUE NO GESTIONA (${no.length}):
-${no.map(i => '- ' + i).join('\n') || '- Ninguna'}
-
-Genera un diagnóstico en HTML (sin html/body/head) con:
-1. Un párrafo de estado general (máx 3 frases)
-2. <h3>${h('strengths')}</h3>
-3. <h3>${h('critical')}</h3> con las 3-5 más importantes, formato <ul><li>
-4. <h3>${h('savings')}</h3> con pasos concretos
-5. <h3>${h('plan')}</h3>
-6. <h3>${h('automation')}</h3>
-
-Tono profesional, directo, accionable. Sin emojis. ${aiLanguageDirective(lang)}`;
-  };
-
+  // Sesión 4 (F2): solo se envían las respuestas; el backend arma el prompt
+  // con el perfil de empresa y calcula la nota de salud (C1) con reglas fijas.
   const runAnalysis = async () => {
     setPhase('loading');
     setErrorMsg(null);
-    const res = await aiApi.analyze(buildPrompt(), 1800, { kind: 'cuestionario', title: REPORT_TITLE });
+    const res = await aiApi.run('cuestionario', { answers }, { lang, title: REPORT_TITLE });
 
-    if (res.ok && res.data.text) {
-      setReport(res.data.text);
+    if (res.ok && res.data.report) {
+      setReport(res.data);
       setPhase('result');
       toast.success(t('questionnaire.ready'));
     } else {
@@ -78,7 +53,7 @@ Tono profesional, directo, accionable. Sin emojis. ${aiLanguageDirective(lang)}`
     }
   };
 
-  const restart = () => { setStep(0); setAnswers({}); setPhase('form'); setReport(''); };
+  const restart = () => { setStep(0); setAnswers({}); setPhase('form'); setReport(null); };
 
   if (phase === 'loading') {
     return (
@@ -119,11 +94,11 @@ Tono profesional, directo, accionable. Sin emojis. ${aiLanguageDirective(lang)}`
       <div className="max-w-3xl">
         <PageHeader title={t('questionnaire.resultTitle')} description={profile.companyName || undefined} />
         <div className="flex flex-wrap gap-2 mb-4">
-          <button onClick={() => exportAnalysisToPdf(REPORT_TITLE, report)} className="btn btn-secondary btn-sm"><Download size={14} /> PDF</button>
+          <ExportMenu doc={{ title: REPORT_TITLE, report: report.report, health: report.health, actions: report.actions, companyName: profile.companyName }} />
+          <AskAssistant analysisId={report.analysis_id} />
           <Link to="/app/historial" className="btn btn-ghost btn-sm"><History size={14} /> {t('questionnaire.savedInHistory')}</Link>
         </div>
-        <div className="card p-5 md:p-7 prose-report anim-fade" style={{ color: 'var(--text-primary)' }}
-          dangerouslySetInnerHTML={{ __html: sanitizeAiHtml(report) }} />
+        <ReportView report={report.report} actions={report.actions} health={report.health} />
         <button onClick={restart} className="btn btn-secondary mt-4 w-full sm:w-auto">
           <RefreshCw size={14} /> {t('questionnaire.newAnalysis')}
         </button>
