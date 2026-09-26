@@ -15,11 +15,23 @@ export const extOf = (name) => {
   return i >= 0 ? name.slice(i).toLowerCase() : '';
 };
 
+/**
+ * CSV: se decodifica a mano. SheetJS asume Windows-1252 al leer bytes, así
+ * que un CSV en UTF-8 salía con tildes rotas ("bÃ¡sica"). Se prueba UTF-8
+ * estricto y, si no es válido, Windows-1252 (lo que exporta Excel en España).
+ */
+function decodeCsv(buffer) {
+  try { return new TextDecoder('utf-8', { fatal: true }).decode(buffer).replace(/^\uFEFF/, ''); }
+  catch { return new TextDecoder('windows-1252').decode(buffer); }
+}
+
 export async function readTabular(file) {
   try {
     const XLSX = await import('xlsx');
     const buffer = await file.arrayBuffer();
-    const wb = XLSX.read(buffer, { type: 'array' });
+    const wb = extOf(file.name) === '.csv'
+      ? XLSX.read(decodeCsv(buffer), { type: 'string' })
+      : XLSX.read(buffer, { type: 'array' });
     const sheet = wb.Sheets[wb.SheetNames[0]];
     return XLSX.utils.sheet_to_json(sheet, { defval: '' });
   } catch {
@@ -110,14 +122,23 @@ export function parseAmount(v) {
   return Number.isFinite(n) ? n : NaN;
 }
 
-/** Heurística de columnas: primera de texto (etiqueta) y primera numérica (valor). */
+/**
+ * Heurística de columnas: la etiqueta es la primera de texto; el valor es la
+ * columna numérica que parece DINERO (importe, total, ventas, €…) y, si
+ * ninguna lo parece, la de mayor suma (antes se cogía la primera numérica y
+ * salían "unidades" en vez de "importe").
+ */
+const MONEY_COL = /importe|total|venta|ingreso|factur|euro|€|precio|saldo|coste|gasto|amount|revenue|price|sales|montant|prix|umsatz|betrag|preis|importo|prezzo|kwota|cena|wartość|przych/i;
+
 export function detectColumns(rows) {
   if (!rows?.length) return {};
   const keys = Object.keys(rows[0]);
   const sample = rows.slice(0, 20);
   const isNum = (k) => sample.filter(r => r[k] !== '' && r[k] != null).every(r => Number.isFinite(parseAmount(r[k])))
     && sample.some(r => r[k] !== '' && r[k] != null);
-  const numberKey = keys.find(isNum);
+  const numeric = keys.filter(isNum);
+  const sumOf = (k) => rows.reduce((acc, r) => acc + (Number.isFinite(parseAmount(r[k])) ? Math.abs(parseAmount(r[k])) : 0), 0);
+  const numberKey = numeric.find(k => MONEY_COL.test(k)) || numeric.sort((a, b) => sumOf(b) - sumOf(a))[0];
   const labelKey = keys.find(k => k !== numberKey && !isNum(k)) || keys.find(k => k !== numberKey);
   return { labelKey, numberKey };
 }
