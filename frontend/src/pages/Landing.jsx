@@ -1,7 +1,8 @@
 import { useEffect } from 'react';
 import { useNavigate, Link, useSearchParams, useLocation } from 'react-router-dom';
 import {
-  ClipboardList, FileSpreadsheet, FileText, Calculator, ArrowRight, ChevronDown, Building2, Sparkles, ListChecks
+  ClipboardList, FileSpreadsheet, FileText, Calculator, ArrowRight, ChevronDown, Building2, Sparkles, ListChecks,
+  ScanLine, Landmark, Mail, LifeBuoy
 } from 'lucide-react';
 import { useLang } from '../context/LangContext';
 import { useToast } from '../context/ToastContext';
@@ -34,7 +35,7 @@ import { localeOf } from '../utils/dates';
  *
  * Estilo (sección 19): solo variables CSS de tema (var(--*)), nunca hex.
  */
-const FEATURE_ICONS = [ClipboardList, FileSpreadsheet, FileText, Calculator];
+const FEATURE_ICONS = [ClipboardList, FileSpreadsheet, ScanLine, Landmark, FileText, Calculator];
 const STEP_ICONS = [Building2, Sparkles, ListChecks];
 
 export default function Landing() {
@@ -70,7 +71,8 @@ export default function Landing() {
     { href: '#como-funciona', label: t('landing.navHow') },
     { href: '#modulos', label: t('landing.navModules') },
     { href: '#precios', label: t('landing.navPricing') },
-    { href: '#faq', label: t('landing.navFaq') }
+    { href: '#faq', label: t('landing.navFaq') },
+    { href: '#contacto', label: t('landing.navContact') }
   ];
 
   return (
@@ -178,6 +180,26 @@ export default function Landing() {
           </p>
         </Section>
 
+        {/* §4.2 (sesión 4): contacto — solo buzones PÚBLICOS (info@ y soporte@). */}
+        <Section id="contacto" title={t('landing.contactTitle')} subtitle={t('landing.contactSubtitle')} narrow>
+          <div className="grid sm:grid-cols-2 gap-4">
+            <RevealItem as="a" i={0} href="mailto:info@nokfi.app?subject=Nokfi" className="card card-interactive p-5 flex gap-4 items-start">
+              <span className="w-10 h-10 rounded-xl grid place-items-center shrink-0" style={{ background: 'var(--accent-soft)', color: 'var(--accent-text)' }}><Mail size={18} /></span>
+              <span className="min-w-0">
+                <span className="block text-base font-semibold" style={{ color: 'var(--text-primary)' }}>info@nokfi.app</span>
+                <span className="block mt-1 text-sm" style={{ color: 'var(--text-secondary)' }}>{t('landing.contactInfo')}</span>
+              </span>
+            </RevealItem>
+            <RevealItem as="a" i={1} href="mailto:soporte@nokfi.app?subject=Soporte%20Nokfi" className="card card-interactive p-5 flex gap-4 items-start">
+              <span className="w-10 h-10 rounded-xl grid place-items-center shrink-0" style={{ background: 'var(--accent-soft)', color: 'var(--accent-text)' }}><LifeBuoy size={18} /></span>
+              <span className="min-w-0">
+                <span className="block text-base font-semibold" style={{ color: 'var(--text-primary)' }}>soporte@nokfi.app</span>
+                <span className="block mt-1 text-sm" style={{ color: 'var(--text-secondary)' }}>{t('landing.contactSupport')}</span>
+              </span>
+            </RevealItem>
+          </div>
+        </Section>
+
         {/* CTA final */}
         <section className="max-w-6xl mx-auto px-4 pb-20 md:pb-28">
           <RevealItem className="rounded-3xl px-6 py-12 md:py-16 text-center flex flex-col items-center gap-5 relative overflow-hidden"
@@ -216,9 +238,9 @@ function Section({ id, eyebrow, title, subtitle, children, narrow }) {
 }
 
 /** Elemento que entra con fade/slide al hacer scroll; `i` = retardo escalonado. */
-function RevealItem({ as: Tag = 'div', i = 0, className = '', style, children }) {
+function RevealItem({ as: Tag = 'div', i = 0, className = '', style, children, ...rest }) {
   const [ref] = useReveal();
-  return <Tag ref={ref} className={`reveal ${className}`} style={{ '--i': i, ...style }}>{children}</Tag>;
+  return <Tag ref={ref} className={`reveal ${className}`} style={{ '--i': i, ...style }} {...rest}>{children}</Tag>;
 }
 
 function FactsStrip({ facts }) {

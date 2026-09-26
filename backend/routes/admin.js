@@ -316,4 +316,15 @@ router.get('/audit-log', (req, res) => {
   }
 });
 
+/* ──────────────────────────────────────────────────────────
+   GET /api/admin/errors?limit=100   (sesión 4, C8)
+   Últimos errores técnicos del frontend/backend (sin datos del usuario).
+────────────────────────────────────────────────────────── */
+router.get('/errors', (req, res) => {
+  const limit = Math.min(Math.max(Number(req.query.limit) || 100, 1), 500);
+  const rows = require('../db/database').getDB()
+    .prepare('SELECT id, source, message, path, version, user_agent, created_at FROM client_errors ORDER BY id DESC LIMIT ?').all(limit);
+  res.json({ errors: rows });
+});
+
 module.exports = router;

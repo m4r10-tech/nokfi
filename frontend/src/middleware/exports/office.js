@@ -84,6 +84,8 @@ export async function exportSheet(model, filename, bookType, labels) {
 /* ── CSV (lo que importan A3, Sage, Holded, ContaSol… y las gestorías) ── */
 export function toCsv(rows, sep = ';') {
   const esc = (v) => {
+    // Con ';' como separador (convención española) los decimales van con coma.
+    if (typeof v === 'number' && Number.isFinite(v)) return sep === ';' ? String(v).replace('.', ',') : String(v);
     const s = String(neutralize(v ?? ''));
     return /[";\n\r,]/.test(s) ? `"${s.replace(/"/g, '""')}"` : s;
   };

@@ -110,6 +110,42 @@ export const chatApi = {
     request('/chat', { method: 'POST', auth: true, body: { messages, analysis_id: analysisId, lang } })
 };
 
+// Núcleo de valor (sesión 4): V1 libro, V2 impuestos, V4 cobros, V5 fugas,
+// V3 previsión, C4 calendario y el resumen del panel.
+const qs = (o) => {
+  const p = new URLSearchParams();
+  Object.entries(o || {}).forEach(([k, v]) => { if (v !== undefined && v !== null && v !== '') p.set(k, v); });
+  const s = p.toString();
+  return s ? `?${s}` : '';
+};
+export const ledgerApi = {
+  list: (filters) => request(`/ledger${qs(filters)}`, { auth: true }),
+  create: (entries, force = false) => request('/ledger', { method: 'POST', auth: true, body: { entries, force } }),
+  update: (id, partial) => request(`/ledger/${encodeURIComponent(id)}`, { method: 'PATCH', auth: true, body: partial }),
+  remove: (id) => request(`/ledger/${encodeURIComponent(id)}`, { method: 'DELETE', auth: true })
+};
+export const financeApi = {
+  taxes: (year, quarter) => request(`/finance/taxes${qs({ year, quarter })}`, { auth: true }),
+  setReserve: (year, quarter, amount) => request('/finance/reserve', { method: 'PUT', auth: true, body: { year, quarter, amount } }),
+  receivables: () => request('/finance/receivables', { auth: true }),
+  collectionEmail: (entry_id, tone, lang) => request('/finance/collection-email', { method: 'POST', auth: true, body: { entry_id, tone, lang } }),
+  leaks: () => request('/finance/leaks', { auth: true }),
+  forecast: (params) => request(`/finance/forecast${qs(params)}`, { auth: true }),
+  calendar: (year) => request(`/finance/calendar${qs({ year })}`, { auth: true })
+};
+export const dashboardApi = { get: () => request('/dashboard', { auth: true }) };
+
+// F4 — claves de API; C9 — mis datos (descargar / borrar la cuenta).
+export const keysApi = {
+  list: () => request('/keys', { auth: true }),
+  create: (name) => request('/keys', { method: 'POST', auth: true, body: { name } }),
+  revoke: (id) => request(`/keys/${encodeURIComponent(id)}`, { method: 'DELETE', auth: true })
+};
+export const meApi = {
+  export: () => request('/me/export', { auth: true }),
+  remove: (password) => request('/me', { method: 'DELETE', auth: true, body: { password } })
+};
+
 // Historial de análisis (G2 — sección 14). El backend scopea todo por la
 // licencia de la sesión (Bearer); el frontend no envía license_id.
 export const analysesApi = {

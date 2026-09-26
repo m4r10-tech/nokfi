@@ -239,6 +239,9 @@ const paymentsRoutes = require('./routes/payments');
 const webhooksRoutes = require('./routes/webhooks');
 const { aiRouter, actionsRouter } = require('./routes/ai');
 const chatRoutes = require('./routes/chat');
+const financeRoutes = require('./routes/finance');
+const accountRoutes = require('./routes/account');
+const v1Routes = require('./routes/v1');
 
 app.use('/api/auth', authRoutes);
 app.use('/api/admin', adminRoutes);
@@ -246,6 +249,13 @@ app.use('/api/proxy', proxyRoutes);
 app.use('/api/ai', aiRouter);               // análisis con plantillas de backend (sesión 4, F1/F2)
 app.use('/api/actions', actionsRouter);     // plan de acción marcable (C2)
 app.use('/api/chat', chatRoutes);           // asistente con modelos gratuitos (C5)
+app.use('/api/ledger', financeRoutes.ledger);       // libro de facturas (V1)
+app.use('/api/finance', financeRoutes.finance);     // impuestos, cobros, fugas, previsión, calendario (V2-V5, C4)
+app.use('/api/dashboard', financeRoutes.dashboard); // resumen del panel de inicio
+app.use('/api/keys', accountRoutes.keys);           // claves de API (F4)
+app.use('/api/me', accountRoutes.me);               // descargar / borrar mis datos (C9)
+app.use('/api/client-errors', accountRoutes.telemetry); // errores del frontend (C8)
+app.use('/api/v1', v1Routes);                       // API pública para automatizaciones (F4)
 app.use('/api/analyses', analysesRoutes);   // historial de análisis (sección 14)
 app.use('/api/profile', profileRoutes);      // perfil de empresa del onboarding (sección 14)
 app.use('/api/payments', paymentsRoutes);   // checkout: /api/payments/stripe/*
@@ -261,8 +271,13 @@ app.get('/health', (_req, res) => res.json({ status: 'ok', ts: Date.now() }));
 ════════════════════════════════════════════════════════════ */
 app.use((_req, res) => res.status(404).json({ error: 'not_found' }));
 
-app.use((err, _req, res, _next) => {
+app.use((err, req, res, _next) => {
+  // Cuerpo demasiado grande o JSON mal formado → 4xx claros (no son fallos del servidor).
+  if (err.type === 'entity.too.large') return res.status(413).json({ error: 'payload_too_large' });
+  if (err.type === 'entity.parse.failed') return res.status(400).json({ error: 'invalid_json' });
   console.error('[UNHANDLED ERROR]', err);
+  // C8: queda registrado (sin cuerpo de la petición → sin datos del usuario).
+  accountRoutes.recordError({ source: 'server', message: err.message, stack: err.stack, path: req.path, version: 'backend' });
   res.status(500).json({ error: 'internal_error' });
 });
 
@@ -276,6 +291,9 @@ initDB()
       const removed = cleanExpiredSessions();
       if (removed > 0) console.log(`[CLEANUP] ${removed} sesiones expiradas eliminadas`);
     }, 60 * 60 * 1000);
+
+    // C4 — avisos del calendario fiscal por email (cada 6 h; no en tests).
+    require('./services/reminders').startReminderScheduler();
 
     app.listen(PORT, () => {
       console.log(`\n✅  Nokfi Backend corriendo en puerto ${PORT}`);

@@ -1,12 +1,46 @@
 import { defineConfig } from 'vite';
 import react from '@vitejs/plugin-react';
 import { VitePWA } from 'vite-plugin-pwa';
+import { execSync } from 'node:child_process';
+
+// §2.2 (sesión 4): versión visible en la app (Configuración, Ayuda y el
+// email de soporte) = hash corto de git + fecha de build. Responde a
+// "¿qué versión ves?" en soporte.
+function appVersion() {
+  let hash = 'dev';
+  try { hash = execSync('git rev-parse --short HEAD', { stdio: ['ignore', 'pipe', 'ignore'] }).toString().trim(); } catch { /* sin git */ }
+  const d = new Date();
+  const date = `${d.getUTCFullYear()}${String(d.getUTCMonth() + 1).padStart(2, '0')}${String(d.getUTCDate()).padStart(2, '0')}`;
+  return `${hash}-${date}`;
+}
 
 export default defineConfig({
+  define: {
+    __APP_VERSION__: JSON.stringify(appVersion())
+  },
+  build: {
+    rollupOptions: {
+      output: {
+        // C7: librerías pesadas en chunks con nombre propio (se cargan bajo
+        // demanda y las de exportación no se precachean en la PWA).
+        manualChunks(id) {
+          if (!id.includes('node_modules')) return undefined;
+          if (/[\\/](docx|pptxgenjs|jszip)[\\/]/.test(id)) return 'vendor-export';
+          if (/[\\/](jspdf|jspdf-autotable|html2canvas|canvg|dompurify)[\\/]/.test(id)) return 'vendor-jspdf';
+          if (/[\\/]pdfjs-dist[\\/]/.test(id)) return 'vendor-pdfjs';
+          if (/[\\/]xlsx[\\/]/.test(id)) return 'vendor-xlsx';
+          if (/[\\/](recharts|d3-[a-z]+|victory-vendor)[\\/]/.test(id)) return 'vendor-charts';
+          return undefined;
+        }
+      }
+    }
+  },
   plugins: [
     react(),
     VitePWA({
-      registerType: 'autoUpdate',
+      // §2.1: 'prompt' + <UpdatePrompt/> (antes 'autoUpdate' dejaba la pestaña
+      // con el bundle viejo hasta cerrar todas las pestañas).
+      registerType: 'prompt',
       includeAssets: ['favicon.svg', 'icons/favicon-16.png', 'icons/favicon-32.png', 'icons/apple-touch-icon.png'],
       manifest: {
         name: 'Nokfi — Análisis financiero para pymes',
@@ -25,8 +59,12 @@ export default defineConfig({
         ]
       },
       workbox: {
+        globIgnores: ['**/vendor-export-*.js', '**/vendor-jspdf-*.js', '**/pdf.worker*', '**/fonts/**'],
         runtimeCaching: [
-          { urlPattern: ({ url }) => url.pathname.startsWith('/api/'), handler: 'NetworkOnly' }
+          { urlPattern: ({ url }) => url.pathname.startsWith('/api/'), handler: 'NetworkOnly' },
+          // Chunks cargados bajo demanda: se cachean al usarse (nombres con hash → inmutables).
+          { urlPattern: ({ url }) => url.pathname.startsWith('/assets/') || url.pathname.startsWith('/fonts/'), handler: 'CacheFirst',
+            options: { cacheName: 'nokfi-assets', expiration: { maxEntries: 60, maxAgeSeconds: 60 * 60 * 24 * 60 } } }
         ]
       }
     })

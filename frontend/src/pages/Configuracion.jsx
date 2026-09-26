@@ -1,10 +1,14 @@
 import { useState, useEffect } from 'react';
-import { useOutletContext } from 'react-router-dom';
-import { Moon, Sun, LogOut, KeyRound, Copy, Eye, EyeOff, Loader2, CreditCard, Check, CloudOff } from 'lucide-react';
+import { useOutletContext, Link } from 'react-router-dom';
+import { Moon, Sun, LogOut, KeyRound, Copy, Eye, EyeOff, Loader2, CreditCard, Check, CloudOff, Code2, Trash2, Download, Lock, BellRing, LifeBuoy, ExternalLink } from 'lucide-react';
+import { SECTORS } from '../components/OnboardingModal';
+import { LANGUAGES } from '../i18n/languages';
+import { Modal, ErrorBox } from '../components/ui';
+import { saveBlob } from '../middleware/exports/model';
 import { useTheme } from '../context/ThemeContext';
 import { useLang } from '../context/LangContext';
 import { useAuth } from '../context/AuthContext';
-import { authApi, paymentsApi } from '../middleware/api';
+import { authApi, paymentsApi, keysApi, meApi } from '../middleware/api';
 import PasswordGenerator from '../components/PasswordGenerator';
 import PageHeader from '../components/PageHeader';
 import { useToast } from '../context/ToastContext';
@@ -29,25 +33,48 @@ export default function Configuracion() {
           ]} />
         </Row>
         <Row label={t('config.language')}>
-          <Segmented value={lang} onChange={setLang} options={[
-            { value: 'es', label: 'Español' },
-            { value: 'en', label: 'English' }
-          ]} />
+          <select value={lang} onChange={(e) => { setLang(e.target.value); updateProfile({ lang: e.target.value }); }} className="input !w-auto !h-9 text-sm" aria-label={t('config.language')}>
+            {LANGUAGES.map(l => <option key={l.code} value={l.code}>{l.name}</option>)}
+          </select>
         </Row>
       </Section>
 
       <Section title={t('config.profile')} aside={<SaveIndicator state={saveState} />}>
         <Field id="cfg-company" label={t('config.companyName')} value={profile.companyName} placeholder={t('onboarding.companyPlaceholder')}
           autoComplete="organization" onChange={(v) => updateProfile({ companyName: v })} disabled={loading} />
-        <Field id="cfg-sector" label={t('config.sector')} value={profile.sector} placeholder={t('config.sectorPlaceholder')}
-          onChange={(v) => updateProfile({ sector: v })} disabled={loading} />
+        {/* §4.3: el sector es el MISMO desplegable del onboarding (antes texto libre). */}
+        <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-1.5 sm:gap-4">
+          <label htmlFor="cfg-sector" className="text-sm shrink-0" style={{ color: 'var(--text-secondary)' }}>{t('config.sector')}</label>
+          <select id="cfg-sector" value={profile.sector} onChange={(e) => updateProfile({ sector: e.target.value })} disabled={loading} className="input sm:!w-72">
+            <option value="">{t('onboarding.sectorSelect')}</option>
+            {SECTORS.map(s => <option key={s.value} value={s.value}>{t(`onboarding.sectors.${s.key}`)}</option>)}
+          </select>
+        </div>
+        <Row label={t('config.legalForm')}>
+          <Segmented value={profile.legalForm || ''} onChange={(v) => updateProfile({ legalForm: v })} options={[
+            { value: 'autonomo', label: t('config.legalAutonomo') },
+            { value: 'sociedad', label: t('config.legalSociedad') }
+          ]} />
+        </Row>
+        <Field id="cfg-taxid" label={t('config.taxId')} value={profile.taxId || ''} placeholder="12345678Z"
+          onChange={(v) => updateProfile({ taxId: v.toUpperCase() })} disabled={loading} />
+        <p className="text-xs -mt-1" style={{ color: 'var(--text-muted)' }}>{t('config.taxIdHint')}</p>
+        <label className="flex items-start gap-2.5 text-sm cursor-pointer pt-1" style={{ color: 'var(--text-primary)' }}>
+          <input type="checkbox" checked={!!profile.fiscalReminders} onChange={(e) => updateProfile({ fiscalReminders: e.target.checked })} className="w-4 h-4 mt-0.5" />
+          <span><span className="font-medium inline-flex items-center gap-1.5"><BellRing size={14} /> {t('finance.calendar.remind')}</span>
+            <span className="block text-xs mt-0.5" style={{ color: 'var(--text-muted)' }}>{t('finance.calendar.remindHint')}</span></span>
+        </label>
       </Section>
 
       <SubscriptionSection />
 
+      <ApiKeysSection />
+
       <RevealKeySection />
 
       <ChangePasswordSection />
+
+      <MyDataSection />
 
       <Section title={t('config.session')}>
         <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
@@ -55,6 +82,10 @@ export default function Configuracion() {
             <p className="text-sm truncate" style={{ color: 'var(--text-primary)' }}>{license?.email}</p>
             <p className="text-xs" style={{ color: 'var(--text-muted)' }}>
               {t('config.planLabel')}: {(license?.plan || '').toUpperCase()} · {t('config.deviceLabel')}: {license?.device_name || '—'}
+            </p>
+            {/* §2.2: versión visible para soporte ("¿qué versión ves?"). */}
+            <p className="text-xs mt-1" style={{ color: 'var(--text-muted)' }}>
+              {t('config.version')}: <code>{__APP_VERSION__}</code> · <Link to="/app/ayuda" className="link inline-flex items-center gap-1"><LifeBuoy size={12} /> {t('nav.help')}</Link>
             </p>
           </div>
           <button onClick={logout} className="btn btn-danger btn-sm">
@@ -200,6 +231,160 @@ function SubscriptionSection() {
         <p className="text-xs mt-1" style={{ color: 'var(--text-muted)' }}>{t('config.legacyNote')}</p>
       )}
     </Section>
+  );
+}
+
+/* ── F4: claves de API (solo Pro y Max; el backend lo valida SIEMPRE) ── */
+function ApiKeysSection() {
+  const { t, lang } = useLang();
+  const toast = useToast();
+  const [data, setData] = useState(null);
+  const [name, setName] = useState('');
+  const [creating, setCreating] = useState(false);
+  const [created, setCreated] = useState(null);
+  const [error, setError] = useState(null);
+
+  const load = async () => {
+    const res = await keysApi.list();
+    if (res.ok) setData(res.data);
+  };
+  useEffect(() => { load(); }, []);
+
+  const create = async (e) => {
+    e.preventDefault();
+    setCreating(true); setError(null);
+    const res = await keysApi.create(name.trim());
+    setCreating(false);
+    if (res.ok) { setCreated(res.data.key); setName(''); load(); }
+    else setError(apiErrorMessage(t, res));
+  };
+  const revoke = async (k) => {
+    if (!window.confirm(t('config.api.confirmRevoke'))) return;
+    const res = await keysApi.revoke(k.id);
+    if (res.ok) { toast.success(t('config.api.revoked')); load(); } else toast.error(apiErrorMessage(t, res));
+  };
+  const copy = async () => { try { await navigator.clipboard.writeText(created); toast.success(t('common.copied')); } catch { /* nada */ } };
+
+  if (!data) return null;
+  const active = data.keys.filter(k => !k.revoked_at);
+
+  return (
+    <Section title={t('config.api.title')} aside={<Link to="/api-docs" className="link text-xs normal-case tracking-normal inline-flex items-center gap-1">{t('config.api.docs')} <ExternalLink size={11} /></Link>}>
+      <p className="text-xs" style={{ color: 'var(--text-muted)' }}>{t('config.api.desc')}</p>
+      {!data.available ? (
+        <div className="rounded-xl p-3.5 flex items-start gap-3" style={{ background: 'var(--surface-2)' }}>
+          <Lock size={16} className="mt-0.5 shrink-0" style={{ color: 'var(--text-muted)' }} />
+          <div className="text-sm">
+            <p style={{ color: 'var(--text-primary)' }}>{t('config.api.locked')}</p>
+            <p className="text-xs mt-1" style={{ color: 'var(--text-secondary)' }}>{t('config.api.lockedHint')}</p>
+          </div>
+        </div>
+      ) : (
+        <>
+          {created && (
+            <div className="rounded-xl p-3.5 flex flex-col gap-2 anim-fade" style={{ background: 'var(--positive-soft)' }}>
+              <p className="text-sm font-medium" style={{ color: 'var(--text-primary)' }}>{t('config.api.createdOnce')}</p>
+              <div className="flex items-center gap-2 rounded-lg pl-3 pr-1.5 py-1.5" style={{ background: 'var(--surface-1)', border: '1px solid var(--border-strong)' }}>
+                <code className="flex-1 text-xs break-all" style={{ color: 'var(--text-primary)' }}>{created}</code>
+                <button onClick={copy} className="btn btn-ghost btn-sm !px-2.5" aria-label={t('common.copy')}><Copy size={15} /></button>
+              </div>
+              <button onClick={() => setCreated(null)} className="text-xs self-start hover:underline" style={{ color: 'var(--text-secondary)' }}>{t('config.api.savedIt')}</button>
+            </div>
+          )}
+          {active.length > 0 && (
+            <ul className="flex flex-col gap-1.5">
+              {active.map(k => (
+                <li key={k.id} className="flex items-center gap-3 rounded-lg px-3 py-2" style={{ background: 'var(--surface-2)' }}>
+                  <Code2 size={15} className="shrink-0" style={{ color: 'var(--accent-text)' }} />
+                  <div className="flex-1 min-w-0">
+                    <p className="text-sm truncate" style={{ color: 'var(--text-primary)' }}>{k.name || t('config.api.unnamed')} <code className="text-xs" style={{ color: 'var(--text-muted)' }}>{k.prefix}…</code></p>
+                    <p className="text-xs" style={{ color: 'var(--text-muted)' }}>{k.last_used_at ? t('config.api.lastUsed').replace('{date}', new Date(k.last_used_at.replace(' ', 'T') + 'Z').toLocaleString(localeOf(lang))) : t('config.api.neverUsed')}</p>
+                  </div>
+                  <button onClick={() => revoke(k)} className="btn btn-ghost btn-sm !px-2" aria-label={t('config.api.revoke')} title={t('config.api.revoke')}><Trash2 size={14} /></button>
+                </li>
+              ))}
+            </ul>
+          )}
+          <form onSubmit={create} className="flex flex-col sm:flex-row gap-2">
+            <input value={name} onChange={(e) => setName(e.target.value)} maxLength={60} placeholder={t('config.api.namePlaceholder')} aria-label={t('config.api.namePlaceholder')} className="input flex-1" />
+            <button type="submit" disabled={creating} className="btn btn-secondary">{creating ? <Loader2 size={15} className="animate-spin" /> : <KeyRound size={15} />} {t('config.api.create')}</button>
+          </form>
+          {error && <ErrorMsg>{error}</ErrorMsg>}
+        </>
+      )}
+    </Section>
+  );
+}
+
+/* ── C9: descargar y borrar mis datos (RGPD autoservicio) ── */
+function MyDataSection() {
+  const { t } = useLang();
+  const { license, logout } = useAuth();
+  const toast = useToast();
+  const [exporting, setExporting] = useState(false);
+  const [deleting, setDeleting] = useState(false);
+
+  const download = async () => {
+    setExporting(true);
+    const res = await meApi.export();
+    setExporting(false);
+    if (!res.ok) { toast.error(apiErrorMessage(t, res)); return; }
+    saveBlob(new Blob([JSON.stringify(res.data, null, 2)], { type: 'application/json' }), 'nokfi-mis-datos.json');
+  };
+
+  return (
+    <Section title={t('config.data.title')}>
+      <p className="text-xs" style={{ color: 'var(--text-muted)' }}>{t('config.data.desc')}</p>
+      <div className="flex flex-col sm:flex-row gap-2">
+        <button onClick={download} disabled={exporting} className="btn btn-secondary">
+          {exporting ? <Loader2 size={15} className="animate-spin" /> : <Download size={15} />} {t('config.data.download')}
+        </button>
+        <button onClick={() => setDeleting(true)} className="btn btn-danger"><Trash2 size={15} /> {t('config.data.delete')}</button>
+      </div>
+      {deleting && <DeleteAccountModal license={license} onClose={() => setDeleting(false)} onDeleted={() => { toast.info(t('config.data.deleted')); logout(); }} />}
+    </Section>
+  );
+}
+
+function DeleteAccountModal({ license, onClose, onDeleted }) {
+  const { t } = useLang();
+  const [password, setPassword] = useState('');
+  const [confirmText, setConfirmText] = useState('');
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState(null);
+  const word = t('config.data.confirmWord');
+  const subActive = license?.has_subscription && !license?.cancel_at_period_end && license?.billing_model !== 'legacy';
+
+  const submit = async (e) => {
+    e.preventDefault();
+    setLoading(true); setError(null);
+    const res = await meApi.remove(password);
+    setLoading(false);
+    if (res.ok) onDeleted();
+    else if (res.data?.error === 'invalid_credentials') setError(t('config.wrongPassword'));
+    else setError(apiErrorMessage(t, res));
+  };
+
+  return (
+    <Modal title={t('config.data.deleteTitle')} onClose={onClose}
+      footer={<>
+        <button type="button" onClick={onClose} className="btn btn-secondary">{t('common.cancel')}</button>
+        <button type="submit" form="delete-account" disabled={loading || !password || confirmText.trim().toUpperCase() !== word.toUpperCase()} className="btn btn-danger">
+          {loading && <Loader2 size={15} className="animate-spin" />} {t('config.data.deleteForever')}
+        </button>
+      </>}>
+      <form id="delete-account" onSubmit={submit} className="flex flex-col gap-3">
+        <p className="text-sm" style={{ color: 'var(--text-secondary)' }}>{t('config.data.deleteWarning')}</p>
+        {subActive && <ErrorBox>{t('errors.subscription_active')}</ErrorBox>}
+        <input type="password" autoComplete="current-password" value={password} onChange={(e) => setPassword(e.target.value)}
+          placeholder={t('config.currentPassword')} aria-label={t('config.currentPassword')} className="input" />
+        <label className="text-sm" style={{ color: 'var(--text-secondary)' }}>
+          {t('config.data.typeToConfirm').replace('{word}', word)}
+          <input value={confirmText} onChange={(e) => setConfirmText(e.target.value)} className="input mt-1.5" aria-label={t('config.data.typeToConfirm').replace('{word}', word)} />
+        </label>
+        {error && <ErrorBox>{error}</ErrorBox>}
+      </form>
+    </Modal>
   );
 }
 

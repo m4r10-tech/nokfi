@@ -244,7 +244,53 @@ async function sendRecoveredKeysEmail({ to, keys }) {
   return dispatch({ to, subject: 'Tus claves de licencia — Nokfi', html });
 }
 
+/* ── C4 (sesión 4): aviso del calendario fiscal, en el idioma del usuario ── */
+const FISCAL_TEXTS = {
+  es: { subject: (m, d) => `Nokfi · Quedan ${d} día${d === 1 ? '' : 's'}: modelos ${m}`, title: 'Aviso del calendario fiscal',
+        lead: (m, p, date, d) => `Los modelos <strong>${m}</strong> (${p}) se presentan hasta el <strong>${date}</strong>: quedan ${d} día${d === 1 ? '' : 's'}.`,
+        cond: 'Solo si te aplica (trabajadores, profesionales o alquiler de local).', dom: 'Si lo domicilias, el plazo del banco suele acabar unos días antes.',
+        cta: 'Ver impuestos estimados en Nokfi', legal: 'Fechas orientativas (sin festivos). Confírmalas en la sede de la AEAT o con tu gestoría.', off: 'Puedes desactivar estos avisos en Configuración.' },
+  en: { subject: (m, d) => `Nokfi · ${d} day${d === 1 ? '' : 's'} left: forms ${m}`, title: 'Tax calendar reminder',
+        lead: (m, p, date, d) => `Spanish tax forms <strong>${m}</strong> (${p}) are due by <strong>${date}</strong>: ${d} day${d === 1 ? '' : 's'} left.`,
+        cond: 'Only if it applies to you (employees, freelancers you pay or rented premises).', dom: 'If you pay by direct debit, the bank deadline usually ends a few days earlier.',
+        cta: 'See estimated taxes in Nokfi', legal: 'Approximate dates (public holidays not included). Confirm them with the Spanish Tax Agency or your accountant.', off: 'You can turn off these reminders in Settings.' },
+  fr: { subject: (m, d) => `Nokfi · Plus que ${d} jour${d === 1 ? '' : 's'} : formulaires ${m}`, title: 'Rappel du calendrier fiscal',
+        lead: (m, p, date, d) => `Les formulaires espagnols <strong>${m}</strong> (${p}) sont à déposer avant le <strong>${date}</strong> : il reste ${d} jour${d === 1 ? '' : 's'}.`,
+        cond: 'Uniquement si cela vous concerne (salariés, professionnels ou local loué).', dom: 'En cas de prélèvement, le délai bancaire se termine généralement quelques jours avant.',
+        cta: 'Voir les impôts estimés dans Nokfi', legal: 'Dates indicatives (hors jours fériés). Vérifiez-les auprès de l’AEAT ou de votre comptable.', off: 'Vous pouvez désactiver ces rappels dans Paramètres.' },
+  it: { subject: (m, d) => `Nokfi · Mancano ${d} giorn${d === 1 ? 'o' : 'i'}: modelli ${m}`, title: 'Promemoria del calendario fiscale',
+        lead: (m, p, date, d) => `I modelli spagnoli <strong>${m}</strong> (${p}) vanno presentati entro il <strong>${date}</strong>: mancano ${d} giorn${d === 1 ? 'o' : 'i'}.`,
+        cond: 'Solo se ti riguarda (dipendenti, professionisti o locale in affitto).', dom: 'Con l’addebito diretto, la scadenza della banca di solito termina qualche giorno prima.',
+        cta: 'Vedi le imposte stimate in Nokfi', legal: 'Date indicative (senza festività). Verificale con l’AEAT o con il tuo commercialista.', off: 'Puoi disattivare questi promemoria in Impostazioni.' },
+  de: { subject: (m, d) => `Nokfi · Noch ${d} Tag${d === 1 ? '' : 'e'}: Formulare ${m}`, title: 'Erinnerung an den Steuerkalender',
+        lead: (m, p, date, d) => `Die spanischen Formulare <strong>${m}</strong> (${p}) sind bis zum <strong>${date}</strong> fällig: noch ${d} Tag${d === 1 ? '' : 'e'}.`,
+        cond: 'Nur falls zutreffend (Beschäftigte, Freiberufler oder gemietete Räume).', dom: 'Bei Lastschrift endet die Frist der Bank meist einige Tage früher.',
+        cta: 'Geschätzte Steuern in Nokfi ansehen', legal: 'Richtwerte (ohne Feiertage). Bitte bei der AEAT oder deinem Steuerberater prüfen.', off: 'Du kannst diese Erinnerungen in den Einstellungen deaktivieren.' },
+  pl: { subject: (m, d) => `Nokfi · Zostało dni: ${d} — formularze ${m}`, title: 'Przypomnienie z kalendarza podatkowego',
+        lead: (m, p, date, d) => `Hiszpańskie formularze <strong>${m}</strong> (${p}) należy złożyć do <strong>${date}</strong>. Zostało dni: ${d}.`,
+        cond: 'Tylko jeśli dotyczy (pracownicy, zleceniobiorcy lub wynajmowany lokal).', dom: 'Przy polecenia zapłaty termin banku kończy się zwykle kilka dni wcześniej.',
+        cta: 'Zobacz szacowane podatki w Nokfi', legal: 'Daty orientacyjne (bez świąt). Sprawdź je w AEAT lub u swojego księgowego.', off: 'Możesz wyłączyć te przypomnienia w Ustawieniach.' }
+};
+
+async function sendFiscalReminderEmail({ to, lang, deadline, daysLeft }) {
+  const tx = FISCAL_TEXTS[lang] || FISCAL_TEXTS.es;
+  const models = deadline.models.join(', ');
+  const html = baseTemplate({
+    title: tx.title,
+    bodyHtml: `
+      <h2 style="margin-top:0;color:#F5F5F5;">${escapeHtml(tx.title)}</h2>
+      <p style="color:#c9c9c5;line-height:1.6;">${tx.lead(escapeHtml(models), escapeHtml(deadline.period), escapeHtml(deadline.date), daysLeft)}</p>
+      ${deadline.conditional ? `<p style="color:#c9c9c5;line-height:1.6;">${escapeHtml(tx.cond)}</p>` : ''}
+      <p style="color:#c9c9c5;line-height:1.6;">${escapeHtml(tx.dom)}</p>
+      <p style="margin:24px 0;"><a href="${APP_URL}/app/finanzas/impuestos" style="background:#1456A2;color:#fff;padding:12px 18px;border-radius:8px;text-decoration:none;">${escapeHtml(tx.cta)}</a></p>
+      <p style="color:#6b6b67;font-size:12px;line-height:1.6;">${escapeHtml(tx.legal)}<br>${escapeHtml(tx.off)}</p>
+    `
+  });
+  return dispatch({ to, subject: tx.subject(models, daysLeft), html });
+}
+
 module.exports = {
+  sendFiscalReminderEmail,
   sendLicenseKeyEmail,
   sendPasswordResetEmail,
   sendPasswordResetLimitEmail,

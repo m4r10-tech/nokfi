@@ -7,7 +7,7 @@ export default {
   },
   nav: {
     home: 'Home', questionnaire: 'Questionnaire', questionnaireShort: 'Diagnosis', excel: 'Excel Analysis', excelShort: 'Excel',
-    history: 'History', calculators: 'Calculators', reports: 'Reports',
+    history: 'History', calculators: 'Calculators', reports: 'Reports', finance: 'Finance', help: 'Help',
     settings: 'Settings', logout: 'Log out', more: 'More', mainNav: 'Main navigation',
     collapse: 'Collapse menu', expand: 'Expand menu', lightMode: 'Light mode', darkMode: 'Dark mode'
   },
@@ -73,7 +73,27 @@ export default {
     status_active: 'Active', status_suspended: 'Suspended', status_expired: 'Expired', status_revoked: 'Revoked', status_past_due: 'Payment due',
     wrongPassword: 'The password is incorrect.', keyCopied: 'Key copied to clipboard',
     legacyNote: 'This is a legacy (lifetime) license. There is no Stripe subscription to manage.',
-    portalError: 'Could not open the management portal. Please try again later.'
+    portalError: 'Could not open the management portal. Please try again later.',
+    legalForm: 'Legal form', legalAutonomo: 'Self-employed', legalSociedad: 'Company',
+    taxId: 'Tax ID (NIF / CIF)', taxIdHint: 'Used to tell your issued invoices from the ones you receive when the AI reads them.',
+    version: 'Version',
+    api: {
+      title: 'API for automations', docs: 'Documentation',
+      desc: 'Connect Nokfi to n8n, Make, Zapier or your own scripts. Each API analysis uses 1 of your daily quota, just like on the web.',
+      locked: 'The API is available on the Pro and Max plans.', lockedHint: 'You can upgrade from “Manage subscription”.',
+      namePlaceholder: 'Key name (e.g. n8n)', create: 'Create key',
+      createdOnce: 'Copy your key now: for security we will not show it again.', savedIt: 'I have saved it',
+      unnamed: 'Unnamed', lastUsed: 'Last used: {date}', neverUsed: 'Not used yet',
+      revoke: 'Revoke', confirmRevoke: 'Revoke this key? Automations using it will stop working.', revoked: 'Key revoked'
+    },
+    data: {
+      title: 'My data',
+      desc: 'Download everything Nokfi stores about you (profile, history, ledger, tasks…) or delete your account.',
+      download: 'Download my data (JSON)', delete: 'Delete my account',
+      deleteTitle: 'Delete account', confirmWord: 'DELETE',
+      deleteWarning: 'Your license, profile, analysis history, invoice ledger, tasks and API keys will be deleted forever. This cannot be undone. If you have an active subscription, cancel it first from “Manage subscription”.',
+      typeToConfirm: 'Type {word} to confirm', deleteForever: 'Delete forever', deleted: 'Your account has been deleted.'
+    }
   },
   pricing: {
     title: 'Choose your plan', subtitle: 'Monthly subscription. Cancel anytime.',
@@ -85,9 +105,9 @@ export default {
     faqLink: 'Frequently asked questions',
     cta: 'Subscribe', goLogin: 'I already have a license — log in',
     features: {
-      mini: ['10 AI analyses per day', 'Full diagnosis', '6 Excel analyses', 'History'],
-      pro: ['50 AI analyses per day', 'Everything in Mini', 'Advanced calculators', 'Reports'],
-      max: ['130 AI analyses per day', 'Everything in Pro', 'Priority support', 'Early access to new features']
+      mini: ['10 AI analyses per day', 'Diagnosis with health score', 'AI-read invoices, taxes and receivables', 'Excel, folders and cash forecast', 'Unlimited AI assistant'],
+      pro: ['50 AI analyses per day', 'Everything in Mini', 'API for automations (n8n, Make, Zapier)'],
+      max: ['130 AI analyses per day', 'Everything in Pro', 'Priority support']
     },
     aiBadge: 'AI analyses/day',
     trialBadge: '14-day free trial',
@@ -122,7 +142,17 @@ export default {
     quickActions: 'Quick actions',
     qaDiagnosis: 'Business diagnosis', qaDiagnosisDesc: 'Financial health and priorities',
     qaExcel: 'Analyse an Excel file', qaExcelDesc: 'Sales, cash, stock and more',
-    qaCalc: 'Calculators', qaCalcDesc: 'Break-even, margins and ROI'
+    qaCalc: 'Calculators', qaCalcDesc: 'Break-even, margins and ROI',
+    qaLedger: 'Read invoices', qaLedgerDesc: 'Ledger, taxes and receivables up to date',
+    stepLedger: 'Upload your first invoices', stepLedgerDesc: 'The AI reads them and works out taxes, receivables and cash.',
+    healthEmpty: 'Take the diagnosis to get your financial health score',
+    actionsTitle: 'Your action plan', actionsEmpty: 'When you run a diagnosis or an analysis, its recommendations will show up here as tasks.',
+    actionsAllDone: 'All done! Run a new analysis to keep improving.',
+    financeEmptyTitle: 'Read your invoices with AI', financeEmptyDesc: 'Nokfi will build your ledger and tell you how much to set aside for taxes, who owes you and how your cash will go.',
+    fTaxes: 'Taxes {q}', fReceivables: 'To collect', fOverdue: '{v} over 60 days', fLeaks: 'Leaks this month',
+    fLeaksHint: '{n} alerts', fForecast: 'Cash in 90 days', fBelow: 'Below threshold on {date}', fForecastOk: 'No cash alerts',
+    fForecastSetup: 'Enter your balance to see the forecast',
+    nextDeadline: 'Next deadline: forms {m} · {date} · {n} days left'
   },
   questionnaire: {
     reportTitle: 'Business diagnosis',
@@ -212,7 +242,7 @@ export default {
     non_json_response: 'The server is not responding. Please try again in a few minutes.',
     server: 'The server is not responding. Please try again in a few minutes.',
     session_invalid: 'Your session has expired. Please sign in again.',
-    license_inactive: 'Your license is suspended or expired. Check your subscription or contact support (info@nokfi.app).',
+    license_inactive: 'Your license is suspended or expired. Check your subscription or contact support (soporte@nokfi.app).',
     otp_limit_reached: 'You have requested too many codes. Wait a few minutes before requesting another one.',
     reset_limit_reached: 'Too many requests. Wait an hour and try again.',
     rate_limited: 'Too many attempts in a row. Wait a few minutes and try again.',
@@ -259,7 +289,7 @@ export default {
       { n: 30, suffix: '', label: 'diagnosis questions' },
       { n: 6, suffix: '', label: 'AI-powered Excel analyses' },
       { n: 14, suffix: ' days', label: 'free trial' },
-      { n: 100, suffix: '%', label: 'of your files are read in your browser' }
+      { n: 8, suffix: '', label: 'export formats' }
     ],
     howEyebrow: 'How it works', howHeading: 'From your numbers to an action plan',
     howSubtitle: 'Nothing to install and no training needed. In a few minutes you know where the margin is.',
@@ -269,7 +299,7 @@ export default {
       { t: 'Get your action plan', d: 'A clear report: what to cut, what to reinforce and what to do in the next 30 days. Export it to PDF or Excel.' }
     ],
     modulesEyebrow: 'Modules',
-    plansSubtitle: 'Every plan includes the same features; only the daily AI analysis quota changes.',
+    plansSubtitle: 'Every plan includes all the app features; the daily AI analysis quota changes. Pro and Max add the API.',
     finalSubtitle: 'Start with a 14-day trial on the Mini plan. No lock-in.',
     checkoutCancelled: 'Payment cancelled: nothing was charged. You can try again whenever you like.',
     navHow: 'How it works', navModules: 'Modules', navPricing: 'Pricing', navFaq: 'FAQ',
@@ -282,10 +312,12 @@ export default {
     aboutHeading: 'What Nokfi is',
     aboutBody: 'AI-powered financial diagnosis and data analysis in plain language, nothing to install. Built for freelancers and small businesses that run on Excel and don\'t want to spend hours sorting numbers.',
     aboutFeatures: [
-      { t: 'Diagnosis questionnaire', d: '5 quick blocks of questions; the AI returns your financial health and what to prioritise.' },
-      { t: '6 Excel analyses with AI', d: 'Stock, sales, services, inputs, cash and total profit. Upload your file and get conclusions.' },
-      { t: 'Consultancy-style report', d: 'Concrete, actionable recommendations — not contextless charts.' },
-      { t: 'Calculators & history', d: 'Break-even, margin and ROI; revisit past analyses and export them to PDF or Excel.' }
+      { t: 'Diagnosis with a health score', d: '30 quick questions; a 0–100 score built on clear rules and an action plan you can tick off.' },
+      { t: 'Excel, PDF and folders with AI', d: 'Stock, sales, cash, profit… or a whole folder. Compare periods and understand what changed.' },
+      { t: 'Invoices read by AI', d: 'Photos or PDFs of your invoices → an automatic income and expense ledger you review and export for your accountant.' },
+      { t: 'Taxes, receivables and cash', d: 'How much to set aside for VAT and income tax, who owes you, which costs are leaking and your balance 90 days out.' },
+      { t: 'Reports you can understand', d: 'Summary, priorities by severity, a plain-language glossary and export to PDF, Word, Excel or PowerPoint.' },
+      { t: 'Calculators, calendar and assistant', d: 'Break-even, margins and ROI, tax deadline reminders and an assistant for your questions.' }
     ],
     plansHeading: 'Plans & pricing',
     choosePlan: 'Subscribe',
@@ -295,13 +327,18 @@ export default {
     faqHeading: 'Frequently asked questions',
     faqItems: [
       { q: 'What is Nokfi?', a: 'A web app for financial diagnosis aimed at freelancers and small businesses: a guided questionnaire, AI analysis of your Excel sheets and PDFs, financial calculators and reports you can export to PDF and Excel.' },
-      { q: 'Do I have to install anything or upload my files?', a: 'No. It runs in your browser, nothing to install. Your Excel and PDF files are read locally on your own device: they are never uploaded to our servers.' },
+      { q: 'Do I have to install anything or upload my files?', a: 'Nothing to install: it runs in your browser. Your Excel files, PDFs and folders are read on your own device and are not stored on our servers. Only when reading scanned or photographed invoices is a reduced copy sent to the AI to read it, without storing it.' },
       { q: 'How does the free trial work?', a: 'The Mini plan includes a 14-day free trial. A card is required at sign-up, but nothing is charged until the trial ends. Cancel before it ends and you pay nothing.' },
       { q: 'Can I change plans or cancel anytime?', a: 'Yes, no lock-in. From Settings you open the Stripe portal to switch plans or cancel; changes take effect at the end of the current period.' },
-      { q: 'What is the difference between plans?', a: 'All plans include the same features; they differ in the daily AI analysis quota: 10 per day on Mini, 50 on Pro and 130 on Max.' }
+      { q: 'What is the difference between plans?', a: 'Every plan includes all the app features (diagnosis, Excel and folders, AI-read invoices, taxes, receivables, cash forecast and the assistant). The daily AI analysis quota changes: 10 per day on Mini, 50 on Pro and 130 on Max. Pro and Max also include the API for automations (n8n, Make, Zapier), and Max includes priority support.' },
+      { q: 'Does Nokfi replace my accountant?', a: 'No. Nokfi keeps your invoices in order and tells you in advance how much to set aside for VAT and income tax, who owes you and how your cash will go, but these are estimates. Your accountant still has the final say — in fact, you can export the ledger for them as CSV or Excel.' }
     ],
     faqPrivacyLink: 'What do we do with your data? Read the privacy policy',
-    privacyLink: 'Privacy'
+    privacyLink: 'Privacy',
+    navContact: 'Contact', contactLink: 'Contact',
+    contactTitle: 'Questions?', contactSubtitle: 'Write to us. A real person replies, no bots.',
+    contactInfo: 'General questions, sales and privacy.',
+    contactSupport: 'Problems with your account, payments or the app.'
   },
   notFound: {
     title: 'Page not found',
@@ -355,31 +392,34 @@ export default {
   },
   privacy: {
     title: 'Privacy policy',
-    updated: 'Last updated: September 2026',
+    updated: 'Last updated: 26 September 2026',
     intro: 'This policy describes, in plain terms, which data Nokfi (nokfi.app) processes, why, and which third-party services are involved. It reflects exactly how the application works.',
     sections: [
-      { h: 'Controller & contact', ps: ['The data controller is Nokfi (nokfi.app). For any privacy question or to exercise your rights, write to info@nokfi.app.'] },
+      { h: 'Controller & contact', ps: ['The data controller is Nokfi (nokfi.app). For any privacy question or to exercise your rights, write to info@nokfi.app. For problems with your account or payments, write to soporte@nokfi.app.'] },
       { h: 'What data we process', list: [
-        'Account: your email, your license key and your password. The password is stored only as a cryptographic hash (scrypt); never in plain text.',
-        'Company profile (optional): name, sector, size and main expenses, used to personalise the analyses.',
-        'Analysis history: we store the AI-generated report and the size of the analysed content — not the full content of your files.',
+        'Account: your email, your license key and your password. The password is stored only as a cryptographic hash (scrypt), never in plain text.',
+        'Company profile: name, sector, size, main expenses and, if you provide them, legal form, tax ID, cash balance and preferred language. They are used to personalise analyses and calculations.',
+        'Analysis history: we store the report generated by the AI, your yes/no diagnosis answers and the size of the analysed content — not the full content of your files.',
+        'Invoice ledger: if you use invoice reading, we store the DATA you review and confirm (issuer or client, tax ID, date, number, amounts, VAT, withholding and whether it is paid). The invoice file itself is not stored.',
+        'Action plan, what you have set aside for taxes and your API keys (stored only as a hash).',
         'Subscription: Stripe customer and subscription identifiers, plan and status. We never see or store your card details.',
-        'Technical logs: IP address and security events (sign-ins, errors) to protect the service.'
+        'Technical logs: IP address and security events (sign-ins, errors) to protect the service. Application error reports include the technical message, the screen and the version, never your financial data.'
       ] },
-      { h: 'Your files are not uploaded to our servers', ps: [
-        'The Excel and PDF files you analyse are read locally, in your own browser. They are never uploaded to or stored on our servers.',
-        'To produce the analysis, the extracted text from your file is sent, through our server, to the AI service.'
+      { h: 'Your files are not stored on our servers', ps: [
+        'The Excel files, PDFs and folders you analyse are read locally, in your own browser. They are not stored on our servers.',
+        'To generate an analysis, the extracted text or rows are sent through our server to the AI service. When reading scanned or photographed invoices, a reduced copy of the image or PDF is also sent, only to read it; it is not stored either.'
       ] },
       { h: 'Third-party services involved', list: [
         'Stripe: processes payments and manages subscriptions.',
-        'Google Gemini: generates the AI analyses. Under the current service plan, Google may use submitted content according to its own terms; avoid including highly sensitive data in analyses.',
-        'Resend: sends transactional emails (your license key, password recovery).',
-        'Cloudflare: content delivery and security network protecting access to the site.'
+        'Google Gemini: generates the AI analyses and reads invoices. Under this service\'s current plan, Google may use the content sent according to its own terms; avoid including especially sensitive data.',
+        'Nokfi assistant: uses free AI models (Google Gemini and, if enabled, Groq, OpenRouter or Cloudflare Workers AI). Their free plans may use messages to improve their models: do not include third parties\' personal data. We do not store your conversations.',
+        'Resend: sends transactional emails (your license key, password recovery and, if you turn them on, tax calendar reminders).',
+        'Cloudflare: delivery and security network protecting access to the website. We use your connection\'s country (provided by Cloudflare) only to choose the website\'s initial language; we do not store it.'
       ] },
-      { h: 'Cookies & analytics', ps: ['Nokfi does not use tracking cookies or third-party analytics tools. Your session is stored in your browser’s local storage.'] },
-      { h: 'Retention & deletion', ps: ['We keep your data while your license is active. If the license is deleted, your profile, analysis history and sessions are deleted with it.'] },
-      { h: 'Your rights', ps: ['You can exercise your rights of access, rectification, erasure, portability and objection by writing to info@nokfi.app. You may also lodge a complaint with the Spanish Data Protection Agency (aepd.es).'] },
-      { h: 'Security', ps: ['We apply HTTPS across the service, scrypt-hashed passwords, session and recovery tokens stored as hashes, and periodic database backups on the server.'] }
+      { h: 'Cookies & analytics', ps: ['Nokfi does not use tracking cookies or third-party analytics tools. Your session, language and theme are kept in your browser\'s local storage.'] },
+      { h: 'Retention & deletion', ps: ['We keep your data while your license exists. From Settings → My data you can download all your data as a file or delete your account: your profile, history, invoice ledger, tasks, API keys and sessions are deleted with it. Technical error reports are deleted after 30 days.'] },
+      { h: 'Your rights', ps: ['You can exercise your rights of access, rectification, erasure, portability and objection from Settings or by writing to info@nokfi.app. You can also lodge a complaint with the Spanish Data Protection Agency (aepd.es).'] },
+      { h: 'Security', ps: ['We enforce HTTPS across the service, passwords hashed with scrypt, session tokens, recovery tokens and API keys stored as hashes, and regular database backups on the server.'] }
     ]
   },
   report: {
@@ -423,5 +463,127 @@ export default {
     ERR_XLSX_READ: 'The spreadsheet "{name}" could not be read (damaged or unsupported format).',
     ERR_IMAGE_READ: 'The image "{name}" could not be read.',
     ERR_FILE_READ: '"{name}" could not be read.'
-  }
+  },
+  finance: {
+    title: 'Finance', subtitle: 'Your invoice ledger, taxes, receivables and cash, always up to date.',
+    tabLedger: 'Ledger', tabTaxes: 'Taxes', tabReceivables: 'Receivables', tabLeaks: 'Leaks', tabForecast: 'Forecast', tabCalendar: 'Calendar',
+    disclaimer: 'Approximate estimates calculated from your ledger. This is not tax advice: always confirm with your accountant.',
+    year: 'Year', quarter: 'Quarter', fullYear: 'Year', type: 'Type', income: 'Income', expense: 'Expense', incomes: 'Income', expenses: 'Expenses',
+    date: 'Date', dueDate: 'Due date', client: 'Client', supplier: 'Supplier', party: 'Client / supplier', nif: 'Tax ID',
+    invoiceNumber: 'Invoice no.', concept: 'Description', category: 'Category', base: 'Net', vatRate: 'VAT %', vat: 'VAT',
+    irpfRate: 'IRPF %', irpf: 'Withholding', total: 'Total', paidCol: 'Paid/collected',
+    categories: { sales: 'Sales', services: 'Professional services', suppliers: 'Suppliers', rent: 'Rent', utilities: 'Utilities', staff: 'Staff', marketing: 'Marketing', tech: 'Technology', transport: 'Transport', other: 'Other' },
+    addEntry: 'Add manually', editEntry: 'Edit entry', readInvoices: 'Read invoices with AI',
+    markCollected: 'Collected', markPaid: 'Paid', collected: 'Collected', paid: 'Paid', pendingCollection: 'To collect', pendingPayment: 'To pay',
+    totalMismatch: 'Net + VAT − withholding does not match the total. Please check it.',
+    duplicateEntry: 'There is already an invoice with that number and tax ID in the ledger.',
+    confirmDelete: 'Delete this ledger entry?', deleted: 'Entry deleted', delete: 'Delete',
+    incomeBase: 'Income (net)', expenseBase: 'Expenses (net)', vatBalance: 'VAT to pay', result: 'Result',
+    reviewCount: '{n} entries do not add up: please review them.', search: 'Search…', ledgerSheet: 'Income and expense ledger',
+    emptyTitle: 'Your ledger is empty', emptyDesc: 'Upload photos or PDFs of your invoices (or a whole folder) and the AI will add them to the ledger. You just review.',
+    days: '{n} days',
+    import: {
+      title: 'Read invoices with AI',
+      desc: 'Choose photos or PDFs of invoices and receipts, or open a whole folder. The AI extracts issuer, tax ID, date, net amount, VAT, withholding and total; you review before saving.',
+      kind: 'What kind of invoices?', kindAuto: 'Detect with my tax ID', kindExpense: 'Expenses (received)', kindIncome: 'Income (issued)',
+      noTaxId: 'Add your tax ID in Settings to tell them apart automatically; otherwise they will be treated as expenses.',
+      formats: 'PDF, JPG, PNG or WebP · up to 60 invoices per read · files are not stored: only the data you confirm.',
+      willRead: '{n} invoices will be read. It will use 1 analysis of your daily quota.', capped: 'Only the first {max} will be read.',
+      start: 'Read invoices', preparing: 'Preparing', reading: 'Reading batch',
+      reviewHint: 'The AI can make mistakes. Check the amounts (especially the flagged ones) before saving.',
+      notInvoice: 'Not an invoice', duplicate: 'Duplicate', check: 'Check', noneFound: 'No invoices were found in the files.',
+      save: 'Save {n} to the ledger', saved: '{n} entries saved to the ledger',
+      dupesFound: '{n} invoices were already in the ledger.', skipDupes: 'Save without the duplicates', saveAnyway: 'Save all anyway'
+    },
+    taxes: {
+      headline: 'This quarter ({q}) you will have to pay approximately:', dueBy: 'Deadline: {date}',
+      reserved: 'You have set aside {v}', missing: '{v} still missing', covered: 'Covered', setAside: 'What I have set aside for taxes (€)',
+      vatRefund: 'This quarter your VAT is refundable or can be offset: {v}.',
+      vatTitle: 'Quarterly VAT (form 303)', vatOutput: 'Output VAT', vatInput: 'Input VAT', result: 'Result',
+      vatExplain: 'VAT on your issued invoices minus VAT on your expenses for the quarter.',
+      irpfTitle: 'Income tax instalment (form 130)', accIncome: 'Income so far this year', accExpense: 'Expenses so far this year',
+      netIncome: 'Net income', twentyPct: '20% of net income', prevPayments: 'Payments from previous quarters', withholdings: 'Withholdings applied to you',
+      companyNote: 'Companies do not file form 130: they make Corporate Tax instalments (form 202), outside Nokfi\'s calculation for now.',
+      noLegalForm: 'Tell us whether you are self-employed or a company to fine-tune the calculation.',
+      legal: 'Approximate estimate under the general regime (Spain). Excludes the equivalence surcharge, modules and Corporate Tax. This is not tax advice.'
+    },
+    receivables: {
+      pending: 'Pending collection', invoices: '{n} invoices', overdue60: 'Over 60 days', avgDays: 'Average collection days',
+      listTitle: 'Invoices to collect', age: '{n} days', clientAvg: 'this client usually pays in {n} days',
+      claim: 'Chase', claimTitle: 'Payment reminder · {name}', toneFriendly: 'Friendly', toneFirm: 'Firm', toneFormal: 'Formal',
+      writing: 'Writing…', subject: 'Subject', body: 'Message', openMail: 'Open in email',
+      reviewNote: 'Check the text before sending it. It is written by the free AI assistant.',
+      collectedToast: 'Invoice marked as collected', emptyTitle: 'Nobody owes you anything', emptyDesc: 'Here you will see issued invoices you have not collected yet.'
+    },
+    leaks: {
+      counter: 'Nokfi has helped you spot this month', counterNote: 'Only identified amounts (duplicate charges and price rises), not assumed savings.',
+      increases: 'Price rises', increaseLine: '{name}: +{pct}% since {since}', extraPerMonth: '{v} more per month',
+      duplicates: 'Possible duplicate charges', sameNumber: 'same invoice number', sameAmount: 'same amount within 7 days',
+      removeEntry: 'Remove from ledger', confirmRemove: 'Remove this duplicate entry from the ledger?',
+      recurring: 'Recurring costs and subscriptions', perMonth: '{v}/month', perYear: '{v}/year', months: 'in {n} different months',
+      recurringHint: 'Check whether you still use everything you pay for each month.',
+      emptyTitle: 'No leaks detected', emptyDesc: 'Once you have a few months of expenses in the ledger, subscriptions, duplicates and price rises will show up here.'
+    },
+    forecast: {
+      startTitle: 'Cash forecast', startDesc: 'Enter how much money you have today in the bank and in cash. With your ledger, Nokfi will work out how your balance will go over the next 90 days.',
+      balance: 'Current balance (€)', threshold: 'Alert me if I drop below (€)', today: 'Balance today', updated: 'Updated on {date}',
+      inDays: 'In {n} days', curve: 'Balance over time',
+      alert: 'Warning: on {date} you would drop below {v}.', minAt: 'Lowest point: {v} on {date}.', ok: 'You do not drop below {v} in the next {n} days.',
+      scenarios: 'Scenarios', hire: 'What if I hire someone? Monthly cost (€)', hireHint: 'Gross salary + social security.',
+      delay: 'What if I get paid late? Days of delay', extra: 'Expected monthly income not in the ledger (€)',
+      extraHint: 'Recurring sales you have not invoiced yet.', apply: 'Apply', reset: 'Clear scenarios',
+      movements: 'Expected movements', noMovements: 'No expected movements in this period.', updateBalance: 'Update balance',
+      method: 'Calculation: current balance + pending receivables (on their due date or based on how long each client takes) − pending payments − recurring costs − estimated taxes for the quarter.',
+      flow_receivable: 'Expected collection', flow_payable: 'Supplier payment', flow_recurring: 'Recurring cost', flow_tax: 'Taxes (303/130)',
+      flow_scenario_hire: 'New hire', flow_scenario_income: 'Expected income'
+    },
+    calendar: {
+      next: 'Next deadline', daysShort: 'days', models: 'Forms {m}', settings: 'Settings', all: 'All',
+      remind: 'Email me reminders', remindHint: '7 days and 1 day before each deadline.', yearTitle: 'Deadlines in {y}', ifApplies: 'If it applies',
+      legal: 'Approximate dates for the general regime in Spain (if a deadline falls on a weekend it moves to Monday; public holidays are not included). If you pay by direct debit, the bank deadline ends a few days earlier. Confirm with the Spanish Tax Agency or your accountant.',
+      kind_quarterly: 'Quarterly returns: VAT, income tax, withholdings and rent',
+      kind_withholdings: 'Withholdings for employees/freelancers (111) and rent (115)',
+      kind_vat_annual: 'Annual VAT summary (390)', kind_withholdings_annual: 'Annual withholding summaries (190/180)',
+      kind_third_parties: 'Transactions with third parties over €3,005.06 (347)', kind_income_tax_annual: 'Annual income tax return (100)',
+      kind_corporate_annual: 'Corporate Tax (200)', kind_corporate_installment: 'Corporate Tax instalment (202)'
+    }
+  },
+  folder: {
+    title: 'Analyse a folder', subtitle: 'Open a folder (invoices, statements, sheets…) and ask for what you need. It is read in your browser.',
+    hubTitle: 'Analyse a whole folder', hubDesc: 'Open a folder of invoices or documents and ask for a summary, totals or alerts.',
+    step1: '1 · Choose the folder', step2: '2 · What do you want to know?',
+    openFolder: 'Open folder', reopen: 'Reopen “{name}”', chooseFiles: 'Choose files',
+    mobileHint: 'Folders cannot be selected on mobile: select the files instead.',
+    formats: 'PDF, Excel, CSV, ODS or text · up to 200 files · opening the folder does not use any analysis.',
+    reading: 'Reading {n} of {total}…', filesRead: '{n} files read', selection: 'Selection',
+    capped: 'The folder has more than {max} files: the first {max} will be analysed ({n} are left out).',
+    moreErrors: 'and {n} more files could not be read.',
+    instructionPlaceholder: 'E.g.: Summarise these invoices: total per supplier and which ones are unpaid',
+    costNotice: '{n} files will be analysed. It will use 1 analysis of your daily quota even if it is processed in parts.',
+    analyze: 'Analyse folder', progress: 'Processing part {n} of {total}…', nothingReadable: 'There is no readable text in the files.',
+    defaultTitle: 'Folder summary'
+  },
+  help: {
+    title: 'Help', subtitle: 'Something not working or a question? Write to us.', contact: 'Contact',
+    supportDesc: 'Problems with your account, payments or the app. We open your email with your basic details filled in.',
+    infoDesc: 'General questions, sales and privacy.',
+    includedInfo: 'The support email includes your email, plan and app version. Never your license key or your financial data.',
+    supportSubject: 'Nokfi support', bodyIntro: 'Tell us what happened:', bodyEmail: 'Email', bodyPlan: 'Plan', bodyVersion: 'Version', bodyBrowser: 'Browser',
+    more: 'More resources', askAssistant: 'Ask the assistant', apiDocs: 'API documentation'
+  },
+  apiDocs: {
+    metaTitle: 'API — Nokfi', metaDesc: 'Nokfi API for automations with n8n, Make or Zapier.',
+    title: 'Nokfi API', intro: 'Run Nokfi analyses from n8n, Make, Zapier or your own scripts and get the report back as structured JSON, ready to chain.',
+    plans: 'Available on the Pro and Max plans',
+    authTitle: 'Authentication', authText: 'Create a key in Settings → API for automations and send it with every request:',
+    limits: 'Each analysis uses 1 of your daily quota (the same as on the web). Up to 30 requests per minute per key. If your plan drops to Mini, keys stop working (401 api_plan_required) but are not deleted.',
+    endpoints: 'Endpoints', ep_usage: 'Your quota today', ep_analyze: 'Run an analysis', ep_list: 'List analyses', ep_get: 'Get a report', ep_openapi: 'OpenAPI specification',
+    types: 'Analysis types: excel (modules stock, ventas, servicios, entradas, caja, total), compare (two periods), folder (several documents with one request) and cuestionario (30 yes/no answers).',
+    example: 'Example', response: 'Response: { id, type, title, report: { summary, key_figures, strengths, priorities, action_plan, glossary }, actions }.',
+    n8nTitle: 'Example with n8n',
+    n8nSteps: ['Create a “Header Auth / Bearer” credential with your nk_live_… key', 'Add an HTTP Request node: POST https://nokfi.app/api/v1/analyze with a JSON body', 'Use $json.report.summary or $json.report.priorities in the following nodes (email, Slack, sheet…)'],
+    spec: 'Full specification:', createKey: 'Create a key'
+  },
+  crash: { title: 'Something went wrong', desc: 'We have logged the error so we can fix it. Reload the page to continue.', reload: 'Reload' },
+  update: { available: 'A new version of Nokfi is available.', reload: 'Reload' }
 };

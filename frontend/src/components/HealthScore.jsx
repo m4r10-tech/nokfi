@@ -1,4 +1,5 @@
 import { useLang } from '../context/LangContext';
+import { localeOf } from '../utils/dates';
 
 /**
  * C1 — Nota de salud financiera 0-100 (sesión 4). La calcula el BACKEND con
@@ -29,7 +30,7 @@ export function ScoreRing({ score, size = 88, stroke = 8 }) {
 }
 
 export default function HealthScore({ health, compact = false }) {
-  const { t } = useLang();
+  const { t, lang } = useLang();
   if (!health || typeof health.score !== 'number') return null;
   const { band } = healthTone(health.score);
   const lost = (health.lost || []).slice(0, compact ? 3 : 5);
@@ -67,7 +68,7 @@ export default function HealthScore({ health, compact = false }) {
             {lost.map(l => (
               <li key={l.id} className="flex items-center justify-between gap-3 text-sm">
                 <span style={{ color: 'var(--text-secondary)' }}>{t(`questionnaire.items.${l.id}`)}</span>
-                <span className="tabular text-xs font-medium shrink-0" style={{ color: 'var(--negative)' }}>−{l.points}</span>
+                <span className="tabular text-xs font-medium shrink-0" style={{ color: 'var(--negative)' }}>−{Number(l.points).toLocaleString(localeOf(lang), { maximumFractionDigits: 1 })}</span>
               </li>
             ))}
           </ul>

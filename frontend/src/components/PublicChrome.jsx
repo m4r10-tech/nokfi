@@ -1,6 +1,7 @@
 import { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
-import { Moon, Sun } from 'lucide-react';
+import { Moon, Sun, Globe, ChevronDown } from 'lucide-react';
+import { LANGUAGES } from '../i18n/languages';
 import Logo from './Logo';
 import { useTheme } from '../context/ThemeContext';
 import { useLang } from '../context/LangContext';
@@ -10,20 +11,19 @@ import { useLang } from '../context/LangContext';
  * La cabecera es fija, transparente arriba del todo y con fondo + borde al
  * hacer scroll. `links` = anclas de la landing (solo en md+).
  */
-export function LangSwitch() {
-  const { lang, setLang } = useLang();
+export function LangSwitch({ className = '' }) {
+  // Sesión 4: 6 idiomas → desplegable nativo (antes botones ES/EN).
+  const { lang, setLang, t } = useLang();
   return (
-    <div className="inline-flex rounded-lg p-0.5" style={{ background: 'var(--surface-2)', border: '1px solid var(--border)' }}>
-      {['es', 'en'].map(l => (
-        <button key={l} onClick={() => setLang(l)} aria-label={l === 'es' ? 'Español' : 'English'} aria-pressed={lang === l}
-          className="rounded-md px-2 h-7 text-xs font-semibold"
-          style={lang === l
-            ? { background: 'var(--surface-1)', color: 'var(--text-primary)', boxShadow: '0 0 0 1px var(--border-strong)' }
-            : { color: 'var(--text-muted)' }}>
-          {l.toUpperCase()}
-        </button>
-      ))}
-    </div>
+    <label className={`relative inline-flex items-center ${className}`}>
+      <Globe size={14} className="absolute left-2 pointer-events-none" style={{ color: 'var(--text-muted)' }} />
+      <select value={lang} onChange={(e) => setLang(e.target.value)} aria-label={t('config.language')}
+        className="appearance-none rounded-lg h-8 pl-7 pr-6 text-xs font-semibold cursor-pointer"
+        style={{ background: 'var(--surface-2)', border: '1px solid var(--border)', color: 'var(--text-primary)' }}>
+        {LANGUAGES.map(l => <option key={l.code} value={l.code}>{l.name}</option>)}
+      </select>
+      <ChevronDown size={12} className="absolute right-2 pointer-events-none" style={{ color: 'var(--text-muted)' }} />
+    </label>
   );
 }
 
@@ -89,9 +89,10 @@ export function PublicFooter() {
           <Logo variant="icon" size="sm" />
           <p className="text-xs" style={{ color: 'var(--text-muted)' }}>© {new Date().getFullYear()} Nokfi · {t('footer.rights')}</p>
         </div>
-        <nav className="flex items-center gap-5 text-xs" style={{ color: 'var(--text-secondary)' }}>
+        <nav className="flex flex-wrap justify-center items-center gap-x-5 gap-y-2 text-xs" style={{ color: 'var(--text-secondary)' }}>
           <Link to="/pricing" className="hover:underline">{t('landing.plansHeading')}</Link>
           <Link to="/privacidad" className="hover:underline">{t('landing.privacyLink')}</Link>
+          <Link to="/home#contacto" className="hover:underline">{t('landing.contactLink')}</Link>
           <Link to="/login" className="hover:underline">{t('landing.login')}</Link>
         </nav>
         <LangSwitch />

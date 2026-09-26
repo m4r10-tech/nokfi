@@ -1,5 +1,5 @@
 import { Link } from 'react-router-dom';
-import { Package, ShoppingCart, Wrench, TruckIcon, Wallet, PieChart, ArrowRight } from 'lucide-react';
+import { Package, ShoppingCart, Wrench, TruckIcon, Wallet, PieChart, ArrowRight, FolderOpen } from 'lucide-react';
 import { useLang } from '../context/LangContext';
 import PageHeader from '../components/PageHeader';
 
@@ -17,6 +17,19 @@ export default function ExcelHub() {
   return (
     <div>
       <PageHeader title={t('excel.hubTitle')} description={t('excel.hubDesc')} />
+
+      {/* F3 (sesión 4): analizar una carpeta entera con una petición libre. */}
+      <Link to="/app/excel/carpeta" className="group card card-interactive anim-enter p-4 md:p-5 mb-4 flex items-center gap-4"
+        style={{ borderColor: 'var(--border-strong)' }}>
+        <span className="shrink-0 w-11 h-11 rounded-xl grid place-items-center" style={{ background: 'var(--accent)', color: 'var(--on-accent)' }}>
+          <FolderOpen size={20} />
+        </span>
+        <div className="flex-1 min-w-0">
+          <h3 className="text-sm font-semibold" style={{ color: 'var(--text-primary)' }}>{t('folder.hubTitle')}</h3>
+          <p className="text-xs mt-1" style={{ color: 'var(--text-secondary)' }}>{t('folder.hubDesc')}</p>
+        </div>
+        <ArrowRight size={16} className="shrink-0 transition-transform group-hover:translate-x-0.5" style={{ color: 'var(--text-muted)' }} />
+      </Link>
 
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3 md:gap-4">
         {MODULES.map(({ to, icon: Icon, id }, i) => (

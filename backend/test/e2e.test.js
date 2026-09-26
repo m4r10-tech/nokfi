@@ -37,6 +37,8 @@ function call(method, path, opts = {}) {
       ? JSON.stringify(opts.body)
       : undefined;
     const headers = { 'Content-Type': 'application/json' };
+    // Node no usa chunked en DELETE: sin Content-Length el cuerpo se perdería.
+    if (body) headers['Content-Length'] = Buffer.byteLength(body);
     if (opts.auth) {
       headers['Authorization'] = opts.auth === 'admin'
         ? `Bearer ${adminSecret}`
@@ -1463,6 +1465,11 @@ async function main() {
         && !!getDB().prepare('SELECT id FROM reset_tokens WHERE token = ?').get(plainHash);
     }
   );
+
+  // ═══════════════════════════════════════════════════════════
+  // Sesión 4 — núcleo de valor, API v1, RGPD… (test/session4.tests.js)
+  // ═══════════════════════════════════════════════════════════
+  await require('./session4.tests')({ post, put, get, call, check, checkAsync, getDB });
 
   } catch (e) {
     console.error('TEST CRASH:', e.message);

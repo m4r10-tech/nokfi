@@ -1,9 +1,12 @@
 import { useState, useEffect, useCallback, useMemo } from 'react';
 import { useOutletContext, Link } from 'react-router-dom';
 import {
-  X, Check, ClipboardList, FileSpreadsheet, Calculator, ArrowRight, BarChart3, Clock, Sparkles, ChevronRight, Gift
+  X, Check, ClipboardList, FileSpreadsheet, Calculator, ArrowRight, BarChart3, Clock, Sparkles, ChevronRight, Gift,
+  Landmark, HandCoins, Droplets, LineChart, CalendarDays, ListChecks, Wallet, BookOpen, AlertTriangle
 } from 'lucide-react';
-import { analysesApi } from '../middleware/api';
+import { analysesApi, dashboardApi, actionsApi } from '../middleware/api';
+import { ScoreRing, healthTone } from '../components/HealthScore';
+import { eur, isoDate } from '../utils/money';
 import { apiErrorMessage, isConnectivityError } from '../middleware/errors';
 import { useLang } from '../context/LangContext';
 import { useAuth } from '../context/AuthContext';
@@ -32,13 +35,15 @@ export default function Home() {
   const { t, lang } = useLang();
   const [items, setItems] = useState(null);
   const [failure, setFailure] = useState(null);
+  const [dash, setDash] = useState(null);
 
   const load = useCallback(async () => {
     setFailure(null);
     setItems(null);
-    const res = await analysesApi.list();
+    const [res, d] = await Promise.all([analysesApi.list(), dashboardApi.get()]);
     if (res.ok) setItems(res.data.analyses || []);
     else setFailure(res);
+    if (d.ok) setDash(d.data);
   }, []);
   useEffect(() => { load(); }, [load]);
 
@@ -55,12 +60,13 @@ export default function Home() {
       if (d.getFullYear() === now.getFullYear() && d.getMonth() === now.getMonth()) month++;
       if (utcDay(d) === today) usedToday++;
     }
+    if (dash?.ledger_count) kinds.add('ledger');
     return { total: items.length, month, usedToday, last: items[0] || null, kinds };
-  }, [items]);
+  }, [items, dash]);
 
   const dismissGuide = () => updateProfile({ welcomeCardDismissed: true });
   const showGuide = !profileLoading && stats && !profile.welcomeCardDismissed
-    && !(stats.kinds.has('cuestionario') && stats.kinds.has('excel'));
+    && !(stats.kinds.has('cuestionario') && stats.kinds.has('ledger'));
 
   const quota = license?.ai_quota ?? null;
   const trialEnd = license?.trial_ends_at ? new Date(license.trial_ends_at) : null;
@@ -104,6 +110,15 @@ export default function Home() {
         </div>
       )}
 
+      {dash && (
+        <div className="grid grid-cols-1 lg:grid-cols-3 gap-4 md:gap-5">
+          <HealthCard health={dash.health} t={t} />
+          <ActionsCard actions={dash.actions} t={t} onChange={load} />
+        </div>
+      )}
+
+      {dash && <FinanceStrip dash={dash} t={t} lang={lang} />}
+
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-4 md:gap-5">
         <section className="card lg:col-span-2 p-4 md:p-5 anim-enter" style={{ '--i': 3 }}>
           <div className="flex items-center justify-between mb-3">
@@ -143,6 +158,7 @@ export default function Home() {
 
         <section className="anim-enter flex flex-col gap-3" style={{ '--i': 4 }}>
           <h2 className="sr-only">{t('home.quickActions')}</h2>
+          <QuickAction to="/app/finanzas/libro" icon={BookOpen} title={t('home.qaLedger')} desc={t('home.qaLedgerDesc')} />
           <QuickAction to="/app/cuestionario" icon={ClipboardList} title={t('home.qaDiagnosis')} desc={t('home.qaDiagnosisDesc')} />
           <QuickAction to="/app/excel" icon={FileSpreadsheet} title={t('home.qaExcel')} desc={t('home.qaExcelDesc')} />
           <QuickAction to="/app/calculadoras" icon={Calculator} title={t('home.qaCalc')} desc={t('home.qaCalcDesc')} />
@@ -238,6 +254,7 @@ function GettingStarted({ stats, onDismiss, t }) {
   const steps = [
     { done: true, title: t('home.stepProfile'), to: '/app/configuracion' },
     { done: stats.kinds.has('cuestionario'), title: t('home.stepDiagnosis'), desc: t('home.stepDiagnosisDesc'), to: '/app/cuestionario' },
+    { done: stats.kinds.has('ledger'), title: t('home.stepLedger'), desc: t('home.stepLedgerDesc'), to: '/app/finanzas/libro' },
     { done: stats.kinds.has('excel'), title: t('home.stepExcel'), desc: t('home.stepExcelDesc'), to: '/app/excel' }
   ];
   const doneCount = steps.filter(s => s.done).length;
@@ -278,6 +295,137 @@ function GettingStarted({ stats, onDismiss, t }) {
           </li>
         ))}
       </ol>
+    </section>
+  );
+}
+
+/* ── C1: nota de salud (reglas fijas, del último diagnóstico) ── */
+function HealthCard({ health, t }) {
+  if (!health) {
+    return (
+      <Link to="/app/cuestionario" className="card card-interactive anim-enter p-4 md:p-5 flex items-center gap-4" style={{ '--i': 2 }}>
+        <span className="w-14 h-14 rounded-full grid place-items-center shrink-0" style={{ border: '2px dashed var(--border-strong)', color: 'var(--text-muted)' }}>?</span>
+        <div className="min-w-0">
+          <p className="text-xs font-medium uppercase tracking-wide" style={{ color: 'var(--text-muted)' }}>{t('report.healthTitle')}</p>
+          <p className="text-sm font-medium mt-1" style={{ color: 'var(--text-primary)' }}>{t('home.healthEmpty')}</p>
+        </div>
+      </Link>
+    );
+  }
+  const { band } = healthTone(health.score);
+  const lost = (health.lost || []).slice(0, 2);
+  return (
+    <Link to={`/app/historial/${health.analysis_id}`} className="card card-interactive anim-enter p-4 md:p-5 flex items-center gap-4" style={{ '--i': 2 }}>
+      <ScoreRing score={health.score} size={72} />
+      <div className="min-w-0">
+        <p className="text-xs font-medium uppercase tracking-wide" style={{ color: 'var(--text-muted)' }}>{t('report.healthTitle')}</p>
+        <p className="text-sm font-semibold mt-1" style={{ color: 'var(--text-primary)' }}>{t(`report.health_${band}`)}</p>
+        {lost.length > 0 && (
+          <p className="text-xs mt-1 truncate" style={{ color: 'var(--text-secondary)' }}>
+            {t('report.healthLost')}: {lost.map(l => t(`questionnaire.items.${l.id}`)).join(', ')}
+          </p>
+        )}
+      </div>
+    </Link>
+  );
+}
+
+/* ── C2: plan de acción (tareas pendientes de los informes) ── */
+function ActionsCard({ actions, t, onChange }) {
+  const [busy, setBusy] = useState(null);
+  const toggle = async (a) => {
+    setBusy(a.id);
+    await actionsApi.setDone(a.id, true);
+    setBusy(null);
+    onChange();
+  };
+  const pct = actions.total ? Math.round((actions.done / actions.total) * 100) : 0;
+  return (
+    <section className="card anim-enter p-4 md:p-5 lg:col-span-2" style={{ '--i': 3 }}>
+      <div className="flex items-center justify-between gap-3 mb-3">
+        <h2 className="text-sm font-semibold flex items-center gap-2" style={{ color: 'var(--text-primary)' }}><ListChecks size={16} /> {t('home.actionsTitle')}</h2>
+        {actions.total > 0 && <span className="text-xs tabular" style={{ color: 'var(--text-muted)' }}>{t('report.progress').replace('{n}', actions.done).replace('{total}', actions.total)}</span>}
+      </div>
+      {actions.total === 0 ? (
+        <p className="text-sm" style={{ color: 'var(--text-secondary)' }}>{t('home.actionsEmpty')}</p>
+      ) : (
+        <>
+          <div className="h-1.5 rounded-full overflow-hidden mb-3" style={{ background: 'var(--surface-2)' }}>
+            <div className="h-full rounded-full" style={{ width: `${pct}%`, background: 'var(--positive)', transition: 'width 600ms var(--ease-out)' }} />
+          </div>
+          {actions.next.length === 0 ? (
+            <p className="text-sm" style={{ color: 'var(--positive)' }}>{t('home.actionsAllDone')}</p>
+          ) : (
+            <ul className="flex flex-col -mx-2">
+              {actions.next.slice(0, 3).map(a => (
+                <li key={a.id}>
+                  <button onClick={() => toggle(a)} disabled={busy === a.id} className="nav-item w-full text-left flex items-start gap-3 rounded-lg px-2 py-2">
+                    <span className="shrink-0 mt-0.5 w-5 h-5 rounded-md" style={{ border: '1.5px solid var(--border-strong)' }} />
+                    <span className="flex-1 min-w-0">
+                      <span className="block text-sm font-medium truncate" style={{ color: 'var(--text-primary)' }}>{a.title}</span>
+                      {a.analysis_title && <span className="block text-xs truncate" style={{ color: 'var(--text-muted)' }}>{a.analysis_title}</span>}
+                    </span>
+                  </button>
+                </li>
+              ))}
+            </ul>
+          )}
+        </>
+      )}
+    </section>
+  );
+}
+
+/* ── Núcleo de valor: impuestos, cobros, fugas y caja (V2-V5) ── */
+function FinanceStrip({ dash, t, lang }) {
+  const deadline = dash.next_deadline;
+  if (!dash.ledger_count) {
+    return (
+      <Link to="/app/finanzas/libro" className="card card-interactive anim-enter p-4 md:p-5 flex items-center gap-4" style={{ '--i': 4, borderColor: 'var(--border-strong)' }}>
+        <span className="w-11 h-11 rounded-xl grid place-items-center shrink-0" style={{ background: 'var(--accent)', color: 'var(--on-accent)' }}><Wallet size={20} /></span>
+        <div className="flex-1 min-w-0">
+          <p className="text-sm font-semibold" style={{ color: 'var(--text-primary)' }}>{t('home.financeEmptyTitle')}</p>
+          <p className="text-xs mt-0.5" style={{ color: 'var(--text-secondary)' }}>{t('home.financeEmptyDesc')}</p>
+        </div>
+        <ArrowRight size={16} className="shrink-0" style={{ color: 'var(--text-muted)' }} />
+      </Link>
+    );
+  }
+  const fc = dash.forecast;
+  const cards = [
+    { to: '/app/finanzas/impuestos', icon: Landmark, label: t('home.fTaxes').replace('{q}', `${dash.taxes.quarter}T`), value: eur(dash.taxes.total_estimated, lang),
+      hint: dash.taxes.missing > 0 ? t('finance.taxes.missing').replace('{v}', eur(dash.taxes.missing, lang)) : t('finance.taxes.covered'), warn: dash.taxes.missing > 0 },
+    { to: '/app/finanzas/cobros', icon: HandCoins, label: t('home.fReceivables'), value: eur(dash.receivables.total, lang),
+      hint: dash.receivables.overdue_60 > 0 ? t('home.fOverdue').replace('{v}', eur(dash.receivables.overdue_60, lang)) : t('finance.receivables.invoices').replace('{n}', dash.receivables.count), warn: dash.receivables.overdue_60 > 0 },
+    { to: '/app/finanzas/fugas', icon: Droplets, label: t('home.fLeaks'), value: eur(dash.leaks.detected_this_month, lang),
+      hint: t('home.fLeaksHint').replace('{n}', dash.leaks.alerts) },
+    fc
+      ? { to: '/app/finanzas/prevision', icon: LineChart, label: t('home.fForecast'), value: eur(fc.at90, lang),
+          hint: fc.first_below ? t('home.fBelow').replace('{date}', isoDate(fc.first_below.date, lang, { day: 'numeric', month: 'short' })) : t('home.fForecastOk'), warn: !!fc.first_below }
+      : { to: '/app/finanzas/prevision', icon: LineChart, label: t('home.fForecast'), value: '—', hint: t('home.fForecastSetup') }
+  ];
+  return (
+    <section className="anim-enter flex flex-col gap-3" style={{ '--i': 4 }}>
+      <div className="grid grid-cols-2 lg:grid-cols-4 gap-3 md:gap-4">
+        {cards.map((c, i) => (
+          <Link key={i} to={c.to} className="card card-interactive p-4 min-w-0">
+            <div className="flex items-center gap-2 mb-2" style={{ color: 'var(--text-muted)' }}>
+              <c.icon size={15} /><span className="text-xs font-medium uppercase tracking-wide truncate">{c.label}</span>
+            </div>
+            <p className="text-xl md:text-2xl font-semibold tabular truncate" style={{ color: 'var(--text-primary)' }}>{c.value}</p>
+            <p className="text-xs mt-1 truncate flex items-center gap-1" style={{ color: c.warn ? 'var(--warning)' : 'var(--text-muted)' }}>
+              {c.warn && <AlertTriangle size={12} className="shrink-0" />}{c.hint}
+            </p>
+          </Link>
+        ))}
+      </div>
+      {deadline && (
+        <Link to="/app/finanzas/calendario" className="inline-flex items-center gap-2 self-start rounded-full px-3 py-1.5 text-xs font-medium"
+          style={{ background: 'var(--surface-1)', border: '1px solid var(--border)', color: 'var(--text-secondary)' }}>
+          <CalendarDays size={13} style={{ color: 'var(--accent-text)' }} />
+          {t('home.nextDeadline').replace('{m}', deadline.models.join(', ')).replace('{n}', deadline.days_left).replace('{date}', isoDate(deadline.date, lang, { day: 'numeric', month: 'short' }))}
+        </Link>
+      )}
     </section>
   );
 }

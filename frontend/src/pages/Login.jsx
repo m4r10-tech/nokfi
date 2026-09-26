@@ -161,7 +161,7 @@ export default function Login() {
           <FormMessage tone={error.tone || 'negative'}>
             {error.msg}
             {error.support && (
-              <a href="mailto:info@nokfi.app" className="block mt-1 font-medium underline">info@nokfi.app</a>
+              <a href="mailto:soporte@nokfi.app?subject=Licencia%20Nokfi" className="block mt-1 font-medium underline">soporte@nokfi.app</a>
             )}
           </FormMessage>
         )}

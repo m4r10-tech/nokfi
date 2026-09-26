@@ -134,4 +134,19 @@ async function chat({ profile, lang, analysisContext, messages }) {
   throw err;
 }
 
-module.exports = { chat, allowMessage, sanitizeMessages, providerOrder, _hits: hits };
+/** Texto libre con la MISMA capa de proveedores gratuitos (p.ej. email de reclamación, V4). */
+async function freeText({ system, prompt }) {
+  for (const name of providerOrder()) {
+    try {
+      const text = await PROVIDERS[name].call(system, [{ role: 'user', content: prompt }]);
+      return { text: String(text).trim().slice(0, 6000), provider: name };
+    } catch (e) {
+      console.warn(`[CHAT] proveedor ${name} falló: ${e.message}`);
+    }
+  }
+  const err = new Error('chat_unavailable');
+  err.code = 'chat_unavailable';
+  throw err;
+}
+
+module.exports = { chat, freeText, allowMessage, sanitizeMessages, providerOrder, _hits: hits };

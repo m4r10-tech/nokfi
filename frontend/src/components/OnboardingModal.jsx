@@ -4,7 +4,7 @@ import { useLang } from '../context/LangContext';
 // `value` es lo que se GUARDA en el perfil (se mantiene el literal histórico
 // en castellano para no romper perfiles existentes ni el prompt); `key` da la
 // etiqueta traducida (i18n onboarding.sectors/sizes/expenses).
-const SECTORS = [
+export const SECTORS = [
   ['Comercio', 'comercio'], ['Hostelería', 'hosteleria'], ['Salud', 'salud'], ['Legal', 'legal'], ['Construcción', 'construccion'],
   ['Tecnología', 'tecnologia'], ['Consultoría', 'consultoria'], ['Diseño', 'diseno'], ['Educación', 'educacion'], ['Otro', 'otro']
 ].map(([value, key]) => ({ value, key }));

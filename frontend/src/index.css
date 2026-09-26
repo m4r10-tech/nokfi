@@ -308,3 +308,8 @@ html { scroll-padding-top: 80px; }
 /* C5 — botón del asistente: encima de la barra inferior en móvil. */
 .chat-launcher { bottom: calc(var(--bottom-nav-h) + 16px + env(safe-area-inset-bottom)); }
 @media (min-width: 768px) { .chat-launcher { bottom: 24px; } }
+
+/* §2.1 — aviso de nueva versión: encima de la barra inferior en móvil. */
+.update-prompt { bottom: 16px; }
+:root:has(.bottom-nav) .update-prompt { bottom: calc(var(--bottom-nav-h) + 12px + env(safe-area-inset-bottom)); }
+@media (min-width: 768px) { :root:has(.bottom-nav) .update-prompt { bottom: 24px; } }
