@@ -206,12 +206,12 @@ export default function InvoiceImport({ profile, onSaved, onCancel }) {
                     <tr key={r.key} style={{ borderTop: '1px solid var(--border)', opacity: r.include ? 1 : 0.55 }}>
                       <td className="p-2"><input type="checkbox" checked={r.include} onChange={(e) => update(r.key, 'include', e.target.checked)} aria-label={r.file_name} className="w-4 h-4" /></td>
                       <td className="p-2">
-                        <select value={r.type} onChange={(e) => update(r.key, 'type', e.target.value)} className="input !h-8 !px-1.5 text-xs">
+                        <select value={r.type} onChange={(e) => update(r.key, 'type', e.target.value)} className="input !h-8 !px-1.5 text-xs !w-[92px]">
                           <option value="expense">{t('finance.expense')}</option><option value="income">{t('finance.income')}</option>
                         </select>
                       </td>
                       <td className="p-2 w-[130px]">{cell('invoice_date', { type: 'date' })}</td>
-                      <td className="p-2">{cell('party_name')}<p className="text-[11px] truncate max-w-[160px] mt-0.5" style={{ color: 'var(--text-muted)' }} title={r.file_name}>{r.file_name}</p></td>
+                      <td className="p-2 min-w-[170px]">{cell('party_name')}<p className="text-[11px] truncate max-w-[160px] mt-0.5" style={{ color: 'var(--text-muted)' }} title={r.file_name}>{r.file_name}</p></td>
                       <td className="p-2 w-[110px]">{cell('party_nif')}</td>
                       <td className="p-2 w-[100px]">{cell('invoice_number')}</td>
                       <td className="p-2 w-[90px]">{cell('base', { type: 'number', step: '0.01', className: 'input !h-8 !px-2 text-xs text-right' })}</td>
