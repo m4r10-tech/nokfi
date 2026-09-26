@@ -522,7 +522,7 @@ export default {
       desc: 'Scegli foto o PDF di fatture e scontrini, oppure apri una cartella intera. L’IA estrae emittente, codice fiscale, data, imponibile, IVA, ritenuta e totale; tu controlli prima di salvare.',
       kind: 'Che fatture sono?', kindAuto: 'Rileva con il mio cod. fiscale', kindExpense: 'Uscite (ricevute)', kindIncome: 'Entrate (emesse)',
       noTaxId: 'Aggiungi il tuo codice fiscale nelle Impostazioni per distinguerle automaticamente; altrimenti verranno trattate come uscite.',
-      formats: 'PDF, JPG, PNG o WebP · fino a 60 fatture per lettura · i file non vengono conservati: solo i dati che confermi.',
+      formats: 'PDF, JPG, PNG, WebP o XML · fino a 60 fatture per lettura · i file non vengono conservati: solo i dati che confermi.', xmlFree: 'Le fatture elettroniche (Facturae, UBL, Factur-X/ZUGFeRD in XML o PDF) si leggono all’istante, in modo esatto e senza consumare analisi.',
       willRead: 'Verranno lette {n} fatture. Consumerà 1 analisi della tua quota giornaliera.', willRead_one: 'Verrà letta {n} fattura. Consumerà 1 analisi della tua quota giornaliera.', capped: 'Verranno lette solo le prime {max}.',
       start: 'Leggi fatture', preparing: 'Preparazione', reading: 'Lettura del lotto',
       reviewHint: 'L’IA può sbagliare. Controlla gli importi (soprattutto quelli segnalati) prima di salvare.',

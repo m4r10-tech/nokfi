@@ -1,0 +1,16 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<rsm:CrossIndustryInvoice xmlns:rsm="urn:un:unece:uncefact:data:standard:CrossIndustryInvoice:100" xmlns:ram="urn:un:unece:uncefact:data:standard:ReusableAggregateBusinessInformationEntity:100" xmlns:udt="urn:un:unece:uncefact:data:standard:UnqualifiedDataType:100">
+ <rsm:ExchangedDocument><ram:ID>FX-555</ram:ID><ram:TypeCode>380</ram:TypeCode><ram:IssueDateTime><udt:DateTimeString format="102">20260911</udt:DateTimeString></ram:IssueDateTime></rsm:ExchangedDocument>
+ <rsm:SupplyChainTradeTransaction>
+  <ram:IncludedSupplyChainTradeLineItem><ram:SpecifiedTradeProduct><ram:Name>Material de oficina</ram:Name></ram:SpecifiedTradeProduct></ram:IncludedSupplyChainTradeLineItem>
+  <ram:ApplicableHeaderTradeAgreement>
+   <ram:SellerTradeParty><ram:Name>Papelería Sur SA</ram:Name><ram:SpecifiedTaxRegistration><ram:ID schemeID="VA">ESA11223344</ram:ID></ram:SpecifiedTaxRegistration></ram:SellerTradeParty>
+   <ram:BuyerTradeParty><ram:Name>Taller García</ram:Name></ram:BuyerTradeParty>
+  </ram:ApplicableHeaderTradeAgreement>
+  <ram:ApplicableHeaderTradeSettlement>
+   <ram:ApplicableTradeTax><ram:CalculatedAmount>21.00</ram:CalculatedAmount><ram:TypeCode>VAT</ram:TypeCode><ram:RateApplicablePercent>21</ram:RateApplicablePercent></ram:ApplicableTradeTax>
+   <ram:SpecifiedTradePaymentTerms><ram:DueDateDateTime><udt:DateTimeString format="102">20261011</udt:DateTimeString></ram:DueDateDateTime></ram:SpecifiedTradePaymentTerms>
+   <ram:SpecifiedTradeSettlementHeaderMonetarySummation><ram:TaxBasisTotalAmount>100.00</ram:TaxBasisTotalAmount><ram:TaxTotalAmount currencyID="EUR">21.00</ram:TaxTotalAmount><ram:GrandTotalAmount>121.00</ram:GrandTotalAmount><ram:DuePayableAmount>121.00</ram:DuePayableAmount></ram:SpecifiedTradeSettlementHeaderMonetarySummation>
+  </ram:ApplicableHeaderTradeSettlement>
+ </rsm:SupplyChainTradeTransaction>
+</rsm:CrossIndustryInvoice>

@@ -21,7 +21,9 @@ import { checkOk } from './EntryForm';
  * usuario revisa y confirma en la tabla.
  * Coste: 1 análisis por lectura, aunque vaya en varios lotes (job).
  */
-const ACCEPT_EXT = ['.pdf', ...IMAGE_EXT];
+// XML: facturas electrónicas estructuradas (Facturae/UBL/CII) → sin IA.
+const XML_EXT = ['.xml', '.xsig'];
+const ACCEPT_EXT = ['.pdf', ...IMAGE_EXT, ...XML_EXT];
 const accept = (name) => ACCEPT_EXT.includes(extOf(name)) && !name.startsWith('.');
 const MAX_INVOICES = 60;
 const PER_BATCH = 5;
@@ -47,9 +49,26 @@ export default function InvoiceImport({ profile, onSaved, onCancel }) {
     setPicked({ name, files: files.slice(0, MAX_INVOICES), skipped: Math.max(0, files.length - MAX_INVOICES) });
   };
 
-  /** Prepara cada archivo: texto (PDF con texto) o imagen/PDF en base64. */
+  /**
+   * Prepara cada archivo. Primero intenta leerlo SIN IA (factura electrónica
+   * XML o PDF con XML embebido Factur-X/ZUGFeRD): { local: [facturas] }.
+   * Si no, texto (PDF con texto) o imagen (foto o PDF escaneado) para la IA.
+   */
   const prepare = async (file) => {
     const ext = extOf(file.name);
+    if (XML_EXT.includes(ext)) {
+      const { parseEInvoiceXml } = await import('../../middleware/einvoice');
+      const local = parseEInvoiceXml(await file.text(), file.name);
+      if (!local?.length) throw Object.assign(new Error('xml'), { code: 'ERR_FILE_TYPE', fileName: file.name });
+      return { local };
+    }
+    if (ext === '.pdf') {
+      try {
+        const { parseEmbeddedPdfInvoice } = await import('../../middleware/einvoice');
+        const local = await parseEmbeddedPdfInvoice(file);
+        if (local?.length) return { local };
+      } catch { /* PDF normal: sigue por texto/imagen */ }
+    }
     if (IMAGE_EXT.includes(ext)) {
       const img = await imageToJpeg(file);
       return { name: file.name, mime: img.mime, data: img.data, bytes: img.data.length };
@@ -70,7 +89,7 @@ export default function InvoiceImport({ profile, onSaved, onCancel }) {
     const party = type === 'income' ? { name: inv.recipient_name, nif: inv.recipient_nif } : { name: inv.issuer_name, nif: inv.issuer_nif };
     return {
       key: `${i}-${inv.file_name}`, include: inv.is_invoice && !!inv.invoice_date,
-      type, file_name: inv.file_name, is_invoice: inv.is_invoice,
+      type, file_name: inv.file_name, is_invoice: inv.is_invoice, source_format: inv.source_format || null,
       invoice_date: inv.invoice_date, due_date: inv.due_date || '', party_name: party.name || '', party_nif: party.nif || '',
       invoice_number: inv.invoice_number, concept: inv.concept, category: inv.category,
       base: inv.base, vat_rate: inv.vat_rate, vat_amount: inv.vat_amount, irpf_rate: inv.irpf_rate, irpf_amount: inv.irpf_amount, total: inv.total,
@@ -80,11 +99,13 @@ export default function InvoiceImport({ profile, onSaved, onCancel }) {
 
   const run = async () => {
     setPhase('reading'); setError(null); setErrors([]); setRows([]);
-    const prepared = [], errs = [];
+    const prepared = [], errs = [], found = [];
     for (const [i, f] of picked.files.entries()) {
       setProgress({ label: t('finance.import.preparing'), n: i + 1, total: picked.files.length });
-      try { prepared.push(await prepare(f)); }
-      catch (e) { errs.push(fileErrorMessage(t, e, f.name)); }
+      try {
+        const p = await prepare(f);
+        if (p.local) found.push(...p.local); else prepared.push(p);
+      } catch (e) { errs.push(fileErrorMessage(t, e, f.name)); }
     }
     // Lotes de ≤5 facturas y ≤6 MB.
     const batches = [];
@@ -95,7 +116,6 @@ export default function InvoiceImport({ profile, onSaved, onCancel }) {
     }
     if (cur.length) batches.push(cur);
 
-    const found = [];
     let job;
     for (const [i, b] of batches.entries()) {
       setProgress({ label: t('finance.import.reading'), n: i + 1, total: batches.length });
@@ -158,6 +178,7 @@ export default function InvoiceImport({ profile, onSaved, onCancel }) {
           </div>
           <FolderSource accept={accept} inputAccept={ACCEPT_EXT.join(',')} slot="invoices" onPick={onPick} />
           <p className="text-xs" style={{ color: 'var(--text-muted)' }}>{t('finance.import.formats')}</p>
+          <p className="text-xs -mt-2" style={{ color: 'var(--text-muted)' }}>{t('finance.import.xmlFree')}</p>
           {picked && (
             <>
               <Notice icon={Info}>
@@ -221,7 +242,8 @@ export default function InvoiceImport({ profile, onSaved, onCancel }) {
                       <td className="p-2 w-[80px]">{cell('irpf_amount', { type: 'number', step: '0.01', className: 'input !h-8 !px-2 text-xs text-right' })}</td>
                       <td className="p-2 w-[90px]">{cell('total', { type: 'number', step: '0.01', className: 'input !h-8 !px-2 text-xs text-right font-semibold' })}</td>
                       <td className="p-2">
-                        {!r.is_invoice ? <Badge tone="muted">{t('finance.import.notInvoice')}</Badge>
+                        {r.source_format ? <Badge tone="accent"><Check size={11} /> {r.source_format}</Badge>
+                          : !r.is_invoice ? <Badge tone="muted">{t('finance.import.notInvoice')}</Badge>
                           : dupe ? <Badge tone="warning">{t('finance.import.duplicate')}</Badge>
                           : ok ? <Badge tone="positive"><Check size={11} /> OK</Badge>
                           : <Badge tone="warning"><AlertTriangle size={11} /> {t('finance.import.check')}</Badge>}

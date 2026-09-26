@@ -1,0 +1,9 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<Invoice xmlns="urn:oasis:names:specification:ubl:schema:xsd:Invoice-2" xmlns:cac="urn:oasis:names:specification:ubl:schema:xsd:CommonAggregateComponents-2" xmlns:cbc="urn:oasis:names:specification:ubl:schema:xsd:CommonBasicComponents-2">
+ <cbc:ID>INV-2026-77</cbc:ID><cbc:IssueDate>2026-09-20</cbc:IssueDate><cbc:DueDate>2026-10-20</cbc:DueDate>
+ <cac:AccountingSupplierParty><cac:Party><cac:PartyName><cbc:Name>Software Cloud SL</cbc:Name></cac:PartyName><cac:PartyTaxScheme><cbc:CompanyID>ESB99887766</cbc:CompanyID><cac:TaxScheme><cbc:ID>VAT</cbc:ID></cac:TaxScheme></cac:PartyTaxScheme></cac:Party></cac:AccountingSupplierParty>
+ <cac:AccountingCustomerParty><cac:Party><cac:PartyLegalEntity><cbc:RegistrationName>Taller García</cbc:RegistrationName><cbc:CompanyID>12345678Z</cbc:CompanyID></cac:PartyLegalEntity></cac:Party></cac:AccountingCustomerParty>
+ <cac:TaxTotal><cbc:TaxAmount currencyID="EUR">10.50</cbc:TaxAmount><cac:TaxSubtotal><cbc:TaxableAmount currencyID="EUR">50.00</cbc:TaxableAmount><cbc:TaxAmount currencyID="EUR">10.50</cbc:TaxAmount><cac:TaxCategory><cbc:ID>S</cbc:ID><cbc:Percent>21</cbc:Percent></cac:TaxCategory></cac:TaxSubtotal></cac:TaxTotal>
+ <cac:LegalMonetaryTotal><cbc:LineExtensionAmount currencyID="EUR">50.00</cbc:LineExtensionAmount><cbc:TaxExclusiveAmount currencyID="EUR">50.00</cbc:TaxExclusiveAmount><cbc:TaxInclusiveAmount currencyID="EUR">60.50</cbc:TaxInclusiveAmount><cbc:PayableAmount currencyID="EUR">60.50</cbc:PayableAmount></cac:LegalMonetaryTotal>
+ <cac:InvoiceLine><cbc:ID>1</cbc:ID><cac:Item><cbc:Name>Suscripción software</cbc:Name></cac:Item></cac:InvoiceLine>
+</Invoice>

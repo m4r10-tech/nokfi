@@ -1,0 +1,19 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<fe:Facturae xmlns:fe="http://www.facturae.gob.es/formato/Versiones/Facturaev3_2_2.xml">
+ <FileHeader><SchemaVersion>3.2.2</SchemaVersion></FileHeader>
+ <Parties>
+  <SellerParty><TaxIdentification><PersonTypeCode>J</PersonTypeCode><TaxIdentificationNumber>ESB12345678</TaxIdentificationNumber></TaxIdentification>
+   <LegalEntity><CorporateName>Asesoría Pérez S.L.</CorporateName></LegalEntity></SellerParty>
+  <BuyerParty><TaxIdentification><PersonTypeCode>F</PersonTypeCode><TaxIdentificationNumber>12345678Z</TaxIdentificationNumber></TaxIdentification>
+   <Individual><Name>Mario</Name><FirstSurname>García</FirstSurname></Individual></BuyerParty>
+ </Parties>
+ <Invoices><Invoice>
+  <InvoiceHeader><InvoiceNumber>0042</InvoiceNumber><InvoiceSeriesCode>A</InvoiceSeriesCode></InvoiceHeader>
+  <InvoiceIssueData><IssueDate>2026-09-15</IssueDate></InvoiceIssueData>
+  <TaxesOutputs><Tax><TaxTypeCode>01</TaxTypeCode><TaxRate>21.00</TaxRate><TaxableBase><TotalAmount>200.00</TotalAmount></TaxableBase><TaxAmount><TotalAmount>42.00</TotalAmount></TaxAmount></Tax></TaxesOutputs>
+  <TaxesWithheld><Tax><TaxTypeCode>04</TaxTypeCode><TaxRate>15.00</TaxRate><TaxableBase><TotalAmount>200.00</TotalAmount></TaxableBase><TaxAmount><TotalAmount>30.00</TotalAmount></TaxAmount></Tax></TaxesWithheld>
+  <InvoiceTotals><TotalGrossAmount>200.00</TotalGrossAmount><TotalGrossAmountBeforeTaxes>200.00</TotalGrossAmountBeforeTaxes><TotalTaxOutputs>42.00</TotalTaxOutputs><TotalTaxesWithheld>30.00</TotalTaxesWithheld><InvoiceTotal>212.00</InvoiceTotal><TotalExecutableAmount>212.00</TotalExecutableAmount></InvoiceTotals>
+  <Items><InvoiceLine><ItemDescription>Asesoría fiscal septiembre</ItemDescription></InvoiceLine></Items>
+  <PaymentDetails><Installment><InstallmentDueDate>2026-10-15</InstallmentDueDate><InstallmentAmount>212.00</InstallmentAmount></Installment></PaymentDetails>
+ </Invoice></Invoices>
+</fe:Facturae>

@@ -525,7 +525,7 @@ export default {
       desc: 'Elige fotos o PDF de facturas y tickets, o abre una carpeta entera. La IA extrae emisor, NIF, fecha, base, IVA, retención y total; tú revisas antes de guardar.',
       kind: '¿Qué facturas son?', kindAuto: 'Detectar con mi NIF', kindExpense: 'Gastos (recibidas)', kindIncome: 'Ingresos (emitidas)',
       noTaxId: 'Añade tu NIF en Configuración para distinguirlas automáticamente; si no, se tratarán como gastos.',
-      formats: 'PDF, JPG, PNG o WebP · hasta 60 facturas por lectura · los archivos no se guardan: solo los datos que confirmes.',
+      formats: 'PDF, JPG, PNG, WebP o XML · hasta 60 facturas por lectura · los archivos no se guardan: solo los datos que confirmes.', xmlFree: 'Las facturas electrónicas (Facturae, UBL, Factur-X/ZUGFeRD en XML o PDF) se leen al instante, de forma exacta y sin gastar análisis.',
       willRead: 'Se van a leer {n} facturas. Gastará 1 análisis de tu cuota diaria.', willRead_one: 'Se va a leer {n} factura. Gastará 1 análisis de tu cuota diaria.', capped: 'Solo se leerán las primeras {max}.',
       start: 'Leer facturas', preparing: 'Preparando', reading: 'Leyendo lote',
       reviewHint: 'La IA puede equivocarse. Revisa los importes (sobre todo los marcados) antes de guardar.',

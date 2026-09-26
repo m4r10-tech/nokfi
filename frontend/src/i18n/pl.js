@@ -522,7 +522,7 @@ export default {
       desc: 'Wybierz zdjęcia lub PDF faktur i paragonów albo otwórz cały folder. AI odczyta wystawcę, numer podatkowy, datę, kwotę netto, VAT, potrącenie i kwotę razem; sprawdzasz przed zapisaniem.',
       kind: 'Jakie to faktury?', kindAuto: 'Wykryj po moim nr podatkowym', kindExpense: 'Wydatki (otrzymane)', kindIncome: 'Przychody (wystawione)',
       noTaxId: 'Dodaj numer podatkowy w Ustawieniach, aby rozróżniać je automatycznie; w przeciwnym razie zostaną potraktowane jako wydatki.',
-      formats: 'PDF, JPG, PNG lub WebP · do 60 faktur naraz · pliki nie są przechowywane: tylko dane, które zatwierdzisz.',
+      formats: 'PDF, JPG, PNG, WebP lub XML · do 60 faktur naraz · pliki nie są przechowywane: tylko dane, które zatwierdzisz.', xmlFree: 'Faktury elektroniczne (Facturae, UBL, Factur-X/ZUGFeRD jako XML lub PDF) są odczytywane natychmiast, dokładnie i bez zużywania analiz.',
       willRead: 'Zostanie odczytane {n} faktury. Zużyje to 1 analizę z dziennego limitu.', willRead_one: 'Zostanie odczytana {n} faktura. Zużyje to 1 analizę z dziennego limitu.', willRead_few: 'Zostaną odczytane {n} faktury. Zużyje to 1 analizę z dziennego limitu.', willRead_many: 'Zostanie odczytanych {n} faktur. Zużyje to 1 analizę z dziennego limitu.', capped: 'Zostanie odczytanych tylko pierwszych {max}.',
       start: 'Czytaj faktury', preparing: 'Przygotowanie', reading: 'Czytanie partii',
       reviewHint: 'AI może się mylić. Sprawdź kwoty (zwłaszcza oznaczone) przed zapisaniem.',
