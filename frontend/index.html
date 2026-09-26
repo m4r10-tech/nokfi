@@ -25,35 +25,11 @@
   <meta name="twitter:image" content="https://nokfi.app/og-image.png" />
 
   <!--
-    ⚠️ AUDITORÍA DE SEGURIDAD — Content Security Policy añadida (defensa en
-    profundidad). No sustituye la sanitización con DOMPurify ya aplicada en
-    middleware/sanitize.js (esa es la corrección real del XSS), pero limita
-    el daño si en el futuro se colara un XSS por otra vía: bloquea scripts
-    inline no autorizados y restringe a qué dominios puede conectarse la
-    página para exfiltrar datos.
-
-    IMPORTANTE PARA EL DESPLIEGUE: en producción el frontend y el backend
-    comparten origen (Nginx proxyea /api → backend :3001; build con
-    VITE_API_URL=/api), así que `connect-src 'self'` basta (se mantiene
-    `http://localhost:3001` solo para dev local: Vite en :5173 → backend :3001).
-    Nota técnica: la etiqueta <meta> de CSP NO soporta la
-    directiva `frame-ancestors` (los navegadores la ignoran ahí) — cuando
-    se configure Nginx (sección 17 del proyecto), añadir también la
-    cabecera HTTP real `Content-Security-Policy` con `frame-ancestors 'none'`
-    y `X-Frame-Options: DENY` a nivel de servidor para cubrir ese hueco.
+    CSP (sesión 4, §2.4): se define SOLO como cabecera HTTP en Nginx
+    (deploy/nginx-nokfi.conf), que además admite frame-ancestors 'none'.
+    La antigua <meta> se retiró para no mantener dos fuentes de verdad.
+    DOMPurify (middleware/sanitize.js) sigue siendo la defensa real contra XSS.
   -->
-  <meta http-equiv="Content-Security-Policy" content="
-    default-src 'self';
-    script-src 'self';
-    style-src 'self' 'unsafe-inline' https://fonts.googleapis.com;
-    font-src 'self' https://fonts.gstatic.com;
-    img-src 'self' data:;
-    connect-src 'self' http://localhost:3001;
-    worker-src 'self' blob:;
-    object-src 'none';
-    base-uri 'self';
-    form-action 'self';
-  ">
 
   <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
   <link rel="icon" type="image/png" sizes="32x32" href="/icons/favicon-32.png" />
