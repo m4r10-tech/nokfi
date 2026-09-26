@@ -84,7 +84,7 @@ export default function Pricing() {
       return;
     }
     setLoadingPlan(selected.id);
-    const res = await paymentsApi.stripeCheckout(trimmed, selected.id);
+    const res = await paymentsApi.stripeCheckout(trimmed, selected.id, lang);
     if (res.ok && res.data.checkout_url) {
       // El spinner se mantiene hasta que el navegador sale hacia Stripe
       // (evita un segundo clic que crearía otra sesión de checkout).

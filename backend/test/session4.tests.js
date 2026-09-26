@@ -9,6 +9,9 @@ module.exports = async function session4Tests({ post, put, get, call, check, che
   const patch = (path, body, auth) => call('PATCH', path, { body, auth });
   const del = (path, body, auth) => call('DELETE', path, { body, auth });
 
+  // §5.1 — país por cabecera de Cloudflare (sin guardar nada).
+  await checkAsync('i18n: GET /api/geo sin CF-IPCountry → country null', get('/api/geo'), r => r.status === 200 && r.data.country === null);
+
   // Licencia dedicada (autónomo) para el libro.
   let key = null, lid = null, tok = null;
   await checkAsync('S4: admin createLicense (finanzas, pro) → 201',

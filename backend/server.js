@@ -266,6 +266,15 @@ app.use('/api/webhooks', webhooksRoutes);   // confirmación: /api/webhooks/stri
 ════════════════════════════════════════════════════════════ */
 app.get('/health', (_req, res) => res.json({ status: 'ok', ts: Date.now() }));
 
+/* Sesión 4 (§5.1) — país de la conexión para elegir el idioma inicial.
+   Cloudflare añade CF-IPCountry a cada petición (Nginx la reenvía tal cual).
+   No se guarda ni se registra: solo se devuelve al navegador. */
+app.get('/api/geo', (req, res) => {
+  const c = String(req.headers['cf-ipcountry'] || '').toUpperCase();
+  res.set('Cache-Control', 'private, max-age=3600');
+  res.json({ country: /^[A-Z]{2}$/.test(c) && c !== 'XX' && c !== 'T1' ? c : null });
+});
+
 /* ════════════════════════════════════════════════════════════
    404 y manejador de errores — SIEMPRE al final
 ════════════════════════════════════════════════════════════ */

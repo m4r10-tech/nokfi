@@ -44,9 +44,9 @@ export default function Receivables() {
   return (
     <div className="flex flex-col gap-4">
       <div className="grid grid-cols-2 lg:grid-cols-3 gap-2 sm:gap-3">
-        <Kpi label={t('finance.receivables.pending')} value={eur(data.total, lang)} hint={t('finance.receivables.invoices').replace('{n}', data.pending.length)} />
+        <Kpi label={t('finance.receivables.pending')} value={eur(data.total, lang)} hint={t('finance.receivables.invoices', { n: data.pending.length })} />
         <Kpi label={t('finance.receivables.overdue60')} value={eur(data.overdue_60, lang)} tone={data.overdue_60 > 0 ? 'var(--negative)' : undefined} />
-        <Kpi className="col-span-2 lg:col-span-1" label={t('finance.receivables.avgDays')} value={data.avg_collection_days == null ? '—' : t('finance.days').replace('{n}', data.avg_collection_days)} />
+        <Kpi className="col-span-2 lg:col-span-1" label={t('finance.receivables.avgDays')} value={data.avg_collection_days == null ? '—' : t('finance.days', { n: data.avg_collection_days })} />
       </div>
 
       {data.pending.length === 0 ? (
@@ -64,7 +64,7 @@ export default function Receivables() {
                   </p>
                 </div>
                 <div className="flex items-center gap-2 flex-wrap">
-                  <Badge tone={LEVEL_TONE[p.level]}>{t('finance.receivables.age').replace('{n}', p.days_outstanding)}</Badge>
+                  <Badge tone={LEVEL_TONE[p.level]}>{t('finance.receivables.age', { n: p.days_outstanding })}</Badge>
                   <span className="text-sm font-semibold tabular" style={{ color: 'var(--text-primary)' }}>{eur(p.total, lang)}</span>
                   <button onClick={() => setEmailFor(p)} className="btn btn-secondary btn-sm"><Mail size={14} /> {t('finance.receivables.claim')}</button>
                   <button onClick={() => markCollected(p)} className="btn btn-ghost btn-sm"><Check size={14} /> {t('finance.collected')}</button>

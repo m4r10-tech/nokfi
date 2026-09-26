@@ -166,9 +166,10 @@ export const paymentsApi = {
   // para que SIEMPRE muestre lo que Stripe cobra (anti-drift vs .env del backend).
   getPlans: () => request('/payments/plans'),
   // Suscripción mensual (Fase 3) — solo Stripe para recurring.
-  stripeCheckout: (email, plan) => request('/payments/stripe/create-checkout', { method: 'POST', body: { email, plan } }),
+  // locale (sesión 4): Checkout de Stripe en el idioma de la web.
+  stripeCheckout: (email, plan, locale) => request('/payments/stripe/create-checkout', { method: 'POST', body: { email, plan, locale } }),
   // Customer Portal de Stripe: cancelar / mejorar plan / actualizar método de pago.
-  stripePortal: () => request('/payments/stripe/create-portal-session', { method: 'POST', auth: true }),
+  stripePortal: (locale) => request('/payments/stripe/create-portal-session', { method: 'POST', auth: true, body: { locale } }),
   reveal: (session_id) => request('/payments/stripe/reveal?session_id=' + encodeURIComponent(session_id))
 };
 

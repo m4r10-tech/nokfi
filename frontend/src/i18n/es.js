@@ -65,7 +65,7 @@ export default {
     subscriptionCancelled: 'Cancelada — acceso hasta el fin de periodo',
     subscriptionNoRenewal: 'Sin renovación programada',
     trialRow: 'Período de prueba',
-    trialDaysLeft: 'Quedan {n} días',
+    trialDaysLeft: 'Quedan {n} días', trialDaysLeft_one: 'Queda {n} día',
     aiQuota: 'Cuota de análisis IA', aiQuotaPerDay: 'análisis/día',
     manageSubscription: 'Gestionar suscripción',
     manageHint: 'Cambia de plan, actualiza tu tarjeta o cancela desde el portal seguro de Stripe. Los cambios de plan se aplican al final del periodo en curso.',
@@ -130,7 +130,7 @@ export default {
     welcomeCard: 'Tu panel está listo. Empieza por donde quieras: no hay un orden obligatorio.',
     startQuestionnaire: 'Hacer el diagnóstico', uploadData: 'Subir mis datos',
     goodMorning: 'Buenos días', goodAfternoon: 'Buenas tardes', goodEvening: 'Buenas noches',
-    trialBanner: 'Estás en el periodo de prueba: te quedan {n} días.', trialManage: 'Ver suscripción',
+    trialBanner: 'Estás en el periodo de prueba: te quedan {n} días.', trialBanner_one: 'Estás en el periodo de prueba: te queda {n} día.', trialManage: 'Ver suscripción',
     guideTitle: 'Primeros pasos', guideProgress: '{n} de {total}', guideDismiss: 'Ocultar guía',
     stepProfile: 'Completa el perfil de tu empresa',
     stepDiagnosis: 'Haz tu primer diagnóstico', stepDiagnosisDesc: '30 preguntas de sí/no, unos 3 minutos.',
@@ -150,9 +150,9 @@ export default {
     actionsAllDone: '¡Todo hecho! Haz un nuevo análisis para seguir mejorando.',
     financeEmptyTitle: 'Lee tus facturas con IA', financeEmptyDesc: 'Nokfi montará tu libro y te dirá cuánto apartar para Hacienda, quién te debe y cómo irá tu caja.',
     fTaxes: 'Impuestos {q}', fReceivables: 'Por cobrar', fOverdue: '{v} con más de 60 días', fLeaks: 'Fugas este mes',
-    fLeaksHint: '{n} alertas', fForecast: 'Caja en 90 días', fBelow: 'Bajas del umbral el {date}', fForecastOk: 'Sin alertas de caja',
+    fLeaksHint: '{n} alertas', fLeaksHint_one: '{n} alerta', fForecast: 'Caja en 90 días', fBelow: 'Bajas del umbral el {date}', fForecastOk: 'Sin alertas de caja',
     fForecastSetup: 'Indica tu saldo para ver la previsión',
-    nextDeadline: 'Próximo plazo: modelos {m} · {date} · faltan {n} días'
+    nextDeadline: 'Próximo plazo: modelos {m} · {date} · faltan {n} días', nextDeadline_one: 'Próximo plazo: modelos {m} · {date} · falta {n} día'
   },
   questionnaire: {
     reportTitle: 'Diagnóstico de negocio',
@@ -482,21 +482,21 @@ export default {
     duplicateEntry: 'Ya hay una factura con ese número y ese NIF en el libro.',
     confirmDelete: '¿Borrar este apunte del libro?', deleted: 'Apunte borrado', delete: 'Borrar',
     incomeBase: 'Ingresos (base)', expenseBase: 'Gastos (base)', vatBalance: 'IVA a pagar', result: 'Resultado',
-    reviewCount: '{n} apuntes no cuadran: revísalos.', search: 'Buscar…', ledgerSheet: 'Libro de ingresos y gastos',
+    reviewCount: '{n} apuntes no cuadran: revísalos.', reviewCount_one: '{n} apunte no cuadra: revísalo.', search: 'Buscar…', ledgerSheet: 'Libro de ingresos y gastos',
     emptyTitle: 'Tu libro está vacío', emptyDesc: 'Sube fotos o PDF de tus facturas (o una carpeta entera) y la IA las pasará al libro. Tú solo revisas.',
-    days: '{n} días',
+    days: '{n} días', days_one: '{n} día',
     import: {
       title: 'Leer facturas con IA',
       desc: 'Elige fotos o PDF de facturas y tickets, o abre una carpeta entera. La IA extrae emisor, NIF, fecha, base, IVA, retención y total; tú revisas antes de guardar.',
       kind: '¿Qué facturas son?', kindAuto: 'Detectar con mi NIF', kindExpense: 'Gastos (recibidas)', kindIncome: 'Ingresos (emitidas)',
       noTaxId: 'Añade tu NIF en Configuración para distinguirlas automáticamente; si no, se tratarán como gastos.',
       formats: 'PDF, JPG, PNG o WebP · hasta 60 facturas por lectura · los archivos no se guardan: solo los datos que confirmes.',
-      willRead: 'Se van a leer {n} facturas. Gastará 1 análisis de tu cuota diaria.', capped: 'Solo se leerán las primeras {max}.',
+      willRead: 'Se van a leer {n} facturas. Gastará 1 análisis de tu cuota diaria.', willRead_one: 'Se va a leer {n} factura. Gastará 1 análisis de tu cuota diaria.', capped: 'Solo se leerán las primeras {max}.',
       start: 'Leer facturas', preparing: 'Preparando', reading: 'Leyendo lote',
       reviewHint: 'La IA puede equivocarse. Revisa los importes (sobre todo los marcados) antes de guardar.',
       notInvoice: 'No es factura', duplicate: 'Duplicada', check: 'Revisar', noneFound: 'No se encontraron facturas en los archivos.',
-      save: 'Guardar {n} en el libro', saved: '{n} apuntes guardados en el libro',
-      dupesFound: '{n} facturas ya estaban en el libro.', skipDupes: 'Guardar sin las duplicadas', saveAnyway: 'Guardar todas igualmente'
+      save: 'Guardar {n} en el libro', saved: '{n} apuntes guardados en el libro', saved_one: '{n} apunte guardado en el libro',
+      dupesFound: '{n} facturas ya estaban en el libro.', dupesFound_one: '{n} factura ya estaba en el libro.', skipDupes: 'Guardar sin las duplicadas', saveAnyway: 'Guardar todas igualmente'
     },
     taxes: {
       headline: 'Este trimestre ({q}) te tocará pagar, aproximadamente:', dueBy: 'Plazo: hasta el {date}',
@@ -511,8 +511,8 @@ export default {
       legal: 'Estimación orientativa en régimen general. No incluye recargo de equivalencia, módulos ni el Impuesto sobre Sociedades. No es asesoramiento fiscal.'
     },
     receivables: {
-      pending: 'Pendiente de cobro', invoices: '{n} facturas', overdue60: 'Más de 60 días', avgDays: 'Días medios de cobro',
-      listTitle: 'Facturas por cobrar', age: '{n} días', clientAvg: 'este cliente suele pagar en {n} días',
+      pending: 'Pendiente de cobro', invoices: '{n} facturas', invoices_one: '{n} factura', overdue60: 'Más de 60 días', avgDays: 'Días medios de cobro',
+      listTitle: 'Facturas por cobrar', age: '{n} días', age_one: '{n} día', clientAvg: 'este cliente suele pagar en {n} días',
       claim: 'Reclamar', claimTitle: 'Email de reclamación · {name}', toneFriendly: 'Amable', toneFirm: 'Firme', toneFormal: 'Formal',
       writing: 'Redactando…', subject: 'Asunto', body: 'Mensaje', openMail: 'Abrir en el correo',
       reviewNote: 'Revisa el texto antes de enviarlo. Lo redacta el asistente de IA gratuito.',
@@ -541,7 +541,7 @@ export default {
       flow_scenario_hire: 'Nueva contratación', flow_scenario_income: 'Ingresos previstos'
     },
     calendar: {
-      next: 'Próximo plazo', daysShort: 'días', models: 'Modelos {m}', settings: 'Ajustes', all: 'Todos',
+      next: 'Próximo plazo', daysShort: 'días', daysShort_one: 'día', models: 'Modelos {m}', settings: 'Ajustes', all: 'Todos',
       remind: 'Avisarme por email', remindHint: '7 días y 1 día antes de cada plazo.', yearTitle: 'Plazos de {y}', ifApplies: 'Si te aplica',
       legal: 'Fechas orientativas del régimen general (si el plazo acaba en fin de semana pasa al lunes; no se tienen en cuenta festivos). Si domicilias el pago, el plazo del banco termina unos días antes. Confírmalo en la sede de la AEAT o con tu gestoría.',
       kind_quarterly: 'Declaraciones trimestrales: IVA, IRPF, retenciones y alquileres',
@@ -558,11 +558,11 @@ export default {
     openFolder: 'Abrir carpeta', reopen: 'Reabrir «{name}»', chooseFiles: 'Elegir archivos',
     mobileHint: 'En el móvil no se pueden elegir carpetas: selecciona los archivos.',
     formats: 'PDF, Excel, CSV, ODS o texto · hasta 200 archivos · abrir la carpeta no gasta análisis.',
-    reading: 'Leyendo {n} de {total}…', filesRead: '{n} archivos leídos', selection: 'Selección',
+    reading: 'Leyendo {n} de {total}…', filesRead: '{n} archivos leídos', filesRead_one: '{n} archivo leído', selection: 'Selección',
     capped: 'La carpeta tiene más de {max} archivos: se analizarán los primeros {max} ({n} se quedan fuera).',
     moreErrors: 'y {n} archivos más no se pudieron leer.',
     instructionPlaceholder: 'Ej.: Hazme un resumen de estas facturas: total por proveedor y cuáles están sin pagar',
-    costNotice: 'Se van a analizar {n} archivos. Gastará 1 análisis de tu cuota diaria aunque se procese por partes.',
+    costNotice: 'Se van a analizar {n} archivos. Gastará 1 análisis de tu cuota diaria aunque se procese por partes.', costNotice_one: 'Se va a analizar {n} archivo. Gastará 1 análisis de tu cuota diaria.',
     analyze: 'Analizar carpeta', progress: 'Procesando parte {n} de {total}…', nothingReadable: 'No hay texto legible en los archivos.',
     defaultTitle: 'Resumen de carpeta'
   },

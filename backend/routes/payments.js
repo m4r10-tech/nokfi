@@ -33,6 +33,7 @@
 
 'use strict';
 
+const CHECKOUT_LOCALES = ['es', 'en', 'fr', 'it', 'de', 'pl'];
 const express = require('express');
 const router = express.Router();
 
@@ -176,6 +177,10 @@ router.post('/stripe/create-checkout', checkoutLimiter, async (req, res) => {
       params.set('subscription_data[trial_period_days]', String(TRIAL_DAYS));
     }
 
+    // Sesión 4 (§5.1): Checkout en el idioma de la web (Stripe los admite todos).
+    const locale = CHECKOUT_LOCALES.includes(req.body?.locale) ? req.body.locale : null;
+    if (locale) params.set('locale', locale);
+
     // Timeout 30s: una API de pagos colgada no debe retener el request del
     // usuario indefinidamente (antes: fetch sin límite de tiempo).
     const stripeRes = await fetchWithTimeout('https://api.stripe.com/v1/checkout/sessions', {
@@ -241,7 +246,9 @@ router.post('/stripe/create-portal-session', requireLicense, async (req, res) =>
       },
       body: new URLSearchParams({
         'customer': license.stripe_customer_id,
-        'return_url': returnUrl
+        'return_url': returnUrl,
+        // Portal en el idioma de la app (sesión 4); 'auto' si no llega uno válido.
+        'locale': CHECKOUT_LOCALES.includes(req.body?.locale) ? req.body.locale : 'auto'
       }).toString()
     }, 30000);
 

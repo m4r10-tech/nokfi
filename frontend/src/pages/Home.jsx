@@ -87,7 +87,7 @@ export default function Home() {
         <div className="anim-enter flex items-center gap-3 rounded-xl px-4 py-3 text-sm"
           style={{ background: 'var(--accent-soft)', color: 'var(--text-primary)', border: '1px solid var(--border)' }}>
           <Gift size={16} className="shrink-0" style={{ color: 'var(--accent-text)' }} />
-          <span className="flex-1">{t('home.trialBanner').replace('{n}', trialDaysLeft)}</span>
+          <span className="flex-1">{t('home.trialBanner', { n: trialDaysLeft })}</span>
           <Link to="/app/configuracion" className="link text-sm font-medium shrink-0">{t('home.trialManage')}</Link>
         </div>
       )}
@@ -396,9 +396,9 @@ function FinanceStrip({ dash, t, lang }) {
     { to: '/app/finanzas/impuestos', icon: Landmark, label: t('home.fTaxes').replace('{q}', `${dash.taxes.quarter}T`), value: eur(dash.taxes.total_estimated, lang),
       hint: dash.taxes.missing > 0 ? t('finance.taxes.missing').replace('{v}', eur(dash.taxes.missing, lang)) : t('finance.taxes.covered'), warn: dash.taxes.missing > 0 },
     { to: '/app/finanzas/cobros', icon: HandCoins, label: t('home.fReceivables'), value: eur(dash.receivables.total, lang),
-      hint: dash.receivables.overdue_60 > 0 ? t('home.fOverdue').replace('{v}', eur(dash.receivables.overdue_60, lang)) : t('finance.receivables.invoices').replace('{n}', dash.receivables.count), warn: dash.receivables.overdue_60 > 0 },
+      hint: dash.receivables.overdue_60 > 0 ? t('home.fOverdue').replace('{v}', eur(dash.receivables.overdue_60, lang)) : t('finance.receivables.invoices', { n: dash.receivables.count }), warn: dash.receivables.overdue_60 > 0 },
     { to: '/app/finanzas/fugas', icon: Droplets, label: t('home.fLeaks'), value: eur(dash.leaks.detected_this_month, lang),
-      hint: t('home.fLeaksHint').replace('{n}', dash.leaks.alerts) },
+      hint: t('home.fLeaksHint', { n: dash.leaks.alerts }) },
     fc
       ? { to: '/app/finanzas/prevision', icon: LineChart, label: t('home.fForecast'), value: eur(fc.at90, lang),
           hint: fc.first_below ? t('home.fBelow').replace('{date}', isoDate(fc.first_below.date, lang, { day: 'numeric', month: 'short' })) : t('home.fForecastOk'), warn: !!fc.first_below }
@@ -423,7 +423,7 @@ function FinanceStrip({ dash, t, lang }) {
         <Link to="/app/finanzas/calendario" className="inline-flex items-center gap-2 self-start rounded-full px-3 py-1.5 text-xs font-medium"
           style={{ background: 'var(--surface-1)', border: '1px solid var(--border)', color: 'var(--text-secondary)' }}>
           <CalendarDays size={13} style={{ color: 'var(--accent-text)' }} />
-          {t('home.nextDeadline').replace('{m}', deadline.models.join(', ')).replace('{n}', deadline.days_left).replace('{date}', isoDate(deadline.date, lang, { day: 'numeric', month: 'short' }))}
+          {t('home.nextDeadline', { m: deadline.models.join(', '), n: deadline.days_left, date: isoDate(deadline.date, lang, { day: 'numeric', month: 'short' }) })}
         </Link>
       )}
     </section>

@@ -130,7 +130,7 @@ export default function InvoiceImport({ profile, onSaved, onCancel }) {
     setSaving(false);
     if (res.status === 409) { setDupes(res.data.duplicates || []); return; }
     if (!res.ok) { setError(apiErrorMessage(t, res)); return; }
-    toast.success(t('finance.import.saved').replace('{n}', res.data.ids.length));
+    toast.success(t('finance.import.saved', { n: res.data.ids.length }));
     onSaved();
   };
 
@@ -159,7 +159,7 @@ export default function InvoiceImport({ profile, onSaved, onCancel }) {
           {picked && (
             <>
               <Notice icon={Info}>
-                {t('finance.import.willRead').replace('{n}', picked.files.length)}
+                {t('finance.import.willRead', { n: picked.files.length })}
                 {picked.skipped > 0 && ` ${t('finance.import.capped').replace('{max}', MAX_INVOICES)}`}
               </Notice>
               <div><button onClick={run} disabled={!picked.files.length} className="btn btn-primary"><Sparkles size={15} /> {t('finance.import.start')}</button></div>
@@ -234,7 +234,7 @@ export default function InvoiceImport({ profile, onSaved, onCancel }) {
 
           {dupes && dupes.length > 0 ? (
             <div className="flex flex-col gap-2">
-              <Notice icon={AlertTriangle} tone="warning">{t('finance.import.dupesFound').replace('{n}', dupes.length)}</Notice>
+              <Notice icon={AlertTriangle} tone="warning">{t('finance.import.dupesFound', { n: dupes.length })}</Notice>
               <div className="flex flex-col sm:flex-row gap-2">
                 <button onClick={() => save(false, true)} disabled={saving} className="btn btn-primary">{t('finance.import.skipDupes')}</button>
                 <button onClick={() => save(true)} disabled={saving} className="btn btn-secondary">{t('finance.import.saveAnyway')}</button>

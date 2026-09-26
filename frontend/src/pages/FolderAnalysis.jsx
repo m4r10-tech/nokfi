@@ -125,7 +125,7 @@ export default function FolderAnalysis() {
             <div className="flex items-center gap-2 text-sm" style={{ color: 'var(--text-primary)' }}>
               <FolderOpen size={16} style={{ color: 'var(--accent-text)' }} />
               <span className="font-medium truncate">{folder.name}</span>
-              <span style={{ color: 'var(--text-muted)' }}>· {t('folder.filesRead').replace('{n}', read.length)}</span>
+              <span style={{ color: 'var(--text-muted)' }}>· {t('folder.filesRead', { n: read.length })}</span>
               <button onClick={() => { setFolder(null); setRead([]); setResult(null); }} className="ml-auto btn btn-ghost btn-sm !px-2" aria-label={t('common.close')}><X size={15} /></button>
             </div>
             {read.length > 0 && (
@@ -148,7 +148,7 @@ export default function FolderAnalysis() {
         <Section title={t('folder.step2')}>
           <textarea value={instruction} onChange={(e) => setInstruction(e.target.value)} rows={2} maxLength={500}
             placeholder={t('folder.instructionPlaceholder')} aria-label={t('folder.step2')} className="input resize-none" />
-          <Notice icon={Info}>{t('folder.costNotice').replace('{n}', read.length)}</Notice>
+          <Notice icon={Info}>{t('folder.costNotice', { n: read.length })}</Notice>
           <div className="mt-3 flex flex-col sm:flex-row sm:items-center gap-3">
             <button onClick={run} disabled={busy} className="btn btn-primary">
               {progress ? <Loader2 size={15} className="animate-spin" /> : <Sparkles size={15} />} {t('folder.analyze')}

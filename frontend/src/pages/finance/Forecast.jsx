@@ -92,7 +92,7 @@ export default function Forecast() {
       </div>
 
       <Section title={t('finance.forecast.curve')} aside={
-        <Segmented value={days} onChange={setDays} size="sm" options={[30, 60, 90].map(d => ({ value: d, label: t('finance.days').replace('{n}', d) }))} />
+        <Segmented value={days} onChange={setDays} size="sm" options={[30, 60, 90].map(d => ({ value: d, label: t('finance.days', { n: d }) }))} />
       }>
         <div className="h-[260px] sm:h-[300px]">
           <ResponsiveContainer width="100%" height="100%">

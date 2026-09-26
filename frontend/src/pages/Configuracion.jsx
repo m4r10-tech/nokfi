@@ -172,7 +172,7 @@ function SubscriptionSection() {
   const openPortal = async () => {
     setError(null);
     setLoading(true);
-    const res = await paymentsApi.stripePortal();
+    const res = await paymentsApi.stripePortal(lang);
     if (res.ok && res.data.url) {
       window.location.href = res.data.url; // el spinner sigue hasta que el navegador sale
       return;
@@ -203,7 +203,7 @@ function SubscriptionSection() {
         {trialDaysLeft != null && (
           <Row label={t('config.trialRow')}>
             <span style={{ color: 'var(--text-secondary)' }}>
-              {t('config.trialDaysLeft').replace('{n}', trialDaysLeft)}
+              {t('config.trialDaysLeft', { n: trialDaysLeft })}
             </span>
           </Row>
         )}

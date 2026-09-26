@@ -144,7 +144,7 @@ export default function Ledger() {
             ]} />
           </div>}>
           {totals.review > 0 && (
-            <p className="text-xs mb-3 flex items-center gap-1.5" style={{ color: 'var(--warning)' }}><AlertTriangle size={13} /> {t('finance.reviewCount').replace('{n}', totals.review)}</p>
+            <p className="text-xs mb-3 flex items-center gap-1.5" style={{ color: 'var(--warning)' }}><AlertTriangle size={13} /> {t('finance.reviewCount', { n: totals.review })}</p>
           )}
           <ul className="flex flex-col -mx-2">
             {visible.map(e => (

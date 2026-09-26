@@ -65,7 +65,7 @@ export default {
     subscriptionCancelled: 'Cancelled — access until end of period',
     subscriptionNoRenewal: 'No renewal scheduled',
     trialRow: 'Trial period',
-    trialDaysLeft: '{n} days left',
+    trialDaysLeft: '{n} days left', trialDaysLeft_one: '{n} day left',
     aiQuota: 'AI analysis quota', aiQuotaPerDay: 'analyses/day',
     manageSubscription: 'Manage subscription',
     manageHint: 'Switch plans, update your card or cancel from Stripe’s secure portal. Plan changes take effect at the end of the current period.',
@@ -130,7 +130,7 @@ export default {
     welcomeCard: 'Your dashboard is ready. Start wherever you like — there is no required order.',
     startQuestionnaire: 'Run diagnosis', uploadData: 'Upload my data',
     goodMorning: 'Good morning', goodAfternoon: 'Good afternoon', goodEvening: 'Good evening',
-    trialBanner: 'You are on your free trial: {n} days left.', trialManage: 'View subscription',
+    trialBanner: 'You are on your free trial: {n} days left.', trialBanner_one: 'You are on your free trial: {n} day left.', trialManage: 'View subscription',
     guideTitle: 'Getting started', guideProgress: '{n} of {total}', guideDismiss: 'Hide guide',
     stepProfile: 'Complete your company profile',
     stepDiagnosis: 'Run your first diagnosis', stepDiagnosisDesc: '30 yes/no questions, about 3 minutes.',
@@ -150,9 +150,9 @@ export default {
     actionsAllDone: 'All done! Run a new analysis to keep improving.',
     financeEmptyTitle: 'Read your invoices with AI', financeEmptyDesc: 'Nokfi will build your ledger and tell you how much to set aside for taxes, who owes you and how your cash will go.',
     fTaxes: 'Taxes {q}', fReceivables: 'To collect', fOverdue: '{v} over 60 days', fLeaks: 'Leaks this month',
-    fLeaksHint: '{n} alerts', fForecast: 'Cash in 90 days', fBelow: 'Below threshold on {date}', fForecastOk: 'No cash alerts',
+    fLeaksHint: '{n} alerts', fLeaksHint_one: '{n} alert', fForecast: 'Cash in 90 days', fBelow: 'Below threshold on {date}', fForecastOk: 'No cash alerts',
     fForecastSetup: 'Enter your balance to see the forecast',
-    nextDeadline: 'Next deadline: forms {m} · {date} · {n} days left'
+    nextDeadline: 'Next deadline: forms {m} · {date} · {n} days left', nextDeadline_one: 'Next deadline: forms {m} · {date} · {n} day left'
   },
   questionnaire: {
     reportTitle: 'Business diagnosis',
@@ -479,21 +479,21 @@ export default {
     duplicateEntry: 'There is already an invoice with that number and tax ID in the ledger.',
     confirmDelete: 'Delete this ledger entry?', deleted: 'Entry deleted', delete: 'Delete',
     incomeBase: 'Income (net)', expenseBase: 'Expenses (net)', vatBalance: 'VAT to pay', result: 'Result',
-    reviewCount: '{n} entries do not add up: please review them.', search: 'Search…', ledgerSheet: 'Income and expense ledger',
+    reviewCount: '{n} entries do not add up: please review them.', reviewCount_one: '{n} entry does not add up: please review it.', search: 'Search…', ledgerSheet: 'Income and expense ledger',
     emptyTitle: 'Your ledger is empty', emptyDesc: 'Upload photos or PDFs of your invoices (or a whole folder) and the AI will add them to the ledger. You just review.',
-    days: '{n} days',
+    days: '{n} days', days_one: '{n} day',
     import: {
       title: 'Read invoices with AI',
       desc: 'Choose photos or PDFs of invoices and receipts, or open a whole folder. The AI extracts issuer, tax ID, date, net amount, VAT, withholding and total; you review before saving.',
       kind: 'What kind of invoices?', kindAuto: 'Detect with my tax ID', kindExpense: 'Expenses (received)', kindIncome: 'Income (issued)',
       noTaxId: 'Add your tax ID in Settings to tell them apart automatically; otherwise they will be treated as expenses.',
       formats: 'PDF, JPG, PNG or WebP · up to 60 invoices per read · files are not stored: only the data you confirm.',
-      willRead: '{n} invoices will be read. It will use 1 analysis of your daily quota.', capped: 'Only the first {max} will be read.',
+      willRead: '{n} invoices will be read. It will use 1 analysis of your daily quota.', willRead_one: '{n} invoice will be read. It will use 1 analysis of your daily quota.', capped: 'Only the first {max} will be read.',
       start: 'Read invoices', preparing: 'Preparing', reading: 'Reading batch',
       reviewHint: 'The AI can make mistakes. Check the amounts (especially the flagged ones) before saving.',
       notInvoice: 'Not an invoice', duplicate: 'Duplicate', check: 'Check', noneFound: 'No invoices were found in the files.',
-      save: 'Save {n} to the ledger', saved: '{n} entries saved to the ledger',
-      dupesFound: '{n} invoices were already in the ledger.', skipDupes: 'Save without the duplicates', saveAnyway: 'Save all anyway'
+      save: 'Save {n} to the ledger', saved: '{n} entries saved to the ledger', saved_one: '{n} entry saved to the ledger',
+      dupesFound: '{n} invoices were already in the ledger.', dupesFound_one: '{n} invoice was already in the ledger.', skipDupes: 'Save without the duplicates', saveAnyway: 'Save all anyway'
     },
     taxes: {
       headline: 'This quarter ({q}) you will have to pay approximately:', dueBy: 'Deadline: {date}',
@@ -508,8 +508,8 @@ export default {
       legal: 'Approximate estimate under the general regime (Spain). Excludes the equivalence surcharge, modules and Corporate Tax. This is not tax advice.'
     },
     receivables: {
-      pending: 'Pending collection', invoices: '{n} invoices', overdue60: 'Over 60 days', avgDays: 'Average collection days',
-      listTitle: 'Invoices to collect', age: '{n} days', clientAvg: 'this client usually pays in {n} days',
+      pending: 'Pending collection', invoices: '{n} invoices', invoices_one: '{n} invoice', overdue60: 'Over 60 days', avgDays: 'Average collection days',
+      listTitle: 'Invoices to collect', age: '{n} days', age_one: '{n} day', clientAvg: 'this client usually pays in {n} days',
       claim: 'Chase', claimTitle: 'Payment reminder · {name}', toneFriendly: 'Friendly', toneFirm: 'Firm', toneFormal: 'Formal',
       writing: 'Writing…', subject: 'Subject', body: 'Message', openMail: 'Open in email',
       reviewNote: 'Check the text before sending it. It is written by the free AI assistant.',
@@ -538,7 +538,7 @@ export default {
       flow_scenario_hire: 'New hire', flow_scenario_income: 'Expected income'
     },
     calendar: {
-      next: 'Next deadline', daysShort: 'days', models: 'Forms {m}', settings: 'Settings', all: 'All',
+      next: 'Next deadline', daysShort: 'days', daysShort_one: 'day', models: 'Forms {m}', settings: 'Settings', all: 'All',
       remind: 'Email me reminders', remindHint: '7 days and 1 day before each deadline.', yearTitle: 'Deadlines in {y}', ifApplies: 'If it applies',
       legal: 'Approximate dates for the general regime in Spain (if a deadline falls on a weekend it moves to Monday; public holidays are not included). If you pay by direct debit, the bank deadline ends a few days earlier. Confirm with the Spanish Tax Agency or your accountant.',
       kind_quarterly: 'Quarterly returns: VAT, income tax, withholdings and rent',
@@ -555,11 +555,11 @@ export default {
     openFolder: 'Open folder', reopen: 'Reopen “{name}”', chooseFiles: 'Choose files',
     mobileHint: 'Folders cannot be selected on mobile: select the files instead.',
     formats: 'PDF, Excel, CSV, ODS or text · up to 200 files · opening the folder does not use any analysis.',
-    reading: 'Reading {n} of {total}…', filesRead: '{n} files read', selection: 'Selection',
+    reading: 'Reading {n} of {total}…', filesRead: '{n} files read', filesRead_one: '{n} file read', selection: 'Selection',
     capped: 'The folder has more than {max} files: the first {max} will be analysed ({n} are left out).',
     moreErrors: 'and {n} more files could not be read.',
     instructionPlaceholder: 'E.g.: Summarise these invoices: total per supplier and which ones are unpaid',
-    costNotice: '{n} files will be analysed. It will use 1 analysis of your daily quota even if it is processed in parts.',
+    costNotice: '{n} files will be analysed. It will use 1 analysis of your daily quota even if it is processed in parts.', costNotice_one: '{n} file will be analysed. It will use 1 analysis of your daily quota.',
     analyze: 'Analyse folder', progress: 'Processing part {n} of {total}…', nothingReadable: 'There is no readable text in the files.',
     defaultTitle: 'Folder summary'
   },
