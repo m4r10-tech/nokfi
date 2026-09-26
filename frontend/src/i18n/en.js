@@ -98,6 +98,10 @@ export default {
     loading: 'Loading plans…'
   },
   onboarding: {
+    companyPlaceholder: 'García Workshop', sectorSelect: 'Choose a sector',
+    sectors: { comercio: 'Retail', hosteleria: 'Hospitality', salud: 'Health', legal: 'Legal', construccion: 'Construction', tecnologia: 'Technology', consultoria: 'Consulting', diseno: 'Design', educacion: 'Education', otro: 'Other' },
+    sizes: { solo: 'Just me (freelancer)', s2: '2–5 people', s6: '6–20 people', s20: '20+ people' },
+    expenses: { alquiler: 'Rent', personal: 'Staff', proveedores: 'Suppliers', marketing: 'Marketing', suministros: 'Utilities', tecnologia: 'Technology', transporte: 'Transport', otro: 'Other' },
     welcome: 'Welcome to Nokfi', subtitle: 'Tell us a bit about your business to personalize your analyses',
     companyName: 'Company name', sector: 'Sector', size: 'Size',
     mainExpenses: 'Main business expenses', start: 'Start using Nokfi'
@@ -121,6 +125,21 @@ export default {
     qaCalc: 'Calculators', qaCalcDesc: 'Break-even, margins and ROI'
   },
   questionnaire: {
+    reportTitle: 'Business diagnosis',
+    sections: { ingresos: 'Revenue and sales', gastos: 'Expenses and costs', pedidos: 'Orders and stock', tesoreria: 'Treasury and finance', reporting: 'Reporting' },
+    items: {
+      facturacion: 'Invoices recorded', control_cobros: 'Payment collection tracking', previsiones_ventas: 'Sales forecasts',
+      descuentos: 'Discount policy', clientes_recurrentes: 'Repeat customers', margen_producto: 'Margin per product/service',
+      gastos_fijos: 'Fixed costs recorded', gastos_variables: 'Variable costs', presupuesto_mensual: 'Monthly budget',
+      tickets_digitales: 'Digital receipts and records', gastos_personal: 'Staff costs', revision_proveedores: 'Supplier review',
+      gestion_pedidos: 'Order management', control_stock: 'Stock/inventory control', productos_top: 'Best-selling products',
+      productos_bajos: 'Low-margin products', punto_pedido: 'Automatic reorder point', devoluciones: 'Returns management',
+      conciliacion: 'Bank reconciliation', flujo_caja: 'Cash flow', fondo_reserva: 'Reserve fund',
+      financiacion: 'Financing management', impuestos: 'Tax planning', rentabilidad: 'Profitability analysis',
+      dashboard: 'Dashboard', informe_mensual: 'Monthly report', comparativa_periodos: 'Comparison with previous periods',
+      alertas_automaticas: 'Automatic alerts', kpi_ventas: 'Sales KPIs', gestor_externo: 'Accountant or advisor'
+    },
+    headings: { strengths: 'Strengths', critical: 'Critical areas to improve', savings: 'Cost reduction', plan: 'Action plan — next 30 days', automation: 'Recommended automations' },
     title: 'Diagnosis questionnaire',
     subtitle: '30 quick yes/no questions about how you run your business. The AI returns a diagnosis with priorities.',
     sectionOf: 'Section {n} of {total}', question: 'Do you currently manage this in your business?',
@@ -139,7 +158,16 @@ export default {
     revenue: 'Revenue', cogs: 'Cost of sales', opex: 'Operating expenses',
     grossMargin: 'Gross margin', netMargin: 'Net margin', investment: 'Investment', profit: 'Profit obtained'
   },
+  excelModules: {
+    stock: { title: 'Stock / Warehouse', desc: 'Current warehouse inventory', description: 'Upload your current inventory to analyse stock levels, safety minimums and turnover.' },
+    ventas: { title: 'Outgoing — Sales', desc: 'Stock allocated to sales', description: 'Upload the products allocated to sales to see what sells most and least.' },
+    servicios: { title: 'Outgoing — Services', desc: 'Stock allocated to services', description: 'Upload the materials allocated to services to analyse how they are distributed.' },
+    entradas: { title: 'Incoming products', desc: 'Orders placed', description: 'Upload your purchase orders to analyse incoming products and suppliers.' },
+    caja: { title: 'Cash', desc: 'Cash on hand and change', description: 'Upload your cash movements to analyse the balance over time and spot anomalies.' },
+    total: { title: 'Total (Profit)', desc: 'Total profit after taxes and expenses', description: 'Upload your income and expenses to calculate total profit after taxes.' }
+  },
   excel: {
+    exportSheet: 'AI analysis', exportColumn: 'Analysis',
     hubTitle: 'Excel analysis', hubDesc: 'Choose the type of data you want to analyse. Your files are read in your browser — they are never uploaded to our servers.',
     importTitle: 'Import files', importHint: 'Drag files here or click to select',
     importHintMobile: 'Tap to choose files',

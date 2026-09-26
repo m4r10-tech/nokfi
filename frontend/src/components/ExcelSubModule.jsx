@@ -13,6 +13,7 @@ import { apiErrorMessage } from '../middleware/errors';
 import { useLang } from '../context/LangContext';
 import { useToast } from '../context/ToastContext';
 import { localeOf } from '../utils/dates';
+import { aiLanguageDirective } from '../utils/aiLang';
 import PageHeader from './PageHeader';
 import Skeleton, { SkeletonText } from './Skeleton';
 
@@ -27,8 +28,12 @@ const CHART_COLORS = ['#3B82F6', '#22C55E', '#F59E0B', '#EF4444', '#8B5CF6', '#E
  * (sección 20 del proyecto). Cada subapartado pasa su propia config:
  *   title, promptBase, chartType, parseRows (cómo convertir la hoja en datos de gráfica)
  */
-export default function ExcelSubModule({ title, description, promptBase, chartType = 'bar' }) {
+export default function ExcelSubModule({ moduleId, promptBase, chartType = 'bar' }) {
   const { t, lang } = useLang();
+  // Título y descripción en el idioma de la app (i18n excelModules.<id>). El
+  // título también etiqueta el análisis guardado en el historial.
+  const title = t(`excelModules.${moduleId}.title`);
+  const description = t(`excelModules.${moduleId}.description`);
   const toast = useToast();
   const [files, setFiles] = useState([]); // { name, rows, context }
   const [contextText, setContextText] = useState('');
@@ -125,7 +130,7 @@ export default function ExcelSubModule({ title, description, promptBase, chartTy
       return `Archivo "${f.name}" (texto extraído del PDF):\n${f.text}`;
     }).join('\n\n');
 
-    return `${promptBase}\n\nContexto añadido por el usuario: ${contextText || 'ninguno'}\n\nDATOS:\n${dataSummary}\n\nResponde en HTML (sin html/body/head) con: resumen, hallazgos clave, alertas, oportunidades y recomendaciones concretas. Sin emojis, en español, tono profesional.`;
+    return `${promptBase}\n\nContexto añadido por el usuario: ${contextText || 'ninguno'}\n\nDATOS:\n${dataSummary}\n\nResponde en HTML (sin html/body/head) con: resumen, hallazgos clave, alertas, oportunidades y recomendaciones concretas. Sin emojis, tono profesional. ${aiLanguageDirective(lang)}`;
   };
 
   const runAnalysis = async () => {
@@ -301,7 +306,7 @@ export default function ExcelSubModule({ title, description, promptBase, chartTy
               <button onClick={() => exportAnalysisToPdf(title, analysis)} className="btn btn-secondary btn-sm">
                 <Download size={14} /> PDF
               </button>
-              <button onClick={() => exportDataToExcel(title, files, analysis)} className="btn btn-secondary btn-sm">
+              <button onClick={() => exportDataToExcel(title, files, analysis, { sheet: t('excel.exportSheet'), column: t('excel.exportColumn') })} className="btn btn-secondary btn-sm">
                 <Download size={14} /> Excel
               </button>
             </div>

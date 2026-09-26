@@ -65,7 +65,7 @@ export function exportAnalysisToPdf(title, analysisHtml) {
 }
 
 /** Exporta los datos originales importados + el análisis en un Excel con hojas separadas */
-export function exportDataToExcel(title, files, analysisHtml) {
+export function exportDataToExcel(title, files, analysisHtml, labels = { sheet: 'Análisis IA', column: 'Análisis' }) {
   const wb = XLSX.utils.book_new();
 
   files.forEach((f, i) => {
@@ -78,9 +78,9 @@ export function exportDataToExcel(title, files, analysisHtml) {
 
   const plainText = analysisHtml.replace(/<[^>]+>/g, '\n').replace(/\n{2,}/g, '\n').trim();
   const analysisRows = plainText.split('\n').filter(Boolean)
-    .map(line => ({ Análisis: neutralizeFormulaInjection(line) }));
+    .map(line => ({ [labels.column]: neutralizeFormulaInjection(line) }));
   const wsAnalysis = XLSX.utils.json_to_sheet(analysisRows);
-  XLSX.utils.book_append_sheet(wb, wsAnalysis, 'Análisis IA');
+  XLSX.utils.book_append_sheet(wb, wsAnalysis, labels.sheet.slice(0, 31));
 
   XLSX.writeFile(wb, `${slug(title)}_nokfi.xlsx`);
 }

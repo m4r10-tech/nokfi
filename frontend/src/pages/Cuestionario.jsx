@@ -8,72 +8,25 @@ import { exportAnalysisToPdf } from '../middleware/exportUtils';
 import { useToast } from '../context/ToastContext';
 import { useLang } from '../context/LangContext';
 import PageHeader from '../components/PageHeader';
+import { aiLanguageDirective } from '../utils/aiLang';
 import Skeleton, { SkeletonText } from '../components/Skeleton';
 
+// Textos en i18n (questionnaire.sections.<key> / questionnaire.items.<id>);
+// aquí solo la estructura. Los ids no cambian: identifican cada respuesta.
 const SECTIONS = [
-  {
-    title: 'Ingresos y ventas',
-    items: [
-      { id: 'facturacion', name: 'Facturación registrada' },
-      { id: 'control_cobros', name: 'Control de cobros' },
-      { id: 'previsiones_ventas', name: 'Previsiones de ventas' },
-      { id: 'descuentos', name: 'Política de descuentos' },
-      { id: 'clientes_recurrentes', name: 'Clientes recurrentes' },
-      { id: 'margen_producto', name: 'Margen por producto/servicio' }
-    ]
-  },
-  {
-    title: 'Gastos y costes',
-    items: [
-      { id: 'gastos_fijos', name: 'Gastos fijos registrados' },
-      { id: 'gastos_variables', name: 'Gastos variables' },
-      { id: 'presupuesto_mensual', name: 'Presupuesto mensual' },
-      { id: 'tickets_digitales', name: 'Tickets y justificantes digitales' },
-      { id: 'gastos_personal', name: 'Gastos de personal' },
-      { id: 'revision_proveedores', name: 'Revisión de proveedores' }
-    ]
-  },
-  {
-    title: 'Pedidos y stock',
-    items: [
-      { id: 'gestion_pedidos', name: 'Gestión de pedidos' },
-      { id: 'control_stock', name: 'Control de stock/inventario' },
-      { id: 'productos_top', name: 'Productos más vendidos' },
-      { id: 'productos_bajos', name: 'Productos poco rentables' },
-      { id: 'punto_pedido', name: 'Punto de pedido automático' },
-      { id: 'devoluciones', name: 'Gestión de devoluciones' }
-    ]
-  },
-  {
-    title: 'Tesorería y finanzas',
-    items: [
-      { id: 'conciliacion', name: 'Conciliación bancaria' },
-      { id: 'flujo_caja', name: 'Flujo de caja (cash flow)' },
-      { id: 'fondo_reserva', name: 'Fondo de reserva' },
-      { id: 'financiacion', name: 'Gestión de financiación' },
-      { id: 'impuestos', name: 'Planificación fiscal' },
-      { id: 'rentabilidad', name: 'Análisis de rentabilidad' }
-    ]
-  },
-  {
-    title: 'Reporting e informes',
-    items: [
-      { id: 'dashboard', name: 'Dashboard o panel de control' },
-      { id: 'informe_mensual', name: 'Informe mensual' },
-      { id: 'comparativa_periodos', name: 'Comparativa con periodos anteriores' },
-      { id: 'alertas_automaticas', name: 'Alertas automáticas' },
-      { id: 'kpi_ventas', name: 'KPIs de ventas' },
-      { id: 'gestor_externo', name: 'Asesor o gestoría' }
-    ]
-  }
+  { key: 'ingresos', items: ['facturacion', 'control_cobros', 'previsiones_ventas', 'descuentos', 'clientes_recurrentes', 'margen_producto'] },
+  { key: 'gastos', items: ['gastos_fijos', 'gastos_variables', 'presupuesto_mensual', 'tickets_digitales', 'gastos_personal', 'revision_proveedores'] },
+  { key: 'pedidos', items: ['gestion_pedidos', 'control_stock', 'productos_top', 'productos_bajos', 'punto_pedido', 'devoluciones'] },
+  { key: 'tesoreria', items: ['conciliacion', 'flujo_caja', 'fondo_reserva', 'financiacion', 'impuestos', 'rentabilidad'] },
+  { key: 'reporting', items: ['dashboard', 'informe_mensual', 'comparativa_periodos', 'alertas_automaticas', 'kpi_ventas', 'gestor_externo'] }
 ];
-
-const REPORT_TITLE = 'Diagnóstico de negocio';
 
 export default function Cuestionario() {
   const { profile } = useOutletContext();
-  const { t } = useLang();
+  const { t, lang } = useLang();
   const toast = useToast();
+  const REPORT_TITLE = t('questionnaire.reportTitle');
+  const itemName = (id) => t(`questionnaire.items.${id}`);
   const [step, setStep] = useState(0);
   const [answers, setAnswers] = useState({});
   const [phase, setPhase] = useState('form'); // form | loading | result | error
@@ -85,10 +38,11 @@ export default function Cuestionario() {
 
   const buildPrompt = () => {
     const yes = [], no = [];
-    SECTIONS.forEach(sec => sec.items.forEach(item => {
-      if (answers[item.id] === true) yes.push(item.name);
-      if (answers[item.id] === false) no.push(item.name);
+    SECTIONS.forEach(sec => sec.items.forEach(id => {
+      if (answers[id] === true) yes.push(itemName(id));
+      if (answers[id] === false) no.push(itemName(id));
     }));
+    const h = (k) => t(`questionnaire.headings.${k}`);
 
     return `Eres un consultor financiero experto en pymes y autónomos españoles. Analiza el negocio "${profile.companyName || 'sin nombre'}" (sector: ${profile.sector || 'no especificado'}, tamaño: ${profile.size || 'no especificado'}).
 
@@ -100,13 +54,13 @@ ${no.map(i => '- ' + i).join('\n') || '- Ninguna'}
 
 Genera un diagnóstico en HTML (sin html/body/head) con:
 1. Un párrafo de estado general (máx 3 frases)
-2. <h3>Puntos fuertes</h3>
-3. <h3>Áreas críticas a mejorar</h3> con las 3-5 más importantes, formato <ul><li>
-4. <h3>Reducción de gastos</h3> con pasos concretos
-5. <h3>Plan de acción — próximos 30 días</h3>
-6. <h3>Automatizaciones recomendadas</h3>
+2. <h3>${h('strengths')}</h3>
+3. <h3>${h('critical')}</h3> con las 3-5 más importantes, formato <ul><li>
+4. <h3>${h('savings')}</h3> con pasos concretos
+5. <h3>${h('plan')}</h3>
+6. <h3>${h('automation')}</h3>
 
-Tono profesional, directo, accionable. Sin emojis. Responde en español.`;
+Tono profesional, directo, accionable. Sin emojis. ${aiLanguageDirective(lang)}`;
   };
 
   const runAnalysis = async () => {
@@ -178,7 +132,7 @@ Tono profesional, directo, accionable. Sin emojis. Responde en español.`;
   }
 
   const section = SECTIONS[step];
-  const answeredInSection = section.items.every(item => answers[item.id] !== undefined);
+  const answeredInSection = section.items.every(id => answers[id] !== undefined);
   const totalQuestions = SECTIONS.reduce((n, sec) => n + sec.items.length, 0);
   const answeredTotal = Object.keys(answers).length;
 
@@ -191,7 +145,7 @@ Tono profesional, directo, accionable. Sin emojis. Responde en español.`;
       <div className="mb-5">
         <div className="flex items-center justify-between text-xs mb-2" style={{ color: 'var(--text-muted)' }}>
           <span className="font-medium" style={{ color: 'var(--text-secondary)' }}>
-            {t('questionnaire.sectionOf').replace('{n}', step + 1).replace('{total}', SECTIONS.length)} · {section.title}
+            {t('questionnaire.sectionOf').replace('{n}', step + 1).replace('{total}', SECTIONS.length)} · {t(`questionnaire.sections.${section.key}`)}
           </span>
           <span className="tabular">{answeredTotal}/{totalQuestions}</span>
         </div>
@@ -206,18 +160,18 @@ Tono profesional, directo, accionable. Sin emojis. Responde en español.`;
       <p className="text-sm mb-4" style={{ color: 'var(--text-secondary)' }}>{t('questionnaire.question')}</p>
 
       <div key={step} className="grid grid-cols-1 sm:grid-cols-2 gap-3 mb-6">
-        {section.items.map((item, i) => {
-          const v = answers[item.id];
+        {section.items.map((id, i) => {
+          const v = answers[id];
           return (
-            <div key={item.id} className="card anim-enter p-4" style={{
+            <div key={id} className="card anim-enter p-4" style={{
               '--i': i,
               borderColor: v === true ? 'var(--positive)' : v === false ? 'var(--negative)' : 'var(--border)',
               transition: 'border-color var(--dur-base) var(--ease-std)'
             }}>
-              <div className="text-sm font-medium mb-3" style={{ color: 'var(--text-primary)' }}>{item.name}</div>
+              <div className="text-sm font-medium mb-3" style={{ color: 'var(--text-primary)' }}>{itemName(id)}</div>
               <div className="flex gap-2">
-                <ToggleBtn active={v === true} color="positive" icon={Check} onClick={() => setAnswer(item.id, true)} label={t('common.yes')} />
-                <ToggleBtn active={v === false} color="negative" icon={X} onClick={() => setAnswer(item.id, false)} label={t('common.no')} />
+                <ToggleBtn active={v === true} color="positive" icon={Check} onClick={() => setAnswer(id, true)} label={t('common.yes')} />
+                <ToggleBtn active={v === false} color="negative" icon={X} onClick={() => setAnswer(id, false)} label={t('common.no')} />
               </div>
             </div>
           );

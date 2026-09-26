@@ -17,3 +17,5 @@ backend/db/backups/
 # Artefactos de sesión de desarrollo / capturas
 claude-photos/
 md/
+# Notas de trabajo por sesión (planes/handoffs locales): no se versionan
+docs/sesion*.md

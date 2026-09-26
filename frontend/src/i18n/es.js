@@ -98,6 +98,10 @@ export default {
     loading: 'Cargando planes…'
   },
   onboarding: {
+    companyPlaceholder: 'Taller García', sectorSelect: 'Selecciona un sector',
+    sectors: { comercio: 'Comercio', hosteleria: 'Hostelería', salud: 'Salud', legal: 'Legal', construccion: 'Construcción', tecnologia: 'Tecnología', consultoria: 'Consultoría', diseno: 'Diseño', educacion: 'Educación', otro: 'Otro' },
+    sizes: { solo: 'Solo (autónomo)', s2: '2–5 personas', s6: '6–20 personas', s20: '+20 personas' },
+    expenses: { alquiler: 'Alquiler', personal: 'Personal', proveedores: 'Proveedores', marketing: 'Marketing', suministros: 'Suministros', tecnologia: 'Tecnología', transporte: 'Transporte', otro: 'Otro' },
     welcome: 'Bienvenido a Nokfi', subtitle: 'Cuéntanos un poco sobre tu negocio para personalizar tus análisis',
     companyName: 'Nombre de la empresa', sector: 'Sector', size: 'Tamaño',
     mainExpenses: 'Principales gastos del negocio', start: 'Empezar a usar Nokfi'
@@ -121,6 +125,21 @@ export default {
     qaCalc: 'Calculadoras', qaCalcDesc: 'Equilibrio, márgenes y ROI'
   },
   questionnaire: {
+    reportTitle: 'Diagnóstico de negocio',
+    sections: { ingresos: 'Ingresos y ventas', gastos: 'Gastos y costes', pedidos: 'Pedidos y stock', tesoreria: 'Tesorería y finanzas', reporting: 'Reporting e informes' },
+    items: {
+      facturacion: 'Facturación registrada', control_cobros: 'Control de cobros', previsiones_ventas: 'Previsiones de ventas',
+      descuentos: 'Política de descuentos', clientes_recurrentes: 'Clientes recurrentes', margen_producto: 'Margen por producto/servicio',
+      gastos_fijos: 'Gastos fijos registrados', gastos_variables: 'Gastos variables', presupuesto_mensual: 'Presupuesto mensual',
+      tickets_digitales: 'Tickets y justificantes digitales', gastos_personal: 'Gastos de personal', revision_proveedores: 'Revisión de proveedores',
+      gestion_pedidos: 'Gestión de pedidos', control_stock: 'Control de stock/inventario', productos_top: 'Productos más vendidos',
+      productos_bajos: 'Productos poco rentables', punto_pedido: 'Punto de pedido automático', devoluciones: 'Gestión de devoluciones',
+      conciliacion: 'Conciliación bancaria', flujo_caja: 'Flujo de caja (cash flow)', fondo_reserva: 'Fondo de reserva',
+      financiacion: 'Gestión de financiación', impuestos: 'Planificación fiscal', rentabilidad: 'Análisis de rentabilidad',
+      dashboard: 'Dashboard o panel de control', informe_mensual: 'Informe mensual', comparativa_periodos: 'Comparativa con periodos anteriores',
+      alertas_automaticas: 'Alertas automáticas', kpi_ventas: 'KPIs de ventas', gestor_externo: 'Asesor o gestoría'
+    },
+    headings: { strengths: 'Puntos fuertes', critical: 'Áreas críticas a mejorar', savings: 'Reducción de gastos', plan: 'Plan de acción — próximos 30 días', automation: 'Automatizaciones recomendadas' },
     title: 'Cuestionario de diagnóstico',
     subtitle: '30 preguntas rápidas de sí/no sobre cómo gestionas tu negocio. La IA te devuelve un diagnóstico con prioridades.',
     sectionOf: 'Sección {n} de {total}', question: '¿Gestionas esto en tu negocio actualmente?',
@@ -139,7 +158,16 @@ export default {
     revenue: 'Ingresos', cogs: 'Coste de ventas', opex: 'Gastos operativos',
     grossMargin: 'Margen bruto', netMargin: 'Margen neto', investment: 'Inversión', profit: 'Beneficio obtenido'
   },
+  excelModules: {
+    stock: { title: 'Stock / Almacén', desc: 'Inventario actual del almacén', description: 'Sube tu inventario actual para analizar existencias, mínimos de seguridad y rotación.' },
+    ventas: { title: 'Salida — Ventas', desc: 'Almacén destinado a ventas', description: 'Sube los datos de productos destinados a ventas para analizar qué se vende más y menos.' },
+    servicios: { title: 'Salida — Servicios', desc: 'Almacén destinado a servicios', description: 'Sube los datos de material destinado a servicios para analizar su distribución.' },
+    entradas: { title: 'Entrada de productos', desc: 'Pedidos realizados', description: 'Sube tus pedidos realizados para analizar entradas de producto y proveedores.' },
+    caja: { title: 'Caja', desc: 'Dinero en caja y cambio', description: 'Sube los movimientos de caja para analizar la evolución del saldo y detectar anomalías.' },
+    total: { title: 'Total (Profit)', desc: 'Profit total tras impuestos y gastos', description: 'Sube los datos de ingresos y gastos para calcular el profit total tras impuestos.' }
+  },
   excel: {
+    exportSheet: 'Análisis IA', exportColumn: 'Análisis',
     hubTitle: 'Análisis Excel', hubDesc: 'Elige el tipo de datos que quieres analizar. Tus archivos se leen en tu navegador: nunca se suben a nuestros servidores.',
     importTitle: 'Importar archivos', importHint: 'Arrastra archivos o haz clic para seleccionar',
     importHintMobile: 'Toca para elegir archivos',

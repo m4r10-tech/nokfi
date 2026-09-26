@@ -1,14 +1,23 @@
 import { useState } from 'react';
 import { useLang } from '../context/LangContext';
 
-const SECTORS = ['Comercio', 'Hostelería', 'Salud', 'Legal', 'Construcción', 'Tecnología', 'Consultoría', 'Diseño', 'Educación', 'Otro'];
+// `value` es lo que se GUARDA en el perfil (se mantiene el literal histórico
+// en castellano para no romper perfiles existentes ni el prompt); `key` da la
+// etiqueta traducida (i18n onboarding.sectors/sizes/expenses).
+const SECTORS = [
+  ['Comercio', 'comercio'], ['Hostelería', 'hosteleria'], ['Salud', 'salud'], ['Legal', 'legal'], ['Construcción', 'construccion'],
+  ['Tecnología', 'tecnologia'], ['Consultoría', 'consultoria'], ['Diseño', 'diseno'], ['Educación', 'educacion'], ['Otro', 'otro']
+].map(([value, key]) => ({ value, key }));
 const SIZES = [
-  { value: 'solo', label: 'Solo (autónomo)' },
-  { value: '2-5', label: '2–5 personas' },
-  { value: '6-20', label: '6–20 personas' },
-  { value: '20+', label: '+20 personas' }
+  { value: 'solo', key: 'solo' },
+  { value: '2-5', key: 's2' },
+  { value: '6-20', key: 's6' },
+  { value: '20+', key: 's20' }
 ];
-const EXPENSES = ['Alquiler', 'Personal', 'Proveedores', 'Marketing', 'Suministros', 'Tecnología', 'Transporte', 'Otro'];
+const EXPENSES = [
+  ['Alquiler', 'alquiler'], ['Personal', 'personal'], ['Proveedores', 'proveedores'], ['Marketing', 'marketing'],
+  ['Suministros', 'suministros'], ['Tecnología', 'tecnologia'], ['Transporte', 'transporte'], ['Otro', 'otro']
+].map(([value, key]) => ({ value, key }));
 
 /** Modal obligatorio de onboarding (sección 14 del proyecto) — no se puede cerrar sin rellenar */
 export default function OnboardingModal({ onComplete }) {
@@ -41,13 +50,13 @@ export default function OnboardingModal({ onComplete }) {
         <form onSubmit={handleSubmit} className="flex flex-col gap-5">
           <Field label={t('onboarding.companyName')}>
             <input required value={companyName} onChange={(e) => setCompanyName(e.target.value)}
-              placeholder="Taller García" autoComplete="organization" className="input" />
+              placeholder={t('onboarding.companyPlaceholder')} autoComplete="organization" className="input" />
           </Field>
 
           <Field label={t('onboarding.sector')}>
             <select required value={sector} onChange={(e) => setSector(e.target.value)} className="input">
-              <option value="" disabled>Selecciona un sector</option>
-              {SECTORS.map(s => <option key={s} value={s}>{s}</option>)}
+              <option value="" disabled>{t('onboarding.sectorSelect')}</option>
+              {SECTORS.map(s => <option key={s.value} value={s.value}>{t(`onboarding.sectors.${s.key}`)}</option>)}
             </select>
           </Field>
 
@@ -60,7 +69,7 @@ export default function OnboardingModal({ onComplete }) {
                   style={size === s.value
                     ? { background: 'var(--accent)', color: 'var(--on-accent)' }
                     : { background: 'var(--surface-2)', color: 'var(--text-secondary)', border: '0.5px solid var(--border-strong)' }}>
-                  {s.label}
+                  {t(`onboarding.sizes.${s.key}`)}
                 </button>
               ))}
             </div>
@@ -68,14 +77,14 @@ export default function OnboardingModal({ onComplete }) {
 
           <Field label={t('onboarding.mainExpenses')}>
             <div className="flex flex-wrap gap-2">
-              {EXPENSES.map(exp => (
+              {EXPENSES.map(({ value: exp, key }) => (
                 <button type="button" key={exp} onClick={() => toggleExpense(exp)}
                   aria-pressed={mainExpenses.includes(exp)}
                   className="rounded-full px-3.5 py-2 text-sm sm:text-xs sm:py-1.5 font-medium transition-colors active:scale-95"
                   style={mainExpenses.includes(exp)
                     ? { background: 'var(--accent-soft)', color: 'var(--accent-text)', border: '0.5px solid var(--accent)' }
                     : { background: 'var(--surface-2)', color: 'var(--text-secondary)', border: '0.5px solid var(--border-strong)' }}>
-                  {exp}
+                  {t(`onboarding.expenses.${key}`)}
                 </button>
               ))}
             </div>

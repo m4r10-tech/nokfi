@@ -36,7 +36,7 @@ export default function Configuracion() {
       </Section>
 
       <Section title={t('config.profile')} aside={<SaveIndicator state={saveState} />}>
-        <Field id="cfg-company" label={t('config.companyName')} value={profile.companyName} placeholder="Taller García"
+        <Field id="cfg-company" label={t('config.companyName')} value={profile.companyName} placeholder={t('onboarding.companyPlaceholder')}
           autoComplete="organization" onChange={(v) => updateProfile({ companyName: v })} disabled={loading} />
         <Field id="cfg-sector" label={t('config.sector')} value={profile.sector} placeholder={t('config.sectorPlaceholder')}
           onChange={(v) => updateProfile({ sector: v })} disabled={loading} />
