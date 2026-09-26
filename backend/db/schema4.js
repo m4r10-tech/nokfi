@@ -12,6 +12,7 @@
  *   api_keys        F4 — claves de API por licencia (hash, nunca en claro)
  *   client_errors   C8 — errores técnicos del frontend/backend (sin datos financieros)
  *   reminders_sent  C4 — avisos del calendario fiscal ya enviados (anti-duplicado)
+ *   share_links     enlaces de solo lectura para la gestoría (token hasheado)
  *
  * Columnas nuevas:
  *   analyses.result_json / meta_json   F1 — salida estructurada + metadatos (C1)
@@ -116,6 +117,19 @@ function runSession4Schema(db) {
       sent_at       TEXT    NOT NULL DEFAULT (datetime('now')),
       PRIMARY KEY (license_id, deadline_key, lead_days)
     );
+
+    CREATE TABLE IF NOT EXISTS share_links (
+      id            INTEGER PRIMARY KEY AUTOINCREMENT,
+      license_id    INTEGER NOT NULL REFERENCES licenses(id) ON DELETE CASCADE,
+      label         TEXT    NOT NULL DEFAULT '',
+      token_hash    TEXT    NOT NULL UNIQUE,
+      prefix        TEXT    NOT NULL,
+      expires_at    TEXT    NOT NULL,
+      created_at    TEXT    NOT NULL DEFAULT (datetime('now')),
+      last_used_at  TEXT    DEFAULT NULL,
+      revoked_at    TEXT    DEFAULT NULL
+    );
+    CREATE INDEX IF NOT EXISTS idx_share_links_license ON share_links(license_id);
   `);
 
   ensureColumn(db, 'analyses', 'result_json', 'TEXT DEFAULT NULL');

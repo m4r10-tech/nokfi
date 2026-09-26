@@ -203,6 +203,26 @@ module.exports = async function session4Tests({ post, put, get, call, check, che
     if (savedResend !== undefined) process.env.RESEND_API_KEY = savedResend;
   }
 
+  // ── Enlace de solo lectura para la gestoría ──
+  {
+    let link = null;
+    await checkAsync('Compartir: POST /api/share → 201 con token (una vez) y caducidad',
+      post('/api/share', { label: 'Gestoría López', days: 90 }, tok),
+      r => { link = r.data.link; return r.status === 201 && /^[A-Za-z0-9_-]{32}$/.test(link.token) && !!link.expires_at; });
+    await checkAsync('Compartir: GET /api/share → lista sin token ni hash',
+      get('/api/share', tok),
+      r => r.status === 200 && r.data.links.length === 1 && r.data.links[0].active && !('token' in r.data.links[0]) && !JSON.stringify(r.data).includes(link.token));
+    check('Compartir: en BD solo el hash del token', () =>
+      !getDB().prepare('SELECT 1 FROM share_links WHERE token_hash = ?').get(link.token));
+    await checkAsync('Compartir: GET /api/shared/:token → empresa, 4 trimestres y libro, sin emails de clientes, noindex',
+      call('GET', `/api/shared/${link.token}?year=2026`, {}),
+      r => r.status === 200 && r.data.quarters.length === 4 && r.data.entries.length >= 6 && r.data.year === 2026
+        && !JSON.stringify(r.data).includes('pagos@clienteb.test') && !('party_email' in r.data.entries[0]));
+    await checkAsync('Compartir: token inventado → 404', call('GET', '/api/shared/abcdefghijklmnopqrstuvwxyz012345', {}), r => r.status === 404);
+    await checkAsync('Compartir: DELETE /api/share/:id → revocado', del(`/api/share/${link.id}`, null, tok), r => r.status === 200);
+    await checkAsync('Compartir: enlace revocado → 404', call('GET', `/api/shared/${link.token}`, {}), r => r.status === 404);
+  }
+
   await checkAsync('V1: DELETE /api/ledger/:id → 200 y ya no está',
     del(`/api/ledger/${ids[6]}`, null, tok), r => r.status === 200);
 

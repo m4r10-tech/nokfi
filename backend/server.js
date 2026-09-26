@@ -246,6 +246,7 @@ const { aiRouter, actionsRouter } = require('./routes/ai');
 const chatRoutes = require('./routes/chat');
 const financeRoutes = require('./routes/finance');
 const accountRoutes = require('./routes/account');
+const shareRoutes = require('./routes/share');
 const v1Routes = require('./routes/v1');
 
 app.use('/api/auth', authRoutes);
@@ -260,6 +261,8 @@ app.use('/api/dashboard', financeRoutes.dashboard); // resumen del panel de inic
 app.use('/api/keys', accountRoutes.keys);           // claves de API (F4)
 app.use('/api/me', accountRoutes.me);               // descargar / borrar mis datos (C9)
 app.use('/api/client-errors', accountRoutes.telemetry); // errores del frontend (C8)
+app.use('/api/share', shareRoutes.share);          // enlaces de solo lectura para la gestoría
+app.use('/api/shared', shareRoutes.shared);        // vista pública del enlace (token)
 app.use('/api/v1', v1Routes);                       // API pública para automatizaciones (F4)
 app.use('/api/analyses', analysesRoutes);   // historial de análisis (sección 14)
 app.use('/api/profile', profileRoutes);      // perfil de empresa del onboarding (sección 14)

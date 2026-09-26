@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react';
 import { useOutletContext, Link } from 'react-router-dom';
-import { Moon, Sun, LogOut, KeyRound, Copy, Eye, EyeOff, Loader2, CreditCard, Check, CloudOff, Code2, Trash2, Download, Lock, BellRing, LifeBuoy, ExternalLink, Mail } from 'lucide-react';
+import { Moon, Sun, LogOut, KeyRound, Copy, Eye, EyeOff, Loader2, CreditCard, Check, CloudOff, Code2, Trash2, Download, Lock, BellRing, LifeBuoy, ExternalLink, Mail, Share2 } from 'lucide-react';
 import { SECTORS, SIZES } from '../components/OnboardingModal';
 import { LANGUAGES } from '../i18n/languages';
 import { Modal, ErrorBox } from '../components/ui';
@@ -8,7 +8,7 @@ import { saveBlob } from '../middleware/exports/model';
 import { useTheme } from '../context/ThemeContext';
 import { useLang } from '../context/LangContext';
 import { useAuth } from '../context/AuthContext';
-import { authApi, paymentsApi, keysApi, meApi } from '../middleware/api';
+import { authApi, paymentsApi, keysApi, meApi, shareApi } from '../middleware/api';
 import PasswordGenerator from '../components/PasswordGenerator';
 import PageHeader from '../components/PageHeader';
 import { useToast } from '../context/ToastContext';
@@ -79,6 +79,8 @@ export default function Configuracion() {
       </Section>
 
       <SubscriptionSection />
+
+      <ShareSection />
 
       <ApiKeysSection />
 
@@ -247,6 +249,83 @@ function SubscriptionSection() {
 }
 
 /* ── F4: claves de API (solo Pro y Max; el backend lo valida SIEMPRE) ── */
+/** Enlace de solo lectura para la gestoría (se muestra una sola vez al crearlo). */
+function ShareSection() {
+  const { t, lang } = useLang();
+  const toast = useToast();
+  const [links, setLinks] = useState(null);
+  const [label, setLabel] = useState('');
+  const [days, setDays] = useState(90);
+  const [creating, setCreating] = useState(false);
+  const [created, setCreated] = useState(null);
+  const [error, setError] = useState(null);
+
+  const load = async () => {
+    const res = await shareApi.list();
+    if (res.ok) setLinks(res.data.links);
+  };
+  useEffect(() => { load(); }, []);
+
+  const create = async (e) => {
+    e.preventDefault();
+    setCreating(true); setError(null);
+    const res = await shareApi.create(label.trim(), days);
+    setCreating(false);
+    if (res.ok) { setCreated(`${window.location.origin}/compartido/${res.data.link.token}`); setLabel(''); load(); }
+    else setError(res.data?.error === 'too_many_links' ? t('share.tooMany') : apiErrorMessage(t, res));
+  };
+  const revoke = async (l) => {
+    if (!window.confirm(t('share.confirmRevoke'))) return;
+    const res = await shareApi.revoke(l.id);
+    if (res.ok) { toast.success(t('share.revoked')); load(); } else toast.error(apiErrorMessage(t, res));
+  };
+  const copy = async () => { try { await navigator.clipboard.writeText(created); toast.success(t('common.copied')); } catch { /* nada */ } };
+  const fmt = (s) => new Date(s.replace(' ', 'T') + 'Z').toLocaleDateString(localeOf(lang));
+
+  if (!links) return null;
+  const active = links.filter(l => l.active);
+
+  return (
+    <Section title={t('share.title')}>
+      <p className="text-xs" style={{ color: 'var(--text-muted)' }}>{t('share.desc')}</p>
+      {created && (
+        <div className="rounded-xl p-3.5 flex flex-col gap-2 anim-fade" style={{ background: 'var(--positive-soft)' }}>
+          <p className="text-sm font-medium" style={{ color: 'var(--text-primary)' }}>{t('share.createdOnce')}</p>
+          <div className="flex items-center gap-2 rounded-lg pl-3 pr-1.5 py-1.5" style={{ background: 'var(--surface-1)', border: '1px solid var(--border-strong)' }}>
+            <code className="flex-1 text-xs break-all" style={{ color: 'var(--text-primary)' }}>{created}</code>
+            <button onClick={copy} className="btn btn-ghost btn-sm !px-2.5" aria-label={t('common.copy')}><Copy size={15} /></button>
+          </div>
+          <button onClick={() => setCreated(null)} className="text-xs self-start hover:underline" style={{ color: 'var(--text-secondary)' }}>{t('config.api.savedIt')}</button>
+        </div>
+      )}
+      {active.length > 0 && (
+        <ul className="flex flex-col gap-1.5">
+          {active.map(l => (
+            <li key={l.id} className="flex items-center gap-3 rounded-lg px-3 py-2" style={{ background: 'var(--surface-2)' }}>
+              <Share2 size={15} className="shrink-0" style={{ color: 'var(--accent-text)' }} />
+              <div className="flex-1 min-w-0">
+                <p className="text-sm truncate" style={{ color: 'var(--text-primary)' }}>{l.label || t('config.api.unnamed')} <code className="text-xs" style={{ color: 'var(--text-muted)' }}>{l.prefix}…</code></p>
+                <p className="text-xs" style={{ color: 'var(--text-muted)' }}>
+                  {t('share.until', { date: fmt(l.expires_at) })} · {l.last_used_at ? t('share.lastOpened', { date: fmt(l.last_used_at) }) : t('share.neverOpened')}
+                </p>
+              </div>
+              <button onClick={() => revoke(l)} className="btn btn-ghost btn-sm !px-2" aria-label={t('share.revoke')} title={t('share.revoke')}><Trash2 size={14} /></button>
+            </li>
+          ))}
+        </ul>
+      )}
+      <form onSubmit={create} className="flex flex-col sm:flex-row gap-2">
+        <input value={label} onChange={(e) => setLabel(e.target.value)} maxLength={60} placeholder={t('share.labelPlaceholder')} aria-label={t('share.labelPlaceholder')} className="input flex-1" />
+        <select value={days} onChange={(e) => setDays(Number(e.target.value))} className="input sm:!w-36" aria-label={t('share.validity')}>
+          {[7, 30, 90, 365].map(d => <option key={d} value={d}>{t('share.days', { n: d })}</option>)}
+        </select>
+        <button type="submit" disabled={creating} className="btn btn-secondary">{creating ? <Loader2 size={15} className="animate-spin" /> : <Share2 size={15} />} {t('share.create')}</button>
+      </form>
+      {error && <ErrorMsg>{error}</ErrorMsg>}
+    </Section>
+  );
+}
+
 function ApiKeysSection() {
   const { t, lang } = useLang();
   const toast = useToast();

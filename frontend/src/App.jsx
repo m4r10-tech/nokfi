@@ -22,6 +22,7 @@ const Reveal = lazy(() => import('./pages/Reveal'));
 const Pricing = lazy(() => import('./pages/Pricing'));
 const Privacidad = lazy(() => import('./pages/Privacidad'));
 const ApiDocs = lazy(() => import('./pages/ApiDocs'));
+const Compartido = lazy(() => import('./pages/Compartido'));
 const NotFound = lazy(() => import('./pages/NotFound'));
 const DashboardLayout = lazy(() => import('./layouts/DashboardLayout'));
 const Home = lazy(() => import('./pages/Home'));
@@ -69,6 +70,7 @@ export default function App() {
             <Route path="/pricing" element={<Pricing />} />
             <Route path="/privacidad" element={<Privacidad />} />
             <Route path="/api-docs" element={<ApiDocs />} />
+            <Route path="/compartido/:token" element={<Compartido />} />
 
             <Route
               path="/app"

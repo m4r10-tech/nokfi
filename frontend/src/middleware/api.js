@@ -142,6 +142,13 @@ export const keysApi = {
   create: (name) => request('/keys', { method: 'POST', auth: true, body: { name } }),
   revoke: (id) => request(`/keys/${encodeURIComponent(id)}`, { method: 'DELETE', auth: true })
 };
+export const shareApi = {
+  list: () => request('/share', { auth: true }),
+  create: (label, days) => request('/share', { method: 'POST', auth: true, body: { label, days } }),
+  revoke: (id) => request(`/share/${encodeURIComponent(id)}`, { method: 'DELETE', auth: true }),
+  // Vista pública: el token del enlace es la credencial (sin sesión).
+  view: (token, year) => request(`/shared/${encodeURIComponent(token)}${qs({ year })}`)
+};
 export const meApi = {
   export: () => request('/me/export', { auth: true }),
   remove: (password) => request('/me', { method: 'DELETE', auth: true, body: { password } })
