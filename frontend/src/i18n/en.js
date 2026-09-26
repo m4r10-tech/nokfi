@@ -393,10 +393,10 @@ export default {
   },
   privacy: {
     title: 'Privacy policy',
-    updated: 'Last updated: 26 September 2026',
+    updated: 'Last updated: 27 September 2026',
     intro: 'This policy describes, in plain terms, which data Nokfi (nokfi.app) processes, why, and which third-party services are involved. It reflects exactly how the application works.',
     sections: [
-      { h: 'Controller & contact', ps: ['The data controller is Nokfi (nokfi.app). For any privacy question or to exercise your rights, write to info@nokfi.app. For problems with your account or payments, write to soporte@nokfi.app.'] },
+      { h: 'Controller & contact', ps: ['The controller for your account data is {OWNER}. For any privacy question or to exercise your rights, write to info@nokfi.app. For account or payment issues, to soporte@nokfi.app.'] },
       { h: 'What data we process', list: [
         'Account: your email, your license key and your password. The password is stored only as a cryptographic hash (scrypt), never in plain text.',
         'Company profile: name, sector, size, main expenses and, if you provide them, legal form, tax ID, cash balance and preferred language. They are used to personalise analyses and calculations.',
@@ -404,7 +404,8 @@ export default {
         'Invoice ledger: if you use invoice reading, we store the DATA you review and confirm (issuer or client, tax ID, date, number, amounts, VAT, withholding and whether it is paid). The invoice file itself is not stored.',
         'Action plan, what you have set aside for taxes and your API keys (stored only as a hash).',
         'Subscription: Stripe customer and subscription identifiers, plan and status. We never see or store your card details.',
-        'Technical logs: IP address and security events (sign-ins, errors) to protect the service. Application error reports include the technical message, the screen and the version, never your financial data.'
+        'Technical logs: IP address and security events (sign-ins, errors) to protect the service. Application error reports include the technical message, the screen and the version, never your financial data.',
+        'Your clients’ and suppliers’ data: what appears on your invoices and, if you enable automatic payment reminders, your clients’ email addresses. Read-only links you create for your accountant are stored as hashes, with their expiry and last access date.',
       ] },
       { h: 'Your files are not stored on our servers', ps: [
         'The Excel files, PDFs and folders you analyse are read locally, in your own browser. They are not stored on our servers.',
@@ -412,11 +413,11 @@ export default {
       ] },
       { h: 'Third-party services involved', list: [
         'Stripe: processes payments and manages subscriptions.',
-        'Groq and Cloudflare Workers AI: generate the analyses and read invoices. Their terms forbid using your data to train models and they do not keep it (except temporary technical logs to investigate abuse). Groq processes it in the United States.',
-        'Nokfi assistant: uses Cerebras, Groq or Cloudflare Workers AI, which do not use your messages to train models. We do not store your conversations.',
-        'Resend: sends transactional emails (your license key, password recovery and, if you turn them on, tax calendar reminders).',
+        'Cloudflare Workers AI: generates the analyses, reads scanned or photographed invoices and answers in the assistant. Its terms forbid using your data to train models and it does not retain it (except temporary technical logs to investigate abuse). We do not store your assistant conversations. If we add another AI provider in the future, it will also be one that does not train on your data, and we will list it here.',
+        'Resend: sends emails (your licence key, password recovery and, if enabled, tax calendar reminders, the monthly summary and payment reminders to your clients).',
         'Cloudflare: delivery and security network protecting access to the website. We use your connection\'s country (provided by Cloudflare) only to choose the website\'s initial language; we do not store it.'
       ] },
+      { h: 'Your clients’ and suppliers’ data', ps: ['For third-party data you enter in Nokfi (clients and suppliers on your invoices), you are the controller and Nokfi acts as processor: we use it only to provide the service. The terms are in the data processing agreement (nokfi.app/encargo-tratamiento). If you enable automatic reminders, they are sent in your company’s name and replies go straight to your email.'] },
       { h: 'Cookies & analytics', ps: ['Nokfi does not use tracking cookies or third-party analytics tools. Your session, language and theme are kept in your browser\'s local storage.'] },
       { h: 'Retention & deletion', ps: ['We keep your data while your license exists. From Settings → My data you can download all your data as a file or delete your account: your profile, history, invoice ledger, tasks, API keys and sessions are deleted with it. Technical error reports are deleted after 30 days.'] },
       { h: 'Your rights', ps: ['You can exercise your rights of access, rectification, erasure, portability and objection from Settings or by writing to info@nokfi.app. You can also lodge a complaint with the Spanish Data Protection Agency (aepd.es).'] },
@@ -464,6 +465,11 @@ export default {
     ERR_XLSX_READ: 'The spreadsheet "{name}" could not be read (damaged or unsupported format).',
     ERR_IMAGE_READ: 'The image "{name}" could not be read.',
     ERR_FILE_READ: '"{name}" could not be read.'
+  },
+  legal: {
+    privacy: 'Privacy policy', terms: 'Terms of use', dpa: 'Data processing agreement',
+    englishOnly: 'This legal text is available in Spanish (prevailing version) and English. The English version is shown.',
+    accept: 'By continuing you accept the {terms} and the {dpa}, and confirm you have read the {privacy}.'
   },
   share: {
     title: 'Share with your accountant',

@@ -92,6 +92,7 @@ export function PublicFooter() {
         <nav className="flex flex-wrap justify-center items-center gap-x-5 gap-y-2 text-xs" style={{ color: 'var(--text-secondary)' }}>
           <Link to="/pricing" className="hover:underline">{t('landing.plansHeading')}</Link>
           <Link to="/privacidad" className="hover:underline">{t('landing.privacyLink')}</Link>
+          <Link to="/terminos" className="hover:underline">{t('legal.terms')}</Link>
           <Link to="/home#contacto" className="hover:underline">{t('landing.contactLink')}</Link>
           <Link to="/login" className="hover:underline">{t('landing.login')}</Link>
         </nav>

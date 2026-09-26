@@ -393,10 +393,10 @@ export default {
   },
   privacy: {
     title: 'Polityka prywatności',
-    updated: 'Ostatnia aktualizacja: 26 września 2026',
+    updated: 'Ostatnia aktualizacja: 27 września 2026',
     intro: 'Ta polityka opisuje bez drobnego druku, jakie dane przetwarza Nokfi (nokfi.app), w jakim celu i jakie usługi zewnętrzne w tym uczestniczą. Odzwierciedla dokładnie działanie aplikacji.',
     sections: [
-      { h: 'Administrator i kontakt', ps: ['Administratorem danych jest Nokfi (nokfi.app). W sprawach prywatności lub aby skorzystać ze swoich praw, napisz na info@nokfi.app. W sprawie problemów z kontem lub płatnościami — na soporte@nokfi.app.'] },
+      { h: 'Administrator i kontakt', ps: ['Administratorem danych twojego konta jest {OWNER}. W sprawach prywatności lub aby skorzystać ze swoich praw, napisz na info@nokfi.app. W sprawach konta lub płatności — na soporte@nokfi.app.'] },
       { h: 'Jakie dane przetwarzamy', list: [
         'Konto: twój e-mail, klucz licencyjny i hasło. Hasło przechowujemy wyłącznie jako skrót kryptograficzny (scrypt), nigdy jawnym tekstem.',
         'Profil firmy: nazwa, branża, wielkość, główne wydatki oraz — jeśli je podasz — forma prawna, numer podatkowy, saldo gotówki i preferowany język. Służą do dopasowania analiz i obliczeń.',
@@ -404,7 +404,8 @@ export default {
         'Rejestr faktur: jeśli korzystasz z czytania faktur, przechowujemy DANE, które sprawdzasz i zatwierdzasz (wystawca lub klient, numer podatkowy, data, numer, kwoty, VAT, potrącenie i status płatności). Samego pliku faktury nie przechowujemy.',
         'Plan działania, kwoty odłożone na podatki i twoje klucze API (przechowywane tylko jako skrót).',
         'Subskrypcja: identyfikatory klienta i subskrypcji Stripe, plan i status. Nigdy nie widzimy ani nie przechowujemy danych twojej karty.',
-        'Logi techniczne: adres IP i zdarzenia bezpieczeństwa (logowania, błędy) w celu ochrony usługi. Raporty błędów aplikacji zawierają komunikat techniczny, ekran i wersję, nigdy twoich danych finansowych.'
+        'Logi techniczne: adres IP i zdarzenia bezpieczeństwa (logowania, błędy) w celu ochrony usługi. Raporty błędów aplikacji zawierają komunikat techniczny, ekran i wersję, nigdy twoich danych finansowych.',
+        'Dane twoich klientów i dostawców: te, które widnieją na fakturach, oraz — jeśli włączysz automatyczne przypomnienia o płatności — e-maile twoich klientów. Linki tylko do odczytu dla księgowego przechowujemy jako skrót, z datą ważności i ostatniego dostępu.',
       ] },
       { h: 'Twoje pliki nie są przechowywane na naszych serwerach', ps: [
         'Pliki Excel, PDF i foldery, które analizujesz, są czytane lokalnie w twojej przeglądarce. Nie są przechowywane na naszych serwerach.',
@@ -412,11 +413,11 @@ export default {
       ] },
       { h: 'Usługi zewnętrzne', list: [
         'Stripe: obsługuje płatności i zarządza subskrypcjami.',
-        'Groq i Cloudflare Workers AI: generują analizy i czytają faktury. Ich warunki zabraniają używania twoich danych do trenowania modeli i ich nie przechowują (poza tymczasowymi logami technicznymi do badania nadużyć). Groq przetwarza je w USA.',
-        'Asystent Nokfi: korzysta z Cerebras, Groq lub Cloudflare Workers AI, które nie używają twoich wiadomości do trenowania modeli. Nie przechowujemy twoich rozmów.',
-        'Resend: wysyła e-maile transakcyjne (twój klucz licencyjny, odzyskiwanie hasła oraz — jeśli je włączysz — przypomnienia z kalendarza podatkowego).',
+        'Cloudflare Workers AI: generuje analizy, czyta zeskanowane lub sfotografowane faktury i odpowiada w asystencie. Jego warunki zabraniają używania twoich danych do trenowania modeli i nie przechowuje ich (poza tymczasowymi logami technicznymi do badania nadużyć). Nie zapisujemy twoich rozmów z asystentem. Jeśli w przyszłości dodamy innego dostawcę AI, także on nie będzie trenował modeli na twoich danych i wskażemy go tutaj.',
+        'Resend: wysyła e-maile (twój klucz licencyjny, odzyskiwanie hasła oraz — jeśli je włączysz — przypomnienia kalendarza podatkowego, miesięczne podsumowanie i przypomnienia o płatności do twoich klientów).',
         'Cloudflare: sieć dostarczania i bezpieczeństwa chroniąca dostęp do strony. Kraju twojego połączenia (podawanego przez Cloudflare) używamy tylko do wyboru początkowego języka strony; nie przechowujemy go.'
       ] },
+      { h: 'Dane twoich klientów i dostawców', ps: ['W przypadku danych osób trzecich, które wprowadzasz do Nokfi (klienci i dostawcy z faktur), ty jesteś administratorem, a Nokfi podmiotem przetwarzającym: używamy ich wyłącznie do świadczenia usługi. Warunki opisuje umowa powierzenia przetwarzania danych (nokfi.app/encargo-tratamiento). Jeśli włączysz automatyczne przypomnienia, wychodzą one w imieniu twojej firmy, a odpowiedzi trafiają bezpośrednio na twój e-mail.'] },
       { h: 'Pliki cookie i analityka', ps: ['Nokfi nie używa śledzących plików cookie ani zewnętrznych narzędzi analitycznych. Sesja, język i motyw są przechowywane w pamięci lokalnej przeglądarki.'] },
       { h: 'Przechowywanie i usuwanie', ps: ['Przechowujemy dane, dopóki istnieje twoja licencja. W Ustawienia → Moje dane możesz pobrać wszystkie dane w pliku lub usunąć konto: razem z nim usuwamy profil, historię, rejestr faktur, zadania, klucze API i sesje. Techniczne raporty błędów usuwamy po 30 dniach.'] },
       { h: 'Twoje prawa', ps: ['Możesz skorzystać z prawa dostępu, sprostowania, usunięcia, przenoszenia i sprzeciwu w Ustawieniach lub pisząc na info@nokfi.app. Możesz też złożyć skargę do hiszpańskiego organu ochrony danych (aepd.es).'] },
@@ -464,6 +465,11 @@ export default {
     ERR_XLSX_READ: 'Nie udało się odczytać arkusza „{name}” (uszkodzony lub nieobsługiwany format).',
     ERR_IMAGE_READ: 'Nie udało się odczytać obrazu „{name}”.',
     ERR_FILE_READ: 'Nie udało się odczytać „{name}”.'
+  },
+  legal: {
+    privacy: 'Polityka prywatności', terms: 'Warunki korzystania', dpa: 'Umowa powierzenia przetwarzania danych',
+    englishOnly: 'Ten tekst prawny jest dostępny po hiszpańsku (wersja rozstrzygająca) i po angielsku. Wyświetlana jest wersja angielska.',
+    accept: 'Kontynuując, akceptujesz {terms} i {dpa} oraz potwierdzasz, że zapoznałeś się z {privacy}.'
   },
   share: {
     title: 'Udostępnij księgowemu',

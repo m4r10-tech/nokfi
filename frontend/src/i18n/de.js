@@ -393,10 +393,10 @@ export default {
   },
   privacy: {
     title: 'Datenschutzerklärung',
-    updated: 'Zuletzt aktualisiert: 26. September 2026',
+    updated: 'Zuletzt aktualisiert: 27. September 2026',
     intro: 'Diese Erklärung beschreibt ohne Kleingedrucktes, welche Daten Nokfi (nokfi.app) verarbeitet, wofür und welche Drittanbieter beteiligt sind. Sie entspricht genau der Funktionsweise der Anwendung.',
     sections: [
-      { h: 'Verantwortlicher und Kontakt', ps: ['Verantwortlich für die Verarbeitung ist Nokfi (nokfi.app). Für Datenschutzfragen oder zur Ausübung deiner Rechte schreib an info@nokfi.app. Bei Problemen mit Konto oder Zahlungen an soporte@nokfi.app.'] },
+      { h: 'Verantwortlicher und Kontakt', ps: ['Verantwortlicher für die Daten deines Kontos ist {OWNER}. Für Datenschutzfragen oder zur Ausübung deiner Rechte schreibe an info@nokfi.app. Bei Problemen mit Konto oder Zahlungen an soporte@nokfi.app.'] },
       { h: 'Welche Daten wir verarbeiten', list: [
         'Konto: deine E-Mail, dein Lizenzschlüssel und dein Passwort. Das Passwort wird nur als kryptografischer Hash (scrypt) gespeichert, nie im Klartext.',
         'Unternehmensprofil: Name, Branche, Größe, wichtigste Ausgaben und – falls angegeben – Rechtsform, Steuernummer, Kontostand und bevorzugte Sprache. Damit werden Analysen und Berechnungen personalisiert.',
@@ -404,7 +404,8 @@ export default {
         'Rechnungsjournal: Wenn du das Lesen von Rechnungen nutzt, speichern wir die DATEN, die du prüfst und bestätigst (Aussteller oder Kunde, Steuernummer, Datum, Nummer, Beträge, Umsatzsteuer, Einbehalt und Zahlungsstatus). Die Rechnungsdatei selbst wird nicht gespeichert.',
         'Maßnahmenplan, für Steuern zurückgelegte Beträge und deine API-Schlüssel (nur als Hash gespeichert).',
         'Abonnement: Kunden- und Abonnement-IDs von Stripe, Plan und Status. Deine Kartendaten sehen und speichern wir nie.',
-        'Technische Protokolle: IP-Adresse und Sicherheitsereignisse (Anmeldungen, Fehler) zum Schutz des Dienstes. Fehlerberichte der Anwendung enthalten die technische Meldung, den Bildschirm und die Version, nie deine Finanzdaten.'
+        'Technische Protokolle: IP-Adresse und Sicherheitsereignisse (Anmeldungen, Fehler) zum Schutz des Dienstes. Fehlerberichte der Anwendung enthalten die technische Meldung, den Bildschirm und die Version, nie deine Finanzdaten.',
+        'Daten deiner Kunden und Lieferanten: die Angaben auf deinen Rechnungen und, wenn du automatische Zahlungserinnerungen aktivierst, die E-Mail-Adressen deiner Kunden. Nur-Lese-Links für deinen Steuerberater werden als Hash gespeichert, mit Ablaufdatum und letztem Zugriff.',
       ] },
       { h: 'Deine Dateien werden nicht auf unseren Servern gespeichert', ps: [
         'Die Excel-Dateien, PDFs und Ordner, die du analysierst, werden lokal in deinem Browser gelesen. Sie werden nicht auf unseren Servern gespeichert.',
@@ -412,11 +413,11 @@ export default {
       ] },
       { h: 'Beteiligte Drittanbieter', list: [
         'Stripe: wickelt Zahlungen ab und verwaltet Abonnements.',
-        'Groq und Cloudflare Workers AI: erstellen die Analysen und lesen Rechnungen. Ihre Bedingungen verbieten, deine Daten zum Training von Modellen zu nutzen, und sie speichern sie nicht (außer vorübergehenden technischen Protokollen zur Missbrauchsaufklärung). Groq verarbeitet sie in den USA.',
-        'Nokfi-Assistent: nutzt Cerebras, Groq oder Cloudflare Workers AI, die deine Nachrichten nicht zum Training von Modellen verwenden. Wir speichern deine Unterhaltungen nicht.',
-        'Resend: versendet transaktionale E-Mails (deinen Lizenzschlüssel, die Passwortwiederherstellung und – falls aktiviert – Erinnerungen des Steuerkalenders).',
+        'Cloudflare Workers AI: erstellt die Analysen, liest gescannte oder fotografierte Rechnungen und antwortet im Assistenten. Seine Bedingungen verbieten, deine Daten zum Training von Modellen zu nutzen, und es speichert sie nicht (außer vorübergehenden technischen Protokollen zur Missbrauchsaufklärung). Deine Gespräche mit dem Assistenten speichern wir nicht. Fügen wir künftig einen weiteren KI-Anbieter hinzu, trainiert auch dieser nicht mit deinen Daten, und wir führen ihn hier auf.',
+        'Resend: versendet die E-Mails (deinen Lizenzschlüssel, die Passwort-Wiederherstellung und, falls aktiviert, Steuerfristen-Erinnerungen, die monatliche Zusammenfassung und Zahlungserinnerungen an deine Kunden).',
         'Cloudflare: Auslieferungs- und Sicherheitsnetz, das den Zugriff auf die Website schützt. Das Land deiner Verbindung (von Cloudflare übermittelt) nutzen wir nur, um die Anfangssprache der Website zu wählen; wir speichern es nicht.'
       ] },
+      { h: 'Daten deiner Kunden und Lieferanten', ps: ['Für Daten Dritter, die du in Nokfi eingibst (Kunden und Lieferanten deiner Rechnungen), bist du der Verantwortliche und Nokfi handelt als Auftragsverarbeiter: Wir nutzen sie nur, um dir den Dienst zu erbringen. Die Bedingungen stehen im Auftragsverarbeitungsvertrag (nokfi.app/encargo-tratamiento). Wenn du automatische Erinnerungen aktivierst, werden sie im Namen deiner Firma versendet und Antworten gehen direkt an deine E-Mail.'] },
       { h: 'Cookies und Analyse', ps: ['Nokfi verwendet weder Tracking-Cookies noch Analysetools von Drittanbietern. Sitzung, Sprache und Design werden im lokalen Speicher deines Browsers gehalten.'] },
       { h: 'Speicherdauer und Löschung', ps: ['Wir speichern deine Daten, solange deine Lizenz besteht. Unter Einstellungen → Meine Daten kannst du alle Daten als Datei herunterladen oder dein Konto löschen: Profil, Verlauf, Rechnungsjournal, Aufgaben, API-Schlüssel und Sitzungen werden dabei gelöscht. Technische Fehlerberichte werden nach 30 Tagen gelöscht.'] },
       { h: 'Deine Rechte', ps: ['Deine Rechte auf Auskunft, Berichtigung, Löschung, Datenübertragbarkeit und Widerspruch kannst du in den Einstellungen oder per E-Mail an info@nokfi.app ausüben. Du kannst dich auch bei der spanischen Datenschutzbehörde (aepd.es) beschweren.'] },
@@ -464,6 +465,11 @@ export default {
     ERR_XLSX_READ: 'Die Tabelle „{name}“ konnte nicht gelesen werden (beschädigt oder Format nicht unterstützt).',
     ERR_IMAGE_READ: 'Das Bild „{name}“ konnte nicht gelesen werden.',
     ERR_FILE_READ: '„{name}“ konnte nicht gelesen werden.'
+  },
+  legal: {
+    privacy: 'Datenschutzerklärung', terms: 'Nutzungsbedingungen', dpa: 'Auftragsverarbeitungsvertrag',
+    englishOnly: 'Dieser Rechtstext ist auf Spanisch (maßgebliche Fassung) und Englisch verfügbar. Es wird die englische Fassung angezeigt.',
+    accept: 'Mit dem Fortfahren akzeptierst du die {terms} und den {dpa} und bestätigst, die {privacy} gelesen zu haben.'
   },
   share: {
     title: 'Mit deinem Steuerberater teilen',

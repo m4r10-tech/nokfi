@@ -393,10 +393,10 @@ export default {
   },
   privacy: {
     title: 'Politique de confidentialité',
-    updated: 'Dernière mise à jour : 26 septembre 2026',
+    updated: 'Dernière mise à jour : 27 septembre 2026',
     intro: 'Cette politique décrit, sans petits caractères, quelles données Nokfi (nokfi.app) traite, dans quel but et quels services tiers interviennent. Elle reflète exactement le fonctionnement de l’application.',
     sections: [
-      { h: 'Responsable et contact', ps: ['Le responsable du traitement est Nokfi (nokfi.app). Pour toute question de confidentialité ou pour exercer vos droits, écrivez à info@nokfi.app. Pour un problème de compte ou de paiement, écrivez à soporte@nokfi.app.'] },
+      { h: 'Responsable et contact', ps: ['Le responsable du traitement des données de votre compte est {OWNER}. Pour toute question de confidentialité ou pour exercer vos droits, écrivez à info@nokfi.app. Pour un problème de compte ou de paiement, à soporte@nokfi.app.'] },
       { h: 'Données traitées', list: [
         'Compte : votre e-mail, votre clé de licence et votre mot de passe. Le mot de passe est stocké uniquement sous forme d’empreinte cryptographique (scrypt), jamais en clair.',
         'Profil de l’entreprise : nom, secteur, taille, principales dépenses et, si vous les indiquez, forme juridique, numéro fiscal, solde de trésorerie et langue préférée. Ils servent à personnaliser les analyses et les calculs.',
@@ -404,7 +404,8 @@ export default {
         'Registre des factures : si vous utilisez la lecture de factures, nous conservons les DONNÉES que vous vérifiez et confirmez (émetteur ou client, numéro fiscal, date, numéro, montants, TVA, retenue et statut de paiement). Le fichier de la facture n’est pas conservé.',
         'Plan d’action, montants mis de côté pour les impôts et vos clés d’API (stockées uniquement sous forme d’empreinte).',
         'Abonnement : identifiants client et abonnement Stripe, offre et statut. Nous ne voyons ni ne stockons jamais les données de votre carte.',
-        'Journaux techniques : adresse IP et événements de sécurité (connexions, erreurs) pour protéger le service. Les rapports d’erreurs de l’application contiennent le message technique, l’écran et la version, jamais vos données financières.'
+        'Journaux techniques : adresse IP et événements de sécurité (connexions, erreurs) pour protéger le service. Les rapports d’erreurs de l’application contiennent le message technique, l’écran et la version, jamais vos données financières.',
+        'Données de vos clients et fournisseurs : celles qui figurent sur vos factures et, si vous activez les relances automatiques, l’e-mail de vos clients. Les liens en lecture seule créés pour votre comptable sont stockés sous forme de hachage, avec leur expiration et la date du dernier accès.',
       ] },
       { h: 'Vos fichiers ne sont pas conservés sur nos serveurs', ps: [
         'Les fichiers Excel, PDF et les dossiers que vous analysez sont lus localement, dans votre propre navigateur. Ils ne sont pas conservés sur nos serveurs.',
@@ -412,11 +413,11 @@ export default {
       ] },
       { h: 'Services tiers qui interviennent', list: [
         'Stripe : traite les paiements et gère les abonnements.',
-        'Groq et Cloudflare Workers AI : génèrent les analyses et lisent les factures. Leurs conditions interdisent d’utiliser vos données pour entraîner des modèles et ils ne les conservent pas (sauf journaux techniques temporaires pour enquêter sur des abus). Groq les traite aux États-Unis.',
-        'Assistant Nokfi : utilise Cerebras, Groq ou Cloudflare Workers AI, qui n’utilisent pas vos messages pour entraîner des modèles. Nous ne conservons pas vos conversations.',
-        'Resend : envoie les e-mails transactionnels (votre clé de licence, la récupération du mot de passe et, si vous les activez, les rappels du calendrier fiscal).',
+        'Cloudflare Workers AI : génère les analyses, lit les factures scannées ou photographiées et répond dans l’assistant. Ses conditions interdisent d’utiliser vos données pour entraîner des modèles et il ne les conserve pas (sauf journaux techniques temporaires pour enquêter sur les abus). Nous ne conservons pas vos conversations avec l’assistant. Si nous ajoutons un autre fournisseur d’IA, il n’entraînera pas non plus ses modèles avec vos données, et nous l’indiquerons ici.',
+        'Resend : envoie les e-mails (votre clé de licence, la récupération du mot de passe et, si vous les activez, les rappels du calendrier fiscal, le résumé mensuel et les relances de paiement à vos clients).',
         'Cloudflare : réseau de distribution et de sécurité qui protège l’accès au site. Nous utilisons le pays de votre connexion (indiqué par Cloudflare) uniquement pour choisir la langue initiale du site ; nous ne le conservons pas.'
       ] },
+      { h: 'Données de vos clients et fournisseurs', ps: ['Pour les données de tiers que vous saisissez dans Nokfi (clients et fournisseurs de vos factures), vous êtes responsable du traitement et Nokfi agit comme sous-traitant : nous ne les utilisons que pour fournir le service. Les conditions figurent dans l’accord de sous-traitance (nokfi.app/encargo-tratamiento). Si vous activez les relances automatiques, elles partent au nom de votre entreprise et les réponses arrivent directement sur votre e-mail.'] },
       { h: 'Cookies et mesure d’audience', ps: ['Nokfi n’utilise ni cookies de suivi ni outils de mesure d’audience tiers. Votre session, votre langue et votre thème sont conservés dans le stockage local de votre navigateur.'] },
       { h: 'Conservation et suppression', ps: ['Nous conservons vos données tant que votre licence existe. Depuis Paramètres → Mes données, vous pouvez télécharger toutes vos données dans un fichier ou supprimer votre compte : votre profil, votre historique, votre registre de factures, vos tâches, vos clés d’API et vos sessions sont supprimés avec lui. Les rapports techniques d’erreurs sont supprimés au bout de 30 jours.'] },
       { h: 'Vos droits', ps: ['Vous pouvez exercer vos droits d’accès, de rectification, d’effacement, de portabilité et d’opposition depuis les Paramètres ou en écrivant à info@nokfi.app. Vous pouvez aussi introduire une réclamation auprès de l’Agence espagnole de protection des données (aepd.es).'] },
@@ -464,6 +465,11 @@ export default {
     ERR_XLSX_READ: 'Impossible de lire la feuille de calcul « {name} » (endommagée ou format non pris en charge).',
     ERR_IMAGE_READ: 'Impossible de lire l’image « {name} ».',
     ERR_FILE_READ: 'Impossible de lire « {name} ».'
+  },
+  legal: {
+    privacy: 'Politique de confidentialité', terms: 'Conditions d’utilisation', dpa: 'Accord de sous-traitance',
+    englishOnly: 'Ce texte juridique est disponible en espagnol (version qui fait foi) et en anglais. La version anglaise est affichée.',
+    accept: 'En continuant, vous acceptez les {terms} et l’{dpa}, et confirmez avoir lu la {privacy}.'
   },
   share: {
     title: 'Partager avec votre comptable',

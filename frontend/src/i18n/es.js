@@ -396,10 +396,10 @@ export default {
   },
   privacy: {
     title: 'Política de privacidad',
-    updated: 'Última actualización: 26 de septiembre de 2026',
+    updated: 'Última actualización: 27 de septiembre de 2026',
     intro: 'Esta política describe, sin letra pequeña, qué datos trata Nokfi (nokfi.app), para qué y qué servicios de terceros intervienen. Refleja exactamente cómo funciona la aplicación.',
     sections: [
-      { h: 'Responsable y contacto', ps: ['El responsable del tratamiento es Nokfi (nokfi.app). Para cualquier cuestión de privacidad o para ejercer tus derechos, escribe a info@nokfi.app. Para problemas con tu cuenta o tus pagos, a soporte@nokfi.app.'] },
+      { h: 'Responsable y contacto', ps: ['El responsable del tratamiento de los datos de tu cuenta es {OWNER}. Para cualquier cuestión de privacidad o para ejercer tus derechos, escribe a info@nokfi.app. Para problemas con tu cuenta o tus pagos, a soporte@nokfi.app.'] },
       { h: 'Qué datos tratamos', list: [
         'Cuenta: tu email, tu clave de licencia y tu contraseña. La contraseña se almacena únicamente como hash criptográfico (scrypt); nunca en texto plano.',
         'Perfil de empresa: nombre, sector, tamaño, principales gastos y, si los indicas, forma jurídica, NIF, saldo de caja e idioma preferido. Se usan para personalizar los análisis y los cálculos.',
@@ -407,7 +407,8 @@ export default {
         'Libro de facturas: si usas la lectura de facturas, guardamos los DATOS que tú revisas y confirmas (emisor o cliente, NIF, fecha, número, importes, IVA, retención y si está pagada). El archivo de la factura no se guarda.',
         'Plan de acción, lo que llevas apartado para impuestos y tus claves de API (guardadas solo como hash).',
         'Suscripción: identificadores de cliente y suscripción de Stripe, plan y estado. Nunca vemos ni almacenamos los datos de tu tarjeta.',
-        'Registros técnicos: dirección IP y eventos de seguridad (inicios de sesión, errores) para proteger el servicio. Los informes de errores de la aplicación incluyen el mensaje técnico, la pantalla y la versión, nunca tus datos financieros.'
+        'Registros técnicos: dirección IP y eventos de seguridad (inicios de sesión, errores) para proteger el servicio. Los informes de errores de la aplicación incluyen el mensaje técnico, la pantalla y la versión, nunca tus datos financieros.',
+        'Datos de tus clientes y proveedores: los que aparecen en tus facturas y, si activas la reclamación automática de cobros, el email de tus clientes. Los enlaces de solo lectura que creas para tu gestoría se guardan como hash, con su caducidad y la fecha del último acceso.',
       ] },
       { h: 'Tus archivos no se guardan en nuestros servidores', ps: [
         'Los archivos Excel, PDF y las carpetas que analizas se leen localmente, en tu propio navegador. No se almacenan en nuestros servidores.',
@@ -415,11 +416,11 @@ export default {
       ] },
       { h: 'Servicios de terceros que intervienen', list: [
         'Stripe: procesa los pagos y gestiona las suscripciones.',
-        'Groq y Cloudflare Workers AI: generan los análisis y leen las facturas. Sus condiciones prohíben usar tus datos para entrenar modelos y no los conservan (salvo registros técnicos temporales para investigar abusos). Groq los procesa en EE. UU.',
-        'Asistente de Nokfi: usa Cerebras, Groq o Cloudflare Workers AI, que no usan tus mensajes para entrenar modelos. No guardamos tus conversaciones.',
-        'Resend: envía los emails transaccionales (tu clave de licencia, recuperación de contraseña y, si los activas, los avisos del calendario fiscal).',
+        'Cloudflare Workers AI: genera los análisis, lee las facturas escaneadas o en foto y responde en el asistente. Sus condiciones prohíben usar tus datos para entrenar modelos y no los conserva (salvo registros técnicos temporales para investigar abusos). No guardamos tus conversaciones con el asistente. Si en el futuro añadimos otro proveedor de IA, también será uno que no entrene con los datos, y lo indicaremos aquí.',
+        'Resend: envía los emails (tu clave de licencia, recuperación de contraseña y, si los tienes activados, los avisos del calendario fiscal, el resumen mensual y los recordatorios de cobro a tus clientes).',
         'Cloudflare: red de distribución y seguridad que protege el acceso a la web. Usamos el país de tu conexión (que Cloudflare nos indica) solo para elegir el idioma inicial de la web; no lo guardamos.'
       ] },
+      { h: 'Datos de tus clientes y proveedores', ps: ['Para los datos de terceros que introduces en Nokfi (clientes y proveedores de tus facturas), tú eres el responsable y Nokfi actúa como encargado del tratamiento: solo los usamos para prestarte el servicio. Las condiciones están en el contrato de encargo de tratamiento (nokfi.app/encargo-tratamiento). Si activas la reclamación automática, los recordatorios salen con el nombre de tu empresa y las respuestas llegan directamente a tu email.'] },
       { h: 'Cookies y analítica', ps: ['Nokfi no utiliza cookies de seguimiento ni herramientas de analítica de terceros. Tu sesión, tu idioma y tu tema se guardan en el almacenamiento local de tu navegador.'] },
       { h: 'Conservación y eliminación', ps: ['Conservamos tus datos mientras tu licencia exista. Desde Configuración → Mis datos puedes descargar todos tus datos en un archivo o borrar tu cuenta: se eliminan con ella tu perfil, tu historial, tu libro de facturas, tus tareas, tus claves de API y tus sesiones. Los informes técnicos de errores se borran a los 30 días.'] },
       { h: 'Tus derechos', ps: ['Puedes ejercer tus derechos de acceso, rectificación, supresión, portabilidad y oposición desde Configuración o escribiendo a info@nokfi.app. También puedes reclamar ante la Agencia Española de Protección de Datos (aepd.es).'] },
@@ -467,6 +468,11 @@ export default {
     ERR_XLSX_READ: 'No se pudo leer la hoja de cálculo "{name}" (dañada o formato no soportado).',
     ERR_IMAGE_READ: 'No se pudo leer la imagen "{name}".',
     ERR_FILE_READ: 'No se pudo leer "{name}".'
+  },
+  legal: {
+    privacy: 'Política de privacidad', terms: 'Términos de uso', dpa: 'Encargo de tratamiento',
+    englishOnly: 'Este texto legal está disponible en español (versión que prevalece) y en inglés. Se muestra la versión en inglés.',
+    accept: 'Al continuar aceptas los {terms} y el {dpa}, y confirmas que has leído la {privacy}.'
   },
   share: {
     title: 'Compartir con tu gestoría',

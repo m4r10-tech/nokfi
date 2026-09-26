@@ -1,3 +1,4 @@
+import LegalAccept from '../components/LegalAccept';
 import { useState, useRef } from 'react';
 import { useNavigate, Link } from 'react-router-dom';
 import { KeyRound, Mail, Lock, Eye, EyeOff, Loader2, Laptop } from 'lucide-react';
@@ -176,6 +177,7 @@ export default function Login() {
           {loading && <Loader2 size={16} className="animate-spin" />}
           {mode === 'activate' ? t('login.activateBtn') : t('login.loginBtn')}
         </button>
+        {mode === 'activate' && <LegalAccept className="text-center" />}
       </form>
 
       <div className="mt-5 pt-5 text-center text-sm" style={{ borderTop: '1px solid var(--border)' }}>

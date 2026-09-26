@@ -1,4 +1,5 @@
 import { useState, useEffect, useRef } from 'react';
+import LegalAccept from '../components/LegalAccept';
 import { Link, useSearchParams } from 'react-router-dom';
 import { Loader2, Lock, Mail, ArrowRight } from 'lucide-react';
 import { paymentsApi } from '../middleware/api';
@@ -148,6 +149,7 @@ export default function Pricing() {
               <p className="text-xs text-center flex items-center justify-center gap-1.5" style={{ color: 'var(--text-muted)' }}>
                 {t('pricing.stripeTrust')}
               </p>
+              <LegalAccept className="text-center" />
             </form>
           </section>
         )}
