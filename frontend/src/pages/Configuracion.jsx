@@ -1,7 +1,7 @@
 import { useState, useEffect } from 'react';
 import { useOutletContext, Link } from 'react-router-dom';
 import { Moon, Sun, LogOut, KeyRound, Copy, Eye, EyeOff, Loader2, CreditCard, Check, CloudOff, Code2, Trash2, Download, Lock, BellRing, LifeBuoy, ExternalLink } from 'lucide-react';
-import { SECTORS } from '../components/OnboardingModal';
+import { SECTORS, SIZES } from '../components/OnboardingModal';
 import { LANGUAGES } from '../i18n/languages';
 import { Modal, ErrorBox } from '../components/ui';
 import { saveBlob } from '../middleware/exports/model';
@@ -48,6 +48,13 @@ export default function Configuracion() {
           <select id="cfg-sector" value={profile.sector} onChange={(e) => updateProfile({ sector: e.target.value })} disabled={loading} className="input sm:!w-72">
             <option value="">{t('onboarding.sectorSelect')}</option>
             {SECTORS.map(s => <option key={s.value} value={s.value}>{t(`onboarding.sectors.${s.key}`)}</option>)}
+          </select>
+        </div>
+        <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-1.5 sm:gap-4">
+          <label htmlFor="cfg-size" className="text-sm shrink-0" style={{ color: 'var(--text-secondary)' }}>{t('onboarding.size')}</label>
+          <select id="cfg-size" value={profile.size} onChange={(e) => updateProfile({ size: e.target.value })} disabled={loading} className="input sm:!w-72">
+            <option value="">—</option>
+            {SIZES.map(s => <option key={s.value} value={s.value}>{t(`onboarding.sizes.${s.key}`)}</option>)}
           </select>
         </div>
         <Row label={t('config.legalForm')}>

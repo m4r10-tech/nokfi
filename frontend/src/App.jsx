@@ -46,6 +46,7 @@ const Receivables = lazy(() => import('./pages/finance/Receivables'));
 const Leaks = lazy(() => import('./pages/finance/Leaks'));
 const Forecast = lazy(() => import('./pages/finance/Forecast'));
 const FiscalCalendar = lazy(() => import('./pages/finance/FiscalCalendar'));
+const Benchmark = lazy(() => import('./pages/finance/Benchmark'));
 
 export default function App() {
   return (
@@ -95,6 +96,7 @@ export default function App() {
                 <Route path="fugas" element={<Leaks />} />
                 <Route path="prevision" element={<Forecast />} />
                 <Route path="calendario" element={<FiscalCalendar />} />
+                <Route path="sector" element={<Benchmark />} />
               </Route>
               <Route path="historial" element={<Historial />} />
               <Route path="historial/:id" element={<HistorialDetalle />} />

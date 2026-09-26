@@ -131,7 +131,8 @@ export const financeApi = {
   collectionEmail: (entry_id, tone, lang) => request('/finance/collection-email', { method: 'POST', auth: true, body: { entry_id, tone, lang } }),
   leaks: () => request('/finance/leaks', { auth: true }),
   forecast: (params) => request(`/finance/forecast${qs(params)}`, { auth: true }),
-  calendar: (year) => request(`/finance/calendar${qs({ year })}`, { auth: true })
+  calendar: (year) => request(`/finance/calendar${qs({ year })}`, { auth: true }),
+  benchmark: () => request('/finance/benchmark', { auth: true })
 };
 export const dashboardApi = { get: () => request('/dashboard', { auth: true }) };
 

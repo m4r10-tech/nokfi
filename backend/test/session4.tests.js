@@ -131,6 +131,26 @@ module.exports = async function session4Tests({ post, put, get, call, check, che
   await checkAsync('V1: DELETE /api/ledger/:id → 200 y ya no está',
     del(`/api/ledger/${ids[6]}`, null, tok), r => r.status === 200);
 
+  // ── V7: comparación con el sector (datos reales del INE) ──
+  {
+    const BENCH = require('../config/benchmarks.json');
+    await checkAsync('V7: sin sector/tamaño → available:false (missing_profile)',
+      get('/api/finance/benchmark', tok), r => r.status === 200 && r.data.available === false && r.data.reason === 'missing_profile');
+    await put('/api/profile', { sector: 'Comercio', size: 'solo' }, tok);
+    await checkAsync('V7: Comercio/solo → referencia INE real + tus cifras + veredictos',
+      get('/api/finance/benchmark', tok),
+      r => r.status === 200 && r.data.available === true
+        && r.data.reference.operating_margin_pct === BENCH.sectors['Comercio'].by_size.solo.operating_margin_pct
+        && r.data.source.name.includes('INE') && r.data.metrics.length === 3 && r.data.owner_pay_included === true);
+    await put('/api/profile', { sector: 'Construcción' }, tok);
+    await checkAsync('V7: Construcción no cubierta por el INE → sector_not_covered (nada inventado)',
+      get('/api/finance/benchmark', tok), r => r.status === 200 && r.data.available === false && r.data.reason === 'sector_not_covered');
+    check('V7: veredicto (margen mayor = mejor; coste mayor = peor; ±15 %)', () => {
+      const { verdict } = require('../utils/benchmark');
+      return verdict(30, 20, true) === 'better' && verdict(30, 20, false) === 'worse' && verdict(21, 20, true) === 'similar';
+    });
+  }
+
   // ── F4: claves de API + /api/v1 ──
   let apiKey = null, apiKeyId = null;
   await checkAsync('F4: POST /api/keys (plan pro) → 201 + clave nk_live_ mostrada una vez',

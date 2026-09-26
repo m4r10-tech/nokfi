@@ -1,5 +1,5 @@
 import { NavLink, Outlet, useOutletContext } from 'react-router-dom';
-import { BookOpen, Landmark, HandCoins, Droplets, LineChart, CalendarDays } from 'lucide-react';
+import { BookOpen, Landmark, HandCoins, Droplets, LineChart, CalendarDays, BarChart3 } from 'lucide-react';
 import { useLang } from '../../context/LangContext';
 import PageHeader from '../../components/PageHeader';
 
@@ -15,7 +15,8 @@ export const FINANCE_TABS = [
   { to: 'cobros', icon: HandCoins, key: 'finance.tabReceivables' },
   { to: 'fugas', icon: Droplets, key: 'finance.tabLeaks' },
   { to: 'prevision', icon: LineChart, key: 'finance.tabForecast' },
-  { to: 'calendario', icon: CalendarDays, key: 'finance.tabCalendar' }
+  { to: 'calendario', icon: CalendarDays, key: 'finance.tabCalendar' },
+  { to: 'sector', icon: BarChart3, key: 'finance.tabBenchmark' }
 ];
 
 export default function FinanceLayout() {

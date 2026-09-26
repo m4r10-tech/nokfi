@@ -30,6 +30,7 @@ const { deadlinesFor, upcoming, iso } = require('../utils/fiscalCalendar');
 const { listActions, actionStats } = require('../db/actions');
 const { freeText, allowMessage } = require('../services/ai/chat');
 const { langDirective, profileContext } = require('../services/ai/prompts');
+const benchmark = require('../utils/benchmark');
 
 const ledger = express.Router();
 const finance = express.Router();
@@ -166,6 +167,11 @@ finance.get('/forecast', requireLicense, (req, res) => {
     scenario: { hire_monthly: req.query.hire, payment_delay_days: req.query.delay, extra_monthly_income: req.query.extra }
   });
   res.json({ ...out, balance_date: profile.cash_balance_date });
+});
+
+/* ── V7: comparación con tu sector (INE) ── */
+finance.get('/benchmark', requireLicense, (req, res) => {
+  res.json(benchmark.compare(getCompanyProfile(req.license.id), F.allEntries(req.license.id)));
 });
 
 /* ── C4: calendario fiscal ── */

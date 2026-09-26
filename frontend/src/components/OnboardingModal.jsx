@@ -8,7 +8,7 @@ export const SECTORS = [
   ['Comercio', 'comercio'], ['Hostelería', 'hosteleria'], ['Salud', 'salud'], ['Legal', 'legal'], ['Construcción', 'construccion'],
   ['Tecnología', 'tecnologia'], ['Consultoría', 'consultoria'], ['Diseño', 'diseno'], ['Educación', 'educacion'], ['Otro', 'otro']
 ].map(([value, key]) => ({ value, key }));
-const SIZES = [
+export const SIZES = [
   { value: 'solo', key: 'solo' },
   { value: '2-5', key: 's2' },
   { value: '6-20', key: 's6' },

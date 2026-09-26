@@ -17,7 +17,9 @@ export const dictionaries = { es, en };
 
 const loaders = {
   fr: () => import('./fr'),
-  it: () => import('./it')
+  it: () => import('./it'),
+  de: () => import('./de'),
+  pl: () => import('./pl')
 };
 
 export const isSupported = (code) => LANG_CODES.includes(code);

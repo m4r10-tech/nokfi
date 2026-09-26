@@ -58,8 +58,9 @@ function systemPrompt({ profile, lang, role }) {
     'Usa lenguaje llano, frases cortas y cifras concretas cuando existan. No inventes datos que no estén en la información recibida.',
     'Sin emojis. Sin HTML ni Markdown: solo texto plano dentro de los campos del JSON.',
     profileContext(profile),
+    require('../../utils/benchmark').promptContext(profile),
     langDirective(lang)
-  ].join('\n\n');
+  ].filter(Boolean).join('\n\n');
 }
 
 /* ── Esquema del informe estructurado (F1) ── */

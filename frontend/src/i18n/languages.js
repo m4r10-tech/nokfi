@@ -7,7 +7,9 @@ export const LANGUAGES = [
   { code: 'es', name: 'Español' },
   { code: 'en', name: 'English' },
   { code: 'fr', name: 'Français' },
-  { code: 'it', name: 'Italiano' }
+  { code: 'it', name: 'Italiano' },
+  { code: 'de', name: 'Deutsch' },
+  { code: 'pl', name: 'Polski' }
 ];
 
 export const LANG_CODES = LANGUAGES.map(l => l.code);
