@@ -1,7 +1,7 @@
 /**
  * services/monthlySummary.js — resumen mensual por email (sesión 4).
  *
- * El día 1 de cada mes (primer tick del programador ≥ 08:00 UTC) cada
+ * El día 1 de cada mes (primer tick del programador ≥ 07:00 UTC) cada
  * licencia activa con `monthly_summary` recibe cómo cerró el mes anterior y
  * qué le viene: resultado del mes, impuestos del trimestre, cobros
  * pendientes, gastos recurrentes, caja y próximo plazo fiscal. Solo se
@@ -64,6 +64,8 @@ function previousMonth(todayIso) {
 
 /** Envía los resúmenes pendientes. Solo actúa los días 1-3 del mes. */
 async function runMonthlySummaries(now = new Date()) {
+  // Programador horario: no enviar emails de madrugada (07:00 UTC ≈ 09:00 en España).
+  if (now.getUTCHours() < 7) return 0;
   const today = iso(now);
   if (Number(today.slice(8, 10)) > 3) return 0;
   const month = previousMonth(today);

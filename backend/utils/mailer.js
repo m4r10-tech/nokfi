@@ -32,7 +32,13 @@ async function dispatch({ to, subject, html, fromName, replyTo }) {
     console.warn(`[MAILER] Sin RESEND_API_KEY — email NO enviado a ${to}. Asunto: "${subject}"`);
     return { skipped: true };
   }
-  return dispatchViaResend({ to, subject, html, fromName, replyTo });
+  try {
+    return await dispatchViaResend({ to, subject, html, fromName, replyTo });
+  } catch (e) {
+    // Sin destinatario ni contenido: solo el fallo, para el email diario de salud.
+    try { require('../db/database').audit('EMAIL_FAILED', { detail: String(e.message).slice(0, 200) }); } catch { /* nada */ }
+    throw e;
+  }
 }
 
 async function dispatchViaResend({ to, subject, html, fromName, replyTo }) {
@@ -457,7 +463,36 @@ async function sendCollectionEmail({ to, replyTo, lang, stage, company, entry })
   return dispatch({ to, subject, html, replyTo, fromName: name ? `${name} (vía Nokfi)` : undefined });
 }
 
+/* ── Informe diario de salud para el dueño (services/opsReport.js) ── */
+async function sendOpsReportEmail({ to, report: r }) {
+  const warn = r.alerts.length > 0;
+  const subject = `${warn ? '⚠ ' : '✓ '}Nokfi · salud ${r.date}${warn ? ` · ${r.alerts.length} aviso${r.alerts.length > 1 ? 's' : ''}` : ''}`;
+  const li = (s) => `<li style="margin:4px 0;">${escapeHtml(s)}</li>`;
+  const block = (title, items) => `<p style="color:#F5F5F5;font-weight:600;margin:18px 0 6px;">${escapeHtml(title)}</p><ul style="color:#c9c9c5;padding-left:18px;margin:0;font-size:14px;line-height:1.5;">${items.join('')}</ul>`;
+  const a = r.activity;
+  const html = baseTemplate({
+    title: subject,
+    bodyHtml: `
+      ${warn ? block('Avisos', r.alerts.map(li)) : '<p style="color:#10B981;margin-top:0;">Sin incidencias en las últimas 24 h.</p>'}
+      ${block('Sistema', [li(`${r.backup.ok ? '✓' : '✗'} ${r.backup.text}`), li(`${r.disk.ok ? '✓' : '✗'} ${r.disk.text}`)])}
+      ${block('IA', [
+        li(`Análisis correctos: ${r.ai.ok} · fallidos: ${r.ai.failed}`),
+        ...r.ai.providerFails.map(f => li(`Proveedor con fallos (${f.c}×): ${f.detail}`))
+      ])}
+      ${r.mail.failed.length ? block('Emails no enviados', r.mail.failed.map(m => li(`${m.c}× ${m.detail}`))) : ''}
+      ${block(`Errores de la app (${r.errorsTotal})`, r.errors.length ? r.errors.map(e => li(`${e.c}× [${e.source}] ${e.message}`)) : [li('Ninguno')])}
+      ${block('Actividad (24 h)', [
+        li(`Licencias activas: ${a.active_licenses} · nuevas: ${a.new_licenses}`),
+        li(`Cobros de Stripe: ${a.paid} · pagos fallidos: ${a.payment_failed} · cancelaciones: ${a.cancelled}`),
+        li(`Inicios de sesión: ${a.logins} · facturas añadidas al libro: ${a.ledger_entries}`)
+      ])}
+    `
+  });
+  return dispatch({ to, subject, html });
+}
+
 module.exports = {
+  sendOpsReportEmail,
   sendCollectionEmail,
   buildCollectionEmail,
   sendMonthlySummaryEmail,

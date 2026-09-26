@@ -19,6 +19,7 @@
 'use strict';
 
 const { fetchWithTimeout } = require('../../utils/http');
+const { audit } = require('../../db/database');
 const gemini = require('./gemini');
 const { profileContext, langDirective } = require('./prompts');
 
@@ -135,6 +136,7 @@ async function chat({ profile, lang, analysisContext, messages }) {
       return { text: String(text).trim().slice(0, 6000), provider: name };
     } catch (e) {
       console.warn(`[CHAT] proveedor ${name} falló: ${e.message}`);
+      audit('AI_PROVIDER_FAILED', { detail: `chat ${name}: ${String(e.message).slice(0, 120)}` });
     }
   }
   const err = new Error('chat_unavailable');
@@ -150,6 +152,7 @@ async function freeText({ system, prompt }) {
       return { text: String(text).trim().slice(0, 6000), provider: name };
     } catch (e) {
       console.warn(`[CHAT] proveedor ${name} falló: ${e.message}`);
+      audit('AI_PROVIDER_FAILED', { detail: `chat ${name}: ${String(e.message).slice(0, 120)}` });
     }
   }
   const err = new Error('chat_unavailable');

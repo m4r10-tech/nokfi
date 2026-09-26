@@ -1,7 +1,7 @@
 /**
  * services/reminders.js — C4: avisos por email del calendario fiscal.
  *
- * Cada 6 h (y 1 min después de arrancar) recorre las licencias activas con
+ * Cada hora (y 1 min después de arrancar) recorre las licencias activas con
  * `fiscal_reminders` activado y envía, por cada plazo, un aviso 7 días antes
  * y otro 1 día antes. `reminders_sent` (PK license+plazo+antelación) evita
  * duplicados aunque el proceso se reinicie. Si el envío falla, se borra la
@@ -53,9 +53,12 @@ function startReminderScheduler() {
     // Resumen mensual (días 1-3 del mes) y reclamación automática de cobros.
     await require('./monthlySummary').runMonthlySummaries().catch(e => console.error('[SUMMARY]', e.message));
     await require('./collections').runAutoCollections().catch(e => console.error('[COLLECTIONS]', e.message));
+    await require('./opsReport').runOpsReport().catch(e => console.error('[OPS]', e.message));
   };
+  // Cada hora: todo lo anterior es idempotente (reminders_sent / ops_runs), y así
+  // el informe diario llega poco después de las 07:00 y no hasta 6 h más tarde.
   setTimeout(tick, 60 * 1000).unref();
-  setInterval(tick, 6 * 60 * 60 * 1000).unref();
+  setInterval(tick, 60 * 60 * 1000).unref();
 }
 
 module.exports = { runFiscalReminders, startReminderScheduler };

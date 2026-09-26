@@ -170,6 +170,7 @@ async function runAnalysis({ license, task, input, lang, title, jobId, ip, sourc
     });
   } catch (e) {
     permit.onFailure();
+    audit('AI_ANALYSIS_FAILED', { license_id: license.id, ip, detail: `task=${task} error=${e.code || e.message}`.slice(0, 200) });
     if (e instanceof AiError && AI_ERROR_RESPONSES[e.code]) {
       const [status, message] = AI_ERROR_RESPONSES[e.code];
       return { status, body: { error: e.code, message } };

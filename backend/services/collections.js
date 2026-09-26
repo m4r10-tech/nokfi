@@ -44,6 +44,8 @@ function sentStages(licenseId) {
 }
 
 async function runAutoCollections(now = new Date()) {
+  // Programador horario: no enviar emails de madrugada (07:00 UTC ≈ 09:00 en España).
+  if (now.getUTCHours() < 7) return 0;
   const today = now.toISOString().slice(0, 10);
   const db = getDB();
   const licenses = db.prepare(`

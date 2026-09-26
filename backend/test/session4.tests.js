@@ -298,6 +298,23 @@ module.exports = async function session4Tests({ post, put, get, call, check, che
   await checkAsync('F4: DELETE /api/keys/:id → revocada', call('DELETE', `/api/keys/${apiKeyId}`, { auth: tok }), r => r.status === 200);
   await checkAsync('F4: clave revocada → 401 api_key_revoked', get('/api/v1/usage', apiKey), r => r.status === 401 && r.data.error === 'api_key_revoked');
 
+  // ── Operaciones: salud, informe diario y registro de fallos ──
+  await checkAsync('Ops: GET /api/health comprueba la BD → 200', get('/api/health'), r => r.status === 200 && r.data.status === 'ok');
+  {
+    const savedResend = process.env.RESEND_API_KEY;
+    delete process.env.RESEND_API_KEY;
+    const { buildOpsReport, runOpsReport } = require('../services/opsReport');
+    const rep = buildOpsReport(new Date());
+    check('Ops: informe con copia, disco, IA, emails y actividad', () =>
+      typeof rep.backup.ok === 'boolean' && typeof rep.disk.text === 'string' && Array.isArray(rep.alerts)
+      && rep.activity.active_licenses >= 1 && typeof rep.ai.ok === 'number');
+    const early = await runOpsReport(new Date('2026-10-05T03:00:00Z'));
+    const first = await runOpsReport(new Date('2026-10-05T06:00:00Z'));
+    const again = await runOpsReport(new Date('2026-10-05T12:00:00Z'));
+    check('Ops: el informe diario se envía una vez al día y no de madrugada', () => early === false && first === true && again === false);
+    if (savedResend !== undefined) process.env.RESEND_API_KEY = savedResend;
+  }
+
   // ── C8: errores del frontend ──
   await checkAsync('C8: POST /api/client-errors → 204', post('/api/client-errors', { message: 'TypeError: x is undefined', path: '/app/home?token=secreto', version: 'abc' }), r => r.status === 204);
   await checkAsync('C8: admin GET /api/admin/errors → incluye el error, sin query string',

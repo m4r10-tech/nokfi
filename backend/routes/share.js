@@ -31,13 +31,13 @@ share.get('/', requireLicense, (req, res) => {
 share.post('/', requireLicense, (req, res) => {
   const out = S.createShareLink(req.license.id, { label: req.body?.label, days: req.body?.days });
   if (out.error) return res.status(409).json({ error: out.error });
-  audit('share_link_created', { license_id: req.license.id, detail: `id=${out.id}` });
+  audit('SHARE_LINK_CREATED', { license_id: req.license.id, detail: `id=${out.id}` });
   res.status(201).json({ link: out });
 });
 
 share.delete('/:id', requireLicense, (req, res) => {
   if (!S.revokeShareLink(req.license.id, Number(req.params.id))) return res.status(404).json({ error: 'not_found' });
-  audit('share_link_revoked', { license_id: req.license.id, detail: `id=${req.params.id}` });
+  audit('SHARE_LINK_REVOKED', { license_id: req.license.id, detail: `id=${req.params.id}` });
   res.json({ ok: true });
 });
 

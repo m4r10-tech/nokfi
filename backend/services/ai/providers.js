@@ -20,6 +20,7 @@
 'use strict';
 
 const { fetchWithTimeout } = require('../../utils/http');
+const { audit } = require('../../db/database');
 const gemini = require('./gemini');
 const { AiError, parseJsonLoose } = gemini;
 
@@ -142,6 +143,8 @@ async function generate(opts) {
       return await PROVIDERS[name].generate({ maxTokens: 8192, ...opts });
     } catch (e) {
       last = e;
+      // Para el email diario de salud (services/opsReport.js): sin datos del usuario.
+      audit('AI_PROVIDER_FAILED', { detail: `analysis ${name}: ${String(e.code || e.message).slice(0, 120)}` });
       if (!(e instanceof AiError) || e.retryable === false) throw e;
       console.warn(`[AI] ${name} falló (${e.message}); probando el siguiente proveedor`);
     }

@@ -28,7 +28,7 @@ const helmet = require('helmet');
 const rateLimit = require('express-rate-limit');
 const morgan = require('morgan');
 
-const { initDB, cleanExpiredSessions } = require('./db/database');
+const { initDB, cleanExpiredSessions, getDB } = require('./db/database');
 
 const app = express();
 const PORT = process.env.PORT || 3001;
@@ -273,6 +273,19 @@ app.use('/api/webhooks', webhooksRoutes);   // confirmación: /api/webhooks/stri
    Health check — usado por monitorización externa si se añade en el futuro
 ════════════════════════════════════════════════════════════ */
 app.get('/health', (_req, res) => res.json({ status: 'ok', ts: Date.now() }));
+
+/* Monitor de caídas (UptimeRobot o similar): pasa por Nginx (/api/) y comprueba
+   la BD de verdad. 200 = todo bien; 503 = el backend responde pero la BD no.
+   Si el backend está caído, Nginx/Cloudflare devuelven 502/521 → alerta. */
+app.get('/api/health', (_req, res) => {
+  res.set('Cache-Control', 'no-store');
+  try {
+    getDB().prepare('SELECT 1').get();
+    res.json({ status: 'ok' });
+  } catch {
+    res.status(503).json({ status: 'db_error' });
+  }
+});
 
 /* Sesión 4 (§5.1) — país de la conexión para elegir el idioma inicial.
    Cloudflare añade CF-IPCountry a cada petición (Nginx la reenvía tal cual).
