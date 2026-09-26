@@ -185,6 +185,11 @@ const authLimiter = rateLimit({
   // En desarrollo/test se relaja (probar el flujo de auth manualmente con npm run dev choca
   // enseguida contra 10/15min); en producción se mantiene estricto como defensa anti-fuerza-bruta.
   max: isProduction ? 10 : 1000,
+  // Sesión 4 (QA en producción): /verify y /logout se llaman en CADA carga de
+  // página con un token de sesión (256 bits, inviable de adivinar); contarlos
+  // bloqueaba con 429 a usuarios que simplemente recargaban. El límite sigue
+  // aplicando a login, activación, recuperación y resets (lo que se ataca).
+  skip: (req) => req.path === '/verify' || req.path === '/logout',
   message: { error: 'rate_limited', message: 'Demasiados intentos. Espera 15 minutos.' }
 });
 

@@ -21,6 +21,10 @@ export default defineConfig({
   build: {
     rollupOptions: {
       output: {
+        // El worker de pdf.js sale como .mjs y Nginx (mime.types de Debian) lo
+        // sirve como application/octet-stream → con nosniff el navegador NO lo
+        // ejecuta y los PDF no se leen. Se emite con extensión .js.
+        assetFileNames: (info) => (/\.mjs$/.test(info.name || '') ? 'assets/[name]-[hash].js' : 'assets/[name]-[hash][extname]'),
         // C7: librerías pesadas en chunks con nombre propio (se cargan bajo
         // demanda y las de exportación no se precachean en la PWA).
         manualChunks(id) {
@@ -60,6 +64,7 @@ export default defineConfig({
       },
       workbox: {
         globIgnores: ['**/vendor-export-*.js', '**/vendor-jspdf-*.js', '**/pdf.worker*', '**/fonts/**'],
+        maximumFileSizeToCacheInBytes: 3 * 1024 * 1024,
         runtimeCaching: [
           { urlPattern: ({ url }) => url.pathname.startsWith('/api/'), handler: 'NetworkOnly' },
           // Chunks cargados bajo demanda: se cachean al usarse (nombres con hash → inmutables).
