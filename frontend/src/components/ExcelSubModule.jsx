@@ -20,7 +20,8 @@ import Skeleton, { SkeletonText } from './Skeleton';
 
 const MAX_FILES = 3;
 const MAX_EXTRACTED_CHARS = 30000;
-const ROWS_TO_AI = 80;
+// El backend calcula las cifras exactas sobre todas estas filas y la IA ve solo una muestra.
+const ROWS_TO_AI = 5000;
 
 const CHART_COLORS = ['#3B82F6', '#22C55E', '#F59E0B', '#EF4444', '#8B5CF6', '#EC4899'];
 

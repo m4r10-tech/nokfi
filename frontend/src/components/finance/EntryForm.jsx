@@ -35,6 +35,8 @@ export default function EntryForm({ initial, onSave, onClose, saving, error }) {
   const [e, setE] = useState(() => ({ ...emptyEntry(), ...initial, due_date: initial?.due_date || '' }));
   const set = (k, v) => setE(prev => {
     const next = { ...prev, [k]: v };
+    // Al cambiar el tipo en un apunte nuevo: gastos pagados, ingresos pendientes de cobro (V4).
+    if (k === 'type' && !initial?.id) next.paid = v === 'expense';
     if (['base', 'vat_rate', 'irpf_rate'].includes(k)) {
       next.vat_amount = r2((Number(next.base) || 0) * (Number(next.vat_rate) || 0) / 100);
       next.irpf_amount = r2((Number(next.base) || 0) * (Number(next.irpf_rate) || 0) / 100);

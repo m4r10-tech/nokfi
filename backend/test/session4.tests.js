@@ -203,6 +203,23 @@ module.exports = async function session4Tests({ post, put, get, call, check, che
     if (savedResend !== undefined) process.env.RESEND_API_KEY = savedResend;
   }
 
+  // ── Cifras exactas de Excel para la IA (la IA no suma) ──
+  {
+    const { tableStats } = require('../utils/tableStats');
+    const P = require('../services/ai/prompts');
+    const rows = [];
+    for (let i = 0; i < 120; i++) rows.push({ Fecha: `2026-0${6 + (i % 3)}-10`, Producto: i % 2 ? 'A' : 'B', 'Precio unitario': '10,5', Importe: i % 2 ? '100' : '1.000,00 €', Coste: i % 2 ? 40 : 900 });
+    const st = tableStats(rows);
+    check('Excel: totales exactos sobre todas las filas, precio solo en media, margen y por producto', () =>
+      st.filas === 120 && st.totales.Importe.suma === 66000 && st.totales['Precio unitario'].suma === undefined
+      && st.margen_total.margen_pct === 14.55 && st.por_categoria.Producto.detalle[0].Producto === 'B'
+      && st.por_categoria.Producto.detalle[1].margen_pct === 60 && st.por_mes.length === 3);
+    const f = P.sanitizeFiles([{ name: 'v.csv', rows, total_rows: 120 }])[0];
+    const { text } = P.buildExcel({ module: 'ventas', context: '', files: [f] });
+    check('Excel: el prompt lleva las CIFRAS EXACTAS y solo una muestra de 80 filas', () =>
+      text.includes('CIFRAS EXACTAS') && text.includes('"suma":66000') && JSON.parse(f.content).length === 80);
+  }
+
   // ── Enlace de solo lectura para la gestoría ──
   {
     let link = null;

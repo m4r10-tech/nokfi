@@ -209,7 +209,11 @@ const EXCEL_MODULES = {
   total: 'Calcula y analiza el beneficio total tras impuestos y gastos a partir de los ingresos y gastos: márgenes y partidas que más pesan.'
 };
 
-const MAX_ROWS_PER_FILE = 80;
+const { tableStats } = require('../../utils/tableStats');
+
+const MAX_ROWS_PER_FILE = 80;     // muestra de filas que ve la IA
+const MAX_STATS_ROWS = 5000;      // filas sobre las que Nokfi calcula las cifras exactas
+const MAX_STATS_CHARS = 9000;
 const MAX_TEXT_PER_FILE = 30000;
 const MAX_INPUT_CHARS = 50000;
 
@@ -217,8 +221,14 @@ function sanitizeFiles(files, maxFiles = 3) {
   return arr(files).slice(0, maxFiles).map(f => {
     const name = clean(f?.name, 120) || 'archivo';
     if (Array.isArray(f?.rows)) {
-      const rows = f.rows.slice(0, MAX_ROWS_PER_FILE).map(r => (r && typeof r === 'object' ? r : {}));
-      return { name, kind: 'rows', total: Number(f.total_rows) || f.rows.length, content: JSON.stringify(rows) };
+      const all = f.rows.slice(0, MAX_STATS_ROWS).map(r => (r && typeof r === 'object' ? r : {}));
+      const rows = all.slice(0, MAX_ROWS_PER_FILE);
+      let stats = null;
+      try { stats = tableStats(all); } catch { stats = null; }
+      return {
+        name, kind: 'rows', total: Number(f.total_rows) || f.rows.length, sample: rows.length, statsRows: all.length,
+        content: JSON.stringify(rows), stats: stats ? JSON.stringify(stats).slice(0, MAX_STATS_CHARS) : null
+      };
     }
     return { name, kind: 'text', content: String(f?.text ?? '').slice(0, MAX_TEXT_PER_FILE) };
   }).filter(f => f.content && f.content !== '[]');
@@ -226,7 +236,10 @@ function sanitizeFiles(files, maxFiles = 3) {
 
 function filesBlock(files) {
   return files.map(f => f.kind === 'rows'
-    ? `Archivo "${f.name}" (${f.total} filas; se muestran las primeras):\n${f.content}`
+    ? `Archivo "${f.name}" (${f.total} filas).
+CIFRAS EXACTAS calculadas por Nokfi sobre ${f.statsRows === f.total ? 'TODAS las filas' : `las primeras ${f.statsRows} filas`}: ${f.stats || 'no disponibles'}
+Muestra de las primeras ${f.sample} filas (solo para entender el contenido; NO sumes a partir de la muestra):
+${f.content}`
     : `Archivo "${f.name}" (texto extraído):\n${f.content}`).join('\n\n');
 }
 
@@ -239,7 +252,9 @@ Contexto añadido por el usuario: ${clean(context, 1000) || 'ninguno'}
 DATOS:
 ${filesBlock(files)}
 
-Devuelve el informe: resumen, cifras clave calculadas con los datos, puntos fuertes, prioridades con gravedad (alertas y riesgos), plan de acción concreto y glosario.`;
+REGLA DE CIFRAS: todas las cifras del informe (totales, márgenes, pesos, rankings, meses) deben salir TAL CUAL de las "CIFRAS EXACTAS" de cada archivo. No sumes, no multipliques ni calcules porcentajes nuevos tú: si una cifra no está calculada, descríbela sin número. Redondea como máximo a 1 decimal.
+
+Devuelve el informe: resumen, cifras clave (de las CIFRAS EXACTAS), puntos fuertes, prioridades con gravedad (alertas y riesgos), plan de acción concreto y glosario.`;
   return { text, chars: text.length };
 }
 
