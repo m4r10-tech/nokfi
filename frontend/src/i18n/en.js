@@ -551,6 +551,7 @@ export default {
       kind: 'What kind of invoices?', kindAuto: 'Detect with my tax ID', kindExpense: 'Expenses (received)', kindIncome: 'Income (issued)',
       noTaxId: 'Add your tax ID in Settings to tell them apart automatically; otherwise they will be treated as expenses.',
       formats: 'PDF, JPG, PNG, WebP or XML · up to 60 invoices per read · files are not stored: only the data you confirm.', xmlFree: 'E-invoices (Facturae, UBL, Factur-X/ZUGFeRD as XML or PDF) are read instantly, exactly and without using any analysis.',
+      willReadFree: '{n} e-invoices will be read instantly, without using any analyses.', willReadFree_one: '{n} e-invoice will be read instantly, without using any analyses.', xmlInBatch: '{n} are e-invoices and are read without AI.', xmlInBatch_one: '{n} is an e-invoice and is read without AI.',
       willRead: '{n} invoices will be read. It will use 1 analysis of your daily quota.', willRead_one: '{n} invoice will be read. It will use 1 analysis of your daily quota.', capped: 'Only the first {max} will be read.',
       start: 'Read invoices', preparing: 'Preparing', reading: 'Reading batch',
       reviewHint: 'The AI can make mistakes. Check the amounts (especially the flagged ones) before saving.',

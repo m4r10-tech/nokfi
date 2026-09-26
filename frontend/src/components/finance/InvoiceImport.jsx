@@ -182,7 +182,12 @@ export default function InvoiceImport({ profile, onSaved, onCancel }) {
           {picked && (
             <>
               <Notice icon={Info}>
-                {t('finance.import.willRead', { n: picked.files.length })}
+                {(() => {
+                  // Las facturas electrónicas XML se leen sin IA: no gastan cuota.
+                  const xml = picked.files.filter(f => XML_EXT.some(e => f.name.toLowerCase().endsWith(e))).length;
+                  if (xml === picked.files.length) return t('finance.import.willReadFree', { n: xml });
+                  return `${t('finance.import.willRead', { n: picked.files.length })}${xml ? ` ${t('finance.import.xmlInBatch', { n: xml })}` : ''}`;
+                })()}
                 {picked.skipped > 0 && ` ${t('finance.import.capped').replace('{max}', MAX_INVOICES)}`}
               </Notice>
               <div><button onClick={run} disabled={!picked.files.length} className="btn btn-primary"><Sparkles size={15} /> {t('finance.import.start')}</button></div>

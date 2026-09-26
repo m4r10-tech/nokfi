@@ -554,6 +554,7 @@ export default {
       kind: '¿Qué facturas son?', kindAuto: 'Detectar con mi NIF', kindExpense: 'Gastos (recibidas)', kindIncome: 'Ingresos (emitidas)',
       noTaxId: 'Añade tu NIF en Configuración para distinguirlas automáticamente; si no, se tratarán como gastos.',
       formats: 'PDF, JPG, PNG, WebP o XML · hasta 60 facturas por lectura · los archivos no se guardan: solo los datos que confirmes.', xmlFree: 'Las facturas electrónicas (Facturae, UBL, Factur-X/ZUGFeRD en XML o PDF) se leen al instante, de forma exacta y sin gastar análisis.',
+      willReadFree: 'Se van a leer {n} facturas electrónicas, al instante y sin gastar análisis.', willReadFree_one: 'Se va a leer {n} factura electrónica, al instante y sin gastar análisis.', xmlInBatch: '{n} son electrónicas y se leen sin IA.', xmlInBatch_one: '{n} es electrónica y se lee sin IA.',
       willRead: 'Se van a leer {n} facturas. Gastará 1 análisis de tu cuota diaria.', willRead_one: 'Se va a leer {n} factura. Gastará 1 análisis de tu cuota diaria.', capped: 'Solo se leerán las primeras {max}.',
       start: 'Leer facturas', preparing: 'Preparando', reading: 'Leyendo lote',
       reviewHint: 'La IA puede equivocarse. Revisa los importes (sobre todo los marcados) antes de guardar.',

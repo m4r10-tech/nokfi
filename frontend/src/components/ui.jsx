@@ -59,7 +59,8 @@ export function Modal({ title, onClose, children, footer, wide }) {
     document.addEventListener('keydown', onKey);
     const prev = document.body.style.overflow;
     document.body.style.overflow = 'hidden';
-    ref.current?.focus();
+    // Si un campo del contenido ya tiene autoFocus, no le quitamos el foco.
+    if (!ref.current?.contains(document.activeElement)) ref.current?.focus();
     return () => { document.removeEventListener('keydown', onKey); document.body.style.overflow = prev; };
   }, [onClose]);
   return (

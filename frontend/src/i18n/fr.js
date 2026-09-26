@@ -551,6 +551,7 @@ export default {
       kind: 'Quel type de factures ?', kindAuto: 'Détecter avec mon n° fiscal', kindExpense: 'Dépenses (reçues)', kindIncome: 'Recettes (émises)',
       noTaxId: 'Ajoutez votre numéro fiscal dans les Paramètres pour les distinguer automatiquement ; sinon, elles seront traitées comme des dépenses.',
       formats: 'PDF, JPG, PNG, WebP ou XML · jusqu’à 60 factures par lecture · les fichiers ne sont pas conservés : seulement les données que vous confirmez.', xmlFree: 'Les factures électroniques (Facturae, UBL, Factur-X/ZUGFeRD en XML ou PDF) sont lues instantanément, avec exactitude et sans consommer d’analyse.',
+      willReadFree: '{n} factures électroniques vont être lues instantanément, sans consommer d’analyse.', willReadFree_one: '{n} facture électronique va être lue instantanément, sans consommer d’analyse.', xmlInBatch: '{n} sont électroniques et se lisent sans IA.', xmlInBatch_one: '{n} est électronique et se lit sans IA.',
       willRead: '{n} factures vont être lues. Cela consommera 1 analyse de votre quota quotidien.', willRead_one: '{n} facture va être lue. Cela consommera 1 analyse de votre quota quotidien.', capped: 'Seules les {max} premières seront lues.',
       start: 'Lire les factures', preparing: 'Préparation', reading: 'Lecture du lot',
       reviewHint: 'L’IA peut se tromper. Vérifiez les montants (surtout ceux signalés) avant d’enregistrer.',

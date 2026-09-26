@@ -551,6 +551,7 @@ export default {
       kind: 'Welche Rechnungen sind es?', kindAuto: 'Mit meiner Steuernr. erkennen', kindExpense: 'Ausgaben (erhalten)', kindIncome: 'Einnahmen (ausgestellt)',
       noTaxId: 'Trage deine Steuernummer in den Einstellungen ein, um sie automatisch zu unterscheiden; sonst werden sie als Ausgaben behandelt.',
       formats: 'PDF, JPG, PNG, WebP oder XML · bis zu 60 Rechnungen pro Durchgang · Dateien werden nicht gespeichert, nur die von dir bestätigten Daten.', xmlFree: 'E-Rechnungen (Facturae, UBL, Factur-X/ZUGFeRD als XML oder PDF) werden sofort, exakt und ohne Analyseverbrauch gelesen.',
+      willReadFree: '{n} E-Rechnungen werden sofort gelesen, ohne Analysen zu verbrauchen.', willReadFree_one: '{n} E-Rechnung wird sofort gelesen, ohne Analysen zu verbrauchen.', xmlInBatch: '{n} davon sind E-Rechnungen und werden ohne KI gelesen.', xmlInBatch_one: '{n} davon ist eine E-Rechnung und wird ohne KI gelesen.',
       willRead: '{n} Rechnungen werden gelesen. Das verbraucht 1 Analyse deines Tageskontingents.', willRead_one: '{n} Rechnung wird gelesen. Das verbraucht 1 Analyse deines Tageskontingents.', capped: 'Es werden nur die ersten {max} gelesen.',
       start: 'Rechnungen lesen', preparing: 'Vorbereitung', reading: 'Stapel wird gelesen',
       reviewHint: 'Die KI kann sich irren. Prüfe die Beträge (vor allem die markierten) vor dem Speichern.',
