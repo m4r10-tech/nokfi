@@ -13,7 +13,8 @@ import { OWNER, HOSTING, ownerLine } from '../legal/owner';
 export default function LegalDoc({ doc, metaDesc, fallbackNote }) {
   const { t, lang } = useLang();
   usePageMeta(`${doc.title} — Nokfi`, metaDesc);
-  const hosting = HOSTING.name ? `${HOSTING.name}${HOSTING.location ? ` (${HOSTING.location})` : ''}: ${lang === 'es' ? 'servidor donde se aloja la base de datos' : 'server hosting the database'}.` : null;
+  const hl = lang === 'es' ? 'es' : 'en';
+  const hosting = HOSTING.name?.[hl] ? `${HOSTING.name[hl]} (${HOSTING.location[hl]}): ${hl === 'es' ? 'aloja la aplicación y la base de datos' : 'hosts the application and the database'}.` : null;
   const fill = (s) => String(s).replace('{OWNER}', ownerLine(lang)).replace('{HOSTING}', hosting || '');
   const items = (arr) => (Array.isArray(arr) ? arr.map(fill).filter(Boolean) : []);
 

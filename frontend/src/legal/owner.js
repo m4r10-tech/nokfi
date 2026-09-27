@@ -13,8 +13,8 @@ export const OWNER = {
 
 /** Proveedor del servidor (VPS) donde vive la base de datos: subencargado del DPA. */
 export const HOSTING = {
-  name: '',      // p. ej. «Hetzner Online GmbH»
-  location: ''   // p. ej. «Alemania (UE)»
+  name: { es: 'Proveedor de servidor virtual (VPS)', en: 'Virtual private server (VPS) provider' },
+  location: { es: 'servidor en Frankfurt, Alemania (UE)', en: 'server in Frankfurt, Germany (EU)' }
 };
 
 export const ownerLine = (lang) => {
