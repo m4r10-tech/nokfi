@@ -23,6 +23,8 @@
 # Retención: se borran copias de más de RETENTION_DAYS días (default 14).
 # ==========================================================================
 set -euo pipefail
+# cron arranca con un PATH mínimo: asegurar node.
+export PATH="/usr/local/bin:/usr/bin:/bin:$PATH"
 
 # Rutas relativas a este script → funciona igual en dev y en el VPS.
 BACKEND_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
@@ -53,3 +55,14 @@ fi
 find "$BACKUP_DIR" -name 'nokfi-*.db' -mtime +"$RETENTION_DAYS" -delete
 
 echo "[backup] OK → $OUT ($(du -h "$OUT" | cut -f1))"
+
+# Copia FUERA del servidor (Cloudflare R2), cifrada. Solo si está configurada
+# en .env (R2_BUCKET). Si falla, la copia local sigue siendo válida; el informe
+# diario de salud avisa si la última subida tiene más de 26 h (offsite.ok).
+if grep -q '^R2_BUCKET=.' "$BACKEND_DIR/.env" 2>/dev/null; then
+  if node "$BACKEND_DIR/scripts/offsite-backup.js" "$OUT"; then
+    date +%s > "$BACKUP_DIR/offsite.ok"
+  else
+    echo "[backup] AVISO: la subida a R2 ha fallado (la copia local es válida)" >&2
+  fi
+fi

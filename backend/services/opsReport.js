@@ -31,7 +31,18 @@ function backupStatus(now = Date.now()) {
       .map(f => ({ f, st: fs.statSync(path.join(BACKUP_DIR, f)) })).sort((a, b) => b.st.mtimeMs - a.st.mtimeMs);
     if (!files.length) return { ok: false, text: 'No hay ninguna copia de seguridad' };
     const ageH = Math.round((now - files[0].st.mtimeMs) / 36e5);
-    return { ok: ageH <= BACKUP_MAX_AGE_H, text: `Última copia hace ${ageH} h (${files[0].f}, ${Math.round(files[0].st.size / 1024)} KB, ${files.length} guardadas)` };
+    let offsite = process.env.R2_BUCKET ? 'copia en R2: aún no se ha subido ninguna' : 'copia fuera del servidor (R2): sin configurar';
+    let offOk = !process.env.R2_BUCKET;
+    try {
+      const ts = Number(fs.readFileSync(path.join(BACKUP_DIR, 'offsite.ok'), 'utf8').trim()) * 1000;
+      const offH = Math.round((now - ts) / 36e5);
+      offOk = offH <= BACKUP_MAX_AGE_H;
+      offsite = `copia en R2 hace ${offH} h`;
+    } catch { /* sin subir aún */ }
+    return {
+      ok: ageH <= BACKUP_MAX_AGE_H && offOk,
+      text: `Última copia hace ${ageH} h (${files[0].f}, ${Math.round(files[0].st.size / 1024)} KB, ${files.length} guardadas) · ${offsite}`
+    };
   } catch {
     return { ok: false, text: 'No se pudo leer la carpeta de copias' };
   }
