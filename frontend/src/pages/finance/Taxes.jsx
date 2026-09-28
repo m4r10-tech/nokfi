@@ -47,6 +47,11 @@ export default function Taxes() {
 
   const s = data?.summary;
   const pct = s && s.total_estimated > 0 ? Math.min(100, (s.reserved / s.total_estimated) * 100) : 100;
+  // Sesión 6: sin nada que pagar no hay barra "Cubierto" (engañaba). Si el IVA
+  // sale a compensar, se dice así y con su importe; sin datos, se dice que no hay.
+  const toPay = s && s.total_estimated > 0;
+  const noData = s && !s.vat.output && !s.vat.input && (!s.irpf130 || (!s.irpf130.income && !s.irpf130.expense));
+  const refundKey = quarter === 4 ? 'finance.taxes.refundHeadline' : 'finance.taxes.compensateHeadline';
 
   return (
     <div className="flex flex-col gap-4">
@@ -70,14 +75,29 @@ export default function Taxes() {
             <div className="flex items-start gap-3">
               <span className="w-10 h-10 rounded-xl grid place-items-center shrink-0" style={{ background: 'var(--accent-soft)', color: 'var(--accent-text)' }}><PiggyBank size={19} /></span>
               <div className="min-w-0">
-                <p className="text-sm" style={{ color: 'var(--text-secondary)' }}>{t('finance.taxes.headline').replace('{q}', `${quarter}T ${year}`)}</p>
-                <p className="text-3xl font-semibold tabular tracking-tight mt-1" style={{ color: 'var(--text-primary)' }}>≈ {eur(s.total_estimated, lang)}</p>
+                {toPay ? (
+                  <>
+                    <p className="text-sm" style={{ color: 'var(--text-secondary)' }}>{t('finance.taxes.headline').replace('{q}', `${quarter}T ${year}`)}</p>
+                    <p className="text-3xl font-semibold tabular tracking-tight mt-1" style={{ color: 'var(--text-primary)' }}>≈ {eur(s.total_estimated, lang)}</p>
+                  </>
+                ) : s.vat_refund > 0 ? (
+                  <>
+                    <p className="text-sm" style={{ color: 'var(--text-secondary)' }}>{t(refundKey).replace('{q}', `${quarter}T ${year}`)}</p>
+                    <p className="text-3xl font-semibold tabular tracking-tight mt-1" style={{ color: 'var(--positive)' }}>{eur(s.vat_refund, lang)}</p>
+                  </>
+                ) : (
+                  <>
+                    <p className="text-sm" style={{ color: 'var(--text-secondary)' }}>{`${quarter}T ${year}`}</p>
+                    <p className="text-lg font-semibold mt-1" style={{ color: 'var(--text-primary)' }}>{t(noData ? 'finance.taxes.noData' : 'finance.taxes.nothingToPay')}</p>
+                    {noData && <Link to="/app/finanzas/libro" className="link text-sm">{t('finance.taxes.goLedger')}</Link>}
+                  </>
+                )}
                 <p className="text-xs mt-1 flex items-center gap-1.5" style={{ color: 'var(--text-muted)' }}>
                   <CalendarDays size={12} /> {t('finance.taxes.dueBy').replace('{date}', isoDate(s.due_date, lang, { day: 'numeric', month: 'long', year: 'numeric' }))}
                 </p>
               </div>
             </div>
-            <div>
+            {toPay && <div>
               <div className="flex justify-between text-xs mb-1.5" style={{ color: 'var(--text-secondary)' }}>
                 <span>{t('finance.taxes.reserved').replace('{v}', eur(s.reserved, lang))}</span>
                 <span className="tabular">{s.missing > 0 ? t('finance.taxes.missing').replace('{v}', eur(s.missing, lang)) : t('finance.taxes.covered')}</span>
@@ -85,14 +105,14 @@ export default function Taxes() {
               <div className="h-2 rounded-full overflow-hidden" style={{ background: 'var(--surface-2)' }}>
                 <div className="h-full rounded-full" style={{ width: `${pct}%`, background: pct >= 100 ? 'var(--positive)' : 'var(--warning)', transition: 'width 600ms var(--ease-out)' }} />
               </div>
-            </div>
-            <form onSubmit={saveReserve} className="flex flex-col sm:flex-row gap-2 sm:items-end">
+            </div>}
+            {toPay && <form onSubmit={saveReserve} className="flex flex-col sm:flex-row gap-2 sm:items-end">
               <label className="flex-1">
                 <span className="field-label">{t('finance.taxes.setAside')}</span>
                 <input type="number" min="0" step="0.01" inputMode="decimal" value={reserve} onChange={(e) => setReserve(e.target.value)} className="input" />
               </label>
               <button type="submit" disabled={saving} className="btn btn-secondary">{saving && <Loader2 size={14} className="animate-spin" />} {t('common.save')}</button>
-            </form>
+            </form>}
             {s.vat_refund > 0 && <Notice tone="positive">{t(quarter === 4 ? 'finance.taxes.vatRefund' : 'finance.taxes.vatCompensate', { v: eur(s.vat_refund, lang) })}</Notice>}
           </section>
 
@@ -102,7 +122,7 @@ export default function Taxes() {
                 <Kpi label={t('finance.taxes.vatOutput')} value={eur(s.vat.output, lang)} />
                 <Kpi label={t('finance.taxes.vatInput')} value={eur(s.vat.input, lang)} />
               </div>
-              <Row label={t('finance.taxes.result')} value={eur(s.vat.result, lang)} strong />
+              <Row label={s.vat.result < 0 ? t('finance.vatBalanceNeg') : t('finance.taxes.result')} value={eur(Math.abs(s.vat.result), lang)} strong />
               <p className="text-xs mt-2" style={{ color: 'var(--text-muted)' }}>{t('finance.taxes.vatExplain')}</p>
             </Section>
             {s.irpf130 ? (

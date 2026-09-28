@@ -153,7 +153,10 @@ export default {
     fTaxes: 'Imposte {q}', fReceivables: 'Da incassare', fOverdue: '{v} scaduti', fLeaks: 'Perdite questo mese',
     fLeaksHint: '{n} avvisi', fLeaksHint_one: '{n} avviso', fForecast: 'Cassa a 90 giorni', fBelow: 'Sotto la soglia il {date}', fForecastOk: 'Nessun avviso di cassa',
     fForecastSetup: 'Inserisci il saldo per vedere la previsione',
-    nextDeadline: 'Prossima scadenza: modelli {m} · {date} · mancano {n} giorni', nextDeadline_one: 'Prossima scadenza: modelli {m} · {date} · manca {n} giorno'
+    nextDeadline: 'Prossima scadenza: modelli {m} · {date} · mancano {n} giorni', nextDeadline_one: 'Prossima scadenza: modelli {m} · {date} · manca {n} giorno',
+    fLeaksAlerts: 'Perdite',
+    fRecurring: 'Spese ricorrenti: {v}/mese',
+    fLeaksNone: 'Nessun avviso'
   },
   questionnaire: {
     reportTitle: 'Diagnosi dell’attività',
@@ -200,7 +203,7 @@ export default {
   excel: {
     modeSingle: 'Un periodo', periodA: 'Periodo A', periodB: 'Periodo B', periodLabel: 'Nome del periodo (es. agosto)', compareBtn: 'Confronta con l’IA', compareTitle: 'Confronto tra periodi', kpiVariation: 'Variazione', rowsShort: 'righe', compareHint: 'Somma di «{value}» raggruppata per «{label}» in ogni periodo.', compareNoNumbers: 'Non abbiamo trovato una colonna numerica comune per calcolare le variazioni; l’IA confronterà comunque il contenuto.',
     exportSheet: 'Analisi IA', exportColumn: 'Analisi',
-    hubTitle: 'Analisi Excel', hubDesc: 'Scegli il tipo di dati da analizzare. I tuoi file vengono letti nel browser: non vengono mai caricati sui nostri server.',
+    hubTitle: 'Analisi Excel', hubDesc: 'Scegli il tipo di dati da analizzare. Il file non lascia il tuo dispositivo: inviamo solo le righe necessarie all’analisi e non le conserviamo.',
     importTitle: 'Importa file', importHint: 'Trascina i file o fai clic per selezionarli',
     importHintMobile: 'Tocca per scegliere i file',
     formats: '.xlsx, .xls, .csv, .ods, .pdf · Max 5 MB · Fino a 3 file',
@@ -337,7 +340,7 @@ export default {
     faqHeading: 'Domande frequenti',
     faqItems: [
       { q: 'Cos’è Nokfi?', a: 'Un’applicazione web di diagnosi finanziaria per autonomi e PMI: un questionario guidato, l’analisi con l’IA dei tuoi Excel e PDF, calcolatrici finanziarie e report esportabili in PDF ed Excel.' },
-      { q: 'Devo installare qualcosa o caricare i miei file?', a: 'Non devi installare nulla: funziona nel browser. I tuoi Excel, PDF e cartelle vengono letti sul tuo dispositivo e non vengono conservati sui nostri server. Solo per leggere fatture scansionate o fotografate viene inviata all’IA una copia ridotta, senza conservarla.' },
+      { q: 'Devo installare qualcosa o caricare i miei file?', a: 'Non devi installare nulla: funziona nel browser. I tuoi Excel, PDF e cartelle vengono letti sul tuo dispositivo: il file non lo lascia. Per l’analisi inviamo solo le righe o il testo necessari, senza conservarli. Per leggere fatture scansionate o fotografate viene inviata all’IA una copia ridotta, senza conservarla.' },
       { q: 'Come funziona la prova gratuita?', a: 'Il piano Mini include 14 giorni gratis. Alla registrazione serve una carta, ma non viene addebitato nulla fino alla fine della prova. Se annulli prima, non paghi nulla.' },
       { q: 'Posso cambiare piano o annullare quando voglio?', a: 'Sì, senza vincoli. Dalle Impostazioni accedi al portale di Stripe per cambiare piano o annullare; le modifiche si applicano alla fine del periodo in corso.' },
       { q: 'In cosa si differenziano i piani?', a: 'Tutti i piani includono tutte le funzioni dell’app (diagnosi, Excel e cartelle, fatture lette dall’IA, imposte, incassi, previsione di cassa e assistente). Cambia la quota giornaliera di analisi IA: 10 al giorno con Mini, 50 con Pro e 130 con Max. Pro e Max includono anche l’API per automazioni (n8n, Make, Zapier) e Max l’assistenza prioritaria.' },
@@ -584,7 +587,12 @@ export default {
       netIncome: 'Reddito netto', twentyPct: '20% del reddito', prevPayments: 'Acconti dei trimestri precedenti', withholdings: 'Ritenute subite',
       companyNote: 'Le società non presentano il modello 130: versano acconti dell’imposta sulle società (modello 202), per ora fuori dal calcolo di Nokfi.',
       noLegalForm: 'Indica se sei autonomo o società per affinare il calcolo.',
-      legal: 'Stima indicativa in regime generale (Spagna). Non include il recargo de equivalencia, i moduli né l’imposta sulle società. Non è consulenza fiscale.'
+      legal: 'Stima indicativa in regime generale (Spagna). Non include il recargo de equivalencia, i moduli né l’imposta sulle società. Non è consulenza fiscale.',
+      compensateHeadline: 'Questo trimestre ({q}) l’IVA è a credito:',
+      refundHeadline: 'Questo trimestre ({q}) l’IVA è a rimborso o a credito:',
+      nothingToPay: 'Niente da accantonare questo trimestre',
+      noData: 'Ancora nessuna fattura di questo trimestre nel registro',
+      goLedger: 'Vai al registro'
     },
     receivables: {
       pending: 'Da incassare', invoices: '{n} fatture', invoices_one: '{n} fattura', overdue60: 'Scaduto da oltre 60 giorni', avgDays: 'Giorni medi d’incasso',
@@ -641,7 +649,8 @@ export default {
       kind_vat_annual: 'Riepilogo annuale IVA (390)', kind_withholdings_annual: 'Riepiloghi annuali delle ritenute (190/180)',
       kind_third_parties: 'Operazioni con terzi oltre 3.005,06 € (347)', kind_income_tax_annual: 'Dichiarazione dei redditi (100)',
       kind_corporate_annual: 'Imposta sulle società (200)', kind_corporate_installment: 'Acconto dell’imposta sulle società (202)'
-    }
+    },
+    vatSplit: 'A debito {out} · A credito {in}'
   },
   folder: {
     title: 'Analizza una cartella', subtitle: 'Apri una cartella (fatture, estratti, fogli…) e chiedi ciò che ti serve. Viene letta nel tuo browser.',

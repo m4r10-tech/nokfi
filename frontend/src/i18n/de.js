@@ -153,7 +153,10 @@ export default {
     fTaxes: 'Steuern {q}', fReceivables: 'Offene Forderungen', fOverdue: '{v} überfällig', fLeaks: 'Lecks diesen Monat',
     fLeaksHint: '{n} Hinweise', fLeaksHint_one: '{n} Hinweis', fForecast: 'Liquidität in 90 Tagen', fBelow: 'Unter der Schwelle am {date}', fForecastOk: 'Keine Liquiditätswarnungen',
     fForecastSetup: 'Kontostand eingeben, um die Prognose zu sehen',
-    nextDeadline: 'Nächste Frist: Formulare {m} · {date} · noch {n} Tage', nextDeadline_one: 'Nächste Frist: Formulare {m} · {date} · noch {n} Tag'
+    nextDeadline: 'Nächste Frist: Formulare {m} · {date} · noch {n} Tage', nextDeadline_one: 'Nächste Frist: Formulare {m} · {date} · noch {n} Tag',
+    fLeaksAlerts: 'Lecks',
+    fRecurring: 'Wiederkehrende Kosten: {v}/Monat',
+    fLeaksNone: 'Keine Warnungen'
   },
   questionnaire: {
     reportTitle: 'Unternehmensdiagnose',
@@ -200,7 +203,7 @@ export default {
   excel: {
     modeSingle: 'Ein Zeitraum', periodA: 'Zeitraum A', periodB: 'Zeitraum B', periodLabel: 'Name des Zeitraums (z. B. August)', compareBtn: 'Mit KI vergleichen', compareTitle: 'Zeitraumvergleich', kpiVariation: 'Veränderung', rowsShort: 'Zeilen', compareHint: 'Summe von „{value}“ gruppiert nach „{label}“ je Zeitraum.', compareNoNumbers: 'Keine gemeinsame Zahlenspalte gefunden, um Veränderungen zu berechnen; die KI vergleicht den Inhalt trotzdem.',
     exportSheet: 'KI-Analyse', exportColumn: 'Analyse',
-    hubTitle: 'Excel-Analyse', hubDesc: 'Wähle die Art der Daten, die du analysieren möchtest. Deine Dateien werden im Browser gelesen und nie auf unsere Server hochgeladen.',
+    hubTitle: 'Excel-Analyse', hubDesc: 'Wähle die Art der Daten, die du analysieren möchtest. Die Datei verlässt dein Gerät nicht: Wir senden nur die für die Analyse nötigen Zeilen und speichern sie nicht.',
     importTitle: 'Dateien importieren', importHint: 'Dateien hierher ziehen oder klicken',
     importHintMobile: 'Tippen, um Dateien zu wählen',
     formats: '.xlsx, .xls, .csv, .ods, .pdf · max. 5 MB · bis zu 3 Dateien',
@@ -337,7 +340,7 @@ export default {
     faqHeading: 'Häufige Fragen',
     faqItems: [
       { q: 'Was ist Nokfi?', a: 'Eine Web-App zur Finanzdiagnose für Selbstständige und KMU: ein geführter Fragebogen, KI-Analyse deiner Excel-Tabellen und PDFs, Finanzrechner und Berichte zum Export als PDF und Excel.' },
-      { q: 'Muss ich etwas installieren oder meine Dateien hochladen?', a: 'Nichts zu installieren: Es läuft im Browser. Deine Excel-Dateien, PDFs und Ordner werden auf deinem Gerät gelesen und nicht auf unseren Servern gespeichert. Nur beim Lesen gescannter oder fotografierter Rechnungen wird eine verkleinerte Kopie an die KI gesendet, ohne sie zu speichern.' },
+      { q: 'Muss ich etwas installieren oder meine Dateien hochladen?', a: 'Nichts zu installieren: Es läuft im Browser. Deine Excel-Dateien, PDFs und Ordner werden auf deinem Gerät gelesen: Die Datei verlässt es nicht. Für die Analyse senden wir nur die nötigen Zeilen oder Texte und speichern sie nicht. Beim Lesen gescannter oder fotografierter Rechnungen wird eine verkleinerte Kopie an die KI gesendet, ohne sie zu speichern.' },
       { q: 'Wie funktioniert der kostenlose Test?', a: 'Der Mini-Plan enthält 14 Tage gratis. Bei der Anmeldung ist eine Karte nötig, aber bis zum Ende des Tests wird nichts abgebucht. Kündigst du vorher, zahlst du nichts.' },
       { q: 'Kann ich den Plan jederzeit wechseln oder kündigen?', a: 'Ja, ohne Bindung. In den Einstellungen öffnest du das Stripe-Portal, um den Plan zu wechseln oder zu kündigen; Änderungen gelten zum Ende der laufenden Periode.' },
       { q: 'Worin unterscheiden sich die Pläne?', a: 'Alle Pläne enthalten alle Funktionen der App (Diagnose, Excel und Ordner, Rechnungen per KI, Steuern, Forderungen, Liquiditätsprognose und Assistent). Es ändert sich das tägliche KI-Analysekontingent: 10 pro Tag bei Mini, 50 bei Pro und 130 bei Max. Pro und Max enthalten außerdem die API für Automatisierungen (n8n, Make, Zapier), Max zusätzlich priorisierten Support.' },
@@ -584,7 +587,12 @@ export default {
       netIncome: 'Nettoeinkünfte', twentyPct: '20 % der Einkünfte', prevPayments: 'Vorauszahlungen der Vorquartale', withholdings: 'Einbehaltene Steuern',
       companyNote: 'Gesellschaften reichen kein Modelo 130 ein: Sie leisten Vorauszahlungen zur Körperschaftsteuer (Modelo 202), die Nokfi derzeit nicht berechnet.',
       noLegalForm: 'Gib an, ob du selbstständig oder eine Gesellschaft bist, um die Berechnung zu verfeinern.',
-      legal: 'Unverbindliche Schätzung im allgemeinen System (Spanien). Ohne Recargo de equivalencia, Modul-Besteuerung und Körperschaftsteuer. Keine Steuerberatung.'
+      legal: 'Unverbindliche Schätzung im allgemeinen System (Spanien). Ohne Recargo de equivalencia, Modul-Besteuerung und Körperschaftsteuer. Keine Steuerberatung.',
+      compensateHeadline: 'Dieses Quartal ({q}) ergibt sich ein Vorsteuerüberhang:',
+      refundHeadline: 'Dieses Quartal ({q}) erhältst du Umsatzsteuer zurück oder verrechnest sie:',
+      nothingToPay: 'Dieses Quartal nichts zurückzulegen',
+      noData: 'Noch keine Rechnungen aus diesem Quartal im Journal',
+      goLedger: 'Zum Journal'
     },
     receivables: {
       pending: 'Offene Forderungen', invoices: '{n} Rechnungen', invoices_one: '{n} Rechnung', overdue60: 'Seit über 60 Tagen überfällig', avgDays: 'Durchschnittliche Zahlungsdauer',
@@ -641,7 +649,8 @@ export default {
       kind_vat_annual: 'Jährliche USt.-Zusammenfassung (390)', kind_withholdings_annual: 'Jährliche Einbehalt-Zusammenfassungen (190/180)',
       kind_third_parties: 'Geschäfte mit Dritten über 3.005,06 € (347)', kind_income_tax_annual: 'Einkommensteuererklärung (100)',
       kind_corporate_annual: 'Körperschaftsteuer (200)', kind_corporate_installment: 'Körperschaftsteuer-Vorauszahlung (202)'
-    }
+    },
+    vatSplit: 'Umsatzsteuer {out} · Vorsteuer {in}'
   },
   folder: {
     title: 'Ordner analysieren', subtitle: 'Öffne einen Ordner (Rechnungen, Auszüge, Tabellen…) und frag, was du brauchst. Er wird in deinem Browser gelesen.',

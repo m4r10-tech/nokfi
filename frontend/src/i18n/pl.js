@@ -153,7 +153,10 @@ export default {
     fTaxes: 'Podatki {q}', fReceivables: 'Do pobrania', fOverdue: '{v} po terminie', fLeaks: 'Wycieki w tym miesiącu',
     fLeaksHint: '{n} alertu', fLeaksHint_one: '{n} alert', fLeaksHint_few: '{n} alerty', fLeaksHint_many: '{n} alertów', fForecast: 'Gotówka za 90 dni', fBelow: 'Poniżej progu {date}', fForecastOk: 'Brak alertów gotówki',
     fForecastSetup: 'Podaj saldo, aby zobaczyć prognozę',
-    nextDeadline: 'Najbliższy termin: formularze {m} · {date} · za {n} dnia', nextDeadline_one: 'Najbliższy termin: formularze {m} · {date} · za {n} dzień', nextDeadline_few: 'Najbliższy termin: formularze {m} · {date} · za {n} dni', nextDeadline_many: 'Najbliższy termin: formularze {m} · {date} · za {n} dni'
+    nextDeadline: 'Najbliższy termin: formularze {m} · {date} · za {n} dnia', nextDeadline_one: 'Najbliższy termin: formularze {m} · {date} · za {n} dzień', nextDeadline_few: 'Najbliższy termin: formularze {m} · {date} · za {n} dni', nextDeadline_many: 'Najbliższy termin: formularze {m} · {date} · za {n} dni',
+    fLeaksAlerts: 'Wycieki',
+    fRecurring: 'Stałe koszty: {v}/mies.',
+    fLeaksNone: 'Brak alertów'
   },
   questionnaire: {
     reportTitle: 'Diagnoza firmy',
@@ -200,7 +203,7 @@ export default {
   excel: {
     modeSingle: 'Jeden okres', periodA: 'Okres A', periodB: 'Okres B', periodLabel: 'Nazwa okresu (np. sierpień)', compareBtn: 'Porównaj z AI', compareTitle: 'Porównanie okresów', kpiVariation: 'Zmiana', rowsShort: 'wierszy', compareHint: 'Suma „{value}” pogrupowana według „{label}” w każdym okresie.', compareNoNumbers: 'Nie znaleźliśmy wspólnej kolumny liczbowej do obliczenia zmian; AI i tak porówna zawartość.',
     exportSheet: 'Analiza AI', exportColumn: 'Analiza',
-    hubTitle: 'Analiza Excel', hubDesc: 'Wybierz rodzaj danych do analizy. Pliki są czytane w przeglądarce — nigdy nie trafiają na nasze serwery.',
+    hubTitle: 'Analiza Excel', hubDesc: 'Wybierz rodzaj danych do analizy. Plik nie opuszcza twojego urządzenia: wysyłamy tylko wiersze potrzebne do analizy i ich nie przechowujemy.',
     importTitle: 'Importuj pliki', importHint: 'Przeciągnij pliki lub kliknij, aby wybrać',
     importHintMobile: 'Dotknij, aby wybrać pliki',
     formats: '.xlsx, .xls, .csv, .ods, .pdf · maks. 5 MB · do 3 plików',
@@ -337,7 +340,7 @@ export default {
     faqHeading: 'Częste pytania',
     faqItems: [
       { q: 'Czym jest Nokfi?', a: 'Aplikacją internetową do diagnozy finansowej dla samozatrudnionych i MŚP: kwestionariusz z przewodnikiem, analiza plików Excel i PDF z AI, kalkulatory finansowe i raporty do eksportu w PDF i Excelu.' },
-      { q: 'Czy muszę coś instalować albo wysyłać pliki?', a: 'Nie trzeba niczego instalować: działa w przeglądarce. Twoje pliki Excel, PDF i foldery są czytane na twoim urządzeniu i nie są przechowywane na naszych serwerach. Tylko przy czytaniu zeskanowanych lub sfotografowanych faktur do AI trafia pomniejszona kopia, której nie przechowujemy.' },
+      { q: 'Czy muszę coś instalować albo wysyłać pliki?', a: 'Nie trzeba niczego instalować: działa w przeglądarce. Twoje pliki Excel, PDF i foldery są czytane na twoim urządzeniu: plik go nie opuszcza. Do analizy wysyłamy tylko potrzebne wiersze lub tekst i ich nie przechowujemy. Przy czytaniu zeskanowanych lub sfotografowanych faktur do AI trafia pomniejszona kopia, której nie przechowujemy.' },
       { q: 'Jak działa darmowy okres próbny?', a: 'Plan Mini obejmuje 14 dni za darmo. Przy rejestracji potrzebna jest karta, ale nic nie pobieramy do końca okresu próbnego. Jeśli anulujesz wcześniej, nie płacisz nic.' },
       { q: 'Czy mogę zmienić plan lub anulować w dowolnej chwili?', a: 'Tak, bez zobowiązań. W Ustawieniach otworzysz portal Stripe, aby zmienić plan lub anulować; zmiany obowiązują od końca bieżącego okresu.' },
       { q: 'Czym różnią się plany?', a: 'Każdy plan zawiera wszystkie funkcje aplikacji (diagnoza, Excel i foldery, faktury czytane przez AI, podatki, należności, prognoza gotówki i asystent). Różni się dzienny limit analiz AI: 10 dziennie w Mini, 50 w Pro i 130 w Max. Pro i Max obejmują też API do automatyzacji (n8n, Make, Zapier), a Max priorytetowe wsparcie.' },
@@ -584,7 +587,12 @@ export default {
       netIncome: 'Dochód netto', twentyPct: '20% dochodu', prevPayments: 'Zaliczki z poprzednich kwartałów', withholdings: 'Potrącone zaliczki',
       companyNote: 'Spółki nie składają modelo 130: płacą zaliczki na podatek od osób prawnych (modelo 202), których Nokfi na razie nie wylicza.',
       noLegalForm: 'Wskaż, czy prowadzisz jednoosobową działalność, czy spółkę, aby doprecyzować obliczenia.',
-      legal: 'Orientacyjny szacunek w systemie ogólnym (Hiszpania). Nie obejmuje recargo de equivalencia, ryczałtu (módulos) ani podatku od osób prawnych. To nie jest doradztwo podatkowe.'
+      legal: 'Orientacyjny szacunek w systemie ogólnym (Hiszpania). Nie obejmuje recargo de equivalencia, ryczałtu (módulos) ani podatku od osób prawnych. To nie jest doradztwo podatkowe.',
+      compensateHeadline: 'W tym kwartale ({q}) VAT do przeniesienia:',
+      refundHeadline: 'W tym kwartale ({q}) VAT do zwrotu lub przeniesienia:',
+      nothingToPay: 'W tym kwartale nie trzeba nic odkładać',
+      noData: 'Brak faktur z tego kwartału w rejestrze',
+      goLedger: 'Przejdź do rejestru'
     },
     receivables: {
       pending: 'Do pobrania', invoices: '{n} faktury', invoices_one: '{n} faktura', invoices_few: '{n} faktury', invoices_many: '{n} faktur', overdue60: 'Po terminie ponad 60 dni', avgDays: 'Średni czas płatności',
@@ -645,7 +653,8 @@ export default {
       kind_vat_annual: 'Roczne podsumowanie VAT (390)', kind_withholdings_annual: 'Roczne podsumowania potrąceń (190/180)',
       kind_third_parties: 'Transakcje z kontrahentami powyżej 3005,06 € (347)', kind_income_tax_annual: 'Roczne zeznanie podatkowe (100)',
       kind_corporate_annual: 'Podatek od osób prawnych (200)', kind_corporate_installment: 'Zaliczka na podatek od osób prawnych (202)'
-    }
+    },
+    vatSplit: 'Należny {out} · Naliczony {in}'
   },
   folder: {
     title: 'Analizuj folder', subtitle: 'Otwórz folder (faktury, wyciągi, arkusze…) i poproś o to, czego potrzebujesz. Jest czytany w twojej przeglądarce.',

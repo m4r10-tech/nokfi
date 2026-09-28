@@ -153,7 +153,10 @@ export default {
     fTaxes: 'Taxes {q}', fReceivables: 'To collect', fOverdue: '{v} overdue', fLeaks: 'Leaks this month',
     fLeaksHint: '{n} alerts', fLeaksHint_one: '{n} alert', fForecast: 'Cash in 90 days', fBelow: 'Below threshold on {date}', fForecastOk: 'No cash alerts',
     fForecastSetup: 'Enter your balance to see the forecast',
-    nextDeadline: 'Next deadline: forms {m} · {date} · {n} days left', nextDeadline_one: 'Next deadline: forms {m} · {date} · {n} day left'
+    nextDeadline: 'Next deadline: forms {m} · {date} · {n} days left', nextDeadline_one: 'Next deadline: forms {m} · {date} · {n} day left',
+    fLeaksAlerts: 'Leaks',
+    fRecurring: 'Recurring costs: {v}/month',
+    fLeaksNone: 'No alerts'
   },
   questionnaire: {
     reportTitle: 'Business diagnosis',
@@ -200,7 +203,7 @@ export default {
   excel: {
     modeSingle: 'One period', periodA: 'Period A', periodB: 'Period B', periodLabel: 'Period name (e.g. August)', compareBtn: 'Compare with AI', compareTitle: 'Period comparison', kpiVariation: 'Change', rowsShort: 'rows', compareHint: 'Sum of “{value}” grouped by “{label}” in each period.', compareNoNumbers: 'We could not find a common numeric column to calculate changes; the AI will still compare the content.',
     exportSheet: 'AI analysis', exportColumn: 'Analysis',
-    hubTitle: 'Excel analysis', hubDesc: 'Choose the type of data you want to analyse. Your files are read in your browser — they are never uploaded to our servers.',
+    hubTitle: 'Excel analysis', hubDesc: 'Choose the type of data you want to analyse. The file never leaves your device: we only send the rows needed for the analysis, and we don’t store them.',
     importTitle: 'Import files', importHint: 'Drag files here or click to select',
     importHintMobile: 'Tap to choose files',
     formats: '.xlsx, .xls, .csv, .ods, .pdf · Max 5 MB · Up to 3 files',
@@ -337,7 +340,7 @@ export default {
     faqHeading: 'Frequently asked questions',
     faqItems: [
       { q: 'What is Nokfi?', a: 'A web app for financial diagnosis aimed at freelancers and small businesses: a guided questionnaire, AI analysis of your Excel sheets and PDFs, financial calculators and reports you can export to PDF and Excel.' },
-      { q: 'Do I have to install anything or upload my files?', a: 'Nothing to install: it runs in your browser. Your Excel files, PDFs and folders are read on your own device and are not stored on our servers. Only when reading scanned or photographed invoices is a reduced copy sent to the AI to read it, without storing it.' },
+      { q: 'Do I have to install anything or upload my files?', a: 'Nothing to install: it runs in your browser. Your Excel files, PDFs and folders are read on your own device: the file never leaves it. For the analysis we only send the rows or text needed, and we don’t store them. When reading scanned or photographed invoices, a reduced copy is sent to the AI to read it, without storing it.' },
       { q: 'How does the free trial work?', a: 'The Mini plan includes a 14-day free trial. A card is required at sign-up, but nothing is charged until the trial ends. Cancel before it ends and you pay nothing.' },
       { q: 'Can I change plans or cancel anytime?', a: 'Yes, no lock-in. From Settings you open the Stripe portal to switch plans or cancel; changes take effect at the end of the current period.' },
       { q: 'What is the difference between plans?', a: 'Every plan includes all the app features (diagnosis, Excel and folders, AI-read invoices, taxes, receivables, cash forecast and the assistant). The daily AI analysis quota changes: 10 per day on Mini, 50 on Pro and 130 on Max. Pro and Max also include the API for automations (n8n, Make, Zapier), and Max includes priority support.' },
@@ -584,7 +587,12 @@ export default {
       netIncome: 'Net income', twentyPct: '20% of net income', prevPayments: 'Payments from previous quarters', withholdings: 'Withholdings applied to you',
       companyNote: 'Companies do not file form 130: they make Corporate Tax instalments (form 202), outside Nokfi\'s calculation for now.',
       noLegalForm: 'Tell us whether you are self-employed or a company to fine-tune the calculation.',
-      legal: 'Approximate estimate under the general regime (Spain). Excludes the equivalence surcharge, modules and Corporate Tax. This is not tax advice.'
+      legal: 'Approximate estimate under the general regime (Spain). Excludes the equivalence surcharge, modules and Corporate Tax. This is not tax advice.',
+      compensateHeadline: 'This quarter ({q}) your VAT is to be offset:',
+      refundHeadline: 'This quarter ({q}) your VAT is to be refunded or offset:',
+      nothingToPay: 'Nothing to set aside this quarter',
+      noData: 'No invoices from this quarter in the ledger yet',
+      goLedger: 'Go to the ledger'
     },
     receivables: {
       pending: 'Pending collection', invoices: '{n} invoices', invoices_one: '{n} invoice', overdue60: 'Overdue by more than 60 days', avgDays: 'Average collection days',
@@ -641,7 +649,8 @@ export default {
       kind_vat_annual: 'Annual VAT summary (390)', kind_withholdings_annual: 'Annual withholding summaries (190/180)',
       kind_third_parties: 'Transactions with third parties over €3,005.06 (347)', kind_income_tax_annual: 'Annual income tax return (100)',
       kind_corporate_annual: 'Corporate Tax (200)', kind_corporate_installment: 'Corporate Tax instalment (202)'
-    }
+    },
+    vatSplit: 'Output {out} · Input {in}'
   },
   folder: {
     title: 'Analyse a folder', subtitle: 'Open a folder (invoices, statements, sheets…) and ask for what you need. It is read in your browser.',

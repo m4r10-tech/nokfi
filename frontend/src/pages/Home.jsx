@@ -92,7 +92,7 @@ export default function Home() {
         </div>
       )}
 
-      {showGuide && <GettingStarted stats={stats} onDismiss={dismissGuide} t={t} />}
+      {showGuide && <GettingStarted stats={stats} profile={profile} onDismiss={dismissGuide} t={t} />}
 
       {failure ? (
         <ErrorState compact offline={isConnectivityError(failure)} message={apiErrorMessage(t, failure)} onRetry={load} />
@@ -250,9 +250,9 @@ function QuickAction({ to, icon: Icon, title, desc }) {
   );
 }
 
-function GettingStarted({ stats, onDismiss, t }) {
+function GettingStarted({ stats, profile, onDismiss, t }) {
   const steps = [
-    { done: true, title: t('home.stepProfile'), to: '/app/configuracion' },
+    { done: !!profile.companyName?.trim(), title: t('home.stepProfile'), to: '/app/configuracion' },
     { done: stats.kinds.has('cuestionario'), title: t('home.stepDiagnosis'), desc: t('home.stepDiagnosisDesc'), to: '/app/cuestionario' },
     { done: stats.kinds.has('ledger'), title: t('home.stepLedger'), desc: t('home.stepLedgerDesc'), to: '/app/finanzas/libro' },
     { done: stats.kinds.has('excel'), title: t('home.stepExcel'), desc: t('home.stepExcelDesc'), to: '/app/excel' }
@@ -393,12 +393,19 @@ function FinanceStrip({ dash, t, lang }) {
   }
   const fc = dash.forecast;
   const cards = [
-    { to: '/app/finanzas/impuestos', icon: Landmark, label: t('home.fTaxes').replace('{q}', `${dash.taxes.quarter}T`), value: eur(dash.taxes.total_estimated, lang),
-      hint: dash.taxes.missing > 0 ? t('finance.taxes.missing').replace('{v}', eur(dash.taxes.missing, lang)) : t('finance.taxes.covered'), warn: dash.taxes.missing > 0 },
+    // Sin nada que pagar no se dice "Cubierto": si el IVA sale a compensar, se dice con su importe.
+    dash.taxes.total_estimated > 0
+      ? { to: '/app/finanzas/impuestos', icon: Landmark, label: t('home.fTaxes').replace('{q}', `${dash.taxes.quarter}T`), value: eur(dash.taxes.total_estimated, lang),
+          hint: dash.taxes.missing > 0 ? t('finance.taxes.missing').replace('{v}', eur(dash.taxes.missing, lang)) : t('finance.taxes.covered'), warn: dash.taxes.missing > 0 }
+      : { to: '/app/finanzas/impuestos', icon: Landmark, label: t('home.fTaxes').replace('{q}', `${dash.taxes.quarter}T`),
+          value: dash.taxes.vat_refund > 0 ? eur(dash.taxes.vat_refund, lang) : '—',
+          hint: dash.taxes.vat_refund > 0 ? t('finance.vatBalanceNeg') : t('finance.taxes.nothingToPay') },
     { to: '/app/finanzas/cobros', icon: HandCoins, label: t('home.fReceivables'), value: eur(dash.receivables.total, lang),
       hint: dash.receivables.overdue_total > 0 ? t('home.fOverdue').replace('{v}', eur(dash.receivables.overdue_total, lang)) : t('finance.receivables.invoices', { n: dash.receivables.count }), warn: dash.receivables.overdue_total > 0 },
-    { to: '/app/finanzas/fugas', icon: Droplets, label: t('home.fLeaks'), value: eur(dash.leaks.detected_this_month, lang),
-      hint: t('home.fLeaksHint', { n: dash.leaks.alerts }) },
+    dash.leaks.detected_this_month > 0
+      ? { to: '/app/finanzas/fugas', icon: Droplets, label: t('home.fLeaks'), value: eur(dash.leaks.detected_this_month, lang), hint: t('home.fLeaksHint', { n: dash.leaks.alerts }) }
+      : { to: '/app/finanzas/fugas', icon: Droplets, label: t('home.fLeaksAlerts'), value: dash.leaks.alerts > 0 ? t('home.fLeaksHint', { n: dash.leaks.alerts }) : '—',
+          hint: dash.leaks.recurring_monthly_total > 0 ? t('home.fRecurring').replace('{v}', eur(dash.leaks.recurring_monthly_total, lang)) : t('home.fLeaksNone') },
     fc
       ? { to: '/app/finanzas/prevision', icon: LineChart, label: t('home.fForecast'), value: eur(fc.at90, lang),
           hint: fc.first_below ? t('home.fBelow').replace('{date}', isoDate(fc.first_below.date, lang, { day: 'numeric', month: 'short' })) : t('home.fForecastOk'), warn: !!fc.first_below }

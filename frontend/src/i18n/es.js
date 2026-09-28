@@ -153,7 +153,10 @@ export default {
     fTaxes: 'Impuestos {q}', fReceivables: 'Por cobrar', fOverdue: '{v} vencido', fLeaks: 'Fugas este mes',
     fLeaksHint: '{n} alertas', fLeaksHint_one: '{n} alerta', fForecast: 'Caja en 90 días', fBelow: 'Bajas del umbral el {date}', fForecastOk: 'Sin alertas de caja',
     fForecastSetup: 'Indica tu saldo para ver la previsión',
-    nextDeadline: 'Próximo plazo: modelos {m} · {date} · faltan {n} días', nextDeadline_one: 'Próximo plazo: modelos {m} · {date} · falta {n} día'
+    nextDeadline: 'Próximo plazo: modelos {m} · {date} · faltan {n} días', nextDeadline_one: 'Próximo plazo: modelos {m} · {date} · falta {n} día',
+    fLeaksAlerts: 'Fugas',
+    fRecurring: 'Gastos recurrentes: {v}/mes',
+    fLeaksNone: 'Sin alertas'
   },
   questionnaire: {
     reportTitle: 'Diagnóstico de negocio',
@@ -203,7 +206,7 @@ export default {
     compareBtn: 'Comparar con IA', compareTitle: 'Comparación de periodos', kpiVariation: 'Variación', rowsShort: 'filas',
     compareHint: 'Suma de «{value}» agrupada por «{label}» en cada periodo.',
     compareNoNumbers: 'No encontramos una columna numérica común para calcular variaciones; la IA comparará el contenido igualmente.',
-    hubTitle: 'Análisis Excel', hubDesc: 'Elige el tipo de datos que quieres analizar. Tus archivos se leen en tu navegador: nunca se suben a nuestros servidores.',
+    hubTitle: 'Análisis Excel', hubDesc: 'Elige el tipo de datos que quieres analizar. El archivo no sale de tu equipo: solo enviamos las filas necesarias para el análisis y no las guardamos.',
     importTitle: 'Importar archivos', importHint: 'Arrastra archivos o haz clic para seleccionar',
     importHintMobile: 'Toca para elegir archivos',
     formats: '.xlsx, .xls, .csv, .ods, .pdf · Máx 5 MB · Hasta 3 archivos',
@@ -340,7 +343,7 @@ export default {
     faqHeading: 'Preguntas frecuentes',
     faqItems: [
       { q: '¿Qué es Nokfi?', a: 'Una aplicación web de diagnóstico financiero para autónomos y pymes: un cuestionario guiado, análisis de tus hojas de Excel y PDF con IA, calculadoras financieras e informes exportables a PDF y Excel.' },
-      { q: '¿Tengo que instalar algo o subir mis archivos?', a: 'No hay que instalar nada: funciona en el navegador. Tus Excel, PDF y carpetas se leen en tu propio dispositivo y no se guardan en nuestros servidores. Solo al leer facturas escaneadas o en foto se envía una copia reducida a la IA para leerla, sin guardarla.' },
+      { q: '¿Tengo que instalar algo o subir mis archivos?', a: 'No hay que instalar nada: funciona en el navegador. Tus Excel, PDF y carpetas se leen en tu propio dispositivo: el archivo no sale de tu equipo. Para el análisis solo enviamos las filas o el texto necesarios, y no los guardamos. Al leer facturas escaneadas o en foto se envía una copia reducida a la IA para leerla, sin guardarla.' },
       { q: '¿Cómo funciona la prueba gratuita?', a: 'El plan Mini incluye 14 días gratis. Se pide una tarjeta al registrarte, pero no se cobra nada hasta que termina la prueba. Si cancelas antes, no pagas.' },
       { q: '¿Puedo cambiar de plan o cancelar cuando quiera?', a: 'Sí, sin permanencia. Desde Configuración accedes al portal de Stripe para cambiar de plan o cancelar; los cambios se aplican al final del periodo en curso.' },
       { q: '¿En qué se diferencian los planes?', a: 'Todos incluyen todas las funciones de la app (diagnóstico, Excel y carpetas, facturas leídas por IA, impuestos, cobros, previsión de caja y el asistente). Cambia la cuota diaria de análisis con IA: 10 al día en Mini, 50 en Pro y 130 en Max. Pro y Max incluyen además la API para automatizaciones (n8n, Make, Zapier), y Max, soporte prioritario.' },
@@ -587,7 +590,12 @@ export default {
       netIncome: 'Rendimiento neto', twentyPct: '20 % del rendimiento', prevPayments: 'Pagos de trimestres anteriores', withholdings: 'Retenciones que te han hecho',
       companyNote: 'Las sociedades no presentan el 130: hacen pagos fraccionados del Impuesto sobre Sociedades (modelo 202), fuera del cálculo de Nokfi por ahora.',
       noLegalForm: 'Indica si eres autónomo o sociedad para afinar el cálculo.',
-      legal: 'Estimación orientativa en régimen general. No incluye recargo de equivalencia, módulos ni el Impuesto sobre Sociedades. No es asesoramiento fiscal.'
+      legal: 'Estimación orientativa en régimen general. No incluye recargo de equivalencia, módulos ni el Impuesto sobre Sociedades. No es asesoramiento fiscal.',
+      compensateHeadline: 'Este trimestre ({q}) el IVA te sale a compensar:',
+      refundHeadline: 'Este trimestre ({q}) el IVA te sale a devolver o compensar:',
+      nothingToPay: 'Nada que apartar este trimestre',
+      noData: 'Aún no hay facturas de este trimestre en el libro',
+      goLedger: 'Ir al libro'
     },
     receivables: {
       pending: 'Pendiente de cobro', invoices: '{n} facturas', invoices_one: '{n} factura', overdue60: 'Vencido hace más de 60 días', avgDays: 'Días medios de cobro',
@@ -644,7 +652,8 @@ export default {
       kind_vat_annual: 'Resumen anual de IVA (390)', kind_withholdings_annual: 'Resúmenes anuales de retenciones (190/180)',
       kind_third_parties: 'Operaciones con terceros de más de 3.005,06 € (347)', kind_income_tax_annual: 'Declaración de la renta (100)',
       kind_corporate_annual: 'Impuesto sobre Sociedades (200)', kind_corporate_installment: 'Pago fraccionado del Impuesto sobre Sociedades (202)'
-    }
+    },
+    vatSplit: 'Repercutido {out} · Soportado {in}'
   },
   folder: {
     title: 'Analizar una carpeta', subtitle: 'Abre una carpeta (facturas, extractos, hojas…) y pide lo que necesites. Se lee en tu navegador.',

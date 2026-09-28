@@ -153,7 +153,10 @@ export default {
     fTaxes: 'Impôts {q}', fReceivables: 'À encaisser', fOverdue: '{v} échus', fLeaks: 'Fuites ce mois-ci',
     fLeaksHint: '{n} alertes', fLeaksHint_one: '{n} alerte', fForecast: 'Trésorerie à 90 jours', fBelow: 'Sous le seuil le {date}', fForecastOk: 'Aucune alerte de trésorerie',
     fForecastSetup: 'Indiquez votre solde pour voir la prévision',
-    nextDeadline: 'Prochaine échéance : formulaires {m} · {date} · dans {n} jours', nextDeadline_one: 'Prochaine échéance : formulaires {m} · {date} · dans {n} jour'
+    nextDeadline: 'Prochaine échéance : formulaires {m} · {date} · dans {n} jours', nextDeadline_one: 'Prochaine échéance : formulaires {m} · {date} · dans {n} jour',
+    fLeaksAlerts: 'Fuites',
+    fRecurring: 'Dépenses récurrentes : {v}/mois',
+    fLeaksNone: 'Aucune alerte'
   },
   questionnaire: {
     reportTitle: 'Diagnostic de l’activité',
@@ -200,7 +203,7 @@ export default {
   excel: {
     modeSingle: 'Une période', periodA: 'Période A', periodB: 'Période B', periodLabel: 'Nom de la période (ex. : août)', compareBtn: 'Comparer avec l’IA', compareTitle: 'Comparaison de périodes', kpiVariation: 'Variation', rowsShort: 'lignes', compareHint: 'Somme de « {value} » regroupée par « {label} » pour chaque période.', compareNoNumbers: 'Aucune colonne numérique commune pour calculer les variations ; l’IA comparera tout de même le contenu.',
     exportSheet: 'Analyse IA', exportColumn: 'Analyse',
-    hubTitle: 'Analyse Excel', hubDesc: 'Choisissez le type de données à analyser. Vos fichiers sont lus dans votre navigateur : ils ne sont jamais envoyés sur nos serveurs.',
+    hubTitle: 'Analyse Excel', hubDesc: 'Choisissez le type de données à analyser. Le fichier ne quitte pas votre appareil : nous n’envoyons que les lignes nécessaires à l’analyse, et nous ne les conservons pas.',
     importTitle: 'Importer des fichiers', importHint: 'Glissez des fichiers ou cliquez pour les sélectionner',
     importHintMobile: 'Touchez pour choisir des fichiers',
     formats: '.xlsx, .xls, .csv, .ods, .pdf · 5 Mo max. · Jusqu’à 3 fichiers',
@@ -337,7 +340,7 @@ export default {
     faqHeading: 'Questions fréquentes',
     faqItems: [
       { q: 'Qu’est-ce que Nokfi ?', a: 'Une application web de diagnostic financier pour indépendants et PME : un questionnaire guidé, l’analyse de vos Excel et PDF avec l’IA, des calculateurs financiers et des rapports exportables en PDF et Excel.' },
-      { q: 'Dois-je installer quelque chose ou envoyer mes fichiers ?', a: 'Rien à installer : tout fonctionne dans le navigateur. Vos Excel, PDF et dossiers sont lus sur votre propre appareil et ne sont pas conservés sur nos serveurs. Seule la lecture de factures numérisées ou photographiées envoie une copie réduite à l’IA pour la lire, sans la conserver.' },
+      { q: 'Dois-je installer quelque chose ou envoyer mes fichiers ?', a: 'Rien à installer : tout fonctionne dans le navigateur. Vos Excel, PDF et dossiers sont lus sur votre propre appareil : le fichier ne le quitte pas. Pour l’analyse, nous n’envoyons que les lignes ou le texte nécessaires, sans les conserver. La lecture de factures numérisées ou photographiées envoie une copie réduite à l’IA pour la lire, sans la conserver.' },
       { q: 'Comment fonctionne l’essai gratuit ?', a: 'L’offre Mini inclut 14 jours gratuits. Une carte est demandée à l’inscription, mais rien n’est débité avant la fin de l’essai. Si vous résiliez avant, vous ne payez rien.' },
       { q: 'Puis-je changer d’offre ou résilier quand je veux ?', a: 'Oui, sans engagement. Depuis les Paramètres, vous accédez au portail Stripe pour changer d’offre ou résilier ; les changements s’appliquent à la fin de la période en cours.' },
       { q: 'Quelle différence entre les offres ?', a: 'Toutes les offres incluent toutes les fonctions de l’app (diagnostic, Excel et dossiers, factures lues par l’IA, impôts, encaissements, prévision de trésorerie et assistant). Seul le quota quotidien d’analyses IA change : 10 par jour avec Mini, 50 avec Pro et 130 avec Max. Pro et Max incluent aussi l’API pour automatisations (n8n, Make, Zapier), et Max le support prioritaire.' },
@@ -584,7 +587,12 @@ export default {
       netIncome: 'Résultat net', twentyPct: '20 % du résultat', prevPayments: 'Acomptes des trimestres précédents', withholdings: 'Retenues subies',
       companyNote: 'Les sociétés ne déposent pas le modèle 130 : elles versent des acomptes d’impôt sur les sociétés (modèle 202), hors du calcul de Nokfi pour l’instant.',
       noLegalForm: 'Indiquez si vous êtes indépendant ou société pour affiner le calcul.',
-      legal: 'Estimation indicative en régime général (Espagne). N’inclut ni le recargo de equivalencia, ni les modules, ni l’impôt sur les sociétés. Ce n’est pas un conseil fiscal.'
+      legal: 'Estimation indicative en régime général (Espagne). N’inclut ni le recargo de equivalencia, ni les modules, ni l’impôt sur les sociétés. Ce n’est pas un conseil fiscal.',
+      compensateHeadline: 'Ce trimestre ({q}), votre TVA est à reporter :',
+      refundHeadline: 'Ce trimestre ({q}), votre TVA est à rembourser ou à reporter :',
+      nothingToPay: 'Rien à mettre de côté ce trimestre',
+      noData: 'Pas encore de factures de ce trimestre dans le registre',
+      goLedger: 'Aller au registre'
     },
     receivables: {
       pending: 'En attente d’encaissement', invoices: '{n} factures', invoices_one: '{n} facture', overdue60: 'Échu depuis plus de 60 jours', avgDays: 'Délai moyen d’encaissement',
@@ -641,7 +649,8 @@ export default {
       kind_vat_annual: 'Récapitulatif annuel de TVA (390)', kind_withholdings_annual: 'Récapitulatifs annuels des retenues (190/180)',
       kind_third_parties: 'Opérations avec des tiers de plus de 3 005,06 € (347)', kind_income_tax_annual: 'Déclaration annuelle de revenus (100)',
       kind_corporate_annual: 'Impôt sur les sociétés (200)', kind_corporate_installment: 'Acompte d’impôt sur les sociétés (202)'
-    }
+    },
+    vatSplit: 'Collectée {out} · Déductible {in}'
   },
   folder: {
     title: 'Analyser un dossier', subtitle: 'Ouvrez un dossier (factures, relevés, feuilles…) et demandez ce dont vous avez besoin. Il est lu dans votre navigateur.',
