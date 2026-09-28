@@ -218,8 +218,17 @@ export default {
     maxFiles: 'Maximal 3 Dateien pro Analyse. Entferne eine, um eine andere hinzuzufügen.',
     removeFile: 'Datei entfernen',
     chartTitle: 'Datenüberblick', kpiTotal: 'Summe', kpiRows: 'Zeilen', kpiMax: 'Höchstwert',
-    chartHint: 'Die ersten 12 Zeilen der zuletzt importierten Excel-Datei.',
-    analyzeError: 'Die Analyse konnte nicht erstellt werden.'
+    analyzeError: 'Die Analyse konnte nicht erstellt werden.',
+    kpiAverage: 'Durchschnitt pro Buchung',
+    kpiIn: 'Eingänge',
+    kpiOut: 'Ausgänge',
+    kpiBalanceEnd: 'Endsaldo',
+    kpiBalanceMin: 'Niedrigster Saldo',
+    qvNet: 'Netto (Eingänge − Ausgänge)',
+    qvHint: 'Pro {period} nach der Spalte „{date}“, vom {from} bis {to}.',
+    periodDay: 'Tag',
+    periodMonth: 'Monat',
+    qvBalanceNote: 'Ein Saldo ist kumuliert: gezeigt wird sein Verlauf, nie seine Summe.'
   },
   history: {
     title: 'Verlauf',

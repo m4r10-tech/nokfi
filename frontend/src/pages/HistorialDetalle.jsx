@@ -13,7 +13,8 @@ import { useToast } from '../context/ToastContext';
 import EmptyState from '../components/EmptyState';
 import ErrorState from '../components/ErrorState';
 import Skeleton, { SkeletonText } from '../components/Skeleton';
-import { formatDateTime, localeOf } from '../utils/dates';
+import { formatDateTime } from '../utils/dates';
+import { num } from '../utils/money';
 import { KIND_ICON, kindLabel } from './Historial';
 
 /**
@@ -88,7 +89,7 @@ export default function HistorialDetalle() {
       </span>
       <h1 className="text-[22px] md:text-2xl font-semibold tracking-tight" style={{ color: 'var(--text-primary)' }}>{analysis.title}</h1>
       <p className="text-xs mt-1.5 mb-5" style={{ color: 'var(--text-muted)' }}>
-        {formatDateTime(analysis.created_at, lang)} · {t('history.detailPromptChars')}: {Number(analysis.prompt_chars || 0).toLocaleString(localeOf(lang))}
+        {formatDateTime(analysis.created_at, lang)} · {t('history.detailPromptChars')}: {num(analysis.prompt_chars, lang, 0)}
       </p>
 
       <div className="flex flex-wrap gap-2 mb-4">

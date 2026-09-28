@@ -5,6 +5,7 @@ import { sanitizeAiHtml } from '../middleware/sanitize';
 import { useLang } from '../context/LangContext';
 import { useToast } from '../context/ToastContext';
 import HealthScore from './HealthScore';
+import { eur, num } from '../utils/money';
 
 /**
  * Visor del informe ESTRUCTURADO de la IA (sesión 4, F1).
@@ -34,7 +35,7 @@ export default function ReportView({ report, html, actions = [], health, onActio
 }
 
 function StructuredReport({ report, actions, health, onActionsChange }) {
-  const { t } = useLang();
+  const { t, lang } = useLang();
   return (
     <div className="flex flex-col gap-4 anim-fade">
       <Block>
@@ -51,7 +52,7 @@ function StructuredReport({ report, actions, health, onActionsChange }) {
             {report.key_figures.map((k, i) => (
               <div key={i} className="rounded-xl p-3 min-w-0" style={{ background: 'var(--surface-2)' }}>
                 <p className="text-xs" style={{ color: 'var(--text-muted)' }}>{k.label}</p>
-                <p className="text-lg font-semibold tabular mt-0.5 break-words" style={{ color: 'var(--text-primary)' }}>{k.value}</p>
+                <p className="text-lg font-semibold tabular mt-0.5 break-words" style={{ color: 'var(--text-primary)' }}>{figure(k.value, lang)}</p>
                 {k.note && <p className="text-xs mt-0.5" style={{ color: 'var(--text-secondary)' }}>{k.note}</p>}
               </div>
             ))}
@@ -188,4 +189,16 @@ function Block({ title, icon: Icon, aside, children }) {
       {children}
     </section>
   );
+}
+
+/**
+ * Red de seguridad para cifras que la IA devuelve "en crudo" ("2301.58",
+ * "14309.9 €"): si el valor es SOLO un número (con o sin €), se formatea con
+ * separador de miles en el idioma de la app. Cualquier otro texto se deja igual.
+ */
+function figure(value, lang) {
+  const m = String(value ?? '').trim().match(/^(-?\d+(?:\.\d+)?)\s*(€|EUR)?$/);
+  if (!m) return value;
+  const n = Number(m[1]);
+  return m[2] ? eur(n, lang) : num(n, lang);
 }

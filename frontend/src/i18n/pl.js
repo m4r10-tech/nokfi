@@ -218,8 +218,17 @@ export default {
     maxFiles: 'Maksymalnie 3 pliki na analizę. Usuń jeden, aby dodać inny.',
     removeFile: 'Usuń plik',
     chartTitle: 'Szybki podgląd danych', kpiTotal: 'Suma', kpiRows: 'Wiersze', kpiMax: 'Wartość maksymalna',
-    chartHint: 'Pierwsze 12 wierszy ostatnio zaimportowanego Excela.',
-    analyzeError: 'Nie udało się wygenerować analizy.'
+    analyzeError: 'Nie udało się wygenerować analizy.',
+    kpiAverage: 'Średnio na operację',
+    kpiIn: 'Wpływy',
+    kpiOut: 'Wydatki',
+    kpiBalanceEnd: 'Saldo końcowe',
+    kpiBalanceMin: 'Najniższe saldo',
+    qvNet: 'Netto (wpływy − wydatki)',
+    qvHint: 'Według {period} z kolumny „{date}”, od {from} do {to}.',
+    periodDay: 'dnia',
+    periodMonth: 'miesiąca',
+    qvBalanceNote: 'Saldo jest narastające: pokazujemy jego zmiany, nigdy sumę.'
   },
   history: {
     title: 'Historia',

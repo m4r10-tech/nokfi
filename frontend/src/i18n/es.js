@@ -221,8 +221,17 @@ export default {
     maxFiles: 'Máximo 3 archivos por análisis. Quita alguno para añadir otro.',
     removeFile: 'Quitar archivo',
     chartTitle: 'Vista rápida de los datos', kpiTotal: 'Total', kpiRows: 'Registros', kpiMax: 'Valor máximo',
-    chartHint: 'Primeras 12 filas del último Excel importado.',
-    analyzeError: 'No se pudo generar el análisis.'
+    analyzeError: 'No se pudo generar el análisis.',
+    kpiAverage: 'Media por movimiento',
+    kpiIn: 'Entradas',
+    kpiOut: 'Salidas',
+    kpiBalanceEnd: 'Saldo final',
+    kpiBalanceMin: 'Saldo mínimo',
+    qvNet: 'Neto (entradas − salidas)',
+    qvHint: 'Por {period} según la columna «{date}», del {from} al {to}.',
+    periodDay: 'día',
+    periodMonth: 'mes',
+    qvBalanceNote: 'El saldo es un acumulado: se muestra su evolución, no se suma.'
   },
   history: {
     title: 'Historial',

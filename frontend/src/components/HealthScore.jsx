@@ -1,5 +1,5 @@
 import { useLang } from '../context/LangContext';
-import { localeOf } from '../utils/dates';
+import { num } from '../utils/money';
 
 /**
  * C1 — Nota de salud financiera 0-100 (sesión 4). La calcula el BACKEND con
@@ -68,7 +68,7 @@ export default function HealthScore({ health, compact = false }) {
             {lost.map(l => (
               <li key={l.id} className="flex items-center justify-between gap-3 text-sm">
                 <span style={{ color: 'var(--text-secondary)' }}>{t(`questionnaire.items.${l.id}`)}</span>
-                <span className="tabular text-xs font-medium shrink-0" style={{ color: 'var(--negative)' }}>−{Number(l.points).toLocaleString(localeOf(lang), { maximumFractionDigits: 1 })}</span>
+                <span className="tabular text-xs font-medium shrink-0" style={{ color: 'var(--negative)' }}>−{num(l.points, lang, 1)}</span>
               </li>
             ))}
           </ul>

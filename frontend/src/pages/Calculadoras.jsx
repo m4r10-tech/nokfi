@@ -1,6 +1,6 @@
 import { useState } from 'react';
 import { useLang } from '../context/LangContext';
-import { localeOf } from '../utils/dates';
+import { formatNumber } from '../utils/money';
 import PageHeader from '../components/PageHeader';
 
 const TABS = ['equilibrio', 'margen', 'roi'];
@@ -47,11 +47,10 @@ const num = (v) => { const n = parseFloat(String(v).replace(',', '.')); return N
 
 function useFmt() {
   const { lang } = useLang();
-  const loc = localeOf(lang);
   return {
-    eur: (n) => n.toLocaleString(loc, { style: 'currency', currency: 'EUR', maximumFractionDigits: 2 }),
-    int: (n) => n.toLocaleString(loc),
-    pct: (n) => `${n.toLocaleString(loc, { minimumFractionDigits: 1, maximumFractionDigits: 1 })} %`
+    eur: (n) => formatNumber(n, lang, { style: 'currency', currency: 'EUR', maximumFractionDigits: 2 }),
+    int: (n) => formatNumber(n, lang),
+    pct: (n) => `${formatNumber(n, lang, { minimumFractionDigits: 1, maximumFractionDigits: 1 })} %`
   };
 }
 

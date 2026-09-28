@@ -218,8 +218,17 @@ export default {
     maxFiles: 'Up to 3 files per analysis. Remove one to add another.',
     removeFile: 'Remove file',
     chartTitle: 'Quick look at the data', kpiTotal: 'Total', kpiRows: 'Rows', kpiMax: 'Highest value',
-    chartHint: 'First 12 rows of the last imported Excel.',
-    analyzeError: 'Could not generate the analysis.'
+    analyzeError: 'Could not generate the analysis.',
+    kpiAverage: 'Average per entry',
+    kpiIn: 'Money in',
+    kpiOut: 'Money out',
+    kpiBalanceEnd: 'Closing balance',
+    kpiBalanceMin: 'Lowest balance',
+    qvNet: 'Net (in − out)',
+    qvHint: 'By {period} using the “{date}” column, from {from} to {to}.',
+    periodDay: 'day',
+    periodMonth: 'month',
+    qvBalanceNote: 'A balance is cumulative: its evolution is shown, never its sum.'
   },
   history: {
     title: 'History',

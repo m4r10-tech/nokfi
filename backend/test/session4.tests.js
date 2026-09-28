@@ -268,7 +268,21 @@ module.exports = async function session4Tests({ post, put, get, call, check, che
     const f = P.sanitizeFiles([{ name: 'v.csv', rows, total_rows: 120 }])[0];
     const { text } = P.buildExcel({ module: 'ventas', context: '', files: [f] });
     check('Excel: el prompt lleva las CIFRAS EXACTAS y solo una muestra de 80 filas', () =>
-      text.includes('CIFRAS EXACTAS') && text.includes('"suma":66000') && JSON.parse(f.content).length === 80);
+      text.includes('CIFRAS EXACTAS') && text.includes('"suma":"66.000,00 €"') && JSON.parse(f.content).length === 80);
+    // Sesión 6: cifras formateadas, saldo sin sumar, fechas de serie → ISO, sin "Número de filas".
+    const caja = [];
+    for (let i = 0; i < 6; i++) caja.push({ Fecha: 46223 + i * 15, Concepto: i % 2 ? 'Pagos' : 'Cobros taller', Entrada: i % 2 ? '' : '1.100,50', Salida: i % 2 ? 300 : '', Saldo: 5000 + i * 100 });
+    const fc = P.sanitizeFiles([{ name: 'caja.csv', rows: caja, total_rows: 6 }], 3, 'es')[0];
+    const stc = JSON.parse(fc.stats);
+    check('S6 Excel: saldo = último valor (no suma), importes "3.301,50 €", fechas de serie → ISO en la muestra', () =>
+      stc.totales.Saldo.saldo_final === '5.500,00 €' && stc.totales.Saldo.suma === undefined && stc.totales.Entrada.suma === '3.301,50 €'
+      && JSON.parse(fc.content)[0].Fecha === '2026-07-20' && stc.fechas.desde === '2026-07');
+    const { text: tc } = P.buildExcel({ module: 'caja', context: '', files: [fc] });
+    check('S6 Excel: el prompt prohíbe fechas numéricas y el nº de filas como cifra', () => tc.includes('nunca como número') && tc.includes('número de filas'));
+    const rep = P.normalizeReport({ summary: 's', key_figures: [{ label: 'Número de filas', value: '120' }, { label: 'Saldo final', value: '5.500,00 €' }], glossary: [{ term: 'Filas', definition: 'x' }], priorities: [], action_plan: [] });
+    check('S6 Excel: normalizeReport quita "Número de filas" de cifras clave y glosario', () =>
+      rep.key_figures.length === 1 && rep.key_figures[0].label === 'Saldo final' && rep.glossary.length === 0);
+    check('S6 toNumber: "1.100" es mil cien (punto de miles)', () => require('../utils/tableStats').toNumber('1.100') === 1100);
   }
 
   // ── Enlace de solo lectura para la gestoría ──

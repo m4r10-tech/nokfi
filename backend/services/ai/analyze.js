@@ -55,7 +55,7 @@ const AI_ERROR_RESPONSES = {
 };
 
 /** Valida la entrada y prepara la llamada. Devuelve { error } o { plan }. */
-function prepare(task, input, profile) {
+function prepare(task, input, profile, lang) {
   input = input && typeof input === 'object' ? input : {};
   switch (task) {
     case 'cuestionario': {
@@ -67,21 +67,21 @@ function prepare(task, input, profile) {
     }
     case 'excel': {
       if (!P.EXCEL_MODULES[input.module]) return { error: bad('invalid_input', 'Módulo de análisis desconocido.') };
-      const files = P.sanitizeFiles(input.files, 3);
+      const files = P.sanitizeFiles(input.files, 3, lang);
       if (!files.length) return { error: bad('invalid_input', 'Falta el contenido a analizar.') };
       const { text, chars } = P.buildExcel({ module: input.module, context: input.context, files });
       return { plan: { parts: [{ text }], chars, schema: P.REPORT_SCHEMA, meta: { module: input.module }, family: 'single' } };
     }
     case 'compare': {
       const module = P.EXCEL_MODULES[input.module] ? input.module : 'total';
-      const a = { label: input.periodA?.label, files: P.sanitizeFiles(input.periodA?.files, 3) };
-      const b = { label: input.periodB?.label, files: P.sanitizeFiles(input.periodB?.files, 3) };
+      const a = { label: input.periodA?.label, files: P.sanitizeFiles(input.periodA?.files, 3, lang) };
+      const b = { label: input.periodB?.label, files: P.sanitizeFiles(input.periodB?.files, 3, lang) };
       if (!a.files.length || !b.files.length) return { error: bad('invalid_input', 'Faltan los datos de alguno de los dos periodos.') };
       const { text, chars } = P.buildCompare({ module, context: input.context, periodA: a, periodB: b, stats: input.stats });
       return { plan: { parts: [{ text }], chars, schema: P.REPORT_SCHEMA, meta: { module, stats: input.stats || null }, family: 'single' } };
     }
     case 'folder_map': {
-      const files = P.sanitizeFiles(input.files, 60);
+      const files = P.sanitizeFiles(input.files, 60, lang);
       if (!files.length) return { error: bad('invalid_input', 'El lote no tiene documentos legibles.') };
       const { text, chars } = P.buildFolderMap({ instruction: input.instruction, files });
       const batches = Math.min(Math.max(Number(input.total_batches) || 1, 1), MAX_FOLDER_BATCHES);
@@ -89,7 +89,7 @@ function prepare(task, input, profile) {
     }
     case 'folder': {
       const notes = Array.isArray(input.notes) ? input.notes.slice(0, MAX_FOLDER_BATCHES).map(n => String(n || '')) : null;
-      const files = notes ? [] : P.sanitizeFiles(input.files, 60);
+      const files = notes ? [] : P.sanitizeFiles(input.files, 60, lang);
       if (!notes && !files.length) return { error: bad('invalid_input', 'La carpeta no tiene documentos legibles.') };
       const fileCount = Math.min(Number(input.file_count) || files.length, 1000);
       const { text, chars } = P.buildFolder({ instruction: input.instruction, folderName: input.folder_name, files, notes, fileCount });
@@ -144,7 +144,7 @@ async function runAnalysis({ license, task, input, lang, title, jobId, ip, sourc
   }
 
   const profile = getCompanyProfile(license.id);
-  const { error, plan } = prepare(task, input, profile);
+  const { error, plan } = prepare(task, input, profile, lang);
   if (error) return error;
   if (!plan.inline && plan.chars > P.MAX_INPUT_CHARS) {
     return bad('prompt_too_long', `El contenido supera el límite permitido (${P.MAX_INPUT_CHARS} caracteres).`);

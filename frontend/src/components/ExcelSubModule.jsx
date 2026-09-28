@@ -2,16 +2,16 @@ import { useState, useRef, useMemo } from 'react';
 import { UploadCloud, FileText, X, Loader2, AlertTriangle, Sparkles, GitCompareArrows, History } from 'lucide-react';
 import { Link } from 'react-router-dom';
 import {
-  BarChart, Bar, LineChart, Line, PieChart, Pie, Cell,
+  BarChart, Bar, LineChart, Line,
   XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, Legend
 } from 'recharts';
 import { aiApi } from '../middleware/api';
-import { readDataFile, detectColumns, sumByLabel } from '../middleware/fileReaders';
+import { readDataFile, detectColumns, sumByLabel, detectQuickView, quickViewData } from '../middleware/fileReaders';
 import { fileErrorMessage } from '../middleware/fileErrors';
 import { apiErrorMessage } from '../middleware/errors';
 import { useLang } from '../context/LangContext';
 import { useToast } from '../context/ToastContext';
-import { localeOf } from '../utils/dates';
+import { eur, num, isoDate } from '../utils/money';
 import PageHeader from './PageHeader';
 import ReportView from './ReportView';
 import ExportMenu from './ExportMenu';
@@ -23,8 +23,6 @@ const MAX_EXTRACTED_CHARS = 30000;
 // El backend calcula las cifras exactas sobre todas estas filas y la IA ve solo una muestra.
 const ROWS_TO_AI = 5000;
 
-const CHART_COLORS = ['#3B82F6', '#22C55E', '#F59E0B', '#EF4444', '#8B5CF6', '#EC4899'];
-
 /**
  * Módulo genérico de análisis Excel — los 6 subapartados (sección 20).
  *
@@ -35,8 +33,12 @@ const CHART_COLORS = ['#3B82F6', '#22C55E', '#F59E0B', '#EF4444', '#8B5CF6', '#E
  *  - C3: "Comparar dos periodos" — dos juegos de archivos (A y B), variación
  *    REAL calculada aquí (totales y por etiqueta) que se pasa a la IA para
  *    que la explique. Vuelve el KPI "Variación" con datos de verdad.
+ *
+ * Sesión 6: la "Vista rápida" es una serie temporal (importe por fecha) con
+ * suma y media del importe; de un saldo se usa el último valor, nunca la
+ * suma. Si no hay columna de fecha y de importe, no se muestra.
  */
-export default function ExcelSubModule({ moduleId, chartType = 'bar' }) {
+export default function ExcelSubModule({ moduleId }) {
   const { t, lang } = useLang();
   const title = t(`excelModules.${moduleId}.title`);
   const description = t(`excelModules.${moduleId}.description`);
@@ -55,7 +57,7 @@ export default function ExcelSubModule({ moduleId, chartType = 'bar' }) {
   const labelB = setB.label.trim() || t('excel.periodB');
 
   const stats = useMemo(() => (compare ? compareStats(setA.files, setB.files) : null), [compare, setA.files, setB.files]);
-  const single = useMemo(() => (!compare ? singleChart(setA.files) : null), [compare, setA.files]);
+  const single = useMemo(() => (!compare ? buildView(quickView(setA.files), t, lang) : null), [compare, setA.files, t, lang]);
 
   const payloadFiles = (files) => files.map(f => (f.type === 'excel'
     ? { name: f.name, rows: f.rows.slice(0, ROWS_TO_AI), total_rows: f.rows.length }
@@ -87,7 +89,9 @@ export default function ExcelSubModule({ moduleId, chartType = 'bar' }) {
     }
   };
 
-  const nf = (n) => (Number(n) || 0).toLocaleString(localeOf(lang), { maximumFractionDigits: 2 });
+  const nf = (n) => num(n, lang);
+  const money = (n) => eur(n, lang);
+  const dateLabel = (d) => (d.length === 7 ? isoDate(`${d}-01`, lang, { month: 'short', year: 'numeric' }) : isoDate(d, lang, { day: 'numeric', month: 'short' }));
   const allFiles = [...setA.files, ...setB.files];
 
   return (
@@ -127,18 +131,34 @@ export default function ExcelSubModule({ moduleId, chartType = 'bar' }) {
         </button>
       </Panel>
 
-      {/* KPIs + gráfica: solo datos DERIVADOS de los archivos */}
-      {single?.data.length > 0 && (
+      {/* Vista rápida: solo datos DERIVADOS de los archivos (serie temporal) */}
+      {single && (
         <Panel label={t('excel.chartTitle')}>
-          <div className="grid grid-cols-3 gap-2 sm:gap-3 mb-4">
-            <MiniKpi label={t('excel.kpiTotal')} value={nf(single.total)} />
-            <MiniKpi label={t('excel.kpiRows')} value={nf(single.rows)} />
-            <MiniKpi label={t('excel.kpiMax')} value={nf(single.max.value)} hint={single.max.name} />
+          <div className="grid grid-cols-2 sm:grid-cols-3 gap-2 sm:gap-3 mb-4">
+            {single.kpis.map(k => <MiniKpi key={k.label} label={k.label} value={k.value} hint={k.hint} />)}
           </div>
           <div className="h-[240px] sm:h-[280px]">
-            <ResponsiveContainer width="100%" height="100%">{renderChart(chartType, single.data)}</ResponsiveContainer>
+            <ResponsiveContainer width="100%" height="100%">
+              {single.line ? (
+                <LineChart data={single.data.series}>
+                  <CartesianGrid strokeDasharray="3 3" stroke="var(--border)" />
+                  <XAxis dataKey="date" tickFormatter={dateLabel} tick={{ fontSize: 11, fill: 'var(--text-muted)' }} minTickGap={16} />
+                  <YAxis tickFormatter={(v) => eur(v, lang, { decimals: 0 })} width={80} tick={{ fontSize: 11, fill: 'var(--text-muted)' }} />
+                  <Tooltip {...TOOLTIP_STYLE} cursor={{ stroke: 'var(--border-strong)' }} labelFormatter={dateLabel} formatter={(v) => [money(v), single.seriesName]} />
+                  <Line type="stepAfter" dataKey="balance" stroke="#3B82F6" strokeWidth={2} dot={false} connectNulls />
+                </LineChart>
+              ) : (
+                <BarChart data={single.data.series}>
+                  <CartesianGrid strokeDasharray="3 3" stroke="var(--border)" />
+                  <XAxis dataKey="date" tickFormatter={dateLabel} tick={{ fontSize: 11, fill: 'var(--text-muted)' }} minTickGap={16} />
+                  <YAxis tickFormatter={(v) => eur(v, lang, { decimals: 0 })} width={80} tick={{ fontSize: 11, fill: 'var(--text-muted)' }} />
+                  <Tooltip {...TOOLTIP_STYLE} labelFormatter={dateLabel} formatter={(v) => [money(v), single.seriesName]} />
+                  <Bar dataKey="amount" fill="#3B82F6" radius={[4, 4, 0, 0]} />
+                </BarChart>
+              )}
+            </ResponsiveContainer>
           </div>
-          <p className="text-xs mt-2" style={{ color: 'var(--text-muted)' }}>{t('excel.chartHint')}</p>
+          <p className="text-xs mt-2" style={{ color: 'var(--text-muted)' }}>{single.hint}</p>
         </Panel>
       )}
 
@@ -155,8 +175,8 @@ export default function ExcelSubModule({ moduleId, chartType = 'bar' }) {
               <BarChart data={stats.chart}>
                 <CartesianGrid strokeDasharray="3 3" stroke="var(--border)" />
                 <XAxis dataKey="name" tick={{ fontSize: 11, fill: 'var(--text-muted)' }} />
-                <YAxis tick={{ fontSize: 11, fill: 'var(--text-muted)' }} />
-                <Tooltip {...TOOLTIP_STYLE} />
+                <YAxis tickFormatter={(v) => nf(v)} width={70} tick={{ fontSize: 11, fill: 'var(--text-muted)' }} />
+                <Tooltip {...TOOLTIP_STYLE} formatter={(v, name) => [nf(v), name]} />
                 <Legend wrapperStyle={{ fontSize: 12 }} />
                 <Bar dataKey="a" name={labelA} fill="#94A3B8" radius={[4, 4, 0, 0]} />
                 <Bar dataKey="b" name={labelB} fill="#3B82F6" radius={[4, 4, 0, 0]} />
@@ -272,7 +292,7 @@ function FileSet({ set, onChange, placeholder, labelHint, compact }) {
               style={{ background: 'var(--surface-2)', color: 'var(--text-primary)', border: '1px solid var(--border)' }}>
               <FileText size={13} className="shrink-0" style={{ color: 'var(--accent-text)' }} />
               <span className="truncate">{f.name}</span>
-              {f.type === 'excel' && <span className="shrink-0" style={{ color: 'var(--text-muted)' }}>{f.rows.length.toLocaleString(localeOf(lang))} {t('excel.rowsShort')}</span>}
+              {f.type === 'excel' && <span className="shrink-0" style={{ color: 'var(--text-muted)' }}>{num(f.rows.length, lang, 0)} {t('excel.rowsShort')}</span>}
               <button onClick={() => onChange(s => ({ ...s, files: s.files.filter((_, j) => j !== i) }))} aria-label={t('excel.removeFile')}
                 className="shrink-0 rounded-md p-1.5 hover:bg-[var(--surface-1)]" style={{ color: 'var(--text-muted)' }}><X size={13} /></button>
             </div>
@@ -306,17 +326,40 @@ function excelRows(files) {
   return files.filter(f => f.type === 'excel').flatMap(f => f.rows);
 }
 
-function singleChart(files) {
+/** Vista rápida: columnas de fecha e importe detectadas; si no hay, null (se oculta). */
+function quickView(files) {
   const rows = excelRows(files);
-  if (!rows.length) return { data: [] };
-  const { labelKey, numberKey } = detectColumns(rows);
-  if (!numberKey) return { data: [] };
-  const sums = sumByLabel(rows, labelKey, numberKey);
-  const all = [...sums.entries()].map(([name, value]) => ({ name: String(name).slice(0, 18), value }));
-  const data = all.slice(0, 12);
-  const total = all.reduce((s, d) => s + d.value, 0);
-  const max = all.reduce((m, d) => (d.value > m.value ? d : m), all[0] || { value: 0, name: '' });
-  return { data, total, rows: rows.length, max };
+  const cols = detectQuickView(rows);
+  if (!cols) return null;
+  const data = quickViewData(rows, cols);
+  if (!data || data.series.length < 2) return null;
+  return { cols, data };
+}
+
+/** KPIs, tipo de gráfica y textos de la vista rápida. */
+function buildView(qv, t, lang) {
+  if (!qv) return null;
+  const { cols, data } = qv;
+  const money = (v) => eur(v, lang);
+  const day = (d) => (d.length === 7 ? isoDate(`${d}-01`, lang, { month: 'long', year: 'numeric' }) : isoDate(d, lang));
+  const kpis = [];
+  if (cols.inKey) {
+    kpis.push({ label: t('excel.kpiIn'), value: money(data.totalIn), hint: `«${cols.inKey}»` });
+    kpis.push({ label: t('excel.kpiOut'), value: money(data.totalOut), hint: `«${cols.outKey}»` });
+  } else if (cols.amountKey && data.hasAmount) {
+    kpis.push({ label: t('excel.kpiTotal'), value: money(data.total), hint: `«${cols.amountKey}»` });
+    kpis.push({ label: t('excel.kpiAverage'), value: money(data.average) });
+  }
+  if (data.balanceEnd != null) {
+    kpis.push({ label: t('excel.kpiBalanceEnd'), value: money(data.balanceEnd), hint: day(data.to) });
+    if (kpis.length < 3) kpis.push({ label: t('excel.kpiBalanceMin'), value: money(data.balanceMin.balance), hint: day(data.balanceMin.date) });
+  }
+  const line = data.balanceEnd != null;
+  const hint = t('excel.qvHint')
+    .replace('{period}', t(data.byMonth ? 'excel.periodMonth' : 'excel.periodDay'))
+    .replace('{date}', cols.dateKey).replace('{from}', day(data.from)).replace('{to}', day(data.to))
+    + (line ? ` ${t('excel.qvBalanceNote')}` : '');
+  return { data, kpis, line, hint, seriesName: line ? cols.balanceKey : (cols.amountKey || t('excel.qvNet')) };
 }
 
 /** C3 — variaciones reales entre dos periodos (totales y por etiqueta). */
@@ -358,39 +401,6 @@ const TOOLTIP_STYLE = {
   itemStyle: { color: 'var(--text-primary)' },
   cursor: { fill: 'var(--surface-2)' }
 };
-
-function renderChart(type, data) {
-  if (type === 'line') {
-    return (
-      <LineChart data={data}>
-        <CartesianGrid strokeDasharray="3 3" stroke="var(--border)" />
-        <XAxis dataKey="name" tick={{ fontSize: 11, fill: 'var(--text-muted)' }} />
-        <YAxis tick={{ fontSize: 11, fill: 'var(--text-muted)' }} />
-        <Tooltip {...TOOLTIP_STYLE} cursor={{ stroke: 'var(--border-strong)' }} />
-        <Line type="monotone" dataKey="value" stroke="#3B82F6" strokeWidth={2} />
-      </LineChart>
-    );
-  }
-  if (type === 'pie') {
-    return (
-      <PieChart>
-        <Pie data={data} dataKey="value" nameKey="name" cx="50%" cy="50%" outerRadius={90} label>
-          {data.map((_, i) => <Cell key={i} fill={CHART_COLORS[i % CHART_COLORS.length]} />)}
-        </Pie>
-        <Tooltip {...TOOLTIP_STYLE} /><Legend wrapperStyle={{ fontSize: 12 }} />
-      </PieChart>
-    );
-  }
-  return (
-    <BarChart data={data}>
-      <CartesianGrid strokeDasharray="3 3" stroke="var(--border)" />
-      <XAxis dataKey="name" tick={{ fontSize: 11, fill: 'var(--text-muted)' }} />
-      <YAxis tick={{ fontSize: 11, fill: 'var(--text-muted)' }} />
-      <Tooltip {...TOOLTIP_STYLE} />
-      <Bar dataKey="value" fill="#3B82F6" radius={[4, 4, 0, 0]} />
-    </BarChart>
-  );
-}
 
 function Panel({ label, aside, children }) {
   return (

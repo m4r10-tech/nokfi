@@ -25,15 +25,44 @@ function decodeCsv(buffer) {
   catch { return new TextDecoder('windows-1252').decode(buffer); }
 }
 
+/** Date de SheetJS (medianoche local, a veces con segundos de desfase) → 'YYYY-MM-DD'. */
+function dateToIso(d) {
+  const r = new Date(d.getTime() + 60000); // absorbe el desfase de segundos de SheetJS
+  return `${r.getFullYear()}-${String(r.getMonth() + 1).padStart(2, '0')}-${String(r.getDate()).padStart(2, '0')}`;
+}
+
+/**
+ * Celda de CSV (texto) → valor. SheetJS, al interpretar un CSV, convierte
+ * "2026-07-20" en el número de serie 46223 y "1.100,50" en 1,1005; por eso
+ * los CSV se leen como texto (raw) y aquí se interpretan: las fechas
+ * "dd/mm/aaaa" pasan a ISO y los importes a número con parseAmount.
+ */
+function csvCell(v) {
+  const s = String(v ?? '').trim();
+  if (!s) return '';
+  if (/^\d{4}-\d{2}-\d{2}/.test(s)) return s.slice(0, 10);
+  const d = s.match(/^(\d{1,2})[/.-](\d{1,2})[/.-](\d{4})$/);
+  if (d) return `${d[3]}-${d[2].padStart(2, '0')}-${d[1].padStart(2, '0')}`;
+  if (/^[-+(]?[\d.,\s]+\)?\s*€?$/.test(s) && /\d/.test(s)) {
+    const n = parseAmount(s.replace(/^\((.*)\)$/, '-$1'));
+    if (Number.isFinite(n)) return n;
+  }
+  return s;
+}
+
 export async function readTabular(file) {
   try {
     const XLSX = await import('xlsx');
     const buffer = await file.arrayBuffer();
-    const wb = extOf(file.name) === '.csv'
-      ? XLSX.read(decodeCsv(buffer), { type: 'string' })
-      : XLSX.read(buffer, { type: 'array' });
-    const sheet = wb.Sheets[wb.SheetNames[0]];
-    return XLSX.utils.sheet_to_json(sheet, { defval: '' });
+    if (extOf(file.name) === '.csv') {
+      const wb = XLSX.read(decodeCsv(buffer), { type: 'string', raw: true });
+      const rows = XLSX.utils.sheet_to_json(wb.Sheets[wb.SheetNames[0]], { defval: '', raw: true });
+      return rows.map(r => Object.fromEntries(Object.entries(r).map(([k, v]) => [k, csvCell(v)])));
+    }
+    // Excel/ODS: las celdas con formato de fecha llegan como Date → ISO.
+    const wb = XLSX.read(buffer, { type: 'array', cellDates: true });
+    const rows = XLSX.utils.sheet_to_json(wb.Sheets[wb.SheetNames[0]], { defval: '' });
+    return rows.map(r => Object.fromEntries(Object.entries(r).map(([k, v]) => [k, v instanceof Date && !isNaN(v) ? dateToIso(v) : v])));
   } catch {
     throw new FileReadError('ERR_XLSX_READ', file.name);
   }
@@ -117,6 +146,7 @@ export function parseAmount(v) {
   let s = String(v ?? '').replace(/[€$\s]/g, '').trim();
   if (!s) return NaN;
   if (/,\d{1,2}$/.test(s)) s = s.replace(/\./g, '').replace(',', '.');
+  else if (/^-?\d{1,3}(\.\d{3})+$/.test(s)) s = s.replace(/\./g, ''); // "1.100" = mil cien
   else s = s.replace(/,/g, '');
   const n = Number(s);
   return Number.isFinite(n) ? n : NaN;
@@ -153,4 +183,70 @@ export function sumByLabel(rows, labelKey, numberKey) {
     map.set(label, (map.get(label) || 0) + n);
   }
   return map;
+}
+
+/* ── Vista rápida del Excel (sesión 6) ──
+ * Solo se pinta si hay una columna de FECHA y una de IMPORTE. Nunca se suma
+ * un saldo acumulado: de un saldo se usa el último valor de cada fecha.
+ * Con columnas de entrada y salida se usa el neto (entrada − salida).
+ */
+const DATE_HEADER = /fecha|date|data|datum|d[ií]a|jour|giorno|tag|dzie/i;
+const BALANCE_COL = /saldo|balance|acumulado|solde|kontostand|stan konta/i;
+const IN_COL = /entrada|ingreso|cobro|haber|abono|income|inflow|credit|recette|entrata|einnahme|wp[łl]yw|przych/i;
+const OUT_COL = /salida|gasto|pago|debe|cargo|expense|outflow|debit|d[ée]pense|uscita|ausgabe|wydat|rozch/i;
+const ISO_DAY = /^\d{4}-\d{2}-\d{2}$/;
+
+export function detectQuickView(rows) {
+  if (!rows?.length) return null;
+  const keys = Object.keys(rows[0]);
+  const sample = rows.slice(0, 50);
+  const filled = (k) => sample.filter(r => r[k] !== '' && r[k] != null);
+  const dateKey = keys.find(k => { const v = filled(k); return v.length && v.filter(r => ISO_DAY.test(String(r[k]))).length >= v.length * 0.8; })
+    || null;
+  if (!dateKey) return null;
+  const isNum = (k) => { const v = filled(k); return v.length > 0 && v.every(r => Number.isFinite(parseAmount(r[k]))); };
+  const numeric = keys.filter(k => k !== dateKey && isNum(k) && !DATE_HEADER.test(k));
+  const money = numeric.filter(k => MONEY_COL.test(k) || IN_COL.test(k) || OUT_COL.test(k));
+  const balanceKey = money.find(k => BALANCE_COL.test(k)) || null;
+  const flows = money.filter(k => k !== balanceKey);
+  const inKey = flows.find(k => IN_COL.test(k)), outKey = flows.find(k => OUT_COL.test(k) && k !== inKey);
+  const amountKey = inKey && outKey ? null : (flows.find(k => /importe|total|amount|betrag|importo|kwota|montant/i.test(k)) || flows[0] || null);
+  if (!amountKey && !(inKey && outKey) && !balanceKey) return null;
+  return { dateKey, amountKey, inKey: inKey && outKey ? inKey : null, outKey: inKey && outKey ? outKey : null, balanceKey };
+}
+
+/** Serie por fecha (día, o mes si hay muchos días) + KPIs. */
+export function quickViewData(rows, cols) {
+  const val = (r, k) => { const n = parseAmount(r[k]); return Number.isFinite(n) ? n : null; };
+  const amountOf = (r) => (cols.inKey ? (val(r, cols.inKey) || 0) - Math.abs(val(r, cols.outKey) || 0) : cols.amountKey ? val(r, cols.amountKey) : null);
+  const dated = rows.filter(r => ISO_DAY.test(String(r[cols.dateKey])));
+  if (!dated.length) return null;
+  const days = new Set(dated.map(r => r[cols.dateKey]));
+  const byMonth = days.size > 60;
+  const bucketOf = (r) => (byMonth ? String(r[cols.dateKey]).slice(0, 7) : r[cols.dateKey]);
+  const buckets = new Map();
+  const amounts = [];
+  let totalIn = 0, totalOut = 0;
+  for (const r of dated) {
+    if (cols.inKey) { totalIn += val(r, cols.inKey) || 0; totalOut += Math.abs(val(r, cols.outKey) || 0); }
+    const b = bucketOf(r);
+    const o = buckets.get(b) || { date: b, amount: 0, balance: null };
+    const a = amountOf(r);
+    if (a !== null) { o.amount += a; amounts.push(a); }
+    if (cols.balanceKey) { const s = val(r, cols.balanceKey); if (s !== null) o.balance = s; } // último valor de la fecha
+    buckets.set(b, o);
+  }
+  const series = [...buckets.values()].sort((a, b) => a.date.localeCompare(b.date)).map(o => ({ ...o, amount: Math.round(o.amount * 100) / 100 }));
+  const total = amounts.reduce((s, x) => s + x, 0);
+  const balances = series.filter(s => s.balance !== null);
+  return {
+    series, byMonth,
+    hasAmount: amounts.length > 0,
+    total: Math.round(total * 100) / 100,
+    totalIn: Math.round(totalIn * 100) / 100, totalOut: Math.round(totalOut * 100) / 100,
+    average: amounts.length ? Math.round((total / amounts.length) * 100) / 100 : null,
+    balanceEnd: balances.length ? balances[balances.length - 1].balance : null,
+    balanceMin: balances.length ? balances.reduce((m, s) => (s.balance < m.balance ? s : m)) : null,
+    from: series[0].date, to: series[series.length - 1].date
+  };
 }

@@ -124,6 +124,9 @@ const REPORT_SCHEMA = {
 const clean = (v, max = 600) => String(v ?? '').replace(/<[^>]*>/g, '').replace(/\s+/g, ' ').trim().slice(0, max);
 const arr = (v) => (Array.isArray(v) ? v : []);
 
+// "Número de filas", "Filas analizadas", "Rows"…: no es una cifra del negocio.
+const ROW_COUNT = /\b(n[úu]mero de |total de )?(filas|registros|rows|lignes|righe|zeilen|wiersz[ey]?)\b/i;
+
 /** Valida y acota el JSON de la IA: nunca se confía en su forma. */
 function normalizeReport(raw) {
   const r = raw && typeof raw === 'object' ? raw : {};
@@ -131,7 +134,7 @@ function normalizeReport(raw) {
     summary: clean(r.summary, 1200),
     key_figures: arr(r.key_figures).slice(0, 8)
       .map(k => ({ label: clean(k?.label, 80), value: clean(k?.value, 60), note: clean(k?.note, 200) }))
-      .filter(k => k.label && k.value),
+      .filter(k => k.label && k.value && !ROW_COUNT.test(k.label)),
     strengths: arr(r.strengths).slice(0, 6).map(s => clean(s, 300)).filter(Boolean),
     priorities: arr(r.priorities).slice(0, 8)
       .map(p => ({
@@ -145,7 +148,7 @@ function normalizeReport(raw) {
       .filter(a => a.title),
     glossary: arr(r.glossary).slice(0, 8)
       .map(g => ({ term: clean(g?.term, 60), definition: clean(g?.definition, 400) }))
-      .filter(g => g.term && g.definition)
+      .filter(g => g.term && g.definition && !ROW_COUNT.test(g.term))
   };
   const order = { high: 0, medium: 1, low: 2 };
   report.priorities.sort((a, b) => order[a.severity] - order[b.severity]);
@@ -209,7 +212,7 @@ const EXCEL_MODULES = {
   total: 'Calcula y analiza el beneficio total tras impuestos y gastos a partir de los ingresos y gastos: márgenes y partidas que más pesan.'
 };
 
-const { tableStats } = require('../../utils/tableStats');
+const { tableStats, formatStats, normalizeRows } = require('../../utils/tableStats');
 
 const MAX_ROWS_PER_FILE = 80;     // muestra de filas que ve la IA
 const MAX_STATS_ROWS = 5000;      // filas sobre las que Nokfi calcula las cifras exactas
@@ -217,14 +220,14 @@ const MAX_STATS_CHARS = 9000;
 const MAX_TEXT_PER_FILE = 30000;
 const MAX_INPUT_CHARS = 50000;
 
-function sanitizeFiles(files, maxFiles = 3) {
+function sanitizeFiles(files, maxFiles = 3, lang = 'es') {
   return arr(files).slice(0, maxFiles).map(f => {
     const name = clean(f?.name, 120) || 'archivo';
     if (Array.isArray(f?.rows)) {
-      const all = f.rows.slice(0, MAX_STATS_ROWS).map(r => (r && typeof r === 'object' ? r : {}));
+      const all = normalizeRows(f.rows.slice(0, MAX_STATS_ROWS).map(r => (r && typeof r === 'object' ? r : {})));
       const rows = all.slice(0, MAX_ROWS_PER_FILE);
       let stats = null;
-      try { stats = tableStats(all); } catch { stats = null; }
+      try { stats = formatStats(tableStats(all), normLang(lang)); } catch { stats = null; }
       return {
         name, kind: 'rows', total: Number(f.total_rows) || f.rows.length, sample: rows.length, statsRows: all.length,
         content: JSON.stringify(rows), stats: stats ? JSON.stringify(stats).slice(0, MAX_STATS_CHARS) : null
@@ -252,11 +255,17 @@ Contexto añadido por el usuario: ${clean(context, 1000) || 'ninguno'}
 DATOS:
 ${filesBlock(files)}
 
-REGLA DE CIFRAS: todas las cifras del informe (totales, márgenes, pesos, rankings, meses) deben salir TAL CUAL de las "CIFRAS EXACTAS" de cada archivo. No sumes, no multipliques ni calcules porcentajes nuevos tú: si una cifra no está calculada, descríbela sin número. Redondea como máximo a 1 decimal.
+${FIGURE_RULES}
 
 Devuelve el informe: resumen, cifras clave (de las CIFRAS EXACTAS), puntos fuertes, prioridades con gravedad (alertas y riesgos), plan de acción concreto y glosario.`;
   return { text, chars: text.length };
 }
+
+// Reglas comunes de cifras y fechas para los análisis de tablas.
+const FIGURE_RULES = `REGLA DE CIFRAS: todas las cifras del informe (totales, márgenes, pesos, rankings, meses) deben salir TAL CUAL de las "CIFRAS EXACTAS" de cada archivo, que ya vienen formateadas (separador de miles, decimales y "€"): cópialas exactamente como están, sin reescribirlas como "2301.58". No sumes, no multipliques ni calcules porcentajes nuevos tú: si una cifra no está calculada, descríbela sin número.
+Una columna de saldo es un acumulado: usa su saldo final, inicial, mínimo o máximo, nunca una suma.
+El número de filas del archivo NO es una cifra del negocio: no lo pongas en las cifras clave ni en el glosario.
+FECHAS: escríbelas siempre como fecha legible (p. ej. "20 de julio de 2026" o "julio de 2026"), nunca como número (p. ej. 46223) ni en formato técnico.`;
 
 /* ── C3: comparar dos periodos ── */
 function buildCompare({ module, context, periodA, periodB, stats }) {
@@ -273,6 +282,8 @@ ${filesBlock(periodA.files)}
 
 DATOS — Periodo B (${clean(periodB.label, 60) || 'B'}):
 ${filesBlock(periodB.files)}
+
+${FIGURE_RULES}
 
 Devuelve el informe: resumen de qué ha cambiado de A a B, cifras clave con la variación (usa las calculadas), prioridades (qué empeora y por qué), plan de acción y glosario.`;
   return { text, chars: text.length };

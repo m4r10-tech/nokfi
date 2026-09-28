@@ -218,8 +218,17 @@ export default {
     maxFiles: '3 fichiers maximum par analyse. Retirez-en un pour en ajouter un autre.',
     removeFile: 'Retirer le fichier',
     chartTitle: 'Aperçu des données', kpiTotal: 'Total', kpiRows: 'Lignes', kpiMax: 'Valeur maximale',
-    chartHint: 'Les 12 premières lignes du dernier Excel importé.',
-    analyzeError: 'L’analyse n’a pas pu être générée.'
+    analyzeError: 'L’analyse n’a pas pu être générée.',
+    kpiAverage: 'Moyenne par mouvement',
+    kpiIn: 'Entrées',
+    kpiOut: 'Sorties',
+    kpiBalanceEnd: 'Solde final',
+    kpiBalanceMin: 'Solde le plus bas',
+    qvNet: 'Net (entrées − sorties)',
+    qvHint: 'Par {period} selon la colonne « {date} », du {from} au {to}.',
+    periodDay: 'jour',
+    periodMonth: 'mois',
+    qvBalanceNote: 'Le solde est un cumul : on montre son évolution, jamais sa somme.'
   },
   history: {
     title: 'Historique',
