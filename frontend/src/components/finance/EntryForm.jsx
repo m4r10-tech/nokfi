@@ -12,7 +12,7 @@ import { todayIso } from '../../utils/money';
 export const CATEGORIES = [
   ['Ventas', 'sales'], ['Servicios profesionales', 'services'], ['Proveedores', 'suppliers'], ['Alquiler', 'rent'],
   ['Suministros', 'utilities'], ['Personal', 'staff'], ['Marketing', 'marketing'], ['Tecnología', 'tech'],
-  ['Transporte', 'transport'], ['Otro', 'other']
+  ['Seguros', 'insurance'], ['Transporte', 'transport'], ['Otro', 'other']
 ];
 export const categoryLabel = (t, value) => {
   const c = CATEGORIES.find(([v]) => v === value);

@@ -12,6 +12,8 @@
  *   GET    /api/finance/receivables        cobros pendientes (V4)
  *   POST   /api/finance/collection-email   { entry_id, tone, lang } borrador de reclamación (IA gratuita)
  *   GET    /api/finance/leaks              fugas (V5)
+ *   POST   /api/finance/leaks/dismiss      { party_key, party_name } "No es una fuga"
+ *   DELETE /api/finance/leaks/dismiss      { party_key } deshacer el descarte
  *   GET    /api/finance/forecast?days&hire&delay&extra   previsión (V3)
  *   GET    /api/finance/calendar?year      plazos fiscales (C4)
  *   GET    /api/dashboard                  resumen para /app/home
@@ -130,7 +132,8 @@ finance.post('/collection-email', requireLicense, async (req, res) => {
   if (!allowMessage(req.license.id)) return res.status(429).json({ error: 'chat_rate_limited' });
   const tone = TONES[req.body?.tone] ? req.body.tone : 'friendly';
   const profile = getCompanyProfile(req.license.id) || {};
-  const days = Math.max(0, Math.round((Date.now() - Date.parse(entry.invoice_date + 'T00:00:00Z')) / 86400000));
+  const pend = receivables([entry]).pending[0];
+  const days = pend ? pend.days_overdue : 0;
   const system = [
     'Redactas emails de reclamación de facturas impagadas para autónomos y pymes. Solo el email, nada más.',
     'Formato EXACTO: primera línea "ASUNTO: <asunto>", una línea en blanco y después el cuerpo en texto plano (sin Markdown). Firma con el nombre de la empresa del remitente.',
@@ -139,8 +142,8 @@ finance.post('/collection-email', requireLicense, async (req, res) => {
   ].join('\n\n');
   const prompt = `Tono: ${TONES[tone]}.
 Cliente: ${entry.party_name || 'cliente'}.
-Factura nº ${entry.invoice_number || '(sin número)'} del ${entry.invoice_date}${entry.due_date ? `, vencida el ${entry.due_date}` : ''}.
-Importe: ${entry.total.toFixed(2)} €. Días desde la emisión: ${days}.
+Factura nº ${entry.invoice_number || '(sin número)'} del ${entry.invoice_date}${pend ? `, con vencimiento el ${pend.effective_due_date}` : ''}.
+Importe: ${entry.total.toFixed(2)} €. ${days > 0 ? `Días desde el vencimiento: ${days}.` : 'Todavía no ha vencido: es un recordatorio previo al vencimiento.'}
 Concepto: ${entry.concept || '—'}.`;
   try {
     const { text } = await freeText({ system, prompt });
@@ -154,7 +157,21 @@ Concepto: ${entry.concept || '—'}.`;
 
 /* ── V5: fugas ── */
 finance.get('/leaks', requireLicense, (req, res) => {
-  res.json(leaks(F.allEntries(req.license.id)));
+  const id = req.license.id;
+  res.json({ ...leaks(F.allEntries(id), undefined, { dismissed: F.dismissedSet(id) }), dismissed: F.listDismissals(id) });
+});
+
+finance.post('/leaks/dismiss', requireLicense, (req, res) => {
+  const key = typeof req.body?.party_key === 'string' ? req.body.party_key.trim() : '';
+  if (!key || key.length > 180) return res.status(400).json({ error: 'invalid_input' });
+  F.addDismissal(req.license.id, key, typeof req.body?.party_name === 'string' ? req.body.party_name : '');
+  res.json({ success: true });
+});
+
+finance.delete('/leaks/dismiss', requireLicense, (req, res) => {
+  const key = typeof req.body?.party_key === 'string' ? req.body.party_key.trim() : '';
+  if (!key) return res.status(400).json({ error: 'invalid_input' });
+  res.json({ success: F.removeDismissal(req.license.id, key) });
 });
 
 /* ── V3: previsión ── */
@@ -169,6 +186,7 @@ finance.get('/forecast', requireLicense, (req, res) => {
     days: Number(req.query.days) || 90,
     threshold: profile.cash_alert_threshold || 0,
     legalForm: profile.legal_form,
+    dismissed: F.dismissedSet(req.license.id),
     scenario: { hire_monthly: req.query.hire, payment_delay_days: req.query.delay, extra_monthly_income: req.query.extra }
   });
   res.json({ ...out, balance_date: profile.cash_balance_date });
@@ -209,12 +227,13 @@ dashboard.get('/', requireLicense, (req, res) => {
   if (entries.length) {
     const tax = taxSummary(entries, { ...cq, legalForm: profile.legal_form, reserve: F.getReserve(id, cq.year, cq.quarter) });
     const rec = receivables(entries);
-    const lk = leaks(entries);
+    const dismissed = F.dismissedSet(id);
+    const lk = leaks(entries, undefined, { dismissed });
     out.taxes = { year: tax.year, quarter: tax.quarter, due_date: tax.due_date, total_estimated: tax.total_estimated, reserved: tax.reserved, missing: tax.missing };
-    out.receivables = { count: rec.pending.length, total: rec.total, overdue_60: rec.overdue_60 };
+    out.receivables = { count: rec.pending.length, total: rec.total, overdue_total: rec.overdue_total, overdue_60: rec.overdue_60 };
     out.leaks = { detected_this_month: lk.detected_this_month, recurring_monthly_total: lk.recurring_monthly_total, alerts: lk.increases.length + lk.duplicates.length };
     if (profile.cash_balance != null) {
-      const fc = forecast({ entries, balance: profile.cash_balance, days: 90, threshold: profile.cash_alert_threshold || 0, legalForm: profile.legal_form });
+      const fc = forecast({ entries, balance: profile.cash_balance, days: 90, threshold: profile.cash_alert_threshold || 0, legalForm: profile.legal_form, dismissed });
       out.forecast = { at30: fc.at30, at90: fc.at90, min: fc.min, first_below: fc.first_below, threshold: fc.threshold };
     }
   }

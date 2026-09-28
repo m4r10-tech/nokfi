@@ -13,6 +13,7 @@
  *   client_errors   C8 — errores técnicos del frontend/backend (sin datos financieros)
  *   reminders_sent  C4 — avisos del calendario fiscal ya enviados (anti-duplicado)
  *   share_links     enlaces de solo lectura para la gestoría (token hasheado)
+ *   leak_dismissals proveedores descartados en Fugas ("No es una fuga", sesión 6)
  *
  * Columnas nuevas:
  *   analyses.result_json / meta_json   F1 — salida estructurada + metadatos (C1)
@@ -130,6 +131,15 @@ function runSession4Schema(db) {
       revoked_at    TEXT    DEFAULT NULL
     );
     CREATE INDEX IF NOT EXISTS idx_share_links_license ON share_links(license_id);
+
+    -- Sesión 6: proveedores que el usuario marca como "No es una fuga".
+    CREATE TABLE IF NOT EXISTS leak_dismissals (
+      license_id  INTEGER NOT NULL REFERENCES licenses(id) ON DELETE CASCADE,
+      party_key   TEXT    NOT NULL,
+      party_name  TEXT    NOT NULL DEFAULT '',
+      created_at  TEXT    NOT NULL DEFAULT (datetime('now')),
+      PRIMARY KEY (license_id, party_key)
+    );
   `);
 
   ensureColumn(db, 'analyses', 'result_json', 'TEXT DEFAULT NULL');

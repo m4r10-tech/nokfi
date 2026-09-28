@@ -20,6 +20,10 @@ import { eur, isoDate } from '../../utils/money';
  *
  * Reclamación automática (opcional): con el email del cliente, Nokfi envía
  * recordatorios fijos a los 7, 30 y 60 días del vencimiento (services/collections.js).
+ *
+ * Sesión 6: los días se cuentan desde el VENCIMIENTO (sin vencimiento, emisión
+ * + 30 días). Una factura que aún no ha vencido dice "Vence en N días", en
+ * gris y sin botón de Reclamar. Sin facturas, solo el estado vacío.
  */
 const LEVEL_TONE = { ok: 'muted', medium: 'warning', high: 'negative', critical: 'negative' };
 
@@ -47,12 +51,19 @@ export default function Receivables() {
   if (failure) return <ErrorState offline={isConnectivityError(failure)} message={apiErrorMessage(t, failure)} onRetry={load} />;
   if (!data) return <div className="grid gap-3"><Skeleton className="h-24" /><Skeleton className="h-48" /></div>;
 
+  if (data.pending.length === 0) {
+    return <EmptyState icon={HandCoins} title={t('finance.receivables.emptyTitle')} description={t('finance.receivables.emptyDesc')} />;
+  }
+
   return (
     <div className="flex flex-col gap-4">
       <div className="grid grid-cols-2 lg:grid-cols-3 gap-2 sm:gap-3">
         <Kpi label={t('finance.receivables.pending')} value={eur(data.total, lang)} hint={t('finance.receivables.invoices', { n: data.pending.length })} />
-        <Kpi label={t('finance.receivables.overdue60')} value={eur(data.overdue_60, lang)} tone={data.overdue_60 > 0 ? 'var(--negative)' : undefined} />
-        <Kpi className="col-span-2 lg:col-span-1" label={t('finance.receivables.avgDays')} value={data.avg_collection_days == null ? '—' : t('finance.days', { n: data.avg_collection_days })} />
+        <Kpi label={t('finance.receivables.overdueTotal')} value={eur(data.overdue_total, lang)} tone={data.overdue_total > 0 ? 'var(--negative)' : undefined}
+          hint={data.overdue_60 > 0 ? t('finance.receivables.overdueOver60').replace('{v}', eur(data.overdue_60, lang)) : data.overdue_total > 0 ? undefined : t('finance.receivables.overdueNone')} />
+        <Kpi className="col-span-2 lg:col-span-1" label={t('finance.receivables.avgDays')}
+          value={data.avg_collection_days == null ? '—' : t('finance.days', { n: data.avg_collection_days })}
+          hint={data.avg_collection_days == null ? t('finance.receivables.avgDaysNone') : undefined} />
       </div>
 
       <label className="card p-4 flex items-start gap-3 cursor-pointer">
@@ -63,40 +74,36 @@ export default function Receivables() {
         </span>
       </label>
 
-      {data.pending.length === 0 ? (
-        <EmptyState icon={HandCoins} title={t('finance.receivables.emptyTitle')} description={t('finance.receivables.emptyDesc')} />
-      ) : (
-        <Section title={t('finance.receivables.listTitle')}>
-          <ul className="flex flex-col -mx-2">
-            {data.pending.map(p => (
-              <li key={p.id} className="flex flex-col sm:flex-row sm:items-center gap-2 sm:gap-3 px-2 py-3" style={{ borderTop: '1px solid var(--border)' }}>
-                <div className="flex-1 min-w-0">
-                  <p className="text-sm font-medium truncate" style={{ color: 'var(--text-primary)' }}>{p.party_name || p.party_nif || '—'}</p>
-                  <p className="text-xs" style={{ color: 'var(--text-muted)' }}>
-                    {p.invoice_number ? `${p.invoice_number} · ` : ''}{isoDate(p.invoice_date, lang)}
-                    {p.client_avg_days != null && ` · ${t('finance.receivables.clientAvg').replace('{n}', p.client_avg_days)}`}
+      <Section title={t('finance.receivables.listTitle')}>
+        <ul className="flex flex-col -mx-2">
+          {data.pending.map(p => (
+            <li key={p.id} className="flex flex-col sm:flex-row sm:items-center gap-2 sm:gap-3 px-2 py-3" style={{ borderTop: '1px solid var(--border)' }}>
+              <div className="flex-1 min-w-0">
+                <p className="text-sm font-medium truncate" style={{ color: 'var(--text-primary)' }}>{p.party_name || p.party_nif || '—'}</p>
+                <p className="text-xs" style={{ color: 'var(--text-muted)' }}>
+                  {p.invoice_number ? `${p.invoice_number} · ` : ''}{isoDate(p.invoice_date, lang)}{p.due_date ? ` → ${isoDate(p.due_date, lang)}` : ''}
+                  {p.client_avg_days != null && ` · ${t('finance.receivables.clientAvg').replace('{n}', p.client_avg_days)}`}
+                </p>
+                {profile.autoCollections && (p.party_email ? (
+                  <p className="text-xs truncate" style={{ color: 'var(--text-muted)' }}>
+                    {p.party_email} · {p.auto_stage ? t('finance.receivables.autoSent', { n: p.auto_stage }) : t('finance.receivables.autoNone')}
                   </p>
-                  {profile.autoCollections && (p.party_email ? (
-                    <p className="text-xs truncate" style={{ color: 'var(--text-muted)' }}>
-                      {p.party_email} · {p.auto_stage ? t('finance.receivables.autoSent', { n: p.auto_stage }) : t('finance.receivables.autoNone')}
-                    </p>
-                  ) : (
-                    <button onClick={() => setAddressFor(p)} className="text-xs inline-flex items-center gap-1 underline" style={{ color: 'var(--warning)' }}>
-                      <AtSign size={12} /> {t('finance.receivables.addEmail')}
-                    </button>
-                  ))}
-                </div>
-                <div className="flex items-center gap-2 flex-wrap">
-                  <Badge tone={LEVEL_TONE[p.level]}>{t('finance.receivables.age', { n: p.days_outstanding })}</Badge>
-                  <span className="text-sm font-semibold tabular" style={{ color: 'var(--text-primary)' }}>{eur(p.total, lang)}</span>
-                  <button onClick={() => setEmailFor(p)} className="btn btn-secondary btn-sm"><Mail size={14} /> {t('finance.receivables.claim')}</button>
-                  <button onClick={() => markCollected(p)} className="btn btn-ghost btn-sm"><Check size={14} /> {t('finance.collected')}</button>
-                </div>
-              </li>
-            ))}
-          </ul>
-        </Section>
-      )}
+                ) : (
+                  <button onClick={() => setAddressFor(p)} className="text-xs inline-flex items-center gap-1 underline" style={{ color: 'var(--warning)' }}>
+                    <AtSign size={12} /> {t('finance.receivables.addEmail')}
+                  </button>
+                ))}
+              </div>
+              <div className="flex items-center gap-2 flex-wrap">
+                <Badge tone={LEVEL_TONE[p.level]}>{dueLabel(t, p)}</Badge>
+                <span className="text-sm font-semibold tabular" style={{ color: 'var(--text-primary)' }}>{eur(p.total, lang)}</span>
+                {p.is_overdue && <button onClick={() => setEmailFor(p)} className="btn btn-secondary btn-sm"><Mail size={14} /> {t('finance.receivables.claim')}</button>}
+                <button onClick={() => markCollected(p)} className="btn btn-ghost btn-sm"><Check size={14} /> {t('finance.collected')}</button>
+              </div>
+            </li>
+          ))}
+        </ul>
+      </Section>
 
       {emailFor && <ClaimEmail item={emailFor} onClose={() => setEmailFor(null)} />}
       {addressFor && <ClientEmail item={addressFor} onClose={() => setAddressFor(null)} onSaved={() => { setAddressFor(null); load(); }} />}
@@ -104,10 +111,15 @@ export default function Receivables() {
   );
 }
 
+function dueLabel(t, p) {
+  if (p.is_overdue) return t('finance.receivables.overdueAge', { n: p.days_overdue });
+  return p.days_to_due === 0 ? t('finance.receivables.dueToday') : t('finance.receivables.dueIn', { n: p.days_to_due });
+}
+
 function ClaimEmail({ item, onClose }) {
   const { t, lang } = useLang();
   const toast = useToast();
-  const [tone, setTone] = useState(item.days_outstanding > 60 ? 'formal' : item.days_outstanding > 30 ? 'firm' : 'friendly');
+  const [tone, setTone] = useState(item.days_overdue > 60 ? 'formal' : item.days_overdue > 30 ? 'firm' : 'friendly');
   const [draft, setDraft] = useState(null);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState(null);

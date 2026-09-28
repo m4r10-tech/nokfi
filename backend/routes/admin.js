@@ -119,9 +119,16 @@ router.get('/stats', (req, res) => {
 /* ──────────────────────────────────────────────────────────
    GET /api/admin/licenses
 ────────────────────────────────────────────────────────── */
+// Nunca se devuelve el hash de la contraseña (ni al admin): solo si tiene una.
+function publicLicense(l) {
+  if (!l) return l;
+  const { password_hash, ...rest } = l;
+  return { ...rest, has_password: !!password_hash };
+}
+
 router.get('/licenses', (req, res) => {
   try {
-    res.json(getAllLicenses());
+    res.json(getAllLicenses().map(publicLicense));
   } catch (e) {
     console.error('[ADMIN LICENSES]', e.message);
     res.status(500).json({ error: 'internal_error' });
@@ -134,7 +141,7 @@ router.get('/licenses', (req, res) => {
 router.get('/licenses/:id', (req, res) => {
   const license = getLicenseById(parseInt(req.params.id, 10));
   if (!license) return res.status(404).json({ error: 'not_found' });
-  res.json(license);
+  res.json(publicLicense(license));
 });
 
 /* ──────────────────────────────────────────────────────────
@@ -184,7 +191,7 @@ router.post('/licenses', async (req, res) => {
       );
     }
 
-    res.status(201).json(license);
+    res.status(201).json(publicLicense(license));
   } catch (e) {
     console.error('[ADMIN CREATE LICENSE]', e.message);
     res.status(500).json({ error: 'internal_error' });
@@ -225,7 +232,7 @@ router.put('/licenses/:id', (req, res) => {
     }
 
     audit('LICENSE_UPDATED', { license_id: id, ip: req.ip, detail: JSON.stringify({ status, plan }) });
-    res.json(updated);
+    res.json(publicLicense(updated));
   } catch (e) {
     console.error('[ADMIN UPDATE LICENSE]', e.message);
     res.status(500).json({ error: 'internal_error' });
@@ -264,7 +271,7 @@ router.post('/licenses/:id/reset-password', (req, res) => {
   try {
     const updated = clearPasswordAndSessions(id);
     audit('PASSWORD_RESET_BY_ADMIN', { license_id: id, ip: req.ip });
-    res.json(updated);
+    res.json(publicLicense(updated));
   } catch (e) {
     console.error('[ADMIN RESET PASSWORD]', e.message);
     res.status(500).json({ error: 'internal_error' });
@@ -293,7 +300,7 @@ router.post('/licenses/:id/set-password', (req, res) => {
     const updated = getLicenseById(id);
     audit('PASSWORD_SET_BY_ADMIN', { license_id: id, ip: req.ip });
     // No reseteamos sesiones: el admin solo está dando acceso inicial, no revocándolo.
-    res.json(updated);
+    res.json(publicLicense(updated));
   } catch (e) {
     console.error('[ADMIN SET PASSWORD]', e.message);
     res.status(500).json({ error: 'internal_error' });

@@ -396,7 +396,7 @@ function FinanceStrip({ dash, t, lang }) {
     { to: '/app/finanzas/impuestos', icon: Landmark, label: t('home.fTaxes').replace('{q}', `${dash.taxes.quarter}T`), value: eur(dash.taxes.total_estimated, lang),
       hint: dash.taxes.missing > 0 ? t('finance.taxes.missing').replace('{v}', eur(dash.taxes.missing, lang)) : t('finance.taxes.covered'), warn: dash.taxes.missing > 0 },
     { to: '/app/finanzas/cobros', icon: HandCoins, label: t('home.fReceivables'), value: eur(dash.receivables.total, lang),
-      hint: dash.receivables.overdue_60 > 0 ? t('home.fOverdue').replace('{v}', eur(dash.receivables.overdue_60, lang)) : t('finance.receivables.invoices', { n: dash.receivables.count }), warn: dash.receivables.overdue_60 > 0 },
+      hint: dash.receivables.overdue_total > 0 ? t('home.fOverdue').replace('{v}', eur(dash.receivables.overdue_total, lang)) : t('finance.receivables.invoices', { n: dash.receivables.count }), warn: dash.receivables.overdue_total > 0 },
     { to: '/app/finanzas/fugas', icon: Droplets, label: t('home.fLeaks'), value: eur(dash.leaks.detected_this_month, lang),
       hint: t('home.fLeaksHint', { n: dash.leaks.alerts }) },
     fc

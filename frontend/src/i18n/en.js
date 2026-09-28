@@ -150,7 +150,7 @@ export default {
     actionsTitle: 'Your action plan', actionsEmpty: 'When you run a diagnosis or an analysis, its recommendations will show up here as tasks.',
     actionsAllDone: 'All done! Run a new analysis to keep improving.',
     financeEmptyTitle: 'Read your invoices with AI', financeEmptyDesc: 'Nokfi will build your ledger and tell you how much to set aside for taxes, who owes you and how your cash will go.',
-    fTaxes: 'Taxes {q}', fReceivables: 'To collect', fOverdue: '{v} over 60 days', fLeaks: 'Leaks this month',
+    fTaxes: 'Taxes {q}', fReceivables: 'To collect', fOverdue: '{v} overdue', fLeaks: 'Leaks this month',
     fLeaksHint: '{n} alerts', fLeaksHint_one: '{n} alert', fForecast: 'Cash in 90 days', fBelow: 'Below threshold on {date}', fForecastOk: 'No cash alerts',
     fForecastSetup: 'Enter your balance to see the forecast',
     nextDeadline: 'Next deadline: forms {m} · {date} · {n} days left', nextDeadline_one: 'Next deadline: forms {m} · {date} · {n} day left'
@@ -506,7 +506,7 @@ export default {
     clientEmail: 'Client email', clientEmailHint: 'client@company.com (for payment reminders)',
     invoiceNumber: 'Invoice no.', concept: 'Description', category: 'Category', base: 'Net', vatRate: 'VAT %', vat: 'VAT',
     irpfRate: 'IRPF %', irpf: 'Withholding', total: 'Total', paidCol: 'Paid/collected',
-    categories: { sales: 'Sales', services: 'Professional services', suppliers: 'Suppliers', rent: 'Rent', utilities: 'Utilities', staff: 'Staff', marketing: 'Marketing', tech: 'Technology', transport: 'Transport', other: 'Other' },
+    categories: { sales: 'Sales', services: 'Professional services', suppliers: 'Suppliers', rent: 'Rent', utilities: 'Utilities', staff: 'Staff', marketing: 'Marketing', tech: 'Technology', transport: 'Transport', other: 'Other', insurance: 'Insurance' },
     addEntry: 'Add manually', editEntry: 'Edit entry', readInvoices: 'Read invoices with AI',
     markCollected: 'Collected', markPaid: 'Paid', collected: 'Collected', paid: 'Paid', pendingCollection: 'To collect', pendingPayment: 'To pay',
     totalMismatch: 'Net + VAT − withholding does not match the total. Please check it.',
@@ -578,23 +578,37 @@ export default {
       legal: 'Approximate estimate under the general regime (Spain). Excludes the equivalence surcharge, modules and Corporate Tax. This is not tax advice.'
     },
     receivables: {
-      pending: 'Pending collection', invoices: '{n} invoices', invoices_one: '{n} invoice', overdue60: 'Over 60 days', avgDays: 'Average collection days',
+      pending: 'Pending collection', invoices: '{n} invoices', invoices_one: '{n} invoice', overdue60: 'Overdue by more than 60 days', avgDays: 'Average collection days',
       listTitle: 'Invoices to collect', age: '{n} days', age_one: '{n} day', clientAvg: 'this client usually pays in {n} days',
       claim: 'Chase', claimTitle: 'Payment reminder · {name}', toneFriendly: 'Friendly', toneFirm: 'Firm', toneFormal: 'Formal',
       writing: 'Writing…', subject: 'Subject', body: 'Message', openMail: 'Open in email',
       reviewNote: 'Check the text before sending it. It is written by the free AI assistant.',
       autoTitle: 'Chase overdue invoices automatically', autoHint: 'Nokfi sends your client a reminder 7 days after the due date (friendly), at 30 (firm) and at 60 (formal), on your behalf and with replies going straight to your email. With no due date, 30 days from issue are assumed. Only invoices with a client email.',
       autoSent: 'Reminder {n} of 3 sent', autoNone: 'No reminders yet', addEmail: 'Add the client email to chase it', addEmailTitle: 'Email for {name}', addEmailNote: 'Reminders are sent with your company name and replies go to your email.',
-      collectedToast: 'Invoice marked as collected', emptyTitle: 'Nobody owes you anything', emptyDesc: 'Here you will see issued invoices you have not collected yet.'
+      collectedToast: 'Invoice marked as collected', emptyTitle: 'Nobody owes you anything', emptyDesc: 'Once you add unpaid issued invoices to the ledger, you will see here how much you are owed, what is overdue, and you can chase it by email.',
+      overdueTotal: 'Overdue',
+      overdueNone: 'No overdue invoices',
+      overdueOver60: '{v} more than 60 days overdue',
+      overdueAge: 'Overdue by {n} days',
+      overdueAge_one: 'Overdue by {n} day',
+      dueIn: 'Due in {n} days',
+      dueIn_one: 'Due tomorrow',
+      dueToday: 'Due today',
+      avgDaysNone: 'Shows up once you mark invoices as collected'
     },
     leaks: {
       counter: 'Nokfi has helped you spot this month', counterNote: 'Only identified amounts (duplicate charges and price rises), not assumed savings.',
-      increases: 'Price rises', increaseLine: '{name}: +{pct}% since {since}', extraPerMonth: '{v} more per month',
+      increases: 'Possible price rises', increaseLine: '{name}: possible {pct}% rise since {since}', extraPerMonth: '{v} more per month',
       duplicates: 'Possible duplicate charges', sameNumber: 'same invoice number', sameAmount: 'same amount within 7 days',
       removeEntry: 'Remove from ledger', confirmRemove: 'Remove this duplicate entry from the ledger?',
       recurring: 'Recurring costs and subscriptions', perMonth: '{v}/month', perYear: '{v}/year', months: 'in {n} different months',
-      recurringHint: 'Check whether you still use everything you pay for each month.',
-      emptyTitle: 'No leaks detected', emptyDesc: 'Once you have a few months of expenses in the ledger, subscriptions, duplicates and price rises will show up here.'
+      recurringHint: 'Only suppliers with the same amount every month or of a subscription type (software, utilities, insurance, rent). Check whether you still use everything you pay for.',
+      emptyTitle: 'No leaks detected', emptyDesc: 'Once you have at least three months of expenses in the ledger, subscriptions, possible duplicate charges and possible price rises will show up here.',
+      baseNote: 'Amounts excluding VAT',
+      dismiss: 'Not a leak',
+      dismissedToast: 'We will stop flagging {name}',
+      dismissedTitle: 'Dismissed suppliers',
+      restore: 'Watch again'
     },
     forecast: {
       startTitle: 'Cash forecast', startDesc: 'Enter how much money you have today in the bank and in cash. With your ledger, Nokfi will work out how your balance will go over the next 90 days.',

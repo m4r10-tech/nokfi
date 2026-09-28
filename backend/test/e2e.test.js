@@ -133,7 +133,7 @@ async function main() {
       if (r.status !== 201) return false;
       licenseKey = r.data.key;
       licenseId = r.data.id;
-      return r.status === 201 && !!r.data.key && !!r.data.password_hash && r.data.plan === 'mini';
+      return r.status === 201 && !!r.data.key && r.data.password_hash === undefined && r.data.has_password === true && r.data.plan === 'mini';
     }
   );
 
@@ -142,11 +142,11 @@ async function main() {
   );
 
   let licenseDetail;
-  await checkAsync('admin GET → ve password_hash',
+  await checkAsync('admin GET → has_password sin exponer el hash',
     get(`/api/admin/licenses/${licenseId}`, 'admin'),
     r => {
       licenseDetail = r.data;
-      return r.status === 200 && !!r.data.password_hash;
+      return r.status === 200 && r.data.has_password === true && r.data.password_hash === undefined;
     }
   );
 
@@ -302,7 +302,7 @@ async function main() {
 
   await checkAsync('admin reset-password → 200',
     post(`/api/admin/licenses/${licenseId}/reset-password`, null, 'admin'),
-    r => r.status === 200 && r.data.password_hash === null
+    r => r.status === 200 && r.data.has_password === false
   );
 
   // sesión revocada tras reset
@@ -335,7 +335,7 @@ async function main() {
   const adminSetPass = 'AdminSetP4ss!';
   await checkAsync('admin set-password → 200',
     post(`/api/admin/licenses/${licenseId}/set-password`, { password: adminSetPass }, 'admin'),
-    r => r.status === 200 && !!r.data.password_hash
+    r => r.status === 200 && r.data.has_password === true
   );
 
   // login con la password seteada por admin
@@ -390,7 +390,7 @@ async function main() {
     post('/api/admin/licenses', { email: 'fresh@nokfi.local', plan: 'basic' }, 'admin'),
     r => {
       if (r.status === 201) freshLicenseKey = r.data.key;
-      return r.status === 201 && r.data.password_hash === null;
+      return r.status === 201 && r.data.has_password === false && r.data.password_hash === undefined;
     }
   );
 

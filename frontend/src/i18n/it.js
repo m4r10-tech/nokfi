@@ -150,7 +150,7 @@ export default {
     actionsTitle: 'Il tuo piano d’azione', actionsEmpty: 'Quando farai una diagnosi o un’analisi, i suoi consigli appariranno qui come attività.',
     actionsAllDone: 'Tutto fatto! Fai una nuova analisi per continuare a migliorare.',
     financeEmptyTitle: 'Leggi le tue fatture con l’IA', financeEmptyDesc: 'Nokfi terrà il tuo registro e ti dirà quanto accantonare per le imposte, chi ti deve soldi e come andrà la tua cassa.',
-    fTaxes: 'Imposte {q}', fReceivables: 'Da incassare', fOverdue: '{v} oltre 60 giorni', fLeaks: 'Perdite questo mese',
+    fTaxes: 'Imposte {q}', fReceivables: 'Da incassare', fOverdue: '{v} scaduti', fLeaks: 'Perdite questo mese',
     fLeaksHint: '{n} avvisi', fLeaksHint_one: '{n} avviso', fForecast: 'Cassa a 90 giorni', fBelow: 'Sotto la soglia il {date}', fForecastOk: 'Nessun avviso di cassa',
     fForecastSetup: 'Inserisci il saldo per vedere la previsione',
     nextDeadline: 'Prossima scadenza: modelli {m} · {date} · mancano {n} giorni', nextDeadline_one: 'Prossima scadenza: modelli {m} · {date} · manca {n} giorno'
@@ -506,7 +506,7 @@ export default {
     clientEmail: 'Email del cliente', clientEmailHint: 'cliente@azienda.com (per i solleciti di pagamento)',
     invoiceNumber: 'N. fattura', concept: 'Descrizione', category: 'Categoria', base: 'Imponibile', vatRate: 'IVA %', vat: 'IVA',
     irpfRate: 'IRPF %', irpf: 'Ritenuta', total: 'Totale', paidCol: 'Pagata/incassata',
-    categories: { sales: 'Vendite', services: 'Servizi professionali', suppliers: 'Fornitori', rent: 'Affitto', utilities: 'Utenze', staff: 'Personale', marketing: 'Marketing', tech: 'Tecnologia', transport: 'Trasporti', other: 'Altro' },
+    categories: { sales: 'Vendite', services: 'Servizi professionali', suppliers: 'Fornitori', rent: 'Affitto', utilities: 'Utenze', staff: 'Personale', marketing: 'Marketing', tech: 'Tecnologia', transport: 'Trasporti', other: 'Altro', insurance: 'Assicurazioni' },
     addEntry: 'Aggiungi a mano', editEntry: 'Modifica registrazione', readInvoices: 'Leggi fatture con l’IA',
     markCollected: 'Incassata', markPaid: 'Pagata', collected: 'Incassata', paid: 'Pagata', pendingCollection: 'Da incassare', pendingPayment: 'Da pagare',
     totalMismatch: 'Imponibile + IVA − ritenuta non corrisponde al totale. Controllalo.',
@@ -578,23 +578,37 @@ export default {
       legal: 'Stima indicativa in regime generale (Spagna). Non include il recargo de equivalencia, i moduli né l’imposta sulle società. Non è consulenza fiscale.'
     },
     receivables: {
-      pending: 'Da incassare', invoices: '{n} fatture', invoices_one: '{n} fattura', overdue60: 'Oltre 60 giorni', avgDays: 'Giorni medi d’incasso',
+      pending: 'Da incassare', invoices: '{n} fatture', invoices_one: '{n} fattura', overdue60: 'Scaduto da oltre 60 giorni', avgDays: 'Giorni medi d’incasso',
       listTitle: 'Fatture da incassare', age: '{n} giorni', age_one: '{n} giorno', clientAvg: 'questo cliente di solito paga in {n} giorni',
       claim: 'Sollecita', claimTitle: 'Email di sollecito · {name}', toneFriendly: 'Cordiale', toneFirm: 'Deciso', toneFormal: 'Formale',
       writing: 'Scrittura in corso…', subject: 'Oggetto', body: 'Messaggio', openMail: 'Apri nella posta',
       reviewNote: 'Rileggi il testo prima di inviarlo. È scritto dall’assistente IA gratuito.',
       autoTitle: 'Sollecita automaticamente le fatture scadute', autoHint: 'Nokfi invia un promemoria al tuo cliente 7 giorni dopo la scadenza (cordiale), a 30 (fermo) e a 60 (formale), a tuo nome e con risposta diretta alla tua email. Senza scadenza si contano 30 giorni dall’emissione. Solo fatture con email del cliente.',
       autoSent: 'Promemoria {n} di 3 inviato', autoNone: 'Ancora nessun promemoria', addEmail: 'Aggiungi l’email del cliente per sollecitare', addEmailTitle: 'Email di {name}', addEmailNote: 'I promemoria partono con il nome della tua azienda e le risposte arrivano alla tua email.',
-      collectedToast: 'Fattura segnata come incassata', emptyTitle: 'Nessuno ti deve nulla', emptyDesc: 'Qui vedrai le fatture emesse che non hai ancora incassato.'
+      collectedToast: 'Fattura segnata come incassata', emptyTitle: 'Nessuno ti deve nulla', emptyDesc: 'Quando aggiungerai al registro fatture emesse non incassate, qui vedrai quanto ti devono, cosa è scaduto e potrai sollecitarlo via email.',
+      overdueTotal: 'Scaduto',
+      overdueNone: 'Nessuna fattura scaduta',
+      overdueOver60: '{v} scaduti da oltre 60 giorni',
+      overdueAge: 'Scaduta da {n} giorni',
+      overdueAge_one: 'Scaduta da {n} giorno',
+      dueIn: 'Scade tra {n} giorni',
+      dueIn_one: 'Scade domani',
+      dueToday: 'Scade oggi',
+      avgDaysNone: 'Comparirà quando segnerai fatture come incassate'
     },
     leaks: {
       counter: 'Nokfi ti ha aiutato a individuare questo mese', counterNote: 'Solo importi identificati (addebiti duplicati e aumenti di prezzo), non risparmi presunti.',
-      increases: 'Aumenti di prezzo', increaseLine: '{name}: +{pct}% da {since}', extraPerMonth: '{v} in più al mese',
+      increases: 'Possibili aumenti di prezzo', increaseLine: '{name}: possibile aumento del {pct}% da {since}', extraPerMonth: '{v} in più al mese',
       duplicates: 'Possibili addebiti duplicati', sameNumber: 'stesso numero di fattura', sameAmount: 'stesso importo in meno di 7 giorni',
       removeEntry: 'Togli dal registro', confirmRemove: 'Togliere questa registrazione duplicata dal registro?',
       recurring: 'Spese ricorrenti e abbonamenti', perMonth: '{v}/mese', perYear: '{v}/anno', months: 'in {n} mesi diversi',
-      recurringHint: 'Controlla se usi ancora tutto ciò che paghi ogni mese.',
-      emptyTitle: 'Nessuna perdita individuata', emptyDesc: 'Quando avrai qualche mese di spese nel registro, qui compariranno abbonamenti, duplicati e aumenti di prezzo.'
+      recurringHint: 'Solo fornitori con lo stesso importo ogni mese o di tipo abbonamento (software, utenze, assicurazioni, affitto). Controlla se usi ancora tutto ciò che paghi.',
+      emptyTitle: 'Nessuna perdita individuata', emptyDesc: 'Quando avrai almeno tre mesi di spese nel registro, qui compariranno abbonamenti, possibili addebiti duplicati e possibili aumenti di prezzo.',
+      baseNote: 'Importi IVA esclusa',
+      dismiss: 'Non è una perdita',
+      dismissedToast: 'Non ti avviseremo più per {name}',
+      dismissedTitle: 'Fornitori esclusi',
+      restore: 'Controlla di nuovo'
     },
     forecast: {
       startTitle: 'Previsione di cassa', startDesc: 'Indica quanti soldi hai oggi in banca e in cassa. Con il tuo registro, Nokfi calcolerà l’andamento del saldo nei prossimi 90 giorni.',

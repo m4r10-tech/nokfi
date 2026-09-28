@@ -79,6 +79,7 @@ me.get('/export', requireLicense, (req, res) => {
     action_items: listActions(l.id, { limit: 10000 }),
     ledger_entries: listLedger(l.id),
     tax_reserves: db.prepare('SELECT year, quarter, amount, updated_at FROM tax_reserves WHERE license_id = ?').all(l.id),
+    leak_dismissals: db.prepare('SELECT party_key, party_name, created_at FROM leak_dismissals WHERE license_id = ?').all(l.id),
     api_keys: listApiKeys(l.id)
   });
 });

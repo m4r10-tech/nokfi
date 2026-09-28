@@ -150,7 +150,7 @@ export default {
     actionsTitle: 'Tu plan de acción', actionsEmpty: 'Cuando hagas un diagnóstico o un análisis, sus recomendaciones aparecerán aquí como tareas.',
     actionsAllDone: '¡Todo hecho! Haz un nuevo análisis para seguir mejorando.',
     financeEmptyTitle: 'Lee tus facturas con IA', financeEmptyDesc: 'Nokfi montará tu libro y te dirá cuánto apartar para Hacienda, quién te debe y cómo irá tu caja.',
-    fTaxes: 'Impuestos {q}', fReceivables: 'Por cobrar', fOverdue: '{v} con más de 60 días', fLeaks: 'Fugas este mes',
+    fTaxes: 'Impuestos {q}', fReceivables: 'Por cobrar', fOverdue: '{v} vencido', fLeaks: 'Fugas este mes',
     fLeaksHint: '{n} alertas', fLeaksHint_one: '{n} alerta', fForecast: 'Caja en 90 días', fBelow: 'Bajas del umbral el {date}', fForecastOk: 'Sin alertas de caja',
     fForecastSetup: 'Indica tu saldo para ver la previsión',
     nextDeadline: 'Próximo plazo: modelos {m} · {date} · faltan {n} días', nextDeadline_one: 'Próximo plazo: modelos {m} · {date} · falta {n} día'
@@ -509,7 +509,7 @@ export default {
     clientEmail: 'Email del cliente', clientEmailHint: 'cliente@empresa.com (para recordatorios de cobro)',
     invoiceNumber: 'Nº factura', concept: 'Concepto', category: 'Categoría', base: 'Base', vatRate: 'IVA %', vat: 'IVA',
     irpfRate: 'IRPF %', irpf: 'Retención', total: 'Total', paidCol: 'Pagada/cobrada',
-    categories: { sales: 'Ventas', services: 'Servicios profesionales', suppliers: 'Proveedores', rent: 'Alquiler', utilities: 'Suministros', staff: 'Personal', marketing: 'Marketing', tech: 'Tecnología', transport: 'Transporte', other: 'Otro' },
+    categories: { sales: 'Ventas', services: 'Servicios profesionales', suppliers: 'Proveedores', rent: 'Alquiler', utilities: 'Suministros', staff: 'Personal', marketing: 'Marketing', tech: 'Tecnología', transport: 'Transporte', other: 'Otro', insurance: 'Seguros' },
     addEntry: 'Añadir a mano', editEntry: 'Editar apunte', readInvoices: 'Leer facturas con IA',
     markCollected: 'Cobrada', markPaid: 'Pagada', collected: 'Cobrada', paid: 'Pagada', pendingCollection: 'Por cobrar', pendingPayment: 'Por pagar',
     totalMismatch: 'Base + IVA − retención no coincide con el total. Revísalo.',
@@ -581,23 +581,37 @@ export default {
       legal: 'Estimación orientativa en régimen general. No incluye recargo de equivalencia, módulos ni el Impuesto sobre Sociedades. No es asesoramiento fiscal.'
     },
     receivables: {
-      pending: 'Pendiente de cobro', invoices: '{n} facturas', invoices_one: '{n} factura', overdue60: 'Más de 60 días', avgDays: 'Días medios de cobro',
+      pending: 'Pendiente de cobro', invoices: '{n} facturas', invoices_one: '{n} factura', overdue60: 'Vencido hace más de 60 días', avgDays: 'Días medios de cobro',
       listTitle: 'Facturas por cobrar', age: '{n} días', age_one: '{n} día', clientAvg: 'este cliente suele pagar en {n} días',
       claim: 'Reclamar', claimTitle: 'Email de reclamación · {name}', toneFriendly: 'Amable', toneFirm: 'Firme', toneFormal: 'Formal',
       writing: 'Redactando…', subject: 'Asunto', body: 'Mensaje', openMail: 'Abrir en el correo',
       reviewNote: 'Revisa el texto antes de enviarlo. Lo redacta el asistente de IA gratuito.',
       autoTitle: 'Reclamar automáticamente las facturas vencidas', autoHint: 'Nokfi envía un recordatorio a tu cliente a los 7 días del vencimiento (amable), a los 30 (firme) y a los 60 (formal), en tu nombre y con respuesta directa a tu email. Si no hay vencimiento, se cuenta 30 días desde la emisión. Solo a facturas con email del cliente.',
       autoSent: 'Recordatorio {n} de 3 enviado', autoNone: 'Aún sin recordatorios', addEmail: 'Añadir email del cliente para reclamar', addEmailTitle: 'Email de {name}', addEmailNote: 'Los recordatorios salen con el nombre de tu empresa y las respuestas llegan a tu email.',
-      collectedToast: 'Factura marcada como cobrada', emptyTitle: 'Nadie te debe nada', emptyDesc: 'Aquí verás las facturas emitidas que aún no has cobrado.'
+      collectedToast: 'Factura marcada como cobrada', emptyTitle: 'Nadie te debe nada', emptyDesc: 'Cuando añadas al libro facturas emitidas sin cobrar, aquí verás cuánto te deben, qué está vencido y podrás reclamarlo con un email.',
+      overdueTotal: 'Vencido',
+      overdueNone: 'Ninguna factura vencida',
+      overdueOver60: '{v} hace más de 60 días',
+      overdueAge: 'Vencida hace {n} días',
+      overdueAge_one: 'Vencida hace {n} día',
+      dueIn: 'Vence en {n} días',
+      dueIn_one: 'Vence mañana',
+      dueToday: 'Vence hoy',
+      avgDaysNone: 'Aparecerá cuando marques facturas como cobradas'
     },
     leaks: {
       counter: 'Nokfi te ha ayudado a detectar este mes', counterNote: 'Solo importes identificados (cargos duplicados y subidas de precio), no ahorros supuestos.',
-      increases: 'Subidas de precio', increaseLine: '{name}: +{pct} % desde {since}', extraPerMonth: '{v} más al mes',
+      increases: 'Posibles subidas de precio', increaseLine: '{name}: posible subida del {pct} % desde {since}', extraPerMonth: '{v} más al mes',
       duplicates: 'Posibles cargos duplicados', sameNumber: 'mismo número de factura', sameAmount: 'mismo importe en menos de 7 días',
       removeEntry: 'Quitar del libro', confirmRemove: '¿Quitar este apunte duplicado del libro?',
       recurring: 'Gastos recurrentes y suscripciones', perMonth: '{v}/mes', perYear: '{v}/año', months: 'en {n} meses distintos',
-      recurringHint: 'Revisa si sigues usando todo lo que pagas cada mes.',
-      emptyTitle: 'Sin fugas detectadas', emptyDesc: 'Cuando tengas unos meses de gastos en el libro, aquí aparecerán suscripciones, duplicados y subidas de precio.'
+      recurringHint: 'Solo proveedores con el mismo importe cada mes o de tipo suscripción (software, suministros, seguros, alquiler). Revisa si sigues usando todo lo que pagas.',
+      emptyTitle: 'Sin fugas detectadas', emptyDesc: 'Cuando tengas al menos tres meses de gastos en el libro, aquí aparecerán las suscripciones, los posibles cargos duplicados y las posibles subidas de precio.',
+      baseNote: 'Importes sin IVA',
+      dismiss: 'No es una fuga',
+      dismissedToast: 'No volveremos a avisarte de {name}',
+      dismissedTitle: 'Proveedores descartados',
+      restore: 'Volver a vigilar'
     },
     forecast: {
       startTitle: 'Previsión de caja', startDesc: 'Indica cuánto dinero tienes hoy en el banco y en caja. Con tu libro, Nokfi calculará cómo irá tu saldo los próximos 90 días.',

@@ -105,20 +105,23 @@ function receivables(entries, refDate = today()) {
   const avgDays = (k) => { const c = byClient.get(k); return c ? Math.round(c.sum / c.n) : null; };
   const pending = incomes.filter(e => !e.paid).map(e => {
     const age = daysBetween(e.invoice_date, refDate);
-    const overdue = e.due_date ? daysBetween(e.due_date, refDate) : age - 30;
+    // Sin vencimiento: emisión + 30 días (igual que el recordatorio automático).
+    const due = e.due_date || addDays(e.invoice_date, 30);
+    const overdue = daysBetween(due, refDate);
     return {
       id: e.id, party_name: e.party_name, party_nif: e.party_nif, party_email: e.party_email || '', invoice_number: e.invoice_number,
-      invoice_date: e.invoice_date, due_date: e.due_date, total: r2(e.total),
-      days_outstanding: age, days_overdue: Math.max(0, overdue),
-      level: age > 90 ? 'critical' : age > 60 ? 'high' : age > 30 ? 'medium' : 'ok',
+      invoice_date: e.invoice_date, due_date: e.due_date, effective_due_date: due, total: r2(e.total),
+      days_outstanding: age, days_overdue: Math.max(0, overdue), days_to_due: Math.max(0, -overdue), is_overdue: overdue > 0,
+      level: overdue > 60 ? 'critical' : overdue > 30 ? 'high' : overdue > 0 ? 'medium' : 'ok',
       client_avg_days: avgDays(partyKey(e))
     };
-  }).sort((a, b) => b.days_outstanding - a.days_outstanding);
+  }).sort((a, b) => (b.days_overdue - a.days_overdue) || (a.days_to_due - b.days_to_due));
   const allPaid = [...byClient.values()].reduce((s, c) => ({ sum: s.sum + c.sum, n: s.n + c.n }), { sum: 0, n: 0 });
   return {
     pending,
     total: r2(pending.reduce((s, p) => s + p.total, 0)),
-    overdue_60: r2(pending.filter(p => p.days_outstanding > 60).reduce((s, p) => s + p.total, 0)),
+    overdue_total: r2(pending.filter(p => p.is_overdue).reduce((s, p) => s + p.total, 0)),
+    overdue_60: r2(pending.filter(p => p.days_overdue > 60).reduce((s, p) => s + p.total, 0)),
     avg_collection_days: allPaid.n ? Math.round(allPaid.sum / allPaid.n) : null
   };
 }
@@ -126,46 +129,82 @@ function receivables(entries, refDate = today()) {
 /* ── V5: fugas ── */
 const monthOf = (d) => String(d).slice(0, 7);
 
-function leaks(entries, refDate = today()) {
+// Categorías de tipo suscripción: su importe puede variar (la luz) y aun así
+// son un gasto que se repite cada mes. Se comparan sin tildes ni mayúsculas.
+const SUBSCRIPTION_CATEGORIES = ['tecnolog', 'software', 'suscrip', 'suministro', 'seguro', 'alquiler'];
+const fold = (s) => String(s || '').normalize('NFD').replace(/[\u0300-\u036f]/g, '').toLowerCase();
+const isSubscriptionCategory = (c) => { const f = fold(c); return !!f && SUBSCRIPTION_CATEGORIES.some(k => f.includes(k)); };
+
+const median = (xs) => { const s = [...xs].sort((a, b) => a - b); const m = s.length >> 1; return s.length % 2 ? s[m] : (s[m - 1] + s[m]) / 2; };
+// ±5 % alrededor de la mediana (tolerancia para redondeos y pequeñas variaciones).
+const STABLE = 0.05;
+const isStable = (xs) => { if (xs.length < 2) return false; const m = median(xs); return m > 0 && xs.every(x => Math.abs(x - m) <= m * STABLE); };
+
+/**
+ * Fugas sobre los gastos del libro, agrupados por proveedor (NIF o nombre).
+ *
+ * - Recurrente: 3+ meses distintos Y (base mensual estable ±5 % O categoría de
+ *   tipo suscripción). Las compras de mercancía o recambios con importes
+ *   variables NO son recurrentes (falso positivo de la sesión 5).
+ * - Posible subida de precio: solo en recurrentes cuya base era estable en los
+ *   meses anteriores y el último mes sube > 5 %. Se comparan BASES (sin IVA).
+ *   Un proveedor sin categoría de suscripción tiene que ser estable en TODOS
+ *   los meses para ser recurrente, así que nunca da "subida".
+ * - Duplicados: mismo nº de factura, o mismo importe en ≤ 7 días.
+ * - `dismissed`: claves de proveedor que el usuario ha marcado como "No es una
+ *   fuga"; se excluyen de todo (también de la previsión).
+ */
+function leaks(entries, refDate = today(), { dismissed = new Set() } = {}) {
   const expenses = entries.filter(e => e.type === 'expense').sort((a, b) => a.invoice_date.localeCompare(b.invoice_date));
   const groups = new Map();
   for (const e of expenses) {
     const k = partyKey(e);
-    if (!k) continue;
+    if (!k || dismissed.has(k)) continue;
     if (!groups.has(k)) groups.set(k, []);
     groups.get(k).push(e);
   }
   const currentMonth = monthOf(refDate);
   const recurring = [], increases = [], duplicates = [];
 
-  for (const list of groups.values()) {
-    const months = new Set(list.map(e => monthOf(e.invoice_date)));
-    const name = list[list.length - 1].party_name || list[list.length - 1].party_nif;
-    if (months.size >= 3) {
-      // Importe mensual = el ÚLTIMO (tras una subida, la mediana se quedaría corta).
-      const last = list[list.length - 1];
-      recurring.push({
-        party_name: name, party_nif: last.party_nif, months: months.size, monthly: r2(last.total),
-        yearly: r2(last.total * 12), last_date: last.invoice_date, category: last.category, day: Number(last.invoice_date.slice(8, 10))
-      });
-      const firstAvg = (list[0].total + list[1].total) / 2;
-      if (firstAvg > 0 && last.total > firstAvg * 1.05) {
-        const prev = list[list.length - 2];
-        increases.push({
-          party_name: name, from: r2(firstAvg), to: r2(last.total), pct: r2(((last.total - firstAvg) / firstAvg) * 100),
-          since: list[0].invoice_date, last_date: last.invoice_date,
-          monthly_extra: r2(last.total - firstAvg), this_month: monthOf(last.invoice_date) === currentMonth, delta_vs_previous: r2(last.total - prev.total)
+  for (const [key, list] of groups) {
+    const last = list[list.length - 1];
+    const name = last.party_name || last.party_nif;
+    // Base por mes (si hay varias facturas en un mes, se suman). Sin base, el total.
+    const byMonth = new Map();
+    for (const e of list) {
+      const m = monthOf(e.invoice_date);
+      byMonth.set(m, (byMonth.get(m) || 0) + (Number(e.base) || Number(e.total) || 0));
+    }
+    const months = [...byMonth.keys()].sort();
+    if (months.length >= 3) {
+      const bases = months.map(m => byMonth.get(m));
+      const prevBases = bases.slice(0, -1);
+      const lastBase = bases[bases.length - 1];
+      const subscription = list.some(e => isSubscriptionCategory(e.category));
+      if (isStable(bases) || subscription) {
+        // Importe mensual = el ÚLTIMO (tras una subida, la mediana se quedaría corta).
+        recurring.push({
+          party_key: key, party_name: name, party_nif: last.party_nif, months: months.length, monthly: r2(last.total),
+          yearly: r2(last.total * 12), last_date: last.invoice_date, category: last.category, day: Number(last.invoice_date.slice(8, 10))
         });
+        const before = median(prevBases);
+        if (isStable(prevBases) && before > 0 && lastBase > before * (1 + STABLE)) {
+          increases.push({
+            party_key: key, party_name: name, from: r2(before), to: r2(lastBase), pct: r2(((lastBase - before) / before) * 100),
+            since: list[0].invoice_date, last_date: last.invoice_date,
+            monthly_extra: r2(lastBase - before), this_month: monthOf(last.invoice_date) === currentMonth,
+            delta_vs_previous: r2(lastBase - prevBases[prevBases.length - 1])
+          });
+        }
       }
     }
-    // Duplicados: mismo nº de factura, o mismo importe en ≤ 7 días.
     for (let i = 1; i < list.length; i++) {
       for (let j = 0; j < i; j++) {
         const a = list[j], b = list[i];
         const sameNumber = a.invoice_number && a.invoice_number === b.invoice_number;
         const sameAmount = Math.abs(a.total - b.total) < 0.01 && Math.abs(daysBetween(a.invoice_date, b.invoice_date)) <= 7;
         if (sameNumber || sameAmount) {
-          duplicates.push({ id: b.id, original_id: a.id, party_name: name, total: r2(b.total), invoice_date: b.invoice_date, invoice_number: b.invoice_number, reason: sameNumber ? 'same_number' : 'same_amount', this_month: monthOf(b.invoice_date) === currentMonth });
+          duplicates.push({ id: b.id, original_id: a.id, party_key: key, party_name: name, total: r2(b.total), invoice_date: b.invoice_date, invoice_number: b.invoice_number, reason: sameNumber ? 'same_number' : 'same_amount', this_month: monthOf(b.invoice_date) === currentMonth });
           break;
         }
       }
@@ -201,7 +240,7 @@ function addDays(isoDate, n) {
  * @param {string} [o.legalForm]
  * @param {object} [o.scenario]      { hire_monthly, payment_delay_days, extra_monthly_income }
  */
-function forecast({ entries, balance, days = 90, threshold = 0, legalForm, scenario = {}, refDate = today() }) {
+function forecast({ entries, balance, days = 90, threshold = 0, legalForm, scenario = {}, refDate = today(), dismissed }) {
   const horizon = Math.min(Math.max(Number(days) || 90, 7), 180);
   const end = addDays(refDate, horizon);
   const flows = []; // { date, amount, kind, label }
@@ -223,7 +262,7 @@ function forecast({ entries, balance, days = 90, threshold = 0, legalForm, scena
     flows.push({ date, amount: -e.total, kind: 'payable', label: e.party_name });
   }
   // Gastos recurrentes (V5), proyectados cada mes el mismo día.
-  const lk = leaks(entries, refDate);
+  const lk = leaks(entries, refDate, { dismissed });
   for (const r of lk.recurring) {
     let d = new Date(refDate + 'T00:00:00Z');
     for (let m = 0; m < 7; m++) {
@@ -278,4 +317,4 @@ function forecast({ entries, balance, days = 90, threshold = 0, legalForm, scena
   };
 }
 
-module.exports = { quarterOf, quarterRange, vatForQuarter, irpf130ForQuarter, taxSummary, receivables, leaks, forecast, addDays, r2 };
+module.exports = { isSubscriptionCategory, quarterOf, quarterRange, vatForQuarter, irpf130ForQuarter, taxSummary, receivables, leaks, forecast, addDays, r2 };

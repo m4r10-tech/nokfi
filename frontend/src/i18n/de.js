@@ -150,7 +150,7 @@ export default {
     actionsTitle: 'Dein Maßnahmenplan', actionsEmpty: 'Wenn du eine Diagnose oder Analyse machst, erscheinen ihre Empfehlungen hier als Aufgaben.',
     actionsAllDone: 'Alles erledigt! Starte eine neue Analyse, um dich weiter zu verbessern.',
     financeEmptyTitle: 'Lies deine Rechnungen mit KI', financeEmptyDesc: 'Nokfi führt dein Journal und sagt dir, wie viel du für Steuern zurücklegen solltest, wer dir Geld schuldet und wie sich deine Liquidität entwickelt.',
-    fTaxes: 'Steuern {q}', fReceivables: 'Offene Forderungen', fOverdue: '{v} über 60 Tage', fLeaks: 'Lecks diesen Monat',
+    fTaxes: 'Steuern {q}', fReceivables: 'Offene Forderungen', fOverdue: '{v} überfällig', fLeaks: 'Lecks diesen Monat',
     fLeaksHint: '{n} Hinweise', fLeaksHint_one: '{n} Hinweis', fForecast: 'Liquidität in 90 Tagen', fBelow: 'Unter der Schwelle am {date}', fForecastOk: 'Keine Liquiditätswarnungen',
     fForecastSetup: 'Kontostand eingeben, um die Prognose zu sehen',
     nextDeadline: 'Nächste Frist: Formulare {m} · {date} · noch {n} Tage', nextDeadline_one: 'Nächste Frist: Formulare {m} · {date} · noch {n} Tag'
@@ -506,7 +506,7 @@ export default {
     clientEmail: 'E-Mail des Kunden', clientEmailHint: 'kunde@firma.de (für Zahlungserinnerungen)',
     invoiceNumber: 'Rechnungsnr.', concept: 'Beschreibung', category: 'Kategorie', base: 'Netto', vatRate: 'USt. %', vat: 'USt.',
     irpfRate: 'IRPF %', irpf: 'Einbehalt', total: 'Gesamt', paidCol: 'Bezahlt/erhalten',
-    categories: { sales: 'Verkauf', services: 'Freiberufliche Leistungen', suppliers: 'Lieferanten', rent: 'Miete', utilities: 'Energie & Nebenkosten', staff: 'Personal', marketing: 'Marketing', tech: 'Technologie', transport: 'Transport', other: 'Sonstiges' },
+    categories: { sales: 'Verkauf', services: 'Freiberufliche Leistungen', suppliers: 'Lieferanten', rent: 'Miete', utilities: 'Energie & Nebenkosten', staff: 'Personal', marketing: 'Marketing', tech: 'Technologie', transport: 'Transport', other: 'Sonstiges', insurance: 'Versicherungen' },
     addEntry: 'Manuell hinzufügen', editEntry: 'Buchung bearbeiten', readInvoices: 'Rechnungen mit KI lesen',
     markCollected: 'Erhalten', markPaid: 'Bezahlt', collected: 'Erhalten', paid: 'Bezahlt', pendingCollection: 'Offen', pendingPayment: 'Zu zahlen',
     totalMismatch: 'Netto + USt. − Einbehalt entspricht nicht dem Gesamtbetrag. Bitte prüfen.',
@@ -578,23 +578,37 @@ export default {
       legal: 'Unverbindliche Schätzung im allgemeinen System (Spanien). Ohne Recargo de equivalencia, Modul-Besteuerung und Körperschaftsteuer. Keine Steuerberatung.'
     },
     receivables: {
-      pending: 'Offene Forderungen', invoices: '{n} Rechnungen', invoices_one: '{n} Rechnung', overdue60: 'Über 60 Tage', avgDays: 'Durchschnittliche Zahlungsdauer',
+      pending: 'Offene Forderungen', invoices: '{n} Rechnungen', invoices_one: '{n} Rechnung', overdue60: 'Seit über 60 Tagen überfällig', avgDays: 'Durchschnittliche Zahlungsdauer',
       listTitle: 'Offene Rechnungen', age: '{n} Tage', age_one: '{n} Tag', clientAvg: 'dieser Kunde zahlt meist nach {n} Tagen',
       claim: 'Mahnen', claimTitle: 'Zahlungserinnerung · {name}', toneFriendly: 'Freundlich', toneFirm: 'Bestimmt', toneFormal: 'Formell',
       writing: 'Wird verfasst…', subject: 'Betreff', body: 'Nachricht', openMail: 'Im E-Mail-Programm öffnen',
       reviewNote: 'Prüfe den Text vor dem Senden. Er stammt vom kostenlosen KI-Assistenten.',
       autoTitle: 'Überfällige Rechnungen automatisch anmahnen', autoHint: 'Nokfi schickt deinem Kunden 7 Tage nach Fälligkeit eine Erinnerung (freundlich), nach 30 (bestimmt) und nach 60 (formell) – in deinem Namen, Antworten gehen direkt an deine E-Mail. Ohne Fälligkeit gelten 30 Tage ab Ausstellung. Nur Rechnungen mit Kunden-E-Mail.',
       autoSent: 'Erinnerung {n} von 3 gesendet', autoNone: 'Noch keine Erinnerungen', addEmail: 'Kunden-E-Mail hinzufügen, um zu mahnen', addEmailTitle: 'E-Mail von {name}', addEmailNote: 'Erinnerungen werden mit deinem Firmennamen gesendet, Antworten kommen an deine E-Mail.',
-      collectedToast: 'Rechnung als erhalten markiert', emptyTitle: 'Niemand schuldet dir etwas', emptyDesc: 'Hier siehst du ausgestellte Rechnungen, die noch nicht bezahlt wurden.'
+      collectedToast: 'Rechnung als erhalten markiert', emptyTitle: 'Niemand schuldet dir etwas', emptyDesc: 'Sobald du unbezahlte Ausgangsrechnungen im Journal hast, siehst du hier, was man dir schuldet und was überfällig ist, und kannst per E-Mail mahnen.',
+      overdueTotal: 'Überfällig',
+      overdueNone: 'Keine überfälligen Rechnungen',
+      overdueOver60: '{v} seit über 60 Tagen überfällig',
+      overdueAge: 'Seit {n} Tagen überfällig',
+      overdueAge_one: 'Seit {n} Tag überfällig',
+      dueIn: 'Fällig in {n} Tagen',
+      dueIn_one: 'Morgen fällig',
+      dueToday: 'Heute fällig',
+      avgDaysNone: 'Erscheint, sobald du Rechnungen als bezahlt markierst'
     },
     leaks: {
       counter: 'Nokfi hat dir diesen Monat geholfen aufzudecken', counterNote: 'Nur identifizierte Beträge (doppelte Abbuchungen und Preiserhöhungen), keine angenommenen Einsparungen.',
-      increases: 'Preiserhöhungen', increaseLine: '{name}: +{pct} % seit {since}', extraPerMonth: '{v} mehr pro Monat',
+      increases: 'Mögliche Preiserhöhungen', increaseLine: '{name}: mögliche Erhöhung um {pct} % seit {since}', extraPerMonth: '{v} mehr pro Monat',
       duplicates: 'Mögliche doppelte Abbuchungen', sameNumber: 'gleiche Rechnungsnummer', sameAmount: 'gleicher Betrag innerhalb von 7 Tagen',
       removeEntry: 'Aus dem Journal entfernen', confirmRemove: 'Diese doppelte Buchung aus dem Journal entfernen?',
       recurring: 'Wiederkehrende Kosten und Abos', perMonth: '{v}/Monat', perYear: '{v}/Jahr', months: 'in {n} verschiedenen Monaten',
-      recurringHint: 'Prüfe, ob du alles, was du monatlich bezahlst, noch nutzt.',
-      emptyTitle: 'Keine Lecks gefunden', emptyDesc: 'Sobald du einige Monate Ausgaben im Journal hast, erscheinen hier Abos, Duplikate und Preiserhöhungen.'
+      recurringHint: 'Nur Lieferanten mit gleichem Betrag jeden Monat oder vom Typ Abo (Software, Energie, Versicherungen, Miete). Prüfe, ob du alles, was du bezahlst, noch nutzt.',
+      emptyTitle: 'Keine Lecks gefunden', emptyDesc: 'Sobald du mindestens drei Monate Ausgaben im Journal hast, erscheinen hier Abos, mögliche doppelte Abbuchungen und mögliche Preiserhöhungen.',
+      baseNote: 'Beträge ohne MwSt.',
+      dismiss: 'Kein Leck',
+      dismissedToast: 'Wir warnen dich nicht mehr bei {name}',
+      dismissedTitle: 'Ausgeblendete Lieferanten',
+      restore: 'Wieder beobachten'
     },
     forecast: {
       startTitle: 'Liquiditätsprognose', startDesc: 'Gib an, wie viel Geld du heute auf dem Konto und in der Kasse hast. Mit deinem Journal berechnet Nokfi, wie sich dein Kontostand in den nächsten 90 Tagen entwickelt.',

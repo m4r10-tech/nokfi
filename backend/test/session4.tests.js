@@ -128,6 +128,57 @@ module.exports = async function session4Tests({ post, put, get, call, check, che
       && r.data.increases.some(x => x.party_name === 'Luz SA' && x.pct === 20)
       && r.data.duplicates.some(x => x.party_name === 'Soft SL'));
 
+  // ── Sesión 6: Fugas sin falsos positivos ──
+  {
+    const { leaks: L, forecast: FC } = require('../utils/finance');
+    const ex = (party, date, base, category = '') => ({ id: Math.random(), type: 'expense', party_name: party, party_nif: '', invoice_number: `${party}-${date}`, invoice_date: date, base, vat_amount: r2x(base * 0.21), total: r2x(base * 1.21), category, paid: true });
+    function r2x(n) { return Math.round(n * 100) / 100; }
+    const ents = [
+      ex('Recambios Norte', '2026-06-10', 1100, 'Proveedores'), ex('Recambios Norte', '2026-07-12', 1100, 'Proveedores'), ex('Recambios Norte', '2026-08-09', 1290, 'Proveedores'),
+      ex('Recambios Sur', '2026-06-03', 420), ex('Recambios Sur', '2026-07-21', 1350), ex('Recambios Sur', '2026-08-15', 780),
+      ex('SoftCloud', '2026-06-01', 29, 'Tecnología'), ex('SoftCloud', '2026-07-01', 29, 'Tecnología'), ex('SoftCloud', '2026-08-01', 35, 'Tecnología')
+    ];
+    const lk = L(ents, '2026-08-20');
+    check('S6 Fugas: recambios variables (1.100/1.100/1.290) NO son recurrentes ni subida', () =>
+      !lk.recurring.some(r => r.party_name.startsWith('Recambios')) && !lk.increases.some(i => i.party_name.startsWith('Recambios')));
+    check('S6 Fugas: software 29 → 35 € (Tecnología) SÍ es posible subida (+20,69 %, sobre bases)', () =>
+      lk.increases.length === 1 && lk.increases[0].party_name === 'SoftCloud' && lk.increases[0].from === 29 && lk.increases[0].to === 35
+      && lk.increases[0].pct === 20.69 && lk.recurring.some(r => r.party_name === 'SoftCloud'));
+    check('S6 Fugas: el contador solo suma lo identificado (6 € de la subida de este mes)', () => lk.detected_this_month === 6);
+    const stableNoCat = L([ex('Gestoría', '2026-06-05', 80), ex('Gestoría', '2026-07-05', 80), ex('Gestoría', '2026-08-05', 81)], '2026-08-20');
+    check('S6 Fugas: sin categoría pero base estable (±5 %) → recurrente, sin subida', () =>
+      stableNoCat.recurring.length === 1 && stableNoCat.increases.length === 0);
+    const fc = FC({ entries: ents, balance: 10000, days: 60, refDate: '2026-08-20' });
+    check('S6 Previsión: no proyecta los recambios como gasto recurrente', () =>
+      !fc.flows.some(f => f.kind === 'recurring' && f.label.startsWith('Recambios')) && fc.flows.some(f => f.kind === 'recurring' && f.label === 'SoftCloud'));
+    const dis = L(ents, '2026-08-20', { dismissed: new Set(['softcloud']) });
+    check('S6 Fugas: un proveedor descartado desaparece de subidas y recurrentes', () => dis.increases.length === 0 && !dis.recurring.length);
+  }
+  await checkAsync('S6 Fugas: POST /leaks/dismiss (Luz SA) → ya no sale en subidas y figura en descartados',
+    post('/api/finance/leaks/dismiss', { party_key: 'A00000001', party_name: 'Luz SA' }, tok).then(() => get('/api/finance/leaks', tok)),
+    r => r.status === 200 && !r.data.increases.some(x => x.party_name === 'Luz SA') && r.data.dismissed.some(d => d.party_key === 'A00000001'));
+  await checkAsync('S6 Fugas: DELETE /leaks/dismiss → Luz SA vuelve',
+    del('/api/finance/leaks/dismiss', { party_key: 'A00000001' }, tok).then(() => get('/api/finance/leaks', tok)),
+    r => r.status === 200 && r.data.increases.some(x => x.party_name === 'Luz SA') && !r.data.dismissed.length);
+  await checkAsync('S6 Fugas: dismiss sin party_key → 400',
+    post('/api/finance/leaks/dismiss', {}, tok), r => r.status === 400);
+
+  // ── Sesión 6: Cobros por días desde el vencimiento ──
+  check('S6 Cobros: factura no vencida → "vence en N días", no cuenta en overdue_60 ni en vencido', () => {
+    const { receivables: R } = require('../utils/finance');
+    const inc = (id, date, due, total) => ({ id, type: 'income', party_name: `C${id}`, party_nif: '', invoice_number: `F${id}`, invoice_date: date, due_date: due, total, paid: false });
+    const out = R([
+      inc(1, '2026-06-01', '2026-10-10', 500),   // emitida hace 119 días, aún no vence
+      inc(2, '2026-07-01', '2026-08-14', 800),   // vencida hace 45 días
+      inc(3, '2026-06-01', null, 300)            // sin vencimiento → 1-jul → 89 días vencida
+    ], '2026-09-28');
+    const p = Object.fromEntries(out.pending.map(x => [x.id, x]));
+    return p[1].is_overdue === false && p[1].days_to_due === 12 && p[1].days_overdue === 0 && p[1].level === 'ok'
+      && p[2].days_overdue === 45 && p[2].level === 'high'
+      && p[3].effective_due_date === '2026-07-01' && p[3].days_overdue === 89 && p[3].level === 'critical'
+      && out.overdue_60 === 300 && out.overdue_total === 1100 && out.pending[0].id === 3;
+  });
+
   // ── V3: previsión ──
   // 500 + 1.000 (cobro 1-oct) − 300 (pago 20-oct) − 200 (130 del 3T: 20 % de 1.000, vence 20-oct) = 1.000
   check('V3: forecast suma cobros y resta pagos e impuestos previstos (determinista)', () => {

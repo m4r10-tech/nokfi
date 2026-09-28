@@ -150,7 +150,7 @@ export default {
     actionsTitle: 'Votre plan d’action', actionsEmpty: 'Quand vous ferez un diagnostic ou une analyse, ses recommandations apparaîtront ici sous forme de tâches.',
     actionsAllDone: 'Tout est fait ! Lancez une nouvelle analyse pour continuer à progresser.',
     financeEmptyTitle: 'Lisez vos factures avec l’IA', financeEmptyDesc: 'Nokfi tiendra votre registre et vous dira combien mettre de côté pour les impôts, qui vous doit de l’argent et comment évoluera votre trésorerie.',
-    fTaxes: 'Impôts {q}', fReceivables: 'À encaisser', fOverdue: '{v} à plus de 60 jours', fLeaks: 'Fuites ce mois-ci',
+    fTaxes: 'Impôts {q}', fReceivables: 'À encaisser', fOverdue: '{v} échus', fLeaks: 'Fuites ce mois-ci',
     fLeaksHint: '{n} alertes', fLeaksHint_one: '{n} alerte', fForecast: 'Trésorerie à 90 jours', fBelow: 'Sous le seuil le {date}', fForecastOk: 'Aucune alerte de trésorerie',
     fForecastSetup: 'Indiquez votre solde pour voir la prévision',
     nextDeadline: 'Prochaine échéance : formulaires {m} · {date} · dans {n} jours', nextDeadline_one: 'Prochaine échéance : formulaires {m} · {date} · dans {n} jour'
@@ -506,7 +506,7 @@ export default {
     clientEmail: 'Email du client', clientEmailHint: 'client@entreprise.com (pour les relances)',
     invoiceNumber: 'N° de facture', concept: 'Libellé', category: 'Catégorie', base: 'HT', vatRate: 'TVA %', vat: 'TVA',
     irpfRate: 'IRPF %', irpf: 'Retenue', total: 'Total', paidCol: 'Payée/encaissée',
-    categories: { sales: 'Ventes', services: 'Services professionnels', suppliers: 'Fournisseurs', rent: 'Loyer', utilities: 'Énergie et fournitures', staff: 'Personnel', marketing: 'Marketing', tech: 'Technologie', transport: 'Transport', other: 'Autre' },
+    categories: { sales: 'Ventes', services: 'Services professionnels', suppliers: 'Fournisseurs', rent: 'Loyer', utilities: 'Énergie et fournitures', staff: 'Personnel', marketing: 'Marketing', tech: 'Technologie', transport: 'Transport', other: 'Autre', insurance: 'Assurances' },
     addEntry: 'Ajouter manuellement', editEntry: 'Modifier l’écriture', readInvoices: 'Lire des factures avec l’IA',
     markCollected: 'Encaissée', markPaid: 'Payée', collected: 'Encaissée', paid: 'Payée', pendingCollection: 'À encaisser', pendingPayment: 'À payer',
     totalMismatch: 'HT + TVA − retenue ne correspond pas au total. Vérifiez-le.',
@@ -578,23 +578,37 @@ export default {
       legal: 'Estimation indicative en régime général (Espagne). N’inclut ni le recargo de equivalencia, ni les modules, ni l’impôt sur les sociétés. Ce n’est pas un conseil fiscal.'
     },
     receivables: {
-      pending: 'En attente d’encaissement', invoices: '{n} factures', invoices_one: '{n} facture', overdue60: 'Plus de 60 jours', avgDays: 'Délai moyen d’encaissement',
+      pending: 'En attente d’encaissement', invoices: '{n} factures', invoices_one: '{n} facture', overdue60: 'Échu depuis plus de 60 jours', avgDays: 'Délai moyen d’encaissement',
       listTitle: 'Factures à encaisser', age: '{n} jours', age_one: '{n} jour', clientAvg: 'ce client paie en général en {n} jours',
       claim: 'Relancer', claimTitle: 'E-mail de relance · {name}', toneFriendly: 'Aimable', toneFirm: 'Ferme', toneFormal: 'Formel',
       writing: 'Rédaction…', subject: 'Objet', body: 'Message', openMail: 'Ouvrir dans la messagerie',
       reviewNote: 'Relisez le texte avant de l’envoyer. Il est rédigé par l’assistant IA gratuit.',
       autoTitle: 'Relancer automatiquement les factures échues', autoHint: 'Nokfi envoie une relance à votre client 7 jours après l’échéance (aimable), à 30 (ferme) et à 60 (formelle), en votre nom et avec réponse directe à votre email. Sans échéance, on compte 30 jours après l’émission. Uniquement les factures avec l’email du client.',
       autoSent: 'Relance {n} sur 3 envoyée', autoNone: 'Aucune relance pour l’instant', addEmail: 'Ajouter l’email du client pour relancer', addEmailTitle: 'Email de {name}', addEmailNote: 'Les relances partent au nom de votre entreprise et les réponses arrivent sur votre email.',
-      collectedToast: 'Facture marquée comme encaissée', emptyTitle: 'Personne ne vous doit rien', emptyDesc: 'Vous verrez ici les factures émises que vous n’avez pas encore encaissées.'
+      collectedToast: 'Facture marquée comme encaissée', emptyTitle: 'Personne ne vous doit rien', emptyDesc: 'Quand vous ajouterez au registre des factures émises non encaissées, vous verrez ici combien on vous doit, ce qui est échu, et vous pourrez relancer par e-mail.',
+      overdueTotal: 'Échu',
+      overdueNone: 'Aucune facture échue',
+      overdueOver60: '{v} échus depuis plus de 60 jours',
+      overdueAge: 'Échue depuis {n} jours',
+      overdueAge_one: 'Échue depuis {n} jour',
+      dueIn: 'Échéance dans {n} jours',
+      dueIn_one: 'Échéance demain',
+      dueToday: 'Échéance aujourd’hui',
+      avgDaysNone: 'Apparaîtra quand vous marquerez des factures comme encaissées'
     },
     leaks: {
       counter: 'Nokfi vous a aidé à détecter ce mois-ci', counterNote: 'Uniquement des montants identifiés (doublons et hausses de prix), pas des économies supposées.',
-      increases: 'Hausses de prix', increaseLine: '{name} : +{pct} % depuis {since}', extraPerMonth: '{v} de plus par mois',
+      increases: 'Hausses de prix possibles', increaseLine: '{name} : hausse possible de {pct} % depuis {since}', extraPerMonth: '{v} de plus par mois',
       duplicates: 'Doublons possibles', sameNumber: 'même numéro de facture', sameAmount: 'même montant en moins de 7 jours',
       removeEntry: 'Retirer du registre', confirmRemove: 'Retirer cette écriture en double du registre ?',
       recurring: 'Dépenses récurrentes et abonnements', perMonth: '{v}/mois', perYear: '{v}/an', months: 'sur {n} mois différents',
-      recurringHint: 'Vérifiez si vous utilisez encore tout ce que vous payez chaque mois.',
-      emptyTitle: 'Aucune fuite détectée', emptyDesc: 'Quand vous aurez quelques mois de dépenses dans le registre, les abonnements, doublons et hausses de prix apparaîtront ici.'
+      recurringHint: 'Uniquement les fournisseurs au même montant chaque mois ou de type abonnement (logiciel, énergie, assurances, loyer). Vérifiez si vous utilisez encore tout ce que vous payez.',
+      emptyTitle: 'Aucune fuite détectée', emptyDesc: 'Quand vous aurez au moins trois mois de dépenses dans le registre, les abonnements, les doublons possibles et les hausses de prix possibles apparaîtront ici.',
+      baseNote: 'Montants hors TVA',
+      dismiss: 'Ce n’est pas une fuite',
+      dismissedToast: 'Nous ne vous alerterons plus pour {name}',
+      dismissedTitle: 'Fournisseurs écartés',
+      restore: 'Surveiller à nouveau'
     },
     forecast: {
       startTitle: 'Prévision de trésorerie', startDesc: 'Indiquez combien d’argent vous avez aujourd’hui en banque et en caisse. Avec votre registre, Nokfi calculera l’évolution de votre solde sur les 90 prochains jours.',

@@ -34,7 +34,8 @@ function buildSummary(licenseId, month, today) {
   const cq = quarterOf(today);
   const tax = taxSummary(entries, { ...cq, legalForm: profile.legal_form, reserve: F.getReserve(licenseId, cq.year, cq.quarter) });
   const rec = receivables(entries, today);
-  const lk = leaks(entries, today);
+  const dismissed = F.dismissedSet(licenseId);
+  const lk = leaks(entries, today, { dismissed });
   const out = {
     company: profile.company_name || '',
     lang: profile.lang || 'es',
@@ -50,7 +51,7 @@ function buildSummary(licenseId, month, today) {
     forecast: null
   };
   if (profile.cash_balance != null && entries.length) {
-    const fc = forecast({ entries, balance: profile.cash_balance, days: 30, threshold: profile.cash_alert_threshold || 0, legalForm: profile.legal_form, refDate: today });
+    const fc = forecast({ entries, balance: profile.cash_balance, days: 30, threshold: profile.cash_alert_threshold || 0, legalForm: profile.legal_form, refDate: today, dismissed });
     out.forecast = { at30: fc.at30, min: fc.min, first_below: fc.first_below, threshold: fc.threshold };
   }
   return out;

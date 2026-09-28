@@ -324,7 +324,7 @@ const INVOICE_SCHEMA = {
           invoice_date: { type: 'STRING', description: 'Formato YYYY-MM-DD' },
           due_date: { type: 'STRING', description: 'Vencimiento YYYY-MM-DD si aparece; vacío si no.' },
           concept: { type: 'STRING', description: 'Concepto resumido en pocas palabras.' },
-          category: { type: 'STRING', description: 'Categoría del gasto/ingreso (Alquiler, Suministros, Proveedores, Personal, Marketing, Tecnología, Transporte, Servicios profesionales, Ventas, Otro).' },
+          category: { type: 'STRING', description: 'Categoría del gasto/ingreso (Alquiler, Suministros, Proveedores, Personal, Marketing, Tecnología, Seguros, Transporte, Servicios profesionales, Ventas, Otro).' },
           base: { type: 'NUMBER', description: 'Base imponible total en euros.' },
           vat_rate: { type: 'NUMBER', description: 'Tipo de IVA principal en % (21, 10, 4, 0).' },
           vat_amount: { type: 'NUMBER', description: 'Cuota de IVA total en euros.' },

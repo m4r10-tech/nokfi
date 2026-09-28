@@ -140,4 +140,21 @@ function setReserve(license_id, year, quarter, amount) {
   return getReserve(license_id, year, quarter);
 }
 
-module.exports = { normalizeEntry, findDuplicate, insertEntries, listLedger, allEntries, getEntry, updateEntry, deleteEntry, getReserve, setReserve };
+/* ── Fugas: proveedores descartados ("No es una fuga") ── */
+function listDismissals(license_id) {
+  return getDB().prepare('SELECT party_key, party_name, created_at FROM leak_dismissals WHERE license_id = ? ORDER BY created_at DESC').all(license_id);
+}
+
+function addDismissal(license_id, party_key, party_name = '') {
+  getDB().prepare(`INSERT INTO leak_dismissals (license_id, party_key, party_name) VALUES (?, ?, ?)
+    ON CONFLICT(license_id, party_key) DO UPDATE SET party_name = excluded.party_name`)
+    .run(license_id, txt(party_key, 180), txt(party_name, 160));
+}
+
+function removeDismissal(license_id, party_key) {
+  return getDB().prepare('DELETE FROM leak_dismissals WHERE license_id = ? AND party_key = ?').run(license_id, String(party_key || '')).changes > 0;
+}
+
+const dismissedSet = (license_id) => new Set(listDismissals(license_id).map(d => d.party_key));
+
+module.exports = { listDismissals, addDismissal, removeDismissal, dismissedSet, normalizeEntry, findDuplicate, insertEntries, listLedger, allEntries, getEntry, updateEntry, deleteEntry, getReserve, setReserve };
