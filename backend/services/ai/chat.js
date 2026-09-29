@@ -5,8 +5,8 @@
  *   cuota diaria de análisis.
  * - Ningún free tier es "para siempre" → capa de proveedores intercambiable
  *   con respaldo: se prueban en orden (CHAT_PROVIDERS) solo los que tengan
- *   clave. Por defecto: cloudflare → cerebras (sesión 7: Cerebras es respaldo,
- *   con tope de seguridad en utils/aiBudget.js), porque sus condiciones NO
+ *   clave. Por defecto: groq → cloudflare → cerebras (sesión 7: Cerebras es el
+ *   último respaldo, con tope de gasto y caducidad en utils/aiBudget.js), porque sus condiciones NO
  *   permiten entrenar con los datos (decisión 2026-09-26). gemini (su free
  *   tier entrena) y openrouter (sus modelos gratis suelen entrenar) solo se
  *   usan si se añaden a mano a CHAT_PROVIDERS.
@@ -105,8 +105,8 @@ const PROVIDERS = {
 };
 
 function providerOrder() {
-  const list = (process.env.CHAT_PROVIDERS || 'cloudflare,cerebras').split(',').map(s => s.trim()).filter(Boolean);
-  return list.filter(p => PROVIDERS[p]?.configured());
+  const list = (process.env.CHAT_PROVIDERS || 'groq,cloudflare,cerebras').split(',').map(s => s.trim()).filter(Boolean);
+  return list.filter(p => PROVIDERS[p]?.configured() && !budget.expired(p));
 }
 
 function chatSystemPrompt({ profile, lang, analysisContext }) {

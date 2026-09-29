@@ -12,6 +12,10 @@
  *   AI_PRICE_<PROV>_IN / _OUT       USD por millón de tokens (para estimar)
  * Hoy solo Cerebras lo trae por defecto (DEFAULTS), porque tiene tarjeta
  * asociada. Poner un tope a 0 lo desactiva del todo.
+ *
+ * Caducidad: AI_EXPIRES_<PROV>=YYYY-MM-DD → desde ese día el proveedor deja
+ * de usarse solo (p. ej. la prueba de Cerebras, que acaba el 29-oct-2026), y
+ * el informe diario avisa desde 7 días antes.
  */
 
 'use strict';
@@ -71,6 +75,33 @@ function record(provider, { prompt_tokens = 0, completion_tokens = 0 } = {}) {
     .run(provider, today(), Math.max(0, prompt_tokens | 0), Math.max(0, completion_tokens | 0), cost);
 }
 
+/** Fecha de caducidad (AI_EXPIRES_<PROV>) o null. */
+function expiresOn(provider) {
+  const v = String(process.env[`AI_EXPIRES_${provider.toUpperCase()}`] || '').trim();
+  return /^\d{4}-\d{2}-\d{2}$/.test(v) ? v : null;
+}
+
+/** ¿Está caducado hoy? (a partir del propio día indicado). */
+function expired(provider, now = new Date()) {
+  const d = expiresOn(provider);
+  return !!d && now.toISOString().slice(0, 10) >= d;
+}
+
+/** Proveedores que caducan en ≤ 7 días o ya han caducado (para el informe diario). */
+function expiringSoon(now = new Date()) {
+  const out = [];
+  for (const k of Object.keys(process.env)) {
+    const m = k.match(/^AI_EXPIRES_([A-Z0-9]+)$/);
+    if (!m) continue;
+    const provider = m[1].toLowerCase();
+    const d = expiresOn(provider);
+    if (!d) continue;
+    const days = Math.round((Date.parse(d + 'T00:00:00Z') - Date.parse(now.toISOString().slice(0, 10) + 'T00:00:00Z')) / 86400000);
+    if (days <= 7) out.push({ provider, date: d, days });
+  }
+  return out;
+}
+
 /** Tokens estimados de una petición: ~3 caracteres por token + la salida máxima pedida. */
 function estimateTokens(chars, maxOut = 0) {
   return Math.ceil(chars / 3) + maxOut;
@@ -83,4 +114,4 @@ function status() {
   ).filter((v, i, a) => a.indexOf(v) === i).map(p => ({ provider: p, budget: budgetFor(p), today: usage(p) }));
 }
 
-module.exports = { budgetFor, allow, record, estimateTokens, usage, status };
+module.exports = { expiresOn, expired, expiringSoon, budgetFor, allow, record, estimateTokens, usage, status };

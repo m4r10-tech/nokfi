@@ -477,6 +477,7 @@ export default {
       { h: 'Servizi di terze parti coinvolti', list: [
         'Stripe: elabora i pagamenti e gestisce gli abbonamenti.',
         'Cloudflare Workers AI: genera le analisi, legge le fatture scansionate o fotografate e risponde nell’assistente. Le sue condizioni vietano di usare i tuoi dati per addestrare modelli e non li conserva (salvo log tecnici temporanei per indagare abusi). Non salviamo le tue conversazioni con l’assistente.',
+        'Groq: genera le analisi, legge le fatture e risponde nell’assistente; se non è disponibile, si usa Cloudflare Workers AI. Il suo contratto gli vieta di usare i tuoi dati per addestrare o perfezionare modelli, e abbiamo attivato la conservazione zero (le richieste non vengono salvate). Tratta i dati negli Stati Uniti, con clausole contrattuali tipo.',
         'Cerebras: fornitore di IA di riserva, usato solo se Cloudflare non è disponibile (stesse attività). Il suo contratto gli consente di usare i tuoi dati solo per fornire il servizio (non per addestrare modelli) e di conservarli lo stretto necessario. Tratta i dati negli Stati Uniti, con clausole contrattuali tipo.',
         'Resend: invia le email (la tua chiave di licenza, il recupero della password e, se attivati, gli avvisi del calendario fiscale, il riepilogo mensile e i solleciti di pagamento ai tuoi clienti).',
         'Cloudflare: rete di distribuzione e sicurezza che protegge l’accesso al sito. Usiamo il paese della tua connessione (indicato da Cloudflare) solo per scegliere la lingua iniziale del sito; non lo conserviamo.'

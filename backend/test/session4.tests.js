@@ -28,7 +28,7 @@ module.exports = async function session4Tests({ post, put, get, call, check, che
     check('IA: si Groq agota cuota (429) responde Cloudflare', () => r2.model.startsWith('cloudflare:') && r2.json.summary === 'desde cloudflare' && calls.length === 2);
     check('IA: sin AI_PROVIDERS explícito, Gemini (free tier que entrena) NO está en el orden', () => {
       delete process.env.AI_PROVIDERS; const o = providers.providerOrder(); process.env.AI_PROVIDERS = 'groq,cloudflare';
-      return !o.includes('gemini') && o[0] === 'cloudflare';
+      return !o.includes('gemini') && o.join() === 'groq,cloudflare';
     });
     let pdfErr = null;
     global.fetch = async () => ok({});
@@ -38,7 +38,8 @@ module.exports = async function session4Tests({ post, put, get, call, check, che
     check('Chat: orden por defecto sin Gemini ni OpenRouter', () => {
       const prev = process.env.CHAT_PROVIDERS; delete process.env.CHAT_PROVIDERS; process.env.CEREBRAS_API_KEY = 'c';
       const o = chat.providerOrder(); if (prev !== undefined) process.env.CHAT_PROVIDERS = prev; delete process.env.CEREBRAS_API_KEY;
-      return o[0] === 'cloudflare' && o[1] === 'cerebras' && !o.includes('gemini') && !o.includes('openrouter');
+      const base = o.filter(x => x !== 'groq');
+      return base[0] === 'cloudflare' && base[1] === 'cerebras' && (!o.includes('groq') || o[0] === 'groq') && !o.includes('gemini') && !o.includes('openrouter');
     });
     global.fetch = saved.fetch;
     for (const [k, v] of [['AI_PROVIDERS', saved.AI], ['GROQ_API_KEY', saved.G], ['CF_ACCOUNT_ID', saved.A], ['CF_AI_TOKEN', saved.T], ['GEMINI_API_KEY', saved.GM]]) { if (v === undefined) delete process.env[k]; else process.env[k] = v; }
@@ -435,6 +436,14 @@ module.exports = async function session4Tests({ post, put, get, call, check, che
     getDB().prepare("INSERT OR REPLACE INTO ai_provider_usage (provider, day, calls, tokens_in, tokens_out, cost_usd) VALUES ('cerebras', ?, 1, 0, 0, 3.99)").run(new Date().toISOString().slice(0, 7) + '-01');
     check('S7 IA: tope mensual en USD (4 $ por defecto) bloquea antes de pasarse', () => budget.allow('cerebras', 100000).ok === false && budget.allow('cerebras', 100).ok === true);
     check('S7 IA: los proveedores sin tope (Cloudflare) no se bloquean', () => budget.allow('cloudflare', 1e9).ok === true);
+    const buildOpsReport_ = () => require('../services/opsReport').buildOpsReport(new Date());
+    process.env.AI_EXPIRES_CEREBRAS = new Date().toISOString().slice(0, 10);
+    check('S7 IA: el día de caducidad (AI_EXPIRES_CEREBRAS) Cerebras sale solo de la cadena de análisis y de chat', () =>
+      !providers.providerOrder().includes('cerebras') && !require('../services/ai/chat').providerOrder().includes('cerebras'));
+    process.env.AI_EXPIRES_CEREBRAS = new Date(Date.now() + 5 * 86400000).toISOString().slice(0, 10);
+    check('S7 IA: antes de la fecha sigue activo y el informe avisa a 5 días', () =>
+      providers.providerOrder().includes('cerebras') && buildOpsReport_().alerts.some(a => a.includes('cerebras caduca') && a.includes('en 5 días')));
+    delete process.env.AI_EXPIRES_CEREBRAS;
     const { buildOpsReport } = require('../services/opsReport');
     check('S7 ops: el informe diario incluye el consumo por proveedor y avisa al 80 % del tope mensual', () => {
       const rep = buildOpsReport(new Date(Date.now() + 86400000));

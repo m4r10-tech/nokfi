@@ -47,6 +47,7 @@ export const DPA = {
       ], list: [
         '{HOSTING}',
         'Cloudflare, Inc.: red de distribución y seguridad y generación de análisis con IA (Workers AI). Transferencias internacionales amparadas por el Marco de Privacidad de Datos UE-EE. UU. y cláusulas contractuales tipo.',
+        'Groq, Inc.: generación de análisis con IA, junto con Cloudflare; sin entrenamiento con los datos y con retención cero. EE. UU., con cláusulas contractuales tipo.',
         'Cerebras Systems, Inc.: generación de análisis con IA como respaldo, solo si Cloudflare no está disponible; sin entrenamiento con los datos. EE. UU., con cláusulas contractuales tipo.',
         'Resend (Plus Five Five, Inc.): envío de emails, incluidos los recordatorios de cobro a tus clientes. EE. UU., con cláusulas contractuales tipo.'
       ], after: [
@@ -101,6 +102,7 @@ export const DPA = {
       { h: '6. Sub-processors', ps: ['You authorise Nokfi to use the following sub-processors, bound by data protection obligations equivalent to this agreement:'], list: [
         '{HOSTING}',
         'Cloudflare, Inc.: content delivery and security network and AI analyses (Workers AI). International transfers covered by the EU-US Data Privacy Framework and standard contractual clauses.',
+        'Groq, Inc.: AI analyses, together with Cloudflare; no training on the data and zero data retention. US, under standard contractual clauses.',
         'Cerebras Systems, Inc.: backup AI analyses, used only if Cloudflare is unavailable; no training on the data. US, under standard contractual clauses.',
         'Resend (Plus Five Five, Inc.): email delivery, including payment reminders to your clients. USA, with standard contractual clauses.'
       ], after: [

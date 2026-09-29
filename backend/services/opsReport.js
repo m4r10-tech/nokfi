@@ -103,6 +103,9 @@ function buildOpsReport(now = new Date()) {
     report.ai.failed > 0 && `${report.ai.failed} análisis de IA fallidos`,
     ...report.ai.usage.filter(u => u.budget?.monthlyUsd && u.month_usd >= u.budget.monthlyUsd * 0.8)
       .map(u => `${u.provider}: gasto estimado del mes ${u.month_usd.toFixed(2)} $ (tope ${u.budget.monthlyUsd} $)`),
+    ...require('../utils/aiBudget').expiringSoon(now).map(x => x.days > 0
+      ? `${x.provider} caduca el ${x.date} (en ${x.days} días): quítalo del .env (AI_PROVIDERS, CHAT_PROVIDERS) y de privacidad/encargo`
+      : `${x.provider} caducó el ${x.date} y ya no se usa: quítalo del .env y de privacidad/encargo`),
     mailFails.length > 0 && `${mailFails.reduce((s, m) => s + m.c, 0)} emails no enviados`,
     report.errorsTotal >= 10 && `${report.errorsTotal} errores de la app`,
     report.activity.payment_failed > 0 && `${report.activity.payment_failed} pagos fallidos`,

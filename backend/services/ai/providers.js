@@ -8,7 +8,7 @@
  *   cloudflare  Cloudflare Workers AI (OpenAI-compatible). Principal.
  *   cerebras    Cerebras (sesión 7). Respaldo, con tope de seguridad de gasto
  *               (utils/aiBudget.js): gpt-oss-120b para texto, qwen-3.8-27b con imágenes.
- *   groq        Groq Cloud. Soportado, pero sin cuenta (el alta falla).
+ *   groq        Groq Cloud (OpenAI-compatible, gratis sin tarjeta). Llama 4 Scout: texto + imágenes.
  *   gemini      Solo si se añade a AI_PROVIDERS (p.ej. cuando haya plan de PAGO).
  *
  * Orden: AI_PROVIDERS (por defecto "cloudflare,cerebras"); solo se usan los que
@@ -157,7 +157,9 @@ const PROVIDERS = {
 };
 
 function providerOrder() {
-  return (process.env.AI_PROVIDERS || 'cloudflare,cerebras').split(',').map(s => s.trim()).filter(p => PROVIDERS[p]?.configured());
+  // Un proveedor con fecha de caducidad (AI_EXPIRES_<PROV>) deja de usarse solo ese día.
+  return (process.env.AI_PROVIDERS || 'groq,cloudflare,cerebras').split(',').map(s => s.trim())
+    .filter(p => PROVIDERS[p]?.configured() && !budget.expired(p));
 }
 
 /** Mismo contrato que gemini.generate; recorre los proveedores configurados. */
