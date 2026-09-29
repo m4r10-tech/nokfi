@@ -25,7 +25,20 @@ export default {
     activeKeys: 'Clés actives',
     keyNameHint: 'Donnez-lui le nom du client ou du flux : vous verrez l’usage de chacun séparément.',
     callsTodayKey: '{n} appels aujourd’hui',
-    callsTodayKey_one: '{n} appel aujourd’hui'
+    callsTodayKey_one: '{n} appel aujourd’hui',
+    templatesTitle: 'Modèles n8n',
+    templatesDesc: 'Flux prêts à importer : téléchargez le JSON, importez-le dans n8n et ajoutez vos identifiants.',
+    downloadJson: 'Télécharger le JSON',
+    flow: 'Étapes du flux',
+    credentials: 'Identifiants',
+    importTitle: 'Comment les importer',
+    importSteps: ['Dans Nokfi, créez une clé dans Développeurs → Clés.', 'Dans n8n, créez un identifiant « Bearer Auth » et collez la clé nk_live_…', 'Dans n8n : menu ⋯ → Import from File, puis choisissez le JSON téléchargé.', 'Ouvrez les nœuds annotés, choisissez vos identifiants et indiquez la feuille, le dossier ou le chat.', 'Testez avec « Execute workflow » puis activez-le.'],
+    tpl_gmail_title: 'Factures de Gmail vers Google Sheets',
+    tpl_gmail_desc: 'Toutes les heures, il vérifie les e-mails avec des factures en pièce jointe (PDF ou photo), les lit avec Nokfi et ajoute une ligne par facture à votre feuille, avec des colonnes indiquant si le total est cohérent et si le NIF est valide.',
+    tpl_drive_title: 'Dossier Drive vers résumé mensuel par e-mail',
+    tpl_drive_desc: 'Le 1er de chaque mois, il lit les factures d’un dossier Google Drive et vous envoie (à vous ou à votre comptable) les totaux de base, TVA et retenues, ainsi que les factures à vérifier.',
+    tpl_weekly_title: 'Rapport de trésorerie hebdomadaire sur Telegram',
+    tpl_weekly_desc: 'Chaque lundi, il analyse votre feuille de trésorerie et envoie sur Telegram le résumé et les trois priorités de la semaine. Pour Slack, remplacez le dernier nœud.'
   },
   common: {
     save: 'Enregistrer', cancel: 'Annuler', continue: 'Continuer', back: 'Retour',
@@ -43,7 +56,8 @@ export default {
     spaceDev: 'Développeurs',
     devSummary: 'Vue d’ensemble',
     devKeys: 'Clés',
-    devDocs: 'Documentation'
+    devDocs: 'Documentation',
+    devTemplates: 'Modèles'
   },
   login: {
     title: 'Accéder à Nokfi', subtitle: 'Saisissez vos informations pour continuer',

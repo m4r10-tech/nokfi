@@ -1,4 +1,4 @@
-import { LayoutDashboard, ClipboardList, FileSpreadsheet, History, Calculator, Settings, Wallet, LifeBuoy, Gauge, KeyRound, BookOpen } from 'lucide-react';
+import { LayoutDashboard, ClipboardList, FileSpreadsheet, History, Calculator, Settings, Wallet, LifeBuoy, Gauge, KeyRound, BookOpen, Workflow } from 'lucide-react';
 
 /**
  * Navegación de la app privada — fuente única para la Sidebar (escritorio) y
@@ -27,7 +27,8 @@ export const NAV_ITEMS = [
 export const DEV_NAV_ITEMS = [
   { to: '/app/dev', end: true, icon: Gauge, key: 'nav.devSummary', mobile: 'bar' },
   { to: '/app/dev/claves', icon: KeyRound, key: 'nav.devKeys', mobile: 'bar' },
-  { to: '/api-docs', icon: BookOpen, key: 'nav.devDocs', mobile: 'bar', external: true },
+  { to: '/app/dev/plantillas', icon: Workflow, key: 'nav.devTemplates', mobile: 'bar' },
+  { to: '/api-docs', icon: BookOpen, key: 'nav.devDocs', mobile: 'more', external: true },
   { to: '/app/ayuda', icon: LifeBuoy, key: 'nav.help', mobile: 'more' },
   { to: '/app/configuracion', icon: Settings, key: 'nav.settings', mobile: 'more' }
 ];

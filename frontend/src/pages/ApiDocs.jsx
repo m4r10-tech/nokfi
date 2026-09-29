@@ -4,6 +4,7 @@ import { useLang } from '../context/LangContext';
 import { useToast } from '../context/ToastContext';
 import { usePageMeta } from '../hooks/usePageMeta';
 import { PublicHeader, PublicFooter } from '../components/PublicChrome';
+import { N8N_TEMPLATES } from './dev/templates';
 
 /**
  * F4 — Documentación pública de la API v1 (sesión 4): autenticación,
@@ -164,6 +165,12 @@ export default function ApiDocs() {
             {(Array.isArray(t('apiDocs.n8nSteps')) ? t('apiDocs.n8nSteps') : []).map((s, i) => <li key={i}>{s}</li>)}
           </ol>
           <Code text={N8N} onCopy={copy} />
+          <p className="text-sm font-medium mt-2" style={{ color: 'var(--text-primary)' }}>{t('dev.templatesTitle')}</p>
+          <ul className="flex flex-col gap-1.5">
+            {N8N_TEMPLATES.map(tpl => (
+              <li key={tpl.id}><a href={tpl.file} download className="link">{t(`dev.tpl_${tpl.id}_title`)}</a> <span className="text-xs" style={{ color: 'var(--text-muted)' }}>· JSON</span></li>
+            ))}
+          </ul>
         </Block>
 
         <p className="text-sm" style={{ color: 'var(--text-secondary)' }}>

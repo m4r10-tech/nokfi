@@ -25,7 +25,20 @@ export default {
     activeKeys: 'Claves activas',
     keyNameHint: 'Ponle el nombre del cliente o del flujo: así verás el uso de cada uno por separado.',
     callsTodayKey: '{n} llamadas hoy',
-    callsTodayKey_one: '{n} llamada hoy'
+    callsTodayKey_one: '{n} llamada hoy',
+    templatesTitle: 'Plantillas de n8n',
+    templatesDesc: 'Flujos listos para importar: descarga el JSON, impórtalo en n8n y pon tus credenciales.',
+    downloadJson: 'Descargar JSON',
+    flow: 'Pasos del flujo',
+    credentials: 'Credenciales',
+    importTitle: 'Cómo importarlas',
+    importSteps: ['En Nokfi, crea una clave en Desarrolladores → Claves.', 'En n8n, crea una credencial «Bearer Auth» y pega la clave nk_live_…', 'En n8n: menú ⋯ → Import from File, y elige el JSON descargado.', 'Abre los nodos marcados con nota, elige tus credenciales y rellena la hoja, carpeta o chat.', 'Pruébalo con «Execute workflow» y actívalo.'],
+    tpl_gmail_title: 'Facturas de Gmail a Google Sheets',
+    tpl_gmail_desc: 'Cada hora mira los correos con facturas adjuntas (PDF o foto), las lee con Nokfi y añade una fila por factura a tu hoja, con columnas que dicen si cuadra el total y si el NIF es válido.',
+    tpl_drive_title: 'Carpeta de Drive a resumen mensual por email',
+    tpl_drive_desc: 'El día 1 de cada mes lee las facturas de una carpeta de Google Drive y te manda (a ti o a tu gestoría) los totales de base, IVA y retenciones, más las facturas que hay que revisar.',
+    tpl_weekly_title: 'Informe semanal de caja a Telegram',
+    tpl_weekly_desc: 'Cada lunes analiza tu hoja de movimientos de caja y te manda a Telegram el resumen y las tres prioridades de la semana. Para Slack, cambia el último nodo.'
   },
   common: {
     save: 'Guardar', cancel: 'Cancelar', continue: 'Continuar', back: 'Atrás',
@@ -43,7 +56,8 @@ export default {
     spaceDev: 'Desarrolladores',
     devSummary: 'Resumen',
     devKeys: 'Claves',
-    devDocs: 'Documentación'
+    devDocs: 'Documentación',
+    devTemplates: 'Plantillas'
   },
   login: {
     title: 'Accede a Nokfi', subtitle: 'Introduce tus datos para continuar',

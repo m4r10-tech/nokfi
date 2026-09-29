@@ -25,7 +25,20 @@ export default {
     activeKeys: 'Aktive Schlüssel',
     keyNameHint: 'Benenne ihn nach Kunde oder Workflow, dann siehst du die Nutzung getrennt.',
     callsTodayKey: '{n} Aufrufe heute',
-    callsTodayKey_one: '{n} Aufruf heute'
+    callsTodayKey_one: '{n} Aufruf heute',
+    templatesTitle: 'n8n-Vorlagen',
+    templatesDesc: 'Importfertige Workflows: JSON herunterladen, in n8n importieren und Zugangsdaten eintragen.',
+    downloadJson: 'JSON herunterladen',
+    flow: 'Schritte des Workflows',
+    credentials: 'Zugangsdaten',
+    importTitle: 'So importierst du sie',
+    importSteps: ['Erstelle in Nokfi einen Schlüssel unter Entwickler → Schlüssel.', 'Lege in n8n eine „Bearer Auth“-Zugangsdatei an und füge den Schlüssel nk_live_… ein.', 'In n8n: Menü ⋯ → Import from File und die heruntergeladene JSON wählen.', 'Öffne die Nodes mit Notiz, wähle deine Zugangsdaten und trage Tabelle, Ordner oder Chat ein.', 'Mit „Execute workflow“ testen und aktivieren.'],
+    tpl_gmail_title: 'Rechnungen aus Gmail nach Google Sheets',
+    tpl_gmail_desc: 'Prüft stündlich E-Mails mit Rechnungsanhängen (PDF oder Foto), liest sie mit Nokfi und fügt pro Rechnung eine Zeile in deine Tabelle ein, mit Spalten dazu, ob die Summe stimmt und die NIF gültig ist.',
+    tpl_drive_title: 'Drive-Ordner zur monatlichen E-Mail-Zusammenfassung',
+    tpl_drive_desc: 'Liest am 1. jedes Monats die Rechnungen eines Google-Drive-Ordners und schickt dir (oder deinem Steuerbüro) die Summen von Netto, MwSt. und Einbehalten sowie die zu prüfenden Rechnungen.',
+    tpl_weekly_title: 'Wöchentlicher Kassenbericht per Telegram',
+    tpl_weekly_desc: 'Analysiert jeden Montag deine Kassentabelle und schickt die Zusammenfassung und die drei Prioritäten der Woche an Telegram. Für Slack den letzten Node tauschen.'
   },
   common: {
     save: 'Speichern', cancel: 'Abbrechen', continue: 'Weiter', back: 'Zurück',
@@ -43,7 +56,8 @@ export default {
     spaceDev: 'Entwickler',
     devSummary: 'Übersicht',
     devKeys: 'Schlüssel',
-    devDocs: 'Dokumentation'
+    devDocs: 'Dokumentation',
+    devTemplates: 'Vorlagen'
   },
   login: {
     title: 'Bei Nokfi anmelden', subtitle: 'Gib deine Daten ein, um fortzufahren',

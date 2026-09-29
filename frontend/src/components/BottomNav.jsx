@@ -87,10 +87,11 @@ function MoreSheet({ items, companyName, onClose }) {
         <div className="mb-3"><SpaceSwitcher /></div>
 
         <div className="flex flex-col gap-1">
-          {items.map(({ to, icon: Icon, key }) => (
-            <NavLink key={to} to={to} className="nav-item flex items-center gap-3 rounded-xl px-3 h-12 text-[15px] font-medium">
-              <Icon size={19} /> {t(key)}
-            </NavLink>
+          {items.map(({ to, icon: Icon, key, external }) => (external
+            ? <a key={to} href={to} target="_blank" rel="noopener" className="nav-item flex items-center gap-3 rounded-xl px-3 h-12 text-[15px] font-medium"><Icon size={19} /> {t(key)}</a>
+            : <NavLink key={to} to={to} className="nav-item flex items-center gap-3 rounded-xl px-3 h-12 text-[15px] font-medium">
+                <Icon size={19} /> {t(key)}
+              </NavLink>
           ))}
           <button onClick={toggleTheme} className="nav-item flex items-center gap-3 rounded-xl px-3 h-12 text-[15px] font-medium">
             {theme === 'dark' ? <Sun size={19} /> : <Moon size={19} />}

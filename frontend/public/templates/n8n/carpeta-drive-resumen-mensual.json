@@ -1,0 +1,209 @@
+{
+  "name": "Nokfi · Carpeta de Drive a resumen mensual por email",
+  "nodes": [
+    {
+      "parameters": {
+        "rule": {
+          "interval": [
+            {
+              "field": "months",
+              "triggerAtDayOfMonth": 1,
+              "triggerAtHour": 8
+            }
+          ]
+        }
+      },
+      "id": "841f22b6-5a8b-590e-bba6-368f40fac2b0",
+      "name": "Día 1 de cada mes",
+      "type": "n8n-nodes-base.scheduleTrigger",
+      "typeVersion": 1.2,
+      "position": [
+        0,
+        0
+      ]
+    },
+    {
+      "parameters": {
+        "resource": "fileFolder",
+        "searchMethod": "name",
+        "returnAll": true,
+        "filter": {
+          "folderId": {
+            "__rl": true,
+            "mode": "url",
+            "value": ""
+          },
+          "whatToSearch": "files"
+        },
+        "options": {}
+      },
+      "id": "fe638369-7547-5cb1-8b86-f83b845e74a1",
+      "name": "Listar la carpeta",
+      "type": "n8n-nodes-base.googleDrive",
+      "typeVersion": 3,
+      "position": [
+        220,
+        0
+      ],
+      "notes": "Pega el enlace de la carpeta donde dejas las facturas del mes.",
+      "notesInFlow": true
+    },
+    {
+      "parameters": {
+        "operation": "download",
+        "fileId": {
+          "__rl": true,
+          "mode": "id",
+          "value": "={{ $json.id }}"
+        },
+        "options": {}
+      },
+      "id": "eab7036f-3322-5693-a2d9-3a5a286e9f5a",
+      "name": "Descargar",
+      "type": "n8n-nodes-base.googleDrive",
+      "typeVersion": 3,
+      "position": [
+        440,
+        0
+      ]
+    },
+    {
+      "parameters": {
+        "jsCode": "// Convierte los adjuntos (binarios) en lotes de hasta 5 documentos para Nokfi.\nconst TYPES = ['application/pdf', 'image/jpeg', 'image/png', 'image/webp'];\nconst docs = [];\nfor (let i = 0; i < $input.all().length; i++) {\n  const item = $input.all()[i];\n  for (const [key, bin] of Object.entries(item.binary || {})) {\n    if (!TYPES.includes(bin.mimeType)) continue;\n    const buffer = await this.helpers.getBinaryDataBuffer(i, key);\n    docs.push({ name: bin.fileName || key, mime: bin.mimeType, data: buffer.toString('base64') });\n  }\n}\nconst batches = [];\nfor (let k = 0; k < docs.length; k += 5) batches.push({ json: { files: docs.slice(k, k + 5) } });\nreturn batches;"
+      },
+      "id": "12490827-93a5-54d1-b201-49e68b2c4985",
+      "name": "Preparar documentos",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        660,
+        0
+      ]
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "https://nokfi.app/api/v1/invoices/extract",
+        "authentication": "genericCredentialType",
+        "genericAuthType": "httpBearerAuth",
+        "sendBody": true,
+        "specifyBody": "json",
+        "jsonBody": "={{ JSON.stringify({ files: $json.files, lang: 'es' }) }}",
+        "options": {}
+      },
+      "id": "f1d58747-380c-56da-b90b-e4ccbd767b5b",
+      "name": "Nokfi · Extraer facturas",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [
+        880,
+        0
+      ],
+      "notes": "Credencial: Bearer Auth con tu clave nk_live_…",
+      "notesInFlow": true
+    },
+    {
+      "parameters": {
+        "jsCode": "// Resumen del mes con las cifras de Nokfi (sumadas aquí, no por la IA).\nconst invs = $input.all().flatMap(i => i.json.invoices || []);\nconst errors = $input.all().flatMap(i => i.json.errors || []);\nconst sum = (k) => invs.reduce((s, x) => s + (Number(x[k]) || 0), 0);\nconst eur = (n) => n.toLocaleString('es-ES', { style: 'currency', currency: 'EUR', useGrouping: 'always' });\nconst bad = invs.filter(x => !x.checks.totals_ok || !x.checks.nif_valid || !x.checks.date_valid);\nconst lines = [\n  `Facturas leídas: ${invs.length}`,\n  `Base imponible: ${eur(sum('base'))}`, `IVA: ${eur(sum('vat_amount'))}`, `Retenciones: ${eur(sum('irpf_amount'))}`, `Total: ${eur(sum('total'))}`,\n  '', bad.length ? `Revisa ${bad.length} factura(s):` : 'Todas las facturas cuadran.',\n  ...bad.map(x => `- ${x.file_name}: ${(x.warnings || []).map(w => w.message).join('; ')}`),\n  ...(errors.length ? ['', 'No se pudieron leer:', ...errors.map(e => `- ${e.file_name}: ${e.message}`)] : [])\n];\nreturn [{ json: { subject: `Resumen de facturas · ${new Date().toLocaleDateString('es-ES', { month: 'long', year: 'numeric' })}`, text: lines.join('\\n') } }];"
+      },
+      "id": "ab2f103a-82a6-5a17-8bdf-e5eb62bb2a41",
+      "name": "Resumen del mes",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        1100,
+        0
+      ]
+    },
+    {
+      "parameters": {
+        "sendTo": "",
+        "subject": "={{ $json.subject }}",
+        "emailType": "text",
+        "message": "={{ $json.text }}",
+        "options": {}
+      },
+      "id": "f97a5602-9e5d-5a0e-acb2-539dfd59dcc7",
+      "name": "Enviar por email",
+      "type": "n8n-nodes-base.gmail",
+      "typeVersion": 2.1,
+      "position": [
+        1320,
+        0
+      ],
+      "notes": "Pon tu email o el de tu gestoría.",
+      "notesInFlow": true
+    }
+  ],
+  "connections": {
+    "Día 1 de cada mes": {
+      "main": [
+        [
+          {
+            "node": "Listar la carpeta",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Listar la carpeta": {
+      "main": [
+        [
+          {
+            "node": "Descargar",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Descargar": {
+      "main": [
+        [
+          {
+            "node": "Preparar documentos",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Preparar documentos": {
+      "main": [
+        [
+          {
+            "node": "Nokfi · Extraer facturas",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Nokfi · Extraer facturas": {
+      "main": [
+        [
+          {
+            "node": "Resumen del mes",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Resumen del mes": {
+      "main": [
+        [
+          {
+            "node": "Enviar por email",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "settings": {
+    "executionOrder": "v1"
+  }
+}

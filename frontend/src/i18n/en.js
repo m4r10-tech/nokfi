@@ -25,7 +25,20 @@ export default {
     activeKeys: 'Active keys',
     keyNameHint: 'Name it after the client or workflow so you can see each one’s usage separately.',
     callsTodayKey: '{n} calls today',
-    callsTodayKey_one: '{n} call today'
+    callsTodayKey_one: '{n} call today',
+    templatesTitle: 'n8n templates',
+    templatesDesc: 'Ready-to-import workflows: download the JSON, import it into n8n and add your credentials.',
+    downloadJson: 'Download JSON',
+    flow: 'Workflow steps',
+    credentials: 'Credentials',
+    importTitle: 'How to import them',
+    importSteps: ['In Nokfi, create a key in Developers → Keys.', 'In n8n, create a “Bearer Auth” credential and paste the nk_live_… key.', 'In n8n: ⋯ menu → Import from File, and pick the downloaded JSON.', 'Open the nodes with a note, choose your credentials and fill in the sheet, folder or chat.', 'Test it with “Execute workflow” and activate it.'],
+    tpl_gmail_title: 'Invoices from Gmail to Google Sheets',
+    tpl_gmail_desc: 'Every hour it checks emails with invoice attachments (PDF or photo), reads them with Nokfi and adds one row per invoice to your sheet, with columns saying whether the total adds up and the NIF is valid.',
+    tpl_drive_title: 'Drive folder to monthly email summary',
+    tpl_drive_desc: 'On the 1st of every month it reads the invoices in a Google Drive folder and emails you (or your accountant) the base, VAT and withholding totals, plus the invoices to review.',
+    tpl_weekly_title: 'Weekly cash report to Telegram',
+    tpl_weekly_desc: 'Every Monday it analyses your cash sheet and sends the summary and the week’s top three priorities to Telegram. For Slack, swap the last node.'
   },
   common: {
     save: 'Save', cancel: 'Cancel', continue: 'Continue', back: 'Back',
@@ -43,7 +56,8 @@ export default {
     spaceDev: 'Developers',
     devSummary: 'Overview',
     devKeys: 'Keys',
-    devDocs: 'Documentation'
+    devDocs: 'Documentation',
+    devTemplates: 'Templates'
   },
   login: {
     title: 'Access Nokfi', subtitle: 'Enter your details to continue',

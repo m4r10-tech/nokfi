@@ -27,7 +27,20 @@ export default {
     callsTodayKey: '{n} wywołań dziś',
     callsTodayKey_one: '{n} wywołanie dziś',
     callsTodayKey_few: '{n} wywołania dziś',
-    callsTodayKey_many: '{n} wywołań dziś'
+    callsTodayKey_many: '{n} wywołań dziś',
+    templatesTitle: 'Szablony n8n',
+    templatesDesc: 'Przepływy gotowe do importu: pobierz JSON, zaimportuj go do n8n i dodaj swoje dane uwierzytelniające.',
+    downloadJson: 'Pobierz JSON',
+    flow: 'Kroki przepływu',
+    credentials: 'Dane uwierzytelniające',
+    importTitle: 'Jak je zaimportować',
+    importSteps: ['W Nokfi utwórz klucz w Deweloperzy → Klucze.', 'W n8n utwórz poświadczenie „Bearer Auth” i wklej klucz nk_live_…', 'W n8n: menu ⋯ → Import from File i wybierz pobrany JSON.', 'Otwórz węzły z notatką, wybierz poświadczenia i uzupełnij arkusz, folder lub czat.', 'Przetestuj przez „Execute workflow” i aktywuj.'],
+    tpl_gmail_title: 'Faktury z Gmaila do Arkuszy Google',
+    tpl_gmail_desc: 'Co godzinę sprawdza e-maile z fakturami w załącznikach (PDF lub zdjęcie), odczytuje je w Nokfi i dodaje wiersz na fakturę do arkusza, z kolumnami, czy suma się zgadza i czy NIF jest poprawny.',
+    tpl_drive_title: 'Folder Drive do miesięcznego podsumowania e-mailem',
+    tpl_drive_desc: '1. dnia każdego miesiąca odczytuje faktury z folderu Google Drive i wysyła tobie (lub księgowej) sumy netto, VAT i potrąceń oraz faktury do sprawdzenia.',
+    tpl_weekly_title: 'Tygodniowy raport kasy na Telegram',
+    tpl_weekly_desc: 'W każdy poniedziałek analizuje arkusz ruchów kasowych i wysyła na Telegram podsumowanie oraz trzy priorytety tygodnia. Dla Slacka zamień ostatni węzeł.'
   },
   common: {
     save: 'Zapisz', cancel: 'Anuluj', continue: 'Dalej', back: 'Wstecz',
@@ -45,7 +58,8 @@ export default {
     spaceDev: 'Deweloperzy',
     devSummary: 'Podsumowanie',
     devKeys: 'Klucze',
-    devDocs: 'Dokumentacja'
+    devDocs: 'Dokumentacja',
+    devTemplates: 'Szablony'
   },
   login: {
     title: 'Zaloguj się do Nokfi', subtitle: 'Wpisz swoje dane, aby kontynuować',
