@@ -4,7 +4,7 @@ import { KeyRound, BookOpen, AlertTriangle, ArrowRight } from 'lucide-react';
 import { keysApi } from '../../middleware/api';
 import { apiErrorMessage, isConnectivityError } from '../../middleware/errors';
 import { useLang } from '../../context/LangContext';
-import { formatDateTime } from '../../utils/dates';
+import { formatDateTime, parseDbDate, localeOf } from '../../utils/dates';
 import { num } from '../../utils/money';
 import PageHeader from '../../components/PageHeader';
 import ErrorState from '../../components/ErrorState';
@@ -45,7 +45,7 @@ export default function DevSummary() {
               hint={data.errors_today > 0 ? t('dev.errorsToday', { n: data.errors_today }) : undefined} tone={data.errors_today > 0 ? 'var(--warning)' : undefined} />
             <Kpi label={t('dev.quota')} value={`${num(data.quota.used_today, lang, 0)} / ${num(data.quota.daily, lang, 0)}`} hint={t('dev.quotaHint')} />
             <Kpi label={t('dev.keysActive')} value={num(data.keys_active, lang, 0)} />
-            <Kpi label={t('dev.lastCall')} value={data.last_call_at ? formatDateTime(data.last_call_at, lang) : '—'} />
+            <Kpi label={t('dev.lastCall')} value={data.last_call_at ? shortWhen(data.last_call_at, lang) : '—'} />
           </div>
 
           <Section title={t('dev.lastError')}>
@@ -82,4 +82,13 @@ export default function DevSummary() {
       )}
     </div>
   );
+}
+
+/** Hoy → "19:05"; otro día → "28 sept 19:05" (cabe en la tarjeta). */
+function shortWhen(s, lang) {
+  const d = parseDbDate(s);
+  if (!d) return '—';
+  const loc = localeOf(lang);
+  const time = d.toLocaleTimeString(loc, { hour: '2-digit', minute: '2-digit' });
+  return d.toDateString() === new Date().toDateString() ? time : `${d.toLocaleDateString(loc, { day: 'numeric', month: 'short' })} ${time}`;
 }

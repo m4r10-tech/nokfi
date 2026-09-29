@@ -20,7 +20,7 @@ export default function SpaceSwitcher({ collapsed = false }) {
   };
   const options = [
     { value: 'business', icon: Briefcase, label: t('nav.spaceBusiness') },
-    { value: 'dev', icon: Code2, label: t('nav.spaceDev') }
+    { value: 'dev', icon: Code2, label: t('nav.spaceDev'), short: 'API' }
   ];
 
   if (collapsed) {
@@ -34,13 +34,13 @@ export default function SpaceSwitcher({ collapsed = false }) {
   return (
     <div role="radiogroup" aria-label={t('nav.space')} className="grid grid-cols-2 gap-1 rounded-lg p-0.5"
       style={{ background: 'var(--surface-2)', border: '1px solid var(--border)' }}>
-      {options.map(({ value, icon: Icon, label }) => (
-        <button key={value} role="radio" aria-checked={current === value} onClick={() => go(value)}
+      {options.map(({ value, icon: Icon, label, short }) => (
+        <button key={value} role="radio" aria-checked={current === value} onClick={() => go(value)} title={label} aria-label={label}
           className="inline-flex items-center justify-center gap-1.5 rounded-md h-8 text-xs font-medium min-w-0"
           style={current === value
             ? { background: 'var(--surface-1)', color: 'var(--text-primary)', boxShadow: '0 0 0 1px var(--border-strong)' }
             : { color: 'var(--text-secondary)' }}>
-          <Icon size={13} className="shrink-0" /><span className="truncate">{label}</span>
+          <Icon size={13} className="shrink-0" /><span className="truncate">{short || label}</span>
         </button>
       ))}
     </div>
