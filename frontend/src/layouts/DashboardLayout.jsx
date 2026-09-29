@@ -1,11 +1,11 @@
 import { useState, useEffect } from 'react';
-import { Outlet, Link, useLocation } from 'react-router-dom';
+import { Outlet, Link, useLocation, useNavigate } from 'react-router-dom';
 import { ArrowLeft } from 'lucide-react';
 import Sidebar from '../components/Sidebar';
 import BottomNav from '../components/BottomNav';
 import Logo from '../components/Logo';
 import OnboardingModal from '../components/OnboardingModal';
-import { parentOf, NAV_ITEMS } from '../components/navItems';
+import { parentOf, navFor, spaceOf, SPACE_KEY } from '../components/navItems';
 import { useCompanyProfile } from '../hooks/useCompanyProfile';
 import { useLang } from '../context/LangContext';
 import { useToast } from '../context/ToastContext';
@@ -40,10 +40,24 @@ export default function DashboardLayout() {
 
   useEffect(() => { window.scrollTo(0, 0); }, [pathname]);
 
+  // Sesión 7: se recuerda el último espacio (Negocio / Desarrolladores). Al
+  // entrar en la app por el inicio, se abre el espacio donde se estaba; una
+  // URL /app/dev/… siempre abre Desarrolladores.
+  const navigate = useNavigate();
+  const space = spaceOf(pathname);
+  useEffect(() => {
+    let restored = false;
+    try { restored = sessionStorage.getItem('nokfi_space_restored') === '1'; sessionStorage.setItem('nokfi_space_restored', '1'); } catch { /* sin storage */ }
+    if (!restored && pathname === '/app/home') {
+      try { if (localStorage.getItem(SPACE_KEY) === 'dev') navigate('/app/dev', { replace: true }); } catch { /* sin storage */ }
+    }
+  }, []); // eslint-disable-line react-hooks/exhaustive-deps
+  useEffect(() => { try { localStorage.setItem(SPACE_KEY, space); } catch { /* sin storage */ } }, [space]);
+
   // Título de la pestaña según la sección (antes se quedaba el de la última
   // página pública, p.ej. "Iniciar sesión — Nokfi").
   useEffect(() => {
-    const item = NAV_ITEMS.find(i => pathname.startsWith(i.to));
+    const item = navFor(spaceOf(pathname)).filter(i => !i.external).sort((a, b) => b.to.length - a.to.length).find(i => pathname.startsWith(i.to));
     document.title = item ? `${t(item.key)} — Nokfi` : 'Nokfi';
   }, [pathname, t]);
 
@@ -60,7 +74,7 @@ export default function DashboardLayout() {
       <div className="flex-1 min-w-0 flex flex-col">
         <header className="md:hidden sticky top-0 z-30 flex items-center h-14 px-4"
           style={{ background: 'var(--bg-base)', borderBottom: '1px solid var(--border)', paddingTop: 'env(safe-area-inset-top)', boxSizing: 'content-box' }}>
-          <Link to="/app/home" aria-label="Nokfi"><Logo size="sm" /></Link>
+          <Link to={space === 'dev' ? '/app/dev' : '/app/home'} aria-label="Nokfi"><Logo size="sm" /></Link>
         </header>
 
         <main className="app-main w-full max-w-6xl mx-auto">

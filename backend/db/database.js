@@ -1330,7 +1330,8 @@ function parseJsonColumn(value) {
 function listAnalyses(license_id, limit = 50) {
   return getDB().prepare(`
     SELECT id, kind, title, prompt_chars, created_at,
-           CASE WHEN result_json IS NOT NULL THEN 'json' ELSE 'html' END AS format
+           CASE WHEN result_json IS NOT NULL THEN 'json' ELSE 'html' END AS format,
+           CASE WHEN json_valid(meta_json) THEN json_extract(meta_json, '$.source') END AS source
     FROM analyses
     WHERE license_id = ?
     ORDER BY created_at DESC, id DESC

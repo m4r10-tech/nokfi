@@ -153,7 +153,7 @@ function Row({ a, t, lang, showTime, i }) {
       <div className="flex-1 min-w-0">
         <p className="text-sm font-medium truncate" style={{ color: 'var(--text-primary)' }}>{a.title}</p>
         <p className="text-xs mt-0.5" style={{ color: 'var(--text-muted)' }}>
-          {kindLabel(a.kind, t)} · {d ? (showTime ? formatTime(d, lang) : formatDate(a.created_at, lang)) : '—'}
+          {kindLabel(a.kind, t)}{a.source === 'api' ? ` · ${t('history.viaApi')}` : ''} · {d ? (showTime ? formatTime(d, lang) : formatDate(a.created_at, lang)) : '—'}
         </p>
       </div>
       <ChevronRight size={16} className="shrink-0" style={{ color: 'var(--text-muted)' }} />

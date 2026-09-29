@@ -13,6 +13,7 @@
  *   client_errors   C8 — errores técnicos del frontend/backend (sin datos financieros)
  *   reminders_sent  C4 — avisos del calendario fiscal ya enviados (anti-duplicado)
  *   share_links     enlaces de solo lectura para la gestoría (token hasheado)
+ *   api_calls       registro mínimo de llamadas a la API v1 (sesión 7)
  *   leak_dismissals proveedores descartados en Fugas ("No es una fuga", sesión 6)
  *
  * Columnas nuevas:
@@ -131,6 +132,23 @@ function runSession4Schema(db) {
       revoked_at    TEXT    DEFAULT NULL
     );
     CREATE INDEX IF NOT EXISTS idx_share_links_license ON share_links(license_id);
+
+    -- Sesión 7: registro mínimo de llamadas a la API v1 (sin contenido del
+    -- cliente): para "llamadas de hoy" por clave, el último error y, en el
+    -- Bloque 2, el registro de llamadas. Retención 90 días.
+    CREATE TABLE IF NOT EXISTS api_calls (
+      id          INTEGER PRIMARY KEY AUTOINCREMENT,
+      license_id  INTEGER NOT NULL REFERENCES licenses(id) ON DELETE CASCADE,
+      key_id      INTEGER REFERENCES api_keys(id) ON DELETE SET NULL,
+      method      TEXT    NOT NULL DEFAULT '',
+      path        TEXT    NOT NULL DEFAULT '',
+      status      INTEGER NOT NULL DEFAULT 0,
+      error_code  TEXT    NOT NULL DEFAULT '',
+      ms          INTEGER NOT NULL DEFAULT 0,
+      created_at  TEXT    NOT NULL DEFAULT (datetime('now'))
+    );
+    CREATE INDEX IF NOT EXISTS idx_api_calls_license ON api_calls(license_id, created_at);
+    CREATE INDEX IF NOT EXISTS idx_api_calls_key ON api_calls(key_id, created_at);
 
     -- Sesión 6: proveedores que el usuario marca como "No es una fuga".
     CREATE TABLE IF NOT EXISTS leak_dismissals (

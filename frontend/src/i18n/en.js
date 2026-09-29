@@ -1,4 +1,32 @@
 export default {
+  dev: {
+    summaryTitle: 'Developers',
+    summaryDesc: 'Connect Nokfi to n8n, Make, AI agents or your own scripts.',
+    callsToday: 'Calls today',
+    errorsToday: '{n} failed',
+    errorsToday_one: '{n} failed',
+    quota: 'AI analyses today',
+    quotaHint: 'Quota shared with the web app',
+    keysActive: 'Active keys',
+    lastCall: 'Last call',
+    lastError: 'Last error',
+    lastErrorNone: 'No errors. When a call fails, you will see here what happened and with which key.',
+    startTitle: 'Getting started',
+    step1: 'Create a key named after your client or workflow.',
+    step1Cta: 'Create key',
+    step2: 'Try a call with the example in the docs (curl or n8n’s HTTP Request node).',
+    step2Cta: 'View docs',
+    step3: 'Check each key’s calls and errors here.',
+    lockedTitle: 'The API is available on the Pro and Max plans',
+    lockedDesc: 'You can read the docs and plan your workflows; to create keys, upgrade from “Manage subscription”.',
+    upgrade: 'Upgrade plan',
+    keysTitle: 'API keys',
+    newKey: 'New key',
+    activeKeys: 'Active keys',
+    keyNameHint: 'Name it after the client or workflow so you can see each one’s usage separately.',
+    callsTodayKey: '{n} calls today',
+    callsTodayKey_one: '{n} call today'
+  },
   common: {
     save: 'Save', cancel: 'Cancel', continue: 'Continue', back: 'Back',
     loading: 'Loading...', error: 'An error occurred', retry: 'Retry',
@@ -9,7 +37,13 @@ export default {
     home: 'Home', questionnaire: 'Questionnaire', questionnaireShort: 'Diagnosis', excel: 'Excel Analysis', excelShort: 'Excel',
     history: 'History', calculators: 'Calculators', reports: 'Reports', finance: 'Finance', help: 'Help',
     settings: 'Settings', logout: 'Log out', more: 'More', mainNav: 'Main navigation',
-    collapse: 'Collapse menu', expand: 'Expand menu', lightMode: 'Light mode', darkMode: 'Dark mode'
+    collapse: 'Collapse menu', expand: 'Expand menu', lightMode: 'Light mode', darkMode: 'Dark mode',
+    space: 'Space',
+    spaceBusiness: 'Business',
+    spaceDev: 'Developers',
+    devSummary: 'Overview',
+    devKeys: 'Keys',
+    devDocs: 'Documentation'
   },
   login: {
     title: 'Access Nokfi', subtitle: 'Enter your details to continue',
@@ -85,7 +119,9 @@ export default {
       namePlaceholder: 'Key name (e.g. n8n)', create: 'Create key',
       createdOnce: 'Copy your key now: for security we will not show it again.', savedIt: 'I have saved it',
       unnamed: 'Unnamed', lastUsed: 'Last used: {date}', neverUsed: 'Not used yet',
-      revoke: 'Revoke', confirmRevoke: 'Revoke this key? Automations using it will stop working.', revoked: 'Key revoked'
+      revoke: 'Revoke', confirmRevoke: 'Revoke this key? Automations using it will stop working.', revoked: 'Key revoked',
+      moved: 'API keys, their usage and the documentation now live in the Developers space.',
+      goDev: 'Go to Developers'
     },
     data: {
       title: 'My data',
@@ -248,7 +284,8 @@ export default {
     exportPdf: 'Export PDF', copyText: 'Copy text', textCopied: 'Text copied to clipboard',
     notFoundTitle: 'This analysis does not exist',
     notFoundDesc: 'The link may be wrong or the analysis may belong to another license.',
-    loadDetailError: 'Could not load this analysis.'
+    loadDetailError: 'Could not load this analysis.',
+    viaApi: 'via API'
   },
   errors: {
     network_error: 'No connection. Check your network and try again.',

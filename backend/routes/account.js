@@ -5,6 +5,7 @@
  *     GET    /api/keys           lista (sin la clave: solo prefijo)
  *     POST   /api/keys {name}    crea → devuelve la clave UNA vez (solo Pro/Max)
  *     DELETE /api/keys/:id       revoca
+ *     GET    /api/keys/summary   resumen del espacio Desarrolladores (sesión 7)
  *
  *   C9 — RGPD autoservicio:
  *     GET    /api/me/export      todos mis datos en JSON
@@ -22,9 +23,9 @@ const rateLimit = require('express-rate-limit');
 const { requireLicense } = require('../middleware/requireLicense');
 const { API_PLANS } = require('../middleware/requireApiKey');
 const {
-  getDB, getCompanyProfile, listAnalyses, getAnalysis, deleteLicense, audit
+  getDB, getCompanyProfile, listAnalyses, getAnalysis, deleteLicense, audit, aiQuotaForPlan, countAiAnalysesToday
 } = require('../db/database');
-const { createApiKey, listApiKeys, revokeApiKey } = require('../db/apikeys');
+const { createApiKey, listApiKeys, revokeApiKey, callsTodayByKey, apiSummary } = require('../db/apikeys');
 const { listActions } = require('../db/actions');
 const { listLedger } = require('../db/finance');
 const { verifyPassword } = require('../utils/password');
@@ -36,7 +37,20 @@ const telemetry = express.Router();
 
 /* ── F4 ── */
 keys.get('/', requireLicense, (req, res) => {
-  res.json({ keys: listApiKeys(req.license.id), available: API_PLANS.includes(req.license.plan) });
+  const calls = callsTodayByKey(req.license.id);
+  res.json({ keys: listApiKeys(req.license.id).map(k => ({ ...k, calls_today: calls[k.id] || 0 })), available: API_PLANS.includes(req.license.plan) });
+});
+
+// Sesión 7 — Resumen de Desarrolladores: llamadas de hoy, cuota, claves activas y último error.
+keys.get('/summary', requireLicense, (req, res) => {
+  const id = req.license.id;
+  res.json({
+    plan: req.license.plan,
+    available: API_PLANS.includes(req.license.plan),
+    quota: { daily: aiQuotaForPlan(req.license.plan), used_today: countAiAnalysesToday(id) },
+    keys_active: listApiKeys(id).filter(k => !k.revoked_at).length,
+    ...apiSummary(id)
+  });
 });
 
 keys.post('/', requireLicense, (req, res) => {
@@ -80,6 +94,7 @@ me.get('/export', requireLicense, (req, res) => {
     ledger_entries: listLedger(l.id),
     tax_reserves: db.prepare('SELECT year, quarter, amount, updated_at FROM tax_reserves WHERE license_id = ?').all(l.id),
     leak_dismissals: db.prepare('SELECT party_key, party_name, created_at FROM leak_dismissals WHERE license_id = ?').all(l.id),
+    api_calls: db.prepare('SELECT key_id, method, path, status, error_code, ms, created_at FROM api_calls WHERE license_id = ? ORDER BY id DESC LIMIT 5000').all(l.id),
     api_keys: listApiKeys(l.id)
   });
 });

@@ -44,4 +44,30 @@ function touchApiKey(id) {
   getDB().prepare("UPDATE api_keys SET last_used_at = datetime('now') WHERE id = ? AND (last_used_at IS NULL OR last_used_at < datetime('now', '-60 seconds'))").run(id);
 }
 
-module.exports = { createApiKey, listApiKeys, revokeApiKey, findApiKey, touchApiKey, API_KEY_PREFIX: PREFIX };
+/* ── Sesión 7: registro de llamadas (sin contenido: ruta, estado, error, ms) ── */
+function logApiCall({ license_id, key_id, method, path, status, error_code = '', ms = 0 }) {
+  const db = getDB();
+  db.prepare('INSERT INTO api_calls (license_id, key_id, method, path, status, error_code, ms) VALUES (?, ?, ?, ?, ?, ?, ?)')
+    .run(license_id, key_id ?? null, String(method).slice(0, 8), String(path).split('?')[0].slice(0, 120), status, String(error_code || '').slice(0, 60), Math.round(ms));
+  if (Math.random() < 0.01) db.prepare("DELETE FROM api_calls WHERE created_at < datetime('now', '-90 days')").run();
+}
+
+/** Llamadas de hoy (UTC) por clave: { [key_id]: n }. */
+function callsTodayByKey(license_id) {
+  const out = {};
+  for (const r of getDB().prepare(`SELECT key_id, COUNT(*) c FROM api_calls WHERE license_id = ? AND created_at >= date('now') GROUP BY key_id`).all(license_id)) {
+    if (r.key_id != null) out[r.key_id] = r.c;
+  }
+  return out;
+}
+
+function apiSummary(license_id) {
+  const db = getDB();
+  const today = db.prepare(`SELECT COUNT(*) c, SUM(status >= 400) e FROM api_calls WHERE license_id = ? AND created_at >= date('now')`).get(license_id);
+  const lastError = db.prepare(`SELECT c.method, c.path, c.status, c.error_code, c.created_at, k.name key_name FROM api_calls c
+    LEFT JOIN api_keys k ON k.id = c.key_id WHERE c.license_id = ? AND c.status >= 400 ORDER BY c.id DESC LIMIT 1`).get(license_id) || null;
+  const lastCall = db.prepare('SELECT created_at FROM api_calls WHERE license_id = ? ORDER BY id DESC LIMIT 1').get(license_id);
+  return { calls_today: today.c || 0, errors_today: today.e || 0, last_error: lastError, last_call_at: lastCall?.created_at || null };
+}
+
+module.exports = { logApiCall, callsTodayByKey, apiSummary, createApiKey, listApiKeys, revokeApiKey, findApiKey, touchApiKey, API_KEY_PREFIX: PREFIX };

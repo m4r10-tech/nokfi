@@ -1,4 +1,32 @@
 export default {
+  dev: {
+    summaryTitle: 'Entwickler',
+    summaryDesc: 'Verbinde Nokfi mit n8n, Make, KI-Agenten oder eigenen Skripten.',
+    callsToday: 'Aufrufe heute',
+    errorsToday: '{n} fehlgeschlagen',
+    errorsToday_one: '{n} fehlgeschlagen',
+    quota: 'KI-Analysen heute',
+    quotaHint: 'Kontingent geteilt mit der Web-App',
+    keysActive: 'Aktive Schlüssel',
+    lastCall: 'Letzter Aufruf',
+    lastError: 'Letzter Fehler',
+    lastErrorNone: 'Keine Fehler. Schlägt ein Aufruf fehl, siehst du hier, was passiert ist und mit welchem Schlüssel.',
+    startTitle: 'Erste Schritte',
+    step1: 'Erstelle einen Schlüssel mit dem Namen deines Kunden oder Workflows.',
+    step1Cta: 'Schlüssel erstellen',
+    step2: 'Teste einen Aufruf mit dem Beispiel aus der Doku (curl oder der HTTP-Request-Node von n8n).',
+    step2Cta: 'Doku ansehen',
+    step3: 'Prüfe hier die Aufrufe und Fehler jedes Schlüssels.',
+    lockedTitle: 'Die API gibt es in den Tarifen Pro und Max',
+    lockedDesc: 'Du kannst die Doku lesen und Workflows vorbereiten; um Schlüssel zu erstellen, wechsle über „Abo verwalten“ den Tarif.',
+    upgrade: 'Tarif wechseln',
+    keysTitle: 'API-Schlüssel',
+    newKey: 'Neuer Schlüssel',
+    activeKeys: 'Aktive Schlüssel',
+    keyNameHint: 'Benenne ihn nach Kunde oder Workflow, dann siehst du die Nutzung getrennt.',
+    callsTodayKey: '{n} Aufrufe heute',
+    callsTodayKey_one: '{n} Aufruf heute'
+  },
   common: {
     save: 'Speichern', cancel: 'Abbrechen', continue: 'Weiter', back: 'Zurück',
     loading: 'Wird geladen…', error: 'Es ist ein Fehler aufgetreten', retry: 'Erneut versuchen',
@@ -9,7 +37,13 @@ export default {
     home: 'Start', questionnaire: 'Fragebogen', questionnaireShort: 'Diagnose', excel: 'Excel-Analyse', excelShort: 'Excel',
     history: 'Verlauf', calculators: 'Rechner', reports: 'Berichte', finance: 'Finanzen', help: 'Hilfe',
     settings: 'Einstellungen', logout: 'Abmelden', more: 'Mehr', mainNav: 'Hauptnavigation',
-    collapse: 'Menü einklappen', expand: 'Menü ausklappen', lightMode: 'Heller Modus', darkMode: 'Dunkler Modus'
+    collapse: 'Menü einklappen', expand: 'Menü ausklappen', lightMode: 'Heller Modus', darkMode: 'Dunkler Modus',
+    space: 'Bereich',
+    spaceBusiness: 'Unternehmen',
+    spaceDev: 'Entwickler',
+    devSummary: 'Übersicht',
+    devKeys: 'Schlüssel',
+    devDocs: 'Dokumentation'
   },
   login: {
     title: 'Bei Nokfi anmelden', subtitle: 'Gib deine Daten ein, um fortzufahren',
@@ -85,7 +119,9 @@ export default {
       namePlaceholder: 'Name des Schlüssels (z. B. n8n)', create: 'Schlüssel erstellen',
       createdOnce: 'Kopiere deinen Schlüssel jetzt: Aus Sicherheitsgründen zeigen wir ihn nicht noch einmal an.', savedIt: 'Ich habe ihn gespeichert',
       unnamed: 'Ohne Namen', lastUsed: 'Zuletzt verwendet: {date}', neverUsed: 'Noch nicht verwendet',
-      revoke: 'Widerrufen', confirmRevoke: 'Diesen Schlüssel widerrufen? Automatisierungen, die ihn nutzen, funktionieren dann nicht mehr.', revoked: 'Schlüssel widerrufen'
+      revoke: 'Widerrufen', confirmRevoke: 'Diesen Schlüssel widerrufen? Automatisierungen, die ihn nutzen, funktionieren dann nicht mehr.', revoked: 'Schlüssel widerrufen',
+      moved: 'API-Schlüssel, ihre Nutzung und die Dokumentation findest du jetzt im Bereich Entwickler.',
+      goDev: 'Zu Entwickler'
     },
     data: {
       title: 'Meine Daten',
@@ -248,7 +284,8 @@ export default {
     exportPdf: 'Als PDF exportieren', copyText: 'Text kopieren', textCopied: 'Text in die Zwischenablage kopiert',
     notFoundTitle: 'Diese Analyse existiert nicht',
     notFoundDesc: 'Der Link ist vielleicht falsch oder die Analyse gehört zu einer anderen Lizenz.',
-    loadDetailError: 'Diese Analyse konnte nicht geladen werden.'
+    loadDetailError: 'Diese Analyse konnte nicht geladen werden.',
+    viaApi: 'per API'
   },
   errors: {
     network_error: 'Keine Verbindung. Prüfe dein Netzwerk und versuche es erneut.',

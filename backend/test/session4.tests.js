@@ -351,9 +351,22 @@ module.exports = async function session4Tests({ post, put, get, call, check, che
       post('/api/v1/analyze', { type: 'excel', lang: 'en', data: { module: 'ventas', files: [{ name: 'v.csv', rows: [{ a: 1 }] }] } }, apiKey),
       r => { aid = r.data.id; return r.status === 200 && r.data.report.summary === 'API ok' && r.data.actions.length === 1; });
     await checkAsync('F4: GET /api/v1/analyses/:id → mismo informe', get(`/api/v1/analyses/${aid}`, apiKey), r => r.status === 200 && r.data.report.summary === 'API ok');
+    await checkAsync('S7: el análisis hecho por API sale en el Historial con source "api"',
+      get('/api/analyses', tok), r => r.status === 200 && (r.data.analyses || r.data).find?.(x => x.id === aid)?.source === 'api');
     global.fetch = savedFetch;
     if (savedKey === undefined) delete process.env.GEMINI_API_KEY; else process.env.GEMINI_API_KEY = savedKey;
   }
+  // ── Sesión 7: registro de llamadas y resumen de Desarrolladores ──
+  await checkAsync('S7 Dev: GET /api/keys → calls_today por clave (>= 3 llamadas hoy)',
+    get('/api/keys', tok), r => r.status === 200 && r.data.keys.find(k => k.id === apiKeyId)?.calls_today >= 3);
+  await checkAsync('S7 Dev: GET /api/keys/summary → llamadas, errores de hoy y último error (invalid_type)',
+    get('/api/keys/summary', tok), r => r.status === 200 && r.data.available === true && r.data.keys_active >= 1
+      && r.data.calls_today >= 3 && r.data.errors_today >= 1 && r.data.last_error?.error_code === 'invalid_type'
+      && r.data.last_error.path === '/api/v1/analyze' && r.data.quota.daily === 50);
+  check('S7 Dev: el registro no guarda contenido (solo ruta, estado, código y ms)', () => {
+    const cols = getDB().prepare('PRAGMA table_info(api_calls)').all().map(c => c.name);
+    return !cols.some(c => /body|data|input|content/.test(c));
+  });
   getDB().prepare("UPDATE licenses SET plan = 'mini' WHERE id = ?").run(lid);
   await checkAsync('F4: licencia bajada a Mini → su clave da 401 api_plan_required (no se borra)',
     get('/api/v1/usage', apiKey), r => r.status === 401 && r.data.error === 'api_plan_required');

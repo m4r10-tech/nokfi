@@ -1,7 +1,8 @@
 import { useState, useEffect, useRef, useCallback } from 'react';
 import { NavLink, useLocation } from 'react-router-dom';
 import { MoreHorizontal, LogOut, Moon, Sun, X } from 'lucide-react';
-import { NAV_ITEMS } from './navItems';
+import { navFor, spaceOf } from './navItems';
+import SpaceSwitcher from './SpaceSwitcher';
 import { useAuth } from '../context/AuthContext';
 import { useLang } from '../context/LangContext';
 import { useTheme } from '../context/ThemeContext';
@@ -16,8 +17,9 @@ export default function BottomNav({ companyName }) {
   const [sheetOpen, setSheetOpen] = useState(false);
   const { pathname } = useLocation();
   const { t } = useLang();
-  const barItems = NAV_ITEMS.filter(i => i.mobile === 'bar');
-  const moreItems = NAV_ITEMS.filter(i => i.mobile === 'more');
+  const items = navFor(spaceOf(pathname));
+  const barItems = items.filter(i => i.mobile === 'bar');
+  const moreItems = items.filter(i => i.mobile === 'more');
   const moreActive = moreItems.some(i => pathname.startsWith(i.to));
   const closeSheet = useCallback(() => setSheetOpen(false), []);
 
@@ -29,12 +31,13 @@ export default function BottomNav({ companyName }) {
       <nav aria-label={t('nav.mainNav')}
         className="bottom-nav md:hidden fixed bottom-0 inset-x-0 z-40 safe-bottom"
         style={{ background: 'var(--surface-1)', borderTop: '1px solid var(--border)' }}>
-        <div className="grid grid-cols-5" style={{ height: 'var(--bottom-nav-h)' }}>
-          {barItems.map(({ to, icon: Icon, key, shortKey }) => (
-            <NavLink key={to} to={to} className="bottom-nav-item">
-              <Icon size={21} strokeWidth={1.9} />
-              <span>{t(shortKey || key)}</span>
-            </NavLink>
+        <div className="grid" style={{ height: 'var(--bottom-nav-h)', gridTemplateColumns: `repeat(${barItems.length + 1}, minmax(0, 1fr))` }}>
+          {barItems.map(({ to, icon: Icon, key, shortKey, end, external }) => (external
+            ? <a key={to} href={to} target="_blank" rel="noopener" className="bottom-nav-item"><Icon size={21} strokeWidth={1.9} /><span>{t(shortKey || key)}</span></a>
+            : <NavLink key={to} to={to} end={end} className="bottom-nav-item">
+                <Icon size={21} strokeWidth={1.9} />
+                <span>{t(shortKey || key)}</span>
+              </NavLink>
           ))}
           <button onClick={() => setSheetOpen(true)} aria-haspopup="dialog" aria-expanded={sheetOpen}
             className={`bottom-nav-item ${moreActive ? 'active' : ''}`}>
@@ -80,6 +83,8 @@ function MoreSheet({ items, companyName, onClose }) {
           </div>
           <button onClick={onClose} className="btn btn-ghost btn-sm !px-2" aria-label={t('common.close')}><X size={18} /></button>
         </div>
+
+        <div className="mb-3"><SpaceSwitcher /></div>
 
         <div className="flex flex-col gap-1">
           {items.map(({ to, icon: Icon, key }) => (

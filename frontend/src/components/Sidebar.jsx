@@ -1,7 +1,8 @@
-import { NavLink, Link } from 'react-router-dom';
-import { LogOut, PanelLeftClose, PanelLeftOpen } from 'lucide-react';
+import { NavLink, Link, useLocation } from 'react-router-dom';
+import { LogOut, PanelLeftClose, PanelLeftOpen, ExternalLink } from 'lucide-react';
 import Logo from './Logo';
-import { NAV_ITEMS } from './navItems';
+import { navFor, spaceOf } from './navItems';
+import SpaceSwitcher from './SpaceSwitcher';
 import { useAuth } from '../context/AuthContext';
 import { useLang } from '../context/LangContext';
 
@@ -14,6 +15,8 @@ export default function Sidebar({ collapsed, onToggle, companyName }) {
   const { logout, license } = useAuth();
   const { t } = useLang();
   const who = companyName || license?.email || '';
+  const { pathname } = useLocation();
+  const space = spaceOf(pathname);
 
   return (
     <aside
@@ -25,7 +28,7 @@ export default function Sidebar({ collapsed, onToggle, companyName }) {
         transition: 'width var(--dur-base) var(--ease-out), padding var(--dur-base) var(--ease-out)'
       }}>
       <div className={`flex items-center mb-6 ${collapsed ? 'flex-col gap-2' : 'h-10 justify-between pl-1.5'}`}>
-        <Link to="/app/home" aria-label="Nokfi" className="rounded-lg">
+        <Link to={space === 'dev' ? '/app/dev' : '/app/home'} aria-label="Nokfi" className="rounded-lg">
           {collapsed ? <Logo variant="icon" size="md" /> : <Logo size="sm" />}
         </Link>
         <button onClick={onToggle} className="btn btn-ghost btn-sm !px-2"
@@ -34,14 +37,20 @@ export default function Sidebar({ collapsed, onToggle, companyName }) {
         </button>
       </div>
 
+      <div className="mb-4"><SpaceSwitcher collapsed={collapsed} /></div>
+
       <nav className="flex-1 flex flex-col gap-0.5">
-        {NAV_ITEMS.map(({ to, icon: Icon, key }) => (
-          <NavLink key={to} to={to} title={collapsed ? t(key) : undefined} aria-label={collapsed ? t(key) : undefined}
-            className={`nav-item flex items-center gap-3 rounded-lg text-sm font-medium h-10 ${collapsed ? 'justify-center' : 'px-3'}`}>
+        {navFor(space).map(({ to, icon: Icon, key, end, external }) => {
+          const cls = `nav-item flex items-center gap-3 rounded-lg text-sm font-medium h-10 ${collapsed ? 'justify-center' : 'px-3'}`;
+          const inner = <>
             <Icon size={18} className="shrink-0" />
-            {!collapsed && <span className="truncate">{t(key)}</span>}
-          </NavLink>
-        ))}
+            {!collapsed && <span className="truncate flex-1">{t(key)}</span>}
+            {!collapsed && external && <ExternalLink size={13} className="shrink-0 opacity-60" />}
+          </>;
+          return external
+            ? <a key={to} href={to} target="_blank" rel="noopener" title={collapsed ? t(key) : undefined} aria-label={collapsed ? t(key) : undefined} className={cls}>{inner}</a>
+            : <NavLink key={to} to={to} end={end} title={collapsed ? t(key) : undefined} aria-label={collapsed ? t(key) : undefined} className={cls}>{inner}</NavLink>;
+        })}
       </nav>
 
       <div className="flex flex-col gap-1 pt-3" style={{ borderTop: '1px solid var(--border)' }}>

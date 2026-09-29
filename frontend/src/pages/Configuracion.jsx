@@ -326,88 +326,17 @@ function ShareSection() {
   );
 }
 
+// Sesión 7: las claves de API viven en Desarrolladores (/app/dev/claves).
 function ApiKeysSection() {
-  const { t, lang } = useLang();
-  const toast = useToast();
-  const [data, setData] = useState(null);
-  const [name, setName] = useState('');
-  const [creating, setCreating] = useState(false);
-  const [created, setCreated] = useState(null);
-  const [error, setError] = useState(null);
-
-  const load = async () => {
-    const res = await keysApi.list();
-    if (res.ok) setData(res.data);
-  };
-  useEffect(() => { load(); }, []);
-
-  const create = async (e) => {
-    e.preventDefault();
-    setCreating(true); setError(null);
-    const res = await keysApi.create(name.trim());
-    setCreating(false);
-    if (res.ok) { setCreated(res.data.key); setName(''); load(); }
-    else setError(apiErrorMessage(t, res));
-  };
-  const revoke = async (k) => {
-    if (!window.confirm(t('config.api.confirmRevoke'))) return;
-    const res = await keysApi.revoke(k.id);
-    if (res.ok) { toast.success(t('config.api.revoked')); load(); } else toast.error(apiErrorMessage(t, res));
-  };
-  const copy = async () => { try { await navigator.clipboard.writeText(created); toast.success(t('common.copied')); } catch { /* nada */ } };
-
-  if (!data) return null;
-  const active = data.keys.filter(k => !k.revoked_at);
-
+  const { t } = useLang();
   return (
-    <Section title={t('config.api.title')} aside={<Link to="/api-docs" className="link text-xs normal-case tracking-normal inline-flex items-center gap-1">{t('config.api.docs')} <ExternalLink size={11} /></Link>}>
-      <p className="text-xs" style={{ color: 'var(--text-muted)' }}>{t('config.api.desc')}</p>
-      {!data.available ? (
-        <div className="rounded-xl p-3.5 flex items-start gap-3" style={{ background: 'var(--surface-2)' }}>
-          <Lock size={16} className="mt-0.5 shrink-0" style={{ color: 'var(--text-muted)' }} />
-          <div className="text-sm">
-            <p style={{ color: 'var(--text-primary)' }}>{t('config.api.locked')}</p>
-            <p className="text-xs mt-1" style={{ color: 'var(--text-secondary)' }}>{t('config.api.lockedHint')}</p>
-          </div>
-        </div>
-      ) : (
-        <>
-          {created && (
-            <div className="rounded-xl p-3.5 flex flex-col gap-2 anim-fade" style={{ background: 'var(--positive-soft)' }}>
-              <p className="text-sm font-medium" style={{ color: 'var(--text-primary)' }}>{t('config.api.createdOnce')}</p>
-              <div className="flex items-center gap-2 rounded-lg pl-3 pr-1.5 py-1.5" style={{ background: 'var(--surface-1)', border: '1px solid var(--border-strong)' }}>
-                <code className="flex-1 text-xs break-all" style={{ color: 'var(--text-primary)' }}>{created}</code>
-                <button onClick={copy} className="btn btn-ghost btn-sm !px-2.5" aria-label={t('common.copy')}><Copy size={15} /></button>
-              </div>
-              <button onClick={() => setCreated(null)} className="text-xs self-start hover:underline" style={{ color: 'var(--text-secondary)' }}>{t('config.api.savedIt')}</button>
-            </div>
-          )}
-          {active.length > 0 && (
-            <ul className="flex flex-col gap-1.5">
-              {active.map(k => (
-                <li key={k.id} className="flex items-center gap-3 rounded-lg px-3 py-2" style={{ background: 'var(--surface-2)' }}>
-                  <Code2 size={15} className="shrink-0" style={{ color: 'var(--accent-text)' }} />
-                  <div className="flex-1 min-w-0">
-                    <p className="text-sm truncate" style={{ color: 'var(--text-primary)' }}>{k.name || t('config.api.unnamed')} <code className="text-xs" style={{ color: 'var(--text-muted)' }}>{k.prefix}…</code></p>
-                    <p className="text-xs" style={{ color: 'var(--text-muted)' }}>{k.last_used_at ? t('config.api.lastUsed').replace('{date}', new Date(k.last_used_at.replace(' ', 'T') + 'Z').toLocaleString(localeOf(lang))) : t('config.api.neverUsed')}</p>
-                  </div>
-                  <button onClick={() => revoke(k)} className="btn btn-ghost btn-sm !px-2" aria-label={t('config.api.revoke')} title={t('config.api.revoke')}><Trash2 size={14} /></button>
-                </li>
-              ))}
-            </ul>
-          )}
-          <form onSubmit={create} className="flex flex-col sm:flex-row gap-2">
-            <input value={name} onChange={(e) => setName(e.target.value)} maxLength={60} placeholder={t('config.api.namePlaceholder')} aria-label={t('config.api.namePlaceholder')} className="input flex-1" />
-            <button type="submit" disabled={creating} className="btn btn-secondary">{creating ? <Loader2 size={15} className="animate-spin" /> : <KeyRound size={15} />} {t('config.api.create')}</button>
-          </form>
-          {error && <ErrorMsg>{error}</ErrorMsg>}
-        </>
-      )}
+    <Section title={t('config.api.title')}>
+      <p className="text-sm" style={{ color: 'var(--text-secondary)' }}>{t('config.api.moved')}</p>
+      <Link to="/app/dev/claves" className="btn btn-secondary btn-sm self-start"><Code2 size={14} /> {t('config.api.goDev')}</Link>
     </Section>
   );
 }
 
-/* ── C9: descargar y borrar mis datos (RGPD autoservicio) ── */
 function MyDataSection() {
   const { t } = useLang();
   const { license, logout } = useAuth();

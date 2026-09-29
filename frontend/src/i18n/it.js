@@ -1,4 +1,32 @@
 export default {
+  dev: {
+    summaryTitle: 'Sviluppatori',
+    summaryDesc: 'Collega Nokfi a n8n, Make, agenti IA o ai tuoi script.',
+    callsToday: 'Chiamate oggi',
+    errorsToday: '{n} con errore',
+    errorsToday_one: '{n} con errore',
+    quota: 'Analisi IA oggi',
+    quotaHint: 'Quota condivisa con l’app web',
+    keysActive: 'Chiavi attive',
+    lastCall: 'Ultima chiamata',
+    lastError: 'Ultimo errore',
+    lastErrorNone: 'Nessun errore. Quando una chiamata fallirà, vedrai qui cosa è successo e con quale chiave.',
+    startTitle: 'Primi passi',
+    step1: 'Crea una chiave con il nome del cliente o del flusso.',
+    step1Cta: 'Crea chiave',
+    step2: 'Prova una chiamata con l’esempio della documentazione (curl o il nodo HTTP Request di n8n).',
+    step2Cta: 'Vedi documentazione',
+    step3: 'Controlla qui le chiamate e gli errori di ogni chiave.',
+    lockedTitle: 'L’API è disponibile nei piani Pro e Max',
+    lockedDesc: 'Puoi leggere la documentazione e preparare i flussi; per creare chiavi, passa a un piano superiore da «Gestisci abbonamento».',
+    upgrade: 'Cambia piano',
+    keysTitle: 'Chiavi API',
+    newKey: 'Nuova chiave',
+    activeKeys: 'Chiavi attive',
+    keyNameHint: 'Dagli il nome del cliente o del flusso: vedrai l’utilizzo di ciascuno separatamente.',
+    callsTodayKey: '{n} chiamate oggi',
+    callsTodayKey_one: '{n} chiamata oggi'
+  },
   common: {
     save: 'Salva', cancel: 'Annulla', continue: 'Continua', back: 'Indietro',
     loading: 'Caricamento…', error: 'Si è verificato un errore', retry: 'Riprova',
@@ -9,7 +37,13 @@ export default {
     home: 'Home', questionnaire: 'Questionario', questionnaireShort: 'Diagnosi', excel: 'Analisi Excel', excelShort: 'Excel',
     history: 'Cronologia', calculators: 'Calcolatrici', reports: 'Report', finance: 'Finanze', help: 'Aiuto',
     settings: 'Impostazioni', logout: 'Esci', more: 'Altro', mainNav: 'Navigazione principale',
-    collapse: 'Comprimi menu', expand: 'Espandi menu', lightMode: 'Tema chiaro', darkMode: 'Tema scuro'
+    collapse: 'Comprimi menu', expand: 'Espandi menu', lightMode: 'Tema chiaro', darkMode: 'Tema scuro',
+    space: 'Spazio',
+    spaceBusiness: 'Azienda',
+    spaceDev: 'Sviluppatori',
+    devSummary: 'Panoramica',
+    devKeys: 'Chiavi',
+    devDocs: 'Documentazione'
   },
   login: {
     title: 'Accedi a Nokfi', subtitle: 'Inserisci i tuoi dati per continuare',
@@ -85,7 +119,9 @@ export default {
       namePlaceholder: 'Nome della chiave (es. n8n)', create: 'Crea chiave',
       createdOnce: 'Copia ora la chiave: per sicurezza non la mostreremo più.', savedIt: 'L’ho salvata',
       unnamed: 'Senza nome', lastUsed: 'Ultimo utilizzo: {date}', neverUsed: 'Non ancora usata',
-      revoke: 'Revoca', confirmRevoke: 'Revocare questa chiave? Le automazioni che la usano smetteranno di funzionare.', revoked: 'Chiave revocata'
+      revoke: 'Revoca', confirmRevoke: 'Revocare questa chiave? Le automazioni che la usano smetteranno di funzionare.', revoked: 'Chiave revocata',
+      moved: 'Le chiavi API, il loro utilizzo e la documentazione sono ora nello spazio Sviluppatori.',
+      goDev: 'Vai a Sviluppatori'
     },
     data: {
       title: 'I miei dati',
@@ -248,7 +284,8 @@ export default {
     exportPdf: 'Esporta PDF', copyText: 'Copia testo', textCopied: 'Testo copiato negli appunti',
     notFoundTitle: 'Questa analisi non esiste',
     notFoundDesc: 'Il link potrebbe essere errato o l’analisi appartenere a un’altra licenza.',
-    loadDetailError: 'Impossibile caricare questa analisi.'
+    loadDetailError: 'Impossibile caricare questa analisi.',
+    viaApi: 'via API'
   },
   errors: {
     network_error: 'Nessuna connessione. Controlla la rete e riprova.',

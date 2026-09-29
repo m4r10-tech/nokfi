@@ -40,6 +40,8 @@ const Historial = lazy(() => import('./pages/Historial'));
 const HistorialDetalle = lazy(() => import('./pages/HistorialDetalle'));
 const Calculadoras = lazy(() => import('./pages/Calculadoras'));
 const Configuracion = lazy(() => import('./pages/Configuracion'));
+const DevSummary = lazy(() => import('./pages/dev/DevSummary'));
+const DevKeys = lazy(() => import('./pages/dev/DevKeys'));
 const Ayuda = lazy(() => import('./pages/Ayuda'));
 const FinanceLayout = lazy(() => import('./pages/finance/FinanceLayout'));
 const Ledger = lazy(() => import('./pages/finance/Ledger'));
@@ -110,6 +112,9 @@ export default function App() {
               <Route path="informes" element={<Navigate to="/app/historial" replace />} />
               <Route path="configuracion" element={<Configuracion />} />
               <Route path="ayuda" element={<Ayuda />} />
+              {/* Sesión 7: espacio Desarrolladores */}
+              <Route path="dev" element={<DevSummary />} />
+              <Route path="dev/claves" element={<DevKeys />} />
             </Route>
 
             {/* 404 real (antes redirigía a /login = soft 404 para crawlers) */}

@@ -34,7 +34,8 @@ router.get('/', requireLicense, (req, res) => {
       title: r.title,
       prompt_chars: r.prompt_chars,
       format: r.format,
-      created_at: r.created_at
+      created_at: r.created_at,
+      source: r.source || 'web'
     }))
   });
 });

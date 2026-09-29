@@ -141,6 +141,7 @@ export const dashboardApi = { get: () => request('/dashboard', { auth: true }) }
 // F4 — claves de API; C9 — mis datos (descargar / borrar la cuenta).
 export const keysApi = {
   list: () => request('/keys', { auth: true }),
+  summary: () => request('/keys/summary', { auth: true }),
   create: (name) => request('/keys', { method: 'POST', auth: true, body: { name } }),
   revoke: (id) => request(`/keys/${encodeURIComponent(id)}`, { method: 'DELETE', auth: true })
 };

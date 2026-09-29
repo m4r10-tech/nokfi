@@ -11,7 +11,7 @@
 'use strict';
 
 const { getLicenseById, audit } = require('../db/database');
-const { findApiKey, touchApiKey } = require('../db/apikeys');
+const { findApiKey, touchApiKey, logApiCall } = require('../db/apikeys');
 
 const API_PLANS = ['pro', 'max'];
 const PER_MINUTE = 30;
@@ -47,6 +47,15 @@ function requireApiKey(req, res, next) {
     return res.status(429).json({ error: 'rate_limited', message: `Máximo ${PER_MINUTE} peticiones por minuto y clave.` });
   }
   touchApiKey(key.id);
+  // Sesión 7: registro de la llamada al terminar (estado y código de error, sin contenido).
+  const started = Date.now();
+  let errorCode = '';
+  const json = res.json.bind(res);
+  res.json = (body) => { if (body && typeof body === 'object' && typeof body.error === 'string') errorCode = body.error; return json(body); };
+  res.on('finish', () => {
+    try { logApiCall({ license_id: license.id, key_id: key.id, method: req.method, path: req.baseUrl + req.path, status: res.statusCode, error_code: errorCode, ms: Date.now() - started }); }
+    catch (e) { console.error('[API] no se pudo registrar la llamada:', e.message); }
+  });
   req.license = license;
   req.apiKey = { id: key.id, name: key.name };
   if (req.method !== 'GET') audit('API_REQUEST', { license_id: license.id, ip: req.ip, detail: `key=${key.id} ${req.method} ${req.path}` });
