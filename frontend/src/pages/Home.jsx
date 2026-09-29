@@ -106,7 +106,7 @@ export default function Home() {
             valueSmall
             hint={stats?.last ? stats.last.title : t('home.lastEmpty')}
             to={stats?.last ? `/app/historial/${stats.last.id}` : null} />
-          <QuotaCard i={2} loading={!stats} used={stats?.usedToday ?? 0} quota={quota} t={t} lang={lang} />
+          <QuotaCard i={2} loading={!stats} used={dash?.ai_used_today ?? stats?.usedToday ?? 0} quota={quota} t={t} lang={lang} />
         </div>
       )}
 

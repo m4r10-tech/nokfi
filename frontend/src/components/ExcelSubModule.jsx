@@ -210,7 +210,7 @@ export default function ExcelSubModule({ moduleId }) {
           <>
             <div className="flex flex-wrap gap-2">
               <ExportMenu doc={{ title: result.title, report: result.report, actions: result.actions, files: allFiles }} />
-              <AskAssistant analysisId={result.analysis_id} />
+              <AskAssistant analysisId={result.analysis_id} title={result.title} />
               <Link to="/app/historial" className="btn btn-ghost btn-sm"><History size={14} /> {t('questionnaire.savedInHistory')}</Link>
             </div>
             <ReportView report={result.report} actions={result.actions} />

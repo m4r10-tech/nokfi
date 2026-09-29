@@ -97,7 +97,7 @@ function ChatPanel({ analysis, messages, setMessages, onClose, onClearContext })
         <span className="w-8 h-8 rounded-lg grid place-items-center" style={{ background: 'var(--accent-soft)', color: 'var(--accent-text)' }}><Sparkles size={16} /></span>
         <div className="flex-1 min-w-0">
           <p className="text-sm font-semibold" style={{ color: 'var(--text-primary)' }}>{t('chat.title')}</p>
-          <p className="text-xs truncate" style={{ color: 'var(--text-muted)' }}>{analysis ? `${t('chat.aboutReport')} ${analysis.title || ''}` : t('chat.subtitle')}</p>
+          <p className="text-xs truncate" style={{ color: 'var(--text-muted)' }}>{analysis?.title ? `${t('chat.aboutReport')} ${analysis.title}` : t('chat.subtitle')}</p>
         </div>
         {analysis && <button onClick={onClearContext} className="btn btn-ghost btn-sm !px-2" title={t('chat.clearContext')} aria-label={t('chat.clearContext')}><Trash2 size={15} /></button>}
         <button onClick={onClose} className="btn btn-ghost btn-sm !px-2" aria-label={t('common.close')}><X size={18} /></button>

@@ -25,7 +25,7 @@
 
 const express = require('express');
 const { requireLicense } = require('../middleware/requireLicense');
-const { getCompanyProfile, getLatestAnalysisOfKind, audit } = require('../db/database');
+const { getCompanyProfile, getLatestAnalysisOfKind, audit, countAiAnalysesToday } = require('../db/database');
 const F = require('../db/finance');
 const { sentStages } = require('../services/collections');
 const { taxSummary, receivables, leaks, forecast, quarterOf } = require('../utils/finance');
@@ -222,6 +222,8 @@ dashboard.get('/', requireLicense, (req, res) => {
     health: health?.meta?.health ? { ...health.meta.health, analysis_id: health.id, created_at: health.created_at } : null,
     actions: { ...actionStats(id), next: openActions },
     ledger_count: entries.length,
+    // Cuota REAL gastada hoy (incluye lecturas de facturas y llamadas por API, que no van al historial).
+    ai_used_today: countAiAnalysesToday(id),
     next_deadline: upcoming(profile.legal_form || undefined, iso(new Date()), 1)[0] || null
   };
   if (entries.length) {

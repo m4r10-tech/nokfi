@@ -201,7 +201,8 @@ module.exports = async function session4Tests({ post, put, get, call, check, che
   // ── Panel ──
   await checkAsync('Dashboard: resumen con impuestos, cobros y fugas',
     get('/api/dashboard', tok),
-    r => r.status === 200 && r.data.ledger_count === 7 && r.data.receivables.count === 1 && !!r.data.next_deadline);
+    r => r.status === 200 && r.data.ledger_count === 7 && r.data.receivables.count === 1 && !!r.data.next_deadline
+      && typeof r.data.ai_used_today === 'number');
 
   // ── C4: avisos (sin enviar emails reales) ──
   {

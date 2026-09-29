@@ -95,7 +95,7 @@ export default function Cuestionario() {
         <PageHeader title={t('questionnaire.resultTitle')} description={profile.companyName || undefined} />
         <div className="flex flex-wrap gap-2 mb-4">
           <ExportMenu doc={{ title: REPORT_TITLE, report: report.report, health: report.health, actions: report.actions, companyName: profile.companyName }} />
-          <AskAssistant analysisId={report.analysis_id} />
+          <AskAssistant analysisId={report.analysis_id} title={report.title} />
           <Link to="/app/historial" className="btn btn-ghost btn-sm"><History size={14} /> {t('questionnaire.savedInHistory')}</Link>
         </div>
         <ReportView report={report.report} actions={report.actions} health={report.health} />

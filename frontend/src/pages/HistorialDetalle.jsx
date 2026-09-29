@@ -97,7 +97,7 @@ export default function HistorialDetalle() {
           title: analysis.title, report: analysis.report, html: analysis.result_html, health: analysis.health,
           actions: analysis.actions, fileBase: analysis.meta?.folder_name || analysis.title
         }} />
-        {analysis.report && <AskAssistant analysisId={analysis.id} />}
+        {analysis.report && <AskAssistant analysisId={analysis.id} title={analysis.title} />}
         <button onClick={copyText} className="btn btn-ghost btn-sm">
           <Copy size={14} /> {t('history.copyText')}
         </button>
