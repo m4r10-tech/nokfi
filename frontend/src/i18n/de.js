@@ -405,7 +405,7 @@ export default {
   },
   privacy: {
     title: 'Datenschutzerklärung',
-    updated: 'Zuletzt aktualisiert: 27. September 2026',
+    updated: 'Zuletzt aktualisiert: 29. September 2026',
     intro: 'Diese Erklärung beschreibt ohne Kleingedrucktes, welche Daten Nokfi (nokfi.app) verarbeitet, wofür und welche Drittanbieter beteiligt sind. Sie entspricht genau der Funktionsweise der Anwendung.',
     sections: [
       { h: 'Verantwortlicher und Kontakt', ps: ['Verantwortlicher für die Daten deines Kontos ist {OWNER}. Für Datenschutzfragen oder zur Ausübung deiner Rechte schreibe an info@nokfi.app. Bei Problemen mit Konto oder Zahlungen an soporte@nokfi.app.'] },
@@ -425,7 +425,8 @@ export default {
       ] },
       { h: 'Beteiligte Drittanbieter', list: [
         'Stripe: wickelt Zahlungen ab und verwaltet Abonnements.',
-        'Cloudflare Workers AI: erstellt die Analysen, liest gescannte oder fotografierte Rechnungen und antwortet im Assistenten. Seine Bedingungen verbieten, deine Daten zum Training von Modellen zu nutzen, und es speichert sie nicht (außer vorübergehenden technischen Protokollen zur Missbrauchsaufklärung). Deine Gespräche mit dem Assistenten speichern wir nicht. Fügen wir künftig einen weiteren KI-Anbieter hinzu, trainiert auch dieser nicht mit deinen Daten, und wir führen ihn hier auf.',
+        'Cloudflare Workers AI: erstellt die Analysen, liest gescannte oder fotografierte Rechnungen und antwortet im Assistenten. Seine Bedingungen verbieten, deine Daten zum Training von Modellen zu nutzen, und es speichert sie nicht (außer vorübergehenden technischen Protokollen zur Missbrauchsaufklärung). Deine Gespräche mit dem Assistenten speichern wir nicht.',
+        'Groq: KI-Ersatzanbieter, nur genutzt, wenn Cloudflare nicht verfügbar ist (gleiche Aufgaben). Sein Vertrag verbietet, deine Daten zum Training oder Feinabstimmen von Modellen zu nutzen, und wir haben die Null-Speicherung aktiviert (Anfragen werden nicht gespeichert). Er verarbeitet die Daten in den USA, auf Grundlage von Standardvertragsklauseln.',
         'Resend: versendet die E-Mails (deinen Lizenzschlüssel, die Passwort-Wiederherstellung und, falls aktiviert, Steuerfristen-Erinnerungen, die monatliche Zusammenfassung und Zahlungserinnerungen an deine Kunden).',
         'Cloudflare: Auslieferungs- und Sicherheitsnetz, das den Zugriff auf die Website schützt. Das Land deiner Verbindung (von Cloudflare übermittelt) nutzen wir nur, um die Anfangssprache der Website zu wählen; wir speichern es nicht.'
       ] },

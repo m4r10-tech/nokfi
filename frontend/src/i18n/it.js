@@ -405,7 +405,7 @@ export default {
   },
   privacy: {
     title: 'Informativa sulla privacy',
-    updated: 'Ultimo aggiornamento: 27 settembre 2026',
+    updated: 'Ultimo aggiornamento: 29 settembre 2026',
     intro: 'Questa informativa descrive, senza clausole nascoste, quali dati tratta Nokfi (nokfi.app), per quale scopo e quali servizi di terze parti intervengono. Riflette esattamente il funzionamento dell’applicazione.',
     sections: [
       { h: 'Titolare e contatti', ps: ['Il titolare del trattamento dei dati del tuo account è {OWNER}. Per qualsiasi questione di privacy o per esercitare i tuoi diritti, scrivi a info@nokfi.app. Per problemi con l’account o i pagamenti, a soporte@nokfi.app.'] },
@@ -425,7 +425,8 @@ export default {
       ] },
       { h: 'Servizi di terze parti coinvolti', list: [
         'Stripe: elabora i pagamenti e gestisce gli abbonamenti.',
-        'Cloudflare Workers AI: genera le analisi, legge le fatture scansionate o fotografate e risponde nell’assistente. Le sue condizioni vietano di usare i tuoi dati per addestrare modelli e non li conserva (salvo log tecnici temporanei per indagare abusi). Non salviamo le tue conversazioni con l’assistente. Se in futuro aggiungeremo un altro fornitore di IA, anch’esso non addestrerà modelli con i tuoi dati e lo indicheremo qui.',
+        'Cloudflare Workers AI: genera le analisi, legge le fatture scansionate o fotografate e risponde nell’assistente. Le sue condizioni vietano di usare i tuoi dati per addestrare modelli e non li conserva (salvo log tecnici temporanei per indagare abusi). Non salviamo le tue conversazioni con l’assistente.',
+        'Groq: fornitore di IA di riserva, usato solo se Cloudflare non è disponibile (stesse attività). Il suo contratto gli vieta di usare i tuoi dati per addestrare o perfezionare modelli, e abbiamo attivato la conservazione zero (le richieste non vengono salvate). Tratta i dati negli Stati Uniti, con clausole contrattuali tipo.',
         'Resend: invia le email (la tua chiave di licenza, il recupero della password e, se attivati, gli avvisi del calendario fiscale, il riepilogo mensile e i solleciti di pagamento ai tuoi clienti).',
         'Cloudflare: rete di distribuzione e sicurezza che protegge l’accesso al sito. Usiamo il paese della tua connessione (indicato da Cloudflare) solo per scegliere la lingua iniziale del sito; non lo conserviamo.'
       ] },

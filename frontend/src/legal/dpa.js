@@ -10,7 +10,7 @@
 export const DPA = {
   es: {
     title: 'Contrato de encargo de tratamiento',
-    updated: 'Última actualización: 27 de septiembre de 2026',
+    updated: 'Última actualización: 29 de septiembre de 2026',
     intro: 'Cuando usas Nokfi tratas datos personales de terceros (por ejemplo, el nombre, NIF y email de tus clientes y proveedores). Para esos datos tú eres el responsable del tratamiento y Nokfi actúa como encargado, conforme al artículo 28 del Reglamento General de Protección de Datos (RGPD) y a la Ley Orgánica 3/2018. Este contrato forma parte de los términos de uso y se acepta al activar la licencia.',
     sections: [
       { h: '1. Partes', list: [
@@ -47,6 +47,7 @@ export const DPA = {
       ], list: [
         '{HOSTING}',
         'Cloudflare, Inc.: red de distribución y seguridad y generación de análisis con IA (Workers AI). Transferencias internacionales amparadas por el Marco de Privacidad de Datos UE-EE. UU. y cláusulas contractuales tipo.',
+        'Groq, Inc.: generación de análisis con IA como respaldo, solo si Cloudflare no está disponible; sin entrenamiento con los datos y con retención cero. EE. UU., con cláusulas contractuales tipo.',
         'Resend (Plus Five Five, Inc.): envío de emails, incluidos los recordatorios de cobro a tus clientes. EE. UU., con cláusulas contractuales tipo.'
       ], after: [
         'Si incorporamos o sustituimos un subencargado (por ejemplo, otro proveedor de IA que no entrene con los datos), lo publicaremos en esta página y te avisaremos con al menos 15 días de antelación; podrás oponerte cancelando tu licencia.',
@@ -65,7 +66,7 @@ export const DPA = {
   },
   en: {
     title: 'Data processing agreement',
-    updated: 'Last updated: 27 September 2026',
+    updated: 'Last updated: 29 September 2026',
     intro: 'When you use Nokfi you process personal data of third parties (for example, the name, tax ID and email of your clients and suppliers). For that data you are the controller and Nokfi acts as processor, under Article 28 of the General Data Protection Regulation (GDPR). This agreement is part of the terms of use and is accepted when you activate your licence. The Spanish version prevails in case of discrepancy.',
     sections: [
       { h: '1. Parties', list: [
@@ -100,6 +101,7 @@ export const DPA = {
       { h: '6. Sub-processors', ps: ['You authorise Nokfi to use the following sub-processors, bound by data protection obligations equivalent to this agreement:'], list: [
         '{HOSTING}',
         'Cloudflare, Inc.: content delivery and security network and AI analyses (Workers AI). International transfers covered by the EU-US Data Privacy Framework and standard contractual clauses.',
+        'Groq, Inc.: backup AI analyses, used only if Cloudflare is unavailable; no training on the data and zero data retention. US, under standard contractual clauses.',
         'Resend (Plus Five Five, Inc.): email delivery, including payment reminders to your clients. USA, with standard contractual clauses.'
       ], after: [
         'If we add or replace a sub-processor (for example another AI provider that does not train on data), we will publish it here and notify you at least 15 days in advance; you may object by cancelling your licence.',

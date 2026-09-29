@@ -405,7 +405,7 @@ export default {
   },
   privacy: {
     title: 'Polityka prywatności',
-    updated: 'Ostatnia aktualizacja: 27 września 2026',
+    updated: 'Ostatnia aktualizacja: 29 września 2026',
     intro: 'Ta polityka opisuje bez drobnego druku, jakie dane przetwarza Nokfi (nokfi.app), w jakim celu i jakie usługi zewnętrzne w tym uczestniczą. Odzwierciedla dokładnie działanie aplikacji.',
     sections: [
       { h: 'Administrator i kontakt', ps: ['Administratorem danych twojego konta jest {OWNER}. W sprawach prywatności lub aby skorzystać ze swoich praw, napisz na info@nokfi.app. W sprawach konta lub płatności — na soporte@nokfi.app.'] },
@@ -425,7 +425,8 @@ export default {
       ] },
       { h: 'Usługi zewnętrzne', list: [
         'Stripe: obsługuje płatności i zarządza subskrypcjami.',
-        'Cloudflare Workers AI: generuje analizy, czyta zeskanowane lub sfotografowane faktury i odpowiada w asystencie. Jego warunki zabraniają używania twoich danych do trenowania modeli i nie przechowuje ich (poza tymczasowymi logami technicznymi do badania nadużyć). Nie zapisujemy twoich rozmów z asystentem. Jeśli w przyszłości dodamy innego dostawcę AI, także on nie będzie trenował modeli na twoich danych i wskażemy go tutaj.',
+        'Cloudflare Workers AI: generuje analizy, czyta zeskanowane lub sfotografowane faktury i odpowiada w asystencie. Jego warunki zabraniają używania twoich danych do trenowania modeli i nie przechowuje ich (poza tymczasowymi logami technicznymi do badania nadużyć). Nie zapisujemy twoich rozmów z asystentem.',
+        'Groq: zapasowy dostawca AI, używany tylko, gdy Cloudflare jest niedostępny (te same zadania). Umowa zabrania mu używania twoich danych do trenowania lub dostrajania modeli, a my mamy włączone zerowe przechowywanie (zapytania nie są zapisywane). Przetwarza dane w USA, na podstawie standardowych klauzul umownych.',
         'Resend: wysyła e-maile (twój klucz licencyjny, odzyskiwanie hasła oraz — jeśli je włączysz — przypomnienia kalendarza podatkowego, miesięczne podsumowanie i przypomnienia o płatności do twoich klientów).',
         'Cloudflare: sieć dostarczania i bezpieczeństwa chroniąca dostęp do strony. Kraju twojego połączenia (podawanego przez Cloudflare) używamy tylko do wyboru początkowego języka strony; nie przechowujemy go.'
       ] },

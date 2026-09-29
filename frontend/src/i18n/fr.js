@@ -405,7 +405,7 @@ export default {
   },
   privacy: {
     title: 'Politique de confidentialité',
-    updated: 'Dernière mise à jour : 27 septembre 2026',
+    updated: 'Dernière mise à jour : 29 septembre 2026',
     intro: 'Cette politique décrit, sans petits caractères, quelles données Nokfi (nokfi.app) traite, dans quel but et quels services tiers interviennent. Elle reflète exactement le fonctionnement de l’application.',
     sections: [
       { h: 'Responsable et contact', ps: ['Le responsable du traitement des données de votre compte est {OWNER}. Pour toute question de confidentialité ou pour exercer vos droits, écrivez à info@nokfi.app. Pour un problème de compte ou de paiement, à soporte@nokfi.app.'] },
@@ -425,7 +425,8 @@ export default {
       ] },
       { h: 'Services tiers qui interviennent', list: [
         'Stripe : traite les paiements et gère les abonnements.',
-        'Cloudflare Workers AI : génère les analyses, lit les factures scannées ou photographiées et répond dans l’assistant. Ses conditions interdisent d’utiliser vos données pour entraîner des modèles et il ne les conserve pas (sauf journaux techniques temporaires pour enquêter sur les abus). Nous ne conservons pas vos conversations avec l’assistant. Si nous ajoutons un autre fournisseur d’IA, il n’entraînera pas non plus ses modèles avec vos données, et nous l’indiquerons ici.',
+        'Cloudflare Workers AI : génère les analyses, lit les factures scannées ou photographiées et répond dans l’assistant. Ses conditions interdisent d’utiliser vos données pour entraîner des modèles et il ne les conserve pas (sauf journaux techniques temporaires pour enquêter sur les abus). Nous ne conservons pas vos conversations avec l’assistant.',
+        'Groq : fournisseur d’IA de secours, utilisé seulement si Cloudflare est indisponible (mêmes tâches). Son contrat lui interdit d’utiliser vos données pour entraîner ou ajuster des modèles, et la conservation zéro est activée (les requêtes ne sont pas conservées). Il traite les données aux États-Unis, sous clauses contractuelles types.',
         'Resend : envoie les e-mails (votre clé de licence, la récupération du mot de passe et, si vous les activez, les rappels du calendrier fiscal, le résumé mensuel et les relances de paiement à vos clients).',
         'Cloudflare : réseau de distribution et de sécurité qui protège l’accès au site. Nous utilisons le pays de votre connexion (indiqué par Cloudflare) uniquement pour choisir la langue initiale du site ; nous ne le conservons pas.'
       ] },

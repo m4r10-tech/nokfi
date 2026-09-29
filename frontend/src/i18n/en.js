@@ -405,7 +405,7 @@ export default {
   },
   privacy: {
     title: 'Privacy policy',
-    updated: 'Last updated: 27 September 2026',
+    updated: 'Last updated: 29 September 2026',
     intro: 'This policy describes, in plain terms, which data Nokfi (nokfi.app) processes, why, and which third-party services are involved. It reflects exactly how the application works.',
     sections: [
       { h: 'Controller & contact', ps: ['The controller for your account data is {OWNER}. For any privacy question or to exercise your rights, write to info@nokfi.app. For account or payment issues, to soporte@nokfi.app.'] },
@@ -425,7 +425,8 @@ export default {
       ] },
       { h: 'Third-party services involved', list: [
         'Stripe: processes payments and manages subscriptions.',
-        'Cloudflare Workers AI: generates the analyses, reads scanned or photographed invoices and answers in the assistant. Its terms forbid using your data to train models and it does not retain it (except temporary technical logs to investigate abuse). We do not store your assistant conversations. If we add another AI provider in the future, it will also be one that does not train on your data, and we will list it here.',
+        'Cloudflare Workers AI: generates the analyses, reads scanned or photographed invoices and answers in the assistant. Its terms forbid using your data to train models and it does not retain it (except temporary technical logs to investigate abuse). We do not store your assistant conversations.',
+        'Groq: backup AI provider, used only if Cloudflare is unavailable (same tasks). Its contract forbids using your data to train or fine-tune models, and we have zero data retention enabled (requests are not stored). It processes data in the US, under standard contractual clauses.',
         'Resend: sends emails (your licence key, password recovery and, if enabled, tax calendar reminders, the monthly summary and payment reminders to your clients).',
         'Cloudflare: delivery and security network protecting access to the website. We use your connection\'s country (provided by Cloudflare) only to choose the website\'s initial language; we do not store it.'
       ] },
