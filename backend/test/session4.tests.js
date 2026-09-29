@@ -21,7 +21,7 @@ module.exports = async function session4Tests({ post, put, get, call, check, che
     check('IA: groq primero, formato OpenAI, imagen como image_url y JSON mode', () =>
       r1.model.startsWith('groq:') && r1.json.summary === 'desde groq' && calls[0].url.includes('api.groq.com')
       && calls[0].body.response_format?.type === 'json_object' && calls[0].body.messages[1].content[1].type === 'image_url'
-      && calls[0].body.messages[0].content.includes('"type":"object"'));
+      && calls[0].body.messages[0].content.includes('"type":"object"') && calls[0].body.model === 'qwen/qwen3.8-27b');
     calls.length = 0;
     global.fetch = async (url, o) => { calls.push({ url }); return url.includes('groq') ? { ok: false, status: 429, text: async () => 'rate' } : ok({ summary: 'desde cloudflare' }); };
     const r2 = await providers.generate({ system: 's', parts: [{ text: 'x' }], schema: { type: 'OBJECT' } });

@@ -78,7 +78,7 @@ const PROVIDERS = {
   groq: {
     configured: () => !!process.env.GROQ_API_KEY,
     call: (system, messages) => openAiCompatible('https://api.groq.com/openai/v1/chat/completions',
-      process.env.GROQ_API_KEY, process.env.GROQ_CHAT_MODEL || 'llama-3.3-70b-versatile', system, messages)
+      process.env.GROQ_API_KEY, process.env.GROQ_CHAT_MODEL || 'openai/gpt-oss-120b', system, messages, {}, 'groq')
   },
   openrouter: {
     configured: () => !!process.env.OPENROUTER_API_KEY,

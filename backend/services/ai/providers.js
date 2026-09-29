@@ -8,7 +8,7 @@
  *   cloudflare  Cloudflare Workers AI (OpenAI-compatible). Principal.
  *   cerebras    Cerebras (sesión 7). Respaldo, con tope de seguridad de gasto
  *               (utils/aiBudget.js): gpt-oss-120b para texto, qwen-3.8-27b con imágenes.
- *   groq        Groq Cloud (OpenAI-compatible, gratis sin tarjeta). Llama 4 Scout: texto + imágenes.
+ *   groq        Groq Cloud (OpenAI-compatible, gratis sin tarjeta). gpt-oss-120b (texto) y qwen3.8-27b (imágenes).
  *   gemini      Solo si se añade a AI_PROVIDERS (p.ej. cuando haya plan de PAGO).
  *
  * Orden: AI_PROVIDERS (por defecto "cloudflare,cerebras"); solo se usan los que
@@ -123,12 +123,17 @@ async function openAiCompatible({ name, url, key, model, system, parts, schema, 
 }
 
 const PROVIDERS = {
+  // Groq (sep-2026) retiró Llama: texto con gpt-oss-120b; imágenes con qwen3.8-27b (visión).
   groq: {
     configured: () => !!process.env.GROQ_API_KEY,
-    generate: (o) => openAiCompatible({
-      ...o, name: 'groq', url: 'https://api.groq.com/openai/v1/chat/completions', key: process.env.GROQ_API_KEY,
-      model: process.env.GROQ_MODEL || 'meta-llama/llama-4-scout-17b-16e-instruct', jsonMode: true
-    })
+    generate: (o) => {
+      const vision = o.parts.some(p => p.inlineData);
+      return openAiCompatible({
+        ...o, name: 'groq', url: 'https://api.groq.com/openai/v1/chat/completions', key: process.env.GROQ_API_KEY,
+        model: vision ? (process.env.GROQ_VISION_MODEL || 'qwen/qwen3.8-27b') : (process.env.GROQ_MODEL || 'openai/gpt-oss-120b'),
+        jsonMode: true, extra: vision ? {} : { reasoning_effort: 'low' }
+      });
+    }
   },
   // Sesión 7: respaldo de Cloudflare. Texto con gpt-oss-120b; si hay imágenes
   // (facturas en foto), qwen-3.8-27b, que admite visión. Con tope de seguridad.
