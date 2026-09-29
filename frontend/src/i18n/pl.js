@@ -734,7 +734,10 @@ export default {
     ep_invoices: 'Odczyt faktur z walidacją',
     invoicesTitle: 'Faktury: z PDF do zweryfikowanego JSON',
     invoicesText: 'Wyślij do 5 faktur na żądanie (PDF, JPG, PNG lub WebP w base64 albo już wyodrębniony tekst) i zawsze otrzymasz ten sam JSON. Każde żądanie zużywa 1 analizę z limitu. Nie przechowujemy ani pliku, ani danych.',
-    invoicesChecks: 'Nokfi sam sprawdza każdą fakturę, bez ufania AI: netto + VAT − potrącenie równe sumie, cyfra kontrolna hiszpańskiego NIF/CIF/NIE, poprawna i nieprzyszła data, typowa stawka VAT. To, co się nie zgadza, trafia do warnings. Zeskanowane PDF wracają w errors (pdf_scanned): wyślij je jako obraz.'
+    invoicesChecks: 'Nokfi sam sprawdza każdą fakturę, bez ufania AI: netto + VAT − potrącenie równe sumie, cyfra kontrolna hiszpańskiego NIF/CIF/NIE, poprawna i nieprzyszła data, typowa stawka VAT. To, co się nie zgadza, trafia do warnings. Zeskanowane PDF wracają w errors (pdf_scanned): wyślij je jako obraz.',
+    mcpTitle: 'Serwer MCP dla agentów AI',
+    mcpText: 'Podłącz Nokfi jako narzędzie w Claude, ChatGPT, Cursor lub AI Agent w n8n. Ten sam klucz API, ten sam limit i te same zasady co API.',
+    mcpTools: 'Narzędzia: extract_invoices, analyze, get_usage, list_analyses i get_analysis.'
   },
   crash: { title: 'Coś poszło nie tak', desc: 'Zarejestrowaliśmy błąd, aby go naprawić. Odśwież stronę, aby kontynuować.', reload: 'Odśwież' },
   update: { available: 'Dostępna jest nowa wersja Nokfi.', reload: 'Odśwież' }

@@ -728,7 +728,10 @@ export default {
     ep_invoices: 'Rechnungen mit Prüfungen auslesen',
     invoicesTitle: 'Rechnungen: vom PDF zum geprüften JSON',
     invoicesText: 'Sende bis zu 5 Rechnungen pro Anfrage (PDF, JPG, PNG oder WebP als Base64 oder bereits extrahierten Text) und erhalte immer dasselbe JSON. Jede Anfrage verbraucht 1 Analyse deines Kontingents. Wir speichern weder die Datei noch die Daten.',
-    invoicesChecks: 'Nokfi prüft jede Rechnung selbst, ohne der KI zu vertrauen: Netto + MwSt. − Einbehalt muss den Gesamtbetrag ergeben, Prüfziffer der spanischen NIF/CIF/NIE, gültiges und nicht zukünftiges Datum, üblicher MwSt.-Satz. Was nicht passt, kommt in warnings. Gescannte PDFs kommen in errors zurück (pdf_scanned): sende sie als Bild.'
+    invoicesChecks: 'Nokfi prüft jede Rechnung selbst, ohne der KI zu vertrauen: Netto + MwSt. − Einbehalt muss den Gesamtbetrag ergeben, Prüfziffer der spanischen NIF/CIF/NIE, gültiges und nicht zukünftiges Datum, üblicher MwSt.-Satz. Was nicht passt, kommt in warnings. Gescannte PDFs kommen in errors zurück (pdf_scanned): sende sie als Bild.',
+    mcpTitle: 'MCP-Server für KI-Agenten',
+    mcpText: 'Binde Nokfi als Tool in Claude, ChatGPT, Cursor oder den AI Agent von n8n ein. Gleicher API-Schlüssel, gleiches Kontingent und gleiche Regeln wie die API.',
+    mcpTools: 'Tools: extract_invoices, analyze, get_usage, list_analyses und get_analysis.'
   },
   crash: { title: 'Etwas ist schiefgelaufen', desc: 'Wir haben den Fehler protokolliert, um ihn zu beheben. Lade die Seite neu, um fortzufahren.', reload: 'Neu laden' },
   update: { available: 'Eine neue Version von Nokfi ist verfügbar.', reload: 'Neu laden' }

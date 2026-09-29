@@ -731,7 +731,10 @@ export default {
     ep_invoices: 'Extraer facturas con validaciones',
     invoicesTitle: 'Facturas: del PDF al JSON validado',
     invoicesText: 'Envía hasta 5 facturas por petición (PDF, JPG, PNG o WebP en base64, o el texto ya extraído) y recibe siempre el mismo JSON. Cada petición gasta 1 análisis de tu cuota. No guardamos ni el archivo ni los datos.',
-    invoicesChecks: 'Nokfi comprueba cada factura por su cuenta, sin fiarse de la IA: que base + IVA − retención cuadre con el total, el dígito de control del NIF/CIF/NIE, que la fecha sea válida y no futura y que el tipo de IVA sea habitual. Lo que no cuadra llega en warnings. Los PDF escaneados vuelven en errors (pdf_scanned): envíalos como imagen.'
+    invoicesChecks: 'Nokfi comprueba cada factura por su cuenta, sin fiarse de la IA: que base + IVA − retención cuadre con el total, el dígito de control del NIF/CIF/NIE, que la fecha sea válida y no futura y que el tipo de IVA sea habitual. Lo que no cuadra llega en warnings. Los PDF escaneados vuelven en errors (pdf_scanned): envíalos como imagen.',
+    mcpTitle: 'Servidor MCP para agentes de IA',
+    mcpText: 'Conecta Nokfi como herramienta de Claude, ChatGPT, Cursor o el AI Agent de n8n. Usa la misma clave de API, la misma cuota y las mismas reglas que la API.',
+    mcpTools: 'Herramientas: extract_invoices, analyze, get_usage, list_analyses y get_analysis.'
   },
   crash: { title: 'Algo ha fallado', desc: 'Hemos registrado el error para arreglarlo. Recarga la página para seguir.', reload: 'Recargar' },
   update: { available: 'Hay una versión nueva de Nokfi.', reload: 'Recargar' }

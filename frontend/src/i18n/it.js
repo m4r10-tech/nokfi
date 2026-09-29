@@ -728,7 +728,10 @@ export default {
     ep_invoices: 'Estrarre fatture con verifiche',
     invoicesTitle: 'Fatture: dal PDF al JSON verificato',
     invoicesText: 'Invia fino a 5 fatture per richiesta (PDF, JPG, PNG o WebP in base64, oppure il testo già estratto) e ricevi sempre lo stesso JSON. Ogni richiesta consuma 1 analisi della quota. Non conserviamo né il file né i dati.',
-    invoicesChecks: 'Nokfi controlla da sé ogni fattura, senza fidarsi dell’IA: imponibile + IVA − ritenuta uguale al totale, cifra di controllo del NIF/CIF/NIE spagnolo, data valida e non futura, aliquota IVA abituale. Ciò che non torna arriva in warnings. I PDF scansionati tornano in errors (pdf_scanned): inviali come immagine.'
+    invoicesChecks: 'Nokfi controlla da sé ogni fattura, senza fidarsi dell’IA: imponibile + IVA − ritenuta uguale al totale, cifra di controllo del NIF/CIF/NIE spagnolo, data valida e non futura, aliquota IVA abituale. Ciò che non torna arriva in warnings. I PDF scansionati tornano in errors (pdf_scanned): inviali come immagine.',
+    mcpTitle: 'Server MCP per agenti IA',
+    mcpText: 'Collega Nokfi come strumento di Claude, ChatGPT, Cursor o dell’AI Agent di n8n. Stessa chiave API, stessa quota e stesse regole dell’API.',
+    mcpTools: 'Strumenti: extract_invoices, analyze, get_usage, list_analyses e get_analysis.'
   },
   crash: { title: 'Qualcosa è andato storto', desc: 'Abbiamo registrato l’errore per correggerlo. Ricarica la pagina per continuare.', reload: 'Ricarica' },
   update: { available: 'È disponibile una nuova versione di Nokfi.', reload: 'Ricarica' }

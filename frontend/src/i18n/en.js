@@ -728,7 +728,10 @@ export default {
     ep_invoices: 'Extract invoices with validation',
     invoicesTitle: 'Invoices: from PDF to validated JSON',
     invoicesText: 'Send up to 5 invoices per request (PDF, JPG, PNG or WebP in base64, or text you already extracted) and always get the same JSON back. Each request uses 1 analysis from your quota. We store neither the file nor the data.',
-    invoicesChecks: 'Nokfi checks every invoice itself, without trusting the AI: base + VAT − withholding must match the total, the NIF/CIF/NIE check digit, a valid, non-future date and a usual VAT rate. Anything that doesn’t add up comes back in warnings. Scanned PDFs come back in errors (pdf_scanned): send them as images.'
+    invoicesChecks: 'Nokfi checks every invoice itself, without trusting the AI: base + VAT − withholding must match the total, the NIF/CIF/NIE check digit, a valid, non-future date and a usual VAT rate. Anything that doesn’t add up comes back in warnings. Scanned PDFs come back in errors (pdf_scanned): send them as images.',
+    mcpTitle: 'MCP server for AI agents',
+    mcpText: 'Connect Nokfi as a tool for Claude, ChatGPT, Cursor or n8n’s AI Agent. It uses the same API key, the same quota and the same rules as the API.',
+    mcpTools: 'Tools: extract_invoices, analyze, get_usage, list_analyses and get_analysis.'
   },
   crash: { title: 'Something went wrong', desc: 'We have logged the error so we can fix it. Reload the page to continue.', reload: 'Reload' },
   update: { available: 'A new version of Nokfi is available.', reload: 'Reload' }

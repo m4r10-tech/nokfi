@@ -167,6 +167,7 @@ app.use('/api/webhooks/stripe', express.raw({ type: 'application/json', limit: '
    comprimido en el navegador; Nginx corta en 10 MB). El resto, 2 MB. */
 app.use('/api/ai/', express.json({ limit: '9mb' }));
 app.use('/api/v1/invoices', express.json({ limit: '9mb' })); // sesión 7: facturas en base64 (hasta 5)
+app.use('/api/mcp', express.json({ limit: '9mb' }));          // sesión 7: servidor MCP (mismas herramientas)
 app.use(express.json({ limit: '2mb' }));
 
 /* ════════════════════════════════════════════════════════════
@@ -265,6 +266,7 @@ app.use('/api/client-errors', accountRoutes.telemetry); // errores del frontend 
 app.use('/api/share', shareRoutes.share);          // enlaces de solo lectura para la gestoría
 app.use('/api/shared', shareRoutes.shared);        // vista pública del enlace (token)
 app.use('/api/v1', v1Routes);                       // API pública para automatizaciones (F4)
+app.use('/api/mcp', require('./routes/mcp'));        // servidor MCP remoto (sesión 7)
 app.use('/api/analyses', analysesRoutes);   // historial de análisis (sección 14)
 app.use('/api/profile', profileRoutes);      // perfil de empresa del onboarding (sección 14)
 app.use('/api/payments', paymentsRoutes);   // checkout: /api/payments/stripe/*

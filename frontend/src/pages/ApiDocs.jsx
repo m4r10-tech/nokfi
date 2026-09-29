@@ -1,5 +1,5 @@
 import { Link } from 'react-router-dom';
-import { Copy, KeyRound, Workflow, FileJson, Lock, Receipt } from 'lucide-react';
+import { Copy, KeyRound, Workflow, FileJson, Lock, Receipt, Bot } from 'lucide-react';
 import { useLang } from '../context/LangContext';
 import { useToast } from '../context/ToastContext';
 import { usePageMeta } from '../hooks/usePageMeta';
@@ -44,6 +44,32 @@ const INVOICE_RESPONSE = `{
   }],
   "errors": []
 }`;
+
+// Sesión 7 — servidor MCP: mismas herramientas y misma clave que la API.
+const MCP_SNIPPETS = [
+  ['Claude Code', `claude mcp add --transport http nokfi https://nokfi.app/api/mcp \\
+  --header "Authorization: Bearer nk_live_TU_CLAVE"`],
+  ['Claude Desktop', `{
+  "mcpServers": {
+    "nokfi": {
+      "command": "npx",
+      "args": ["-y", "mcp-remote", "https://nokfi.app/api/mcp",
+               "--header", "Authorization: Bearer nk_live_TU_CLAVE"]
+    }
+  }
+}`],
+  ['Cursor · VS Code', `{
+  "mcpServers": {
+    "nokfi": {
+      "url": "https://nokfi.app/api/mcp",
+      "headers": { "Authorization": "Bearer nk_live_TU_CLAVE" }
+    }
+  }
+}`],
+  ['n8n (AI Agent → MCP Client Tool)', `Endpoint: https://nokfi.app/api/mcp
+Server Transport: HTTP Streamable
+Authentication: Bearer Auth → nk_live_TU_CLAVE`]
+];
 
 const N8N = `{
   "nodes": [
@@ -115,6 +141,17 @@ export default function ApiDocs() {
           <Code text={CURL_INVOICES} onCopy={copy} />
           <p>{t('apiDocs.invoicesChecks')}</p>
           <Code text={INVOICE_RESPONSE} onCopy={copy} />
+        </Block>
+
+        <Block icon={Bot} title={t('apiDocs.mcpTitle')}>
+          <p>{t('apiDocs.mcpText')}</p>
+          <p className="text-xs" style={{ color: 'var(--text-muted)' }}>{t('apiDocs.mcpTools')}</p>
+          {MCP_SNIPPETS.map(([label, code]) => (
+            <div key={label} className="flex flex-col gap-1.5">
+              <p className="text-xs font-medium" style={{ color: 'var(--text-primary)' }}>{label}</p>
+              <Code text={code} onCopy={copy} />
+            </div>
+          ))}
         </Block>
 
         <Block title={t('apiDocs.example')}>
