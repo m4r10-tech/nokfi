@@ -478,7 +478,7 @@ export default {
         'Stripe: processes payments and manages subscriptions.',
         'Cloudflare Workers AI: generates the analyses, reads scanned or photographed invoices and answers in the assistant. Its terms forbid using your data to train models and it does not retain it (except temporary technical logs to investigate abuse). We do not store your assistant conversations.',
         'Groq: generates the analyses, reads invoices and answers in the assistant; if it is unavailable, Cloudflare Workers AI is used. Its contract forbids using your data to train or fine-tune models, and we have zero data retention enabled (requests are not stored). It processes data in the US, under standard contractual clauses.',
-        'Cerebras: backup AI provider, used only if Cloudflare is unavailable (same tasks). Its contract only allows it to use your data to provide the service (not to train models) and to keep it only as long as necessary. It processes data in the US, under standard contractual clauses.',
+        'Cerebras: backup AI provider, used only if Groq and Cloudflare are unavailable (same tasks). Its contract only allows it to use your data to provide the service (not to train models) and to keep it only as long as necessary. It processes data in the US, under standard contractual clauses.',
         'Resend: sends emails (your licence key, password recovery and, if enabled, tax calendar reminders, the monthly summary and payment reminders to your clients).',
         'Cloudflare: delivery and security network protecting access to the website. We use your connection\'s country (provided by Cloudflare) only to choose the website\'s initial language; we do not store it.'
       ] },
