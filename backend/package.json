@@ -18,7 +18,8 @@
     "express": "^4.21.0",
     "express-rate-limit": "^7.4.0",
     "helmet": "^7.1.0",
-    "morgan": "^1.10.0"
+    "morgan": "^1.10.0",
+    "pdfjs-dist": "^4.10.38"
   },
   "license": "UNLICENSED"
 }

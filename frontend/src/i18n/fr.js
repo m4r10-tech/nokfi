@@ -717,14 +717,18 @@ export default {
     metaTitle: 'API — Nokfi', metaDesc: 'API Nokfi pour les automatisations avec n8n, Make ou Zapier.',
     title: 'API Nokfi', intro: 'Lancez des analyses Nokfi depuis n8n, Make, Zapier ou vos propres scripts et recevez le rapport en JSON structuré, prêt à être enchaîné.',
     plans: 'Disponible avec les offres Pro et Max',
-    authTitle: 'Authentification', authText: 'Créez une clé dans Paramètres → API pour automatisations et envoyez-la avec chaque requête :',
+    authTitle: 'Authentification', authText: 'Créez une clé dans Développeurs → Clés et envoyez-la avec chaque requête :',
     limits: 'Chaque analyse consomme 1 analyse de votre quota quotidien (le même que sur le web). 30 requêtes par minute et par clé au maximum. Si votre offre repasse à Mini, les clés cessent de fonctionner (401 api_plan_required) mais ne sont pas supprimées.',
     endpoints: 'Points d’accès', ep_usage: 'Votre quota du jour', ep_analyze: 'Lancer une analyse', ep_list: 'Lister les analyses', ep_get: 'Obtenir un rapport', ep_openapi: 'Spécification OpenAPI',
     types: 'Types d’analyse : excel (modules stock, ventas, servicios, entradas, caja, total), compare (deux périodes), folder (plusieurs documents en une requête) et cuestionario (30 réponses oui/non).',
     example: 'Exemple', response: 'Réponse : { id, type, title, report: { summary, key_figures, strengths, priorities, action_plan, glossary }, actions }.',
     n8nTitle: 'Exemple avec n8n',
     n8nSteps: ['Créez un identifiant « Header Auth / Bearer » avec votre clé nk_live_…', 'Ajoutez un nœud HTTP Request : POST https://nokfi.app/api/v1/analyze avec un corps JSON', 'Utilisez $json.report.summary ou $json.report.priorities dans les nœuds suivants (e-mail, Slack, feuille…)'],
-    spec: 'Spécification complète :', createKey: 'Créer une clé'
+    spec: 'Spécification complète :', createKey: 'Créer une clé',
+    ep_invoices: 'Extraire des factures avec validations',
+    invoicesTitle: 'Factures : du PDF au JSON validé',
+    invoicesText: 'Envoyez jusqu’à 5 factures par requête (PDF, JPG, PNG ou WebP en base64, ou le texte déjà extrait) et recevez toujours le même JSON. Chaque requête consomme 1 analyse de votre quota. Nous ne conservons ni le fichier ni les données.',
+    invoicesChecks: 'Nokfi vérifie lui-même chaque facture, sans se fier à l’IA : base + TVA − retenue égale au total, clé de contrôle du NIF/CIF/NIE espagnol, date valide et non future, taux de TVA habituel. Ce qui ne colle pas arrive dans warnings. Les PDF scannés reviennent dans errors (pdf_scanned) : envoyez-les en image.'
   },
   crash: { title: 'Un problème est survenu', desc: 'Nous avons enregistré l’erreur pour la corriger. Rechargez la page pour continuer.', reload: 'Recharger' },
   update: { available: 'Une nouvelle version de Nokfi est disponible.', reload: 'Recharger' }

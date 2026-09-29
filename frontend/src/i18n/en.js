@@ -717,14 +717,18 @@ export default {
     metaTitle: 'API — Nokfi', metaDesc: 'Nokfi API for automations with n8n, Make or Zapier.',
     title: 'Nokfi API', intro: 'Run Nokfi analyses from n8n, Make, Zapier or your own scripts and get the report back as structured JSON, ready to chain.',
     plans: 'Available on the Pro and Max plans',
-    authTitle: 'Authentication', authText: 'Create a key in Settings → API for automations and send it with every request:',
+    authTitle: 'Authentication', authText: 'Create a key in Developers → Keys and send it with every request:',
     limits: 'Each analysis uses 1 of your daily quota (the same as on the web). Up to 30 requests per minute per key. If your plan drops to Mini, keys stop working (401 api_plan_required) but are not deleted.',
     endpoints: 'Endpoints', ep_usage: 'Your quota today', ep_analyze: 'Run an analysis', ep_list: 'List analyses', ep_get: 'Get a report', ep_openapi: 'OpenAPI specification',
     types: 'Analysis types: excel (modules stock, ventas, servicios, entradas, caja, total), compare (two periods), folder (several documents with one request) and cuestionario (30 yes/no answers).',
     example: 'Example', response: 'Response: { id, type, title, report: { summary, key_figures, strengths, priorities, action_plan, glossary }, actions }.',
     n8nTitle: 'Example with n8n',
     n8nSteps: ['Create a “Header Auth / Bearer” credential with your nk_live_… key', 'Add an HTTP Request node: POST https://nokfi.app/api/v1/analyze with a JSON body', 'Use $json.report.summary or $json.report.priorities in the following nodes (email, Slack, sheet…)'],
-    spec: 'Full specification:', createKey: 'Create a key'
+    spec: 'Full specification:', createKey: 'Create a key',
+    ep_invoices: 'Extract invoices with validation',
+    invoicesTitle: 'Invoices: from PDF to validated JSON',
+    invoicesText: 'Send up to 5 invoices per request (PDF, JPG, PNG or WebP in base64, or text you already extracted) and always get the same JSON back. Each request uses 1 analysis from your quota. We store neither the file nor the data.',
+    invoicesChecks: 'Nokfi checks every invoice itself, without trusting the AI: base + VAT − withholding must match the total, the NIF/CIF/NIE check digit, a valid, non-future date and a usual VAT rate. Anything that doesn’t add up comes back in warnings. Scanned PDFs come back in errors (pdf_scanned): send them as images.'
   },
   crash: { title: 'Something went wrong', desc: 'We have logged the error so we can fix it. Reload the page to continue.', reload: 'Reload' },
   update: { available: 'A new version of Nokfi is available.', reload: 'Reload' }

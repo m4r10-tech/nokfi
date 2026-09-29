@@ -717,14 +717,18 @@ export default {
     metaTitle: 'API — Nokfi', metaDesc: 'Nokfi-API für Automatisierungen mit n8n, Make oder Zapier.',
     title: 'Nokfi-API', intro: 'Starte Nokfi-Analysen aus n8n, Make, Zapier oder eigenen Skripten und erhalte den Bericht als strukturiertes JSON – bereit zur Weiterverarbeitung.',
     plans: 'Verfügbar in den Plänen Pro und Max',
-    authTitle: 'Authentifizierung', authText: 'Erstelle einen Schlüssel unter Einstellungen → API für Automatisierungen und sende ihn bei jeder Anfrage mit:',
+    authTitle: 'Authentifizierung', authText: 'Erstelle einen Schlüssel unter Entwickler → Schlüssel und sende ihn bei jeder Anfrage mit:',
     limits: 'Jede Analyse verbraucht 1 deines Tageskontingents (dasselbe wie im Web). Maximal 30 Anfragen pro Minute und Schlüssel. Fällt dein Plan auf Mini zurück, funktionieren die Schlüssel nicht mehr (401 api_plan_required), werden aber nicht gelöscht.',
     endpoints: 'Endpunkte', ep_usage: 'Dein heutiges Kontingent', ep_analyze: 'Analyse starten', ep_list: 'Analysen auflisten', ep_get: 'Bericht abrufen', ep_openapi: 'OpenAPI-Spezifikation',
     types: 'Analysetypen: excel (Module stock, ventas, servicios, entradas, caja, total), compare (zwei Zeiträume), folder (mehrere Dokumente in einer Anfrage) und cuestionario (30 Ja/Nein-Antworten).',
     example: 'Beispiel', response: 'Antwort: { id, type, title, report: { summary, key_figures, strengths, priorities, action_plan, glossary }, actions }.',
     n8nTitle: 'Beispiel mit n8n',
     n8nSteps: ['Lege eine Zugangsdaten-Art „Header Auth / Bearer“ mit deinem Schlüssel nk_live_… an', 'Füge einen HTTP-Request-Knoten hinzu: POST https://nokfi.app/api/v1/analyze mit JSON-Body', 'Nutze $json.report.summary oder $json.report.priorities in den folgenden Knoten (E-Mail, Slack, Tabelle…)'],
-    spec: 'Vollständige Spezifikation:', createKey: 'Schlüssel erstellen'
+    spec: 'Vollständige Spezifikation:', createKey: 'Schlüssel erstellen',
+    ep_invoices: 'Rechnungen mit Prüfungen auslesen',
+    invoicesTitle: 'Rechnungen: vom PDF zum geprüften JSON',
+    invoicesText: 'Sende bis zu 5 Rechnungen pro Anfrage (PDF, JPG, PNG oder WebP als Base64 oder bereits extrahierten Text) und erhalte immer dasselbe JSON. Jede Anfrage verbraucht 1 Analyse deines Kontingents. Wir speichern weder die Datei noch die Daten.',
+    invoicesChecks: 'Nokfi prüft jede Rechnung selbst, ohne der KI zu vertrauen: Netto + MwSt. − Einbehalt muss den Gesamtbetrag ergeben, Prüfziffer der spanischen NIF/CIF/NIE, gültiges und nicht zukünftiges Datum, üblicher MwSt.-Satz. Was nicht passt, kommt in warnings. Gescannte PDFs kommen in errors zurück (pdf_scanned): sende sie als Bild.'
   },
   crash: { title: 'Etwas ist schiefgelaufen', desc: 'Wir haben den Fehler protokolliert, um ihn zu beheben. Lade die Seite neu, um fortzufahren.', reload: 'Neu laden' },
   update: { available: 'Eine neue Version von Nokfi ist verfügbar.', reload: 'Neu laden' }

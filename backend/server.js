@@ -166,6 +166,7 @@ app.use('/api/webhooks/stripe', express.raw({ type: 'application/json', limit: '
 /* 3. JSON — /api/ai/ admite lotes de facturas en imagen (V1, base64 ya
    comprimido en el navegador; Nginx corta en 10 MB). El resto, 2 MB. */
 app.use('/api/ai/', express.json({ limit: '9mb' }));
+app.use('/api/v1/invoices', express.json({ limit: '9mb' })); // sesión 7: facturas en base64 (hasta 5)
 app.use(express.json({ limit: '2mb' }));
 
 /* ════════════════════════════════════════════════════════════

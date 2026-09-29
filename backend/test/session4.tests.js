@@ -353,16 +353,63 @@ module.exports = async function session4Tests({ post, put, get, call, check, che
     await checkAsync('F4: GET /api/v1/analyses/:id → mismo informe', get(`/api/v1/analyses/${aid}`, apiKey), r => r.status === 200 && r.data.report.summary === 'API ok');
     await checkAsync('S7: el análisis hecho por API sale en el Historial con source "api"',
       get('/api/analyses', tok), r => r.status === 200 && (r.data.analyses || r.data).find?.(x => x.id === aid)?.source === 'api');
+    // ── Sesión 7: POST /api/v1/invoices/extract ──
+    const minimalPdf = (lines) => {
+      const content = 'BT /F1 12 Tf 50 750 Td 16 TL ' + lines.map(l => `(${l}) '`).join(' ') + ' ET';
+      const objs = ['<< /Type /Catalog /Pages 2 0 R >>', '<< /Type /Pages /Kids [3 0 R] /Count 1 >>',
+        '<< /Type /Page /Parent 2 0 R /MediaBox [0 0 612 792] /Contents 4 0 R /Resources << /Font << /F1 5 0 R >> >> >>',
+        `<< /Length ${content.length} >>\nstream\n${content}\nendstream`, '<< /Type /Font /Subtype /Type1 /BaseFont /Helvetica >>'];
+      let out = '%PDF-1.4\n'; const offs = [];
+      objs.forEach((o, i) => { offs.push(out.length); out += `${i + 1} 0 obj\n${o}\nendobj\n`; });
+      const x = out.length;
+      out += `xref\n0 ${objs.length + 1}\n0000000000 65535 f \n` + offs.map(o => `${String(o).padStart(10, '0')} 00000 n \n`).join('');
+      out += `trailer\n<< /Size ${objs.length + 1} /Root 1 0 R >>\nstartxref\n${x}\n%%EOF\n`;
+      return Buffer.from(out, 'latin1').toString('base64');
+    };
+    let sentPrompt = '';
+    global.fetch = async (_url, o) => {
+      sentPrompt = String(o?.body || '');
+      return { ok: true, status: 200, text: async () => '', json: async () => ({ candidates: [{ content: { parts: [{ text: JSON.stringify({ invoices: [
+        { file_name: 'f1.pdf', is_invoice: true, issuer_name: 'Talleres Ruiz SL', issuer_nif: 'B12345674', recipient_nif: '12345678Z', invoice_number: 'F-2026-017', invoice_date: '2026-09-14', base: 1000, vat_rate: 21, vat_amount: 210, irpf_rate: 0, irpf_amount: 0, total: 1210 },
+        { file_name: 'f2.txt', is_invoice: true, issuer_name: 'Mal SL', issuer_nif: 'B12345675', invoice_number: '', invoice_date: '2099-01-01', base: 100, vat_rate: 21, vat_amount: 21, irpf_amount: 0, total: 150 }
+      ] }) }] } }] }) };
+    };
+    const usedBefore = (await get('/api/v1/usage', apiKey)).data.used_today;
+    await checkAsync('S7 API: invoices/extract (PDF digital + texto) → checks y warnings deterministas',
+      post('/api/v1/invoices/extract', { files: [
+        { name: 'f1.pdf', mime: 'application/pdf', data: minimalPdf(['FACTURA F-2026-017', 'Talleres Ruiz SL NIF B12345674', 'Total 1.210,00 EUR']) },
+        { name: 'f2.txt', text: 'Factura de Mal SL, total 150' },
+        { name: 'foto.gif', mime: 'image/gif', data: 'R0lGODlh' }
+      ] }, apiKey),
+      r => {
+        if (r.status !== 200) return false;
+        const [a, b] = r.data.invoices;
+        return r.data.invoices.length === 2 && a.checks.totals_ok && a.checks.nif_valid && a.checks.recipient_nif_valid === true && a.checks.date_valid && a.warnings.length === 0
+          && !b.checks.totals_ok && !b.checks.nif_valid && !b.checks.date_valid
+          && ['totals_mismatch', 'issuer_nif_invalid', 'date_in_future', 'number_missing'].every(c => b.warnings.some(w => w.code === c))
+          && r.data.errors.length === 1 && r.data.errors[0].error === 'unsupported_type' && a.check_ok === undefined;
+      });
+    check('S7 API: el texto del PDF se extrae en el servidor y va en el prompt', () => sentPrompt.includes('Talleres Ruiz SL NIF B12345674'));
+    await checkAsync('S7 API: una petición de facturas gasta 1 análisis de la cuota',
+      get('/api/v1/usage', apiKey), r => r.data.used_today === usedBefore + 1);
+    await checkAsync('S7 API: PDF sin texto (escaneado) → 400 no_readable_files con pdf_scanned y sin gastar cuota',
+      post('/api/v1/invoices/extract', { files: [{ name: 'scan.pdf', mime: 'application/pdf', data: minimalPdf([]) }] }, apiKey),
+      r => r.status === 400 && r.data.error === 'no_readable_files' && r.data.errors[0].error === 'pdf_scanned');
+    await checkAsync('S7 API: más de 5 documentos → 400 too_many_files',
+      post('/api/v1/invoices/extract', { files: Array.from({ length: 6 }, (_, i) => ({ name: `t${i}`, text: 'x' })) }, apiKey),
+      r => r.status === 400 && r.data.error === 'too_many_files');
+    await checkAsync('S7 API: las facturas por API no se guardan en el libro',
+      get('/api/ledger', tok), r => r.status === 200 && !r.data.entries.some(e => e.party_name === 'Talleres Ruiz SL'));
     global.fetch = savedFetch;
     if (savedKey === undefined) delete process.env.GEMINI_API_KEY; else process.env.GEMINI_API_KEY = savedKey;
   }
   // ── Sesión 7: registro de llamadas y resumen de Desarrolladores ──
   await checkAsync('S7 Dev: GET /api/keys → calls_today por clave (>= 3 llamadas hoy)',
     get('/api/keys', tok), r => r.status === 200 && r.data.keys.find(k => k.id === apiKeyId)?.calls_today >= 3);
-  await checkAsync('S7 Dev: GET /api/keys/summary → llamadas, errores de hoy y último error (invalid_type)',
+  await checkAsync('S7 Dev: GET /api/keys/summary → llamadas, errores de hoy y último error (too_many_files)',
     get('/api/keys/summary', tok), r => r.status === 200 && r.data.available === true && r.data.keys_active >= 1
-      && r.data.calls_today >= 3 && r.data.errors_today >= 1 && r.data.last_error?.error_code === 'invalid_type'
-      && r.data.last_error.path === '/api/v1/analyze' && r.data.quota.daily === 50);
+      && r.data.calls_today >= 3 && r.data.errors_today >= 2 && r.data.last_error?.error_code === 'too_many_files'
+      && r.data.last_error.path === '/api/v1/invoices/extract' && r.data.quota.daily === 50);
   check('S7 Dev: el registro no guarda contenido (solo ruta, estado, código y ms)', () => {
     const cols = getDB().prepare('PRAGMA table_info(api_calls)').all().map(c => c.name);
     return !cols.some(c => /body|data|input|content/.test(c));

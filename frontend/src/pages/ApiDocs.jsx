@@ -1,5 +1,5 @@
 import { Link } from 'react-router-dom';
-import { Copy, KeyRound, Workflow, FileJson, Lock } from 'lucide-react';
+import { Copy, KeyRound, Workflow, FileJson, Lock, Receipt } from 'lucide-react';
 import { useLang } from '../context/LangContext';
 import { useToast } from '../context/ToastContext';
 import { usePageMeta } from '../hooks/usePageMeta';
@@ -26,6 +26,25 @@ const CURL = `curl -X POST https://nokfi.app/api/v1/analyze \\
     }
   }'`;
 
+const CURL_INVOICES = `curl -X POST https://nokfi.app/api/v1/invoices/extract \\
+  -H "Authorization: Bearer nk_live_TU_CLAVE" \\
+  -H "Content-Type: application/json" \\
+  -d "{\\"files\\": [{\\"name\\": \\"factura.pdf\\", \\"mime\\": \\"application/pdf\\",
+        \\"data\\": \\"$(base64 -w0 factura.pdf)\\"}]}"`;
+
+const INVOICE_RESPONSE = `{
+  "invoices": [{
+    "file_name": "factura.pdf",
+    "issuer_name": "Talleres Ruiz SL", "issuer_nif": "B12345674",
+    "invoice_number": "F-2026-017", "invoice_date": "2026-09-14",
+    "base": 1000, "vat_rate": 21, "vat_amount": 210, "irpf_amount": 0, "total": 1210,
+    "checks": { "totals_ok": true, "nif_valid": true, "recipient_nif_valid": null,
+                "date_valid": true, "vat_rate_valid": true },
+    "warnings": []
+  }],
+  "errors": []
+}`;
+
 const N8N = `{
   "nodes": [
     { "name": "Cada lunes", "type": "n8n-nodes-base.scheduleTrigger",
@@ -46,6 +65,7 @@ const N8N = `{
 
 const ENDPOINTS = [
   ['GET', '/api/v1/usage', 'usage'],
+  ['POST', '/api/v1/invoices/extract', 'invoices'],
   ['POST', '/api/v1/analyze', 'analyze'],
   ['GET', '/api/v1/analyses', 'list'],
   ['GET', '/api/v1/analyses/{id}', 'get'],
@@ -90,6 +110,13 @@ export default function ApiDocs() {
           <p className="text-sm">{t('apiDocs.types')}</p>
         </Block>
 
+        <Block icon={Receipt} title={t('apiDocs.invoicesTitle')}>
+          <p>{t('apiDocs.invoicesText')}</p>
+          <Code text={CURL_INVOICES} onCopy={copy} />
+          <p>{t('apiDocs.invoicesChecks')}</p>
+          <Code text={INVOICE_RESPONSE} onCopy={copy} />
+        </Block>
+
         <Block title={t('apiDocs.example')}>
           <Code text={CURL} onCopy={copy} />
           <p className="text-sm">{t('apiDocs.response')}</p>
@@ -103,7 +130,7 @@ export default function ApiDocs() {
         </Block>
 
         <p className="text-sm" style={{ color: 'var(--text-secondary)' }}>
-          {t('apiDocs.spec')} <a href="/api/v1/openapi.json" className="link">/api/v1/openapi.json</a> · <Link to="/app/configuracion" className="link">{t('apiDocs.createKey')}</Link>
+          {t('apiDocs.spec')} <a href="/api/v1/openapi.json" className="link">/api/v1/openapi.json</a> · <Link to="/app/dev/claves" className="link">{t('apiDocs.createKey')}</Link>
         </p>
       </main>
       <PublicFooter />

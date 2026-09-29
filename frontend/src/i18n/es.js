@@ -720,14 +720,18 @@ export default {
     metaTitle: 'API — Nokfi', metaDesc: 'API de Nokfi para automatizaciones con n8n, Make o Zapier.',
     title: 'API de Nokfi', intro: 'Lanza análisis de Nokfi desde n8n, Make, Zapier o tus propios scripts y recibe el informe en JSON estructurado, listo para encadenar.',
     plans: 'Disponible en los planes Pro y Max',
-    authTitle: 'Autenticación', authText: 'Crea una clave en Configuración → API para automatizaciones y envíala en cada petición:',
+    authTitle: 'Autenticación', authText: 'Crea una clave en Desarrolladores → Claves y envíala en cada petición:',
     limits: 'Cada análisis gasta 1 de tu cuota diaria (la misma que en la web). Máximo 30 peticiones por minuto y clave. Si tu plan baja a Mini, las claves dejan de funcionar (401 api_plan_required) pero no se borran.',
     endpoints: 'Endpoints', ep_usage: 'Tu cuota de hoy', ep_analyze: 'Lanzar un análisis', ep_list: 'Listar análisis', ep_get: 'Obtener un informe', ep_openapi: 'Especificación OpenAPI',
     types: 'Tipos de análisis: excel (módulos stock, ventas, servicios, entradas, caja, total), compare (dos periodos), folder (varios documentos con una petición) y cuestionario (30 respuestas sí/no).',
     example: 'Ejemplo', response: 'Respuesta: { id, type, title, report: { summary, key_figures, strengths, priorities, action_plan, glossary }, actions }.',
     n8nTitle: 'Ejemplo con n8n',
     n8nSteps: ['Crea una credencial «Header Auth / Bearer» con tu clave nk_live_…', 'Añade un nodo HTTP Request: POST https://nokfi.app/api/v1/analyze con cuerpo JSON', 'Usa $json.report.summary o $json.report.priorities en los nodos siguientes (email, Slack, hoja…)'],
-    spec: 'Especificación completa:', createKey: 'Crear una clave'
+    spec: 'Especificación completa:', createKey: 'Crear una clave',
+    ep_invoices: 'Extraer facturas con validaciones',
+    invoicesTitle: 'Facturas: del PDF al JSON validado',
+    invoicesText: 'Envía hasta 5 facturas por petición (PDF, JPG, PNG o WebP en base64, o el texto ya extraído) y recibe siempre el mismo JSON. Cada petición gasta 1 análisis de tu cuota. No guardamos ni el archivo ni los datos.',
+    invoicesChecks: 'Nokfi comprueba cada factura por su cuenta, sin fiarse de la IA: que base + IVA − retención cuadre con el total, el dígito de control del NIF/CIF/NIE, que la fecha sea válida y no futura y que el tipo de IVA sea habitual. Lo que no cuadra llega en warnings. Los PDF escaneados vuelven en errors (pdf_scanned): envíalos como imagen.'
   },
   crash: { title: 'Algo ha fallado', desc: 'Hemos registrado el error para arreglarlo. Recarga la página para seguir.', reload: 'Recargar' },
   update: { available: 'Hay una versión nueva de Nokfi.', reload: 'Recargar' }
