@@ -343,7 +343,7 @@ router.get('/errors', (req, res) => {
 router.get('/ai-status', async (_req, res) => {
   const providers = require('../services/ai/providers');
   const chat = require('../services/ai/chat');
-  const out = { analysis_order: providers.providerOrder(), chat_order: chat.providerOrder(), analysis: {}, chat: {} };
+  const out = { analysis_order: providers.providerOrder(), chat_order: chat.providerOrder(), budgets: require('../utils/aiBudget').status(), analysis: {}, chat: {} };
   const schema = { type: 'OBJECT', properties: { ok: { type: 'BOOLEAN' }, idioma: { type: 'STRING' } }, required: ['ok'] };
   for (const name of Object.keys(providers.PROVIDERS)) {
     if (!providers.PROVIDERS[name].configured()) { out.analysis[name] = 'sin configurar'; continue; }

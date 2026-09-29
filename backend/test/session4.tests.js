@@ -28,7 +28,7 @@ module.exports = async function session4Tests({ post, put, get, call, check, che
     check('IA: si Groq agota cuota (429) responde Cloudflare', () => r2.model.startsWith('cloudflare:') && r2.json.summary === 'desde cloudflare' && calls.length === 2);
     check('IA: sin AI_PROVIDERS explícito, Gemini (free tier que entrena) NO está en el orden', () => {
       delete process.env.AI_PROVIDERS; const o = providers.providerOrder(); process.env.AI_PROVIDERS = 'groq,cloudflare';
-      return !o.includes('gemini') && o[0] === 'groq';
+      return !o.includes('gemini') && o[0] === 'cloudflare';
     });
     let pdfErr = null;
     global.fetch = async () => ok({});
@@ -38,7 +38,7 @@ module.exports = async function session4Tests({ post, put, get, call, check, che
     check('Chat: orden por defecto sin Gemini ni OpenRouter', () => {
       const prev = process.env.CHAT_PROVIDERS; delete process.env.CHAT_PROVIDERS; process.env.CEREBRAS_API_KEY = 'c';
       const o = chat.providerOrder(); if (prev !== undefined) process.env.CHAT_PROVIDERS = prev; delete process.env.CEREBRAS_API_KEY;
-      return o[0] === 'cerebras' && !o.includes('gemini') && !o.includes('openrouter');
+      return o[0] === 'cloudflare' && o[1] === 'cerebras' && !o.includes('gemini') && !o.includes('openrouter');
     });
     global.fetch = saved.fetch;
     for (const [k, v] of [['AI_PROVIDERS', saved.AI], ['GROQ_API_KEY', saved.G], ['CF_ACCOUNT_ID', saved.A], ['CF_AI_TOKEN', saved.T], ['GEMINI_API_KEY', saved.GM]]) { if (v === undefined) delete process.env[k]; else process.env[k] = v; }
@@ -403,6 +403,50 @@ module.exports = async function session4Tests({ post, put, get, call, check, che
     global.fetch = savedFetch;
     if (savedKey === undefined) delete process.env.GEMINI_API_KEY; else process.env.GEMINI_API_KEY = savedKey;
   }
+  // ── Sesión 7: Cerebras como respaldo con tope de seguridad de gasto ──
+  {
+    const providers = require('../services/ai/providers');
+    const budget = require('../utils/aiBudget');
+    const saved = { fetch: global.fetch, AI: process.env.AI_PROVIDERS, K: process.env.CEREBRAS_API_KEY, A: process.env.CF_ACCOUNT_ID, T: process.env.CF_AI_TOKEN, D: process.env.AI_BUDGET_CEREBRAS_DAILY_TOKENS };
+    process.env.AI_PROVIDERS = 'cloudflare,cerebras'; process.env.CEREBRAS_API_KEY = 'csk_test'; process.env.CF_ACCOUNT_ID = 'acc'; process.env.CF_AI_TOKEN = 'tok';
+    const seen = [];
+    global.fetch = async (url, o) => {
+      const body = JSON.parse(o.body); seen.push({ url, model: body.model, reasoning: body.reasoning_effort });
+      if (url.includes('cloudflare')) return { ok: false, status: 429, text: async () => 'neurons exhausted' };
+      return { ok: true, status: 200, text: async () => '', json: async () => ({ choices: [{ message: { content: '{"summary":"desde cerebras"}' }, finish_reason: 'stop' }], usage: { prompt_tokens: 1000, completion_tokens: 500 } }) };
+    };
+    getDB().prepare("DELETE FROM ai_provider_usage WHERE provider = 'cerebras'").run();
+    const r1 = await providers.generate({ system: 's', parts: [{ text: 'hola' }], schema: { type: 'OBJECT', properties: { summary: { type: 'STRING' } } }, maxTokens: 200 });
+    check('S7 IA: si Cloudflare se agota, responde Cerebras (gpt-oss-120b, reasoning low) y se anota su consumo', () =>
+      r1.json.summary === 'desde cerebras' && seen.some(x => x.url.includes('cerebras') && x.model === 'gpt-oss-120b' && x.reasoning === 'low')
+      && budget.usage('cerebras').tokens === 1500 && budget.usage('cerebras').cost_usd > 0);
+    seen.length = 0;
+    await providers.generate({ system: 's', parts: [{ text: 'factura' }, { inlineData: { mimeType: 'image/png', data: 'AAAA' } }], schema: { type: 'OBJECT', properties: { summary: { type: 'STRING' } } }, maxTokens: 200 });
+    check('S7 IA: con imágenes, Cerebras usa el modelo con visión (qwen-3.8-27b)', () => seen.some(x => x.url.includes('cerebras') && x.model === 'qwen-3.8-27b'));
+    process.env.AI_BUDGET_CEREBRAS_DAILY_TOKENS = '2000';
+    seen.length = 0;
+    let err = null;
+    try { await providers.generate({ system: 's', parts: [{ text: 'hola' }], schema: { type: 'OBJECT', properties: { summary: { type: 'STRING' } } }, maxTokens: 1000 }); } catch (e) { err = e; }
+    check('S7 IA: con el tope diario alcanzado NO se llama a Cerebras (0 peticiones) y el error es controlado', () =>
+      err && err.code === 'ai_quota_exceeded' && !seen.some(x => x.url.includes('cerebras')));
+    process.env.AI_BUDGET_CEREBRAS_DAILY_TOKENS = '0';
+    check('S7 IA: tope a 0 desactiva el proveedor', () => budget.allow('cerebras', 1).ok === false);
+    delete process.env.AI_BUDGET_CEREBRAS_DAILY_TOKENS;
+    getDB().prepare("INSERT OR REPLACE INTO ai_provider_usage (provider, day, calls, tokens_in, tokens_out, cost_usd) VALUES ('cerebras', ?, 1, 0, 0, 3.99)").run(new Date().toISOString().slice(0, 7) + '-01');
+    check('S7 IA: tope mensual en USD (4 $ por defecto) bloquea antes de pasarse', () => budget.allow('cerebras', 100000).ok === false && budget.allow('cerebras', 100).ok === true);
+    check('S7 IA: los proveedores sin tope (Cloudflare) no se bloquean', () => budget.allow('cloudflare', 1e9).ok === true);
+    const { buildOpsReport } = require('../services/opsReport');
+    check('S7 ops: el informe diario incluye el consumo por proveedor y avisa al 80 % del tope mensual', () => {
+      const rep = buildOpsReport(new Date(Date.now() + 86400000));
+      return Array.isArray(rep.ai.usage) && rep.alerts.some(a => a.includes('cerebras') && a.includes('tope'));
+    });
+    getDB().prepare("DELETE FROM ai_provider_usage").run();
+    global.fetch = saved.fetch;
+    for (const [k, env] of [['AI', 'AI_PROVIDERS'], ['K', 'CEREBRAS_API_KEY'], ['A', 'CF_ACCOUNT_ID'], ['T', 'CF_AI_TOKEN'], ['D', 'AI_BUDGET_CEREBRAS_DAILY_TOKENS']]) {
+      if (saved[k] === undefined) delete process.env[env]; else process.env[env] = saved[k];
+    }
+  }
+
   // ── Sesión 7: servidor MCP (/api/mcp) ──
   {
     const rpc = (method, params, id = 1, key = apiKey) => post('/api/mcp', { jsonrpc: '2.0', id, method, params }, key);

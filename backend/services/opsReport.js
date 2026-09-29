@@ -58,6 +58,14 @@ function diskStatus() {
   }
 }
 
+/** Consumo de IA de AYER por proveedor (sesión 7), con su tope si lo tiene. */
+function providerUsage(now) {
+  const { usage, budgetFor } = require('../utils/aiBudget');
+  const day = new Date(now.getTime() - 86400000).toISOString().slice(0, 10);
+  return getDB().prepare('SELECT DISTINCT provider FROM ai_provider_usage WHERE day >= ?').all(day.slice(0, 7) + '-01')
+    .map(({ provider }) => ({ provider, day, ...usage(provider, day), budget: budgetFor(provider) }));
+}
+
 function buildOpsReport(now = new Date()) {
   const db = getDB();
   const since = "datetime('now', '-1 day')";
@@ -77,7 +85,7 @@ function buildOpsReport(now = new Date()) {
     date: now.toISOString().slice(0, 10),
     backup, disk,
     errors, errorsTotal: errors.reduce((s, e) => s + e.c, 0),
-    ai: { ok: ev('AI_ANALYSIS_GENERATED'), failed: ev('AI_ANALYSIS_FAILED'), providerFails: aiFails },
+    ai: { ok: ev('AI_ANALYSIS_GENERATED'), failed: ev('AI_ANALYSIS_FAILED'), providerFails: aiFails, usage: providerUsage(now) },
     mail: { failed: mailFails },
     activity: {
       active_licenses: count("SELECT COUNT(*) c FROM licenses WHERE status = 'active'"),
@@ -93,6 +101,8 @@ function buildOpsReport(now = new Date()) {
     !backup.ok && backup.text,
     !disk.ok && disk.text,
     report.ai.failed > 0 && `${report.ai.failed} análisis de IA fallidos`,
+    ...report.ai.usage.filter(u => u.budget?.monthlyUsd && u.month_usd >= u.budget.monthlyUsd * 0.8)
+      .map(u => `${u.provider}: gasto estimado del mes ${u.month_usd.toFixed(2)} $ (tope ${u.budget.monthlyUsd} $)`),
     mailFails.length > 0 && `${mailFails.reduce((s, m) => s + m.c, 0)} emails no enviados`,
     report.errorsTotal >= 10 && `${report.errorsTotal} errores de la app`,
     report.activity.payment_failed > 0 && `${report.activity.payment_failed} pagos fallidos`,

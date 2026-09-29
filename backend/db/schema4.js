@@ -13,6 +13,7 @@
  *   client_errors   C8 — errores técnicos del frontend/backend (sin datos financieros)
  *   reminders_sent  C4 — avisos del calendario fiscal ya enviados (anti-duplicado)
  *   share_links     enlaces de solo lectura para la gestoría (token hasheado)
+ *   ai_provider_usage consumo diario por proveedor de IA (tope de seguridad, sesión 7)
  *   api_calls       registro mínimo de llamadas a la API v1 (sesión 7)
  *   leak_dismissals proveedores descartados en Fugas ("No es una fuga", sesión 6)
  *
@@ -149,6 +150,17 @@ function runSession4Schema(db) {
     );
     CREATE INDEX IF NOT EXISTS idx_api_calls_license ON api_calls(license_id, created_at);
     CREATE INDEX IF NOT EXISTS idx_api_calls_key ON api_calls(key_id, created_at);
+
+    -- Sesión 7: consumo por proveedor de IA y día (tope de seguridad: utils/aiBudget.js).
+    CREATE TABLE IF NOT EXISTS ai_provider_usage (
+      provider    TEXT    NOT NULL,
+      day         TEXT    NOT NULL,
+      calls       INTEGER NOT NULL DEFAULT 0,
+      tokens_in   INTEGER NOT NULL DEFAULT 0,
+      tokens_out  INTEGER NOT NULL DEFAULT 0,
+      cost_usd    REAL    NOT NULL DEFAULT 0,
+      PRIMARY KEY (provider, day)
+    );
 
     -- Sesión 6: proveedores que el usuario marca como "No es una fuga".
     CREATE TABLE IF NOT EXISTS leak_dismissals (

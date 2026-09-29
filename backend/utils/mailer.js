@@ -477,7 +477,8 @@ async function sendOpsReportEmail({ to, report: r }) {
       ${block('Sistema', [li(`${r.backup.ok ? '✓' : '✗'} ${r.backup.text}`), li(`${r.disk.ok ? '✓' : '✗'} ${r.disk.text}`)])}
       ${block('IA', [
         li(`Análisis correctos: ${r.ai.ok} · fallidos: ${r.ai.failed}`),
-        ...r.ai.providerFails.map(f => li(`Proveedor con fallos (${f.c}×): ${f.detail}`))
+        ...r.ai.providerFails.map(f => li(`Proveedor con fallos (${f.c}×): ${f.detail}`)),
+        ...(r.ai.usage || []).map(u => li(`${u.provider} ayer: ${u.calls} llamadas · ${u.tokens.toLocaleString('es-ES')} tokens${u.budget ? ` (tope ${u.budget.dailyTokens?.toLocaleString('es-ES') ?? '—'}/día) · mes ≈ ${u.month_usd.toFixed(2)} $ de ${u.budget.monthlyUsd ?? '—'} $` : ''}`))
       ])}
       ${r.mail.failed.length ? block('Emails no enviados', r.mail.failed.map(m => li(`${m.c}× ${m.detail}`))) : ''}
       ${block(`Errores de la app (${r.errorsTotal})`, r.errors.length ? r.errors.map(e => li(`${e.c}× [${e.source}] ${e.message}`)) : [li('Ninguno')])}

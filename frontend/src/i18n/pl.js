@@ -479,7 +479,7 @@ export default {
       { h: 'Usługi zewnętrzne', list: [
         'Stripe: obsługuje płatności i zarządza subskrypcjami.',
         'Cloudflare Workers AI: generuje analizy, czyta zeskanowane lub sfotografowane faktury i odpowiada w asystencie. Jego warunki zabraniają używania twoich danych do trenowania modeli i nie przechowuje ich (poza tymczasowymi logami technicznymi do badania nadużyć). Nie zapisujemy twoich rozmów z asystentem.',
-        'Groq: zapasowy dostawca AI, używany tylko, gdy Cloudflare jest niedostępny (te same zadania). Umowa zabrania mu używania twoich danych do trenowania lub dostrajania modeli, a my mamy włączone zerowe przechowywanie (zapytania nie są zapisywane). Przetwarza dane w USA, na podstawie standardowych klauzul umownych.',
+        'Cerebras: zapasowy dostawca AI, używany tylko, gdy Cloudflare jest niedostępny (te same zadania). Umowa pozwala mu używać twoich danych wyłącznie do świadczenia usługi (nie do trenowania modeli) i przechowywać je tylko tak długo, jak to konieczne. Przetwarza dane w USA, na podstawie standardowych klauzul umownych.',
         'Resend: wysyła e-maile (twój klucz licencyjny, odzyskiwanie hasła oraz — jeśli je włączysz — przypomnienia kalendarza podatkowego, miesięczne podsumowanie i przypomnienia o płatności do twoich klientów).',
         'Cloudflare: sieć dostarczania i bezpieczeństwa chroniąca dostęp do strony. Kraju twojego połączenia (podawanego przez Cloudflare) używamy tylko do wyboru początkowego języka strony; nie przechowujemy go.'
       ] },

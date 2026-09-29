@@ -4,12 +4,14 @@
  *
  * Decisión (2026-09-26): nada que lleve datos de usuarios va a planes que
  * entrenen con ellos. El free tier de Gemini SÍ entrena → fuera por defecto.
- * Proveedores gratuitos que contractualmente NO entrenan con los datos:
- *   groq        Groq Cloud (OpenAI-compatible). Llama 4 Scout: texto + imágenes.
- *   cloudflare  Cloudflare Workers AI (OpenAI-compatible). Respaldo.
+ * Proveedores que contractualmente NO entrenan con los datos:
+ *   cloudflare  Cloudflare Workers AI (OpenAI-compatible). Principal.
+ *   cerebras    Cerebras (sesión 7). Respaldo, con tope de seguridad de gasto
+ *               (utils/aiBudget.js): gpt-oss-120b para texto, qwen-3.8-27b con imágenes.
+ *   groq        Groq Cloud. Soportado, pero sin cuenta (el alta falla).
  *   gemini      Solo si se añade a AI_PROVIDERS (p.ej. cuando haya plan de PAGO).
  *
- * Orden: AI_PROVIDERS (por defecto "groq,cloudflare"); solo se usan los que
+ * Orden: AI_PROVIDERS (por defecto "cloudflare,cerebras"); solo se usan los que
  * tengan credenciales. Si uno falla (cuota, saturación, petición demasiado
  * grande, formato no soportado…) se prueba el siguiente.
  *
@@ -21,6 +23,7 @@
 
 const { fetchWithTimeout } = require('../../utils/http');
 const { audit } = require('../../db/database');
+const budget = require('../../utils/aiBudget');
 const gemini = require('./gemini');
 const { AiError, parseJsonLoose } = gemini;
 
@@ -68,13 +71,23 @@ function providerError(name, status, body) {
   return err;
 }
 
-async function openAiCompatible({ name, url, key, model, system, parts, schema, maxTokens, jsonMode, timeoutMs = 90000 }) {
+async function openAiCompatible({ name, url, key, model, system, parts, schema, maxTokens, jsonMode, extra = {}, timeoutMs = 90000 }) {
   const sys = schema ? `${system}\n\n${jsonInstruction(schema)}` : system;
+  const content = toOpenAiContent(parts);
+  // Tope de seguridad (utils/aiBudget.js): si la llamada puede pasarse, se salta este proveedor.
+  const chars = sys.length + parts.reduce((n, p) => n + (p.text ? p.text.length : p.inlineData ? 4000 : 0), 0);
+  const gate = budget.allow(name, budget.estimateTokens(chars, maxTokens));
+  if (!gate.ok) {
+    const err = new AiError('ai_quota_exceeded', `${name}: tope de seguridad (${gate.reason})`);
+    err.retryable = true;
+    throw err;
+  }
   const body = {
     model,
-    messages: [{ role: 'system', content: sys }, { role: 'user', content: toOpenAiContent(parts) }],
+    messages: [{ role: 'system', content: sys }, { role: 'user', content }],
     max_tokens: maxTokens,
-    temperature: 0.3
+    temperature: 0.3,
+    ...extra
   };
   if (schema && jsonMode) body.response_format = { type: 'json_object' };
   let res;
@@ -91,6 +104,7 @@ async function openAiCompatible({ name, url, key, model, system, parts, schema, 
   }
   if (!res.ok) throw providerError(name, res.status, await res.text().catch(() => ''));
   const data = await res.json();
+  if (data.usage) budget.record(name, data.usage);
   const text = data.choices?.[0]?.message?.content || '';
   if (!text) {
     const err = new AiError('ai_empty_response', `${name} vacío`);
@@ -116,6 +130,19 @@ const PROVIDERS = {
       model: process.env.GROQ_MODEL || 'meta-llama/llama-4-scout-17b-16e-instruct', jsonMode: true
     })
   },
+  // Sesión 7: respaldo de Cloudflare. Texto con gpt-oss-120b; si hay imágenes
+  // (facturas en foto), qwen-3.8-27b, que admite visión. Con tope de seguridad.
+  cerebras: {
+    configured: () => !!process.env.CEREBRAS_API_KEY,
+    generate: (o) => {
+      const vision = o.parts.some(p => p.inlineData);
+      return openAiCompatible({
+        ...o, name: 'cerebras', url: 'https://api.cerebras.ai/v1/chat/completions', key: process.env.CEREBRAS_API_KEY,
+        model: vision ? (process.env.CEREBRAS_VISION_MODEL || 'qwen-3.8-27b') : (process.env.CEREBRAS_MODEL || 'gpt-oss-120b'),
+        jsonMode: true, extra: vision ? {} : { reasoning_effort: 'low' }
+      });
+    }
+  },
   cloudflare: {
     configured: () => !!(process.env.CF_ACCOUNT_ID && process.env.CF_AI_TOKEN),
     generate: (o) => openAiCompatible({
@@ -130,7 +157,7 @@ const PROVIDERS = {
 };
 
 function providerOrder() {
-  return (process.env.AI_PROVIDERS || 'groq,cloudflare').split(',').map(s => s.trim()).filter(p => PROVIDERS[p]?.configured());
+  return (process.env.AI_PROVIDERS || 'cloudflare,cerebras').split(',').map(s => s.trim()).filter(p => PROVIDERS[p]?.configured());
 }
 
 /** Mismo contrato que gemini.generate; recorre los proveedores configurados. */

@@ -5,8 +5,9 @@
  *   cuota diaria de análisis.
  * - Ningún free tier es "para siempre" → capa de proveedores intercambiable
  *   con respaldo: se prueban en orden (CHAT_PROVIDERS) solo los que tengan
- *   clave. Por defecto: cerebras → groq → cloudflare, porque sus condiciones
- *   NO permiten entrenar con los datos (decisión 2026-09-26). gemini (su free
+ *   clave. Por defecto: cloudflare → cerebras (sesión 7: Cerebras es respaldo,
+ *   con tope de seguridad en utils/aiBudget.js), porque sus condiciones NO
+ *   permiten entrenar con los datos (decisión 2026-09-26). gemini (su free
  *   tier entrena) y openrouter (sus modelos gratis suelen entrenar) solo se
  *   usan si se añaden a mano a CHAT_PROVIDERS.
  * - Anti-abuso: máx. CHAT_PER_MINUTE mensajes/min por licencia (10 por
@@ -20,6 +21,7 @@
 
 const { fetchWithTimeout } = require('../../utils/http');
 const { audit } = require('../../db/database');
+const budget = require('../../utils/aiBudget');
 const gemini = require('./gemini');
 const { profileContext, langDirective } = require('./prompts');
 
@@ -43,7 +45,12 @@ setInterval(() => {
 }, 5 * 60 * 1000).unref();
 
 /* ── Proveedores (API compatible con OpenAI salvo Gemini) ── */
-async function openAiCompatible(url, key, model, system, messages, extraHeaders = {}) {
+async function openAiCompatible(url, key, model, system, messages, extraHeaders = {}, name = '') {
+  // Tope de seguridad por proveedor (utils/aiBudget.js): si no cabe, se prueba el siguiente.
+  if (name) {
+    const chars = system.length + messages.reduce((n, m) => n + String(m.content || '').length, 0);
+    if (!budget.allow(name, budget.estimateTokens(chars, 700)).ok) throw new Error(`${name}: tope de seguridad`);
+  }
   const res = await fetchWithTimeout(url, {
     method: 'POST',
     headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${key}`, ...extraHeaders },
@@ -56,6 +63,7 @@ async function openAiCompatible(url, key, model, system, messages, extraHeaders 
   }, 30000);
   if (!res.ok) throw new Error(`status ${res.status}`);
   const data = await res.json();
+  if (name && data.usage) budget.record(name, data.usage);
   const text = data.choices?.[0]?.message?.content || '';
   if (!text) throw new Error('empty');
   return text;
@@ -65,7 +73,7 @@ const PROVIDERS = {
   cerebras: {
     configured: () => !!process.env.CEREBRAS_API_KEY,
     call: (system, messages) => openAiCompatible('https://api.cerebras.ai/v1/chat/completions',
-      process.env.CEREBRAS_API_KEY, process.env.CEREBRAS_MODEL || 'gpt-oss-120b', system, messages)
+      process.env.CEREBRAS_API_KEY, process.env.CEREBRAS_MODEL || 'gpt-oss-120b', system, messages, {}, 'cerebras')
   },
   groq: {
     configured: () => !!process.env.GROQ_API_KEY,
@@ -81,7 +89,7 @@ const PROVIDERS = {
   cloudflare: {
     configured: () => !!(process.env.CF_ACCOUNT_ID && process.env.CF_AI_TOKEN),
     call: (system, messages) => openAiCompatible(`https://api.cloudflare.com/client/v4/accounts/${process.env.CF_ACCOUNT_ID}/ai/v1/chat/completions`,
-      process.env.CF_AI_TOKEN, process.env.CF_AI_CHAT_MODEL || '@cf/meta/llama-3.3-70b-instruct-fp8-fast', system, messages)
+      process.env.CF_AI_TOKEN, process.env.CF_AI_CHAT_MODEL || '@cf/meta/llama-3.3-70b-instruct-fp8-fast', system, messages, {}, 'cloudflare')
   },
   gemini: {
     configured: () => !!process.env.GEMINI_API_KEY,
@@ -97,7 +105,7 @@ const PROVIDERS = {
 };
 
 function providerOrder() {
-  const list = (process.env.CHAT_PROVIDERS || 'cerebras,groq,cloudflare').split(',').map(s => s.trim()).filter(Boolean);
+  const list = (process.env.CHAT_PROVIDERS || 'cloudflare,cerebras').split(',').map(s => s.trim()).filter(Boolean);
   return list.filter(p => PROVIDERS[p]?.configured());
 }
 
