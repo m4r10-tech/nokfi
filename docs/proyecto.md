@@ -397,7 +397,7 @@ aquí queda el resumen operativo.
 2. **`backend/scripts/backup-db.sh` (nuevo, +x)** — backup consistente en caliente
    con `sqlite3 "$DB" ".backup ..."`, verificación `PRAGMA integrity_check`
    (borra la copia si falla), retención 14 días. Listo para cron:
-   `30 3 * * * /home/deploy/nokfi-fase3/backend/scripts/backup-db.sh >> /home/deploy/nokfi-fase3/backend/db/backups/backup.log 2>&1`
+   `30 3 * * * /home/deploy/nokfi/backend/scripts/backup-db.sh >> /home/deploy/nokfi/backend/db/backups/backup.log 2>&1`
 3. **`.gitignore`** — ignorados `backend/db/*.db`, `*.db-wal/-shm/-journal` y
    `backend/db/backups/` (antes ni tracked ni ignorados → riesgo de commitear
    datos reales).

@@ -40,7 +40,7 @@ vía Namecheap (gratis; CF no proxya MX/TXT).
 Cadena de tráfico: **Cliente → TLS → Cloudflare (edge, valida LE) → TLS → Nginx
 (real-IP) → Express `:3001`**.
 
-- **Paths**: app en `/home/deploy/nokfi-fase3/`. Backend (PM2 fork, cwd
+- **Paths**: app en `/home/deploy/nokfi/`. Backend (PM2 fork, cwd
   `.../backend`, `:3001`), frontend build en `.../frontend/dist` (servido por
   Nginx). `/etc/nginx/sites-available/nokfi.app` (sitio) +
   `/etc/nginx/conf.d/cloudflare.conf` (real-IP). DB en `.../backend/db/nokfi.db`.
@@ -213,7 +213,7 @@ vía `sqlite3 .backup` (seguro con WAL), verificación `PRAGMA integrity_check`
 Para activarlo en el VPS, añadir al cron de `deploy` (`crontab -e`):
 
 ```cron
-30 3 * * * /home/deploy/nokfi-fase3/backend/scripts/backup-db.sh >> /home/deploy/nokfi-fase3/backend/db/backups/backup.log 2>&1
+30 3 * * * /home/deploy/nokfi/backend/scripts/backup-db.sh >> /home/deploy/nokfi/backend/db/backups/backup.log 2>&1
 ```
 
 Notas:

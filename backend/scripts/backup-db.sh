@@ -18,7 +18,7 @@
 #   pm2 start nokfi-backend
 #
 # Cron recomendado en el VPS (crontab -e del usuario deploy), diario 03:30:
-#   30 3 * * * /home/deploy/nokfi-fase3/backend/scripts/backup-db.sh >> /home/deploy/nokfi-fase3/backend/db/backups/backup.log 2>&1
+#   30 3 * * * /home/deploy/nokfi/backend/scripts/backup-db.sh >> /home/deploy/nokfi/backend/db/backups/backup.log 2>&1
 #
 # Retención: se borran copias de más de RETENTION_DAYS días (default 14).
 # ==========================================================================
