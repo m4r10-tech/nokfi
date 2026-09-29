@@ -83,7 +83,7 @@ const N8N = `{
         "method": "POST", "url": "https://nokfi.app/api/v1/analyze",
         "authentication": "genericCredentialType", "genericAuthType": "httpBearerAuth",
         "sendBody": true, "specifyBody": "json",
-        "jsonBody": "={{ { type: 'excel', lang: 'es', data: { module: 'ventas', files: [{ name: 'ventas', rows: $input.all().map(i => i.json).slice(0, 80) }] } } }}"
+        "jsonBody": "={{ { type: 'excel', lang: 'es', data: { module: 'ventas', files: [{ name: 'ventas', rows: $input.all().map(i => i.json).slice(0, 5000), total_rows: $input.all().length }] } } }}"
       } },
     { "name": "Enviar resumen", "type": "n8n-nodes-base.emailSend",
       "parameters": { "subject": "Informe Nokfi", "text": "={{ $json.report.summary }}" } }
