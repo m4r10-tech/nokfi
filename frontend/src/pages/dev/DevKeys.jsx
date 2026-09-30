@@ -8,13 +8,14 @@ import { formatDateTime } from '../../utils/dates';
 import PageHeader from '../../components/PageHeader';
 import ErrorState from '../../components/ErrorState';
 import Skeleton from '../../components/Skeleton';
-import { Section, ErrorBox, Badge } from '../../components/ui';
+import { Section, ErrorBox, Badge, Segmented } from '../../components/ui';
 import DevLocked from './DevLocked';
 
 /**
  * Sesión 7 — Desarrolladores › Claves (antes en Configuración). La clave se
  * muestra una sola vez; se guarda solo su hash. Cada clave lleva el nombre
  * del cliente o del flujo (opción A para agencias) y su uso de hoy.
+ * Sesión 9: claves de prueba (nk_test_, todos los planes) y cliente.
  */
 export default function DevKeys() {
   const { t, lang } = useLang();
@@ -22,6 +23,8 @@ export default function DevKeys() {
   const [data, setData] = useState(null);
   const [failure, setFailure] = useState(null);
   const [name, setName] = useState('');
+  const [client, setClient] = useState('');
+  const [mode, setMode] = useState('live');
   const [creating, setCreating] = useState(false);
   const [created, setCreated] = useState(null);
   const [error, setError] = useState(null);
@@ -36,9 +39,9 @@ export default function DevKeys() {
   const create = async (e) => {
     e.preventDefault();
     setCreating(true); setError(null);
-    const res = await keysApi.create(name.trim());
+    const res = await keysApi.create(name.trim(), { mode: data.available ? mode : 'test', client: client.trim() });
     setCreating(false);
-    if (res.ok) { setCreated(res.data.key); setName(''); load(); }
+    if (res.ok) { setCreated(res.data.key); setName(''); setClient(''); load(); }
     else setError(apiErrorMessage(t, res));
   };
   const revoke = async (k) => {
@@ -54,8 +57,9 @@ export default function DevKeys() {
   return (
     <div className="flex flex-col gap-4">
       <PageHeader title={t('dev.keysTitle')} description={t('config.api.desc')} />
-      {!data ? <Skeleton className="h-40" /> : !data.available ? <DevLocked /> : (
+      {!data ? <Skeleton className="h-40" /> : (
         <>
+          {!data.available && <DevLocked />}
           {created && (
             <section className="card p-4 flex flex-col gap-2 anim-fade" style={{ background: 'var(--positive-soft)' }}>
               <p className="text-sm font-medium" style={{ color: 'var(--text-primary)' }}>{t('config.api.createdOnce')}</p>
@@ -68,9 +72,20 @@ export default function DevKeys() {
           )}
 
           <Section title={t('dev.newKey')}>
-            <form onSubmit={create} className="flex flex-col sm:flex-row gap-2">
-              <input value={name} onChange={(e) => setName(e.target.value)} maxLength={60} placeholder={t('config.api.namePlaceholder')} aria-label={t('config.api.namePlaceholder')} className="input flex-1" />
-              <button type="submit" disabled={creating} className="btn btn-primary">{creating ? <Loader2 size={15} className="animate-spin" /> : <KeyRound size={15} />} {t('config.api.create')}</button>
+            <form onSubmit={create} className="flex flex-col gap-3">
+              {data.available && (
+                <div className="flex flex-col gap-1.5">
+                  <Segmented value={mode} onChange={setMode} label={t('dev.modeLabel')}
+                    options={[{ value: 'live', label: t('dev.modeLive') }, { value: 'test', label: t('dev.modeTest') }]} />
+                  <p className="text-xs" style={{ color: 'var(--text-muted)' }}>{mode === 'live' ? t('dev.modeLiveHint') : t('dev.modeTestHint')}</p>
+                </div>
+              )}
+              {!data.available && <p className="text-xs" style={{ color: 'var(--text-secondary)' }}>{t('dev.testOnlyNotice')}</p>}
+              <div className="flex flex-col sm:flex-row gap-2">
+                <input value={name} onChange={(e) => setName(e.target.value)} maxLength={60} placeholder={t('config.api.namePlaceholder')} aria-label={t('config.api.namePlaceholder')} className="input flex-1" />
+                <input value={client} onChange={(e) => setClient(e.target.value)} maxLength={60} placeholder={t('dev.clientPlaceholder')} aria-label={t('dev.clientLabel')} className="input sm:w-48" />
+                <button type="submit" disabled={creating} className="btn btn-primary">{creating ? <Loader2 size={15} className="animate-spin" /> : <KeyRound size={15} />} {t('config.api.create')}</button>
+              </div>
             </form>
             <p className="text-xs mt-2" style={{ color: 'var(--text-muted)' }}>{t('dev.keyNameHint')}</p>
             {error && <ErrorBox>{error}</ErrorBox>}
@@ -84,8 +99,9 @@ export default function DevKeys() {
                     <Code2 size={15} className="shrink-0" style={{ color: 'var(--accent-text)' }} />
                     <div className="flex-1 min-w-0">
                       <p className="text-sm truncate" style={{ color: 'var(--text-primary)' }}>{k.name || t('config.api.unnamed')} <code className="text-xs" style={{ color: 'var(--text-muted)' }}>{k.prefix}…</code></p>
-                      <p className="text-xs" style={{ color: 'var(--text-muted)' }}>{k.last_used_at ? t('config.api.lastUsed').replace('{date}', formatDateTime(k.last_used_at, lang)) : t('config.api.neverUsed')}</p>
+                      <p className="text-xs" style={{ color: 'var(--text-muted)' }}>{k.client ? `${k.client} · ` : ''}{k.last_used_at ? t('config.api.lastUsed').replace('{date}', formatDateTime(k.last_used_at, lang)) : t('config.api.neverUsed')}</p>
                     </div>
+                    {k.mode === 'test' && <Badge tone="accent">{t('dev.testBadge')}</Badge>}
                     <Badge tone={k.calls_today ? 'accent' : 'muted'}>{t('dev.callsTodayKey', { n: k.calls_today || 0 })}</Badge>
                     <button onClick={() => revoke(k)} className="btn btn-ghost btn-sm !px-2" aria-label={t('config.api.revoke')} title={t('config.api.revoke')}><Trash2 size={14} /></button>
                   </li>

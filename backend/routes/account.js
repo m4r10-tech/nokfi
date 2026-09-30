@@ -50,6 +50,7 @@ keys.get('/summary', requireLicense, (req, res) => {
     available: API_PLANS.includes(req.license.plan),
     quota: { daily: aiQuotaForPlan(req.license.plan), used_today: countAiAnalysesToday(id) },
     ...keyCounts(listApiKeys(id)),
+    webhooks_total: getDB().prepare('SELECT COUNT(*) c FROM webhook_endpoints WHERE license_id = ?').get(id).c,
     ...apiSummary(id)
   });
 });

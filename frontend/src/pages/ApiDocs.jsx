@@ -1,5 +1,5 @@
 import { Link } from 'react-router-dom';
-import { Copy, KeyRound, Workflow, FileJson, Lock, Receipt, Bot } from 'lucide-react';
+import { Copy, KeyRound, Workflow, FileJson, Lock, Receipt, Bot, Calculator, Webhook, FlaskConical } from 'lucide-react';
 import { useLang } from '../context/LangContext';
 import { useToast } from '../context/ToastContext';
 import { usePageMeta } from '../hooks/usePageMeta';
@@ -90,12 +90,49 @@ const N8N = `{
   ]
 }`;
 
+// Sesión 9 — Bloque 2.
+const CURL_TAX = `curl "https://nokfi.app/api/v1/tax/nif?value=B12345674" \\
+  -H "Authorization: Bearer nk_live_TU_CLAVE"
+
+curl -X POST https://nokfi.app/api/v1/tax/withholding \\
+  -H "Authorization: Bearer nk_live_TU_CLAVE" \\
+  -H "Content-Type: application/json" \\
+  -d '{ "base": 1000, "type": "professional" }'
+# → { "withholding_rate": 15, "withholding_amount": 150, "vat_amount": 210, "total_invoice": 1060, … }`;
+
+const CURL_ASYNC = `curl -X POST "https://nokfi.app/api/v1/invoices/extract?async=true" \\
+  -H "Authorization: Bearer nk_live_TU_CLAVE" \\
+  -H "Idempotency-Key: factura-2026-017" \\
+  -H "Content-Type: application/json" \\
+  -d '{ "files": [{ "name": "f.pdf", "mime": "application/pdf", "data": "JVBERi0x…" }] }'
+# → 202 { "id": "job_3f9c…", "status": "queued", … }
+
+curl https://nokfi.app/api/v1/jobs/job_3f9c… -H "Authorization: Bearer nk_live_TU_CLAVE"
+# → { "status": "succeeded", "result": { "invoices": [ … ] } }`;
+
+const EVENT = `POST https://tu-servidor/webhook
+Nokfi-Signature: t=1790000000,v1=5f2b…   (HMAC-SHA256 de "t.cuerpo" con tu whsec_…)
+Nokfi-Event: job.completed
+Nokfi-Event-Id: evt_91c0…
+
+{ "id": "evt_91c0…", "type": "job.completed", "created_at": "2026-10-01T09:12:03Z",
+  "livemode": true, "data": { "job_id": "job_3f9c…", "kind": "invoices.extract",
+  "status": "succeeded", "result": { "invoices": [ … ] } } }`;
+
 const ENDPOINTS = [
   ['GET', '/api/v1/usage', 'usage'],
   ['POST', '/api/v1/invoices/extract', 'invoices'],
   ['POST', '/api/v1/analyze', 'analyze'],
   ['GET', '/api/v1/analyses', 'list'],
   ['GET', '/api/v1/analyses/{id}', 'get'],
+  ['GET', '/api/v1/jobs/{id}', 'job'],
+  ['GET · POST', '/api/v1/webhooks', 'webhooks'],
+  ['GET', '/api/v1/tax/nif', 'tax_nif'],
+  ['POST', '/api/v1/tax/vat', 'tax_vat'],
+  ['POST', '/api/v1/tax/withholding', 'tax_withholding'],
+  ['POST', '/api/v1/tax/model-130', 'tax_130'],
+  ['GET', '/api/v1/tax/quarter', 'tax_quarter'],
+  ['GET', '/api/v1/tax/calendar', 'tax_calendar'],
   ['GET', '/api/v1/openapi.json', 'openapi']
 ];
 
@@ -128,7 +165,7 @@ export default function ApiDocs() {
           <ul className="flex flex-col gap-2">
             {ENDPOINTS.map(([m, path, k]) => (
               <li key={path} className="flex flex-col sm:flex-row sm:items-center gap-1 sm:gap-3">
-                <code className="text-xs font-semibold rounded px-1.5 py-0.5 self-start" style={{ background: m === 'POST' ? 'var(--accent-soft)' : 'var(--surface-2)', color: m === 'POST' ? 'var(--accent-text)' : 'var(--text-secondary)' }}>{m}</code>
+                <code className="text-xs font-semibold rounded px-1.5 py-0.5 self-start" style={{ background: m.includes('POST') ? 'var(--accent-soft)' : 'var(--surface-2)', color: m.includes('POST') ? 'var(--accent-text)' : 'var(--text-secondary)' }}>{m}</code>
                 <code className="text-sm" style={{ color: 'var(--text-primary)' }}>{path}</code>
                 <span className="text-sm sm:ml-auto" style={{ color: 'var(--text-secondary)' }}>{t(`apiDocs.ep_${k}`)}</span>
               </li>
@@ -142,6 +179,23 @@ export default function ApiDocs() {
           <Code text={CURL_INVOICES} onCopy={copy} />
           <p>{t('apiDocs.invoicesChecks')}</p>
           <Code text={INVOICE_RESPONSE} onCopy={copy} />
+        </Block>
+
+        <Block icon={Calculator} title={t('apiDocs.taxTitle')}>
+          <p>{t('apiDocs.taxText')}</p>
+          <Code text={CURL_TAX} onCopy={copy} />
+        </Block>
+
+        <Block icon={Webhook} title={t('apiDocs.asyncTitle')}>
+          <p>{t('apiDocs.asyncText')}</p>
+          <Code text={CURL_ASYNC} onCopy={copy} />
+          <p>{t('apiDocs.idemText')}</p>
+          <p>{t('apiDocs.webhooksText')}</p>
+          <Code text={EVENT} onCopy={copy} />
+        </Block>
+
+        <Block icon={FlaskConical} title={t('apiDocs.testTitle')}>
+          <p>{t('apiDocs.testText')}</p>
         </Block>
 
         <Block icon={Bot} title={t('apiDocs.mcpTitle')}>

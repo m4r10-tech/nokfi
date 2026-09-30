@@ -10,7 +10,7 @@
 export const DPA = {
   es: {
     title: 'Contrato de encargo de tratamiento',
-    updated: 'Última actualización: 29 de septiembre de 2026',
+    updated: 'Última actualización: 30 de septiembre de 2026',
     intro: 'Cuando usas Nokfi tratas datos personales de terceros (por ejemplo, el nombre, NIF y email de tus clientes y proveedores). Para esos datos tú eres el responsable del tratamiento y Nokfi actúa como encargado, conforme al artículo 28 del Reglamento General de Protección de Datos (RGPD) y a la Ley Orgánica 3/2018. Este contrato forma parte de los términos de uso y se acepta al activar la licencia.',
     sections: [
       { h: '1. Partes', list: [
@@ -40,6 +40,7 @@ export const DPA = {
         'Contraseñas guardadas con scrypt; tokens de sesión, de recuperación, claves de API y enlaces compartidos guardados solo como hash.',
         'Separación de datos por licencia en todas las consultas; límites de peticiones frente a abusos.',
         'Los archivos que analizas se leen en tu navegador y no se guardan en nuestros servidores.',
+        'API: el registro de llamadas no guarda el contenido (90 días); los resultados de los trabajos asíncronos y el contenido de los webhooks se borran a las 24 h. Los webhooks solo envían datos a las URL que tú configuras, firmados con HMAC y solo a direcciones públicas por https.',
         'Copias de seguridad periódicas de la base de datos y registro de eventos de seguridad.'
       ] },
       { h: '6. Subencargados', ps: [
@@ -67,7 +68,7 @@ export const DPA = {
   },
   en: {
     title: 'Data processing agreement',
-    updated: 'Last updated: 29 September 2026',
+    updated: 'Last updated: 30 September 2026',
     intro: 'When you use Nokfi you process personal data of third parties (for example, the name, tax ID and email of your clients and suppliers). For that data you are the controller and Nokfi acts as processor, under Article 28 of the General Data Protection Regulation (GDPR). This agreement is part of the terms of use and is accepted when you activate your licence. The Spanish version prevails in case of discrepancy.',
     sections: [
       { h: '1. Parties', list: [
@@ -97,6 +98,7 @@ export const DPA = {
         'Passwords stored with scrypt; session, recovery, API and share-link tokens stored only as hashes.',
         'Data separated per licence in every query; rate limits against abuse.',
         'Files you analyse are read in your browser and not stored on our servers.',
+        'API: the call log never stores content (90 days); async job results and webhook contents are deleted after 24 h. Webhooks only send data to the URLs you configure, HMAC-signed and only to public https addresses.',
         'Regular database backups and security event logging.'
       ] },
       { h: '6. Sub-processors', ps: ['You authorise Nokfi to use the following sub-processors, bound by data protection obligations equivalent to this agreement:'], list: [

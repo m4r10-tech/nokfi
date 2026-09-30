@@ -43,6 +43,10 @@ const Configuracion = lazy(() => import('./pages/Configuracion'));
 const DevSummary = lazy(() => import('./pages/dev/DevSummary'));
 const DevKeys = lazy(() => import('./pages/dev/DevKeys'));
 const DevTemplates = lazy(() => import('./pages/dev/DevTemplates'));
+const DevWebhooks = lazy(() => import('./pages/dev/DevWebhooks'));
+const DevPlayground = lazy(() => import('./pages/dev/DevPlayground'));
+const DevLogs = lazy(() => import('./pages/dev/DevLogs'));
+const DevClients = lazy(() => import('./pages/dev/DevClients'));
 const Ayuda = lazy(() => import('./pages/Ayuda'));
 const FinanceLayout = lazy(() => import('./pages/finance/FinanceLayout'));
 const Ledger = lazy(() => import('./pages/finance/Ledger'));
@@ -117,6 +121,10 @@ export default function App() {
               <Route path="dev" element={<DevSummary />} />
               <Route path="dev/claves" element={<DevKeys />} />
               <Route path="dev/plantillas" element={<DevTemplates />} />
+              <Route path="dev/webhooks" element={<DevWebhooks />} />
+              <Route path="dev/playground" element={<DevPlayground />} />
+              <Route path="dev/registro" element={<DevLogs />} />
+              <Route path="dev/clientes" element={<DevClients />} />
             </Route>
 
             {/* 404 real (antes redirigía a /login = soft 404 para crawlers) */}

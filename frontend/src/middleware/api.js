@@ -142,8 +142,24 @@ export const dashboardApi = { get: () => request('/dashboard', { auth: true }) }
 export const keysApi = {
   list: () => request('/keys', { auth: true }),
   summary: () => request('/keys/summary', { auth: true }),
-  create: (name) => request('/keys', { method: 'POST', auth: true, body: { name } }),
+  create: (name, { mode = 'live', client = '' } = {}) => request('/keys', { method: 'POST', auth: true, body: { name, mode, client } }),
+  setClient: (id, client) => request(`/keys/${encodeURIComponent(id)}`, { method: 'PATCH', auth: true, body: { client } }),
   revoke: (id) => request(`/keys/${encodeURIComponent(id)}`, { method: 'DELETE', auth: true })
+};
+// Sesión 9 — panel de Desarrolladores (webhooks, registro, clientes, Playground).
+export const devApi = {
+  webhooks: () => request('/dev/webhooks', { auth: true }),
+  createWebhook: (body) => request('/dev/webhooks', { method: 'POST', auth: true, body }),
+  updateWebhook: (id, body) => request(`/dev/webhooks/${encodeURIComponent(id)}`, { method: 'PATCH', auth: true, body }),
+  deleteWebhook: (id) => request(`/dev/webhooks/${encodeURIComponent(id)}`, { method: 'DELETE', auth: true }),
+  secret: (id) => request(`/dev/webhooks/${encodeURIComponent(id)}/secret`, { auth: true }),
+  rotateSecret: (id) => request(`/dev/webhooks/${encodeURIComponent(id)}/rotate-secret`, { method: 'POST', auth: true }),
+  testWebhook: (id) => request(`/dev/webhooks/${encodeURIComponent(id)}/test`, { method: 'POST', auth: true }),
+  deliveries: (params) => request(`/dev/deliveries${qs(params)}`, { auth: true }),
+  resend: (id) => request(`/dev/deliveries/${encodeURIComponent(id)}/resend`, { method: 'POST', auth: true }),
+  calls: (params) => request(`/dev/calls${qs(params)}`, { auth: true }),
+  clients: () => request('/dev/clients', { auth: true }),
+  playground: (body) => request('/dev/playground', { method: 'POST', auth: true, body })
 };
 export const shareApi = {
   list: () => request('/share', { auth: true }),

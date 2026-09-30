@@ -1,4 +1,4 @@
-import { LayoutDashboard, ClipboardList, FileSpreadsheet, History, Calculator, Settings, Wallet, LifeBuoy, Gauge, KeyRound, BookOpen, Workflow } from 'lucide-react';
+import { LayoutDashboard, ClipboardList, FileSpreadsheet, History, Calculator, Settings, Wallet, LifeBuoy, Gauge, KeyRound, BookOpen, Workflow, Webhook, Play, ScrollText, Users } from 'lucide-react';
 
 /**
  * Navegación de la app privada — fuente única para la Sidebar (escritorio) y
@@ -23,11 +23,16 @@ export const NAV_ITEMS = [
 /**
  * Sesión 7 — espacio Desarrolladores (/app/dev/*): la misma cuenta, con su
  * propio menú. Documentación abre la página pública /api-docs.
+ * Sesión 9: Webhooks, Playground, Registro de llamadas y Clientes.
  */
 export const DEV_NAV_ITEMS = [
   { to: '/app/dev', end: true, icon: Gauge, key: 'nav.devSummary', mobile: 'bar' },
   { to: '/app/dev/claves', icon: KeyRound, key: 'nav.devKeys', mobile: 'bar' },
-  { to: '/app/dev/plantillas', icon: Workflow, key: 'nav.devTemplates', mobile: 'bar' },
+  { to: '/app/dev/webhooks', icon: Webhook, key: 'nav.devWebhooks', mobile: 'bar' },
+  { to: '/app/dev/playground', icon: Play, key: 'nav.devPlayground', mobile: 'bar' },
+  { to: '/app/dev/registro', icon: ScrollText, key: 'nav.devLogs', mobile: 'more' },
+  { to: '/app/dev/clientes', icon: Users, key: 'nav.devClients', mobile: 'more' },
+  { to: '/app/dev/plantillas', icon: Workflow, key: 'nav.devTemplates', mobile: 'more' },
   { to: '/api-docs', icon: BookOpen, key: 'nav.devDocs', mobile: 'more', external: true },
   { to: '/app/ayuda', icon: LifeBuoy, key: 'nav.help', mobile: 'more' },
   { to: '/app/configuracion', icon: Settings, key: 'nav.settings', mobile: 'more' }
