@@ -1,6 +1,6 @@
 import { useState, useEffect, useMemo, useCallback } from 'react';
 import { Link } from 'react-router-dom';
-import { History, ClipboardList, FileSpreadsheet, Sparkles, Search, ChevronRight, FolderOpen } from 'lucide-react';
+import { History, ClipboardList, FileSpreadsheet, FileText, Search, ChevronRight, FolderOpen } from 'lucide-react';
 import { analysesApi } from '../middleware/api';
 import { apiErrorMessage, isConnectivityError } from '../middleware/errors';
 import { useLang } from '../context/LangContext';
@@ -129,7 +129,7 @@ export default function Historial() {
         <div className="flex flex-col gap-6">
           {groups.map((g, gi) => (
             <section key={g.label}>
-              <h2 className="text-xs font-medium uppercase tracking-wide mb-2" style={{ color: 'var(--text-muted)' }}>{g.label}</h2>
+              <h2 className="section-title mb-2">{g.label}</h2>
               <div className="flex flex-col gap-2">
                 {g.items.map((a, i) => <Row key={a.id} a={a} t={t} lang={lang} showTime={g.recent} i={Math.min(gi * 3 + i, 10)} />)}
               </div>
@@ -142,7 +142,7 @@ export default function Historial() {
 }
 
 function Row({ a, t, lang, showTime, i }) {
-  const Icon = KIND_ICON[a.kind] || Sparkles;
+  const Icon = KIND_ICON[a.kind] || FileText;
   const d = parseDbDate(a.created_at);
   return (
     <Link to={`/app/historial/${a.id}`} className="card card-interactive anim-enter p-3.5 md:p-4 flex items-center gap-3"

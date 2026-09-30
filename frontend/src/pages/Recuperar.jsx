@@ -205,7 +205,7 @@ function KeysStep({ recoveryToken, keys }) {
 
       {keys.map((k, i) => (
         <div key={k.key} className="anim-enter" style={{ '--i': i }}>
-          <p className="text-xs font-medium uppercase tracking-wide mb-1.5 flex items-center gap-1.5"
+          <p className="section-title mb-1.5 flex items-center gap-1.5"
              style={{ color: 'var(--text-muted)' }}>
             <KeyRound size={12} /> {k.plan}
           </p>

@@ -85,7 +85,8 @@ export default function DashboardLayout() {
               <ArrowLeft size={16} /> {t(parent.key)}
             </Link>
           )}
-          <div key={pathname} className="anim-enter">
+          {/* Las pestañas de Finanzas comparten clave: al cambiar de pestaña solo se anima su contenido (FinanceLayout). */}
+          <div key={pathname.startsWith('/app/finanzas') ? '/app/finanzas' : pathname} className="anim-enter">
             <Outlet context={{ profile, updateProfile, loading, saveState }} />
           </div>
         </main>

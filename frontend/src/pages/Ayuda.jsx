@@ -34,14 +34,14 @@ export default function Ayuda() {
 
       <Section title={t('help.contact')}>
         <a href={supportHref} className="card card-interactive p-4 flex items-start gap-3">
-          <span className="w-10 h-10 rounded-xl grid place-items-center shrink-0" style={{ background: 'var(--accent)', color: 'var(--on-accent)' }}><LifeBuoy size={18} /></span>
+          <LifeBuoy size={18} className="shrink-0 mt-0.5" style={{ color: 'var(--text-muted)' }} />
           <div className="min-w-0">
             <p className="text-sm font-semibold" style={{ color: 'var(--text-primary)' }}>soporte@nokfi.app</p>
             <p className="text-xs mt-0.5" style={{ color: 'var(--text-secondary)' }}>{t('help.supportDesc')}</p>
           </div>
         </a>
         <a href={`mailto:info@nokfi.app?subject=${encodeURIComponent('Nokfi')}`} className="card card-interactive p-4 flex items-start gap-3 mt-2">
-          <span className="w-10 h-10 rounded-xl grid place-items-center shrink-0" style={{ background: 'var(--accent-soft)', color: 'var(--accent-text)' }}><Mail size={18} /></span>
+          <Mail size={18} className="shrink-0 mt-0.5" style={{ color: 'var(--text-muted)' }} />
           <div className="min-w-0">
             <p className="text-sm font-semibold" style={{ color: 'var(--text-primary)' }}>info@nokfi.app</p>
             <p className="text-xs mt-0.5" style={{ color: 'var(--text-secondary)' }}>{t('help.infoDesc')}</p>

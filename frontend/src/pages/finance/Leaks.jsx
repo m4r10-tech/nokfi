@@ -61,7 +61,6 @@ export default function Leaks() {
     <div className="flex flex-col gap-4">
       {data.detected_this_month > 0 && (
       <section className="card p-5 flex items-center gap-4" style={{ borderColor: 'var(--border-strong)' }}>
-        <span className="w-11 h-11 rounded-xl grid place-items-center shrink-0" style={{ background: 'var(--positive-soft)', color: 'var(--positive)' }}><Droplets size={20} /></span>
         <div className="min-w-0">
           <p className="text-sm" style={{ color: 'var(--text-secondary)' }}>{t('finance.leaks.counter')}</p>
           <p className="text-2xl font-semibold tabular" style={{ color: 'var(--text-primary)' }}>{eur(data.detected_this_month, lang)}</p>

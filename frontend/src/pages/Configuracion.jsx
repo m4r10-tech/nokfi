@@ -1,7 +1,7 @@
 import { useState, useEffect } from 'react';
 import { useOutletContext, Link } from 'react-router-dom';
 import { Moon, Sun, LogOut, KeyRound, Copy, Eye, EyeOff, Loader2, CreditCard, Check, CloudOff, Code2, Trash2, Download, Lock, BellRing, LifeBuoy, ExternalLink, Mail, Share2 } from 'lucide-react';
-import { SECTORS, SIZES } from '../components/OnboardingModal';
+import { sortedSectors, SIZES } from '../components/OnboardingModal';
 import { LANGUAGES } from '../i18n/languages';
 import { Modal, ErrorBox } from '../components/ui';
 import { saveBlob } from '../middleware/exports/model';
@@ -47,7 +47,7 @@ export default function Configuracion() {
           <label htmlFor="cfg-sector" className="text-sm shrink-0" style={{ color: 'var(--text-secondary)' }}>{t('config.sector')}</label>
           <select id="cfg-sector" value={profile.sector} onChange={(e) => updateProfile({ sector: e.target.value })} disabled={loading} className="input sm:!w-72">
             <option value="">{t('onboarding.sectorSelect')}</option>
-            {SECTORS.map(s => <option key={s.value} value={s.value}>{t(`onboarding.sectors.${s.key}`)}</option>)}
+            {sortedSectors(t, lang).map(s => <option key={s.value} value={s.value}>{s.label}</option>)}
           </select>
         </div>
         <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-1.5 sm:gap-4">
@@ -560,7 +560,7 @@ function Section({ title, aside, children }) {
   return (
     <section className="card p-4 sm:p-5 flex flex-col gap-3">
       <div className="flex items-center justify-between gap-3 min-h-[20px]">
-        <h2 className="text-xs font-medium uppercase tracking-wide" style={{ color: 'var(--text-muted)' }}>{title}</h2>
+        <h2 className="section-title">{title}</h2>
         {aside}
       </div>
       {children}

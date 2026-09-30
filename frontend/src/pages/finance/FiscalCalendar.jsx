@@ -47,7 +47,7 @@ export default function FiscalCalendar() {
             <div className="flex items-center gap-4">
               <div className="w-16 h-16 rounded-2xl flex flex-col items-center justify-center shrink-0" style={{ background: 'var(--accent-soft)', color: 'var(--accent-text)' }}>
                 <span className="text-2xl font-semibold tabular leading-none">{next.days_left}</span>
-                <span className="text-[10px] uppercase tracking-wide mt-1">{t('finance.calendar.daysShort', { n: next.days_left })}</span>
+                <span className="text-[11px] mt-1">{t('finance.calendar.daysShort', { n: next.days_left })}</span>
               </div>
               <div className="min-w-0">
                 <p className="text-sm font-semibold" style={{ color: 'var(--text-primary)' }}>{t('finance.calendar.models').replace('{m}', next.models.join(', '))} · {next.period}</p>
@@ -80,7 +80,7 @@ export default function FiscalCalendar() {
         <div className="flex flex-col gap-5">
           {Object.entries(byMonth).map(([m, list]) => (
             <div key={m}>
-              <p className="text-xs font-medium uppercase tracking-wide mb-2 first-letter:uppercase" style={{ color: 'var(--text-muted)' }}>
+              <p className="section-title mb-2 first-letter:uppercase">
                 {isoDate(`${m}-01`, lang, { month: 'long', year: 'numeric' })}
               </p>
               <ul className="flex flex-col gap-1.5">

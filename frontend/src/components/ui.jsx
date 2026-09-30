@@ -15,7 +15,7 @@ export function Section({ title, aside, children, className = '' }) {
     <section className={`card p-4 sm:p-5 ${className}`}>
       {(title || aside) && (
         <div className="flex items-center justify-between gap-3 mb-3 min-h-[20px]">
-          {title && <h2 className="text-xs font-medium uppercase tracking-wide" style={{ color: 'var(--text-muted)' }}>{title}</h2>}
+          {title && <h2 className="section-title">{title}</h2>}
           {aside}
         </div>
       )}

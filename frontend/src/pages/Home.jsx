@@ -1,8 +1,8 @@
 import { useState, useEffect, useCallback, useMemo } from 'react';
 import { useOutletContext, Link } from 'react-router-dom';
 import {
-  X, Check, ClipboardList, FileSpreadsheet, Calculator, ArrowRight, BarChart3, Clock, Sparkles, ChevronRight, Gift,
-  Landmark, HandCoins, Droplets, LineChart, CalendarDays, ListChecks, Wallet, BookOpen, AlertTriangle
+  X, Check, ClipboardList, FileSpreadsheet, Calculator, ArrowRight, ChevronRight, Gift, FileText,
+  Landmark, HandCoins, Droplets, LineChart, CalendarDays, BookOpen, AlertTriangle
 } from 'lucide-react';
 import { analysesApi, dashboardApi, actionsApi } from '../middleware/api';
 import { ScoreRing, healthTone } from '../components/HealthScore';
@@ -12,22 +12,21 @@ import { useLang } from '../context/LangContext';
 import { useAuth } from '../context/AuthContext';
 import Skeleton from '../components/Skeleton';
 import ErrorState from '../components/ErrorState';
+import { toolLabelKey } from '../utils/nokfiLinks';
 import { parseDbDate, relativeTime, utcDay, localeOf, formatTime } from '../utils/dates';
 import { KIND_ICON, kindLabel } from './Historial';
 
 /**
- * Panel de inicio (/app/home) — sesión 3, Tanda D ("dashboard vivo").
+ * Panel de inicio (/app/home) — sesión 8: Inicio en DOS MODOS (decidido en la
+ * revisión de la sesión 5).
  *
- * Antes: 3 KPI cards con valores FIJOS ("—", "0", "Sin datos aún") que nunca
- * se alimentaban. Ahora todo sale de datos reales que ya expone la API:
- *   - GET /api/analyses → nº de análisis, este mes, último, actividad reciente
- *     y los análisis de HOY (día UTC, el mismo corte que la cuota del backend).
- *   - license.ai_quota (login/verify) → cuota diaria del plan.
- * "Salud financiera" y "Alertas activas" se retiraron: no hay motor de scoring
- * y mostrar números inventados rompía la confianza (plan D.3: nada falso).
+ *   - Sin datos en el libro: casi solo los Primeros pasos, con UNO principal
+ *     (subir facturas) y el próximo plazo fiscal como pieza útil.
+ *   - Con datos: arriba el dinero (Hacienda, cobros vencidos, caja a 90 días)
+ *     junto al próximo plazo en grande; después el plan de acción del último
+ *     informe. Las métricas de uso (análisis, cuota) bajan a una línea al final.
  *
- * Usuario nuevo: guía de primeros pasos (sustituye a la welcome card) con los
- * pasos marcados según lo que ya hizo; se puede descartar (welcomeCardDismissed).
+ * Todo sale de GET /api/dashboard (cálculos del backend) y GET /api/analyses.
  */
 export default function Home() {
   const { profile, updateProfile, loading: profileLoading } = useOutletContext();
@@ -39,52 +38,40 @@ export default function Home() {
 
   const load = useCallback(async () => {
     setFailure(null);
-    setItems(null);
     const [res, d] = await Promise.all([analysesApi.list(), dashboardApi.get()]);
     if (res.ok) setItems(res.data.analyses || []);
     else setFailure(res);
     if (d.ok) setDash(d.data);
+    else if (res.ok) setFailure(d);
   }, []);
   useEffect(() => { load(); }, [load]);
 
   const stats = useMemo(() => {
     if (!items) return null;
-    const now = new Date();
-    const today = utcDay(now);
-    let month = 0, usedToday = 0;
-    const kinds = new Set();
-    for (const a of items) {
-      const d = parseDbDate(a.created_at);
-      kinds.add(a.kind);
-      if (!d) continue;
-      if (d.getFullYear() === now.getFullYear() && d.getMonth() === now.getMonth()) month++;
-      if (utcDay(d) === today) usedToday++;
-    }
+    const today = utcDay(new Date());
+    const kinds = new Set(items.map(a => a.kind));
     if (dash?.ledger_count) kinds.add('ledger');
-    return { total: items.length, month, usedToday, last: items[0] || null, kinds };
+    const usedToday = items.filter(a => { const d = parseDbDate(a.created_at); return d && utcDay(d) === today; }).length;
+    return { total: items.length, usedToday, kinds };
   }, [items, dash]);
 
-  const dismissGuide = () => updateProfile({ welcomeCardDismissed: true });
-  const showGuide = !profileLoading && stats && !profile.welcomeCardDismissed
-    && !(stats.kinds.has('cuestionario') && stats.kinds.has('ledger'));
-
-  const quota = license?.ai_quota ?? null;
   const trialEnd = license?.trial_ends_at ? new Date(license.trial_ends_at) : null;
   const trialDaysLeft = trialEnd && trialEnd > new Date() ? Math.ceil((trialEnd - new Date()) / 86400000) : null;
+  const ready = stats && dash && !profileLoading;
+  const hasData = !!dash?.ledger_count;
 
   return (
     <div className="flex flex-col gap-5 md:gap-6">
       <header>
-        <h1 className="text-[22px] md:text-2xl font-semibold tracking-tight" style={{ color: 'var(--text-primary)' }}>
-          {greeting(t)}{profile.companyName ? `, ${profile.companyName}` : ''}
-        </h1>
-        <p className="text-sm mt-1 first-letter:uppercase" style={{ color: 'var(--text-secondary)' }}>
-          {new Date().toLocaleDateString(localeOf(lang), { weekday: 'long', day: 'numeric', month: 'long' })}
+        <h1 className="text-[22px] md:text-2xl font-semibold tracking-tight" style={{ color: 'var(--text-primary)' }}>{greeting(t)}</h1>
+        <p className="text-sm mt-1" style={{ color: 'var(--text-secondary)' }}>
+          {profile.companyName ? `${profile.companyName} · ` : ''}
+          <span className="first-letter:uppercase inline-block">{new Date().toLocaleDateString(localeOf(lang), { weekday: 'long', day: 'numeric', month: 'long' })}</span>
         </p>
       </header>
 
       {trialDaysLeft != null && (
-        <div className="anim-enter flex items-center gap-3 rounded-xl px-4 py-3 text-sm"
+        <div className="flex items-center gap-3 rounded-xl px-4 py-3 text-sm"
           style={{ background: 'var(--accent-soft)', color: 'var(--text-primary)', border: '1px solid var(--border)' }}>
           <Gift size={16} className="shrink-0" style={{ color: 'var(--accent-text)' }} />
           <span className="flex-1">{t('home.trialBanner', { n: trialDaysLeft })}</span>
@@ -92,78 +79,18 @@ export default function Home() {
         </div>
       )}
 
-      {showGuide && <GettingStarted stats={stats} profile={profile} onDismiss={dismissGuide} t={t} />}
-
       {failure ? (
         <ErrorState compact offline={isConnectivityError(failure)} message={apiErrorMessage(t, failure)} onRetry={load} />
+      ) : !ready ? (
+        <div className="grid grid-cols-1 lg:grid-cols-3 gap-4" aria-busy="true">
+          <Skeleton className="h-48 lg:col-span-1" /><Skeleton className="h-48 lg:col-span-2" />
+        </div>
+      ) : hasData ? (
+        <WithData dash={dash} stats={stats} items={items} license={license} onChange={load} t={t} lang={lang} />
       ) : (
-        <div className="grid grid-cols-2 sm:grid-cols-3 gap-3 md:gap-4">
-          <KpiCard i={0} icon={BarChart3} label={t('home.kpiTotal')} loading={!stats}
-            value={stats?.total} hint={stats && (stats.total ? t('home.kpiMonth').replace('{n}', stats.month) : t('home.kpiTotalEmpty'))} />
-          <KpiCard i={1} icon={Clock} label={t('home.lastAnalysis')} loading={!stats}
-            className="col-span-2 sm:col-span-1 order-last sm:order-none"
-            value={stats?.last ? relativeTime(stats.last.created_at, lang) : t('home.none')}
-            valueSmall
-            hint={stats?.last ? stats.last.title : t('home.lastEmpty')}
-            to={stats?.last ? `/app/historial/${stats.last.id}` : null} />
-          <QuotaCard i={2} loading={!stats} used={dash?.ai_used_today ?? stats?.usedToday ?? 0} quota={quota} t={t} lang={lang} />
-        </div>
+        <WithoutData dash={dash} stats={stats} items={items} profile={profile} onChange={load}
+          onDismiss={() => updateProfile({ welcomeCardDismissed: true })} t={t} lang={lang} />
       )}
-
-      {dash && (
-        <div className="grid grid-cols-1 lg:grid-cols-3 gap-4 md:gap-5">
-          <HealthCard health={dash.health} t={t} />
-          <ActionsCard actions={dash.actions} t={t} onChange={load} />
-        </div>
-      )}
-
-      {dash && <FinanceStrip dash={dash} t={t} lang={lang} />}
-
-      <div className="grid grid-cols-1 lg:grid-cols-3 gap-4 md:gap-5">
-        <section className="card lg:col-span-2 p-4 md:p-5 anim-enter" style={{ '--i': 3 }}>
-          <div className="flex items-center justify-between mb-3">
-            <h2 className="text-sm font-semibold" style={{ color: 'var(--text-primary)' }}>{t('home.recent')}</h2>
-            {stats?.total > 0 && <Link to="/app/historial" className="link text-sm font-medium">{t('home.seeAll')}</Link>}
-          </div>
-          {!stats && !failure ? (
-            <div className="flex flex-col gap-1" aria-busy="true">
-              {[0, 1, 2].map(i => (
-                <div key={i} className="flex items-center gap-3 py-2.5">
-                  <Skeleton className="w-9 h-9 !rounded-lg" /><div className="flex-1"><Skeleton className="h-3.5 w-1/2 mb-2" /><Skeleton className="h-3 w-24" /></div>
-                </div>
-              ))}
-            </div>
-          ) : stats?.total ? (
-            <ul className="flex flex-col -mx-2">
-              {items.slice(0, 5).map(a => {
-                const Icon = KIND_ICON[a.kind] || Sparkles;
-                return (
-                  <li key={a.id}>
-                    <Link to={`/app/historial/${a.id}`} className="nav-item flex items-center gap-3 rounded-lg px-2 py-2.5">
-                      <span className="shrink-0 w-9 h-9 rounded-lg grid place-items-center" style={{ background: 'var(--surface-2)' }}><Icon size={16} /></span>
-                      <span className="flex-1 min-w-0">
-                        <span className="block text-sm font-medium truncate" style={{ color: 'var(--text-primary)' }}>{a.title}</span>
-                        <span className="block text-xs" style={{ color: 'var(--text-muted)' }}>{kindLabel(a.kind, t)} · {relativeTime(a.created_at, lang)}</span>
-                      </span>
-                      <ChevronRight size={15} className="shrink-0" style={{ color: 'var(--text-muted)' }} />
-                    </Link>
-                  </li>
-                );
-              })}
-            </ul>
-          ) : (
-            <p className="text-sm py-6 text-center" style={{ color: 'var(--text-secondary)' }}>{t('home.recentEmpty')}</p>
-          )}
-        </section>
-
-        <section className="anim-enter flex flex-col gap-3" style={{ '--i': 4 }}>
-          <h2 className="sr-only">{t('home.quickActions')}</h2>
-          <QuickAction to="/app/finanzas/libro" icon={BookOpen} title={t('home.qaLedger')} desc={t('home.qaLedgerDesc')} />
-          <QuickAction to="/app/cuestionario" icon={ClipboardList} title={t('home.qaDiagnosis')} desc={t('home.qaDiagnosisDesc')} />
-          <QuickAction to="/app/excel" icon={FileSpreadsheet} title={t('home.qaExcel')} desc={t('home.qaExcelDesc')} />
-          <QuickAction to="/app/calculadoras" icon={Calculator} title={t('home.qaCalc')} desc={t('home.qaCalcDesc')} />
-        </section>
-      </div>
     </div>
   );
 }
@@ -175,122 +102,77 @@ function greeting(t) {
   return t('home.goodEvening');
 }
 
-function KpiCard({ icon: Icon, label, value, valueSmall, hint, loading, to, i, className = '' }) {
-  const body = (
+/* ── Modo sin datos: primeros pasos + próximo plazo ── */
+function WithoutData({ dash, stats, items, profile, onChange, onDismiss, t, lang }) {
+  const showGuide = !profile.welcomeCardDismissed;
+  return (
     <>
-      <div className="flex items-center gap-2 mb-3" style={{ color: 'var(--text-muted)' }}>
-        <Icon size={15} />
-        <span className="text-xs font-medium uppercase tracking-wide">{label}</span>
+      <div className="grid grid-cols-1 lg:grid-cols-3 gap-4 md:gap-5 items-start">
+        {showGuide
+          ? <GettingStarted stats={stats} profile={profile} onDismiss={onDismiss} t={t} className="lg:col-span-2" />
+          : <LedgerInvite t={t} className="lg:col-span-2" />}
+        <DeadlineCard deadline={dash.next_deadline} t={t} lang={lang} />
       </div>
-      {loading ? (
-        <><Skeleton className="h-7 w-16 mb-2" /><Skeleton className="h-3 w-28" /></>
-      ) : (
-        <>
-          <div className={`${valueSmall ? 'text-lg md:text-xl leading-9' : 'text-2xl md:text-3xl'} font-semibold tabular mb-1 first-letter:uppercase truncate`}
-            style={{ color: 'var(--text-primary)' }}>{value}</div>
-          <div className="text-xs truncate" style={{ color: 'var(--text-muted)' }}>{hint}</div>
-        </>
-      )}
+      {dash.actions.total > 0 && <ActionsCard actions={dash.actions} t={t} onChange={onChange} />}
+      {stats.total > 0 && <RecentCard items={items} t={t} lang={lang} />}
     </>
   );
-  const cls = `card anim-enter p-4 md:p-5 min-w-0 ${className}`;
-  return to
-    ? <Link to={to} className={`${cls} card-interactive`} style={{ '--i': i }}>{body}</Link>
-    : <div className={cls} style={{ '--i': i }}>{body}</div>;
 }
 
-/** Cuota IA de hoy: usados (análisis con fecha UTC de hoy) / cuota del plan. */
-function QuotaCard({ used, quota, loading, t, lang, i }) {
-  const pct = quota ? Math.min(100, (used / quota) * 100) : 0;
-  const tone = pct >= 100 ? 'var(--negative)' : pct >= 80 ? 'var(--warning)' : 'var(--accent)';
-  // El contador se reinicia a medianoche UTC → se muestra en la hora local.
-  const now = new Date();
-  const reset = new Date(Date.UTC(now.getUTCFullYear(), now.getUTCMonth(), now.getUTCDate() + 1));
+function LedgerInvite({ t, className = '' }) {
   return (
-    <div className="card anim-enter p-4 md:p-5 min-w-0" style={{ '--i': i }}>
-      <div className="flex items-center gap-2 mb-3" style={{ color: 'var(--text-muted)' }}>
-        <Sparkles size={15} />
-        <span className="text-xs font-medium uppercase tracking-wide">{t('home.kpiQuota')}</span>
+    <Link to="/app/finanzas/libro" className={`card card-interactive p-5 md:p-6 flex items-center gap-4 ${className}`} style={{ borderColor: 'var(--border-strong)' }}>
+      <div className="flex-1 min-w-0">
+        <p className="text-base font-semibold" style={{ color: 'var(--text-primary)' }}>{t('home.financeEmptyTitle')}</p>
+        <p className="text-sm mt-1" style={{ color: 'var(--text-secondary)' }}>{t('home.financeEmptyDesc')}</p>
       </div>
-      {loading ? (
-        <><Skeleton className="h-7 w-20 mb-3" /><Skeleton className="h-1.5 w-full" /></>
-      ) : (
-        <>
-          <div className="flex items-baseline gap-1 mb-2.5">
-            <span className="text-2xl md:text-3xl font-semibold tabular" style={{ color: 'var(--text-primary)' }}>{used}</span>
-            {quota != null && <span className="text-sm tabular" style={{ color: 'var(--text-muted)' }}>/ {quota}</span>}
-          </div>
-          {quota != null && (
-            <div className="h-1.5 rounded-full overflow-hidden mb-2" style={{ background: 'var(--surface-2)' }}
-              role="progressbar" aria-valuemin={0} aria-valuemax={quota} aria-valuenow={used} aria-label={t('home.kpiQuota')}>
-              <div className="h-full rounded-full" style={{ width: `${pct}%`, background: tone, transition: 'width 700ms var(--ease-out)' }} />
-            </div>
-          )}
-          <div className="text-xs truncate" style={{ color: 'var(--text-muted)' }}>
-            {t('home.quotaReset').replace('{time}', formatTime(reset, lang))}
-          </div>
-        </>
-      )}
-    </div>
-  );
-}
-
-function QuickAction({ to, icon: Icon, title, desc }) {
-  return (
-    <Link to={to} className="group card card-interactive p-4 flex items-center gap-3">
-      <span className="shrink-0 w-10 h-10 rounded-xl grid place-items-center" style={{ background: 'var(--accent-soft)', color: 'var(--accent-text)' }}>
-        <Icon size={18} />
-      </span>
-      <span className="flex-1 min-w-0">
-        <span className="block text-sm font-semibold" style={{ color: 'var(--text-primary)' }}>{title}</span>
-        <span className="block text-xs mt-0.5" style={{ color: 'var(--text-secondary)' }}>{desc}</span>
-      </span>
-      <ArrowRight size={16} className="shrink-0 transition-transform duration-200 group-hover:translate-x-0.5" style={{ color: 'var(--text-muted)' }} />
+      <ArrowRight size={18} className="shrink-0" style={{ color: 'var(--text-muted)' }} />
     </Link>
   );
 }
 
-function GettingStarted({ stats, profile, onDismiss, t }) {
+function GettingStarted({ stats, profile, onDismiss, t, className = '' }) {
+  // El libro va primero: es lo que desbloquea impuestos, cobros y caja.
   const steps = [
-    { done: !!profile.companyName?.trim(), title: t('home.stepProfile'), to: '/app/configuracion' },
-    { done: stats.kinds.has('cuestionario'), title: t('home.stepDiagnosis'), desc: t('home.stepDiagnosisDesc'), to: '/app/cuestionario' },
     { done: stats.kinds.has('ledger'), title: t('home.stepLedger'), desc: t('home.stepLedgerDesc'), to: '/app/finanzas/libro' },
+    { done: stats.kinds.has('cuestionario'), title: t('home.stepDiagnosis'), desc: t('home.stepDiagnosisDesc'), to: '/app/cuestionario' },
+    { done: !!profile.companyName?.trim(), title: t('home.stepProfile'), to: '/app/configuracion' },
     { done: stats.kinds.has('excel'), title: t('home.stepExcel'), desc: t('home.stepExcelDesc'), to: '/app/excel' }
   ];
+  const main = steps.find(s => !s.done);
+  const rest = steps.filter(s => s !== main);
   const doneCount = steps.filter(s => s.done).length;
   return (
-    <section className="card anim-enter p-4 md:p-5" style={{ borderColor: 'var(--border-strong)' }}>
-      <div className="flex items-start justify-between gap-3 mb-4">
+    <section className={`card p-5 md:p-6 ${className}`}>
+      <div className="flex items-start justify-between gap-3">
         <div>
           <h2 className="text-base font-semibold" style={{ color: 'var(--text-primary)' }}>{t('home.guideTitle')}</h2>
-          <p className="text-sm mt-0.5" style={{ color: 'var(--text-secondary)' }}>{t('home.welcomeCard')}</p>
+          <p className="text-xs mt-0.5 tabular" style={{ color: 'var(--text-muted)' }}>{t('home.guideProgress', { n: doneCount, total: steps.length })}</p>
         </div>
         <button onClick={onDismiss} className="btn btn-ghost btn-sm !px-2 -mr-1 -mt-1" aria-label={t('home.guideDismiss')} title={t('home.guideDismiss')}>
           <X size={16} />
         </button>
       </div>
-      <div className="flex items-center gap-3 mb-3">
-        <div className="flex-1 h-1.5 rounded-full overflow-hidden" style={{ background: 'var(--surface-2)' }}>
-          <div className="h-full rounded-full" style={{ width: `${(doneCount / steps.length) * 100}%`, background: 'var(--positive)', transition: 'width 700ms var(--ease-out)' }} />
+
+      {main && (
+        <div className="mt-4 rounded-xl p-4" style={{ background: 'var(--surface-2)' }}>
+          <p className="text-xs font-medium" style={{ color: 'var(--accent-text)' }}>{t('home.guideStart')}</p>
+          <p className="text-lg font-semibold mt-1" style={{ color: 'var(--text-primary)' }}>{main.title}</p>
+          {main.desc && <p className="text-sm mt-0.5" style={{ color: 'var(--text-secondary)' }}>{main.desc}</p>}
+          <Link to={main.to} className="btn btn-primary mt-3">{t('home.guideGo')} <ArrowRight size={15} /></Link>
         </div>
-        <span className="text-xs tabular shrink-0" style={{ color: 'var(--text-muted)' }}>{t('home.guideProgress').replace('{n}', doneCount).replace('{total}', steps.length)}</span>
-      </div>
-      <ol className="flex flex-col gap-1 -mx-2">
-        {steps.map((s, i) => (
-          <li key={i}>
+      )}
+
+      <ol className="flex flex-col mt-3 -mx-2">
+        {rest.map(s => (
+          <li key={s.to}>
             <Link to={s.to} className="nav-item flex items-center gap-3 rounded-lg px-2 py-2.5">
-              <span className="shrink-0 w-6 h-6 rounded-full grid place-items-center text-xs font-semibold"
-                style={s.done
-                  ? { background: 'var(--positive)', color: 'var(--on-accent)' }
-                  : { border: '1.5px solid var(--border-strong)', color: 'var(--text-muted)' }}>
-                {s.done ? <Check size={13} strokeWidth={3} /> : i + 1}
+              <span className="shrink-0 w-5 h-5 rounded-full grid place-items-center"
+                style={s.done ? { background: 'var(--positive)', color: 'var(--on-accent)' } : { border: '1.5px solid var(--border-strong)' }}>
+                {s.done && <Check size={12} strokeWidth={3} />}
               </span>
-              <span className="flex-1 min-w-0">
-                <span className={`block text-sm font-medium ${s.done ? 'line-through' : ''}`}
-                  style={{ color: s.done ? 'var(--text-muted)' : 'var(--text-primary)' }}>{s.title}</span>
-                {!s.done && s.desc && <span className="block text-xs mt-0.5" style={{ color: 'var(--text-secondary)' }}>{s.desc}</span>}
-              </span>
-              {!s.done && <ArrowRight size={15} className="shrink-0" style={{ color: 'var(--text-muted)' }} />}
+              <span className={`flex-1 min-w-0 text-sm ${s.done ? 'line-through' : 'font-medium'}`} style={{ color: s.done ? 'var(--text-muted)' : 'var(--text-primary)' }}>{s.title}</span>
+              {!s.done && <ChevronRight size={15} className="shrink-0" style={{ color: 'var(--text-muted)' }} />}
             </Link>
           </li>
         ))}
@@ -299,39 +181,102 @@ function GettingStarted({ stats, profile, onDismiss, t }) {
   );
 }
 
-/* ── C1: nota de salud (reglas fijas, del último diagnóstico) ── */
-function HealthCard({ health, t }) {
-  if (!health) {
-    return (
-      <Link to="/app/cuestionario" className="card card-interactive anim-enter p-4 md:p-5 flex items-center gap-4" style={{ '--i': 2 }}>
-        <span className="w-14 h-14 rounded-full grid place-items-center shrink-0" style={{ border: '2px dashed var(--border-strong)', color: 'var(--text-muted)' }}>?</span>
-        <div className="min-w-0">
-          <p className="text-xs font-medium uppercase tracking-wide" style={{ color: 'var(--text-muted)' }}>{t('report.healthTitle')}</p>
-          <p className="text-sm font-medium mt-1" style={{ color: 'var(--text-primary)' }}>{t('home.healthEmpty')}</p>
-        </div>
-      </Link>
-    );
-  }
-  const { band } = healthTone(health.score);
-  const lost = (health.lost || []).slice(0, 2);
+/* ── Modo con datos: el dinero y el plazo arriba ── */
+function WithData({ dash, stats, items, license, onChange, t, lang }) {
   return (
-    <Link to={`/app/historial/${health.analysis_id}`} className="card card-interactive anim-enter p-4 md:p-5 flex items-center gap-4" style={{ '--i': 2 }}>
-      <ScoreRing score={health.score} size={72} />
-      <div className="min-w-0">
-        <p className="text-xs font-medium uppercase tracking-wide" style={{ color: 'var(--text-muted)' }}>{t('report.healthTitle')}</p>
-        <p className="text-sm font-semibold mt-1" style={{ color: 'var(--text-primary)' }}>{t(`report.health_${band}`)}</p>
-        {lost.length > 0 && (
-          <p className="text-xs mt-1 truncate" style={{ color: 'var(--text-secondary)' }}>
-            {t('report.healthLost')}: {lost.map(l => t(`questionnaire.items.${l.id}`)).join(', ')}
-          </p>
-        )}
+    <>
+      <div className="grid grid-cols-1 lg:grid-cols-3 gap-4 md:gap-5 items-stretch">
+        <DeadlineCard deadline={dash.next_deadline} t={t} lang={lang} big />
+        <MoneyCard dash={dash} t={t} lang={lang} className="lg:col-span-2" />
       </div>
+
+      <div className="grid grid-cols-1 lg:grid-cols-3 gap-4 md:gap-5 items-start">
+        <ActionsCard actions={dash.actions} t={t} onChange={onChange} className="lg:col-span-2" />
+        <HealthCard health={dash.health} t={t} />
+      </div>
+
+      <div className="grid grid-cols-1 lg:grid-cols-3 gap-4 md:gap-5 items-start">
+        <RecentCard items={items} t={t} lang={lang} className="lg:col-span-2" />
+        <QuickActions t={t} />
+      </div>
+
+      <UsageLine total={stats.total} used={dash.ai_used_today ?? stats.usedToday} quota={license?.ai_quota ?? null} t={t} lang={lang} />
+    </>
+  );
+}
+
+function DeadlineCard({ deadline, t, lang, big }) {
+  if (!deadline) return null;
+  const n = deadline.days_left;
+  const urgent = n <= 7;
+  return (
+    <Link to="/app/finanzas/calendario" className="card card-interactive p-5 md:p-6 flex flex-col">
+      <p className="section-title flex items-center gap-1.5"><CalendarDays size={15} style={{ color: 'var(--text-muted)' }} /> {t('home.deadlineTitle')}</p>
+      <p className={`${big ? 'text-3xl md:text-4xl' : 'text-2xl'} font-semibold tracking-tight mt-3 first-letter:uppercase`} style={{ color: 'var(--text-primary)' }}>
+        {isoDate(deadline.date, lang, { day: 'numeric', month: 'long' })}
+      </p>
+      <p className="text-sm font-medium mt-1" style={{ color: urgent ? 'var(--warning)' : 'var(--text-secondary)' }}>
+        {n === 0 ? t('home.deadlineToday') : t('home.deadlineDays', { n })}
+      </p>
+      <p className="text-sm mt-3" style={{ color: 'var(--text-secondary)' }}>{t('home.deadlineModels', { m: deadline.models.join(', '), period: deadline.period })}</p>
+      <span className="mt-auto pt-4 text-sm font-medium inline-flex items-center gap-1" style={{ color: 'var(--accent-text)' }}>
+        {t('home.deadlineSee')} <ArrowRight size={14} />
+      </span>
     </Link>
   );
 }
 
-/* ── C2: plan de acción (tareas pendientes de los informes) ── */
-function ActionsCard({ actions, t, onChange }) {
+function MoneyCard({ dash, t, lang, className = '' }) {
+  const tx = dash.taxes, rec = dash.receivables, fc = dash.forecast, lk = dash.leaks;
+  const q = `${tx.quarter}T`;
+  const rows = [
+    tx.total_estimated > 0
+      ? { to: '/app/finanzas/impuestos', icon: Landmark, label: t('home.mTaxSave', { q }), value: eur(tx.total_estimated, lang),
+          hint: tx.missing > 0 ? t('finance.taxes.missing', { v: eur(tx.missing, lang) }) : t('finance.taxes.reserved', { v: eur(tx.reserved, lang) }), warn: tx.missing > 0 }
+      : tx.vat_refund > 0
+        ? { to: '/app/finanzas/impuestos', icon: Landmark, label: t('home.mTaxCompensate', { q }), value: eur(tx.vat_refund, lang), hint: t('home.mTaxCompensateHint') }
+        : { to: '/app/finanzas/impuestos', icon: Landmark, label: t('home.mTaxNone', { q }), value: eur(0, lang), hint: t('finance.taxes.nothingToPay') },
+    rec.overdue_total > 0
+      ? { to: '/app/finanzas/cobros', icon: HandCoins, label: t('home.mOverdue'), value: eur(rec.overdue_total, lang), warn: true,
+          hint: rec.top_overdue ? t('home.mOverdueTop', { name: rec.top_overdue.party_name || '—', n: rec.top_overdue.days_overdue }) : t('home.fOverdue', { v: eur(rec.overdue_total, lang) }) }
+      : { to: '/app/finanzas/cobros', icon: HandCoins, label: t('home.fReceivables'), value: eur(rec.total, lang), hint: t('home.mNoOverdue') },
+    fc
+      ? { to: '/app/finanzas/prevision', icon: LineChart, label: t('home.fForecast'), value: eur(fc.at90, lang), warn: !!fc.first_below,
+          hint: fc.first_below ? t('home.fBelow', { date: isoDate(fc.first_below.date, lang, { day: 'numeric', month: 'short' }) }) : t('home.fForecastOk') }
+      : { to: '/app/finanzas/prevision', icon: LineChart, label: t('home.fForecast'), value: '—', hint: t('home.fForecastSetup') }
+  ];
+  if (lk.alerts > 0) {
+    rows.push({ to: '/app/finanzas/fugas', icon: Droplets, label: t('home.fLeaksAlerts'), value: t('home.fLeaksHint', { n: lk.alerts }),
+      hint: lk.recurring_monthly_total > 0 ? t('home.fRecurring', { v: eur(lk.recurring_monthly_total, lang) }) : '' });
+  }
+  return (
+    <section className={`card p-2 md:p-3 ${className}`}>
+      <h2 className="sr-only">{t('home.moneyTitle')}</h2>
+      <ul className="flex flex-col">
+        {rows.map((r, i) => (
+          <li key={r.to} style={{ borderTop: i ? '1px solid var(--border)' : 'none' }}>
+            <Link to={r.to} className="nav-item group flex items-center gap-3 rounded-lg px-3 py-3.5">
+              <r.icon size={17} className="shrink-0" style={{ color: 'var(--text-muted)' }} aria-hidden="true" />
+              <span className="flex-1 min-w-0">
+                <span className="block text-sm" style={{ color: 'var(--text-secondary)' }}>{r.label}</span>
+                {r.hint && (
+                  <span className="text-xs mt-0.5 flex items-center gap-1 truncate" style={{ color: r.warn ? 'var(--warning)' : 'var(--text-muted)' }}>
+                    {r.warn && <AlertTriangle size={12} className="shrink-0" />}{r.hint}
+                  </span>
+                )}
+              </span>
+              <span className="text-xl md:text-2xl font-semibold tabular shrink-0" style={{ color: 'var(--text-primary)' }}>{r.value}</span>
+              <ChevronRight size={16} className="shrink-0 transition-transform group-hover:translate-x-0.5" style={{ color: 'var(--text-muted)' }} />
+            </Link>
+          </li>
+        ))}
+      </ul>
+    </section>
+  );
+}
+
+/* ── C2: plan de acción (pendientes del último informe, ya ordenadas por plazo) ── */
+function ActionsCard({ actions, t, onChange, className = '' }) {
   const [busy, setBusy] = useState(null);
   const toggle = async (a) => {
     setBusy(a.id);
@@ -339,100 +284,132 @@ function ActionsCard({ actions, t, onChange }) {
     setBusy(null);
     onChange();
   };
-  const pct = actions.total ? Math.round((actions.done / actions.total) * 100) : 0;
+  const from = actions.next[0]?.analysis_title;
   return (
-    <section className="card anim-enter p-4 md:p-5 lg:col-span-2" style={{ '--i': 3 }}>
-      <div className="flex items-center justify-between gap-3 mb-3">
-        <h2 className="text-sm font-semibold flex items-center gap-2" style={{ color: 'var(--text-primary)' }}><ListChecks size={16} /> {t('home.actionsTitle')}</h2>
-        {actions.total > 0 && <span className="text-xs tabular" style={{ color: 'var(--text-muted)' }}>{t('report.progress').replace('{n}', actions.done).replace('{total}', actions.total)}</span>}
+    <section className={`card p-4 md:p-5 ${className}`}>
+      <div className="flex items-baseline justify-between gap-3 mb-2">
+        <h2 className="section-title">{t('home.actionsTitle')}</h2>
+        {from && <span className="text-xs truncate" style={{ color: 'var(--text-muted)' }}>{t('home.actionsFrom', { title: from })}</span>}
       </div>
       {actions.total === 0 ? (
         <p className="text-sm" style={{ color: 'var(--text-secondary)' }}>{t('home.actionsEmpty')}</p>
+      ) : actions.next.length === 0 ? (
+        <p className="text-sm" style={{ color: 'var(--positive)' }}>{t('home.actionsAllDone')}</p>
       ) : (
-        <>
-          <div className="h-1.5 rounded-full overflow-hidden mb-3" style={{ background: 'var(--surface-2)' }}>
-            <div className="h-full rounded-full" style={{ width: `${pct}%`, background: 'var(--positive)', transition: 'width 600ms var(--ease-out)' }} />
-          </div>
-          {actions.next.length === 0 ? (
-            <p className="text-sm" style={{ color: 'var(--positive)' }}>{t('home.actionsAllDone')}</p>
-          ) : (
-            <ul className="flex flex-col -mx-2">
-              {actions.next.slice(0, 3).map(a => (
-                <li key={a.id}>
-                  <button onClick={() => toggle(a)} disabled={busy === a.id} className="nav-item w-full text-left flex items-start gap-3 rounded-lg px-2 py-2">
-                    <span className="shrink-0 mt-0.5 w-5 h-5 rounded-md" style={{ border: '1.5px solid var(--border-strong)' }} />
-                    <span className="flex-1 min-w-0">
-                      <span className="block text-sm font-medium truncate" style={{ color: 'var(--text-primary)' }}>{a.title}</span>
-                      {a.analysis_title && <span className="block text-xs truncate" style={{ color: 'var(--text-muted)' }}>{a.analysis_title}</span>}
-                    </span>
-                  </button>
-                </li>
-              ))}
-            </ul>
-          )}
-        </>
+        <ul className="flex flex-col -mx-2">
+          {actions.next.map(a => (
+            <li key={a.id} className="flex items-start gap-1">
+              <button onClick={() => toggle(a)} disabled={busy === a.id} aria-label={t('home.actionDone', { title: a.title })}
+                className="nav-item flex-1 min-w-0 text-left flex items-start gap-3 rounded-lg px-2 py-2.5">
+                <span className="shrink-0 mt-0.5 w-5 h-5 rounded-md" style={{ border: '1.5px solid var(--border-strong)' }} />
+                <span className="flex-1 min-w-0">
+                  <span className="block text-sm font-medium" style={{ color: 'var(--text-primary)' }}>{a.title}</span>
+                  {a.timeframe && <span className="block text-xs mt-0.5" style={{ color: 'var(--text-muted)' }}>{a.timeframe}</span>}
+                </span>
+              </button>
+              {toolLabelKey(a.link) && (
+                <Link to={a.link} className="btn btn-ghost btn-sm shrink-0 mt-1.5" title={t('report.goTo', { name: t(toolLabelKey(a.link)) })}>
+                  {t(toolLabelKey(a.link))} <ArrowRight size={13} />
+                </Link>
+              )}
+            </li>
+          ))}
+        </ul>
       )}
     </section>
   );
 }
 
-/* ── Núcleo de valor: impuestos, cobros, fugas y caja (V2-V5) ── */
-function FinanceStrip({ dash, t, lang }) {
-  const deadline = dash.next_deadline;
-  if (!dash.ledger_count) {
+/* ── C1: nota de salud (reglas fijas, del último diagnóstico) ── */
+function HealthCard({ health, t }) {
+  if (!health) {
     return (
-      <Link to="/app/finanzas/libro" className="card card-interactive anim-enter p-4 md:p-5 flex items-center gap-4" style={{ '--i': 4, borderColor: 'var(--border-strong)' }}>
-        <span className="w-11 h-11 rounded-xl grid place-items-center shrink-0" style={{ background: 'var(--accent)', color: 'var(--on-accent)' }}><Wallet size={20} /></span>
-        <div className="flex-1 min-w-0">
-          <p className="text-sm font-semibold" style={{ color: 'var(--text-primary)' }}>{t('home.financeEmptyTitle')}</p>
-          <p className="text-xs mt-0.5" style={{ color: 'var(--text-secondary)' }}>{t('home.financeEmptyDesc')}</p>
+      <Link to="/app/cuestionario" className="card card-interactive p-4 md:p-5 flex items-center gap-4">
+        <span className="w-14 h-14 rounded-full grid place-items-center shrink-0" style={{ border: '2px dashed var(--border-strong)', color: 'var(--text-muted)' }}>?</span>
+        <div className="min-w-0">
+          <p className="section-title">{t('report.healthTitle')}</p>
+          <p className="text-sm mt-1" style={{ color: 'var(--text-secondary)' }}>{t('home.healthEmpty')}</p>
         </div>
-        <ArrowRight size={16} className="shrink-0" style={{ color: 'var(--text-muted)' }} />
       </Link>
     );
   }
-  const fc = dash.forecast;
-  const cards = [
-    // Sin nada que pagar no se dice "Cubierto": si el IVA sale a compensar, se dice con su importe.
-    dash.taxes.total_estimated > 0
-      ? { to: '/app/finanzas/impuestos', icon: Landmark, label: t('home.fTaxes').replace('{q}', `${dash.taxes.quarter}T`), value: eur(dash.taxes.total_estimated, lang),
-          hint: dash.taxes.missing > 0 ? t('finance.taxes.missing').replace('{v}', eur(dash.taxes.missing, lang)) : t('finance.taxes.covered'), warn: dash.taxes.missing > 0 }
-      : { to: '/app/finanzas/impuestos', icon: Landmark, label: t('home.fTaxes').replace('{q}', `${dash.taxes.quarter}T`),
-          value: dash.taxes.vat_refund > 0 ? eur(dash.taxes.vat_refund, lang) : '—',
-          hint: dash.taxes.vat_refund > 0 ? t('finance.vatBalanceNeg') : t('finance.taxes.nothingToPay') },
-    { to: '/app/finanzas/cobros', icon: HandCoins, label: t('home.fReceivables'), value: eur(dash.receivables.total, lang),
-      hint: dash.receivables.overdue_total > 0 ? t('home.fOverdue').replace('{v}', eur(dash.receivables.overdue_total, lang)) : t('finance.receivables.invoices', { n: dash.receivables.count }), warn: dash.receivables.overdue_total > 0 },
-    dash.leaks.detected_this_month > 0
-      ? { to: '/app/finanzas/fugas', icon: Droplets, label: t('home.fLeaks'), value: eur(dash.leaks.detected_this_month, lang), hint: t('home.fLeaksHint', { n: dash.leaks.alerts }) }
-      : { to: '/app/finanzas/fugas', icon: Droplets, label: t('home.fLeaksAlerts'), value: dash.leaks.alerts > 0 ? t('home.fLeaksHint', { n: dash.leaks.alerts }) : '—',
-          hint: dash.leaks.recurring_monthly_total > 0 ? t('home.fRecurring').replace('{v}', eur(dash.leaks.recurring_monthly_total, lang)) : t('home.fLeaksNone') },
-    fc
-      ? { to: '/app/finanzas/prevision', icon: LineChart, label: t('home.fForecast'), value: eur(fc.at90, lang),
-          hint: fc.first_below ? t('home.fBelow').replace('{date}', isoDate(fc.first_below.date, lang, { day: 'numeric', month: 'short' })) : t('home.fForecastOk'), warn: !!fc.first_below }
-      : { to: '/app/finanzas/prevision', icon: LineChart, label: t('home.fForecast'), value: '—', hint: t('home.fForecastSetup') }
-  ];
+  const { band } = healthTone(health.score);
   return (
-    <section className="anim-enter flex flex-col gap-3" style={{ '--i': 4 }}>
-      <div className="grid grid-cols-2 lg:grid-cols-4 gap-3 md:gap-4">
-        {cards.map((c, i) => (
-          <Link key={i} to={c.to} className="card card-interactive p-4 min-w-0">
-            <div className="flex items-center gap-2 mb-2" style={{ color: 'var(--text-muted)' }}>
-              <c.icon size={15} /><span className="text-xs font-medium uppercase tracking-wide truncate">{c.label}</span>
-            </div>
-            <p className="text-xl md:text-2xl font-semibold tabular truncate" style={{ color: 'var(--text-primary)' }}>{c.value}</p>
-            <p className="text-xs mt-1 truncate flex items-center gap-1" style={{ color: c.warn ? 'var(--warning)' : 'var(--text-muted)' }}>
-              {c.warn && <AlertTriangle size={12} className="shrink-0" />}{c.hint}
-            </p>
-          </Link>
-        ))}
+    <Link to={`/app/historial/${health.analysis_id}`} className="card card-interactive p-4 md:p-5 flex items-center gap-4">
+      <ScoreRing score={health.score} size={64} />
+      <div className="min-w-0">
+        <p className="section-title">{t('report.healthTitle')}</p>
+        <p className="text-sm mt-1" style={{ color: 'var(--text-secondary)' }}>{t(`report.health_${band}`)}</p>
       </div>
-      {deadline && (
-        <Link to="/app/finanzas/calendario" className="inline-flex items-center gap-2 self-start rounded-full px-3 py-1.5 text-xs font-medium"
-          style={{ background: 'var(--surface-1)', border: '1px solid var(--border)', color: 'var(--text-secondary)' }}>
-          <CalendarDays size={13} style={{ color: 'var(--accent-text)' }} />
-          {t('home.nextDeadline', { m: deadline.models.join(', '), n: deadline.days_left, date: isoDate(deadline.date, lang, { day: 'numeric', month: 'short' }) })}
-        </Link>
+    </Link>
+  );
+}
+
+function RecentCard({ items, t, lang, className = '' }) {
+  return (
+    <section className={`card p-4 md:p-5 ${className}`}>
+      <div className="flex items-center justify-between mb-2">
+        <h2 className="section-title">{t('home.recent')}</h2>
+        {items.length > 0 && <Link to="/app/historial" className="link text-sm font-medium">{t('home.seeAll')}</Link>}
+      </div>
+      {items.length ? (
+        <ul className="flex flex-col -mx-2">
+          {items.slice(0, 4).map(a => {
+            const Icon = KIND_ICON[a.kind] || FileText;
+            return (
+              <li key={a.id}>
+                <Link to={`/app/historial/${a.id}`} className="nav-item flex items-center gap-3 rounded-lg px-2 py-2.5">
+                  <Icon size={16} className="shrink-0" style={{ color: 'var(--text-muted)' }} aria-hidden="true" />
+                  <span className="flex-1 min-w-0">
+                    <span className="block text-sm font-medium truncate" style={{ color: 'var(--text-primary)' }}>{a.title}</span>
+                    <span className="block text-xs" style={{ color: 'var(--text-muted)' }}>{kindLabel(a.kind, t)} · {relativeTime(a.created_at, lang)}</span>
+                  </span>
+                  <ChevronRight size={15} className="shrink-0" style={{ color: 'var(--text-muted)' }} />
+                </Link>
+              </li>
+            );
+          })}
+        </ul>
+      ) : (
+        <p className="text-sm py-4" style={{ color: 'var(--text-secondary)' }}>{t('home.recentEmpty')}</p>
       )}
     </section>
+  );
+}
+
+function QuickActions({ t }) {
+  const list = [
+    { to: '/app/finanzas/libro', icon: BookOpen, title: t('home.qaLedger') },
+    { to: '/app/cuestionario', icon: ClipboardList, title: t('home.qaDiagnosis') },
+    { to: '/app/excel', icon: FileSpreadsheet, title: t('home.qaExcel') },
+    { to: '/app/calculadoras', icon: Calculator, title: t('home.qaCalc') }
+  ];
+  return (
+    <section className="card p-4 md:p-5">
+      <h2 className="section-title mb-2">{t('home.quickActions')}</h2>
+      <ul className="flex flex-col -mx-2">
+        {list.map(({ to, icon: Icon, title }) => (
+          <li key={to}>
+            <Link to={to} className="nav-item flex items-center gap-3 rounded-lg px-2 py-2.5 text-sm font-medium" style={{ color: 'var(--text-primary)' }}>
+              <Icon size={16} className="shrink-0" style={{ color: 'var(--text-muted)' }} aria-hidden="true" />
+              <span className="flex-1">{title}</span>
+              <ChevronRight size={15} className="shrink-0" style={{ color: 'var(--text-muted)' }} />
+            </Link>
+          </li>
+        ))}
+      </ul>
+    </section>
+  );
+}
+
+/** Métricas de uso en una línea discreta (antes eran las tres tarjetas de arriba). */
+function UsageLine({ total, used, quota, t, lang }) {
+  const now = new Date();
+  const reset = new Date(Date.UTC(now.getUTCFullYear(), now.getUTCMonth(), now.getUTCDate() + 1));
+  return (
+    <p className="text-xs tabular" style={{ color: 'var(--text-muted)' }}>
+      {t('home.usageTotal', { n: total })}
+      {quota != null && ` · ${t('home.usageToday', { used, quota, time: formatTime(reset, lang) })}`}
+    </p>
   );
 }

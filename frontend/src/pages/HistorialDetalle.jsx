@@ -1,6 +1,6 @@
 import { useState, useEffect, useCallback } from 'react';
 import { useParams, Link } from 'react-router-dom';
-import { Copy, SearchX, Sparkles } from 'lucide-react';
+import { Copy, SearchX, FileText } from 'lucide-react';
 import { analysesApi } from '../middleware/api';
 import { apiErrorMessage, isConnectivityError } from '../middleware/errors';
 import { sanitizeAiHtml } from '../middleware/sanitize';
@@ -62,7 +62,7 @@ export default function HistorialDetalle() {
     );
   }
 
-  const Icon = KIND_ICON[analysis.kind] || Sparkles;
+  const Icon = KIND_ICON[analysis.kind] || FileText;
   const html = analysis.report ? '' : sanitizeAiHtml(analysis.result_html);
 
   const copyText = async () => {

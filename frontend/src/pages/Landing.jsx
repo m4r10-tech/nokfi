@@ -228,7 +228,7 @@ function Section({ id, eyebrow, title, subtitle, children, narrow }) {
   return (
     <section id={id} className={`${narrow ? 'max-w-3xl' : 'max-w-6xl'} mx-auto px-4 py-16 md:py-24 scroll-mt-16`}>
       <div ref={ref} className="reveal text-center mb-10 md:mb-14 max-w-2xl mx-auto">
-        {eyebrow && <p className="text-xs font-semibold uppercase tracking-[0.14em] mb-3" style={{ color: 'var(--accent-text)' }}>{eyebrow}</p>}
+        {eyebrow && <p className="text-sm font-medium mb-3" style={{ color: 'var(--accent-text)' }}>{eyebrow}</p>}
         <h2 className="text-[28px] leading-tight md:text-4xl font-semibold tracking-tight" style={{ color: 'var(--text-primary)' }}>{title}</h2>
         {subtitle && <p className="mt-4 text-base leading-relaxed" style={{ color: 'var(--text-secondary)' }}>{subtitle}</p>}
       </div>

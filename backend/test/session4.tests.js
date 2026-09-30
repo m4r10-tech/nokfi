@@ -532,6 +532,14 @@ module.exports = async function session4Tests({ post, put, get, call, check, che
     check('S8: las tareas del plan guardan su enlace', () => listActionsForAnalysis(lid, aid)[0].link === '/app/finanzas/impuestos');
     await checkAsync('S8: el panel trae el deudor vencido principal', get('/api/dashboard', tok),
       r => r.status === 200 && 'top_overdue' in r.data.receivables);
+    await checkAsync('S8: el plan de Inicio solo trae tareas del informe más reciente', get('/api/dashboard', tok),
+      r => r.status === 200 && r.data.actions.next.length > 0 && r.data.actions.next.every(a => a.analysis_id === aid));
+    await checkAsync('S8: sector nuevo del onboarding se guarda y tiene comparación del INE',
+      put('/api/profile', { sector: 'Taller mecánico', size: 'solo' }, tok), r => r.status === 200 && r.data.profile.sector === 'Taller mecánico');
+    await checkAsync('S8: comparación con el sector para "Taller mecánico" (CNAE 452)', get('/api/finance/benchmark', tok),
+      r => r.status === 200 && JSON.stringify(r.data).includes('452'));
+    await checkAsync('S8: el resumen de Desarrolladores cuenta también las claves revocadas', get('/api/keys/summary', tok),
+      r => r.status === 200 && typeof r.data.keys_total === 'number' && r.data.keys_total >= r.data.keys_active);
 
     const saved = { fetch: global.fetch, CP: process.env.CHAT_PROVIDERS, G: process.env.GROQ_API_KEY };
     process.env.CHAT_PROVIDERS = 'groq'; process.env.GROQ_API_KEY = 'gsk_test';

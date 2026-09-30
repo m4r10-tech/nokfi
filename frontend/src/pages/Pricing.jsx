@@ -123,7 +123,7 @@ export default function Pricing() {
               style={{ borderColor: 'var(--border-strong)' }}>
               <div className="flex items-start justify-between gap-3">
                 <div>
-                  <p className="text-xs font-medium uppercase tracking-wide" style={{ color: 'var(--text-muted)' }}>{t('pricing.step2')}</p>
+                  <p className="section-title">{t('pricing.step2')}</p>
                   <h2 id="checkout-title" className="text-lg font-semibold mt-1" style={{ color: 'var(--text-primary)' }}>
                     {selected.name} · <span className="tabular">{price}</span><span className="text-sm font-normal" style={{ color: 'var(--text-muted)' }}>{t('pricing.monthSuffix')}</span>
                   </h2>

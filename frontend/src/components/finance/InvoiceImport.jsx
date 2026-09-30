@@ -1,6 +1,6 @@
 import { useState } from 'react';
 import { Link } from 'react-router-dom';
-import { Loader2, Sparkles, AlertTriangle, Info, Check, X } from 'lucide-react';
+import { Loader2, ScanLine, AlertTriangle, Info, Check, X } from 'lucide-react';
 import { aiApi, ledgerApi } from '../../middleware/api';
 import { apiErrorMessage } from '../../middleware/errors';
 import { readPdf, imageToJpeg, extOf, IMAGE_EXT } from '../../middleware/fileReaders';
@@ -190,7 +190,7 @@ export default function InvoiceImport({ profile, onSaved, onCancel }) {
                 })()}
                 {picked.skipped > 0 && ` ${t('finance.import.capped').replace('{max}', MAX_INVOICES)}`}
               </Notice>
-              <div><button onClick={run} disabled={!picked.files.length} className="btn btn-primary"><Sparkles size={15} /> {t('finance.import.start')}</button></div>
+              <div><button onClick={run} disabled={!picked.files.length} className="btn btn-primary"><ScanLine size={15} /> {t('finance.import.start')}</button></div>
             </>
           )}
           {error && <ErrorBox>{error}</ErrorBox>}

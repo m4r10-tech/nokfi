@@ -21,9 +21,7 @@ export default function ExcelHub() {
       {/* F3 (sesión 4): analizar una carpeta entera con una petición libre. */}
       <Link to="/app/excel/carpeta" className="group card card-interactive anim-enter p-4 md:p-5 mb-4 flex items-center gap-4"
         style={{ borderColor: 'var(--border-strong)' }}>
-        <span className="shrink-0 w-11 h-11 rounded-xl grid place-items-center" style={{ background: 'var(--accent)', color: 'var(--on-accent)' }}>
-          <FolderOpen size={20} />
-        </span>
+        <FolderOpen size={20} className="shrink-0" style={{ color: 'var(--accent-text)' }} aria-hidden="true" />
         <div className="flex-1 min-w-0">
           <h3 className="text-sm font-semibold" style={{ color: 'var(--text-primary)' }}>{t('folder.hubTitle')}</h3>
           <p className="text-xs mt-1" style={{ color: 'var(--text-secondary)' }}>{t('folder.hubDesc')}</p>
@@ -31,25 +29,20 @@ export default function ExcelHub() {
         <ArrowRight size={16} className="shrink-0 transition-transform group-hover:translate-x-0.5" style={{ color: 'var(--text-muted)' }} />
       </Link>
 
-      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3 md:gap-4">
-        {MODULES.map(({ to, icon: Icon, id }, i) => (
-          <Link key={to} to={to} className="group card card-interactive anim-enter p-4 md:p-5 flex sm:flex-col items-center sm:items-start gap-3.5 sm:gap-0"
-            style={{ '--i': i }}>
-            <span className="shrink-0 w-10 h-10 rounded-xl grid place-items-center" style={{ background: 'var(--accent-soft)', color: 'var(--accent-text)' }}>
-              <Icon size={20} />
-            </span>
-            <div className="flex-1 min-w-0 sm:mt-4">
-              <h3 className="text-sm font-semibold" style={{ color: 'var(--text-primary)' }}>{t(`excelModules.${id}.title`)}</h3>
-              <p className="text-xs mt-1" style={{ color: 'var(--text-secondary)' }}>{t(`excelModules.${id}.desc`)}</p>
-            </div>
-            <ArrowRight size={16} className="shrink-0 sm:hidden" style={{ color: 'var(--text-muted)' }} />
-            <span className="hidden sm:flex items-center gap-1 mt-4 text-xs font-medium opacity-0 -translate-x-1 group-hover:opacity-100 group-hover:translate-x-0 transition-all duration-200"
-              style={{ color: 'var(--accent-text)' }}>
-              {t('common.open')} <ArrowRight size={13} />
-            </span>
-          </Link>
+      <ul className="card divide-y" style={{ borderColor: 'var(--border)' }}>
+        {MODULES.map(({ to, icon: Icon, id }) => (
+          <li key={to} style={{ borderColor: 'var(--border)' }}>
+            <Link to={to} className="group nav-item flex items-center gap-3.5 px-4 md:px-5 py-3.5">
+              <Icon size={18} className="shrink-0" style={{ color: 'var(--text-muted)' }} aria-hidden="true" />
+              <div className="flex-1 min-w-0">
+                <h3 className="text-sm font-semibold" style={{ color: 'var(--text-primary)' }}>{t(`excelModules.${id}.title`)}</h3>
+                <p className="text-xs mt-0.5" style={{ color: 'var(--text-secondary)' }}>{t(`excelModules.${id}.desc`)}</p>
+              </div>
+              <ArrowRight size={16} className="shrink-0 transition-transform group-hover:translate-x-0.5" style={{ color: 'var(--text-muted)' }} />
+            </Link>
+          </li>
         ))}
-      </div>
+      </ul>
     </div>
   );
 }

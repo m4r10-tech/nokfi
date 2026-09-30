@@ -63,7 +63,7 @@ export default function HealthScore({ health, compact = false }) {
 
       {lost.length > 0 && (
         <div>
-          <p className="text-xs font-medium uppercase tracking-wide mb-2" style={{ color: 'var(--text-muted)' }}>{t('report.healthLost')}</p>
+          <p className="section-title mb-2">{t('report.healthLost')}</p>
           <ul className="flex flex-col gap-1.5">
             {lost.map(l => (
               <li key={l.id} className="flex items-center justify-between gap-3 text-sm">

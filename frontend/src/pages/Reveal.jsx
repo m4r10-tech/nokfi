@@ -99,7 +99,7 @@ function RevealStep({ session_id }) {
           </div>
 
           <div>
-            <p className="text-xs font-medium uppercase tracking-wide mb-1.5 flex items-center gap-1.5"
+            <p className="section-title mb-1.5 flex items-center gap-1.5"
                style={{ color: 'var(--text-muted)' }}>
               <KeyRound size={12} /> {t('reveal.yourKey')}
             </p>

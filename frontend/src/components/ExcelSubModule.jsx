@@ -1,5 +1,5 @@
 import { useState, useRef, useMemo } from 'react';
-import { UploadCloud, FileText, X, Loader2, AlertTriangle, Sparkles, GitCompareArrows, History } from 'lucide-react';
+import { UploadCloud, FileText, X, Loader2, AlertTriangle, ArrowRight, GitCompareArrows, History } from 'lucide-react';
 import { Link } from 'react-router-dom';
 import {
   BarChart, Bar, LineChart, Line,
@@ -126,7 +126,7 @@ export default function ExcelSubModule({ moduleId }) {
         {errorMsg && <ErrorLine>{errorMsg}</ErrorLine>}
 
         <button onClick={runAnalysis} disabled={!canRun || loading} className="btn btn-primary mt-4 w-full sm:w-auto">
-          {loading ? <Loader2 size={15} className="animate-spin" /> : <Sparkles size={15} />}
+          {loading ? <Loader2 size={15} className="animate-spin" /> : <ArrowRight size={15} />}
           {compare ? t('excel.compareBtn') : t('common.analyze')}
         </button>
       </Panel>
@@ -197,7 +197,7 @@ export default function ExcelSubModule({ moduleId }) {
           <Panel label={t('excel.aiAnalysis')}>
             <div aria-busy="true" aria-live="polite">
               <p className="text-sm font-medium flex items-center gap-2 mb-1" style={{ color: 'var(--text-primary)' }}>
-                <Sparkles size={15} style={{ color: 'var(--accent-text)' }} /> {t('excel.analyzing')}
+                <Loader2 size={15} className="animate-spin" style={{ color: 'var(--accent-text)' }} /> {t('excel.analyzing')}
               </p>
               <p className="text-xs mb-5" style={{ color: 'var(--text-muted)' }}>{t('excel.analyzingHint')}</p>
               <Skeleton className="h-4 w-40 mb-3" /><SkeletonText lines={3} />
@@ -406,7 +406,7 @@ function Panel({ label, aside, children }) {
   return (
     <section className="card p-4 sm:p-5">
       <div className="flex items-center justify-between gap-3 mb-3">
-        <h2 className="text-xs font-medium uppercase tracking-wide" style={{ color: 'var(--text-muted)' }}>{label}</h2>
+        <h2 className="section-title">{label}</h2>
         {aside}
       </div>
       {children}

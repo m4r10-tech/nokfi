@@ -170,6 +170,8 @@ body {
   .btn-danger { background: var(--negative-soft); color: var(--negative); }
 
   /* Tarjeta base e interactiva (hover sutil: borde más fuerte + 1px arriba). */
+  /* Sesión 8: títulos de sección en frase normal (fuera las ETIQUETAS en mayúsculas). */
+  .section-title { font-size: 0.875rem; line-height: 1.25rem; font-weight: 600; color: var(--text-primary); letter-spacing: -0.005em; }
   .card { background: var(--surface-1); border: 1px solid var(--border); border-radius: 14px; }
   .card-interactive {
     transition: border-color var(--dur-base) var(--ease-std), transform var(--dur-base) var(--ease-out),

@@ -69,11 +69,11 @@ function StructuredReport({ report, actions, health, onActionsChange }) {
               const Icon = s.icon;
               return (
                 <li key={i} className="rounded-xl p-3.5 flex gap-3" style={{ background: 'var(--surface-2)' }}>
-                  <span className="shrink-0 w-8 h-8 rounded-lg grid place-items-center" style={{ background: s.soft, color: s.color }}><Icon size={16} /></span>
+                  <Icon size={17} className="shrink-0 mt-0.5" style={{ color: s.color }} aria-hidden="true" />
                   <div className="min-w-0">
                     <div className="flex flex-wrap items-center gap-2">
                       <p className="text-sm font-semibold" style={{ color: 'var(--text-primary)' }}>{p.title}</p>
-                      <span className="text-[11px] font-semibold uppercase tracking-wide rounded-full px-2 py-0.5" style={{ background: s.soft, color: s.color }}>
+                      <span className="text-xs font-medium rounded-full px-2 py-0.5" style={{ background: s.soft, color: s.color }}>
                         {t(`report.severity_${p.severity}`)}
                       </span>
                     </div>
@@ -183,7 +183,7 @@ function Block({ title, icon: Icon, aside, children }) {
     <section className="card p-4 sm:p-5">
       {title && (
         <div className="flex items-center justify-between gap-3 mb-3">
-          <h2 className="text-xs font-medium uppercase tracking-wide flex items-center gap-1.5" style={{ color: 'var(--text-muted)' }}>
+          <h2 className="section-title flex items-center gap-1.5">
             {Icon && <Icon size={13} />}{title}
           </h2>
           {aside}

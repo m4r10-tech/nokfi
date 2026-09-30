@@ -7,7 +7,7 @@
       76819
     ],
     "url": "https://www.ine.es/dyngs/INEbase/operacion.htm?c=Estadistica_C&cid=1254736176865",
-    "generated_at": "2026-09-26"
+    "generated_at": "2026-09-30"
   },
   "sectors": {
     "Comercio": {
@@ -418,7 +418,621 @@
         }
       }
     },
+    "Taller mecánico": {
+      "activity": "Mantenimiento y reparación de vehículos de motor",
+      "cnae": "452",
+      "by_size": {
+        "solo": {
+          "ine_size": "De 0 a 1",
+          "companies": 18737,
+          "operating_margin_pct": 17.4,
+          "staff_costs_pct": 8.4,
+          "purchases_pct": 73.7,
+          "revenue_per_company_eur": 79088,
+          "revenue_per_employee_eur": 85160
+        },
+        "2-5": {
+          "ine_size": "De 2 a 9",
+          "companies": 25638,
+          "operating_margin_pct": 8,
+          "staff_costs_pct": 26.7,
+          "purchases_pct": 66,
+          "revenue_per_company_eur": 286762,
+          "revenue_per_employee_eur": 89926
+        },
+        "6-20": {
+          "ine_size": "De 10 a 19",
+          "companies": 1288,
+          "operating_margin_pct": 8.3,
+          "staff_costs_pct": 25.4,
+          "purchases_pct": 67.6,
+          "revenue_per_company_eur": 1793102,
+          "revenue_per_employee_eur": 138269
+        },
+        "20+": {
+          "ine_size": "De 20 a 49",
+          "companies": 430,
+          "operating_margin_pct": 7.2,
+          "staff_costs_pct": 24,
+          "purchases_pct": 74.9,
+          "revenue_per_company_eur": 4366712,
+          "revenue_per_employee_eur": 153757
+        },
+        "total": {
+          "ine_size": "Total",
+          "companies": 46166,
+          "operating_margin_pct": 8.9,
+          "staff_costs_pct": 24.2,
+          "purchases_pct": 68.5,
+          "revenue_per_company_eur": 315729,
+          "revenue_per_employee_eur": 105205
+        }
+      }
+    },
+    "Automoción": {
+      "activity": "Venta y reparación de vehículos de motor y motocicletas",
+      "cnae": "45",
+      "by_size": {
+        "solo": {
+          "ine_size": "De 0 a 1",
+          "companies": 34955,
+          "operating_margin_pct": 7.7,
+          "staff_costs_pct": 4.8,
+          "purchases_pct": 90.2,
+          "revenue_per_company_eur": 139496,
+          "revenue_per_employee_eur": 173236
+        },
+        "2-5": {
+          "ine_size": "De 2 a 9",
+          "companies": 36492,
+          "operating_margin_pct": 6.4,
+          "staff_costs_pct": 18.6,
+          "purchases_pct": 76.2,
+          "revenue_per_company_eur": 410692,
+          "revenue_per_employee_eur": 133408
+        },
+        "6-20": {
+          "ine_size": "De 10 a 19",
+          "companies": 2258,
+          "operating_margin_pct": 6.3,
+          "staff_costs_pct": 15.7,
+          "purchases_pct": 80.5,
+          "revenue_per_company_eur": 3029015,
+          "revenue_per_employee_eur": 230116
+        },
+        "20+": {
+          "ine_size": "De 20 a 49",
+          "companies": 1187,
+          "operating_margin_pct": 4.8,
+          "staff_costs_pct": 10.3,
+          "purchases_pct": 89,
+          "revenue_per_company_eur": 11363772,
+          "revenue_per_employee_eur": 380363
+        },
+        "total": {
+          "ine_size": "Total",
+          "companies": 75465,
+          "operating_margin_pct": 4.8,
+          "staff_costs_pct": 9.2,
+          "purchases_pct": 89.6,
+          "revenue_per_company_eur": 1440712,
+          "revenue_per_employee_eur": 348368
+        }
+      }
+    },
+    "Comercio mayorista": {
+      "activity": "Comercio al por mayor e intermediarios del comercio, excepto de vehículos de motor y motocicletas",
+      "cnae": "46",
+      "by_size": {
+        "solo": {
+          "ine_size": "De 0 a 1",
+          "companies": 114601,
+          "operating_margin_pct": 11.4,
+          "staff_costs_pct": 3.9,
+          "purchases_pct": 85.5,
+          "revenue_per_company_eur": 237945,
+          "revenue_per_employee_eur": 321262
+        },
+        "2-5": {
+          "ine_size": "De 2 a 9",
+          "companies": 61548,
+          "operating_margin_pct": 4.9,
+          "staff_costs_pct": 7.9,
+          "purchases_pct": 88.4,
+          "revenue_per_company_eur": 1439175,
+          "revenue_per_employee_eur": 412040
+        },
+        "6-20": {
+          "ine_size": "De 10 a 19",
+          "companies": 9712,
+          "operating_margin_pct": 5.5,
+          "staff_costs_pct": 8.6,
+          "purchases_pct": 87.8,
+          "revenue_per_company_eur": 6085111,
+          "revenue_per_employee_eur": 450660
+        },
+        "20+": {
+          "ine_size": "De 20 a 49",
+          "companies": 6149,
+          "operating_margin_pct": 5,
+          "staff_costs_pct": 7.6,
+          "purchases_pct": 88.8,
+          "revenue_per_company_eur": 16936365,
+          "revenue_per_employee_eur": 552593
+        },
+        "total": {
+          "ine_size": "Total",
+          "companies": 194937,
+          "operating_margin_pct": 5.3,
+          "staff_costs_pct": 7.8,
+          "purchases_pct": 88.3,
+          "revenue_per_company_eur": 3121004,
+          "revenue_per_employee_eur": 528534
+        }
+      }
+    },
+    "Transporte": {
+      "activity": "Transporte de mercancías por carretera y servicios de mudanza",
+      "cnae": "494",
+      "by_size": {
+        "solo": {
+          "ine_size": "De 0 a 1",
+          "companies": 72097,
+          "operating_margin_pct": 48,
+          "staff_costs_pct": 5.3,
+          "purchases_pct": 47,
+          "revenue_per_company_eur": 72490,
+          "revenue_per_employee_eur": 90506
+        },
+        "2-5": {
+          "ine_size": "De 2 a 9",
+          "companies": 30442,
+          "operating_margin_pct": 15.5,
+          "staff_costs_pct": 24.6,
+          "purchases_pct": 60.8,
+          "revenue_per_company_eur": 318847,
+          "revenue_per_employee_eur": 100931
+        },
+        "6-20": {
+          "ine_size": "De 10 a 19",
+          "companies": 3461,
+          "operating_margin_pct": 11.8,
+          "staff_costs_pct": 27.6,
+          "purchases_pct": 61.9,
+          "revenue_per_company_eur": 1718956,
+          "revenue_per_employee_eur": 125096
+        },
+        "20+": {
+          "ine_size": "De 20 a 49",
+          "companies": 2071,
+          "operating_margin_pct": 10.1,
+          "staff_costs_pct": 26.5,
+          "purchases_pct": 64.8,
+          "revenue_per_company_eur": 4256990,
+          "revenue_per_employee_eur": 139747
+        },
+        "total": {
+          "ine_size": "Total",
+          "companies": 108780,
+          "operating_margin_pct": 14.7,
+          "staff_costs_pct": 22.8,
+          "purchases_pct": 63.7,
+          "revenue_per_company_eur": 435574,
+          "revenue_per_employee_eur": 127275
+        }
+      }
+    },
+    "Alojamiento": {
+      "activity": "Servicios de alojamiento",
+      "cnae": "55",
+      "by_size": {
+        "solo": {
+          "ine_size": "De 0 a 1",
+          "companies": 15508,
+          "operating_margin_pct": 37.5,
+          "staff_costs_pct": 10,
+          "purchases_pct": 65.9,
+          "revenue_per_company_eur": 64065,
+          "revenue_per_employee_eur": 99084
+        },
+        "2-5": {
+          "ine_size": "De 2 a 9",
+          "companies": 12652,
+          "operating_margin_pct": 24.5,
+          "staff_costs_pct": 27.2,
+          "purchases_pct": 52.5,
+          "revenue_per_company_eur": 252282,
+          "revenue_per_employee_eur": 77253
+        },
+        "6-20": {
+          "ine_size": "De 10 a 19",
+          "companies": 2277,
+          "operating_margin_pct": 21.5,
+          "staff_costs_pct": 28.9,
+          "purchases_pct": 53.2,
+          "revenue_per_company_eur": 1259652,
+          "revenue_per_employee_eur": 96502
+        },
+        "20+": {
+          "ine_size": "De 20 a 49",
+          "companies": 1835,
+          "operating_margin_pct": 23.6,
+          "staff_costs_pct": 28.8,
+          "purchases_pct": 49.4,
+          "revenue_per_company_eur": 3311660,
+          "revenue_per_employee_eur": 107301
+        },
+        "total": {
+          "ine_size": "Total",
+          "companies": 33348,
+          "operating_margin_pct": 24.7,
+          "staff_costs_pct": 29.2,
+          "purchases_pct": 48.1,
+          "revenue_per_company_eur": 1243473,
+          "revenue_per_employee_eur": 105401
+        }
+      }
+    },
+    "Inmobiliaria": {
+      "activity": "Actividades inmobiliarias",
+      "cnae": "68",
+      "by_size": {
+        "solo": {
+          "ine_size": "De 0 a 1",
+          "companies": 185632,
+          "operating_margin_pct": 45.2,
+          "staff_costs_pct": 6.5,
+          "purchases_pct": 40.6,
+          "revenue_per_company_eur": 88823,
+          "revenue_per_employee_eur": 139072
+        },
+        "2-5": {
+          "ine_size": "De 2 a 9",
+          "companies": 41331,
+          "operating_margin_pct": 44.9,
+          "staff_costs_pct": 20.2,
+          "purchases_pct": 37.7,
+          "revenue_per_company_eur": 291725,
+          "revenue_per_employee_eur": 117521
+        },
+        "6-20": {
+          "ine_size": "De 10 a 19",
+          "companies": 1275,
+          "operating_margin_pct": 39.5,
+          "staff_costs_pct": 18.4,
+          "purchases_pct": 45.1,
+          "revenue_per_company_eur": 2482063,
+          "revenue_per_employee_eur": 211313
+        },
+        "20+": {
+          "ine_size": "De 20 a 49",
+          "companies": 481,
+          "operating_margin_pct": 29.1,
+          "staff_costs_pct": 18.3,
+          "purchases_pct": 45.3,
+          "revenue_per_company_eur": 6371227,
+          "revenue_per_employee_eur": 241380
+        },
+        "total": {
+          "ine_size": "Total",
+          "companies": 228854,
+          "operating_margin_pct": 40.2,
+          "staff_costs_pct": 14.8,
+          "purchases_pct": 41.6,
+          "revenue_per_company_eur": 177626,
+          "revenue_per_employee_eur": 150455
+        }
+      }
+    },
+    "Asesoría y gestoría": {
+      "activity": "Actividades de contabilidad, teneduría de libros, auditoría y asesoría fiscal",
+      "cnae": "692",
+      "by_size": {
+        "solo": {
+          "ine_size": "De 0 a 1",
+          "companies": 39418,
+          "operating_margin_pct": 55.6,
+          "staff_costs_pct": 12.1,
+          "purchases_pct": 37.2,
+          "revenue_per_company_eur": 66280,
+          "revenue_per_employee_eur": 77260
+        },
+        "2-5": {
+          "ine_size": "De 2 a 9",
+          "companies": 23675,
+          "operating_margin_pct": 23.2,
+          "staff_costs_pct": 41.3,
+          "purchases_pct": 38,
+          "revenue_per_company_eur": 187583,
+          "revenue_per_employee_eur": 58453
+        },
+        "6-20": {
+          "ine_size": "De 10 a 19",
+          "companies": 1642,
+          "operating_margin_pct": 18.6,
+          "staff_costs_pct": 47.5,
+          "purchases_pct": 34.9,
+          "revenue_per_company_eur": 971519,
+          "revenue_per_employee_eur": 73795
+        },
+        "20+": {
+          "ine_size": "De 20 a 49",
+          "companies": 543,
+          "operating_margin_pct": 14.6,
+          "staff_costs_pct": 50.5,
+          "purchases_pct": 37,
+          "revenue_per_company_eur": 2332589,
+          "revenue_per_employee_eur": 83692
+        },
+        "total": {
+          "ine_size": "Total",
+          "companies": 65444,
+          "operating_margin_pct": 23.6,
+          "staff_costs_pct": 38.7,
+          "purchases_pct": 40,
+          "revenue_per_company_eur": 211067,
+          "revenue_per_employee_eur": 76219
+        }
+      }
+    },
+    "Arquitectura e ingeniería": {
+      "activity": "Servicios técnicos de arquitectura e ingeniería y otras actividades relacionadas con el asesoramiento técnico",
+      "cnae": "711",
+      "by_size": {
+        "solo": {
+          "ine_size": "De 0 a 1",
+          "companies": 76161,
+          "operating_margin_pct": 47.5,
+          "staff_costs_pct": 6.6,
+          "purchases_pct": 47.9,
+          "revenue_per_company_eur": 60829,
+          "revenue_per_employee_eur": 79953
+        },
+        "2-5": {
+          "ine_size": "De 2 a 9",
+          "companies": 14721,
+          "operating_margin_pct": 16.9,
+          "staff_costs_pct": 30.7,
+          "purchases_pct": 56.9,
+          "revenue_per_company_eur": 295085,
+          "revenue_per_employee_eur": 110536
+        },
+        "6-20": {
+          "ine_size": "De 10 a 19",
+          "companies": 1389,
+          "operating_margin_pct": 12.6,
+          "staff_costs_pct": 34.6,
+          "purchases_pct": 57,
+          "revenue_per_company_eur": 1595922,
+          "revenue_per_employee_eur": 125887
+        },
+        "20+": {
+          "ine_size": "De 20 a 49",
+          "companies": 887,
+          "operating_margin_pct": 14.6,
+          "staff_costs_pct": 36.2,
+          "purchases_pct": 55.1,
+          "revenue_per_company_eur": 4148948,
+          "revenue_per_employee_eur": 130026
+        },
+        "total": {
+          "ine_size": "Total",
+          "companies": 93621,
+          "operating_margin_pct": 17.1,
+          "staff_costs_pct": 28.7,
+          "purchases_pct": 57.3,
+          "revenue_per_company_eur": 343235,
+          "revenue_per_employee_eur": 132144
+        }
+      }
+    },
+    "Marketing y publicidad": {
+      "activity": "Publicidad",
+      "cnae": "731",
+      "by_size": {
+        "solo": {
+          "ine_size": "De 0 a 1",
+          "companies": 46904,
+          "operating_margin_pct": 45.8,
+          "staff_costs_pct": 7,
+          "purchases_pct": 48.8,
+          "revenue_per_company_eur": 52764,
+          "revenue_per_employee_eur": 74542
+        },
+        "2-5": {
+          "ine_size": "De 2 a 9",
+          "companies": 8958,
+          "operating_margin_pct": 12.1,
+          "staff_costs_pct": 26.7,
+          "purchases_pct": 62.3,
+          "revenue_per_company_eur": 285622,
+          "revenue_per_employee_eur": 106034
+        },
+        "6-20": {
+          "ine_size": "De 10 a 19",
+          "companies": 777,
+          "operating_margin_pct": 7.9,
+          "staff_costs_pct": 28.6,
+          "purchases_pct": 65.3,
+          "revenue_per_company_eur": 1816444,
+          "revenue_per_employee_eur": 144401
+        },
+        "20+": {
+          "ine_size": "De 20 a 49",
+          "companies": 382,
+          "operating_margin_pct": 9.1,
+          "staff_costs_pct": 23.9,
+          "purchases_pct": 69.1,
+          "revenue_per_company_eur": 5506254,
+          "revenue_per_employee_eur": 183606
+        },
+        "total": {
+          "ine_size": "Total",
+          "companies": 57194,
+          "operating_margin_pct": 11.2,
+          "staff_costs_pct": 16.8,
+          "purchases_pct": 74.4,
+          "revenue_per_company_eur": 383566,
+          "revenue_per_employee_eur": 189656
+        }
+      }
+    },
+    "Limpieza": {
+      "activity": "Actividades de limpieza",
+      "cnae": "812",
+      "by_size": {
+        "solo": {
+          "ine_size": "De 0 a 1",
+          "companies": 23660,
+          "operating_margin_pct": 46.7,
+          "staff_costs_pct": 10.4,
+          "purchases_pct": 46.7,
+          "revenue_per_company_eur": 27321,
+          "revenue_per_employee_eur": 35563
+        },
+        "2-5": {
+          "ine_size": "De 2 a 9",
+          "companies": 12847,
+          "operating_margin_pct": 22.5,
+          "staff_costs_pct": 44,
+          "purchases_pct": 35.7,
+          "revenue_per_company_eur": 105429,
+          "revenue_per_employee_eur": 32751
+        },
+        "6-20": {
+          "ine_size": "De 10 a 19",
+          "companies": 2319,
+          "operating_margin_pct": 11.9,
+          "staff_costs_pct": 60.8,
+          "purchases_pct": 28.4,
+          "revenue_per_company_eur": 360438,
+          "revenue_per_employee_eur": 29926
+        },
+        "20+": {
+          "ine_size": "De 20 a 49",
+          "companies": 1682,
+          "operating_margin_pct": 8.9,
+          "staff_costs_pct": 69.4,
+          "purchases_pct": 24.2,
+          "revenue_per_company_eur": 806658,
+          "revenue_per_employee_eur": 25259
+        },
+        "total": {
+          "ine_size": "Total",
+          "companies": 41533,
+          "operating_margin_pct": 9.1,
+          "staff_costs_pct": 70.7,
+          "purchases_pct": 23.2,
+          "revenue_per_company_eur": 353154,
+          "revenue_per_employee_eur": 25962
+        }
+      }
+    },
+    "Peluquería y estética": {
+      "activity": "Otros servicios personales",
+      "cnae": "96",
+      "by_size": {
+        "solo": {
+          "ine_size": "De 0 a 1",
+          "companies": 110239,
+          "operating_margin_pct": 41.3,
+          "staff_costs_pct": 9.2,
+          "purchases_pct": 50.8,
+          "revenue_per_company_eur": 16775,
+          "revenue_per_employee_eur": 19675
+        },
+        "2-5": {
+          "ine_size": "De 2 a 9",
+          "companies": 58779,
+          "operating_margin_pct": 17.1,
+          "staff_costs_pct": 41.3,
+          "purchases_pct": 41.9,
+          "revenue_per_company_eur": 72651,
+          "revenue_per_employee_eur": 29251
+        },
+        "6-20": {
+          "ine_size": "De 10 a 19",
+          "companies": 1359,
+          "operating_margin_pct": 12.5,
+          "staff_costs_pct": 47.3,
+          "purchases_pct": 42.6,
+          "revenue_per_company_eur": 603812,
+          "revenue_per_employee_eur": 45799
+        },
+        "20+": {
+          "ine_size": "De 20 a 49",
+          "companies": 591,
+          "operating_margin_pct": 14.3,
+          "staff_costs_pct": 47.8,
+          "purchases_pct": 41.6,
+          "revenue_per_company_eur": 1338511,
+          "revenue_per_employee_eur": 48777
+        },
+        "total": {
+          "ine_size": "Total",
+          "companies": 171121,
+          "operating_margin_pct": 21,
+          "staff_costs_pct": 35.7,
+          "purchases_pct": 45,
+          "revenue_per_company_eur": 59483,
+          "revenue_per_employee_eur": 33271
+        }
+      }
+    },
+    "Deporte y ocio": {
+      "activity": "Actividades deportivas",
+      "cnae": "931",
+      "by_size": {
+        "solo": {
+          "ine_size": "De 0 a 1",
+          "companies": 23293,
+          "operating_margin_pct": 29,
+          "staff_costs_pct": 12.6,
+          "purchases_pct": 61.6,
+          "revenue_per_company_eur": 41557,
+          "revenue_per_employee_eur": 55947
+        },
+        "2-5": {
+          "ine_size": "De 2 a 9",
+          "companies": 10975,
+          "operating_margin_pct": 17.2,
+          "staff_costs_pct": 32.1,
+          "purchases_pct": 60.5,
+          "revenue_per_company_eur": 151098,
+          "revenue_per_employee_eur": 48556
+        },
+        "6-20": {
+          "ine_size": "De 10 a 19",
+          "companies": 1026,
+          "operating_margin_pct": 17.6,
+          "staff_costs_pct": 37.8,
+          "purchases_pct": 55.3,
+          "revenue_per_company_eur": 683570,
+          "revenue_per_employee_eur": 53277
+        },
+        "20+": {
+          "ine_size": "De 20 a 49",
+          "companies": 802,
+          "operating_margin_pct": 20,
+          "staff_costs_pct": 38.1,
+          "purchases_pct": 54.1,
+          "revenue_per_company_eur": 1934383,
+          "revenue_per_employee_eur": 65664
+        },
+        "total": {
+          "ine_size": "Total",
+          "companies": 36471,
+          "operating_margin_pct": 14.1,
+          "staff_costs_pct": 39.8,
+          "purchases_pct": 53.3,
+          "revenue_per_company_eur": 383451,
+          "revenue_per_employee_eur": 90517
+        }
+      }
+    },
     "Construcción": null,
+    "Industria": null,
+    "Agricultura": null,
     "Otro": null
   }
 }

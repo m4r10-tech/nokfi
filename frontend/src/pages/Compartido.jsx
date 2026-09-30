@@ -73,7 +73,7 @@ export default function Compartido() {
           <>
             <header className="flex flex-col sm:flex-row sm:items-end justify-between gap-3">
               <div className="min-w-0">
-                <p className="text-xs font-semibold uppercase tracking-[0.14em] mb-1.5 inline-flex items-center gap-1.5" style={{ color: 'var(--accent-text)' }}>
+                <p className="text-sm font-medium mb-1.5 inline-flex items-center gap-1.5" style={{ color: 'var(--accent-text)' }}>
                   <Eye size={13} /> {t('share.readOnly')}
                 </p>
                 <h1 className="text-2xl font-semibold tracking-tight truncate" style={{ color: 'var(--text-primary)' }}>{data.company.name || '—'}</h1>

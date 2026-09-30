@@ -68,7 +68,7 @@ export default function PlanCards({ plans = [], notLoaded = false, failed = fals
               <div className="flex items-center justify-between gap-2 min-h-[24px]">
                 <span className="text-base font-semibold" style={{ color: 'var(--text-primary)' }}>{plan.name}</span>
                 {plan.highlight && (
-                  <span className="text-[11px] font-semibold uppercase tracking-wide rounded-full px-2.5 py-1"
+                  <span className="text-xs font-medium rounded-full px-2.5 py-1"
                     style={{ background: 'var(--accent)', color: 'var(--on-accent)' }}>{t('pricing.recommended')}</span>
                 )}
               </div>

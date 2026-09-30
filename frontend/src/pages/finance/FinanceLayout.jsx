@@ -1,4 +1,4 @@
-import { NavLink, Outlet, useOutletContext } from 'react-router-dom';
+import { NavLink, Outlet, useOutletContext, useLocation } from 'react-router-dom';
 import { BookOpen, Landmark, HandCoins, Droplets, LineChart, CalendarDays, BarChart3 } from 'lucide-react';
 import { useLang } from '../../context/LangContext';
 import PageHeader from '../../components/PageHeader';
@@ -22,6 +22,7 @@ export const FINANCE_TABS = [
 export default function FinanceLayout() {
   const { t } = useLang();
   const ctx = useOutletContext();
+  const { pathname } = useLocation();
   return (
     <div className="max-w-5xl">
       <PageHeader title={t('finance.title')} description={t('finance.subtitle')} />
@@ -38,7 +39,9 @@ export default function FinanceLayout() {
           ))}
         </div>
       </nav>
-      <Outlet context={ctx} />
+      <div key={pathname} className="anim-fade">
+        <Outlet context={ctx} />
+      </div>
       <p className="text-xs mt-8" style={{ color: 'var(--text-muted)' }}>{t('finance.disclaimer')}</p>
     </div>
   );

@@ -34,7 +34,22 @@ const SECTOR_MAP = {
   'Consultoría': { table: 'servicios', activity: 'Actividades de consultoría de gestión empresarial', cnae: '702' },
   'Diseño': { table: 'servicios', activity: 'Actividades de diseño especializado', cnae: '741' },
   'Educación': { table: 'servicios', activity: 'Educación', cnae: '85' },
+  // Sesión 8: sectores ampliados del onboarding.
+  'Taller mecánico': { table: 'comercio', activity: 'Mantenimiento y reparación de vehículos de motor', cnae: '452' },
+  'Automoción': { table: 'comercio', activity: 'Venta y reparación de vehículos de motor y motocicletas', cnae: '45' },
+  'Comercio mayorista': { table: 'comercio', activity: 'Comercio al por mayor e intermediarios del comercio, excepto de vehículos de motor y motocicletas', cnae: '46' },
+  'Transporte': { table: 'servicios', activity: 'Transporte de mercancías por carretera y servicios de mudanza', cnae: '494' },
+  'Alojamiento': { table: 'servicios', activity: 'Servicios de alojamiento', cnae: '55' },
+  'Inmobiliaria': { table: 'servicios', activity: 'Actividades inmobiliarias', cnae: '68' },
+  'Asesoría y gestoría': { table: 'servicios', activity: 'Actividades de contabilidad, teneduría de libros, auditoría y asesoría fiscal', cnae: '692' },
+  'Arquitectura e ingeniería': { table: 'servicios', activity: 'Servicios técnicos de arquitectura e ingeniería y otras actividades relacionadas con el asesoramiento técnico', cnae: '711' },
+  'Marketing y publicidad': { table: 'servicios', activity: 'Publicidad', cnae: '731' },
+  'Limpieza': { table: 'servicios', activity: 'Actividades de limpieza', cnae: '812' },
+  'Peluquería y estética': { table: 'servicios', activity: 'Otros servicios personales', cnae: '96' },
+  'Deporte y ocio': { table: 'servicios', activity: 'Actividades deportivas', cnae: '931' },
   'Construcción': null,
+  'Industria': null,
+  'Agricultura': null,
   'Otro': null
 };
 

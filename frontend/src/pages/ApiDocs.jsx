@@ -110,7 +110,7 @@ export default function ApiDocs() {
       <PublicHeader />
       <main className="flex-1 w-full max-w-3xl mx-auto px-4 py-10 md:py-14 flex flex-col gap-8">
         <header>
-          <p className="text-xs font-semibold uppercase tracking-[0.14em] mb-2" style={{ color: 'var(--accent-text)' }}>API v1</p>
+          <p className="text-sm font-medium mb-2" style={{ color: 'var(--accent-text)' }}>API v1</p>
           <h1 className="text-3xl font-semibold tracking-tight" style={{ color: 'var(--text-primary)' }}>{t('apiDocs.title')}</h1>
           <p className="mt-3 text-base" style={{ color: 'var(--text-secondary)' }}>{t('apiDocs.intro')}</p>
           <p className="mt-3 text-sm inline-flex items-center gap-2 rounded-full px-3 py-1" style={{ background: 'var(--surface-1)', border: '1px solid var(--border)', color: 'var(--text-secondary)' }}>

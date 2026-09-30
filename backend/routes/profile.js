@@ -37,7 +37,11 @@ const { sanitizeFreeText } = require('../utils/sanitize');
 // frontend se modifica sin tocar esto, un valor fuera de lista se ignora (no
 // rompe, no persiste basura). Mantener sincronizado.
 const VALID_SECTORS = ['Comercio', 'Hostelería', 'Salud', 'Legal', 'Construcción',
-  'Tecnología', 'Consultoría', 'Diseño', 'Educación', 'Otro'];
+  'Tecnología', 'Consultoría', 'Diseño', 'Educación', 'Otro',
+  // Sesión 8: sectores ampliados (los que cubre el INE, en config/benchmarks.json).
+  'Taller mecánico', 'Automoción', 'Comercio mayorista', 'Transporte', 'Alojamiento', 'Inmobiliaria',
+  'Asesoría y gestoría', 'Arquitectura e ingeniería', 'Marketing y publicidad', 'Limpieza',
+  'Peluquería y estética', 'Deporte y ocio', 'Industria', 'Agricultura'];
 const VALID_SIZES = ['solo', '2-5', '6-20', '20+'];
 const VALID_EXPENSES = ['Alquiler', 'Personal', 'Proveedores', 'Marketing',
   'Suministros', 'Tecnología', 'Transporte', 'Otro'];

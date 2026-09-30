@@ -64,7 +64,7 @@ export default function Sidebar({ collapsed, onToggle, companyName }) {
               <div className="min-w-0">
                 <p className="text-sm font-medium truncate" style={{ color: 'var(--text-primary)' }}>{who}</p>
                 {license?.plan && (
-                  <p className="text-xs uppercase tracking-wide" style={{ color: 'var(--text-muted)' }}>{license.plan}</p>
+                  <p className="text-xs capitalize" style={{ color: 'var(--text-muted)' }}>{license.plan}</p>
                 )}
               </div>
             )}

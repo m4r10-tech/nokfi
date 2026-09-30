@@ -1,6 +1,6 @@
 import { useState } from 'react';
 import { useOutletContext, Link } from 'react-router-dom';
-import { Check, X, RefreshCw, RotateCw, ArrowLeft, ArrowRight, Sparkles, AlertCircle, History } from 'lucide-react';
+import { Check, X, RefreshCw, RotateCw, ArrowLeft, ArrowRight, Loader2, AlertCircle, History } from 'lucide-react';
 import { aiApi } from '../middleware/api';
 import { apiErrorMessage } from '../middleware/errors';
 import { useToast } from '../context/ToastContext';
@@ -61,7 +61,7 @@ export default function Cuestionario() {
         <PageHeader title={t('questionnaire.resultTitle')} />
         <div className="card p-5 md:p-7">
           <p className="text-sm font-medium flex items-center gap-2 mb-1" style={{ color: 'var(--text-primary)' }}>
-            <Sparkles size={15} style={{ color: 'var(--accent-text)' }} /> {t('questionnaire.analyzing')}
+            <Loader2 size={15} className="animate-spin" style={{ color: 'var(--accent-text)' }} /> {t('questionnaire.analyzing')}
           </p>
           <p className="text-xs mb-6" style={{ color: 'var(--text-muted)' }}>{t('excel.analyzingHint')}</p>
           <SkeletonText lines={3} />
@@ -164,7 +164,7 @@ export default function Cuestionario() {
           onClick={() => (isLast ? runAnalysis() : setStep(s => s + 1))}
           className="btn btn-primary flex-1 sm:flex-none"
         >
-          {isLast ? <><Sparkles size={15} /> {t('questionnaire.seeDiagnosis')}</> : <>{t('questionnaire.next')} <ArrowRight size={15} /></>}
+          {isLast ? <>{t('questionnaire.seeDiagnosis')} <ArrowRight size={15} /></> : <>{t('questionnaire.next')} <ArrowRight size={15} /></>}
         </button>
       </div>
       {!answeredInSection && (

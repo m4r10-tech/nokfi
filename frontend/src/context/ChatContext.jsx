@@ -1,6 +1,6 @@
 import { createContext, useContext, useState, useCallback, useRef, useEffect } from 'react';
 import { Link } from 'react-router-dom';
-import { MessageCircle, X, Send, Loader2, Sparkles, Trash2 } from 'lucide-react';
+import { MessageCircle, X, Send, Loader2, Trash2 } from 'lucide-react';
 import { chatApi, dashboardApi } from '../middleware/api';
 import { apiErrorMessage } from '../middleware/errors';
 import { useLang } from './LangContext';
@@ -137,7 +137,6 @@ function ChatPanel({ analysis, messages, setMessages, onClose, onClearContext })
       role="dialog" aria-modal="false" aria-label={t('chat.title')}
       style={{ background: 'var(--surface-1)', border: '1px solid var(--border-strong)', boxShadow: 'var(--shadow-lg)' }}>
       <header className="flex items-center gap-3 px-4 h-14 shrink-0" style={{ borderBottom: '1px solid var(--border)', paddingTop: 'env(safe-area-inset-top)', boxSizing: 'content-box' }}>
-        <span className="w-8 h-8 rounded-lg grid place-items-center" style={{ background: 'var(--accent-soft)', color: 'var(--accent-text)' }}><Sparkles size={16} /></span>
         <div className="flex-1 min-w-0">
           <p className="text-sm font-semibold" style={{ color: 'var(--text-primary)' }}>{t('chat.title')}</p>
           <p className="text-xs truncate" style={{ color: 'var(--text-muted)' }}>{analysis?.title ? `${t('chat.aboutReport')} ${analysis.title}` : t('chat.subtitle')}</p>

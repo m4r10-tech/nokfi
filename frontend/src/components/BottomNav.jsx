@@ -79,7 +79,7 @@ function MoreSheet({ items, companyName, onClose }) {
         <div className="flex items-center justify-between mb-2 px-1">
           <div className="min-w-0">
             <p className="text-sm font-semibold truncate" style={{ color: 'var(--text-primary)' }}>{companyName || license?.email}</p>
-            {license?.plan && <p className="text-xs uppercase tracking-wide" style={{ color: 'var(--text-muted)' }}>{license.plan}</p>}
+            {license?.plan && <p className="text-xs capitalize" style={{ color: 'var(--text-muted)' }}>{license.plan}</p>}
           </div>
           <button onClick={onClose} className="btn btn-ghost btn-sm !px-2" aria-label={t('common.close')}><X size={18} /></button>
         </div>

@@ -1,6 +1,6 @@
 import { useState, useEffect, useCallback, useMemo } from 'react';
 import { useOutletContext } from 'react-router-dom';
-import { Plus, Sparkles, Pencil, Trash2, AlertTriangle, BookOpen, Check, Search } from 'lucide-react';
+import { Plus, ScanLine, Pencil, Trash2, AlertTriangle, BookOpen, Check, Search } from 'lucide-react';
 import { ledgerApi } from '../../middleware/api';
 import { apiErrorMessage, isConnectivityError } from '../../middleware/errors';
 import { useLang } from '../../context/LangContext';
@@ -107,7 +107,7 @@ export default function Ledger() {
             options={[{ value: 1, label: '1T' }, { value: 2, label: '2T' }, { value: 3, label: '3T' }, { value: 4, label: '4T' }, { value: 0, label: t('finance.fullYear') }]} />
         </div>
         <div className="flex flex-wrap gap-2">
-          <button onClick={() => setImporting(true)} className="btn btn-primary btn-sm"><Sparkles size={14} /> {t('finance.readInvoices')}</button>
+          <button onClick={() => setImporting(true)} className="btn btn-primary btn-sm"><ScanLine size={14} /> {t('finance.readInvoices')}</button>
           <button onClick={() => { setFormError(null); setEditing(emptyEntry()); }} className="btn btn-secondary btn-sm"><Plus size={14} /> {t('finance.addEntry')}</button>
           <ExportMenu formats={['csv', 'xlsx', 'ods', 'pdf']} doc={{ title: `${t('finance.ledgerSheet')} ${periodLabel.replace('_', ' ')}`, fileBase: `libro_${periodLabel}`, tables: [exportTable] }} />
         </div>
@@ -133,7 +133,7 @@ export default function Ledger() {
         <div className="card p-4 flex flex-col gap-3" aria-busy="true">{[0, 1, 2, 3].map(i => <Skeleton key={i} className="h-10" />)}</div>
       ) : entries.length === 0 && !importing ? (
         <EmptyState icon={BookOpen} title={t('finance.emptyTitle')} description={t('finance.emptyDesc')}>
-          <button onClick={() => setImporting(true)} className="btn btn-primary"><Sparkles size={16} /> {t('finance.readInvoices')}</button>
+          <button onClick={() => setImporting(true)} className="btn btn-primary"><ScanLine size={16} /> {t('finance.readInvoices')}</button>
           <button onClick={() => setEditing(emptyEntry())} className="btn btn-secondary"><Plus size={16} /> {t('finance.addEntry')}</button>
         </EmptyState>
       ) : entries.length > 0 && (

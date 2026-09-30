@@ -217,7 +217,9 @@ dashboard.get('/', requireLicense, (req, res) => {
   const entries = F.allEntries(id);
   const cq = currentQuarter();
   const health = getLatestAnalysisOfKind(id, 'cuestionario');
-  const openActions = listActions(id, { limit: 50 }).filter(a => !a.done).slice(0, 4);
+  // Plan de Inicio: solo las pendientes del informe más reciente, en su orden (ya va por plazo).
+  const open = listActions(id, { limit: 50 }).filter(a => !a.done);
+  const openActions = open.filter(a => a.analysis_id === open[0]?.analysis_id).slice(0, 4);
   const out = {
     health: health?.meta?.health ? { ...health.meta.health, analysis_id: health.id, created_at: health.created_at } : null,
     actions: { ...actionStats(id), next: openActions },

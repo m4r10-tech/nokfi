@@ -1,6 +1,6 @@
 import { useState } from 'react';
 import { Link } from 'react-router-dom';
-import { FolderOpen, Loader2, Sparkles, FileText, History, X, Info } from 'lucide-react';
+import { FolderOpen, Loader2, ArrowRight, FileText, History, X, Info } from 'lucide-react';
 import { aiApi } from '../middleware/api';
 import { apiErrorMessage } from '../middleware/errors';
 import { readDataFile, fileAsText, extOf } from '../middleware/fileReaders';
@@ -151,7 +151,7 @@ export default function FolderAnalysis() {
           <Notice icon={Info}>{t('folder.costNotice', { n: read.length })}</Notice>
           <div className="mt-3 flex flex-col sm:flex-row sm:items-center gap-3">
             <button onClick={run} disabled={busy} className="btn btn-primary">
-              {progress ? <Loader2 size={15} className="animate-spin" /> : <Sparkles size={15} />} {t('folder.analyze')}
+              {progress ? <Loader2 size={15} className="animate-spin" /> : <ArrowRight size={15} />} {t('folder.analyze')}
             </button>
             {progress && (
               <span className="text-sm" style={{ color: 'var(--text-secondary)' }} aria-live="polite">
