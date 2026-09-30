@@ -315,3 +315,7 @@ html { scroll-padding-top: 80px; }
 .update-prompt { bottom: 16px; }
 :root:has(.bottom-nav) .update-prompt { bottom: calc(var(--bottom-nav-h) + 12px + env(safe-area-inset-bottom)); }
 @media (min-width: 768px) { :root:has(.bottom-nav) .update-prompt { bottom: 24px; } }
+
+/* Sesión 10: capturas de la landing en el tema que se está viendo. */
+html.theme-light .shot-dark,
+html:not(.theme-light) .shot-light { display: none; }

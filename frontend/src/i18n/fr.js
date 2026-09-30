@@ -284,10 +284,10 @@ export default {
     features: {
       mini: ['10 analyses IA par jour', 'Diagnostic avec note de santé', 'Factures lues par l’IA, impôts et encaissements', 'Excel, dossiers et prévision de trésorerie', 'Assistant IA illimité'],
       pro: ['50 analyses IA par jour', 'Tout Mini', 'API pour automatisations (n8n, Make, Zapier)'],
-      max: ['130 analyses IA par jour', 'Tout Pro', 'Support prioritaire']
+      max: ['130 analyses IA par jour', 'Tout Pro', 'Support prioritaire : réponse en moins de 4 h ouvrées']
     },
     aiBadge: 'analyses IA/jour',
-    trialBadge: '14 jours gratuits',
+    noTrial: 'Pas d’essai propre : commencez avec Mini gratuitement et changez quand vous voulez', trialBadge: '14 jours gratuits',
     monthSuffix: '/mois',
     invalidEmail: 'Saisissez un e-mail valide.',
     checkoutError: 'Impossible de lancer le paiement. Réessayez.',
@@ -582,22 +582,24 @@ export default {
   },
   footer: { rights: 'Tous droits réservés' },
   landing: {
+    screensEyebrow: 'À l’intérieur', screensHeading: 'Voici Nokfi', screensSubtitle: 'Des captures réelles de l’app avec un compte d’exemple : un garage avec ses factures du trimestre.',
+    screensTabs: ['Accueil', 'Impôts', 'Encaissements', 'Diagnostic'], screensNote: 'Compte d’exemple avec des données fictives.',
     login: 'Se connecter',
     heroTitle: 'Savez-vous vraiment où va l’argent de votre activité ?',
-    heroSubtitle: 'Nokfi analyse vos finances avec l’IA et vous dit quoi couper, quoi renforcer et où se trouve la marge. Pour les indépendants et les PME.',
+    heroSubtitle: 'Il lit vos factures et vous dit combien mettre de côté pour les impôts, qui vous doit de l’argent et comment évoluera votre trésorerie. Pour les indépendants et les PME en Espagne.',
     heroEyebrow: 'Pour les indépendants et les PME',
     heroSecondary: 'Voir comment ça marche',
     facts: [
-      { n: 30, suffix: '', label: 'questions de diagnostic' },
-      { n: 6, suffix: '', label: 'analyses Excel avec l’IA' },
+      { n: 60, suffix: '', label: 'factures lues en une fois' },
+      { n: 90, suffix: ' jours', label: 'de prévision de trésorerie' },
       { n: 14, suffix: ' jours', label: 'd’essai gratuit' },
-      { n: 8, suffix: '', label: 'formats d’export' }
+      { n: 24, suffix: ' h', label: 'maximum pour vous répondre' }
     ],
     howEyebrow: 'Comment ça marche', howHeading: 'De vos chiffres à un plan d’action',
     howSubtitle: 'Rien à installer, aucune formation. En quelques minutes, vous savez où se trouve la marge.',
     howSteps: [
       { t: 'Parlez-nous de votre activité', d: 'Secteur, taille et principales dépenses. Cela prend une minute et personnalise chaque analyse.' },
-      { t: 'Répondez ou importez vos données', d: 'Le diagnostic de 30 questions oui/non, ou vos Excel et PDF de ventes, caisse, stock ou commandes.' },
+      { t: 'Répondez ou importez vos données', d: 'Le diagnostic de 30 questions, vos factures en photo ou PDF, ou vos Excel de ventes, caisse, stock ou commandes.' },
       { t: 'Recevez votre plan d’action', d: 'Un rapport clair : quoi couper, quoi renforcer et quoi faire dans les 30 prochains jours. Exportez-le en PDF ou Excel.' }
     ],
     modulesEyebrow: 'Modules',
@@ -619,7 +621,7 @@ export default {
       { t: 'Factures lues par l’IA', d: 'Photos ou PDF de vos factures → un registre de recettes et dépenses automatique, que vous vérifiez et exportez pour votre comptable.' },
       { t: 'Impôts, encaissements et trésorerie', d: 'Combien mettre de côté pour la TVA et l’impôt sur le revenu, qui vous doit de l’argent, quelles dépenses fuient et votre solde à 90 jours.' },
       { t: 'Des rapports compréhensibles', d: 'Résumé, priorités par gravité, glossaire en langage simple et export en PDF, Word, Excel ou PowerPoint.' },
-      { t: 'Calculateurs, calendrier et assistant', d: 'Seuil de rentabilité, marges et ROI, rappels d’échéances fiscales et un assistant pour vos questions.' }
+      { t: 'Calculateurs, calendrier et assistant', d: 'TVA, retenue d’IRPF, cotisation d’indépendant, coût d’un salarié et prix horaire ; rappels d’échéances fiscales et un assistant pour vos questions.' }
     ],
     plansHeading: 'Offres et tarifs',
     choosePlan: 'S’abonner',

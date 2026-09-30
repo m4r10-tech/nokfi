@@ -286,10 +286,10 @@ export default {
     features: {
       mini: ['10 analiz AI dziennie', 'Diagnoza z oceną kondycji', 'Faktury czytane przez AI, podatki i należności', 'Excel, foldery i prognoza gotówki', 'Nielimitowany asystent AI'],
       pro: ['50 analiz AI dziennie', 'Wszystko z Mini', 'API do automatyzacji (n8n, Make, Zapier)'],
-      max: ['130 analiz AI dziennie', 'Wszystko z Pro', 'Priorytetowe wsparcie']
+      max: ['130 analiz AI dziennie', 'Wszystko z Pro', 'Wsparcie priorytetowe: odpowiedź w ciągu 4 godzin roboczych']
     },
     aiBadge: 'analiz AI/dzień',
-    trialBadge: '14 dni za darmo',
+    noTrial: 'Bez własnego okresu próbnego: zacznij od Mini za darmo i zmień, kiedy chcesz', trialBadge: '14 dni za darmo',
     monthSuffix: '/mies.',
     invalidEmail: 'Wpisz poprawny adres e-mail.',
     checkoutError: 'Nie udało się rozpocząć płatności. Spróbuj ponownie.',
@@ -585,22 +585,24 @@ export default {
   },
   footer: { rights: 'Wszelkie prawa zastrzeżone' },
   landing: {
+    screensEyebrow: 'Od środka', screensHeading: 'Tak wygląda Nokfi', screensSubtitle: 'Prawdziwe zrzuty ekranu aplikacji z przykładowym kontem: warsztat samochodowy z fakturami z kwartału.',
+    screensTabs: ['Start', 'Podatki', 'Należności', 'Diagnoza'], screensNote: 'Przykładowe konto z fikcyjnymi danymi.',
     login: 'Zaloguj się',
     heroTitle: 'Czy naprawdę wiesz, gdzie znikają pieniądze twojej firmy?',
-    heroSubtitle: 'Nokfi analizuje twoje finanse z pomocą AI i mówi, co ograniczyć, co wzmocnić i gdzie jest marża. Dla samozatrudnionych i małych firm.',
+    heroSubtitle: 'Odczytuje twoje faktury i mówi, ile odłożyć na podatki, kto jest ci winien pieniądze i jak będzie wyglądać twoja gotówka. Dla samozatrudnionych i małych firm w Hiszpanii.',
     heroEyebrow: 'Dla samozatrudnionych i MŚP',
     heroSecondary: 'Zobacz, jak to działa',
     facts: [
-      { n: 30, suffix: '', label: 'pytań diagnostycznych' },
-      { n: 6, suffix: '', label: 'analiz Excel z AI' },
-      { n: 14, suffix: ' dni', label: 'darmowego okresu próbnego' },
-      { n: 8, suffix: '', label: 'formatów eksportu' }
+      { n: 60, suffix: '', label: 'faktur odczytanych naraz' },
+      { n: 90, suffix: ' dni', label: 'prognozy gotówki' },
+      { n: 14, suffix: ' dni', label: 'bezpłatnego okresu próbnego' },
+      { n: 24, suffix: ' h', label: 'maksymalny czas odpowiedzi' }
     ],
     howEyebrow: 'Jak to działa', howHeading: 'Od twoich liczb do planu działania',
     howSubtitle: 'Bez instalacji i bez szkoleń. W kilka minut wiesz, gdzie jest marża.',
     howSteps: [
       { t: 'Opowiedz nam o firmie', d: 'Branża, wielkość i główne wydatki. To minuta, a każda analiza będzie dopasowana.' },
-      { t: 'Odpowiedz lub wgraj dane', d: 'Diagnoza z 30 pytaniami tak/nie albo twoje pliki Excel i PDF ze sprzedażą, kasą, magazynem lub zamówieniami.' },
+      { t: 'Odpowiedz lub wgraj dane', d: 'Diagnoza z 30 pytaniami, twoje faktury jako zdjęcia lub PDF albo pliki Excel ze sprzedażą, kasą, magazynem lub zamówieniami.' },
       { t: 'Otrzymaj plan działania', d: 'Przejrzysty raport: co ograniczyć, co wzmocnić i co zrobić w ciągu 30 dni. Eksport do PDF lub Excela.' }
     ],
     modulesEyebrow: 'Moduły',
@@ -622,7 +624,7 @@ export default {
       { t: 'Faktury czytane przez AI', d: 'Zdjęcia lub PDF faktur → automatyczny rejestr przychodów i wydatków, który sprawdzasz i eksportujesz dla księgowego.' },
       { t: 'Podatki, należności i gotówka', d: 'Ile odłożyć na VAT i podatek dochodowy, kto jest ci winien, które koszty wyciekają i jakie będziesz mieć saldo za 90 dni.' },
       { t: 'Zrozumiałe raporty', d: 'Podsumowanie, priorytety według wagi, słowniczek prostym językiem i eksport do PDF, Worda, Excela lub PowerPointa.' },
-      { t: 'Kalkulatory, kalendarz i asystent', d: 'Próg rentowności, marże i ROI, przypomnienia o terminach podatkowych i asystent do twoich pytań.' }
+      { t: 'Kalkulatory, kalendarz i asystent', d: 'VAT, potrącenie IRPF, składka samozatrudnionego, koszt pracownika i stawka godzinowa; przypomnienia o terminach podatkowych i asystent do twoich pytań.' }
     ],
     plansHeading: 'Plany i ceny',
     choosePlan: 'Subskrybuj',

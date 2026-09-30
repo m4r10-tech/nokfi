@@ -284,10 +284,10 @@ export default {
     features: {
       mini: ['10 analisi IA al giorno', 'Diagnosi con punteggio di salute', 'Fatture lette dall’IA, imposte e incassi', 'Excel, cartelle e previsione di cassa', 'Assistente IA illimitato'],
       pro: ['50 analisi IA al giorno', 'Tutto quello di Mini', 'API per automazioni (n8n, Make, Zapier)'],
-      max: ['130 analisi IA al giorno', 'Tutto quello di Pro', 'Assistenza prioritaria']
+      max: ['130 analisi IA al giorno', 'Tutto quello di Pro', 'Assistenza prioritaria: risposta entro 4 ore lavorative']
     },
     aiBadge: 'analisi IA/giorno',
-    trialBadge: '14 giorni gratis',
+    noTrial: 'Senza prova propria: inizia gratis con Mini e cambia quando vuoi', trialBadge: '14 giorni gratis',
     monthSuffix: '/mese',
     invalidEmail: 'Inserisci un’email valida.',
     checkoutError: 'Impossibile avviare il pagamento. Riprova.',
@@ -582,22 +582,24 @@ export default {
   },
   footer: { rights: 'Tutti i diritti riservati' },
   landing: {
+    screensEyebrow: 'Dentro', screensHeading: 'Ecco com’è Nokfi', screensSubtitle: 'Schermate reali dell’app con un account di esempio: un’officina con le fatture del trimestre.',
+    screensTabs: ['Home', 'Imposte', 'Incassi', 'Diagnosi'], screensNote: 'Account di esempio con dati fittizi.',
     login: 'Accedi',
     heroTitle: 'Sai davvero dove vanno i soldi della tua attività?',
-    heroSubtitle: 'Nokfi analizza le tue finanze con l’IA e ti dice cosa tagliare, cosa rafforzare e dov’è il margine. Per lavoratori autonomi e PMI.',
+    heroSubtitle: 'Legge le tue fatture e ti dice quanto mettere da parte per le tasse, chi ti deve soldi e come andrà la tua liquidità. Per autonomi e PMI in Spagna.',
     heroEyebrow: 'Per autonomi e PMI',
     heroSecondary: 'Scopri come funziona',
     facts: [
-      { n: 30, suffix: '', label: 'domande di diagnosi' },
-      { n: 6, suffix: '', label: 'analisi Excel con l’IA' },
+      { n: 60, suffix: '', label: 'fatture lette in una volta' },
+      { n: 90, suffix: ' giorni', label: 'di previsione di cassa' },
       { n: 14, suffix: ' giorni', label: 'di prova gratuita' },
-      { n: 8, suffix: '', label: 'formati di esportazione' }
+      { n: 24, suffix: ' h', label: 'al massimo per risponderti' }
     ],
     howEyebrow: 'Come funziona', howHeading: 'Dai tuoi numeri a un piano d’azione',
     howSubtitle: 'Niente da installare e nessuna formazione. In pochi minuti sai dov’è il margine.',
     howSteps: [
       { t: 'Raccontaci la tua attività', d: 'Settore, dimensione e spese principali. Basta un minuto e serve a personalizzare ogni analisi.' },
-      { t: 'Rispondi o carica i tuoi dati', d: 'La diagnosi di 30 domande sì/no, oppure i tuoi Excel e PDF di vendite, cassa, magazzino o ordini.' },
+      { t: 'Rispondi o carica i tuoi dati', d: 'La diagnosi di 30 domande, le tue fatture in foto o PDF, o i tuoi Excel di vendite, cassa, magazzino o ordini.' },
       { t: 'Ricevi il tuo piano d’azione', d: 'Un report chiaro: cosa tagliare, cosa rafforzare e cosa fare nei prossimi 30 giorni. Esportalo in PDF o Excel.' }
     ],
     modulesEyebrow: 'Moduli',
@@ -619,7 +621,7 @@ export default {
       { t: 'Fatture lette dall’IA', d: 'Foto o PDF delle tue fatture → un registro di entrate e uscite automatico, che controlli ed esporti per il commercialista.' },
       { t: 'Imposte, incassi e cassa', d: 'Quanto accantonare per IVA e imposte sul reddito, chi ti deve soldi, quali spese si disperdono e il tuo saldo a 90 giorni.' },
       { t: 'Report che si capiscono', d: 'Riepilogo, priorità per gravità, glossario in linguaggio semplice ed esportazione in PDF, Word, Excel o PowerPoint.' },
-      { t: 'Calcolatrici, calendario e assistente', d: 'Punto di pareggio, margini e ROI, promemoria delle scadenze fiscali e un assistente per i tuoi dubbi.' }
+      { t: 'Calcolatrici, calendario e assistente', d: 'IVA, ritenuta IRPF, contributi da autonomo, costo di un dipendente e prezzo orario; promemoria delle scadenze fiscali e un assistente per i tuoi dubbi.' }
     ],
     plansHeading: 'Piani e prezzi',
     choosePlan: 'Abbonati',

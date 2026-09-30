@@ -284,10 +284,10 @@ export default {
     features: {
       mini: ['10 AI analyses per day', 'Diagnosis with health score', 'AI-read invoices, taxes and receivables', 'Excel, folders and cash forecast', 'Unlimited AI assistant'],
       pro: ['50 AI analyses per day', 'Everything in Mini', 'API for automations (n8n, Make, Zapier)'],
-      max: ['130 AI analyses per day', 'Everything in Pro', 'Priority support']
+      max: ['130 AI analyses per day', 'Everything in Pro', 'Priority support: reply within 4 working hours']
     },
     aiBadge: 'AI analyses/day',
-    trialBadge: '14-day free trial',
+    noTrial: 'No trial of its own: start with Mini for free and switch any time', trialBadge: '14-day free trial',
     monthSuffix: '/mo',
     invalidEmail: 'Please enter a valid email.',
     checkoutError: 'Could not start checkout. Please try again.',
@@ -583,22 +583,24 @@ export default {
   },
   footer: { rights: 'All rights reserved' },
   landing: {
+    screensEyebrow: 'Inside', screensHeading: 'This is what Nokfi looks like', screensSubtitle: 'Real screenshots of the app with a sample account: a car repair shop with its invoices for the quarter.',
+    screensTabs: ['Home', 'Taxes', 'Receivables', 'Diagnosis'], screensNote: 'Sample account with fictitious data.',
     login: 'Sign in',
     heroTitle: 'Do you really know where your business money goes?',
-    heroSubtitle: 'Nokfi analyses your finances with AI and tells you what to cut, what to reinforce and where the margin is. For freelancers and small businesses.',
+    heroSubtitle: 'It reads your invoices and tells you how much to set aside for taxes, who owes you and how your cash will look. For freelancers and small businesses in Spain.',
     heroEyebrow: 'For freelancers and small businesses',
     heroSecondary: 'See how it works',
     facts: [
-      { n: 30, suffix: '', label: 'diagnosis questions' },
-      { n: 6, suffix: '', label: 'AI-powered Excel analyses' },
+      { n: 60, suffix: '', label: 'invoices read in one go' },
+      { n: 90, suffix: ' days', label: 'of cash forecast' },
       { n: 14, suffix: ' days', label: 'free trial' },
-      { n: 8, suffix: '', label: 'export formats' }
+      { n: 24, suffix: ' h', label: 'maximum support reply time' }
     ],
     howEyebrow: 'How it works', howHeading: 'From your numbers to an action plan',
     howSubtitle: 'Nothing to install and no training needed. In a few minutes you know where the margin is.',
     howSteps: [
       { t: 'Tell us about your business', d: 'Sector, size and main expenses. It takes a minute and personalises every analysis.' },
-      { t: 'Answer or upload your data', d: 'The 30 yes/no diagnosis questions, or your Excel and PDF files for sales, cash, stock or orders.' },
+      { t: 'Answer or upload your data', d: 'The 30-question diagnosis, your invoices as photos or PDFs, or your Excel files for sales, cash, stock or orders.' },
       { t: 'Get your action plan', d: 'A clear report: what to cut, what to reinforce and what to do in the next 30 days. Export it to PDF or Excel.' }
     ],
     modulesEyebrow: 'Modules',
@@ -620,7 +622,7 @@ export default {
       { t: 'Invoices read by AI', d: 'Photos or PDFs of your invoices → an automatic income and expense ledger you review and export for your accountant.' },
       { t: 'Taxes, receivables and cash', d: 'How much to set aside for VAT and income tax, who owes you, which costs are leaking and your balance 90 days out.' },
       { t: 'Reports you can understand', d: 'Summary, priorities by severity, a plain-language glossary and export to PDF, Word, Excel or PowerPoint.' },
-      { t: 'Calculators, calendar and assistant', d: 'Break-even, margins and ROI, tax deadline reminders and an assistant for your questions.' }
+      { t: 'Calculators, calendar and assistant', d: 'VAT, income tax withholding, self-employed contribution, cost of an employee and hourly rate; tax deadline reminders and an assistant for your questions.' }
     ],
     plansHeading: 'Plans & pricing',
     choosePlan: 'Subscribe',

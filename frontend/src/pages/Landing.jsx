@@ -1,4 +1,4 @@
-import { useEffect } from 'react';
+import { useEffect, useState } from 'react';
 import { useNavigate, Link, useSearchParams, useLocation } from 'react-router-dom';
 import {
   ClipboardList, FileSpreadsheet, FileText, Calculator, ArrowRight, ChevronDown, Building2, Sparkles, ListChecks,
@@ -110,6 +110,9 @@ export default function Landing() {
         {/* Cifras del producto (hechos, no métricas inventadas) */}
         <FactsStrip facts={Array.isArray(facts) ? facts : []} />
 
+        {/* Sesión 10: capturas reales de la app (cuenta de ejemplo, datos ficticios). */}
+        <Screens t={t} />
+
         {/* Cómo funciona */}
         <Section id="como-funciona" eyebrow={t('landing.howEyebrow')} title={t('landing.howHeading')} subtitle={t('landing.howSubtitle')}>
           <ol className="grid md:grid-cols-3 gap-4 md:gap-6 relative">
@@ -220,6 +223,62 @@ export default function Landing() {
 
       <PublicFooter />
     </div>
+  );
+}
+
+/**
+ * Capturas REALES de la app con la cuenta de ejemplo (backend/scripts/
+ * landing-screens.js las genera en oscuro y claro). Pestañas que rotan solas
+ * cada 6 s hasta que el visitante elige una; con movimiento reducido no rotan.
+ */
+const SCREENS = ['inicio', 'impuestos', 'cobros', 'informe'];
+
+function Screens({ t }) {
+  const [ref] = useReveal({ threshold: 0.15 });
+  const [active, setActive] = useState(0);
+  const [auto, setAuto] = useState(true);
+  const tabs = t('landing.screensTabs');
+  useEffect(() => {
+    if (!auto || window.matchMedia?.('(prefers-reduced-motion: reduce)').matches) return;
+    const id = setInterval(() => setActive(a => (a + 1) % SCREENS.length), 6000);
+    return () => clearInterval(id);
+  }, [auto]);
+  const pick = (i) => { setActive(i); setAuto(false); };
+
+  return (
+    <Section id="por-dentro" eyebrow={t('landing.screensEyebrow')} title={t('landing.screensHeading')} subtitle={t('landing.screensSubtitle')}>
+      <div ref={ref} className="reveal flex flex-col items-center gap-5">
+        <div role="tablist" className="inline-flex max-w-full overflow-x-auto gap-1 rounded-xl p-1" style={{ background: 'var(--surface-1)', border: '1px solid var(--border)' }}>
+          {SCREENS.map((s, i) => (
+            <button key={s} role="tab" aria-selected={active === i} onClick={() => pick(i)}
+              className="shrink-0 rounded-lg px-2.5 sm:px-3.5 h-9 text-[13px] sm:text-sm font-medium"
+              style={{
+                ...(active === i ? { background: 'var(--accent-soft)', color: 'var(--accent-text)' } : { color: 'var(--text-secondary)' }),
+                transition: 'background-color var(--dur-base) var(--ease-std), color var(--dur-base) var(--ease-std)'
+              }}>
+              {Array.isArray(tabs) ? tabs[i] : s}
+            </button>
+          ))}
+        </div>
+        <div className="relative w-full rounded-2xl overflow-hidden"
+          style={{ border: '1px solid var(--border-strong)', boxShadow: 'var(--shadow-lg)', background: 'var(--surface-1)' }}>
+          <div className="flex items-center gap-1.5 px-4 h-9" style={{ borderBottom: '1px solid var(--border)' }} aria-hidden="true">
+            {[0, 1, 2].map(i => <span key={i} className="w-2.5 h-2.5 rounded-full" style={{ background: 'var(--border-strong)' }} />)}
+            <span className="ml-3 text-xs" style={{ color: 'var(--text-muted)' }}>nokfi.app</span>
+          </div>
+          <div className="relative" style={{ aspectRatio: '1280 / 800' }}>
+            {SCREENS.map((s, i) => (
+              <div key={s} className="absolute inset-0" aria-hidden={active !== i}
+                style={{ opacity: active === i ? 1 : 0, transform: active === i ? 'none' : 'scale(0.985)', transition: 'opacity 500ms var(--ease-out), transform 600ms var(--ease-out)' }}>
+                <img src={`/screens/${s}-dark.jpg`} alt={Array.isArray(tabs) ? tabs[i] : s} loading="lazy" decoding="async" className="shot-dark w-full h-full object-cover object-top" />
+                <img src={`/screens/${s}-light.jpg`} alt={Array.isArray(tabs) ? tabs[i] : s} loading="lazy" decoding="async" className="shot-light w-full h-full object-cover object-top" />
+              </div>
+            ))}
+          </div>
+        </div>
+        <p className="text-xs" style={{ color: 'var(--text-muted)' }}>{t('landing.screensNote')}</p>
+      </div>
+    </Section>
   );
 }
 

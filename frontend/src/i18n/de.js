@@ -284,10 +284,10 @@ export default {
     features: {
       mini: ['10 KI-Analysen pro Tag', 'Diagnose mit Gesundheitsnote', 'Rechnungen per KI, Steuern und Forderungen', 'Excel, Ordner und Liquiditätsprognose', 'Unbegrenzter KI-Assistent'],
       pro: ['50 KI-Analysen pro Tag', 'Alles aus Mini', 'API für Automatisierungen (n8n, Make, Zapier)'],
-      max: ['130 KI-Analysen pro Tag', 'Alles aus Pro', 'Priorisierter Support']
+      max: ['130 KI-Analysen pro Tag', 'Alles aus Pro', 'Priority-Support: Antwort innerhalb von 4 Arbeitsstunden']
     },
     aiBadge: 'KI-Analysen/Tag',
-    trialBadge: '14 Tage gratis',
+    noTrial: 'Kein eigener Test: starte kostenlos mit Mini und wechsle jederzeit', trialBadge: '14 Tage gratis',
     monthSuffix: '/Monat',
     invalidEmail: 'Gib eine gültige E-Mail-Adresse ein.',
     checkoutError: 'Die Zahlung konnte nicht gestartet werden. Versuche es erneut.',
@@ -582,22 +582,24 @@ export default {
   },
   footer: { rights: 'Alle Rechte vorbehalten' },
   landing: {
+    screensEyebrow: 'Von innen', screensHeading: 'So sieht Nokfi aus', screensSubtitle: 'Echte Screenshots der App mit einem Beispielkonto: eine Autowerkstatt mit ihren Rechnungen des Quartals.',
+    screensTabs: ['Start', 'Steuern', 'Forderungen', 'Diagnose'], screensNote: 'Beispielkonto mit fiktiven Daten.',
     login: 'Anmelden',
     heroTitle: 'Weißt du wirklich, wohin das Geld deines Unternehmens fließt?',
-    heroSubtitle: 'Nokfi analysiert deine Finanzen mit KI und sagt dir, was du streichen, was du stärken solltest und wo die Marge liegt. Für Selbstständige und kleine Unternehmen.',
+    heroSubtitle: 'Es liest deine Rechnungen und sagt dir, wie viel du für Steuern zurücklegen musst, wer dir Geld schuldet und wie sich deine Liquidität entwickelt. Für Selbstständige und kleine Unternehmen in Spanien.',
     heroEyebrow: 'Für Selbstständige und KMU',
     heroSecondary: 'So funktioniert’s',
     facts: [
-      { n: 30, suffix: '', label: 'Diagnosefragen' },
-      { n: 6, suffix: '', label: 'Excel-Analysen mit KI' },
+      { n: 60, suffix: '', label: 'Rechnungen auf einmal gelesen' },
+      { n: 90, suffix: ' Tage', label: 'Liquiditätsprognose' },
       { n: 14, suffix: ' Tage', label: 'kostenlos testen' },
-      { n: 8, suffix: '', label: 'Exportformate' }
+      { n: 24, suffix: ' h', label: 'maximale Antwortzeit' }
     ],
     howEyebrow: 'So funktioniert’s', howHeading: 'Von deinen Zahlen zum Maßnahmenplan',
     howSubtitle: 'Nichts installieren, keine Schulung. In wenigen Minuten weißt du, wo die Marge liegt.',
     howSteps: [
       { t: 'Erzähl uns von deinem Unternehmen', d: 'Branche, Größe und wichtigste Ausgaben. Das dauert eine Minute und personalisiert jede Analyse.' },
-      { t: 'Antworte oder lade Daten hoch', d: 'Die Diagnose mit 30 Ja/Nein-Fragen oder deine Excel- und PDF-Dateien zu Umsatz, Kasse, Lager oder Bestellungen.' },
+      { t: 'Antworte oder lade Daten hoch', d: 'Die Diagnose mit 30 Fragen, deine Rechnungen als Foto oder PDF oder deine Excel-Dateien zu Umsatz, Kasse, Lager oder Bestellungen.' },
       { t: 'Erhalte deinen Maßnahmenplan', d: 'Ein klarer Bericht: was streichen, was stärken und was in den nächsten 30 Tagen zu tun ist. Export als PDF oder Excel.' }
     ],
     modulesEyebrow: 'Module',
@@ -619,7 +621,7 @@ export default {
       { t: 'Rechnungen von der KI gelesen', d: 'Fotos oder PDFs deiner Rechnungen → ein automatisches Einnahmen- und Ausgabenjournal, das du prüfst und für deinen Steuerberater exportierst.' },
       { t: 'Steuern, Forderungen und Liquidität', d: 'Wie viel du für Umsatz- und Einkommensteuer zurücklegen solltest, wer dir Geld schuldet, welche Kosten versickern und dein Kontostand in 90 Tagen.' },
       { t: 'Verständliche Berichte', d: 'Zusammenfassung, Prioritäten nach Dringlichkeit, Glossar in einfacher Sprache und Export als PDF, Word, Excel oder PowerPoint.' },
-      { t: 'Rechner, Kalender und Assistent', d: 'Break-even, Margen und ROI, Erinnerungen an Steuerfristen und ein Assistent für deine Fragen.' }
+      { t: 'Rechner, Kalender und Assistent', d: 'MwSt., IRPF-Einbehalt, Beitrag für Selbstständige, Kosten eines Mitarbeiters und Stundensatz; Erinnerungen an Steuerfristen und ein Assistent für deine Fragen.' }
     ],
     plansHeading: 'Pläne und Preise',
     choosePlan: 'Abonnieren',

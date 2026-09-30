@@ -77,12 +77,16 @@ export default function PlanCards({ plans = [], notLoaded = false, failed = fals
                 <span className="text-4xl font-semibold tracking-tight tabular" style={{ color: 'var(--text-primary)' }}>{fmtPrice(plan.price)}</span>
                 <span className="text-sm" style={{ color: 'var(--text-muted)' }}>{t('pricing.monthSuffix')}</span>
               </div>
-              <div className="mt-2 md:h-6">
-                {plan.trial && (
+              <div className="mt-2 md:min-h-6">
+                {plan.trial ? (
                   <span className="inline-flex text-xs font-medium rounded-full px-2.5 py-1"
                     style={{ color: 'var(--positive)', background: 'var(--positive-soft)' }}>
                     {t('pricing.trialBadge')}
                   </span>
+                ) : plans.some(p => p.trial) && (
+                  // Sesión 10: aclarar que Pro y Max no tienen prueba propia (se
+                  // empieza en Mini y se cambia; el cambio se cobra al acabar la prueba).
+                  <span className="text-xs" style={{ color: 'var(--text-muted)' }}>{t('pricing.noTrial')}</span>
                 )}
               </div>
 

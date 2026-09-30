@@ -284,10 +284,10 @@ export default {
     features: {
       mini: ['10 análisis IA al día', 'Diagnóstico con nota de salud', 'Facturas leídas por IA, impuestos y cobros', 'Excel, carpetas y previsión de caja', 'Asistente IA sin límite'],
       pro: ['50 análisis IA al día', 'Todo lo de Mini', 'API para automatizaciones (n8n, Make, Zapier)'],
-      max: ['130 análisis IA al día', 'Todo lo de Pro', 'Soporte prioritario']
+      max: ['130 análisis IA al día', 'Todo lo de Pro', 'Soporte prioritario: respuesta en menos de 4 h laborables']
     },
     aiBadge: 'análisis IA/día',
-    trialBadge: '14 días gratis',
+    noTrial: 'Sin prueba propia: empieza con Mini gratis y cambia cuando quieras', trialBadge: '14 días gratis',
     monthSuffix: '/mes',
     invalidEmail: 'Introduce un email válido.',
     checkoutError: 'No se pudo iniciar el pago. Inténtalo de nuevo.',
@@ -586,22 +586,24 @@ export default {
   },
   footer: { rights: 'Todos los derechos reservados' },
   landing: {
+    screensEyebrow: 'Por dentro', screensHeading: 'Así se ve Nokfi', screensSubtitle: 'Capturas reales de la app con una cuenta de ejemplo: un taller mecánico con sus facturas del trimestre.',
+    screensTabs: ['Inicio', 'Impuestos', 'Cobros', 'Diagnóstico'], screensNote: 'Cuenta de ejemplo con datos ficticios.',
     login: 'Iniciar sesión',
     heroTitle: '¿Sabes realmente a dónde va el dinero de tu negocio?',
-    heroSubtitle: 'Nokfi analiza tus finanzas con IA y te dice qué cortar, qué reforzar y dónde está el margen. Para autónomos y pymes.',
+    heroSubtitle: 'Lee tus facturas, te dice cuánto apartar para Hacienda, quién te debe y cómo irá tu caja. Para autónomos y pymes en España.',
     heroEyebrow: 'Para autónomos y pymes',
     heroSecondary: 'Ver cómo funciona',
     facts: [
-      { n: 30, suffix: '', label: 'preguntas de diagnóstico' },
-      { n: 6, suffix: '', label: 'análisis de Excel con IA' },
+      { n: 60, suffix: '', label: 'facturas leídas de una vez' },
+      { n: 90, suffix: ' días', label: 'de previsión de caja' },
       { n: 14, suffix: ' días', label: 'de prueba gratis' },
-      { n: 8, suffix: '', label: 'formatos de exportación' }
+      { n: 24, suffix: ' h', label: 'como máximo para responderte' }
     ],
     howEyebrow: 'Cómo funciona', howHeading: 'De tus números a un plan de acción',
     howSubtitle: 'Sin instalar nada y sin formación previa. En unos minutos sabes dónde está el margen.',
     howSteps: [
       { t: 'Cuéntanos tu negocio', d: 'Sector, tamaño y principales gastos. Es un minuto y sirve para personalizar cada análisis.' },
-      { t: 'Responde o sube tus datos', d: 'El diagnóstico de 30 preguntas de sí/no, o tus Excel y PDF de ventas, caja, stock o pedidos.' },
+      { t: 'Responde o sube tus datos', d: 'El diagnóstico de 30 preguntas, tus facturas en foto o PDF, o tus Excel de ventas, caja, stock o pedidos.' },
       { t: 'Recibe tu plan de acción', d: 'Un informe claro: qué cortar, qué reforzar y qué hacer los próximos 30 días. Expórtalo a PDF o Excel.' }
     ],
     modulesEyebrow: 'Módulos',
@@ -623,7 +625,7 @@ export default {
       { t: 'Facturas leídas por la IA', d: 'Fotos o PDF de tus facturas → libro de ingresos y gastos automático, que revisas y exportas para tu gestoría.' },
       { t: 'Impuestos, cobros y caja', d: 'Cuánto apartar para el IVA y el IRPF, quién te debe, qué gastos se escapan y cómo irá tu saldo a 90 días.' },
       { t: 'Informes que se entienden', d: 'Resumen, prioridades por gravedad, glosario en lenguaje llano y exportación a PDF, Word, Excel o PowerPoint.' },
-      { t: 'Calculadoras, calendario y asistente', d: 'Punto de equilibrio, márgenes y ROI, avisos de plazos fiscales y un asistente para tus dudas.' }
+      { t: 'Calculadoras, calendario y asistente', d: 'IVA, retención de IRPF, cuota de autónomos, coste de un empleado y precio por hora; avisos de plazos fiscales y un asistente para tus dudas.' }
     ],
     plansHeading: 'Planes y precios',
     choosePlan: 'Suscribirme',
