@@ -1,6 +1,6 @@
-import { useState } from 'react';
+import { useEffect, useMemo, useRef, useState } from 'react';
 import { Link } from 'react-router-dom';
-import { Loader2, ScanLine, AlertTriangle, Info, Check, X } from 'lucide-react';
+import { Loader2, ScanLine, AlertTriangle, Info, Check, X, FileText, FileCode2, Eye, EyeOff } from 'lucide-react';
 import { aiApi, ledgerApi } from '../../middleware/api';
 import { apiErrorMessage } from '../../middleware/errors';
 import { readPdf, imageToJpeg, extOf, IMAGE_EXT } from '../../middleware/fileReaders';
@@ -9,7 +9,9 @@ import { useLang } from '../../context/LangContext';
 import { useToast } from '../../context/ToastContext';
 import FolderSource from '../FolderSource';
 import { Section, Segmented, ErrorBox, Notice, Badge } from '../ui';
-import { checkOk } from './EntryForm';
+import { CATEGORIES } from './EntryForm';
+import { nameCase } from '../../utils/names';
+import { invoiceDoubts } from '../../utils/invoiceDoubts';
 
 /**
  * V1 — Facturas leídas por la IA → libro (sesión 4).
@@ -18,7 +20,8 @@ import { checkOk } from './EntryForm';
  * navegador: los PDF con texto se extraen aquí; los escaneados y las fotos
  * se reducen y se envían a la IA (Gemini lee imágenes y PDF) SOLO para
  * leerlos: el archivo no se guarda. Lo que se guarda son los DATOS que el
- * usuario revisa y confirma en la tabla.
+ * usuario revisa y confirma, factura a factura, junto a la vista previa
+ * del documento (sesión 10). Solo se marcan los campos dudosos.
  * Coste: 1 análisis por lectura, aunque vaya en varios lotes (job).
  */
 // XML: facturas electrónicas estructuradas (Facturae/UBL/CII) → sin IA.
@@ -43,6 +46,9 @@ export default function InvoiceImport({ profile, onSaved, onCancel }) {
   const [saving, setSaving] = useState(false);
   const [dupes, setDupes] = useState(null);
   const taxId = (profile?.taxId || '').toUpperCase();
+
+  // Archivo de cada factura, para la vista previa (se pinta en el navegador).
+  const files = useMemo(() => new Map((picked?.files || []).map(f => [f.name, f])), [picked]);
 
   const onPick = ({ name, files }) => {
     setError(null); setErrors([]);
@@ -90,7 +96,7 @@ export default function InvoiceImport({ profile, onSaved, onCancel }) {
     return {
       key: `${i}-${inv.file_name}`, include: inv.is_invoice && !!inv.invoice_date,
       type, file_name: inv.file_name, is_invoice: inv.is_invoice, source_format: inv.source_format || null,
-      invoice_date: inv.invoice_date, due_date: inv.due_date || '', party_name: party.name || '', party_nif: party.nif || '',
+      invoice_date: inv.invoice_date, due_date: inv.due_date || '', party_name: nameCase(party.name || ''), party_nif: party.nif || '',
       invoice_number: inv.invoice_number, concept: inv.concept, category: inv.category,
       base: inv.base, vat_rate: inv.vat_rate, vat_amount: inv.vat_amount, irpf_rate: inv.irpf_rate, irpf_amount: inv.irpf_amount, total: inv.total,
       paid: type === 'expense'
@@ -189,6 +195,11 @@ export default function InvoiceImport({ profile, onSaved, onCancel }) {
                   return `${t('finance.import.willRead', { n: picked.files.length })}${xml ? ` ${t('finance.import.xmlInBatch', { n: xml })}` : ''}`;
                 })()}
                 {picked.skipped > 0 && ` ${t('finance.import.capped').replace('{max}', MAX_INVOICES)}`}
+                <span className="block mt-1 break-all" style={{ color: 'var(--text-primary)' }}>
+                  {picked.name && <strong className="font-medium">{picked.name}/ </strong>}
+                  {picked.files.slice(0, 3).map(f => f.name).join(' · ')}
+                  {picked.files.length > 3 && ` ${t('finance.import.andMore', { n: picked.files.length - 3 })}`}
+                </span>
               </Notice>
               <div><button onClick={run} disabled={!picked.files.length} className="btn btn-primary"><ScanLine size={15} /> {t('finance.import.start')}</button></div>
             </>
@@ -210,55 +221,17 @@ export default function InvoiceImport({ profile, onSaved, onCancel }) {
 
       {phase === 'review' && (
         <div className="flex flex-col gap-3">
-          <Notice icon={AlertTriangle} tone="warning">{t('finance.import.reviewHint')}</Notice>
+          <p className="text-sm" style={{ color: 'var(--text-secondary)' }}>{t('finance.import.reviewHint')}</p>
           {errors.slice(0, 3).map((e, i) => <ErrorBox key={i} code={e.code}>{e.message}</ErrorBox>)}
           {error && <ErrorBox>{error}</ErrorBox>}
-          <div className="overflow-x-auto -mx-4 sm:mx-0">
-            <table className="w-full text-sm min-w-[860px]">
-              <thead>
-                <tr className="text-left text-xs" style={{ color: 'var(--text-muted)' }}>
-                  <th className="p-2 w-8" /><th className="p-2">{t('finance.type')}</th><th className="p-2">{t('finance.date')}</th>
-                  <th className="p-2">{t('finance.party')}</th><th className="p-2">{t('finance.nif')}</th><th className="p-2">{t('finance.invoiceNumber')}</th>
-                  <th className="p-2 text-right">{t('finance.base')}</th><th className="p-2 text-right">{t('finance.vat')}</th>
-                  <th className="p-2 text-right">{t('finance.irpf')}</th><th className="p-2 text-right">{t('finance.total')}</th><th className="p-2" />
-                </tr>
-              </thead>
-              <tbody>
-                {rows.map((r, i) => {
-                  const ok = checkOk(r) && r.invoice_date;
-                  const dupe = dupes?.includes(rows.filter(x => x.include).indexOf(r));
-                  const cell = (k, props = {}) => (
-                    <input value={r[k] ?? ''} onChange={(e) => update(r.key, k, e.target.value)} className="input !h-8 !px-2 text-xs" {...props} />
-                  );
-                  return (
-                    <tr key={r.key} style={{ borderTop: '1px solid var(--border)', opacity: r.include ? 1 : 0.55 }}>
-                      <td className="p-2"><input type="checkbox" checked={r.include} onChange={(e) => update(r.key, 'include', e.target.checked)} aria-label={r.file_name} className="w-4 h-4" /></td>
-                      <td className="p-2">
-                        <select value={r.type} onChange={(e) => update(r.key, 'type', e.target.value)} className="input !h-8 !px-1.5 text-xs !w-[92px]">
-                          <option value="expense">{t('finance.expense')}</option><option value="income">{t('finance.income')}</option>
-                        </select>
-                      </td>
-                      <td className="p-2 w-[130px]">{cell('invoice_date', { type: 'date' })}</td>
-                      <td className="p-2 min-w-[170px]">{cell('party_name')}<p className="text-[11px] truncate max-w-[160px] mt-0.5" style={{ color: 'var(--text-muted)' }} title={r.file_name}>{r.file_name}</p></td>
-                      <td className="p-2 w-[110px]">{cell('party_nif')}</td>
-                      <td className="p-2 w-[100px]">{cell('invoice_number')}</td>
-                      <td className="p-2 w-[90px]">{cell('base', { type: 'number', step: '0.01', className: 'input !h-8 !px-2 text-xs text-right' })}</td>
-                      <td className="p-2 w-[80px]">{cell('vat_amount', { type: 'number', step: '0.01', className: 'input !h-8 !px-2 text-xs text-right' })}</td>
-                      <td className="p-2 w-[80px]">{cell('irpf_amount', { type: 'number', step: '0.01', className: 'input !h-8 !px-2 text-xs text-right' })}</td>
-                      <td className="p-2 w-[90px]">{cell('total', { type: 'number', step: '0.01', className: 'input !h-8 !px-2 text-xs text-right font-semibold' })}</td>
-                      <td className="p-2">
-                        {r.source_format ? <Badge tone="accent"><Check size={11} /> {r.source_format}</Badge>
-                          : !r.is_invoice ? <Badge tone="muted">{t('finance.import.notInvoice')}</Badge>
-                          : dupe ? <Badge tone="warning">{t('finance.import.duplicate')}</Badge>
-                          : ok ? <Badge tone="positive"><Check size={11} /> OK</Badge>
-                          : <Badge tone="warning"><AlertTriangle size={11} /> {t('finance.import.check')}</Badge>}
-                      </td>
-                    </tr>
-                  );
-                })}
-              </tbody>
-            </table>
-          </div>
+          {(() => {
+            const included = rows.filter(x => x.include);
+            return rows.map(r => (
+              <InvoiceCard key={r.key} r={r} update={update}
+                file={files.get(r.file_name) || files.get(String(r.file_name).replace(/ \(\d+\)$/, ''))}
+                dupe={!!dupes?.includes(included.indexOf(r))} />
+            ));
+          })()}
           {rows.length === 0 && <p className="text-sm py-4 text-center" style={{ color: 'var(--text-secondary)' }}>{t('finance.import.noneFound')}</p>}
 
           {dupes && dupes.length > 0 ? (
@@ -280,5 +253,132 @@ export default function InvoiceImport({ profile, onSaved, onCancel }) {
         </div>
       )}
     </Section>
+  );
+}
+
+/**
+ * Vista previa como imagen data: (la CSP no admite blob: en img ni frames):
+ * foto reducida o 1.ª página del PDF. Se genera al acercarse la tarjeta a la
+ * pantalla, para no pintar 60 PDF de golpe.
+ */
+function useDocPreview(file, active) {
+  const ref = useRef(null);
+  const [state, setState] = useState({ src: null, failed: false });
+  useEffect(() => {
+    if (!file || !active || !ref.current || state.src) return;
+    let cancelled = false;
+    const load = async () => {
+      try {
+        const img = IMAGE_EXT.includes(extOf(file.name))
+          ? await imageToJpeg(file, { maxDim: 1400 })
+          : await (await import('../../middleware/pdfExtract')).renderPdfFirstPage(file, { maxDim: 1400 });
+        if (!cancelled) setState({ src: `data:${img.mime};base64,${img.data}`, failed: false });
+      } catch { if (!cancelled) setState({ src: null, failed: true }); }
+    };
+    const io = new IntersectionObserver((entries) => {
+      if (entries.some(e => e.isIntersecting)) { io.disconnect(); load(); }
+    }, { rootMargin: '400px' });
+    io.observe(ref.current);
+    return () => { cancelled = true; io.disconnect(); };
+  }, [file, active]); // eslint-disable-line react-hooks/exhaustive-deps
+  return [ref, state];
+}
+
+/** Una factura leída: documento a la izquierda, campos a la derecha. */
+function InvoiceCard({ r, update, file, dupe }) {
+  const { t } = useLang();
+  const [showDoc, setShowDoc] = useState(false);
+  const [previewRef, preview] = useDocPreview(r.source_format ? null : file, r.include);
+  const doubts = r.is_invoice ? invoiceDoubts(r) : {};
+  const nDoubts = Object.keys(doubts).length;
+  const set = (k) => (e) => update(r.key, k, e.target.value);
+  const doubt = (k) => doubts[k] && (
+    <p className="text-xs mt-1 flex items-start gap-1" style={{ color: 'var(--warning)' }}>
+      <AlertTriangle size={12} className="mt-0.5 shrink-0" /> {t(`finance.import.doubts.${doubts[k]}`)}
+    </p>
+  );
+  const box = (k) => ({ borderColor: doubts[k] ? 'var(--warning)' : undefined });
+  const field = (k, label, props = {}, className = '') => (
+    <div className={className}>
+      <label htmlFor={`${r.key}-${k}`} className="field-label">{label}</label>
+      <input id={`${r.key}-${k}`} value={r[k] ?? ''} onChange={set(k)} className="input" style={box(k)} {...props} />
+      {doubt(k)}
+    </div>
+  );
+  const money = (k, label, strong) => (
+    <div>
+      <label htmlFor={`${r.key}-${k}`} className="field-label">{label}</label>
+      <div className="relative">
+        <input id={`${r.key}-${k}`} type="number" step="0.01" inputMode="decimal" value={r[k] ?? ''} onChange={set(k)}
+          className={`input text-right tabular-nums !pr-7 ${strong ? 'font-semibold' : ''}`} style={box(k)} />
+        <span className="absolute right-2.5 top-1/2 -translate-y-1/2 text-sm pointer-events-none" style={{ color: 'var(--text-muted)' }}>€</span>
+      </div>
+      {doubt(k)}
+    </div>
+  );
+
+  const status = r.source_format ? <Badge tone="accent"><Check size={11} /> {r.source_format}</Badge>
+    : !r.is_invoice ? <Badge tone="muted">{t('finance.import.notInvoice')}</Badge>
+    : dupe ? <Badge tone="warning">{t('finance.import.duplicate')}</Badge>
+    : nDoubts ? <Badge tone="warning"><AlertTriangle size={11} /> {t('finance.import.toCheck', { n: nDoubts })}</Badge>
+    : <Badge tone="positive"><Check size={11} /> {t('finance.import.allGood')}</Badge>;
+
+  const doc = preview.src ? (
+    <img src={preview.src} alt={r.file_name} className="w-full max-h-[640px] object-contain object-top rounded-lg" style={{ border: '1px solid var(--border)', background: '#fff' }} />
+  ) : (
+    <div className="h-full min-h-[160px] rounded-lg flex flex-col items-center justify-center gap-2 p-4 text-center text-xs" style={{ background: 'var(--surface-2)', color: 'var(--text-muted)' }}>
+      {r.source_format ? <><FileCode2 size={20} /> {t('finance.import.xmlNoPreview')}</>
+        : preview.failed || !file ? <><FileText size={20} /> {t('finance.import.noPreview')}</>
+        : <Loader2 size={20} className="animate-spin" />}
+    </div>
+  );
+
+  return (
+    <article className="rounded-xl" style={{ border: '1px solid var(--border)', opacity: r.include ? 1 : 0.6 }}>
+      <header className="flex flex-wrap items-center gap-x-3 gap-y-1.5 px-3.5 py-2.5" style={{ borderBottom: '1px solid var(--border)' }}>
+        <label className="flex items-center gap-2 text-sm font-medium min-w-0 flex-1 cursor-pointer" style={{ color: 'var(--text-primary)' }}>
+          <input type="checkbox" checked={r.include} onChange={(e) => update(r.key, 'include', e.target.checked)} className="w-4 h-4 shrink-0" />
+          <FileText size={15} className="shrink-0" style={{ color: 'var(--text-muted)' }} />
+          <span className="truncate" title={r.file_name}>{r.file_name}</span>
+        </label>
+        {status}
+        <button type="button" onClick={() => setShowDoc(v => !v)} className="btn btn-ghost btn-sm lg:hidden">
+          {showDoc ? <EyeOff size={14} /> : <Eye size={14} />} {t(showDoc ? 'finance.import.hideDoc' : 'finance.import.showDoc')}
+        </button>
+      </header>
+      {r.include && (
+        <div className="grid lg:grid-cols-[minmax(0,5fr)_minmax(0,7fr)] gap-4 p-3.5">
+          <div ref={previewRef} className={showDoc ? '' : 'hidden lg:block'}>{doc}</div>
+          <div className="grid grid-cols-2 gap-x-3 gap-y-3 content-start">
+            <div className="col-span-2">
+              <Segmented value={r.type} onChange={(v) => update(r.key, 'type', v)} size="sm" options={[
+                { value: 'expense', label: t('finance.expense') }, { value: 'income', label: t('finance.income') }
+              ]} />
+            </div>
+            {field('party_name', r.type === 'income' ? t('finance.client') : t('finance.supplier'), {}, 'col-span-2')}
+            {field('party_nif', t('finance.nif'), { autoCapitalize: 'characters' })}
+            {field('invoice_number', t('finance.invoiceNumber'))}
+            {field('invoice_date', t('finance.date'), { type: 'date' })}
+            {field('due_date', t('finance.dueDate'), { type: 'date' })}
+            {field('concept', t('finance.concept'), {}, 'col-span-2')}
+            <div className="col-span-2 sm:col-span-1">
+              <label htmlFor={`${r.key}-category`} className="field-label">{t('finance.category')}</label>
+              <select id={`${r.key}-category`} value={r.category || ''} onChange={set('category')} className="input">
+                <option value="">—</option>
+                {CATEGORIES.map(([v, k]) => <option key={v} value={v}>{t(`finance.categories.${k}`)}</option>)}
+              </select>
+            </div>
+            <label className="col-span-2 sm:col-span-1 flex items-center gap-2 text-sm sm:mt-6" style={{ color: 'var(--text-secondary)' }}>
+              <input type="checkbox" checked={!!r.paid} onChange={(e) => update(r.key, 'paid', e.target.checked)} className="w-4 h-4" />
+              {r.type === 'income' ? t('finance.collected') : t('finance.paid')}
+            </label>
+            {money('base', t('finance.base'))}
+            {money('vat_amount', `${t('finance.vat')}${r.vat_rate !== '' && r.vat_rate != null ? ` (${r.vat_rate} %)` : ''}`)}
+            {money('irpf_amount', t('finance.irpf'))}
+            {money('total', t('finance.total'), true)}
+          </div>
+        </div>
+      )}
+    </article>
   );
 }
