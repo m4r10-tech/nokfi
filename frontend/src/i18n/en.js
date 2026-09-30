@@ -1,6 +1,15 @@
 export default {
   dev: {
     // Sesión 9 — API Bloque 2: panel de Desarrolladores
+    whErr_http: 'the server answered HTTP {status}',
+    whErr_timeout: 'no answer within 10 s',
+    whErr_blocked: 'the URL points to a private network',
+    whErr_dns: 'that domain does not exist',
+    whErr_refused: 'the server refused the connection',
+    whErr_tls: 'invalid https certificate',
+    whErr_disabled: 'the webhook is disabled',
+    whErr_expired: 'the content was already deleted (24 h)',
+    whErr_other: 'connection error ({code})',
     step1: 'Create a key named after your client or workflow. If you don’t want to use quota yet, start with a test key.',
     step2: 'Try a call in the Playground and copy the code for curl, JavaScript, Python or n8n.',
     step2Cta: 'Open Playground',
@@ -890,7 +899,7 @@ export default {
     spec: 'Full specification:', createKey: 'Create a key',
     ep_invoices: 'Extract invoices with validation',
     invoicesTitle: 'Invoices: from PDF to validated JSON',
-    invoicesText: 'Send up to 5 invoices per request (PDF, JPG, PNG or WebP in base64, or text you already extracted) and always get the same JSON back. Each request uses 1 analysis from your quota. We store neither the file nor the data.',
+    invoicesText: 'Send up to 5 invoices per request (PDF, JPG, PNG or WebP in base64, or text you already extracted) and always get the same JSON back. Each request uses 1 analysis from your quota. We store neither the file nor the data (in async mode, the result is kept for 24 h so you can collect it).',
     invoicesChecks: 'Nokfi checks every invoice itself, without trusting the AI: base + VAT − withholding must match the total, the NIF/CIF/NIE check digit, a valid, non-future date and a usual VAT rate. Anything that doesn’t add up comes back in warnings. Scanned PDFs come back in errors (pdf_scanned): send them as images.',
     mcpTitle: 'MCP server for AI agents',
     mcpText: 'Connect Nokfi as a tool for Claude, ChatGPT, Cursor or n8n’s AI Agent. It uses the same API key, the same quota and the same rules as the API.',

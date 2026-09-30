@@ -1,6 +1,15 @@
 export default {
   dev: {
     // Sesión 9 — API Bloque 2: panel de Desarrolladores
+    whErr_http: 'le serveur a répondu HTTP {status}',
+    whErr_timeout: 'pas de réponse en 10 s',
+    whErr_blocked: 'l’URL pointe vers un réseau privé',
+    whErr_dns: 'ce domaine n’existe pas',
+    whErr_refused: 'le serveur a refusé la connexion',
+    whErr_tls: 'certificat https non valide',
+    whErr_disabled: 'le webhook est désactivé',
+    whErr_expired: 'le contenu a déjà été supprimé (24 h)',
+    whErr_other: 'erreur de connexion ({code})',
     step1: 'Créez une clé au nom de votre client ou de votre flux. Pour ne pas encore utiliser de quota, commencez par une clé de test.',
     step2: 'Essayez un appel dans le Playground et copiez le code pour curl, JavaScript, Python ou n8n.',
     step2Cta: 'Ouvrir le Playground',
@@ -889,7 +898,7 @@ export default {
     spec: 'Spécification complète :', createKey: 'Créer une clé',
     ep_invoices: 'Extraire des factures avec validations',
     invoicesTitle: 'Factures : du PDF au JSON validé',
-    invoicesText: 'Envoyez jusqu’à 5 factures par requête (PDF, JPG, PNG ou WebP en base64, ou le texte déjà extrait) et recevez toujours le même JSON. Chaque requête consomme 1 analyse de votre quota. Nous ne conservons ni le fichier ni les données.',
+    invoicesText: 'Envoyez jusqu’à 5 factures par requête (PDF, JPG, PNG ou WebP en base64, ou le texte déjà extrait) et recevez toujours le même JSON. Chaque requête consomme 1 analyse de votre quota. Nous ne conservons ni le fichier ni les données (en mode asynchrone, le résultat est gardé 24 h pour que vous le récupériez).',
     invoicesChecks: 'Nokfi vérifie lui-même chaque facture, sans se fier à l’IA : base + TVA − retenue égale au total, clé de contrôle du NIF/CIF/NIE espagnol, date valide et non future, taux de TVA habituel. Ce qui ne colle pas arrive dans warnings. Les PDF scannés reviennent dans errors (pdf_scanned) : envoyez-les en image.',
     mcpTitle: 'Serveur MCP pour agents IA',
     mcpText: 'Connectez Nokfi comme outil de Claude, ChatGPT, Cursor ou de l’AI Agent de n8n. Même clé d’API, même quota et mêmes règles que l’API.',

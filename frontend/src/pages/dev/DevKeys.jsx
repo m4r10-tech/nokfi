@@ -10,6 +10,7 @@ import ErrorState from '../../components/ErrorState';
 import Skeleton from '../../components/Skeleton';
 import { Section, ErrorBox, Badge, Segmented } from '../../components/ui';
 import DevLocked from './DevLocked';
+import ConfirmModal from '../../components/dev/ConfirmModal';
 
 /**
  * Sesión 7 — Desarrolladores › Claves (antes en Configuración). La clave se
@@ -28,6 +29,7 @@ export default function DevKeys() {
   const [creating, setCreating] = useState(false);
   const [created, setCreated] = useState(null);
   const [error, setError] = useState(null);
+  const [revoking, setRevoking] = useState(null);
 
   const load = useCallback(async () => {
     setFailure(null);
@@ -44,9 +46,9 @@ export default function DevKeys() {
     if (res.ok) { setCreated(res.data.key); setName(''); setClient(''); load(); }
     else setError(apiErrorMessage(t, res));
   };
-  const revoke = async (k) => {
-    if (!window.confirm(t('config.api.confirmRevoke'))) return;
-    const res = await keysApi.revoke(k.id);
+  const revoke = async () => {
+    const res = await keysApi.revoke(revoking.id);
+    setRevoking(null);
     if (res.ok) { toast.success(t('config.api.revoked')); load(); } else toast.error(apiErrorMessage(t, res));
   };
   const copy = async () => { try { await navigator.clipboard.writeText(created); toast.success(t('common.copied')); } catch { /* sin portapapeles */ } };
@@ -74,7 +76,7 @@ export default function DevKeys() {
           <Section title={t('dev.newKey')}>
             <form onSubmit={create} className="flex flex-col gap-3">
               {data.available && (
-                <div className="flex flex-col gap-1.5">
+                <div className="flex flex-col items-start gap-1.5">
                   <Segmented value={mode} onChange={setMode} label={t('dev.modeLabel')}
                     options={[{ value: 'live', label: t('dev.modeLive') }, { value: 'test', label: t('dev.modeTest') }]} />
                   <p className="text-xs" style={{ color: 'var(--text-muted)' }}>{mode === 'live' ? t('dev.modeLiveHint') : t('dev.modeTestHint')}</p>
@@ -103,7 +105,7 @@ export default function DevKeys() {
                     </div>
                     {k.mode === 'test' && <Badge tone="accent">{t('dev.testBadge')}</Badge>}
                     <Badge tone={k.calls_today ? 'accent' : 'muted'}>{t('dev.callsTodayKey', { n: k.calls_today || 0 })}</Badge>
-                    <button onClick={() => revoke(k)} className="btn btn-ghost btn-sm !px-2" aria-label={t('config.api.revoke')} title={t('config.api.revoke')}><Trash2 size={14} /></button>
+                    <button onClick={() => setRevoking(k)} className="btn btn-ghost btn-sm !px-2" aria-label={t('config.api.revoke')} title={t('config.api.revoke')}><Trash2 size={14} /></button>
                   </li>
                 ))}
               </ul>
@@ -111,6 +113,7 @@ export default function DevKeys() {
           )}
         </>
       )}
+      {revoking && <ConfirmModal title={t('config.api.revoke')} text={t('config.api.confirmRevoke')} cta={t('config.api.revoke')} danger onConfirm={revoke} onClose={() => setRevoking(null)} />}
     </div>
   );
 }

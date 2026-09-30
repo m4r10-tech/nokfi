@@ -1,6 +1,15 @@
 export default {
   dev: {
     // Sesión 9 — API Bloque 2: panel de Desarrolladores
+    whErr_http: 'el servidor respondió HTTP {status}',
+    whErr_timeout: 'sin respuesta en 10 s',
+    whErr_blocked: 'la URL apunta a una red privada',
+    whErr_dns: 'no existe ese dominio',
+    whErr_refused: 'el servidor rechazó la conexión',
+    whErr_tls: 'certificado https no válido',
+    whErr_disabled: 'el webhook está desactivado',
+    whErr_expired: 'el contenido ya se borró (24 h)',
+    whErr_other: 'error de conexión ({code})',
     step1: 'Crea una clave con el nombre de tu cliente o de tu flujo. Si aún no quieres gastar cuota, empieza con una de prueba.',
     step2: 'Prueba una llamada en el Playground y copia el código para curl, JavaScript, Python o n8n.',
     step2Cta: 'Abrir Playground',
@@ -893,7 +902,7 @@ export default {
     spec: 'Especificación completa:', createKey: 'Crear una clave',
     ep_invoices: 'Extraer facturas con validaciones',
     invoicesTitle: 'Facturas: del PDF al JSON validado',
-    invoicesText: 'Envía hasta 5 facturas por petición (PDF, JPG, PNG o WebP en base64, o el texto ya extraído) y recibe siempre el mismo JSON. Cada petición gasta 1 análisis de tu cuota. No guardamos ni el archivo ni los datos.',
+    invoicesText: 'Envía hasta 5 facturas por petición (PDF, JPG, PNG o WebP en base64, o el texto ya extraído) y recibe siempre el mismo JSON. Cada petición gasta 1 análisis de tu cuota. No guardamos el archivo ni los datos (en modo asíncrono, el resultado se guarda 24 h para que lo recojas).',
     invoicesChecks: 'Nokfi comprueba cada factura por su cuenta, sin fiarse de la IA: que base + IVA − retención cuadre con el total, el dígito de control del NIF/CIF/NIE, que la fecha sea válida y no futura y que el tipo de IVA sea habitual. Lo que no cuadra llega en warnings. Los PDF escaneados vuelven en errors (pdf_scanned): envíalos como imagen.',
     mcpTitle: 'Servidor MCP para agentes de IA',
     mcpText: 'Conecta Nokfi como herramienta de Claude, ChatGPT, Cursor o el AI Agent de n8n. Usa la misma clave de API, la misma cuota y las mismas reglas que la API.',

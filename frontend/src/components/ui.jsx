@@ -1,4 +1,5 @@
 import { useEffect, useRef } from 'react';
+import { createPortal } from 'react-dom';
 import { Link } from 'react-router-dom';
 import { X, AlertTriangle, ArrowRight } from 'lucide-react';
 import { useLang } from '../context/LangContext';
@@ -77,7 +78,9 @@ export function Modal({ title, onClose, children, footer, wide }) {
     if (!ref.current?.contains(document.activeElement)) ref.current?.focus();
     return () => { document.removeEventListener('keydown', onKey); document.body.style.overflow = prev; };
   }, [onClose]);
-  return (
+  // Portal a <body>: si el modal se pinta dentro de un contenedor animado
+  // (transform), `fixed` se posicionaría respecto a él y no cubriría el menú.
+  return createPortal(
     <div className="fixed inset-0 z-50 flex items-end sm:items-center justify-center sm:p-4 anim-fade" style={{ background: 'var(--overlay)' }}
       role="dialog" aria-modal="true" aria-label={title} onMouseDown={(e) => { if (e.target === e.currentTarget) onClose(); }}>
       <div ref={ref} tabIndex={-1} className={`w-full ${wide ? 'max-w-3xl' : 'max-w-lg'} rounded-t-2xl sm:rounded-2xl flex flex-col max-h-[92dvh] outline-none safe-bottom`}
@@ -89,7 +92,8 @@ export function Modal({ title, onClose, children, footer, wide }) {
         <div className="px-5 py-4 overflow-y-auto overscroll-contain">{children}</div>
         {footer && <div className="px-5 py-3 flex flex-col-reverse sm:flex-row sm:justify-end gap-2" style={{ borderTop: '1px solid var(--border)' }}>{footer}</div>}
       </div>
-    </div>
+    </div>,
+    document.body
   );
 }
 

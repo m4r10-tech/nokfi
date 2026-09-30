@@ -29,6 +29,17 @@ export function formatTime(d, lang) {
   return d.toLocaleTimeString(localeOf(lang), { hour: '2-digit', minute: '2-digit' });
 }
 
+/** Fecha corta para listas: hoy → "19:48"; este año → "29 sept 19:48"; otro año → con el año. */
+export function shortDateTime(s, lang) {
+  const d = parseDbDate(s);
+  if (!d) return '—';
+  const time = formatTime(d, lang);
+  const now = new Date();
+  if (d.toDateString() === now.toDateString()) return time;
+  const opts = { day: 'numeric', month: 'short', ...(d.getFullYear() !== now.getFullYear() ? { year: 'numeric' } : {}) };
+  return `${d.toLocaleDateString(localeOf(lang), opts)} ${time}`;
+}
+
 /** "hace 5 min", "hace 3 h", "ayer", "hace 4 días"… (Intl.RelativeTimeFormat) */
 export function relativeTime(s, lang) {
   const d = parseDbDate(s);

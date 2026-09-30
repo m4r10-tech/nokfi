@@ -1,6 +1,15 @@
 export default {
   dev: {
     // Sesión 9 — API Bloque 2: panel de Desarrolladores
+    whErr_http: 'serwer odpowiedział HTTP {status}',
+    whErr_timeout: 'brak odpowiedzi w ciągu 10 s',
+    whErr_blocked: 'URL wskazuje na sieć prywatną',
+    whErr_dns: 'taka domena nie istnieje',
+    whErr_refused: 'serwer odrzucił połączenie',
+    whErr_tls: 'nieprawidłowy certyfikat https',
+    whErr_disabled: 'webhook jest wyłączony',
+    whErr_expired: 'treść została już usunięta (24 h)',
+    whErr_other: 'błąd połączenia ({code})',
     step1: 'Utwórz klucz z nazwą klienta lub przepływu. Jeśli nie chcesz jeszcze zużywać limitu, zacznij od klucza testowego.',
     step2: 'Wypróbuj wywołanie w Playground i skopiuj kod dla curl, JavaScript, Python lub n8n.',
     step2Cta: 'Otwórz Playground',
@@ -896,7 +905,7 @@ export default {
     spec: 'Pełna specyfikacja:', createKey: 'Utwórz klucz',
     ep_invoices: 'Odczyt faktur z walidacją',
     invoicesTitle: 'Faktury: z PDF do zweryfikowanego JSON',
-    invoicesText: 'Wyślij do 5 faktur na żądanie (PDF, JPG, PNG lub WebP w base64 albo już wyodrębniony tekst) i zawsze otrzymasz ten sam JSON. Każde żądanie zużywa 1 analizę z limitu. Nie przechowujemy ani pliku, ani danych.',
+    invoicesText: 'Wyślij do 5 faktur na żądanie (PDF, JPG, PNG lub WebP w base64 albo już wyodrębniony tekst) i zawsze otrzymasz ten sam JSON. Każde żądanie zużywa 1 analizę z limitu. Nie przechowujemy ani pliku, ani danych (w trybie asynchronicznym wynik jest dostępny przez 24 h).',
     invoicesChecks: 'Nokfi sam sprawdza każdą fakturę, bez ufania AI: netto + VAT − potrącenie równe sumie, cyfra kontrolna hiszpańskiego NIF/CIF/NIE, poprawna i nieprzyszła data, typowa stawka VAT. To, co się nie zgadza, trafia do warnings. Zeskanowane PDF wracają w errors (pdf_scanned): wyślij je jako obraz.',
     mcpTitle: 'Serwer MCP dla agentów AI',
     mcpText: 'Podłącz Nokfi jako narzędzie w Claude, ChatGPT, Cursor lub AI Agent w n8n. Ten sam klucz API, ten sam limit i te same zasady co API.',

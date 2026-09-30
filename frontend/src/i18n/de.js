@@ -1,6 +1,15 @@
 export default {
   dev: {
     // Sesión 9 — API Bloque 2: panel de Desarrolladores
+    whErr_http: 'der Server antwortete mit HTTP {status}',
+    whErr_timeout: 'keine Antwort innerhalb von 10 s',
+    whErr_blocked: 'die URL zeigt auf ein privates Netz',
+    whErr_dns: 'diese Domain existiert nicht',
+    whErr_refused: 'der Server hat die Verbindung abgelehnt',
+    whErr_tls: 'ungültiges https-Zertifikat',
+    whErr_disabled: 'der Webhook ist deaktiviert',
+    whErr_expired: 'der Inhalt wurde bereits gelöscht (24 h)',
+    whErr_other: 'Verbindungsfehler ({code})',
     step1: 'Erstelle einen Schlüssel mit dem Namen deines Kunden oder Workflows. Wenn du noch kein Kontingent verbrauchen willst, beginne mit einem Testschlüssel.',
     step2: 'Probiere einen Aufruf im Playground aus und kopiere den Code für curl, JavaScript, Python oder n8n.',
     step2Cta: 'Playground öffnen',
@@ -889,7 +898,7 @@ export default {
     spec: 'Vollständige Spezifikation:', createKey: 'Schlüssel erstellen',
     ep_invoices: 'Rechnungen mit Prüfungen auslesen',
     invoicesTitle: 'Rechnungen: vom PDF zum geprüften JSON',
-    invoicesText: 'Sende bis zu 5 Rechnungen pro Anfrage (PDF, JPG, PNG oder WebP als Base64 oder bereits extrahierten Text) und erhalte immer dasselbe JSON. Jede Anfrage verbraucht 1 Analyse deines Kontingents. Wir speichern weder die Datei noch die Daten.',
+    invoicesText: 'Sende bis zu 5 Rechnungen pro Anfrage (PDF, JPG, PNG oder WebP als Base64 oder bereits extrahierten Text) und erhalte immer dasselbe JSON. Jede Anfrage verbraucht 1 Analyse deines Kontingents. Wir speichern weder die Datei noch die Daten (im asynchronen Modus bleibt das Ergebnis 24 h abrufbar).',
     invoicesChecks: 'Nokfi prüft jede Rechnung selbst, ohne der KI zu vertrauen: Netto + MwSt. − Einbehalt muss den Gesamtbetrag ergeben, Prüfziffer der spanischen NIF/CIF/NIE, gültiges und nicht zukünftiges Datum, üblicher MwSt.-Satz. Was nicht passt, kommt in warnings. Gescannte PDFs kommen in errors zurück (pdf_scanned): sende sie als Bild.',
     mcpTitle: 'MCP-Server für KI-Agenten',
     mcpText: 'Binde Nokfi als Tool in Claude, ChatGPT, Cursor oder den AI Agent von n8n ein. Gleicher API-Schlüssel, gleiches Kontingent und gleiche Regeln wie die API.',

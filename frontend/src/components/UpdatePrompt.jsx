@@ -10,12 +10,32 @@ import { useLang } from '../context/LangContext';
  * causa exacta de "el fix está desplegado pero sigo viendo el error".
  * Ahora (registerType 'prompt'): se comprueba cada hora y al volver a la
  * pestaña; si hay versión nueva, aparece este aviso con "Recargar".
+ *
+ * Sesión 9: "Recargar" activa el SW en espera de forma explícita
+ * (SKIP_WAITING al `registration.waiting`) y recarga al tomar el control.
+ * El camino del plugin no recargaba cuando el SW en espera lo había
+ * detectado una carga anterior: el aviso volvía y seguía el bundle viejo.
  */
 const CHECK_EVERY_MS = 60 * 60 * 1000;
 
+async function activateWaitingAndReload() {
+  let reloaded = false;
+  const reload = () => { if (!reloaded) { reloaded = true; window.location.reload(); } };
+  try {
+    const reg = await navigator.serviceWorker?.getRegistration();
+    if (reg?.waiting) {
+      navigator.serviceWorker.addEventListener('controllerchange', reload, { once: true });
+      reg.waiting.postMessage({ type: 'SKIP_WAITING' });
+      setTimeout(reload, 4000); // por si el cambio de control no llega a avisar
+      return;
+    }
+  } catch { /* sin SW: recarga normal */ }
+  reload();
+}
+
 export default function UpdatePrompt() {
   const { t } = useLang();
-  const { needRefresh: [needRefresh, setNeedRefresh], updateServiceWorker } = useRegisterSW({
+  const { needRefresh: [needRefresh, setNeedRefresh] } = useRegisterSW({
     onRegisteredSW(_url, registration) {
       if (!registration) return;
       setInterval(() => registration.update().catch(() => {}), CHECK_EVERY_MS);
@@ -31,7 +51,7 @@ export default function UpdatePrompt() {
       style={{ background: 'var(--surface-1)', border: '1px solid var(--border-strong)', boxShadow: 'var(--shadow-lg)' }}>
       <RefreshCw size={17} className="shrink-0" style={{ color: 'var(--accent-text)' }} />
       <p className="flex-1 text-sm" style={{ color: 'var(--text-primary)' }}>{t('update.available')}</p>
-      <button onClick={() => updateServiceWorker(true)} className="btn btn-primary btn-sm">{t('update.reload')}</button>
+      <button onClick={activateWaitingAndReload} className="btn btn-primary btn-sm">{t('update.reload')}</button>
       <button onClick={() => setNeedRefresh(false)} className="btn btn-ghost btn-sm !px-1.5" aria-label={t('common.close')}><X size={15} /></button>
     </div>
   );

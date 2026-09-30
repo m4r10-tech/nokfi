@@ -65,7 +65,7 @@ export default function DevPlayground() {
                 </optgroup>
               </select>
             </Field>
-            <div>
+            <div className="flex flex-col">
               <span className="field-label">{t('dev.modeLabel')}</span>
               <Segmented value={mode} onChange={(v) => { if (v === 'live' && !liveOk) return; setMode(v); }} label={t('dev.modeLabel')}
                 options={[{ value: 'test', label: t('dev.modeTest') }, { value: 'live', label: t('dev.modeLive') }]} />
@@ -97,7 +97,7 @@ export default function DevPlayground() {
           </span>
         }>
           {result.uses_quota && ok && <div className="mb-3"><Notice>{t('dev.pgUsedQuota')}</Notice></div>}
-          <CodeBlock text={JSON.stringify(result.body, null, 2)} maxHeight={480} label={t('dev.pgResponse')} />
+          <CodeBlock text={JSON.stringify(result.body, null, 2)} maxHeight={480} label={t('dev.pgResponse')} wrap />
         </Section>
       )}
 

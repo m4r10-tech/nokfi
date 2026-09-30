@@ -4,7 +4,7 @@ import { Loader2 } from 'lucide-react';
 import { devApi, keysApi } from '../../middleware/api';
 import { apiErrorMessage, isConnectivityError } from '../../middleware/errors';
 import { useLang } from '../../context/LangContext';
-import { formatDateTime } from '../../utils/dates';
+import { shortDateTime } from '../../utils/dates';
 import PageHeader from '../../components/PageHeader';
 import ErrorState from '../../components/ErrorState';
 import Skeleton from '../../components/Skeleton';
@@ -70,16 +70,16 @@ export default function DevLogs() {
           <>
             <ul className="flex flex-col -mx-2 text-sm">
               {calls.map((c, i) => (
-                <li key={c.id} className="grid grid-cols-[auto_1fr_auto] sm:grid-cols-[9.5rem_1fr_9rem_4.5rem] items-center gap-x-3 gap-y-0.5 px-2 py-2" style={{ borderTop: i ? '1px solid var(--border)' : 'none' }}>
-                  <Badge tone={c.status >= 400 ? 'negative' : 'positive'}>{c.status}</Badge>
-                  <div className="min-w-0 sm:order-2">
+                <li key={c.id} className="flex flex-wrap sm:flex-nowrap items-center gap-x-3 gap-y-0.5 px-2 py-2" style={{ borderTop: i ? '1px solid var(--border)' : 'none' }}>
+                  <span className="order-2 sm:order-1 w-full sm:w-28 shrink-0 text-xs tabular" style={{ color: 'var(--text-secondary)' }}>{shortDateTime(c.created_at, lang)}</span>
+                  <span className="order-1 sm:order-2 shrink-0"><Badge tone={c.status >= 400 ? 'negative' : 'positive'}>{c.status}</Badge></span>
+                  <div className="order-1 sm:order-3 flex-1 min-w-0">
                     <p className="truncate" style={{ color: 'var(--text-primary)' }}><code className="text-xs">{c.method} {c.path.replace('/api/v1', '') || '/'}</code>{c.error_code ? <span className="text-xs" style={{ color: 'var(--negative)' }}> · {c.error_code}</span> : null}</p>
                     <p className="text-xs truncate" style={{ color: 'var(--text-muted)' }}>
                       {c.key_id ? `${c.key_name || t('config.api.unnamed')} (${c.key_prefix}…)` : 'Playground'}{c.client ? ` · ${c.client}` : ''}{!c.livemode ? ` · ${t('dev.testBadge')}` : ''}
                     </p>
                   </div>
-                  <span className="text-xs tabular text-right sm:order-4" style={{ color: 'var(--text-muted)' }}>{c.ms} ms</span>
-                  <span className="text-xs col-span-3 sm:col-span-1 sm:order-1" style={{ color: 'var(--text-secondary)' }}>{formatDateTime(c.created_at, lang)}</span>
+                  <span className="order-1 sm:order-4 shrink-0 w-16 text-xs tabular text-right" style={{ color: 'var(--text-muted)' }}>{c.ms} ms</span>
                 </li>
               ))}
             </ul>

@@ -4,11 +4,12 @@ import { devApi } from '../../middleware/api';
 import { apiErrorMessage, isConnectivityError } from '../../middleware/errors';
 import { useLang } from '../../context/LangContext';
 import { useToast } from '../../context/ToastContext';
-import { formatDateTime, formatTime, parseDbDate } from '../../utils/dates';
+import { formatTime, parseDbDate, shortDateTime } from '../../utils/dates';
 import PageHeader from '../../components/PageHeader';
 import ErrorState from '../../components/ErrorState';
 import Skeleton from '../../components/Skeleton';
 import CodeBlock from '../../components/dev/CodeBlock';
+import ConfirmModal from '../../components/dev/ConfirmModal';
 import { Section, Badge, ErrorBox, Notice, Field } from '../../components/ui';
 
 const VERIFY = `// Node.js (Express): comprobar la firma de Nokfi
@@ -20,9 +21,9 @@ app.post('/nokfi', express.raw({ type: 'application/json' }), (req, res) => {
   const expected = crypto.createHmac('sha256', process.env.NOKFI_WEBHOOK_SECRET)
     .update(\`\${t}.\${req.body}\`).digest('hex');
   const fresh = Math.abs(Date.now() / 1000 - Number(t)) < 300;
-  if (!fresh || !v1 || !crypto.timingSafeEqual(Buffer.from(v1), Buffer.from(expected))) {
-    return res.status(400).end();
-  }
+  const ok = fresh && v1 && v1.length === expected.length
+    && crypto.timingSafeEqual(Buffer.from(v1), Buffer.from(expected));
+  if (!ok) return res.status(400).end();
   const event = JSON.parse(req.body);   // { id, type, created_at, livemode, data }
   // Guarda event.id: si llega dos veces (reintento), ignóralo.
   res.status(200).end();
@@ -53,7 +54,7 @@ export default function DevWebhooks() {
   }, []);
   useEffect(() => { load(); }, [load]);
 
-  const toggle = (ev) => setEvents(list => (list.includes(ev) ? list.filter(x => x !== ev) : [...list, ev]));
+  const toggle = (ev) => { setError(null); setEvents(list => (list.includes(ev) ? list.filter(x => x !== ev) : [...list, ev])); };
 
   const create = async (e) => {
     e.preventDefault();
@@ -86,7 +87,7 @@ export default function DevWebhooks() {
           <Section title={t('dev.whNew')}>
             <form onSubmit={create} className="flex flex-col gap-3">
               <Field label={t('dev.whUrl')} htmlFor="wh-url" hint={t('dev.whUrlHint')}>
-                <input id="wh-url" type="url" required value={url} onChange={(e) => setUrl(e.target.value)} placeholder="https://" className="input" maxLength={500} />
+                <input id="wh-url" type="url" required value={url} onChange={(e) => { setUrl(e.target.value); setError(null); }} placeholder="https://" className="input" maxLength={500} />
               </Field>
               <Field label={t('dev.whDescription')} htmlFor="wh-desc">
                 <input id="wh-desc" value={description} onChange={(e) => setDescription(e.target.value)} maxLength={120} className="input" />
@@ -94,7 +95,7 @@ export default function DevWebhooks() {
               <fieldset className="flex flex-col gap-2">
                 <legend className="field-label">{t('dev.whEvents')}</legend>
                 <label className="flex items-center gap-2 text-sm" style={{ color: 'var(--text-primary)' }}>
-                  <input type="checkbox" checked={all} onChange={(e) => setAll(e.target.checked)} /> {t('dev.whAllEvents')}
+                  <input type="checkbox" checked={all} onChange={(e) => { setAll(e.target.checked); setError(null); }} /> {t('dev.whAllEvents')}
                 </label>
                 {!all && (
                   <div className="flex flex-col gap-1.5 pl-6">
@@ -133,9 +134,21 @@ export default function DevWebhooks() {
   );
 }
 
+/** Error de entrega legible: http_500 → "El servidor respondió HTTP 500". */
+export function deliveryError(t, code) {
+  const c = String(code || '');
+  const m = c.match(/^http_(\d{3})$/);
+  if (m) return t('dev.whErr_http', { status: m[1] });
+  const map = { timeout: 'timeout', blocked_address: 'blocked', enotfound: 'dns', eai_again: 'dns', econnrefused: 'refused', econnreset: 'refused', endpoint_disabled: 'disabled', payload_expired: 'expired' };
+  if (map[c]) return t(`dev.whErr_${map[c]}`);
+  if (/cert|tls|ssl/i.test(c)) return t('dev.whErr_tls');
+  return t('dev.whErr_other', { code: c || '—' });
+}
+
 function Endpoint({ w, first, open, onToggle, onChange, t, lang, toast }) {
   const [busy, setBusy] = useState(null);
   const [secret, setSecret] = useState(null);
+  const [confirm, setConfirm] = useState(null); // 'rotate' | 'delete'
   const s = w.last_7_days;
 
   const act = async (name, fn) => { setBusy(name); const r = await fn(); setBusy(null); return r; };
@@ -143,7 +156,7 @@ function Endpoint({ w, first, open, onToggle, onChange, t, lang, toast }) {
     const r = await act('test', () => devApi.testWebhook(w.id));
     if (!r.ok) return toast.error(apiErrorMessage(t, r));
     if (r.data.ok) toast.success(t('dev.whTestOk', { status: r.data.status, ms: r.data.ms }));
-    else toast.error(t('dev.whTestFail', { error: r.data.error }));
+    else toast.error(t('dev.whTestFail', { error: deliveryError(t, r.data.error) }));
     onChange();
   };
   const reveal = async () => {
@@ -152,8 +165,8 @@ function Endpoint({ w, first, open, onToggle, onChange, t, lang, toast }) {
     if (r.ok) setSecret(r.data.secret); else toast.error(apiErrorMessage(t, r));
   };
   const rotate = async () => {
-    if (!window.confirm(t('dev.whRotateConfirm'))) return;
     const r = await act('rotate', () => devApi.rotateSecret(w.id));
+    setConfirm(null);
     if (r.ok) { setSecret(r.data.secret); toast.success(t('dev.whRotated')); } else toast.error(apiErrorMessage(t, r));
   };
   const setEnabled = async () => {
@@ -161,8 +174,8 @@ function Endpoint({ w, first, open, onToggle, onChange, t, lang, toast }) {
     if (r.ok) onChange(); else toast.error(apiErrorMessage(t, r));
   };
   const remove = async () => {
-    if (!window.confirm(t('dev.whDeleteConfirm'))) return;
     const r = await act('delete', () => devApi.deleteWebhook(w.id));
+    setConfirm(null);
     if (r.ok) { toast.success(t('dev.whDeleted')); onChange(); } else toast.error(apiErrorMessage(t, r));
   };
 
@@ -187,19 +200,21 @@ function Endpoint({ w, first, open, onToggle, onChange, t, lang, toast }) {
       </p>
       <div className="flex flex-wrap gap-1.5">
         <button onClick={sendTest} disabled={!!busy || !w.enabled} className="btn btn-secondary btn-sm">{spin('test', Send)} {t('dev.whTest')}</button>
-        <button onClick={onToggle} className="btn btn-ghost btn-sm">{open ? <ChevronUp size={14} /> : <ChevronDown size={14} />} {t('dev.whDeliveries')}</button>
+        <button onClick={() => { onToggle(); if (!open) onChange(); }} className="btn btn-ghost btn-sm">{open ? <ChevronUp size={14} /> : <ChevronDown size={14} />} {t('dev.whDeliveries')}</button>
         <button onClick={reveal} disabled={!!busy} className="btn btn-ghost btn-sm">{spin('secret', Eye)} {secret ? t('dev.whHideSecret') : t('dev.whShowSecret')}</button>
-        <button onClick={rotate} disabled={!!busy} className="btn btn-ghost btn-sm">{spin('rotate', RefreshCw)} {t('dev.whRotate')}</button>
+        <button onClick={() => setConfirm('rotate')} disabled={!!busy} className="btn btn-ghost btn-sm">{spin('rotate', RefreshCw)} {t('dev.whRotate')}</button>
         <button onClick={setEnabled} disabled={!!busy} className="btn btn-ghost btn-sm">{spin('enable', Power)} {w.enabled ? t('dev.whDisable') : t('dev.whEnable')}</button>
-        <button onClick={remove} disabled={!!busy} className="btn btn-ghost btn-sm !px-2" aria-label={t('dev.whDelete')} title={t('dev.whDelete')}>{spin('delete', Trash2)}</button>
+        <button onClick={() => setConfirm('delete')} disabled={!!busy} className="btn btn-ghost btn-sm !px-2" aria-label={t('dev.whDelete')} title={t('dev.whDelete')}>{spin('delete', Trash2)}</button>
       </div>
       {secret && <CodeBlock text={secret} label={t('dev.whSecret')} />}
-      {open && <Deliveries endpointId={w.id} t={t} lang={lang} toast={toast} />}
+      {open && <Deliveries endpointId={w.id} t={t} lang={lang} toast={toast} onChange={onChange} />}
+      {confirm === 'rotate' && <ConfirmModal title={t('dev.whRotate')} text={t('dev.whRotateConfirm')} cta={t('dev.whRotate')} busy={busy === 'rotate'} onConfirm={rotate} onClose={() => setConfirm(null)} />}
+      {confirm === 'delete' && <ConfirmModal title={t('dev.whDelete')} text={t('dev.whDeleteConfirm')} cta={t('dev.whDelete')} danger busy={busy === 'delete'} onConfirm={remove} onClose={() => setConfirm(null)} />}
     </li>
   );
 }
 
-function Deliveries({ endpointId, t, lang, toast }) {
+function Deliveries({ endpointId, t, lang, toast, onChange }) {
   const [list, setList] = useState(null);
   const [busy, setBusy] = useState(null);
   const load = useCallback(async () => {
@@ -213,8 +228,8 @@ function Deliveries({ endpointId, t, lang, toast }) {
     const r = await devApi.resend(d.id);
     setBusy(null);
     if (!r.ok) return toast.error(apiErrorMessage(t, r));
-    if (r.data.ok) toast.success(t('dev.whTestOk', { status: r.data.status, ms: r.data.ms })); else toast.error(t('dev.whTestFail', { error: r.data.error }));
-    load();
+    if (r.data.ok) toast.success(t('dev.whTestOk', { status: r.data.status, ms: r.data.ms })); else toast.error(t('dev.whTestFail', { error: deliveryError(t, r.data.error) }));
+    load(); onChange();
   };
 
   if (!list) return <Skeleton className="h-16" />;
@@ -231,9 +246,9 @@ function Deliveries({ endpointId, t, lang, toast }) {
             {d.status === 'failed' && <Badge tone="negative">{t('dev.whFailed')}</Badge>}
             {!d.livemode && <Badge tone="accent">{t('dev.testBadge')}</Badge>}
             <span style={{ color: 'var(--text-muted)' }}>
-              {d.last_status ? `HTTP ${d.last_status}` : d.last_error || ''}{d.last_ms != null ? ` · ${d.last_ms} ms` : ''} · {t('dev.whAttempts', { n: d.attempts })}
+              {d.status === 'delivered' ? `HTTP ${d.last_status}` : d.last_error ? deliveryError(t, d.last_error) : ''}{d.last_ms != null ? ` · ${d.last_ms} ms` : ''} · {t('dev.whAttempts', { n: d.attempts })}
             </span>
-            <span className="flex-1 text-right" style={{ color: 'var(--text-muted)' }}>{formatDateTime(d.created_at, lang)}</span>
+            <span className="flex-1 text-right tabular" style={{ color: 'var(--text-muted)' }}>{shortDateTime(d.created_at, lang)}</span>
             {d.resendable && d.status !== 'pending' && (
               <button onClick={() => resend(d)} disabled={busy === d.id} className="btn btn-ghost btn-sm !h-7">{busy === d.id ? <Loader2 size={13} className="animate-spin" /> : <RotateCw size={13} />} {t('dev.whResend')}</button>
             )}

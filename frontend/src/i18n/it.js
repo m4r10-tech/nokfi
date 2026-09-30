@@ -1,6 +1,15 @@
 export default {
   dev: {
     // Sesión 9 — API Bloque 2: panel de Desarrolladores
+    whErr_http: 'il server ha risposto HTTP {status}',
+    whErr_timeout: 'nessuna risposta entro 10 s',
+    whErr_blocked: 'l’URL punta a una rete privata',
+    whErr_dns: 'quel dominio non esiste',
+    whErr_refused: 'il server ha rifiutato la connessione',
+    whErr_tls: 'certificato https non valido',
+    whErr_disabled: 'il webhook è disattivato',
+    whErr_expired: 'il contenuto è già stato cancellato (24 h)',
+    whErr_other: 'errore di connessione ({code})',
     step1: 'Crea una chiave con il nome del tuo cliente o del tuo flusso. Se non vuoi ancora usare quota, inizia con una chiave di prova.',
     step2: 'Prova una chiamata nel Playground e copia il codice per curl, JavaScript, Python o n8n.',
     step2Cta: 'Apri il Playground',
@@ -889,7 +898,7 @@ export default {
     spec: 'Specifica completa:', createKey: 'Crea una chiave',
     ep_invoices: 'Estrarre fatture con verifiche',
     invoicesTitle: 'Fatture: dal PDF al JSON verificato',
-    invoicesText: 'Invia fino a 5 fatture per richiesta (PDF, JPG, PNG o WebP in base64, oppure il testo già estratto) e ricevi sempre lo stesso JSON. Ogni richiesta consuma 1 analisi della quota. Non conserviamo né il file né i dati.',
+    invoicesText: 'Invia fino a 5 fatture per richiesta (PDF, JPG, PNG o WebP in base64, oppure il testo già estratto) e ricevi sempre lo stesso JSON. Ogni richiesta consuma 1 analisi della quota. Non conserviamo né il file né i dati (in modalità asincrona il risultato resta 24 h perché tu lo recuperi).',
     invoicesChecks: 'Nokfi controlla da sé ogni fattura, senza fidarsi dell’IA: imponibile + IVA − ritenuta uguale al totale, cifra di controllo del NIF/CIF/NIE spagnolo, data valida e non futura, aliquota IVA abituale. Ciò che non torna arriva in warnings. I PDF scansionati tornano in errors (pdf_scanned): inviali come immagine.',
     mcpTitle: 'Server MCP per agenti IA',
     mcpText: 'Collega Nokfi come strumento di Claude, ChatGPT, Cursor o dell’AI Agent di n8n. Stessa chiave API, stessa quota e stesse regole dell’API.',

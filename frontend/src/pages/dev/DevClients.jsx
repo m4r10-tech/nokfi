@@ -5,7 +5,7 @@ import { devApi, keysApi } from '../../middleware/api';
 import { apiErrorMessage, isConnectivityError } from '../../middleware/errors';
 import { useLang } from '../../context/LangContext';
 import { useToast } from '../../context/ToastContext';
-import { formatDateTime } from '../../utils/dates';
+import { shortDateTime } from '../../utils/dates';
 import { num } from '../../utils/money';
 import PageHeader from '../../components/PageHeader';
 import ErrorState from '../../components/ErrorState';
@@ -54,7 +54,7 @@ export default function DevClients() {
             <Kpi label={t('dev.callsToday')} value={num(g.calls_today, lang, 0)} hint={g.errors_today ? t('dev.errorsToday', { n: g.errors_today }) : undefined} tone={g.errors_today ? 'var(--warning)' : undefined} />
             <Kpi label={t('dev.calls30d')} value={num(g.calls_30d, lang, 0)} hint={g.errors_30d ? t('dev.errorsToday', { n: g.errors_30d }) : undefined} />
             <Kpi label={t('dev.clientKeys')} value={num(g.keys.filter(k => !k.revoked_at).length, lang, 0)} />
-            <Kpi label={t('dev.lastCall')} value={g.last_call_at ? formatDateTime(g.last_call_at, lang) : '—'} />
+            <Kpi label={t('dev.lastCall')} value={g.last_call_at ? shortDateTime(g.last_call_at, lang) : '—'} />
           </div>
           <ul className="flex flex-col -mx-2">
             {g.keys.map((k, i) => (
