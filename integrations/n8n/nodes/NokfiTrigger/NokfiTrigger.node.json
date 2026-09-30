@@ -1,0 +1,10 @@
+{
+	"node": "n8n-nodes-nokfi.nokfiTrigger",
+	"nodeVersion": "1.0",
+	"codexVersion": "1.0",
+	"categories": ["Finance & Accounting", "Analytics"],
+	"resources": {
+		"credentialDocumentation": [{ "url": "https://nokfi.app/api-docs" }],
+		"primaryDocumentation": [{ "url": "https://github.com/m4r10-tech/n8n-nodes-nokfi#readme" }]
+	}
+}

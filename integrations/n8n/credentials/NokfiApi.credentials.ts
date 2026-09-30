@@ -23,9 +23,9 @@ export class NokfiApi implements ICredentialType {
 			typeOptions: { password: true },
 			default: '',
 			required: true,
-			placeholder: 'nk_live_…',
+			placeholder: 'nk_live_… or nk_test_…',
 			description:
-				'Create it in Nokfi → Developers → Keys. Available on the Pro and Max plans. Tip: name each key after the client or workflow to see its usage separately.',
+				'Create it in Nokfi → Developers → Keys. Live keys (nk_live_) on the Pro and Max plans; test keys (nk_test_) on every plan return sample data and use no quota. Tip: name each key after the client or workflow to see its usage separately.',
 		},
 		{
 			displayName: 'Base URL',

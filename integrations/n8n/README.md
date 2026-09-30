@@ -4,6 +4,8 @@ This is an n8n community node for [Nokfi](https://nokfi.app): the AI for small-b
 
 - **Extract invoices** from PDFs, images or text and get the same JSON every time, with **validation done by Nokfi, not by the AI**: totals (base + VAT − withholding = total), Spanish NIF/CIF/NIE check digits, dates and usual VAT rates.
 - **Run financial analyses** (sales, cash, stock, purchases, profit, two-period comparison, document folders) and get a structured report: summary, key figures, priorities and an action plan.
+- **Spanish tax tools without AI** (no quota): validate NIF/NIE/CIF, VAT with the equivalence surcharge, IRPF withholding, Modelo 130 and the tax calendar.
+- **Nokfi Trigger**: start a workflow when an analysis or a background job finishes, when your quota reaches 80 % or 100 %, or 7 days and 1 day before each tax deadline. Signed webhooks, registered automatically.
 - **Check your usage** (plan, daily quota, analyses used today).
 
 Data is processed by AI providers that do not train on it. Invoices sent through the API are not stored.
@@ -16,9 +18,11 @@ Follow the [installation guide](https://docs.n8n.io/integrations/community-nodes
 
 ## Credentials
 
-1. Sign in to Nokfi and open **Developers → Keys** (Pro and Max plans).
+1. Sign in to Nokfi and open **Developers → Keys**.
 2. Create a key. Name it after the client or workflow: Nokfi shows the usage of each key separately.
-3. In n8n, create a **Nokfi API** credential and paste the key (`nk_live_…`). Leave the base URL as `https://nokfi.app`.
+   - **Live keys** (`nk_live_…`, Pro and Max plans) work with your data and use your quota.
+   - **Test keys** (`nk_test_…`, every plan) validate input the same way and return realistic sample data, without using quota. Build and test with them, then switch.
+3. In n8n, create a **Nokfi API** credential and paste the key. Leave the base URL as `https://nokfi.app`.
 
 The credential test calls `GET /api/v1/usage`.
 
@@ -29,9 +33,27 @@ The credential test calls `GET /api/v1/usage`.
 | Invoice | Extract | Reads up to 5 documents per request (PDF, JPG, PNG, WebP or text). Use `*` as the binary field to send every attachment of the item. Outputs one item per invoice (or one item with all of them). |
 | Analysis | Create | Runs an analysis. For spreadsheets, "All Input Items as Rows" sends the whole input (e.g. a Google Sheets node) as one table. |
 | Analysis | Get / Get Many | Reads reports you already have. |
+| Tax | Validate Tax ID | NIF, NIE or CIF check digit, entity type and EU VAT number. |
+| Tax | Calculate VAT | VAT with or without VAT included, plus the equivalence surcharge. |
+| Tax | Calculate Withholding | IRPF withholding (professional 15 %, new professional 7 %, rental 19 %…) and the invoice total. |
+| Tax | Estimate Modelo 130 | From your year-to-date figures or from your Nokfi ledger. |
+| Tax | Get Fiscal Calendar | Upcoming deadlines (303, 130, 111, 115, 390…) with days left, one item each. |
 | Usage | Get | Plan, daily quota and analyses used today. |
 
-Every invoice request and every analysis uses **1 analysis from your daily quota** (the same quota as the web app). Maximum 30 requests per minute per key.
+Every invoice request and every analysis uses **1 analysis from your daily quota** (the same quota as the web app); the tax tools use none. Maximum 30 requests per minute per key. Requests carry an `Idempotency-Key`, so n8n's *Retry On Fail* never charges twice.
+
+**Run in Background**: Invoice › Extract and Analysis › Create can return a job right away (`?async=true`). Pair it with the Nokfi Trigger (*Job Completed*) to get the result.
+
+### Nokfi Trigger
+
+Choose the events and activate the workflow: the trigger registers its webhook in Nokfi (you'll see it in **Developers → Webhooks**) and deletes it when you deactivate the workflow. Every request is checked against the `Nokfi-Signature` HMAC; unsigned or old requests get a 401. Your n8n instance must be reachable on a public https URL.
+
+| Event | When |
+|---|---|
+| Analysis Completed | A report finished (API or web app). Includes the report. |
+| Job Completed / Job Failed | A background job finished. Includes the result or the error. |
+| Quota Threshold | You reached 80 % or 100 % of today's quota. |
+| Fiscal Deadline | A tax deadline is 7 days or 1 day away (according to your legal form). |
 
 ### Invoice output
 
@@ -52,6 +74,8 @@ Documents that cannot be read come out as items with `is_invoice: false` and an 
 
 - **Invoices from email to a spreadsheet**: Gmail Trigger (download attachments) → Nokfi (Invoice › Extract, binary field `*`) → IF `checks.totals_ok` → Google Sheets (append row).
 - **Weekly sales report**: Schedule Trigger → Google Sheets (read) → Nokfi (Analysis › Create, Sales, All Input Items as Rows) → Send Email with `{{ $json.report.summary }}`.
+- **Tax deadline reminder to Slack**: Nokfi Trigger (Fiscal Deadline) → Slack with `{{ $json.data.models.join(', ') }} due on {{ $json.data.date }}`.
+- **Background invoice batch**: Nokfi (Invoice › Extract, Run in Background) in one workflow, Nokfi Trigger (Job Completed) → Google Sheets in another.
 - **AI Agent tool**: the node can be used as a tool by n8n's AI Agent.
 
 ## Resources

@@ -1,7 +1,7 @@
 {
 	"name": "n8n-nodes-nokfi",
 	"version": "0.1.2",
-	"description": "n8n node for Nokfi: extract and validate invoices (PDF, image or text) and run financial analyses for small businesses.",
+	"description": "n8n nodes for Nokfi: extract and validate invoices, run financial analyses, Spanish tax tools (NIF, VAT, IRPF, Modelo 130, tax calendar) and a trigger for Nokfi events.",
 	"license": "MIT",
 	"homepage": "https://nokfi.app/api-docs",
 	"keywords": [
@@ -11,7 +11,10 @@
 		"invoice-extraction",
 		"finance",
 		"accounting",
-		"spain"
+		"spain",
+		"tax",
+		"vat",
+		"webhook"
 	],
 	"author": {
 		"name": "Nokfi",
@@ -41,7 +44,8 @@
 			"dist/credentials/NokfiApi.credentials.js"
 		],
 		"nodes": [
-			"dist/nodes/Nokfi/Nokfi.node.js"
+			"dist/nodes/Nokfi/Nokfi.node.js",
+			"dist/nodes/NokfiTrigger/NokfiTrigger.node.js"
 		]
 	},
 	"devDependencies": {
