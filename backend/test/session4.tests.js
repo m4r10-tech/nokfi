@@ -500,6 +500,50 @@ module.exports = async function session4Tests({ post, put, get, call, check, che
   await checkAsync('F4: DELETE /api/keys/:id → revocada', call('DELETE', `/api/keys/${apiKeyId}`, { auth: tok }), r => r.status === 200);
   await checkAsync('F4: clave revocada → 401 api_key_revoked', get('/api/v1/usage', apiKey), r => r.status === 401 && r.data.error === 'api_key_revoked');
 
+  // ── Sesión 8: informes y asistente con los datos reales del libro ──
+  {
+    const { financeContext, normalizeLink } = require('../services/ai/financeContext');
+    const P = require('../services/ai/prompts');
+    const fc = financeContext(lid, { today: '2026-04-10' });
+    check('S8: contexto del libro con impuestos, cobros, plazo y caja enlazados', () =>
+      fc.hasData && fc.text.includes('Por cobrar') && fc.text.includes('[enlace: cobros]') && fc.text.includes('[enlace: impuestos]')
+      && fc.text.includes('Próximo plazo fiscal') && fc.text.includes('Caja: saldo') && /\d\.\d{3},\d{2} €/.test(fc.text));
+    check('S8: contexto con tope de caracteres (por líneas completas)', () => financeContext(lid, { maxChars: 200 }).text.length <= 200);
+    check('S8: libro vacío → sin cifras inventadas', () => { const e = financeContext(999999); return !e.hasData && e.text.includes('vacío'); });
+    check('S8: enlaces solo a pantallas de Nokfi', () =>
+      normalizeLink('cobros') === '/app/finanzas/cobros' && normalizeLink('/app/finanzas/prevision') === '/app/finanzas/prevision'
+      && normalizeLink('https://evil.example') === '' && normalizeLink('/app/admin') === '');
+    const rep = P.normalizeReport({
+      summary: 's',
+      key_figures: [{ label: 'Nota de salud', value: '42/100' }, { label: 'Vencido', value: '2.420,00 €' }],
+      priorities: [{ title: 'Cobros', detail: 'd', severity: 'high', link: 'cobros' }],
+      action_plan: [{ title: 'B', due_in_days: 14, link: 'x' }, { title: 'C' }, { title: 'A', due_in_days: 2, link: 'impuestos' }]
+    }, { dropHealth: true });
+    check('S8: informe sin la nota repetida, con enlaces y plan ordenado por plazo', () =>
+      rep.key_figures.length === 1 && rep.priorities[0].link === '/app/finanzas/cobros'
+      && rep.action_plan.map(a => a.title).join() === 'A,B,C' && rep.action_plan[1].link === '' && rep.action_plan[0].link === '/app/finanzas/impuestos');
+    const q = P.buildQuestionnaire({ answers: { conciliacion: true, control_cobros: false }, health: { score: 42 }, finance: fc.text });
+    check('S8: el diagnóstico lleva el libro y prohíbe frases genéricas', () =>
+      q.text.includes('[enlace: cobros]') && q.text.includes('puede llevar a') && q.text.includes('no las propongas como tarea'));
+    const { createAnalysis } = require('../db/database');
+    const { createActionsForAnalysis, listActionsForAnalysis } = require('../db/actions');
+    const aid = createAnalysis({ license_id: lid, kind: 'cuestionario', title: 'S8', result_json: rep, meta: {}, prompt_chars: 1 });
+    createActionsForAnalysis(lid, aid, rep.action_plan);
+    check('S8: las tareas del plan guardan su enlace', () => listActionsForAnalysis(lid, aid)[0].link === '/app/finanzas/impuestos');
+    await checkAsync('S8: el panel trae el deudor vencido principal', get('/api/dashboard', tok),
+      r => r.status === 200 && 'top_overdue' in r.data.receivables);
+
+    const saved = { fetch: global.fetch, CP: process.env.CHAT_PROVIDERS, G: process.env.GROQ_API_KEY };
+    process.env.CHAT_PROVIDERS = 'groq'; process.env.GROQ_API_KEY = 'gsk_test';
+    let sys = '';
+    global.fetch = async (url, o) => { sys = JSON.parse(o.body).messages[0].content; return { ok: true, status: 200, json: async () => ({ choices: [{ message: { content: 'Te deben 2.420,00 €.\n/app/finanzas/cobros' } }] }) }; };
+    await checkAsync('S8: el asistente recibe las cifras del libro y las rutas válidas',
+      post('/api/chat', { messages: [{ role: 'user', content: '¿Quién me debe dinero?' }], lang: 'es' }, tok),
+      r => r.status === 200 && sys.includes('Datos reales del negocio') && sys.includes('Por cobrar') && sys.includes('cobros = /app/finanzas/cobros'));
+    global.fetch = saved.fetch;
+    for (const [k, v] of [['CHAT_PROVIDERS', saved.CP], ['GROQ_API_KEY', saved.G]]) { if (v === undefined) delete process.env[k]; else process.env[k] = v; }
+  }
+
   // ── Operaciones: salud, informe diario y registro de fallos ──
   await checkAsync('Ops: GET /api/health comprueba la BD → 200', get('/api/health'), r => r.status === 200 && r.data.status === 'ok');
   {

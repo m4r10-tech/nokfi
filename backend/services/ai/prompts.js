@@ -14,6 +14,8 @@
 
 'use strict';
 
+const { normalizeLink, LINK_KEYS } = require('./financeContext');
+
 const SUPPORTED_LANGS = ['es', 'en', 'fr', 'it', 'de', 'pl'];
 
 const LANG_DIRECTIVES = {
@@ -90,7 +92,8 @@ const REPORT_SCHEMA = {
         properties: {
           title: { type: 'STRING' },
           detail: { type: 'STRING' },
-          severity: { type: 'STRING', enum: ['high', 'medium', 'low'] }
+          severity: { type: 'STRING', enum: ['high', 'medium', 'low'] },
+          link: { type: 'STRING', enum: LINK_KEYS, description: 'Herramienta de Nokfi que lo resuelve (opcional).' }
         },
         required: ['title', 'detail', 'severity']
       }
@@ -103,7 +106,9 @@ const REPORT_SCHEMA = {
         properties: {
           title: { type: 'STRING' },
           detail: { type: 'STRING' },
-          timeframe: { type: 'STRING', description: 'Plazo corto, p.ej. "Esta semana".' }
+          timeframe: { type: 'STRING', description: 'Plazo corto, p.ej. "Esta semana".' },
+          due_in_days: { type: 'INTEGER', description: 'Días desde hoy para hacerlo (0 = hoy).' },
+          link: { type: 'STRING', enum: LINK_KEYS, description: 'Herramienta de Nokfi para hacerlo (opcional).' }
         },
         required: ['title']
       }
@@ -127,24 +132,37 @@ const arr = (v) => (Array.isArray(v) ? v : []);
 // "Número de filas", "Filas analizadas", "Rows"…: no es una cifra del negocio.
 const ROW_COUNT = /\b(n[úu]mero de |total de )?(filas|registros|rows|lignes|righe|zeilen|wiersz[ey]?)\b/i;
 
+// La nota de salud ya sale en el medidor: no se repite en las cifras clave.
+const HEALTH_FIGURE = /\b(nota|salud|health|score|sant[ée]|salute|punteggio|gesundheit|zdrowi|[áa]reas?\b)/i;
+const isHealthFigure = (k) => HEALTH_FIGURE.test(k.label) || /^\d{1,3}\s*\/\s*100$/.test(k.value);
+
+const dueDays = (v) => {
+  const n = Number(v);
+  return Number.isFinite(n) && n >= 0 ? Math.min(Math.round(n), 365) : null;
+};
+
 /** Valida y acota el JSON de la IA: nunca se confía en su forma. */
-function normalizeReport(raw) {
+function normalizeReport(raw, { dropHealth = false } = {}) {
   const r = raw && typeof raw === 'object' ? raw : {};
   const report = {
     summary: clean(r.summary, 1200),
     key_figures: arr(r.key_figures).slice(0, 8)
       .map(k => ({ label: clean(k?.label, 80), value: clean(k?.value, 60), note: clean(k?.note, 200) }))
-      .filter(k => k.label && k.value && !ROW_COUNT.test(k.label)),
+      .filter(k => k.label && k.value && !ROW_COUNT.test(k.label) && !(dropHealth && isHealthFigure(k))),
     strengths: arr(r.strengths).slice(0, 6).map(s => clean(s, 300)).filter(Boolean),
     priorities: arr(r.priorities).slice(0, 8)
       .map(p => ({
         title: clean(p?.title, 160),
         detail: clean(p?.detail, 700),
-        severity: ['high', 'medium', 'low'].includes(p?.severity) ? p.severity : 'medium'
+        severity: ['high', 'medium', 'low'].includes(p?.severity) ? p.severity : 'medium',
+        link: normalizeLink(p?.link)
       }))
       .filter(p => p.title),
     action_plan: arr(r.action_plan).slice(0, 10)
-      .map(a => ({ title: clean(a?.title, 160), detail: clean(a?.detail, 600), timeframe: clean(a?.timeframe, 60) }))
+      .map(a => ({
+        title: clean(a?.title, 160), detail: clean(a?.detail, 600), timeframe: clean(a?.timeframe, 60),
+        due_in_days: dueDays(a?.due_in_days), link: normalizeLink(a?.link)
+      }))
       .filter(a => a.title),
     glossary: arr(r.glossary).slice(0, 8)
       .map(g => ({ term: clean(g?.term, 60), definition: clean(g?.definition, 400) }))
@@ -152,6 +170,8 @@ function normalizeReport(raw) {
   };
   const order = { high: 0, medium: 1, low: 2 };
   report.priorities.sort((a, b) => order[a.severity] - order[b.severity]);
+  // Plan ordenado por plazo (los pasos sin plazo, al final y en su orden).
+  report.action_plan.sort((a, b) => (a.due_in_days ?? 999) - (b.due_in_days ?? 999));
   return report;
 }
 
@@ -181,26 +201,42 @@ const QUESTIONNAIRE_ITEMS = {
   alertas_automaticas: 'Alertas automáticas', kpi_ventas: 'KPIs de ventas', gestor_externo: 'Asesor o gestoría'
 };
 
-function buildQuestionnaire({ answers, health }) {
+function buildQuestionnaire({ answers, health, finance }) {
   const yes = [], no = [];
   for (const [id, name] of Object.entries(QUESTIONNAIRE_ITEMS)) {
     if (answers[id] === true) yes.push(name);
     else if (answers[id] === false) no.push(name);
   }
-  const text = `TAREA: diagnóstico financiero del negocio a partir de un cuestionario de sí/no sobre cómo se gestiona.
+  const text = `TAREA: diagnóstico financiero del negocio. Cruza el cuestionario (cómo dice que se gestiona) con los datos del libro de Nokfi (lo que de verdad está pasando) y di qué hacer primero.
 
-DATOS:
-Áreas que SÍ gestiona (${yes.length}):
+DATOS — Cuestionario:
+Áreas que SÍ gestiona (${yes.length}; son puntos fuertes, no las propongas como tarea):
 ${yes.map(i => '- ' + i).join('\n') || '- Ninguna'}
 
 Áreas que NO gestiona (${no.length}):
 ${no.map(i => '- ' + i).join('\n') || '- Ninguna'}
 
-Nota de salud financiera calculada por Nokfi con reglas fijas: ${health.score}/100.
+Nota de salud calculada por Nokfi con reglas fijas: ${health.score}/100. Ya se muestra en un medidor: no la pongas en key_figures ni la repitas en el resumen.
 
-Devuelve el informe: resumen del estado general, puntos fuertes, prioridades (las áreas no gestionadas más peligrosas primero, con gravedad), plan de acción de 30 días con pasos concretos (incluye automatizaciones útiles) y glosario de los términos financieros que uses. En key_figures pon la nota de salud y el nº de áreas gestionadas; no inventes cifras económicas.`;
+DATOS — Libro de Nokfi (calculados por Nokfi, fiables; copia las cifras y fechas tal cual):
+${finance || 'No disponibles.'}
+
+${REPORT_RULES}
+
+Devuelve el informe: resumen (lo más urgente y por qué, con su cifra), cifras clave SOLO del libro (por cobrar vencido, impuestos del trimestre, caja…; vacío si el libro está vacío), puntos fuertes, prioridades (lo que más dinero o riesgo supone primero, citando el cliente, el importe o el plazo cuando exista), plan de acción de 30 días y glosario de los términos financieros que uses.`;
   return { text, chars: text.length };
 }
+
+// Reglas de estilo comunes a todos los informes (sesión 8: fuera el "AI slop").
+const REPORT_RULES = `REGLAS DEL INFORME (obligatorias):
+- Habla de ESTE negocio con sus cifras, clientes y fechas. Prohibidas las frases que valdrían para cualquier empresa: "puede llevar a…", "es fundamental/importante/clave…", "decisiones poco informadas", "sorpresas desagradables", "problemas de liquidez" sin cifra, "mejorar la eficiencia". Si no tienes un dato concreto para un punto, sé breve o quítalo.
+- El resumen no repite recuentos ("gestiona 13 áreas y deja de lado 17"): dice en 2-3 frases qué es lo más urgente y por qué.
+- Nombra la empresa sin artículo delante ("Taller García", no "El Taller García") o di "tu negocio".
+- Cada prioridad y cada paso del plan lleva en link la herramienta de Nokfi que lo resuelve, si la hay: cobros (facturas por cobrar y reclamarlas), impuestos (303/130 y cuánto apartar), prevision (caja a 30/60/90 días y escenarios), calendario (plazos fiscales y avisos), libro (registrar facturas y gastos), fugas (suscripciones y gastos recurrentes), sector (comparar con su sector), calculadoras, excel (analizar hojas de cálculo), configuracion (datos de la empresa). No recomiendes crear sistemas, hojas ni herramientas externas para algo que Nokfi ya hace: di que use esa pantalla.
+- Coherencia: lo que es un punto fuerte no aparece como prioridad ni como paso del plan.
+- Gravedad: un plazo fiscal a menos de 30 días con algo por pagar o por preparar es "high". Si el IVA sale a compensar, no digas que hay que pagarlo.
+- Plan de acción: due_in_days = días desde hoy para hacerlo (0 = hoy) y timeframe = ese mismo plazo en palabras. Lo que depende de un plazo fiscal se hace antes de ese plazo. Ordénalo de más urgente a menos.
+- No repitas la misma cifra en varias partes del informe salvo que haga falta para explicar una prioridad.`;
 
 /* ── Excel (6 módulos) ── */
 const EXCEL_MODULES = {
@@ -257,6 +293,8 @@ ${filesBlock(files)}
 
 ${FIGURE_RULES}
 
+${REPORT_RULES}
+
 Devuelve el informe: resumen, cifras clave (de las CIFRAS EXACTAS), puntos fuertes, prioridades con gravedad (alertas y riesgos), plan de acción concreto y glosario.`;
   return { text, chars: text.length };
 }
@@ -285,6 +323,8 @@ ${filesBlock(periodB.files)}
 
 ${FIGURE_RULES}
 
+${REPORT_RULES}
+
 Devuelve el informe: resumen de qué ha cambiado de A a B, cifras clave con la variación (usa las calculadas), prioridades (qué empeora y por qué), plan de acción y glosario.`;
   return { text, chars: text.length };
 }
@@ -311,6 +351,8 @@ function buildFolder({ instruction, folderName, files, notes, fileCount }) {
 
 DATOS:
 ${body}
+
+${REPORT_RULES}
 
 Devuelve el informe: resumen que responda a la petición, cifras clave (totales, nº de documentos, importes destacados), prioridades/alertas, plan de acción y glosario.`;
   return { text, chars: text.length };

@@ -232,7 +232,11 @@ dashboard.get('/', requireLicense, (req, res) => {
     const dismissed = F.dismissedSet(id);
     const lk = leaks(entries, undefined, { dismissed });
     out.taxes = { year: tax.year, quarter: tax.quarter, due_date: tax.due_date, total_estimated: tax.total_estimated, reserved: tax.reserved, missing: tax.missing, vat_refund: tax.vat_refund };
-    out.receivables = { count: rec.pending.length, total: rec.total, overdue_total: rec.overdue_total, overdue_60: rec.overdue_60 };
+    const top = rec.pending.find(p => p.is_overdue);
+    out.receivables = {
+      count: rec.pending.length, total: rec.total, overdue_total: rec.overdue_total, overdue_60: rec.overdue_60,
+      top_overdue: top ? { party_name: top.party_name, total: top.total, days_overdue: top.days_overdue } : null
+    };
     out.leaks = { detected_this_month: lk.detected_this_month, recurring_monthly_total: lk.recurring_monthly_total, alerts: lk.increases.length + lk.duplicates.length };
     if (profile.cash_balance != null) {
       const fc = forecast({ entries, balance: profile.cash_balance, days: 90, threshold: profile.cash_alert_threshold || 0, legalForm: profile.legal_form, dismissed });

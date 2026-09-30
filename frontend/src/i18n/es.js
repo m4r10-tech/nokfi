@@ -495,6 +495,7 @@ export default {
   report: {
     summary: 'Resumen', keyFigures: 'Cifras clave', strengths: 'Puntos fuertes', priorities: 'Prioridades',
     actionPlan: 'Plan de acción', glossary: 'Glosario', progress: '{n} de {total} hechas',
+    goTo: 'Ir a {name}',
     severity_high: 'Alta', severity_medium: 'Media', severity_low: 'Baja',
     healthTitle: 'Salud financiera', healthScoreLabel: 'Nota de salud',
     healthExplain: 'Nota calculada por Nokfi con reglas fijas a partir de tus respuestas. No la inventa la IA.',
@@ -519,6 +520,8 @@ export default {
     empty: 'Hola. Pregúntame lo que quieras sobre las finanzas de tu negocio o sobre tus informes.',
     suggestions: ['¿Cómo calculo mi punto de equilibrio?', '¿Qué gastos fijos debería revisar primero?', '¿Cuánto debería tener en el fondo de reserva?'],
     suggestionsReport: ['Explícame la prioridad más grave con un ejemplo', '¿Por dónde empiezo el plan de acción?', '¿Qué significa este término del glosario?'],
+    sugDebtor: '¿Cómo le reclamo a {name} los {amount} que me debe?', sugVatRefund: 'Me sale el IVA a compensar: ¿qué significa y qué hago?', sugTaxes: '¿Cuánto tengo que apartar para Hacienda este trimestre?',
+    sugDeadline: '¿Qué tengo que presentar antes del {date}?', sugCashLow: '¿Por qué baja mi caja el {date} y qué puedo hacer?', sugCash: '¿Cómo estará mi caja dentro de 90 días?', sugReceivables: '¿Quién me debe dinero y cuánto?',
     placeholder: 'Escribe tu pregunta…', send: 'Enviar',
     privacyNote: 'Asistente con IA · tus mensajes no se usan para entrenar modelos ni se guardan · no incluyas datos personales de terceros',
     privacyMore: 'Más info'

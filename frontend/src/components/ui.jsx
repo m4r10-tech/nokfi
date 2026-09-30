@@ -1,6 +1,8 @@
 import { useEffect, useRef } from 'react';
-import { X, AlertTriangle } from 'lucide-react';
+import { Link } from 'react-router-dom';
+import { X, AlertTriangle, ArrowRight } from 'lucide-react';
 import { useLang } from '../context/LangContext';
+import { toolLabelKey } from '../utils/nokfiLinks';
 
 /**
  * Piezas de UI compartidas por las pantallas de la sesión 4 (finanzas,
@@ -19,6 +21,18 @@ export function Section({ title, aside, children, className = '' }) {
       )}
       {children}
     </section>
+  );
+}
+
+/** Botón "Ir a Cobros" hacia la herramienta de Nokfi que resuelve algo (sesión 8). */
+export function ToolLink({ to, onClick, className = '' }) {
+  const { t } = useLang();
+  const key = toolLabelKey(to);
+  if (!key) return null;
+  return (
+    <Link to={to} onClick={onClick} className={`btn btn-secondary btn-sm self-start ${className}`}>
+      {t('report.goTo', { name: t(key) })}<ArrowRight size={14} />
+    </Link>
   );
 }
 

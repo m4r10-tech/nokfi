@@ -1,9 +1,12 @@
 import { createContext, useContext, useState, useCallback, useRef, useEffect } from 'react';
 import { Link } from 'react-router-dom';
 import { MessageCircle, X, Send, Loader2, Sparkles, Trash2 } from 'lucide-react';
-import { chatApi } from '../middleware/api';
+import { chatApi, dashboardApi } from '../middleware/api';
 import { apiErrorMessage } from '../middleware/errors';
 import { useLang } from './LangContext';
+import { ToolLink } from '../components/ui';
+import { extractToolLinks } from '../utils/nokfiLinks';
+import { eur, isoDate } from '../utils/money';
 
 /**
  * C5 — Asistente integrado (sesión 4). Botón flotante en toda la app privada y
@@ -56,6 +59,45 @@ function Launcher({ onClick }) {
   );
 }
 
+/** Respuesta del asistente: las rutas de Nokfi que cite salen como botón (sesión 8). */
+function AssistantMessage({ content, onNavigate }) {
+  const { text, links } = extractToolLinks(content);
+  return (
+    <div className="max-w-[88%] self-start flex flex-col gap-2">
+      <div className="rounded-2xl px-3.5 py-2.5 text-sm whitespace-pre-wrap leading-relaxed" style={{ background: 'var(--surface-2)', color: 'var(--text-primary)' }}>
+        {text}
+      </div>
+      {links.map(l => <ToolLink key={l} to={l} onClick={onNavigate} />)}
+    </div>
+  );
+}
+
+/**
+ * Sugerencias a partir de los datos del usuario (deudor vencido, IVA, plazo,
+ * caja). null mientras carga o si no hay datos: se usan las genéricas.
+ */
+function useDataSuggestions(enabled) {
+  const { t, lang } = useLang();
+  const [data, setData] = useState(null);
+  useEffect(() => {
+    if (!enabled || data) return;
+    let alive = true;
+    dashboardApi.get().then(res => { if (alive && res.ok) setData(res.data); });
+    return () => { alive = false; };
+  }, [enabled, data]);
+  if (!data) return null;
+  const out = [];
+  const top = data.receivables?.top_overdue;
+  if (top?.party_name) out.push(t('chat.sugDebtor', { name: top.party_name, amount: eur(top.total, lang) }));
+  else if (data.receivables?.count) out.push(t('chat.sugReceivables'));
+  if (data.taxes?.vat_refund > 0) out.push(t('chat.sugVatRefund'));
+  else if (data.taxes?.total_estimated > 0) out.push(t('chat.sugTaxes'));
+  if (data.forecast?.first_below) out.push(t('chat.sugCashLow', { date: isoDate(data.forecast.first_below.date, lang, { day: 'numeric', month: 'long' }) }));
+  else if (data.forecast) out.push(t('chat.sugCash'));
+  if (out.length < 3 && data.next_deadline) out.push(t('chat.sugDeadline', { date: isoDate(data.next_deadline.date, lang, { day: 'numeric', month: 'long' }) }));
+  return out.length >= 2 ? out.slice(0, 3) : null;
+}
+
 function ChatPanel({ analysis, messages, setMessages, onClose, onClearContext }) {
   const { t, lang } = useLang();
   const [text, setText] = useState('');
@@ -87,7 +129,8 @@ function ChatPanel({ analysis, messages, setMessages, onClose, onClearContext })
     else setError(apiErrorMessage(t, res));
   };
 
-  const suggestions = analysis ? t('chat.suggestionsReport') : t('chat.suggestions');
+  const dataSuggestions = useDataSuggestions(!analysis && messages.length === 0);
+  const suggestions = analysis ? t('chat.suggestionsReport') : (dataSuggestions || t('chat.suggestions'));
 
   return (
     <div className="fixed z-50 inset-0 md:inset-auto md:right-6 md:bottom-6 md:w-[400px] md:h-[600px] md:max-h-[calc(100dvh-48px)] flex flex-col md:rounded-2xl overflow-hidden anim-scale"
@@ -112,11 +155,14 @@ function ChatPanel({ analysis, messages, setMessages, onClose, onClearContext })
             ))}
           </div>
         )}
-        {messages.map((m, i) => (
-          <div key={i} className={`max-w-[88%] rounded-2xl px-3.5 py-2.5 text-sm whitespace-pre-wrap leading-relaxed ${m.role === 'user' ? 'self-end' : 'self-start'}`}
-            style={m.role === 'user' ? { background: 'var(--accent)', color: 'var(--on-accent)' } : { background: 'var(--surface-2)', color: 'var(--text-primary)' }}>
-            {m.content}
-          </div>
+        {messages.map((m, i) => (m.role === 'user'
+          ? (
+            <div key={i} className="max-w-[88%] rounded-2xl px-3.5 py-2.5 text-sm whitespace-pre-wrap leading-relaxed self-end"
+              style={{ background: 'var(--accent)', color: 'var(--on-accent)' }}>
+              {m.content}
+            </div>
+          )
+          : <AssistantMessage key={i} content={m.content} onNavigate={onClose} />
         ))}
         {sending && <div className="self-start rounded-2xl px-3.5 py-2.5" style={{ background: 'var(--surface-2)' }}><Loader2 size={15} className="animate-spin" style={{ color: 'var(--text-muted)' }} /></div>}
         {error && <p role="alert" className="text-sm rounded-lg px-3 py-2" style={{ background: 'var(--negative-soft)', color: 'var(--negative)' }}>{error}</p>}

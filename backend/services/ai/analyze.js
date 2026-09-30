@@ -23,6 +23,7 @@ const { acquire, QuotaError, quotaMessage } = require('./quota');
 const { computeHealth, cleanAnswers } = require('../../utils/healthScore');
 const { audit, createAnalysis, getCompanyProfile } = require('../../db/database');
 const { createActionsForAnalysis, listActionsForAnalysis } = require('../../db/actions');
+const { financeContext } = require('./financeContext');
 
 const REPORT_TASKS = ['cuestionario', 'excel', 'compare', 'folder'];
 const ALL_TASKS = [...REPORT_TASKS, 'folder_map', 'invoices'];
@@ -55,14 +56,15 @@ const AI_ERROR_RESPONSES = {
 };
 
 /** Valida la entrada y prepara la llamada. Devuelve { error } o { plan }. */
-function prepare(task, input, profile, lang) {
+function prepare(task, input, profile, lang, licenseId) {
   input = input && typeof input === 'object' ? input : {};
   switch (task) {
     case 'cuestionario': {
       const answers = cleanAnswers(input.answers);
       if (Object.keys(answers).length < 10) return { error: bad('invalid_input', 'Faltan respuestas del cuestionario.') };
       const health = computeHealth(answers);
-      const { text, chars } = P.buildQuestionnaire({ answers, health });
+      const { text: finance } = financeContext(licenseId, { lang: P.normLang(lang) });
+      const { text, chars } = P.buildQuestionnaire({ answers, health, finance });
       return { plan: { parts: [{ text }], chars, schema: P.REPORT_SCHEMA, meta: { answers, health }, family: 'single' } };
     }
     case 'excel': {
@@ -144,7 +146,7 @@ async function runAnalysis({ license, task, input, lang, title, jobId, ip, sourc
   }
 
   const profile = getCompanyProfile(license.id);
-  const { error, plan } = prepare(task, input, profile, lang);
+  const { error, plan } = prepare(task, input, profile, lang, license.id);
   if (error) return error;
   if (!plan.inline && plan.chars > P.MAX_INPUT_CHARS) {
     return bad('prompt_too_long', `El contenido supera el límite permitido (${P.MAX_INPUT_CHARS} caracteres).`);
@@ -192,7 +194,7 @@ async function runAnalysis({ license, task, input, lang, title, jobId, ip, sourc
     return { status: 200, body: { invoices: P.normalizeInvoices(result.json, plan.files), ...jobOut } };
   }
 
-  const report = P.normalizeReport(result.json);
+  const report = P.normalizeReport(result.json, { dropHealth: task === 'cuestionario' });
   if (!report.summary && !report.priorities.length) {
     return { status: 502, body: { error: 'ai_bad_output', message: AI_ERROR_RESPONSES.ai_bad_output[1] } };
   }

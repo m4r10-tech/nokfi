@@ -188,6 +188,8 @@ function runSession4Schema(db) {
   ensureColumn(db, 'ledger_entries', 'party_email', "TEXT NOT NULL DEFAULT ''");
   ensureColumn(db, 'company_profiles', 'cash_balance_date', 'TEXT DEFAULT NULL');
   ensureColumn(db, 'company_profiles', 'cash_alert_threshold', 'REAL NOT NULL DEFAULT 0');
+  // Sesión 8: cada tarea del plan enlaza a la herramienta de Nokfi que la resuelve.
+  ensureColumn(db, 'action_items', 'link', "TEXT NOT NULL DEFAULT ''");
 }
 
 module.exports = { runSession4Schema, ensureColumn, hasColumn };

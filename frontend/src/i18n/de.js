@@ -492,6 +492,7 @@ export default {
   report: {
     summary: 'Zusammenfassung', keyFigures: 'Kennzahlen', strengths: 'Stärken', priorities: 'Prioritäten',
     actionPlan: 'Maßnahmenplan', glossary: 'Glossar', progress: '{n} von {total} erledigt',
+    goTo: 'Zu {name}',
     severity_high: 'Hoch', severity_medium: 'Mittel', severity_low: 'Niedrig',
     healthTitle: 'Finanzielle Gesundheit', healthScoreLabel: 'Gesundheitsnote',
     healthExplain: 'Von Nokfi mit festen Regeln aus deinen Antworten berechnet. Nicht von der KI erfunden.',
@@ -516,6 +517,8 @@ export default {
     empty: 'Hallo! Frag mich alles zu den Finanzen deines Unternehmens oder zu deinen Berichten.',
     suggestions: ['Wie berechne ich meinen Break-even?', 'Welche Fixkosten sollte ich zuerst prüfen?', 'Wie viel sollte ich als Rücklage haben?'],
     suggestionsReport: ['Erkläre mir die dringendste Priorität mit einem Beispiel', 'Womit fange ich beim Maßnahmenplan an?', 'Was bedeutet dieser Begriff aus dem Glossar?'],
+    sugDebtor: 'Wie mahne ich bei {name} die {amount} an, die mir geschuldet werden?', sugVatRefund: 'Meine Umsatzsteuer ergibt ein Guthaben zum Verrechnen: was bedeutet das?', sugTaxes: 'Wie viel sollte ich dieses Quartal für Steuern zurücklegen?',
+    sugDeadline: 'Was muss ich bis zum {date} einreichen?', sugCashLow: 'Warum sinkt meine Liquidität am {date} und was kann ich tun?', sugCash: 'Wie sieht meine Liquidität in 90 Tagen aus?', sugReceivables: 'Wer schuldet mir Geld und wie viel?',
     placeholder: 'Schreib deine Frage…', send: 'Senden',
     privacyNote: 'KI-Assistent · deine Nachrichten werden weder zum Training genutzt noch gespeichert · keine personenbezogenen Daten Dritter eingeben',
     privacyMore: 'Mehr erfahren'

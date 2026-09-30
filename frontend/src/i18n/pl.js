@@ -494,6 +494,7 @@ export default {
   report: {
     summary: 'Podsumowanie', keyFigures: 'Kluczowe liczby', strengths: 'Mocne strony', priorities: 'Priorytety',
     actionPlan: 'Plan działania', glossary: 'Słowniczek', progress: '{n} z {total} zrobione',
+    goTo: 'Przejdź do: {name}',
     severity_high: 'Wysoki', severity_medium: 'Średni', severity_low: 'Niski',
     healthTitle: 'Kondycja finansowa', healthScoreLabel: 'Ocena kondycji',
     healthExplain: 'Ocena wyliczona przez Nokfi według stałych zasad na podstawie twoich odpowiedzi. Nie wymyśla jej AI.',
@@ -518,6 +519,8 @@ export default {
     empty: 'Cześć! Zapytaj mnie o finanse swojej firmy lub o swoje raporty.',
     suggestions: ['Jak obliczyć próg rentowności?', 'Które koszty stałe przejrzeć najpierw?', 'Ile powinienem mieć w funduszu rezerwowym?'],
     suggestionsReport: ['Wyjaśnij najpoważniejszy priorytet na przykładzie', 'Od czego zacząć plan działania?', 'Co oznacza ten termin ze słowniczka?'],
+    sugDebtor: 'Jak upomnieć się u {name} o {amount}, które mi jest winien?', sugVatRefund: 'VAT wychodzi mi do odliczenia w kolejnych kwartałach: co to znaczy?', sugTaxes: 'Ile powinienem odłożyć na podatki w tym kwartale?',
+    sugDeadline: 'Co muszę złożyć przed {date}?', sugCashLow: 'Dlaczego moja gotówka spada {date} i co mogę zrobić?', sugCash: 'Jak będzie wyglądać moja gotówka za 90 dni?', sugReceivables: 'Kto jest mi winien pieniądze i ile?',
     placeholder: 'Wpisz pytanie…', send: 'Wyślij',
     privacyNote: 'Asystent AI · twoje wiadomości nie służą do trenowania modeli i nie są przechowywane · nie podawaj danych osobowych osób trzecich',
     privacyMore: 'Więcej informacji'

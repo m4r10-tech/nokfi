@@ -5,6 +5,7 @@ import { sanitizeAiHtml } from '../middleware/sanitize';
 import { useLang } from '../context/LangContext';
 import { useToast } from '../context/ToastContext';
 import HealthScore from './HealthScore';
+import { ToolLink } from './ui';
 import { eur, num } from '../utils/money';
 
 /**
@@ -77,6 +78,7 @@ function StructuredReport({ report, actions, health, onActionsChange }) {
                       </span>
                     </div>
                     {p.detail && <p className="text-sm mt-1 leading-relaxed" style={{ color: 'var(--text-secondary)' }}>{p.detail}</p>}
+                    {p.link && <ToolLink to={p.link} className="mt-2.5" />}
                   </div>
                 </li>
               );
@@ -168,6 +170,7 @@ function ActionChecklist({ plan, actions, onActionsChange }) {
               </span>
               {a.timeframe && <span className="shrink-0 text-[11px] rounded-full px-2 py-0.5 mt-0.5" style={{ background: 'var(--surface-2)', color: 'var(--text-muted)' }}>{a.timeframe}</span>}
             </button>
+            {a.link && !a.done && <ToolLink to={a.link} className="ml-10 mb-1.5" />}
           </li>
         ))}
       </ol>

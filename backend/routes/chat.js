@@ -14,7 +14,10 @@ const router = express.Router();
 const { requireLicense } = require('../middleware/requireLicense');
 const { getAnalysis, getCompanyProfile } = require('../db/database');
 const { chat, allowMessage, sanitizeMessages } = require('../services/ai/chat');
-const { reportToText } = require('../services/ai/prompts');
+const { reportToText, normLang } = require('../services/ai/prompts');
+const { financeContext } = require('../services/ai/financeContext');
+
+const MAX_FINANCE_CHARS = 2500;
 
 router.post('/', requireLicense, async (req, res) => {
   const messages = sanitizeMessages(req.body?.messages);
@@ -36,11 +39,19 @@ router.post('/', requireLicense, async (req, res) => {
     }
   }
 
+  let financeText = '';
+  try {
+    financeText = financeContext(req.license.id, { lang: normLang(req.body?.lang), maxChars: MAX_FINANCE_CHARS }).text;
+  } catch (e) {
+    console.error('[CHAT] Contexto financiero no disponible:', e.message);
+  }
+
   try {
     const { text, provider } = await chat({
       profile: getCompanyProfile(req.license.id),
       lang: req.body?.lang,
       analysisContext,
+      financeText,
       messages
     });
     res.json({ reply: text, provider });

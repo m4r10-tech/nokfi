@@ -13,18 +13,18 @@ const { getDB } = require('./database');
 function createActionsForAnalysis(license_id, analysis_id, plan) {
   const db = getDB();
   const insert = db.prepare(`
-    INSERT INTO action_items (license_id, analysis_id, title, detail, timeframe, position)
-    VALUES (?, ?, ?, ?, ?, ?)
+    INSERT INTO action_items (license_id, analysis_id, title, detail, timeframe, link, position)
+    VALUES (?, ?, ?, ?, ?, ?, ?)
   `);
   const tx = db.transaction((items) => {
-    items.forEach((a, i) => insert.run(license_id, analysis_id, a.title, a.detail || '', a.timeframe || '', i));
+    items.forEach((a, i) => insert.run(license_id, analysis_id, a.title, a.detail || '', a.timeframe || '', a.link || '', i));
   });
   tx((plan || []).slice(0, 10));
 }
 
 function listActionsForAnalysis(license_id, analysis_id) {
   return getDB().prepare(`
-    SELECT id, title, detail, timeframe, done, done_at FROM action_items
+    SELECT id, title, detail, timeframe, link, done, done_at FROM action_items
     WHERE license_id = ? AND analysis_id = ? ORDER BY position, id
   `).all(license_id, analysis_id).map(r => ({ ...r, done: !!r.done }));
 }
@@ -32,7 +32,7 @@ function listActionsForAnalysis(license_id, analysis_id) {
 /** Pendientes primero (del informe más reciente), luego hechas recientes. */
 function listActions(license_id, { limit = 100 } = {}) {
   return getDB().prepare(`
-    SELECT a.id, a.analysis_id, a.title, a.detail, a.timeframe, a.done, a.done_at, a.created_at,
+    SELECT a.id, a.analysis_id, a.title, a.detail, a.timeframe, a.link, a.done, a.done_at, a.created_at,
            an.title AS analysis_title
     FROM action_items a LEFT JOIN analyses an ON an.id = a.analysis_id
     WHERE a.license_id = ?

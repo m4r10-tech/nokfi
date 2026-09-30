@@ -492,6 +492,7 @@ export default {
   report: {
     summary: 'Summary', keyFigures: 'Key figures', strengths: 'Strengths', priorities: 'Priorities',
     actionPlan: 'Action plan', glossary: 'Glossary', progress: '{n} of {total} done',
+    goTo: 'Go to {name}',
     severity_high: 'High', severity_medium: 'Medium', severity_low: 'Low',
     healthTitle: 'Financial health', healthScoreLabel: 'Health score',
     healthExplain: 'Score calculated by Nokfi with fixed rules from your answers. It is not made up by the AI.',
@@ -516,6 +517,8 @@ export default {
     empty: 'Hi. Ask me anything about your business finances or your reports.',
     suggestions: ['How do I calculate my break-even point?', 'Which fixed costs should I review first?', 'How much should I keep in a reserve fund?'],
     suggestionsReport: ['Explain the most serious priority with an example', 'Where do I start with the action plan?', 'What does this glossary term mean?'],
+    sugDebtor: 'How do I chase {name} for the {amount} they owe me?', sugVatRefund: 'My VAT comes out as a credit to carry forward: what does that mean?', sugTaxes: 'How much should I set aside for tax this quarter?',
+    sugDeadline: 'What do I have to file before {date}?', sugCashLow: 'Why does my cash drop on {date} and what can I do?', sugCash: 'What will my cash look like in 90 days?', sugReceivables: 'Who owes me money and how much?',
     placeholder: 'Type your question…', send: 'Send',
     privacyNote: 'AI assistant · your messages are not used to train models or stored · do not include third parties’ personal data',
     privacyMore: 'Learn more'
