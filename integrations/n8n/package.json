@@ -19,7 +19,7 @@
 	},
 	"repository": {
 		"type": "git",
-		"url": "https://github.com/m4r10-tech/n8n-nodes-nokfi.git"
+		"url": "git+https://github.com/m4r10-tech/n8n-nodes-nokfi.git"
 	},
 	"scripts": {
 		"build": "n8n-node build",
@@ -31,7 +31,8 @@
 		"prepublishOnly": "n8n-node prerelease"
 	},
 	"files": [
-		"dist"
+		"dist",
+		"!dist/tsconfig.tsbuildinfo"
 	],
 	"n8n": {
 		"n8nNodesApiVersion": 1,
