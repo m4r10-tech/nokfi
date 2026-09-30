@@ -157,7 +157,7 @@ export default function Ledger() {
           )}
           <ul className="flex flex-col -mx-2">
             {visible.map(e => (
-              <li key={e.id} className="flex items-center gap-3 rounded-lg px-2 py-2.5" style={{ borderTop: '1px solid var(--border)' }}>
+              <li key={e.id} className="group flex items-center gap-2 sm:gap-3 rounded-lg px-2 py-2.5" style={{ borderTop: '1px solid var(--border)' }}>
                 <span className="shrink-0 w-2 h-9 rounded-full" style={{ background: e.type === 'income' ? 'var(--positive)' : 'var(--text-muted)' }} aria-hidden="true" />
                 <div className="flex-1 min-w-0">
                   <p className="text-sm font-medium truncate flex items-center gap-2" style={{ color: 'var(--text-primary)' }}>
@@ -178,8 +178,10 @@ export default function Ledger() {
                   {e.paid ? <Badge tone="positive"><Check size={11} /> {e.type === 'income' ? t('finance.collected') : t('finance.paid')}</Badge>
                     : <Badge tone={e.type === 'income' ? 'warning' : 'muted'}>{e.type === 'income' ? t('finance.pendingCollection') : t('finance.pendingPayment')}</Badge>}
                 </button>
-                <button onClick={() => { setFormError(null); setEditing(e); }} className="btn btn-ghost btn-sm !px-2" aria-label={t('finance.editEntry')}><Pencil size={14} /></button>
-                <button onClick={() => setDeleting(e)} className="btn btn-ghost btn-sm !px-2" aria-label={t('finance.delete')}><Trash2 size={14} /></button>
+                {/* Sesión 10: iconos discretos en escritorio (aparecen al pasar por la fila) y
+                    solo el lápiz en móvil, para que se lea el nombre. */}
+                <button onClick={() => { setFormError(null); setEditing(e); }} className="btn btn-ghost btn-sm !px-2 sm:opacity-40 sm:group-hover:opacity-100 focus-visible:opacity-100" aria-label={t('finance.editEntry')}><Pencil size={14} /></button>
+                <button onClick={() => setDeleting(e)} className="btn btn-ghost btn-sm !px-2 hidden sm:inline-flex sm:opacity-40 sm:group-hover:opacity-100 focus-visible:opacity-100" aria-label={t('finance.delete')}><Trash2 size={14} /></button>
               </li>
             ))}
           </ul>
@@ -187,7 +189,8 @@ export default function Ledger() {
         </Section>
       )}
 
-      {editing && <EntryForm initial={editing} saving={saving} error={formError} onClose={() => setEditing(null)} onSave={save} />}
+      {editing && <EntryForm initial={editing} saving={saving} error={formError} onClose={() => setEditing(null)} onSave={save}
+        onDelete={() => { const e = editing; setEditing(null); setDeleting(e); }} />}
       {deleting && (
         <ConfirmModal title={t('finance.delete')} text={`${t('finance.confirmDelete')} ${deleting.party_name || deleting.party_nif || ''}${deleting.invoice_number ? ` · ${deleting.invoice_number}` : ''}`}
           cta={t('finance.delete')} danger busy={removing} onConfirm={remove} onClose={() => setDeleting(null)} />

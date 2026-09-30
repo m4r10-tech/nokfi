@@ -9,6 +9,7 @@ import EmptyState from '../components/EmptyState';
 import ErrorState from '../components/ErrorState';
 import Skeleton from '../components/Skeleton';
 import { parseDbDate, dayDiff, formatDate, formatTime, localeOf } from '../utils/dates';
+import { num } from '../utils/money';
 
 /**
  * Historial de análisis (sección 14) — sesión 3, Tanda N: Historial e Informes
@@ -55,10 +56,13 @@ export function analysisSource(a) {
 }
 
 /** Resultado clave de la línea: la nota del diagnóstico o la primera cifra clave. */
-export function analysisResult(a, t) {
+export function analysisResult(a, t, lang) {
   if (typeof a.summary?.score === 'number') return t('history.score', { n: a.summary.score });
   const k = a.key_figure;
-  return k?.value ? `${k.label ? `${k.label}: ` : ''}${k.value}` : '';
+  if (!k?.value) return '';
+  // Informes antiguos: a veces la IA devolvía el número pelado ("2301.58").
+  const value = /^-?\d+(\.\d+)?$/.test(String(k.value).trim()) ? num(Number(k.value), lang) : k.value;
+  return `${k.label ? `${k.label}: ` : ''}${value}`;
 }
 
 export default function Historial() {
@@ -179,7 +183,7 @@ function Row({ a, t, lang, showTime, i }) {
   const Icon = KIND_ICON[a.kind] || FileText;
   const d = parseDbDate(a.created_at);
   const source = analysisSource(a);
-  const result = analysisResult(a, t);
+  const result = analysisResult(a, t, lang);
   return (
     <Link to={`/app/historial/${a.id}`} className="card card-interactive anim-enter p-3.5 md:p-4 flex items-center gap-3"
       style={{ '--i': i }}>
@@ -189,6 +193,7 @@ function Row({ a, t, lang, showTime, i }) {
       <div className="flex-1 min-w-0">
         <p className="text-sm font-medium truncate" style={{ color: 'var(--text-primary)' }}>{analysisTitle(a, lang)}</p>
         <p className="text-xs mt-0.5 truncate" style={{ color: 'var(--text-muted)' }}>
+          {result && <span className="sm:hidden" style={{ color: 'var(--text-secondary)' }}>{result} · </span>}
           {kindLabel(a.kind, t)}{source && ` · ${source}`}{a.source === 'api' || a.source === 'mcp' ? ` · ${t('history.viaApi')}` : ''} · {d ? (showTime ? formatTime(d, lang) : formatDate(a.created_at, lang)) : '—'}
         </p>
       </div>

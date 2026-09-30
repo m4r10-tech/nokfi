@@ -27,7 +27,7 @@ export default function Configuracion() {
   return (
     <div className="max-w-2xl flex flex-col gap-4 md:gap-5">
       <PageHeader title={t('config.title')} />
-      <nav aria-label={t('config.title')} className="flex gap-1 overflow-x-auto -mx-4 px-4 sm:mx-0 sm:px-0 -mt-1" style={{ borderBottom: '1px solid var(--border)' }}>
+      <nav aria-label={t('config.title')} className="no-scrollbar flex gap-1 overflow-x-auto -mx-4 px-4 sm:mx-0 sm:px-0 -mt-1" style={{ borderBottom: '1px solid var(--border)' }}>
         {TABS.map(id => (
           <button key={id} onClick={() => setParams({ s: id }, { replace: true })} aria-current={tab === id ? 'page' : undefined}
             className="whitespace-nowrap px-3 h-10 text-sm font-medium -mb-px"

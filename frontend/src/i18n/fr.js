@@ -593,7 +593,7 @@ export default {
       { n: 60, suffix: '', label: 'factures lues en une fois' },
       { n: 90, suffix: ' jours', label: 'de prévision de trésorerie' },
       { n: 14, suffix: ' jours', label: 'd’essai gratuit' },
-      { n: 24, suffix: ' h', label: 'maximum pour vous répondre' }
+      { n: 24, suffix: ' h', label: 'maximum pour vous répondre' }
     ],
     howEyebrow: 'Comment ça marche', howHeading: 'De vos chiffres à un plan d’action',
     howSubtitle: 'Rien à installer, aucune formation. En quelques minutes, vous savez où se trouve la marge.',
@@ -888,7 +888,7 @@ export default {
       netIncome: 'Résultat net', twentyPct: '20 % du résultat', prevPayments: 'Acomptes des trimestres précédents', withholdings: 'Retenues subies',
       companyNote: 'Les sociétés ne déposent pas le modèle 130 : elles versent des acomptes d’impôt sur les sociétés (modèle 202), hors du calcul de Nokfi pour l’instant.',
       noLegalForm: 'Indiquez si vous êtes indépendant ou société pour affiner le calcul.',
-      legal: 'Estimation indicative en régime général (Espagne). N’inclut ni le recargo de equivalencia, ni les modules, ni l’impôt sur les sociétés. Ce n’est pas un conseil fiscal.',
+      legal: 'Estimation indicative en régime général (Espagne). N’inclut ni le recargo de equivalencia, ni les modules, ni l’impôt sur les sociétés.',
       compensateHeadline: 'Ce trimestre ({q}), votre TVA est à reporter :',
       refundHeadline: 'Ce trimestre ({q}), votre TVA est à rembourser ou à reporter :',
       nothingToPay: 'Rien à mettre de côté ce trimestre',

@@ -284,7 +284,7 @@ export default {
     features: {
       mini: ['10 análisis IA al día', 'Diagnóstico con nota de salud', 'Facturas leídas por IA, impuestos y cobros', 'Excel, carpetas y previsión de caja', 'Asistente IA sin límite'],
       pro: ['50 análisis IA al día', 'Todo lo de Mini', 'API para automatizaciones (n8n, Make, Zapier)'],
-      max: ['130 análisis IA al día', 'Todo lo de Pro', 'Soporte prioritario: respuesta en menos de 4 h laborables']
+      max: ['130 análisis IA al día', 'Todo lo de Pro', 'Soporte prioritario: respuesta en menos de 4 h laborables']
     },
     aiBadge: 'análisis IA/día',
     noTrial: 'Sin prueba propia: empieza con Mini gratis y cambia cuando quieras', trialBadge: '14 días gratis',
@@ -487,7 +487,7 @@ export default {
     servicios: { title: 'Salida — Servicios', desc: 'Almacén destinado a servicios', description: 'Sube los datos de material destinado a servicios para analizar su distribución.' },
     entradas: { title: 'Entrada de productos', desc: 'Pedidos realizados', description: 'Sube tus pedidos realizados para analizar entradas de producto y proveedores.' },
     caja: { title: 'Caja', desc: 'Dinero en caja y cambio', description: 'Sube los movimientos de caja para analizar la evolución del saldo y detectar anomalías.' },
-    total: { title: 'Total (Profit)', desc: 'Profit total tras impuestos y gastos', description: 'Sube los datos de ingresos y gastos para calcular el profit total tras impuestos.' }
+    total: { title: 'Beneficio total', desc: 'Beneficio tras impuestos y gastos', description: 'Sube los datos de ingresos y gastos para calcular el profit total tras impuestos.' }
   },
   excel: {
     exportSheet: 'Análisis IA', exportColumn: 'Análisis',
@@ -597,7 +597,7 @@ export default {
       { n: 60, suffix: '', label: 'facturas leídas de una vez' },
       { n: 90, suffix: ' días', label: 'de previsión de caja' },
       { n: 14, suffix: ' días', label: 'de prueba gratis' },
-      { n: 24, suffix: ' h', label: 'como máximo para responderte' }
+      { n: 24, suffix: ' h', label: 'como máximo para responderte' }
     ],
     howEyebrow: 'Cómo funciona', howHeading: 'De tus números a un plan de acción',
     howSubtitle: 'Sin instalar nada y sin formación previa. En unos minutos sabes dónde está el margen.',
@@ -892,7 +892,7 @@ export default {
       netIncome: 'Rendimiento neto', twentyPct: '20 % del rendimiento', prevPayments: 'Pagos de trimestres anteriores', withholdings: 'Retenciones que te han hecho',
       companyNote: 'Las sociedades no presentan el 130: hacen pagos fraccionados del Impuesto sobre Sociedades (modelo 202), fuera del cálculo de Nokfi por ahora.',
       noLegalForm: 'Indica si eres autónomo o sociedad para afinar el cálculo.',
-      legal: 'Estimación orientativa en régimen general. No incluye recargo de equivalencia, módulos ni el Impuesto sobre Sociedades. No es asesoramiento fiscal.',
+      legal: 'Estimación orientativa en régimen general. No incluye recargo de equivalencia, módulos ni el Impuesto sobre Sociedades.',
       compensateHeadline: 'Este trimestre ({q}) el IVA te sale a compensar:',
       refundHeadline: 'Este trimestre ({q}) el IVA te sale a devolver o compensar:',
       nothingToPay: 'Nada que apartar este trimestre',

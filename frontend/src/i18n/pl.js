@@ -596,7 +596,7 @@ export default {
       { n: 60, suffix: '', label: 'faktur odczytanych naraz' },
       { n: 90, suffix: ' dni', label: 'prognozy gotówki' },
       { n: 14, suffix: ' dni', label: 'bezpłatnego okresu próbnego' },
-      { n: 24, suffix: ' h', label: 'maksymalny czas odpowiedzi' }
+      { n: 24, suffix: ' h', label: 'maksymalny czas odpowiedzi' }
     ],
     howEyebrow: 'Jak to działa', howHeading: 'Od twoich liczb do planu działania',
     howSubtitle: 'Bez instalacji i bez szkoleń. W kilka minut wiesz, gdzie jest marża.',
@@ -891,7 +891,7 @@ export default {
       netIncome: 'Dochód netto', twentyPct: '20% dochodu', prevPayments: 'Zaliczki z poprzednich kwartałów', withholdings: 'Potrącone zaliczki',
       companyNote: 'Spółki nie składają modelo 130: płacą zaliczki na podatek od osób prawnych (modelo 202), których Nokfi na razie nie wylicza.',
       noLegalForm: 'Wskaż, czy prowadzisz jednoosobową działalność, czy spółkę, aby doprecyzować obliczenia.',
-      legal: 'Orientacyjny szacunek w systemie ogólnym (Hiszpania). Nie obejmuje recargo de equivalencia, ryczałtu (módulos) ani podatku od osób prawnych. To nie jest doradztwo podatkowe.',
+      legal: 'Orientacyjny szacunek w systemie ogólnym (Hiszpania). Nie obejmuje recargo de equivalencia, ryczałtu (módulos) ani podatku od osób prawnych.',
       compensateHeadline: 'W tym kwartale ({q}) VAT do przeniesienia:',
       refundHeadline: 'W tym kwartale ({q}) VAT do zwrotu lub przeniesienia:',
       nothingToPay: 'W tym kwartale nie trzeba nic odkładać',

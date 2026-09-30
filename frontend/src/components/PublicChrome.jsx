@@ -60,9 +60,9 @@ export function PublicHeader({ links = [] }) {
       <div className="max-w-6xl mx-auto px-4 h-16 flex items-center justify-between gap-3">
         <Link to="/home" aria-label="Nokfi" className="rounded-lg"><Logo size="md" /></Link>
         {links.length > 0 && (
-          <nav className="hidden md:flex items-center gap-1">
+          <nav className="hidden lg:flex items-center gap-1">
             {links.map(l => (
-              <a key={l.href} href={l.href} onClick={(e) => smoothTo(e, l.href)} className="rounded-lg px-3 py-1.5 text-sm font-medium transition-colors hover:text-[var(--text-primary)]"
+              <a key={l.href} href={l.href} onClick={(e) => smoothTo(e, l.href)} className="whitespace-nowrap rounded-lg px-3 py-1.5 text-sm font-medium transition-colors hover:text-[var(--text-primary)]"
                 style={{ color: 'var(--text-secondary)' }}>{l.label}</a>
             ))}
           </nav>

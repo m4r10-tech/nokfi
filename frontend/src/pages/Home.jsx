@@ -260,8 +260,8 @@ function MoneyCard({ dash, t, lang, className = '' }) {
               <span className="flex-1 min-w-0">
                 <span className="block text-sm" style={{ color: 'var(--text-secondary)' }}>{r.label}</span>
                 {r.hint && (
-                  <span className="text-xs mt-0.5 flex items-center gap-1 truncate" style={{ color: r.warn ? 'var(--warning)' : 'var(--text-muted)' }}>
-                    {r.warn && <AlertTriangle size={12} className="shrink-0" />}{r.hint}
+                  <span className="block text-xs mt-0.5" style={{ color: r.warn ? 'var(--warning)' : 'var(--text-muted)' }}>
+                    {r.warn && <AlertTriangle size={12} className="inline -mt-0.5 mr-1" />}{r.hint}
                   </span>
                 )}
               </span>
@@ -362,7 +362,7 @@ function RecentCard({ items, t, lang, className = '' }) {
                   <Icon size={16} className="shrink-0" style={{ color: 'var(--text-muted)' }} aria-hidden="true" />
                   <span className="flex-1 min-w-0">
                     <span className="block text-sm font-medium truncate" style={{ color: 'var(--text-primary)' }}>{analysisTitle(a, lang)}</span>
-                    <span className="block text-xs truncate" style={{ color: 'var(--text-muted)' }}>{[analysisResult(a, t) || analysisSource(a) || kindLabel(a.kind, t), relativeTime(a.created_at, lang)].join(' · ')}</span>
+                    <span className="block text-xs truncate" style={{ color: 'var(--text-muted)' }}>{[analysisResult(a, t, lang) || analysisSource(a) || kindLabel(a.kind, t), relativeTime(a.created_at, lang)].join(' · ')}</span>
                   </span>
                   <ChevronRight size={15} className="shrink-0" style={{ color: 'var(--text-muted)' }} />
                 </Link>

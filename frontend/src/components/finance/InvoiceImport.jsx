@@ -32,6 +32,8 @@ const MAX_INVOICES = 60;
 const PER_BATCH = 5;
 const BATCH_BYTES = 6 * 1024 * 1024;
 const MAX_PDF_BYTES = 4 * 1024 * 1024;
+// Importes con dos decimales en la revisión ("96,60", no "96,6").
+const money2 = (v) => (v === null || v === undefined || v === '' || !Number.isFinite(Number(v)) ? '' : Number(v).toFixed(2));
 
 export default function InvoiceImport({ profile, onSaved, onCancel }) {
   const { t, lang } = useLang();
@@ -98,7 +100,7 @@ export default function InvoiceImport({ profile, onSaved, onCancel }) {
       type, file_name: inv.file_name, is_invoice: inv.is_invoice, source_format: inv.source_format || null,
       invoice_date: inv.invoice_date, due_date: inv.due_date || '', party_name: nameCase(party.name || ''), party_nif: party.nif || '',
       invoice_number: inv.invoice_number, concept: inv.concept, category: inv.category,
-      base: inv.base, vat_rate: inv.vat_rate, vat_amount: inv.vat_amount, irpf_rate: inv.irpf_rate, irpf_amount: inv.irpf_amount, total: inv.total,
+      base: money2(inv.base), vat_rate: inv.vat_rate, vat_amount: money2(inv.vat_amount), irpf_rate: inv.irpf_rate, irpf_amount: money2(inv.irpf_amount), total: money2(inv.total),
       paid: type === 'expense'
     };
   };
@@ -336,13 +338,13 @@ function InvoiceCard({ r, update, file, dupe }) {
   return (
     <article className="rounded-xl" style={{ border: '1px solid var(--border)', opacity: r.include ? 1 : 0.6 }}>
       <header className="flex flex-wrap items-center gap-x-3 gap-y-1.5 px-3.5 py-2.5" style={{ borderBottom: '1px solid var(--border)' }}>
-        <label className="flex items-center gap-2 text-sm font-medium min-w-0 flex-1 cursor-pointer" style={{ color: 'var(--text-primary)' }}>
+        <label className="flex items-center gap-2 text-sm font-medium min-w-0 basis-full sm:basis-0 sm:flex-1 cursor-pointer" style={{ color: 'var(--text-primary)' }}>
           <input type="checkbox" checked={r.include} onChange={(e) => update(r.key, 'include', e.target.checked)} className="w-4 h-4 shrink-0" />
           <FileText size={15} className="shrink-0" style={{ color: 'var(--text-muted)' }} />
           <span className="truncate" title={r.file_name}>{r.file_name}</span>
         </label>
         {status}
-        <button type="button" onClick={() => setShowDoc(v => !v)} className="btn btn-ghost btn-sm lg:hidden">
+        <button type="button" onClick={() => setShowDoc(v => !v)} className="btn btn-ghost btn-sm lg:hidden ml-auto">
           {showDoc ? <EyeOff size={14} /> : <Eye size={14} />} {t(showDoc ? 'finance.import.hideDoc' : 'finance.import.showDoc')}
         </button>
       </header>

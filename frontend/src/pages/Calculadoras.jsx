@@ -38,7 +38,7 @@ export default function Calculadoras() {
     <div className="max-w-4xl">
       <PageHeader title={t('calc.title')} description={t('calc.subtitle')} />
       <div className="grid md:grid-cols-[190px_minmax(0,1fr)] gap-4 md:gap-6">
-        <nav aria-label={t('calc.title')} className="flex md:flex-col gap-1 overflow-x-auto -mx-4 px-4 md:mx-0 md:px-0 pb-1 md:pb-0">
+        <nav aria-label={t('calc.title')} className="no-scrollbar flex md:flex-col gap-1 overflow-x-auto -mx-4 px-4 md:mx-0 md:px-0 pb-1 md:pb-0">
           {GROUPS.map(([g, ids]) => (
             <div key={g} className="flex md:flex-col gap-1 shrink-0 md:mb-3">
               <p className="hidden md:block text-xs font-medium px-2.5 mb-1" style={{ color: 'var(--text-muted)' }}>{t(`calc.${g}`)}</p>

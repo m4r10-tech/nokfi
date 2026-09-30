@@ -74,4 +74,14 @@ module.exports = async function session10Tests({ check, getDB }) {
         && /\/app\/finanzas\/impuestos$/.test(out.actions[0].link) && out.actions[0].link.startsWith('http')
         && src.report.priorities[0].link === '/app/finanzas/cobros';
     });
+
+  const { nameCase } = require('../utils/names');
+  const F = require('../db/finance');
+  check('S10 libro: los nombres en MAYÚSCULAS se leen en formato título (y el resto se respeta)',
+    () => {
+      const lid = getDB().prepare('SELECT id FROM licenses ORDER BY id LIMIT 1').get().id;
+      F.insertEntries(lid, [F.normalizeEntry({ type: 'expense', invoice_date: '2026-09-17', party_name: 'NEUMÁTICOS DEL SUR, S.L.', party_nif: 'B00000000', invoice_number: 'S10-NC', base: 10, vat_rate: 21, vat_amount: 2.1, irpf_rate: 0, irpf_amount: 0, total: 12.1, paid: true }).entry]);
+      const e = F.allEntries(lid).find(x => x.invoice_number === 'S10-NC');
+      return e.party_name === 'Neumáticos del Sur, S.L.' && nameCase('BBVA') === 'BBVA' && nameCase('Autoescuela Norte') === 'Autoescuela Norte';
+    });
 };

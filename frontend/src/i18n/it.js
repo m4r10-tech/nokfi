@@ -593,7 +593,7 @@ export default {
       { n: 60, suffix: '', label: 'fatture lette in una volta' },
       { n: 90, suffix: ' giorni', label: 'di previsione di cassa' },
       { n: 14, suffix: ' giorni', label: 'di prova gratuita' },
-      { n: 24, suffix: ' h', label: 'al massimo per risponderti' }
+      { n: 24, suffix: ' h', label: 'al massimo per risponderti' }
     ],
     howEyebrow: 'Come funziona', howHeading: 'Dai tuoi numeri a un piano d’azione',
     howSubtitle: 'Niente da installare e nessuna formazione. In pochi minuti sai dov’è il margine.',
@@ -888,7 +888,7 @@ export default {
       netIncome: 'Reddito netto', twentyPct: '20% del reddito', prevPayments: 'Acconti dei trimestri precedenti', withholdings: 'Ritenute subite',
       companyNote: 'Le società non presentano il modello 130: versano acconti dell’imposta sulle società (modello 202), per ora fuori dal calcolo di Nokfi.',
       noLegalForm: 'Indica se sei autonomo o società per affinare il calcolo.',
-      legal: 'Stima indicativa in regime generale (Spagna). Non include il recargo de equivalencia, i moduli né l’imposta sulle società. Non è consulenza fiscale.',
+      legal: 'Stima indicativa in regime generale (Spagna). Non include il recargo de equivalencia, i moduli né l’imposta sulle società.',
       compensateHeadline: 'Questo trimestre ({q}) l’IVA è a credito:',
       refundHeadline: 'Questo trimestre ({q}) l’IVA è a rimborso o a credito:',
       nothingToPay: 'Niente da accantonare questo trimestre',

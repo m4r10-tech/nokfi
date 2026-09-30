@@ -196,7 +196,7 @@ function Choice({ active, onClick, label }) {
       className="rounded-md min-h-9 py-1 px-1 text-xs font-medium leading-tight active:scale-[0.97]"
       style={{
         ...(active
-          ? { background: 'var(--surface-1)', color: 'var(--accent-text)', boxShadow: '0 0 0 1.5px var(--accent)' }
+          ? { background: 'var(--accent-soft)', color: 'var(--accent-text)', boxShadow: '0 0 0 1.5px var(--accent)' }
           : { background: 'transparent', color: 'var(--text-secondary)' }),
         transition: 'background-color var(--dur-fast) var(--ease-std), color var(--dur-fast) var(--ease-std), transform var(--dur-fast) var(--ease-std)'
       }}>

@@ -487,7 +487,7 @@ export default {
     servicios: { title: 'Outgoing — Services', desc: 'Stock allocated to services', description: 'Upload the materials allocated to services to analyse how they are distributed.' },
     entradas: { title: 'Incoming products', desc: 'Orders placed', description: 'Upload your purchase orders to analyse incoming products and suppliers.' },
     caja: { title: 'Cash', desc: 'Cash on hand and change', description: 'Upload your cash movements to analyse the balance over time and spot anomalies.' },
-    total: { title: 'Total (Profit)', desc: 'Total profit after taxes and expenses', description: 'Upload your income and expenses to calculate total profit after taxes.' }
+    total: { title: 'Total profit', desc: 'Total profit after taxes and expenses', description: 'Upload your income and expenses to calculate total profit after taxes.' }
   },
   excel: {
     modeSingle: 'One period', periodA: 'Period A', periodB: 'Period B', periodLabel: 'Period name (e.g. August)', compareBtn: 'Compare with AI', compareTitle: 'Period comparison', kpiVariation: 'Change', rowsShort: 'rows', compareHint: 'Sum of “{value}” grouped by “{label}” in each period.', compareNoNumbers: 'We could not find a common numeric column to calculate changes; the AI will still compare the content.',
@@ -594,7 +594,7 @@ export default {
       { n: 60, suffix: '', label: 'invoices read in one go' },
       { n: 90, suffix: ' days', label: 'of cash forecast' },
       { n: 14, suffix: ' days', label: 'free trial' },
-      { n: 24, suffix: ' h', label: 'maximum support reply time' }
+      { n: 24, suffix: ' h', label: 'maximum support reply time' }
     ],
     howEyebrow: 'How it works', howHeading: 'From your numbers to an action plan',
     howSubtitle: 'Nothing to install and no training needed. In a few minutes you know where the margin is.',
@@ -889,7 +889,7 @@ export default {
       netIncome: 'Net income', twentyPct: '20% of net income', prevPayments: 'Payments from previous quarters', withholdings: 'Withholdings applied to you',
       companyNote: 'Companies do not file form 130: they make Corporate Tax instalments (form 202), outside Nokfi\'s calculation for now.',
       noLegalForm: 'Tell us whether you are self-employed or a company to fine-tune the calculation.',
-      legal: 'Approximate estimate under the general regime (Spain). Excludes the equivalence surcharge, modules and Corporate Tax. This is not tax advice.',
+      legal: 'Approximate estimate under the general regime (Spain). Excludes the equivalence surcharge, modules and Corporate Tax.',
       compensateHeadline: 'This quarter ({q}) your VAT is to be offset:',
       refundHeadline: 'This quarter ({q}) your VAT is to be refunded or offset:',
       nothingToPay: 'Nothing to set aside this quarter',

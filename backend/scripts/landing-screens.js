@@ -29,7 +29,9 @@ Object.assign(process.env, {
 });
 
 const DIST = path.join(__dirname, '../../frontend/dist');
-const OUT = path.join(__dirname, '../../frontend/public/screens');
+// SHOTS_OUT=<carpeta>: revisión en móvil (390×844, más pantallas) sin tocar las capturas de la landing.
+const MOBILE_OUT = process.env.SHOTS_OUT || null;
+const OUT = MOBILE_OUT || path.join(__dirname, '../../frontend/public/screens');
 const { chromium } = require(process.env.PLAYWRIGHT_CORE || 'playwright-core');
 const CHROME = fs.readdirSync(path.join(os.homedir(), '.cache/ms-playwright'))
   .filter(d => /^chromium-\d+$/.test(d)).sort().map(d => path.join(os.homedir(), '.cache/ms-playwright', d, 'chrome-linux64/chrome'))
@@ -190,10 +192,15 @@ async function main() {
     ['inicio', '/app/home'],
     ['impuestos', '/app/finanzas/impuestos'],
     ['cobros', '/app/finanzas/cobros'],
-    ['informe', `/app/historial/${aid}`]
+    ['informe', `/app/historial/${aid}`],
+    ...(MOBILE_OUT ? [['libro', '/app/finanzas/libro'], ['cuestionario', '/app/cuestionario'], ['calculadoras', '/app/calculadoras?c=hora'],
+      ['historial', '/app/historial'], ['configuracion', '/app/configuracion'], ['ayuda', '/app/ayuda'], ['landing', '/home'], ['precios', '/pricing']] : [])
   ];
-  for (const theme of ['dark', 'light']) {
-    const ctx = await browser.newContext({ viewport: { width: 1280, height: 800 }, deviceScaleFactor: 1.5, locale: 'es-ES', timezoneId: 'Europe/Madrid' });
+  for (const theme of MOBILE_OUT ? ['dark'] : ['dark', 'light']) {
+    const ctx = await browser.newContext({
+      viewport: MOBILE_OUT ? { width: 390, height: 844 } : { width: 1280, height: 800 },
+      deviceScaleFactor: MOBILE_OUT ? 2 : 1.5, isMobile: !!MOBILE_OUT, hasTouch: !!MOBILE_OUT, locale: 'es-ES', timezoneId: 'Europe/Madrid'
+    });
     await ctx.addInitScript(([tk, th]) => {
       sessionStorage.setItem('nokfi_session_token', tk);
       localStorage.setItem('nokfi_theme', th);
@@ -207,7 +214,7 @@ async function main() {
       await page.goto(`http://localhost:${WEB}${url}`, { waitUntil: 'networkidle' });
       await page.addStyleTag({ content: '*,*::before,*::after{animation-duration:0s!important;transition-duration:0s!important}' });
       await wait(1200);
-      await page.screenshot({ path: path.join(OUT, `${name}-${theme}.jpg`), type: 'jpeg', quality: 82 });
+      await page.screenshot({ path: path.join(OUT, `${name}-${theme}.jpg`), type: 'jpeg', quality: 82, fullPage: !!MOBILE_OUT });
       console.log('✓', name, theme);
     }
     await ctx.close();

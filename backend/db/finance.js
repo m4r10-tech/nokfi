@@ -10,6 +10,8 @@
 
 const { getDB } = require('./database');
 const { sanitizeFreeText } = require('../utils/sanitize');
+// Sesión 10: los nombres en MAYÚSCULAS se devuelven en formato título al leer.
+const { nameCase } = require('../utils/names');
 
 const FIELDS = ['type', 'party_name', 'party_nif', 'party_email', 'invoice_number', 'invoice_date', 'due_date', 'concept', 'category',
   'base', 'vat_rate', 'vat_amount', 'irpf_rate', 'irpf_amount', 'total', 'paid', 'paid_at', 'source', 'file_name'];
@@ -93,17 +95,17 @@ function listLedger(license_id, { from, to, type } = {}) {
   if (to && ISO.test(to)) { where.push('invoice_date <= ?'); args.push(to); }
   if (type === 'income' || type === 'expense') { where.push('type = ?'); args.push(type); }
   return getDB().prepare(`SELECT * FROM ledger_entries WHERE ${where.join(' AND ')} ORDER BY invoice_date DESC, id DESC LIMIT 5000`)
-    .all(...args).map(r => ({ ...r, paid: !!r.paid, needs_review: !!r.needs_review }));
+    .all(...args).map(r => ({ ...r, party_name: nameCase(r.party_name), paid: !!r.paid, needs_review: !!r.needs_review }));
 }
 
 function allEntries(license_id) {
   return getDB().prepare('SELECT * FROM ledger_entries WHERE license_id = ? ORDER BY invoice_date ASC, id ASC')
-    .all(license_id).map(r => ({ ...r, paid: !!r.paid }));
+    .all(license_id).map(r => ({ ...r, party_name: nameCase(r.party_name), paid: !!r.paid }));
 }
 
 function getEntry(license_id, id) {
   const r = getDB().prepare('SELECT * FROM ledger_entries WHERE id = ? AND license_id = ?').get(id, license_id);
-  return r ? { ...r, paid: !!r.paid, needs_review: !!r.needs_review } : null;
+  return r ? { ...r, party_name: nameCase(r.party_name), paid: !!r.paid, needs_review: !!r.needs_review } : null;
 }
 
 function updateEntry(license_id, id, partial) {

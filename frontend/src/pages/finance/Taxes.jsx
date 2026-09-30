@@ -1,6 +1,6 @@
 import { useState, useEffect, useCallback } from 'react';
 import { Link } from 'react-router-dom';
-import { Landmark, Loader2, CalendarDays, Info } from 'lucide-react';
+import { Loader2, CalendarDays, Info } from 'lucide-react';
 import { financeApi } from '../../middleware/api';
 import { apiErrorMessage, isConnectivityError } from '../../middleware/errors';
 import { useLang } from '../../context/LangContext';
@@ -140,7 +140,7 @@ export default function Taxes() {
               </Section>
             )}
           </div>
-          <Notice icon={Landmark}>{t('finance.taxes.legal')}</Notice>
+          <p className="text-xs" style={{ color: 'var(--text-muted)' }}>{t('finance.taxes.legal')}</p>
         </>
       )}
     </div>

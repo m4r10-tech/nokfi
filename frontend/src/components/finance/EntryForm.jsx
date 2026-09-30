@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { Loader2, AlertTriangle } from 'lucide-react';
+import { Loader2, AlertTriangle, Trash2 } from 'lucide-react';
 import { useLang } from '../../context/LangContext';
 import { Modal, Segmented, Field, ErrorBox } from '../ui';
 import { todayIso } from '../../utils/money';
@@ -30,7 +30,7 @@ export function checkOk(e) {
   return Math.abs(r2(e.base) + r2(e.vat_amount) - r2(e.irpf_amount) - r2(e.total)) <= 0.05;
 }
 
-export default function EntryForm({ initial, onSave, onClose, saving, error }) {
+export default function EntryForm({ initial, onSave, onClose, onDelete, saving, error }) {
   const { t } = useLang();
   const [e, setE] = useState(() => ({ ...emptyEntry(), ...initial, due_date: initial?.due_date || '' }));
   const set = (k, v) => setE(prev => {
@@ -65,6 +65,12 @@ export default function EntryForm({ initial, onSave, onClose, saving, error }) {
   return (
     <Modal title={initial?.id ? t('finance.editEntry') : t('finance.addEntry')} onClose={onClose} wide
       footer={<>
+        {/* Sesión 10: en móvil la fila del libro no lleva papelera; se borra desde aquí. */}
+        {onDelete && initial?.id && (
+          <button type="button" onClick={onDelete} className="btn btn-ghost sm:mr-auto" style={{ color: 'var(--negative)' }}>
+            <Trash2 size={15} /> {t('finance.delete')}
+          </button>
+        )}
         <button type="button" onClick={onClose} className="btn btn-secondary">{t('common.cancel')}</button>
         <button type="submit" form="entry-form" disabled={!valid || saving} className="btn btn-primary">
           {saving && <Loader2 size={15} className="animate-spin" />} {t('common.save')}

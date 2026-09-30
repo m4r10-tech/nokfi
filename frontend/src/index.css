@@ -319,3 +319,7 @@ html { scroll-padding-top: 80px; }
 /* Sesión 10: capturas de la landing en el tema que se está viendo. */
 html.theme-light .shot-dark,
 html:not(.theme-light) .shot-light { display: none; }
+
+/* Sesión 10: filas de pestañas con scroll horizontal sin barra visible. */
+.no-scrollbar { scrollbar-width: none; }
+.no-scrollbar::-webkit-scrollbar { display: none; }

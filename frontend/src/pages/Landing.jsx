@@ -248,7 +248,7 @@ function Screens({ t }) {
   return (
     <Section id="por-dentro" eyebrow={t('landing.screensEyebrow')} title={t('landing.screensHeading')} subtitle={t('landing.screensSubtitle')}>
       <div ref={ref} className="reveal flex flex-col items-center gap-5">
-        <div role="tablist" className="inline-flex max-w-full overflow-x-auto gap-1 rounded-xl p-1" style={{ background: 'var(--surface-1)', border: '1px solid var(--border)' }}>
+        <div role="tablist" className="no-scrollbar inline-flex max-w-full overflow-x-auto gap-1 rounded-xl p-1" style={{ background: 'var(--surface-1)', border: '1px solid var(--border)' }}>
           {SCREENS.map((s, i) => (
             <button key={s} role="tab" aria-selected={active === i} onClick={() => pick(i)}
               className="shrink-0 rounded-lg px-2.5 sm:px-3.5 h-9 text-[13px] sm:text-sm font-medium"

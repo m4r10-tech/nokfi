@@ -593,7 +593,7 @@ export default {
       { n: 60, suffix: '', label: 'Rechnungen auf einmal gelesen' },
       { n: 90, suffix: ' Tage', label: 'Liquiditätsprognose' },
       { n: 14, suffix: ' Tage', label: 'kostenlos testen' },
-      { n: 24, suffix: ' h', label: 'maximale Antwortzeit' }
+      { n: 24, suffix: ' h', label: 'maximale Antwortzeit' }
     ],
     howEyebrow: 'So funktioniert’s', howHeading: 'Von deinen Zahlen zum Maßnahmenplan',
     howSubtitle: 'Nichts installieren, keine Schulung. In wenigen Minuten weißt du, wo die Marge liegt.',
@@ -888,7 +888,7 @@ export default {
       netIncome: 'Nettoeinkünfte', twentyPct: '20 % der Einkünfte', prevPayments: 'Vorauszahlungen der Vorquartale', withholdings: 'Einbehaltene Steuern',
       companyNote: 'Gesellschaften reichen kein Modelo 130 ein: Sie leisten Vorauszahlungen zur Körperschaftsteuer (Modelo 202), die Nokfi derzeit nicht berechnet.',
       noLegalForm: 'Gib an, ob du selbstständig oder eine Gesellschaft bist, um die Berechnung zu verfeinern.',
-      legal: 'Unverbindliche Schätzung im allgemeinen System (Spanien). Ohne Recargo de equivalencia, Modul-Besteuerung und Körperschaftsteuer. Keine Steuerberatung.',
+      legal: 'Unverbindliche Schätzung im allgemeinen System (Spanien). Ohne Recargo de equivalencia, Modul-Besteuerung und Körperschaftsteuer.',
       compensateHeadline: 'Dieses Quartal ({q}) ergibt sich ein Vorsteuerüberhang:',
       refundHeadline: 'Dieses Quartal ({q}) erhältst du Umsatzsteuer zurück oder verrechnest sie:',
       nothingToPay: 'Dieses Quartal nichts zurückzulegen',
