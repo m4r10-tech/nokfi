@@ -117,10 +117,10 @@ export default function Forecast() {
         <Section title={t('finance.forecast.scenarios')}>
           <form onSubmit={(e) => { e.preventDefault(); setApplied({ hire: scenario.hire, delay: scenario.delay, extra: scenario.extra }); }} className="flex flex-col gap-3">
             <Field label={t('finance.forecast.hire')} htmlFor="sc-hire" hint={t('finance.forecast.hireHint')}>
-              <input id="sc-hire" type="number" min="0" step="50" inputMode="decimal" value={scenario.hire} onChange={(e) => setScenario(s => ({ ...s, hire: e.target.value }))} className="input" placeholder="1600" />
+              <input id="sc-hire" type="number" min="0" step="50" inputMode="decimal" value={scenario.hire} onChange={(e) => setScenario(s => ({ ...s, hire: e.target.value }))} className="input" placeholder="0" />
             </Field>
             <Field label={t('finance.forecast.delay')} htmlFor="sc-delay">
-              <input id="sc-delay" type="number" min="0" max="180" step="5" value={scenario.delay} onChange={(e) => setScenario(s => ({ ...s, delay: e.target.value }))} className="input" placeholder="30" />
+              <input id="sc-delay" type="number" min="0" max="180" step="5" value={scenario.delay} onChange={(e) => setScenario(s => ({ ...s, delay: e.target.value }))} className="input" placeholder="0" />
             </Field>
             <Field label={t('finance.forecast.extra')} htmlFor="sc-extra" hint={t('finance.forecast.extraHint')}>
               <input id="sc-extra" type="number" min="0" step="50" inputMode="decimal" value={scenario.extra} onChange={(e) => setScenario(s => ({ ...s, extra: e.target.value }))} className="input" />

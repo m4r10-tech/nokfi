@@ -25,6 +25,8 @@ const { requireLicense } = require('../middleware/requireLicense');
 const { listAnalyses, getAnalysis } = require('../db/database');
 const { listActionsForAnalysis } = require('../db/actions');
 
+const parse = (s) => { try { return s ? JSON.parse(s) : null; } catch { return null; } };
+
 router.get('/', requireLicense, (req, res) => {
   const rows = listAnalyses(req.license.id);
   res.json({
@@ -35,7 +37,10 @@ router.get('/', requireLicense, (req, res) => {
       prompt_chars: r.prompt_chars,
       format: r.format,
       created_at: r.created_at,
-      source: r.source || 'web'
+      source: r.source || 'web',
+      // Sesión 10: para el título y el resultado clave de cada línea.
+      summary: parse(r.summary_json),
+      key_figure: parse(r.key_figure_json)
     }))
   });
 });
@@ -60,7 +65,7 @@ router.get('/:id', requireLicense, (req, res) => {
     result_html: analysis.result_html,
     report: analysis.result_json || null,
     health: meta?.health || null,
-    meta: meta ? { task: meta.task, module: meta.module, folder_name: meta.folder_name, file_count: meta.file_count, stats: meta.stats } : null,
+    meta: meta ? { task: meta.task, module: meta.module, folder_name: meta.folder_name, file_count: meta.file_count, stats: meta.stats, files: meta.files, period: meta.period, periods: meta.periods } : null,
     actions: analysis.format === 'json' ? listActionsForAnalysis(req.license.id, analysis.id) : [],
     prompt_chars: analysis.prompt_chars,
     created_at: analysis.created_at

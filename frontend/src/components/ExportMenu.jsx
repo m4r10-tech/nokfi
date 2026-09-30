@@ -7,7 +7,10 @@ import { useToast } from '../context/ToastContext';
  * F5 — botón "Exportar" con todos los formatos habituales en empresa.
  * Cada formato carga su librería solo al elegirlo (middleware/exports).
  * `formats` permite limitar la lista (p.ej. el libro de facturas: CSV/Excel/ODS).
+ * Sesión 10: si están PDF y Excel, van como botones directos y el resto en
+ * "Más formatos" (seis formatos de golpe eran demasiados para un informe).
  */
+const PRIMARY = ['pdf', 'xlsx'];
 const ICONS = { pdf: FileText, docx: FileType, xlsx: FileSpreadsheet, csv: Table2, ods: FileSpreadsheet, odt: FileType, pptx: Presentation, json: Braces };
 const ALL = ['pdf', 'docx', 'xlsx', 'csv', 'ods', 'odt', 'pptx', 'json'];
 
@@ -43,16 +46,27 @@ export default function ExportMenu({ doc, formats = ALL, onExport }) {
     setBusy(null);
   };
 
+  const split = PRIMARY.every(f => formats.includes(f));
+  const menu = split ? formats.filter(f => !PRIMARY.includes(f)) : formats;
+
   return (
-    <div ref={ref} className="relative">
-      <button onClick={() => setOpen(o => !o)} aria-haspopup="menu" aria-expanded={open} disabled={!!busy} className="btn btn-secondary btn-sm">
-        {busy ? <Loader2 size={14} className="animate-spin" /> : <Download size={14} />}
-        {t('common.export')} <ChevronDown size={14} />
+    <div ref={ref} className="relative flex flex-wrap gap-2">
+      {split && PRIMARY.map(f => {
+        const Icon = ICONS[f];
+        return (
+          <button key={f} onClick={() => run(f)} disabled={!!busy} className="btn btn-secondary btn-sm">
+            {busy === f ? <Loader2 size={14} className="animate-spin" /> : <Icon size={14} />} {t(f === 'pdf' ? 'export.pdf' : 'export.excelShort')}
+          </button>
+        );
+      })}
+      <button onClick={() => setOpen(o => !o)} aria-haspopup="menu" aria-expanded={open} disabled={!!busy} className={`btn btn-sm ${split ? 'btn-ghost' : 'btn-secondary'}`}>
+        {busy && !(split && PRIMARY.includes(busy)) ? <Loader2 size={14} className="animate-spin" /> : !split && <Download size={14} />}
+        {split ? t('export.moreFormats') : t('common.export')} <ChevronDown size={14} />
       </button>
       {open && (
         <div role="menu" className="absolute left-0 top-full mt-1.5 z-40 w-72 max-w-[calc(100vw-32px)] rounded-xl p-1.5 anim-scale"
           style={{ background: 'var(--surface-1)', border: '1px solid var(--border-strong)', boxShadow: 'var(--shadow-lg)' }}>
-          {formats.map(f => {
+          {menu.map(f => {
             const Icon = ICONS[f] || FileText;
             return (
               <button key={f} role="menuitem" onClick={() => run(f)}

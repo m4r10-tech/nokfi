@@ -12,7 +12,7 @@ export default function DevLocked() {
         <p className="text-sm font-medium" style={{ color: 'var(--text-primary)' }}>{t('dev.lockedTitle')}</p>
         <p className="text-sm mt-0.5" style={{ color: 'var(--text-secondary)' }}>{t('dev.lockedDesc')}</p>
       </div>
-      <Link to="/app/configuracion" className="btn btn-primary btn-sm shrink-0">{t('dev.upgrade')} <ArrowRight size={14} /></Link>
+      <Link to="/app/configuracion?s=plan" className="btn btn-primary btn-sm shrink-0">{t('dev.upgrade')} <ArrowRight size={14} /></Link>
     </section>
   );
 }

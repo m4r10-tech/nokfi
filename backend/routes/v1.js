@@ -41,6 +41,8 @@ const W = require('../db/webhooks');
 const T = require('../services/taxTools');
 const { sampleAnalysis, sampleInvoices } = require('../services/testMode');
 
+const { absoluteLinks } = require('../services/ai/financeContext');
+
 const TYPES = ['cuestionario', 'excel', 'compare', 'folder'];
 
 router.get('/openapi.json', (_req, res) => res.json(openapi));
@@ -56,14 +58,14 @@ async function analyze({ license, body, ip, source = 'api', livemode = true }) {
   if (!livemode) {
     const err = checkInput({ license, task: type, input: body?.data, lang: body?.lang });
     if (err) return err;
-    const out = sampleAnalysis({ type, data: body?.data, title: body?.title });
+    const out = absoluteLinks(sampleAnalysis({ type, data: body?.data, title: body?.title }));
     webhooks.emit(license.id, 'analysis.completed', { id: null, type: out.type, title: out.title, source, report: out.report, health: out.health }, { livemode: false });
     return { status: 200, body: out };
   }
   const out = await runAnalysis({ license, task: type, input: body?.data, lang: body?.lang, title: body?.title, ip, source });
   if (out.status !== 200) return out;
   const b = out.body;
-  return { status: 200, body: { id: b.analysis_id, type: b.kind, title: b.title, report: b.report, health: b.health, actions: b.actions } };
+  return { status: 200, body: absoluteLinks({ id: b.analysis_id, type: b.kind, title: b.title, report: b.report, health: b.health, actions: b.actions }) };
 }
 
 function usage(license, livemode = true) {
@@ -79,12 +81,12 @@ function getApiAnalysis(license, rawId) {
   const id = Number(rawId);
   const a = Number.isInteger(id) ? getAnalysis(license.id, id) : null;
   if (!a) return null;
-  return {
+  return absoluteLinks({
     id: a.id, type: a.kind, title: a.title, created_at: a.created_at, format: a.format,
     report: a.result_json || null, html: a.result_json ? undefined : a.result_html,
     health: a.meta?.health || null,
     actions: a.format === 'json' ? listActionsForAnalysis(license.id, a.id) : []
-  };
+  });
 }
 
 router.get('/analyses', requireApiKey, (req, res) => res.json(listApiAnalyses(req.license, req.query.limit)));

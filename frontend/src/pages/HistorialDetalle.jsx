@@ -14,8 +14,7 @@ import EmptyState from '../components/EmptyState';
 import ErrorState from '../components/ErrorState';
 import Skeleton, { SkeletonText } from '../components/Skeleton';
 import { formatDateTime } from '../utils/dates';
-import { num } from '../utils/money';
-import { KIND_ICON, kindLabel } from './Historial';
+import { KIND_ICON, kindLabel, analysisTitle, analysisSource } from './Historial';
 
 /**
  * Detalle de un análisis guardado (/app/historial/:id). El HTML de la IA se
@@ -63,6 +62,10 @@ export default function HistorialDetalle() {
   }
 
   const Icon = KIND_ICON[analysis.kind] || FileText;
+  // Mismo título y origen que en la lista (sesión 10).
+  const summary = { ...analysis.meta, score: analysis.health?.score };
+  const title = analysisTitle({ ...analysis, summary }, lang);
+  const source = analysisSource({ summary });
   const html = analysis.report ? '' : sanitizeAiHtml(analysis.result_html);
 
   const copyText = async () => {
@@ -87,9 +90,9 @@ export default function HistorialDetalle() {
         style={{ background: 'var(--accent-soft)', color: 'var(--accent-text)' }}>
         <Icon size={13} /> {kindLabel(analysis.kind, t)}
       </span>
-      <h1 className="text-[22px] md:text-2xl font-semibold tracking-tight" style={{ color: 'var(--text-primary)' }}>{analysis.title}</h1>
+      <h1 className="text-[22px] md:text-2xl font-semibold tracking-tight" style={{ color: 'var(--text-primary)' }}>{title}</h1>
       <p className="text-xs mt-1.5 mb-5" style={{ color: 'var(--text-muted)' }}>
-        {formatDateTime(analysis.created_at, lang)} · {t('history.detailPromptChars')}: {num(analysis.prompt_chars, lang, 0)}
+        {formatDateTime(analysis.created_at, lang)}{source && ` · ${source}`}
       </p>
 
       <div className="flex flex-wrap gap-2 mb-4">

@@ -210,4 +210,24 @@ function formatStats(stats, lang = 'es') {
   return walk(stats);
 }
 
-module.exports = { tableStats, formatStats, normalizeRows, serialToIso, toNumber, toMonth };
+/**
+ * Sesión 10: meses que cubren los datos (columna de fecha detectada igual que
+ * en tableStats) → { from: 'YYYY-MM', to: 'YYYY-MM' } o null. Para el título
+ * del historial ("Caja · jul–sep 2026").
+ */
+function monthRange(rows) {
+  const list = Array.isArray(rows) ? rows.filter(r => r && typeof r === 'object') : [];
+  if (!list.length) return null;
+  const columns = [...new Set(list.slice(0, 50).flatMap(r => Object.keys(r)))].slice(0, 40);
+  for (const c of columns) {
+    const vals = list.map(r => r[c]).filter(v => v !== '' && v != null);
+    if (!vals.length) continue;
+    const months = vals.map(toMonth).filter(Boolean);
+    if (months.length < vals.length * 0.8) continue;
+    months.sort();
+    return { from: months[0], to: months[months.length - 1] };
+  }
+  return null;
+}
+
+module.exports = { tableStats, formatStats, normalizeRows, serialToIso, toNumber, toMonth, monthRange };

@@ -225,6 +225,7 @@ export default {
   },
   config: {
     title: 'Configuración',
+    tabs: { perfil: 'Perfil', plan: 'Plan', compartir: 'Compartir', seguridad: 'Seguridad', datos: 'Datos' }, notifications: 'Avisos por email', taxIdPlaceholder: 'NIF, NIE o CIF',
     appearance: 'Apariencia', theme: 'Tema', dark: 'Oscuro', light: 'Claro',
     language: 'Idioma', profile: 'Perfil de empresa', companyName: 'Nombre', sector: 'Sector',
     session: 'Sesión', planLabel: 'Plan', deviceLabel: 'Dispositivo', logout: 'Cerrar sesión',
@@ -245,7 +246,7 @@ export default {
     sectorPlaceholder: 'Ej.: Hostelería', saving: 'Guardando…', saved: 'Guardado', saveError: 'No se pudo guardar',
     status_active: 'Activa', status_suspended: 'Suspendida', status_expired: 'Caducada', status_revoked: 'Revocada', status_past_due: 'Pago pendiente',
     wrongPassword: 'La contraseña no es correcta.', keyCopied: 'Clave copiada al portapapeles',
-    legacyNote: 'Esta es una licencia legacy (de por vida). No hay suscripción de Stripe que gestionar.',
+    legacyNote: 'Tu licencia es de pago único y no caduca: no hay nada que renovar ni cancelar.',
     portalError: 'No se pudo abrir el portal de gestión. Inténtalo de nuevo más tarde.',
     legalForm: 'Forma jurídica', legalAutonomo: 'Autónomo', legalSociedad: 'Sociedad',
     taxId: 'NIF / CIF', taxIdHint: 'Sirve para distinguir tus facturas emitidas de las recibidas al leerlas con IA.',
@@ -294,7 +295,7 @@ export default {
     loading: 'Cargando planes…'
   },
   onboarding: {
-    companyPlaceholder: 'Taller García', sectorSelect: 'Selecciona un sector',
+    companyPlaceholder: 'El nombre de tu negocio', sectorSelect: 'Selecciona un sector',
     sectors: { taller: 'Taller mecánico', automocion: 'Automoción (venta de vehículos)', transporte: 'Transporte', industria: 'Industria', mayorista: 'Comercio mayorista', alojamiento: 'Alojamiento', inmobiliaria: 'Inmobiliaria', estetica: 'Peluquería y estética', deporte: 'Deporte y ocio', asesoria: 'Asesoría y gestoría', arquitectura: 'Arquitectura e ingeniería', marketing: 'Marketing y publicidad', limpieza: 'Limpieza', agricultura: 'Agricultura', comercio: 'Comercio minorista', hosteleria: 'Hostelería', salud: 'Salud', legal: 'Legal', construccion: 'Construcción', tecnologia: 'Tecnología', consultoria: 'Consultoría', diseno: 'Diseño', educacion: 'Educación', otro: 'Otro' },
     sectorAliases: { taller: 'coche mecánica neumáticos chapa pintura electricidad del automóvil', automocion: 'concesionario coches motos compraventa', transporte: 'camión mensajería reparto mudanzas logística taxi', industria: 'fábrica taller industrial metal carpintería', comercio: 'tienda minorista boutique frutería panadería', mayorista: 'distribución almacén', hosteleria: 'bar restaurante cafetería', alojamiento: 'hotel hostal apartamentos turísticos casa rural', construccion: 'obras reformas albañil fontanero electricista', inmobiliaria: 'pisos alquiler agencia', salud: 'clínica médico dentista fisioterapia psicología', estetica: 'barbería uñas spa', deporte: 'gimnasio academia de baile', educacion: 'academia formación clases', legal: 'abogado despacho', asesoria: 'gestoría contabilidad asesor fiscal', consultoria: 'consultor', arquitectura: 'arquitecto ingeniero estudio', tecnologia: 'software informática programación web', marketing: 'agencia redes sociales', diseno: 'diseñador gráfico fotografía', limpieza: 'limpiezas mantenimiento', agricultura: 'campo ganadería granja' },
     sizes: { solo: 'Solo (autónomo)', s2: '2–5 personas', s6: '6–20 personas', s20: '+20 personas' },
@@ -525,7 +526,7 @@ export default {
     qvBalanceNote: 'El saldo es un acumulado: se muestra su evolución, no se suma.'
   },
   history: {
-    title: 'Historial',
+    score: 'Nota {n}/100',     title: 'Historial',
     subtitle: 'Tus análisis guardados. Ábrelos para revisarlos o exportarlos a PDF.',
     loading: 'Cargando historial...', loadError: 'No se pudo cargar el historial.',
     emptyTitle: 'Aún no has generado ningún análisis',
@@ -743,6 +744,8 @@ export default {
     dataSheet: 'Datos', reportSheet: 'Informe', colSection: 'Sección', colItem: 'Elemento', colDetail: 'Detalle', colExtra: 'Extra'
   },
   export: {
+    excelShort: 'Excel',
+    moreFormats: 'Más formatos',
     error: 'No se pudo generar el archivo. Inténtalo de nuevo.',
     pdf: 'PDF', pdfDesc: 'Para enviar, imprimir o archivar',
     docx: 'Word (.docx)', docxDesc: 'Para editar o completar el informe',
@@ -973,7 +976,18 @@ export default {
     infoDesc: 'Dudas generales, información comercial y privacidad.',
     includedInfo: 'El correo de soporte incluye tu email, tu plan y la versión de la app. Nunca tu clave de licencia ni tus datos financieros.',
     supportSubject: 'Soporte Nokfi', bodyIntro: 'Cuéntanos qué ha pasado:', bodyEmail: 'Email', bodyPlan: 'Plan', bodyVersion: 'Versión', bodyBrowser: 'Navegador',
-    more: 'Más recursos', askAssistant: 'Preguntar al asistente', apiDocs: 'Documentación de la API'
+    more: 'Más recursos', askAssistant: 'Preguntar al asistente', apiDocs: 'Documentación de la API',
+    person: 'Te responde Mario, que hace Nokfi', response: 'Normalmente en menos de 24 horas laborables.', responseMax: 'Tu plan Max tiene soporte prioritario: te respondemos en menos de 4 horas laborables.', guides: 'Guías rápidas',
+    faq: [
+      { q: '¿Cómo leo mis facturas con IA?', a: 'En Finanzas › Libro, pulsa «Leer facturas con IA» y elige fotos o PDF (o una carpeta entera). Revisa cada factura junto al documento y guarda. Los archivos no se guardan: solo los datos que confirmas.', cta: 'Ir al libro' },
+      { q: '¿Qué es el modelo 303 y cuánto tengo que apartar?', a: 'Es la declaración trimestral del IVA: el IVA que cobras en tus facturas menos el que pagas en tus gastos. En Impuestos ves cuánto te sale este trimestre, el plazo y lo que llevas apartado.', cta: 'Ver mis impuestos' },
+      { q: '¿Y el modelo 130?', a: 'Es el pago fraccionado del IRPF de los autónomos: el 20 % de lo que llevas ganado en el año, menos lo ya pagado y las retenciones que te han hecho. Las sociedades no lo presentan.', cta: 'Ver el cálculo' },
+      { q: '¿Cómo reclamo una factura vencida?', a: 'En Cobros, pulsa «Reclamar» en la factura: Nokfi te redacta el email en tono amable, firme o formal. También puedes activar los recordatorios automáticos.', cta: 'Ir a cobros' },
+      { q: '¿Puedo darle acceso a mi gestoría?', a: 'Sí. En Configuración › Compartir creas un enlace de solo lectura, con fecha de caducidad, que puedes revocar cuando quieras.', cta: 'Crear un enlace' },
+      { q: '¿Qué pasa con mis datos?', a: 'Son tuyos. Los proveedores de IA que usamos no entrenan con ellos. Desde Configuración › Datos puedes descargarlos todos o borrar tu cuenta.', cta: 'Mis datos' },
+      { q: '¿Cuántos análisis con IA tengo?', a: 'Depende del plan: 10 al día en Mini, 50 en Pro y 130 en Max. La cuota se renueva cada día. Las facturas electrónicas y las calculadoras no gastan análisis.', cta: 'Ver mi plan' },
+      { q: '¿Cómo cambio de plan o cancelo?', a: 'En Configuración › Plan, «Gestionar suscripción». No hay permanencia y los cambios se aplican al final del periodo que ya has pagado.', cta: 'Ir a mi plan' }
+    ]
   },
   apiDocs: {
     // Sesión 9 — Bloque 2

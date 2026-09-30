@@ -245,6 +245,7 @@ const REPORT_RULES = `REGLAS DEL INFORME (obligatorias):
 - Gravedad: un plazo fiscal a menos de 30 días con algo por pagar o por preparar es "high". Si el IVA sale a compensar, no digas que hay que pagarlo.
 - Plan de acción: due_in_days = días desde hoy para hacerlo (0 = hoy) y timeframe = ese mismo plazo en palabras. Lo que depende de un plazo fiscal se hace antes de ese plazo. Ordénalo de más urgente a menos.
 - No repitas la misma cifra en varias partes del informe salvo que haga falta para explicar una prioridad.
+- En cifras clave, de lo que le deben pon UNA sola cifra: el importe vencido si hay algo vencido; si no, el total por cobrar. Nunca las dos.
 - Los datos del libro son hechos: las facturas que aparecen YA están registradas en Nokfi (no propongas registrarlas). "Vencido" es solo lo marcado como "venció"; lo que "vence" más adelante aún no se debe y no se reclama como impagado.
 - Cifras clave: como mucho 4, cada una distinta (no pongas a la vez un total y una parte suya con otra etiqueta). La nota solo si aporta un hecho de los datos; si no, déjala vacía.`;
 
@@ -258,7 +259,7 @@ const EXCEL_MODULES = {
   total: 'Calcula y analiza el beneficio total tras impuestos y gastos a partir de los ingresos y gastos: márgenes y partidas que más pesan.'
 };
 
-const { tableStats, formatStats, normalizeRows } = require('../../utils/tableStats');
+const { tableStats, formatStats, normalizeRows, monthRange } = require('../../utils/tableStats');
 
 const MAX_ROWS_PER_FILE = 80;     // muestra de filas que ve la IA
 const MAX_STATS_ROWS = 5000;      // filas sobre las que Nokfi calcula las cifras exactas
@@ -274,8 +275,10 @@ function sanitizeFiles(files, maxFiles = 3, lang = 'es') {
       const rows = all.slice(0, MAX_ROWS_PER_FILE);
       let stats = null;
       try { stats = formatStats(tableStats(all), normLang(lang)); } catch { stats = null; }
+      let period = null;
+      try { period = monthRange(all); } catch { period = null; }
       return {
-        name, kind: 'rows', total: Number(f.total_rows) || f.rows.length, sample: rows.length, statsRows: all.length,
+        name, kind: 'rows', total: Number(f.total_rows) || f.rows.length, sample: rows.length, statsRows: all.length, period,
         content: JSON.stringify(rows), stats: stats ? JSON.stringify(stats).slice(0, MAX_STATS_CHARS) : null
       };
     }

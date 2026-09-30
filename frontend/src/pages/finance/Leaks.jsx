@@ -8,6 +8,7 @@ import ErrorState from '../../components/ErrorState';
 import EmptyState from '../../components/EmptyState';
 import Skeleton from '../../components/Skeleton';
 import { Section, Badge } from '../../components/ui';
+import ConfirmModal from '../../components/dev/ConfirmModal';
 import { eur, isoDate, num } from '../../utils/money';
 
 /**
@@ -34,9 +35,12 @@ export default function Leaks() {
   }, []);
   useEffect(() => { load(); }, [load]);
 
-  const removeDuplicate = async (d) => {
-    if (!window.confirm(t('finance.leaks.confirmRemove'))) return;
-    const res = await ledgerApi.remove(d.id);
+  const [confirming, setConfirming] = useState(null);
+  const [removing, setRemoving] = useState(false);
+  const removeDuplicate = async () => {
+    setRemoving(true);
+    const res = await ledgerApi.remove(confirming.id);
+    setRemoving(false); setConfirming(null);
     if (res.ok) { toast.success(t('finance.deleted')); load(); } else toast.error(apiErrorMessage(t, res));
   };
 
@@ -106,7 +110,7 @@ export default function Leaks() {
                         {isoDate(d.invoice_date, lang)} · {t(d.reason === 'same_number' ? 'finance.leaks.sameNumber' : 'finance.leaks.sameAmount')}
                       </p>
                     </div>
-                    <button onClick={() => removeDuplicate(d)} className="btn btn-ghost btn-sm"><Trash2 size={14} /> {t('finance.leaks.removeEntry')}</button>
+                    <button onClick={() => setConfirming(d)} className="btn btn-ghost btn-sm"><Trash2 size={14} /> {t('finance.leaks.removeEntry')}</button>
                     {dismissButton(d.party_key, d.party_name)}
                   </li>
                 ))}
@@ -149,6 +153,10 @@ export default function Leaks() {
             ))}
           </ul>
         </Section>
+      )}
+      {confirming && (
+        <ConfirmModal title={t('finance.leaks.removeEntry')} text={t('finance.leaks.confirmRemove')} cta={t('finance.leaks.removeEntry')} danger busy={removing}
+          onConfirm={removeDuplicate} onClose={() => setConfirming(null)} />
       )}
     </div>
   );

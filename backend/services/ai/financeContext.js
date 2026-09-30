@@ -135,4 +135,22 @@ function cap(lines, maxChars) {
   return out.join('\n');
 }
 
-module.exports = { financeContext, normalizeLink, NOKFI_LINKS, LINK_KEYS };
+/**
+ * Sesión 10: fuera de la web (API, MCP, webhooks) una ruta "/app/…" no sirve
+ * de nada: se devuelve absoluta (https://nokfi.app/app/…). Copia el objeto:
+ * cambia `link` en report.priorities, report.action_plan y en actions.
+ */
+function absoluteLinks(body) {
+  if (!body || typeof body !== 'object') return body;
+  const base = (process.env.APP_PUBLIC_URL || 'https://nokfi.app').replace(/\/+$/, '');
+  const fix = (x) => (x && typeof x.link === 'string' && x.link.startsWith('/') ? { ...x, link: base + x.link } : x);
+  const out = { ...body };
+  if (out.report && typeof out.report === 'object') {
+    out.report = { ...out.report };
+    for (const k of ['priorities', 'action_plan']) if (Array.isArray(out.report[k])) out.report[k] = out.report[k].map(fix);
+  }
+  if (Array.isArray(out.actions)) out.actions = out.actions.map(fix);
+  return out;
+}
+
+module.exports = { financeContext, normalizeLink, absoluteLinks, NOKFI_LINKS, LINK_KEYS };

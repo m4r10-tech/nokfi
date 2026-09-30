@@ -27,6 +27,40 @@ export function kindLabel(kind, t) {
   return t('history.typeAnalysis');
 }
 
+/**
+ * Sesión 10: título con periodo y detalle con archivo, para que no salgan
+ * cinco "Caja" iguales. `a.summary` y `a.key_figure` vienen de GET /api/analyses.
+ */
+export function periodLabel(p, lang) {
+  if (!p?.from) return '';
+  const fmt = (ym, opts) => new Date(`${ym}-01T00:00:00`).toLocaleDateString(localeOf(lang), opts);
+  const [fy] = p.from.split('-'), [ty] = (p.to || p.from).split('-');
+  if (!p.to || p.to === p.from) return fmt(p.from, { month: 'short', year: 'numeric' });
+  if (fy === ty) return `${fmt(p.from, { month: 'short' })}–${fmt(p.to, { month: 'short', year: 'numeric' })}`;
+  return `${fmt(p.from, { month: 'short', year: 'numeric' })}–${fmt(p.to, { month: 'short', year: 'numeric' })}`;
+}
+
+export function analysisTitle(a, lang) {
+  const s = a.summary || {};
+  const extra = s.periods?.filter(Boolean).length === 2 ? s.periods.join(' vs ') : periodLabel(s.period, lang);
+  return extra && !a.title.includes(extra) ? `${a.title} · ${extra}` : a.title;
+}
+
+/** Archivo(s) o carpeta de origen: "caja-3T.csv", "ventas.xlsx +2", "Facturas 2026 (34)". */
+export function analysisSource(a) {
+  const s = a.summary || {};
+  if (s.folder_name) return s.file_count ? `${s.folder_name} (${s.file_count})` : s.folder_name;
+  if (Array.isArray(s.files) && s.files.length) return s.files.length > 1 ? `${s.files[0]} +${s.files.length - 1}` : s.files[0];
+  return '';
+}
+
+/** Resultado clave de la línea: la nota del diagnóstico o la primera cifra clave. */
+export function analysisResult(a, t) {
+  if (typeof a.summary?.score === 'number') return t('history.score', { n: a.summary.score });
+  const k = a.key_figure;
+  return k?.value ? `${k.label ? `${k.label}: ` : ''}${k.value}` : '';
+}
+
 export default function Historial() {
   const { t, lang } = useLang();
   const [items, setItems] = useState(null); // null = cargando
@@ -53,7 +87,7 @@ export default function Historial() {
   const groups = useMemo(() => {
     const q = query.trim().toLowerCase();
     const list = (items || []).filter(a =>
-      (filter === 'all' || a.kind === filter) && (!q || (a.title || '').toLowerCase().includes(q)));
+      (filter === 'all' || a.kind === filter) && (!q || `${a.title || ''} ${analysisSource(a)}`.toLowerCase().includes(q)));
     return groupByDate(list, t, lang);
   }, [items, filter, query, t, lang]);
 
@@ -144,6 +178,8 @@ export default function Historial() {
 function Row({ a, t, lang, showTime, i }) {
   const Icon = KIND_ICON[a.kind] || FileText;
   const d = parseDbDate(a.created_at);
+  const source = analysisSource(a);
+  const result = analysisResult(a, t);
   return (
     <Link to={`/app/historial/${a.id}`} className="card card-interactive anim-enter p-3.5 md:p-4 flex items-center gap-3"
       style={{ '--i': i }}>
@@ -151,11 +187,12 @@ function Row({ a, t, lang, showTime, i }) {
         <Icon size={18} />
       </span>
       <div className="flex-1 min-w-0">
-        <p className="text-sm font-medium truncate" style={{ color: 'var(--text-primary)' }}>{a.title}</p>
-        <p className="text-xs mt-0.5" style={{ color: 'var(--text-muted)' }}>
-          {kindLabel(a.kind, t)}{a.source === 'api' || a.source === 'mcp' ? ` · ${t('history.viaApi')}` : ''} · {d ? (showTime ? formatTime(d, lang) : formatDate(a.created_at, lang)) : '—'}
+        <p className="text-sm font-medium truncate" style={{ color: 'var(--text-primary)' }}>{analysisTitle(a, lang)}</p>
+        <p className="text-xs mt-0.5 truncate" style={{ color: 'var(--text-muted)' }}>
+          {kindLabel(a.kind, t)}{source && ` · ${source}`}{a.source === 'api' || a.source === 'mcp' ? ` · ${t('history.viaApi')}` : ''} · {d ? (showTime ? formatTime(d, lang) : formatDate(a.created_at, lang)) : '—'}
         </p>
       </div>
+      {result && <span className="hidden sm:block text-sm font-medium tabular shrink-0 max-w-[40%] truncate text-right" style={{ color: 'var(--text-secondary)' }} title={result}>{result}</span>}
       <ChevronRight size={16} className="shrink-0" style={{ color: 'var(--text-muted)' }} />
     </Link>
   );

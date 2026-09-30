@@ -14,7 +14,7 @@ import Skeleton from '../components/Skeleton';
 import ErrorState from '../components/ErrorState';
 import { toolLabelKey } from '../utils/nokfiLinks';
 import { parseDbDate, relativeTime, utcDay, localeOf, formatTime } from '../utils/dates';
-import { KIND_ICON, kindLabel } from './Historial';
+import { KIND_ICON, kindLabel, analysisTitle, analysisSource, analysisResult } from './Historial';
 
 /**
  * Panel de inicio (/app/home) — sesión 8: Inicio en DOS MODOS (decidido en la
@@ -75,7 +75,7 @@ export default function Home() {
           style={{ background: 'var(--accent-soft)', color: 'var(--text-primary)', border: '1px solid var(--border)' }}>
           <Gift size={16} className="shrink-0" style={{ color: 'var(--accent-text)' }} />
           <span className="flex-1">{t('home.trialBanner', { n: trialDaysLeft })}</span>
-          <Link to="/app/configuracion" className="link text-sm font-medium shrink-0">{t('home.trialManage')}</Link>
+          <Link to="/app/configuracion?s=plan" className="link text-sm font-medium shrink-0">{t('home.trialManage')}</Link>
         </div>
       )}
 
@@ -361,8 +361,8 @@ function RecentCard({ items, t, lang, className = '' }) {
                 <Link to={`/app/historial/${a.id}`} className="nav-item flex items-center gap-3 rounded-lg px-2 py-2.5">
                   <Icon size={16} className="shrink-0" style={{ color: 'var(--text-muted)' }} aria-hidden="true" />
                   <span className="flex-1 min-w-0">
-                    <span className="block text-sm font-medium truncate" style={{ color: 'var(--text-primary)' }}>{a.title}</span>
-                    <span className="block text-xs" style={{ color: 'var(--text-muted)' }}>{kindLabel(a.kind, t)} · {relativeTime(a.created_at, lang)}</span>
+                    <span className="block text-sm font-medium truncate" style={{ color: 'var(--text-primary)' }}>{analysisTitle(a, lang)}</span>
+                    <span className="block text-xs truncate" style={{ color: 'var(--text-muted)' }}>{[analysisResult(a, t) || analysisSource(a) || kindLabel(a.kind, t), relativeTime(a.created_at, lang)].join(' · ')}</span>
                   </span>
                   <ChevronRight size={15} className="shrink-0" style={{ color: 'var(--text-muted)' }} />
                 </Link>

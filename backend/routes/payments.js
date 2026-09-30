@@ -235,7 +235,7 @@ router.post('/stripe/create-portal-session', requireLicense, async (req, res) =>
     return res.status(500).json({ error: 'stripe_not_configured' });
   }
 
-  const returnUrl = `${process.env.APP_PUBLIC_URL}/app/configuracion`;
+  const returnUrl = `${process.env.APP_PUBLIC_URL}/app/configuracion?s=plan`;
   try {
     const portalRes = await fetchWithTimeout('https://api.stripe.com/v1/billing_portal/sessions', {
       method: 'POST',

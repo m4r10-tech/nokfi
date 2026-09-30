@@ -225,6 +225,7 @@ export default {
   },
   config: {
     title: 'Paramètres',
+    tabs: { perfil: 'Profil', plan: 'Formule', compartir: 'Partage', seguridad: 'Sécurité', datos: 'Données' }, notifications: 'Alertes par e-mail', taxIdPlaceholder: 'NIF, NIE ou CIF',
     appearance: 'Apparence', theme: 'Thème', dark: 'Sombre', light: 'Clair',
     language: 'Langue', profile: 'Profil de l’entreprise', companyName: 'Nom', sector: 'Secteur',
     session: 'Session', planLabel: 'Offre', deviceLabel: 'Appareil', logout: 'Se déconnecter',
@@ -245,7 +246,7 @@ export default {
     sectorPlaceholder: 'Ex. : Restauration', saving: 'Enregistrement…', saved: 'Enregistré', saveError: 'Impossible d’enregistrer',
     status_active: 'Active', status_suspended: 'Suspendue', status_expired: 'Expirée', status_revoked: 'Révoquée', status_past_due: 'Paiement en attente',
     wrongPassword: 'Le mot de passe est incorrect.', keyCopied: 'Clé copiée dans le presse-papiers',
-    legacyNote: 'Il s’agit d’une licence historique (à vie). Il n’y a pas d’abonnement Stripe à gérer.',
+    legacyNote: 'Votre licence est un paiement unique et n’expire pas : rien à renouveler ni à résilier.',
     portalError: 'Impossible d’ouvrir le portail de gestion. Réessayez plus tard.',
     legalForm: 'Forme juridique', legalAutonomo: 'Indépendant', legalSociedad: 'Société',
     taxId: 'N° fiscal (NIF / CIF)', taxIdHint: 'Il permet de distinguer vos factures émises de vos factures reçues lorsque l’IA les lit.',
@@ -294,7 +295,7 @@ export default {
     loading: 'Chargement des offres…'
   },
   onboarding: {
-    companyPlaceholder: 'Atelier García', sectorSelect: 'Choisissez un secteur',
+    companyPlaceholder: 'Le nom de votre entreprise', sectorSelect: 'Choisissez un secteur',
     sectors: { taller: 'Garage automobile', automocion: 'Automobile (vente de véhicules)', transporte: 'Transport', industria: 'Industrie', mayorista: 'Commerce de gros', alojamiento: 'Hébergement', inmobiliaria: 'Immobilier', estetica: 'Coiffure et esthétique', deporte: 'Sport et loisirs', asesoria: 'Expertise comptable et conseil', arquitectura: 'Architecture et ingénierie', marketing: 'Marketing et publicité', limpieza: 'Nettoyage', agricultura: 'Agriculture', comercio: 'Commerce de détail', hosteleria: 'Hôtellerie-restauration', salud: 'Santé', legal: 'Juridique', construccion: 'Construction', tecnologia: 'Technologie', consultoria: 'Conseil', diseno: 'Design', educacion: 'Éducation', otro: 'Autre' },
     sizes: { solo: 'Seul (indépendant)', s2: '2–5 personnes', s6: '6–20 personnes', s20: 'Plus de 20 personnes' },
     expenses: { alquiler: 'Loyer', personal: 'Personnel', proveedores: 'Fournisseurs', marketing: 'Marketing', suministros: 'Énergie et fournitures', tecnologia: 'Technologie', transporte: 'Transport', otro: 'Autre' },
@@ -521,7 +522,7 @@ export default {
     qvBalanceNote: 'Le solde est un cumul : on montre son évolution, jamais sa somme.'
   },
   history: {
-    title: 'Historique',
+    score: 'Note {n}/100',     title: 'Historique',
     subtitle: 'Vos analyses enregistrées. Ouvrez-les pour les relire ou les exporter.',
     loading: 'Chargement de l’historique…', loadError: 'Impossible de charger l’historique.',
     emptyTitle: 'Vous n’avez encore généré aucune analyse',
@@ -739,6 +740,8 @@ export default {
     dataSheet: 'Données', reportSheet: 'Rapport', colSection: 'Section', colItem: 'Élément', colDetail: 'Détail', colExtra: 'Extra'
   },
   export: {
+    excelShort: 'Excel',
+    moreFormats: 'Autres formats',
     error: 'Le fichier n’a pas pu être généré. Réessayez.',
     pdf: 'PDF', pdfDesc: 'Pour envoyer, imprimer ou archiver',
     docx: 'Word (.docx)', docxDesc: 'Pour modifier ou compléter le rapport',
@@ -969,7 +972,18 @@ export default {
     infoDesc: 'Questions générales, informations commerciales et confidentialité.',
     includedInfo: 'L’e-mail au support inclut votre e-mail, votre offre et la version de l’app. Jamais votre clé de licence ni vos données financières.',
     supportSubject: 'Support Nokfi', bodyIntro: 'Racontez-nous ce qui s’est passé :', bodyEmail: 'E-mail', bodyPlan: 'Offre', bodyVersion: 'Version', bodyBrowser: 'Navigateur',
-    more: 'Plus de ressources', askAssistant: 'Demander à l’assistant', apiDocs: 'Documentation de l’API'
+    more: 'Plus de ressources', askAssistant: 'Demander à l’assistant', apiDocs: 'Documentation de l’API',
+    person: 'C’est Mario, qui développe Nokfi, qui vous répond', response: 'En général en moins de 24 heures ouvrées.', responseMax: 'Votre formule Max inclut le support prioritaire : nous répondons en moins de 4 heures ouvrées.', guides: 'Guides rapides',
+    faq: [
+      { q: 'Comment lire mes factures avec l’IA ?', a: 'Dans Finances › Registre, cliquez sur « Lire des factures avec l’IA » et choisissez des photos ou des PDF (ou un dossier entier). Vérifiez chaque facture à côté du document et enregistrez. Les fichiers ne sont pas conservés : seulement les données que vous confirmez.', cta: 'Aller au registre' },
+      { q: 'Qu’est-ce que le modèle 303 et combien dois-je mettre de côté ?', a: 'C’est la déclaration trimestrielle de TVA : la TVA facturée moins la TVA payée sur vos dépenses. Dans Impôts, vous voyez le montant du trimestre, l’échéance et ce que vous avez mis de côté.', cta: 'Voir mes impôts' },
+      { q: 'Et le modèle 130 ?', a: 'C’est l’acompte d’impôt sur le revenu des indépendants : 20 % de ce que vous avez gagné depuis le début de l’année, moins ce qui a déjà été payé et les retenues subies. Les sociétés ne le déposent pas.', cta: 'Voir le calcul' },
+      { q: 'Comment relancer une facture échue ?', a: 'Dans Encaissements, cliquez sur « Relancer » : Nokfi rédige l’e-mail sur un ton aimable, ferme ou formel. Vous pouvez aussi activer les relances automatiques.', cta: 'Aller aux encaissements' },
+      { q: 'Puis-je donner accès à mon comptable ?', a: 'Oui. Dans Paramètres › Partage, créez un lien en lecture seule avec une date d’expiration, révocable à tout moment.', cta: 'Créer un lien' },
+      { q: 'Que deviennent mes données ?', a: 'Elles vous appartiennent. Les fournisseurs d’IA que nous utilisons ne s’entraînent pas avec. Dans Paramètres › Données, vous pouvez tout télécharger ou supprimer votre compte.', cta: 'Mes données' },
+      { q: 'Combien d’analyses IA ai-je ?', a: 'Cela dépend de la formule : 10 par jour en Mini, 50 en Pro et 130 en Max. Le quota se renouvelle chaque jour. Les factures électroniques et les calculatrices n’en consomment pas.', cta: 'Voir ma formule' },
+      { q: 'Comment changer de formule ou résilier ?', a: 'Dans Paramètres › Formule, « Gérer l’abonnement ». Sans engagement ; les changements s’appliquent à la fin de la période déjà payée.', cta: 'Aller à ma formule' }
+    ]
   },
   apiDocs: {
     // Sesión 9 — Bloque 2

@@ -225,6 +225,7 @@ export default {
   },
   config: {
     title: 'Impostazioni',
+    tabs: { perfil: 'Profilo', plan: 'Piano', compartir: 'Condivisione', seguridad: 'Sicurezza', datos: 'Dati' }, notifications: 'Avvisi via email', taxIdPlaceholder: 'NIF, NIE o CIF',
     appearance: 'Aspetto', theme: 'Tema', dark: 'Scuro', light: 'Chiaro',
     language: 'Lingua', profile: 'Profilo aziendale', companyName: 'Nome', sector: 'Settore',
     session: 'Sessione', planLabel: 'Piano', deviceLabel: 'Dispositivo', logout: 'Esci',
@@ -245,7 +246,7 @@ export default {
     sectorPlaceholder: 'Es.: Ristorazione', saving: 'Salvataggio…', saved: 'Salvato', saveError: 'Impossibile salvare',
     status_active: 'Attiva', status_suspended: 'Sospesa', status_expired: 'Scaduta', status_revoked: 'Revocata', status_past_due: 'Pagamento in sospeso',
     wrongPassword: 'La password non è corretta.', keyCopied: 'Chiave copiata negli appunti',
-    legacyNote: 'Questa è una licenza legacy (a vita). Non c’è un abbonamento Stripe da gestire.',
+    legacyNote: 'La tua licenza è a pagamento unico e non scade: non c’è nulla da rinnovare o annullare.',
     portalError: 'Impossibile aprire il portale di gestione. Riprova più tardi.',
     legalForm: 'Forma giuridica', legalAutonomo: 'Lavoratore autonomo', legalSociedad: 'Società',
     taxId: 'Codice fiscale (NIF / CIF)', taxIdHint: 'Serve a distinguere le fatture emesse da quelle ricevute quando l’IA le legge.',
@@ -294,7 +295,7 @@ export default {
     loading: 'Caricamento piani…'
   },
   onboarding: {
-    companyPlaceholder: 'Officina García', sectorSelect: 'Scegli un settore',
+    companyPlaceholder: 'Il nome della tua attività', sectorSelect: 'Scegli un settore',
     sectors: { taller: 'Officina meccanica', automocion: 'Automotive (vendita di veicoli)', transporte: 'Trasporti', industria: 'Industria', mayorista: 'Commercio all\'ingrosso', alojamiento: 'Alloggio', inmobiliaria: 'Immobiliare', estetica: 'Parrucchiere ed estetica', deporte: 'Sport e tempo libero', asesoria: 'Consulenza fiscale e contabile', arquitectura: 'Architettura e ingegneria', marketing: 'Marketing e pubblicità', limpieza: 'Pulizie', agricultura: 'Agricoltura', comercio: 'Commercio al dettaglio', hosteleria: 'Ristorazione e ospitalità', salud: 'Salute', legal: 'Legale', construccion: 'Edilizia', tecnologia: 'Tecnologia', consultoria: 'Consulenza', diseno: 'Design', educacion: 'Istruzione', otro: 'Altro' },
     sizes: { solo: 'Da solo (autonomo)', s2: '2–5 persone', s6: '6–20 persone', s20: 'Più di 20 persone' },
     expenses: { alquiler: 'Affitto', personal: 'Personale', proveedores: 'Fornitori', marketing: 'Marketing', suministros: 'Utenze', tecnologia: 'Tecnologia', transporte: 'Trasporti', otro: 'Altro' },
@@ -521,7 +522,7 @@ export default {
     qvBalanceNote: 'Il saldo è un accumulato: se ne mostra l’andamento, mai la somma.'
   },
   history: {
-    title: 'Cronologia',
+    score: 'Punteggio {n}/100',     title: 'Cronologia',
     subtitle: 'Le tue analisi salvate. Aprile per rivederle o esportarle.',
     loading: 'Caricamento della cronologia…', loadError: 'Impossibile caricare la cronologia.',
     emptyTitle: 'Non hai ancora generato nessuna analisi',
@@ -739,6 +740,8 @@ export default {
     dataSheet: 'Dati', reportSheet: 'Report', colSection: 'Sezione', colItem: 'Elemento', colDetail: 'Dettaglio', colExtra: 'Extra'
   },
   export: {
+    excelShort: 'Excel',
+    moreFormats: 'Altri formati',
     error: 'Non è stato possibile generare il file. Riprova.',
     pdf: 'PDF', pdfDesc: 'Da inviare, stampare o archiviare',
     docx: 'Word (.docx)', docxDesc: 'Per modificare o completare il report',
@@ -969,7 +972,18 @@ export default {
     infoDesc: 'Domande generali, informazioni commerciali e privacy.',
     includedInfo: 'L’email all’assistenza include la tua email, il piano e la versione dell’app. Mai la chiave di licenza né i tuoi dati finanziari.',
     supportSubject: 'Assistenza Nokfi', bodyIntro: 'Raccontaci cosa è successo:', bodyEmail: 'Email', bodyPlan: 'Piano', bodyVersion: 'Versione', bodyBrowser: 'Browser',
-    more: 'Altre risorse', askAssistant: 'Chiedi all’assistente', apiDocs: 'Documentazione API'
+    more: 'Altre risorse', askAssistant: 'Chiedi all’assistente', apiDocs: 'Documentazione API',
+    person: 'Ti risponde Mario, che sviluppa Nokfi', response: 'Di solito entro 24 ore lavorative.', responseMax: 'Il tuo piano Max include il supporto prioritario: rispondiamo entro 4 ore lavorative.', guides: 'Guide rapide',
+    faq: [
+      { q: 'Come leggo le mie fatture con l’IA?', a: 'In Finanze › Registro, premi «Leggi fatture con l’IA» e scegli foto o PDF (o un’intera cartella). Controlla ogni fattura accanto al documento e salva. I file non vengono conservati: solo i dati che confermi.', cta: 'Vai al registro' },
+      { q: 'Cos’è il modello 303 e quanto devo mettere da parte?', a: 'È la dichiarazione trimestrale IVA: l’IVA che incassi con le fatture meno quella che paghi sulle spese. In Imposte vedi quanto ti risulta questo trimestre, la scadenza e quanto hai già messo da parte.', cta: 'Vedi le mie imposte' },
+      { q: 'E il modello 130?', a: 'È l’acconto IRPF degli autonomi: il 20 % di quanto hai guadagnato nell’anno, meno quanto già pagato e le ritenute subite. Le società non lo presentano.', cta: 'Vedi il calcolo' },
+      { q: 'Come sollecito una fattura scaduta?', a: 'In Incassi, premi «Sollecita» sulla fattura: Nokfi scrive l’email in tono cordiale, deciso o formale. Puoi anche attivare i promemoria automatici.', cta: 'Vai agli incassi' },
+      { q: 'Posso dare accesso al mio commercialista?', a: 'Sì. In Impostazioni › Condivisione crei un link di sola lettura con scadenza, revocabile quando vuoi.', cta: 'Crea un link' },
+      { q: 'Che fine fanno i miei dati?', a: 'Sono tuoi. I fornitori di IA che usiamo non si addestrano con essi. Da Impostazioni › Dati puoi scaricarli tutti o eliminare l’account.', cta: 'I miei dati' },
+      { q: 'Quante analisi IA ho?', a: 'Dipende dal piano: 10 al giorno in Mini, 50 in Pro e 130 in Max. La quota si rinnova ogni giorno. Fatture elettroniche e calcolatrici non consumano analisi.', cta: 'Vedi il mio piano' },
+      { q: 'Come cambio piano o disdico?', a: 'In Impostazioni › Piano, «Gestisci abbonamento». Nessun vincolo; le modifiche si applicano alla fine del periodo già pagato.', cta: 'Vai al mio piano' }
+    ]
   },
   apiDocs: {
     // Sesión 9 — Bloque 2

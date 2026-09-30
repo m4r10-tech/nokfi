@@ -12,6 +12,7 @@ import EmptyState from '../../components/EmptyState';
 import ErrorState from '../../components/ErrorState';
 import Skeleton from '../../components/Skeleton';
 import { Section, Kpi, Segmented, Badge } from '../../components/ui';
+import ConfirmModal from '../../components/dev/ConfirmModal';
 import { eur, isoDate, currentQuarter, quarterRange } from '../../utils/money';
 
 /**
@@ -68,9 +69,13 @@ export default function Ledger() {
     load();
   };
 
-  const remove = async (e) => {
-    if (!window.confirm(t('finance.confirmDelete'))) return;
+  const [deleting, setDeleting] = useState(null);
+  const [removing, setRemoving] = useState(false);
+  const remove = async () => {
+    const e = deleting;
+    setRemoving(true);
     const res = await ledgerApi.remove(e.id);
+    setRemoving(false); setDeleting(null);
     if (res.ok) { setEntries(list => list.filter(x => x.id !== e.id)); toast.success(t('finance.deleted')); }
     else toast.error(apiErrorMessage(t, res));
   };
@@ -174,7 +179,7 @@ export default function Ledger() {
                     : <Badge tone={e.type === 'income' ? 'warning' : 'muted'}>{e.type === 'income' ? t('finance.pendingCollection') : t('finance.pendingPayment')}</Badge>}
                 </button>
                 <button onClick={() => { setFormError(null); setEditing(e); }} className="btn btn-ghost btn-sm !px-2" aria-label={t('finance.editEntry')}><Pencil size={14} /></button>
-                <button onClick={() => remove(e)} className="btn btn-ghost btn-sm !px-2" aria-label={t('finance.delete')}><Trash2 size={14} /></button>
+                <button onClick={() => setDeleting(e)} className="btn btn-ghost btn-sm !px-2" aria-label={t('finance.delete')}><Trash2 size={14} /></button>
               </li>
             ))}
           </ul>
@@ -183,6 +188,10 @@ export default function Ledger() {
       )}
 
       {editing && <EntryForm initial={editing} saving={saving} error={formError} onClose={() => setEditing(null)} onSave={save} />}
+      {deleting && (
+        <ConfirmModal title={t('finance.delete')} text={`${t('finance.confirmDelete')} ${deleting.party_name || deleting.party_nif || ''}${deleting.invoice_number ? ` · ${deleting.invoice_number}` : ''}`}
+          cta={t('finance.delete')} danger busy={removing} onConfirm={remove} onClose={() => setDeleting(null)} />
+      )}
     </div>
   );
 }

@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react';
-import { useOutletContext, Link } from 'react-router-dom';
-import { Moon, Sun, LogOut, KeyRound, Copy, Eye, EyeOff, Loader2, CreditCard, Check, CloudOff, Code2, Trash2, Download, Lock, BellRing, LifeBuoy, ExternalLink, Mail, Share2 } from 'lucide-react';
+import { useOutletContext, useSearchParams, Link } from 'react-router-dom';
+import { Moon, Sun, LogOut, KeyRound, Copy, Eye, EyeOff, Loader2, CreditCard, Check, CloudOff, Code2, Trash2, Download, BellRing, LifeBuoy, Mail, Share2 } from 'lucide-react';
 import { sortedSectors, SIZES } from '../components/OnboardingModal';
 import { LANGUAGES } from '../i18n/languages';
 import { Modal, ErrorBox } from '../components/ui';
@@ -10,35 +10,53 @@ import { useLang } from '../context/LangContext';
 import { useAuth } from '../context/AuthContext';
 import { authApi, paymentsApi, keysApi, meApi, shareApi } from '../middleware/api';
 import PasswordGenerator from '../components/PasswordGenerator';
+import ConfirmModal from '../components/dev/ConfirmModal';
 import PageHeader from '../components/PageHeader';
 import { useToast } from '../context/ToastContext';
 import { apiErrorMessage } from '../middleware/errors';
 import { localeOf } from '../utils/dates';
 
+// Sesión 10: por secciones en lugar de una página larguísima (?s=<id>).
+const TABS = ['perfil', 'plan', 'compartir', 'seguridad', 'datos'];
+
 export default function Configuracion() {
-  const { profile, updateProfile, loading, saveState } = useOutletContext();
-  const { theme, setTheme } = useTheme();
-  const { lang, setLang, t } = useLang();
-  const { license, logout } = useAuth();
+  const { t } = useLang();
+  const [params, setParams] = useSearchParams();
+  const tab = TABS.includes(params.get('s')) ? params.get('s') : 'perfil';
 
   return (
     <div className="max-w-2xl flex flex-col gap-4 md:gap-5">
       <PageHeader title={t('config.title')} />
+      <nav aria-label={t('config.title')} className="flex gap-1 overflow-x-auto -mx-4 px-4 sm:mx-0 sm:px-0 -mt-1" style={{ borderBottom: '1px solid var(--border)' }}>
+        {TABS.map(id => (
+          <button key={id} onClick={() => setParams({ s: id }, { replace: true })} aria-current={tab === id ? 'page' : undefined}
+            className="whitespace-nowrap px-3 h-10 text-sm font-medium -mb-px"
+            style={{
+              color: tab === id ? 'var(--text-primary)' : 'var(--text-secondary)',
+              borderBottom: `2px solid ${tab === id ? 'var(--accent)' : 'transparent'}`,
+              transition: 'color var(--dur-fast) var(--ease-std), border-color var(--dur-fast) var(--ease-std)'
+            }}>
+            {t(`config.tabs.${id}`)}
+          </button>
+        ))}
+      </nav>
+      <div key={tab} className="anim-enter flex flex-col gap-4 md:gap-5">
+        {tab === 'perfil' && <ProfileTab />}
+        {tab === 'plan' && <><SubscriptionSection /><ApiKeysSection /></>}
+        {tab === 'compartir' && <ShareSection />}
+        {tab === 'seguridad' && <><SessionSection /><ChangePasswordSection /><RevealKeySection /></>}
+        {tab === 'datos' && <MyDataSection />}
+      </div>
+    </div>
+  );
+}
 
-      <Section title={t('config.appearance')}>
-        <Row label={t('config.theme')}>
-          <Segmented value={theme} onChange={setTheme} options={[
-            { value: 'dark', label: t('config.dark'), icon: Moon },
-            { value: 'light', label: t('config.light'), icon: Sun }
-          ]} />
-        </Row>
-        <Row label={t('config.language')}>
-          <select value={lang} onChange={(e) => { setLang(e.target.value); updateProfile({ lang: e.target.value }); }} className="input !w-auto !h-9 text-sm" aria-label={t('config.language')}>
-            {LANGUAGES.map(l => <option key={l.code} value={l.code}>{l.name}</option>)}
-          </select>
-        </Row>
-      </Section>
-
+function ProfileTab() {
+  const { profile, updateProfile, loading, saveState } = useOutletContext();
+  const { theme, setTheme } = useTheme();
+  const { lang, setLang, t } = useLang();
+  return (
+    <>
       <Section title={t('config.profile')} aside={<SaveIndicator state={saveState} />}>
         <Field id="cfg-company" label={t('config.companyName')} value={profile.companyName} placeholder={t('onboarding.companyPlaceholder')}
           autoComplete="organization" onChange={(v) => updateProfile({ companyName: v })} disabled={loading} />
@@ -63,10 +81,13 @@ export default function Configuracion() {
             { value: 'sociedad', label: t('config.legalSociedad') }
           ]} />
         </Row>
-        <Field id="cfg-taxid" label={t('config.taxId')} value={profile.taxId || ''} placeholder="12345678Z"
+        <Field id="cfg-taxid" label={t('config.taxId')} value={profile.taxId || ''} placeholder={t('config.taxIdPlaceholder')}
           onChange={(v) => updateProfile({ taxId: v.toUpperCase() })} disabled={loading} />
         <p className="text-xs -mt-1" style={{ color: 'var(--text-muted)' }}>{t('config.taxIdHint')}</p>
-        <label className="flex items-start gap-2.5 text-sm cursor-pointer pt-1" style={{ color: 'var(--text-primary)' }}>
+      </Section>
+
+      <Section title={t('config.notifications')}>
+        <label className="flex items-start gap-2.5 text-sm cursor-pointer" style={{ color: 'var(--text-primary)' }}>
           <input type="checkbox" checked={!!profile.fiscalReminders} onChange={(e) => updateProfile({ fiscalReminders: e.target.checked })} className="w-4 h-4 mt-0.5" />
           <span><span className="font-medium inline-flex items-center gap-1.5"><BellRing size={14} /> {t('finance.calendar.remind')}</span>
             <span className="block text-xs mt-0.5" style={{ color: 'var(--text-muted)' }}>{t('finance.calendar.remindHint')}</span></span>
@@ -78,36 +99,41 @@ export default function Configuracion() {
         </label>
       </Section>
 
-      <SubscriptionSection />
-
-      <ShareSection />
-
-      <ApiKeysSection />
-
-      <RevealKeySection />
-
-      <ChangePasswordSection />
-
-      <MyDataSection />
-
-      <Section title={t('config.session')}>
-        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
-          <div className="min-w-0">
-            <p className="text-sm truncate" style={{ color: 'var(--text-primary)' }}>{license?.email}</p>
-            <p className="text-xs" style={{ color: 'var(--text-muted)' }}>
-              {t('config.planLabel')}: {(license?.plan || '').toUpperCase()} · {t('config.deviceLabel')}: {license?.device_name || '—'}
-            </p>
-            {/* §2.2: versión visible para soporte ("¿qué versión ves?"). */}
-            <p className="text-xs mt-1" style={{ color: 'var(--text-muted)' }}>
-              {t('config.version')}: <code>{__APP_VERSION__}</code> · <Link to="/app/ayuda" className="link inline-flex items-center gap-1"><LifeBuoy size={12} /> {t('nav.help')}</Link>
-            </p>
-          </div>
-          <button onClick={logout} className="btn btn-danger btn-sm">
-            <LogOut size={14} /> {t('config.logout')}
-          </button>
-        </div>
+      <Section title={t('config.appearance')}>
+        <Row label={t('config.theme')}>
+          <Segmented value={theme} onChange={setTheme} options={[
+            { value: 'dark', label: t('config.dark'), icon: Moon },
+            { value: 'light', label: t('config.light'), icon: Sun }
+          ]} />
+        </Row>
+        <Row label={t('config.language')}>
+          <select value={lang} onChange={(e) => { setLang(e.target.value); updateProfile({ lang: e.target.value }); }} className="input !w-auto !h-9 text-sm" aria-label={t('config.language')}>
+            {LANGUAGES.map(l => <option key={l.code} value={l.code}>{l.name}</option>)}
+          </select>
+        </Row>
       </Section>
-    </div>
+    </>
+  );
+}
+
+function SessionSection() {
+  const { t } = useLang();
+  const { license, logout } = useAuth();
+  return (
+    <Section title={t('config.session')}>
+      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
+        <div className="min-w-0">
+          <p className="text-sm truncate" style={{ color: 'var(--text-primary)' }}>{license?.email}</p>
+          {/* §2.2: versión visible para soporte ("¿qué versión ves?"). */}
+          <p className="text-xs mt-1" style={{ color: 'var(--text-muted)' }}>
+            {t('config.version')}: <code>{__APP_VERSION__}</code> · <Link to="/app/ayuda" className="link inline-flex items-center gap-1"><LifeBuoy size={12} /> {t('nav.help')}</Link>
+          </p>
+        </div>
+        <button onClick={logout} className="btn btn-danger btn-sm">
+          <LogOut size={14} /> {t('config.logout')}
+        </button>
+      </div>
+    </Section>
   );
 }
 
@@ -259,6 +285,8 @@ function ShareSection() {
   const [creating, setCreating] = useState(false);
   const [created, setCreated] = useState(null);
   const [error, setError] = useState(null);
+  const [confirming, setConfirming] = useState(null);
+  const [revoking, setRevoking] = useState(false);
 
   const load = async () => {
     const res = await shareApi.list();
@@ -274,9 +302,10 @@ function ShareSection() {
     if (res.ok) { setCreated(`${window.location.origin}/compartido/${res.data.link.token}`); setLabel(''); load(); }
     else setError(res.data?.error === 'too_many_links' ? t('share.tooMany') : apiErrorMessage(t, res));
   };
-  const revoke = async (l) => {
-    if (!window.confirm(t('share.confirmRevoke'))) return;
-    const res = await shareApi.revoke(l.id);
+  const revoke = async () => {
+    setRevoking(true);
+    const res = await shareApi.revoke(confirming.id);
+    setRevoking(false); setConfirming(null);
     if (res.ok) { toast.success(t('share.revoked')); load(); } else toast.error(apiErrorMessage(t, res));
   };
   const copy = async () => { try { await navigator.clipboard.writeText(created); toast.success(t('common.copied')); } catch { /* nada */ } };
@@ -309,7 +338,7 @@ function ShareSection() {
                   {t('share.until', { date: fmt(l.expires_at) })} · {l.last_used_at ? t('share.lastOpened', { date: fmt(l.last_used_at) }) : t('share.neverOpened')}
                 </p>
               </div>
-              <button onClick={() => revoke(l)} className="btn btn-ghost btn-sm !px-2" aria-label={t('share.revoke')} title={t('share.revoke')}><Trash2 size={14} /></button>
+              <button onClick={() => setConfirming(l)} className="btn btn-ghost btn-sm !px-2" aria-label={t('share.revoke')} title={t('share.revoke')}><Trash2 size={14} /></button>
             </li>
           ))}
         </ul>
@@ -322,6 +351,10 @@ function ShareSection() {
         <button type="submit" disabled={creating} className="btn btn-secondary">{creating ? <Loader2 size={15} className="animate-spin" /> : <Share2 size={15} />} {t('share.create')}</button>
       </form>
       {error && <ErrorMsg>{error}</ErrorMsg>}
+      {confirming && (
+        <ConfirmModal title={t('share.revoke')} text={t('share.confirmRevoke')} cta={t('share.revoke')} danger busy={revoking}
+          onConfirm={revoke} onClose={() => setConfirming(null)} />
+      )}
     </Section>
   );
 }

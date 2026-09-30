@@ -225,6 +225,7 @@ export default {
   },
   config: {
     title: 'Settings',
+    tabs: { perfil: 'Profile', plan: 'Plan', compartir: 'Sharing', seguridad: 'Security', datos: 'Data' }, notifications: 'Email notifications', taxIdPlaceholder: 'NIF, NIE or CIF',
     appearance: 'Appearance', theme: 'Theme', dark: 'Dark', light: 'Light',
     language: 'Language', profile: 'Company profile', companyName: 'Name', sector: 'Sector',
     session: 'Session', planLabel: 'Plan', deviceLabel: 'Device', logout: 'Log out',
@@ -245,7 +246,7 @@ export default {
     sectorPlaceholder: 'E.g. Hospitality', saving: 'Saving…', saved: 'Saved', saveError: 'Couldn’t save',
     status_active: 'Active', status_suspended: 'Suspended', status_expired: 'Expired', status_revoked: 'Revoked', status_past_due: 'Payment due',
     wrongPassword: 'The password is incorrect.', keyCopied: 'Key copied to clipboard',
-    legacyNote: 'This is a legacy (lifetime) license. There is no Stripe subscription to manage.',
+    legacyNote: 'Your licence is a one-off payment and never expires: there is nothing to renew or cancel.',
     portalError: 'Could not open the management portal. Please try again later.',
     legalForm: 'Legal form', legalAutonomo: 'Self-employed', legalSociedad: 'Company',
     taxId: 'Tax ID (NIF / CIF)', taxIdHint: 'Used to tell your issued invoices from the ones you receive when the AI reads them.',
@@ -294,7 +295,7 @@ export default {
     loading: 'Loading plans…'
   },
   onboarding: {
-    companyPlaceholder: 'García Workshop', sectorSelect: 'Choose a sector',
+    companyPlaceholder: 'Your business name', sectorSelect: 'Choose a sector',
     sectors: { taller: 'Car repair garage', automocion: 'Motor trade (vehicle sales)', transporte: 'Transport', industria: 'Manufacturing', mayorista: 'Wholesale', alojamiento: 'Accommodation', inmobiliaria: 'Real estate', estetica: 'Hair and beauty', deporte: 'Sport and leisure', asesoria: 'Accounting and tax advice', arquitectura: 'Architecture and engineering', marketing: 'Marketing and advertising', limpieza: 'Cleaning', agricultura: 'Agriculture', comercio: 'Retail', hosteleria: 'Hospitality', salud: 'Health', legal: 'Legal', construccion: 'Construction', tecnologia: 'Technology', consultoria: 'Consulting', diseno: 'Design', educacion: 'Education', otro: 'Other' },
     sectorAliases: { taller: 'car mechanic tyres bodywork', automocion: 'dealership cars motorbikes', transporte: 'lorry courier delivery removals logistics taxi', industria: 'factory manufacturing metal', comercio: 'shop store retail bakery', mayorista: 'distribution warehouse', hosteleria: 'bar restaurant cafe hospitality', alojamiento: 'hotel hostel holiday lets', construccion: 'building renovation plumber electrician', inmobiliaria: 'property estate agent lettings', salud: 'clinic doctor dentist physio', estetica: 'barber nails spa salon', deporte: 'gym fitness', educacion: 'school training tutoring', legal: 'lawyer solicitor', asesoria: 'accountant bookkeeping tax adviser', consultoria: 'consultant', arquitectura: 'architect engineer', tecnologia: 'software IT web developer', marketing: 'agency social media', diseno: 'graphic designer photography', limpieza: 'cleaning maintenance', agricultura: 'farm farming' },
     sizes: { solo: 'Just me (freelancer)', s2: '2–5 people', s6: '6–20 people', s20: '20+ people' },
@@ -522,7 +523,7 @@ export default {
     qvBalanceNote: 'A balance is cumulative: its evolution is shown, never its sum.'
   },
   history: {
-    title: 'History',
+    score: 'Score {n}/100',     title: 'History',
     subtitle: 'Your saved analyses. Open them to review or export to PDF.',
     loading: 'Loading history...', loadError: 'Could not load the history.',
     emptyTitle: "You haven't generated any analysis yet",
@@ -740,6 +741,8 @@ export default {
     dataSheet: 'Data', reportSheet: 'Report', colSection: 'Section', colItem: 'Item', colDetail: 'Detail', colExtra: 'Extra'
   },
   export: {
+    excelShort: 'Excel',
+    moreFormats: 'More formats',
     error: 'The file could not be generated. Please try again.',
     pdf: 'PDF', pdfDesc: 'To send, print or archive',
     docx: 'Word (.docx)', docxDesc: 'To edit or complete the report',
@@ -970,7 +973,18 @@ export default {
     infoDesc: 'General questions, sales and privacy.',
     includedInfo: 'The support email includes your email, plan and app version. Never your license key or your financial data.',
     supportSubject: 'Nokfi support', bodyIntro: 'Tell us what happened:', bodyEmail: 'Email', bodyPlan: 'Plan', bodyVersion: 'Version', bodyBrowser: 'Browser',
-    more: 'More resources', askAssistant: 'Ask the assistant', apiDocs: 'API documentation'
+    more: 'More resources', askAssistant: 'Ask the assistant', apiDocs: 'API documentation',
+    person: 'Mario, who builds Nokfi, will answer you', response: 'Usually within 24 working hours.', responseMax: 'Your Max plan includes priority support: we reply within 4 working hours.', guides: 'Quick guides',
+    faq: [
+      { q: 'How do I read my invoices with AI?', a: 'In Finance › Ledger, click "Read invoices with AI" and choose photos or PDFs (or a whole folder). Check each invoice next to the document and save. The files aren\'t stored: only the data you confirm.', cta: 'Go to the ledger' },
+      { q: 'What is form 303 and how much should I set aside?', a: 'It\'s the quarterly VAT return: the VAT you charge on your invoices minus the VAT you pay on your expenses. In Taxes you see how much it comes to this quarter, the deadline and what you\'ve set aside.', cta: 'See my taxes' },
+      { q: 'And form 130?', a: 'It\'s the self-employed income tax instalment: 20 % of what you\'ve earned so far this year, minus what you\'ve already paid and the withholdings made on your invoices. Companies don\'t file it.', cta: 'See the calculation' },
+      { q: 'How do I chase an overdue invoice?', a: 'In Receivables, click "Chase" on the invoice: Nokfi drafts the email in a friendly, firm or formal tone. You can also turn on automatic reminders.', cta: 'Go to receivables' },
+      { q: 'Can I give my accountant access?', a: 'Yes. In Settings › Sharing you create a read-only link with an expiry date that you can revoke at any time.', cta: 'Create a link' },
+      { q: 'What happens to my data?', a: 'It\'s yours. The AI providers we use don\'t train on it. From Settings › Data you can download all of it or delete your account.', cta: 'My data' },
+      { q: 'How many AI analyses do I have?', a: 'It depends on the plan: 10 a day on Mini, 50 on Pro and 130 on Max. The quota renews every day. E-invoices and calculators don\'t use analyses.', cta: 'See my plan' },
+      { q: 'How do I change plan or cancel?', a: 'In Settings › Plan, "Manage subscription". There\'s no lock-in and changes apply at the end of the period you\'ve already paid for.', cta: 'Go to my plan' }
+    ]
   },
   apiDocs: {
     // Sesión 9 — Bloque 2

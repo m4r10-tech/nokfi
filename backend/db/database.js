@@ -1331,7 +1331,13 @@ function listAnalyses(license_id, limit = 50) {
   return getDB().prepare(`
     SELECT id, kind, title, prompt_chars, created_at,
            CASE WHEN result_json IS NOT NULL THEN 'json' ELSE 'html' END AS format,
-           CASE WHEN json_valid(meta_json) THEN json_extract(meta_json, '$.source') END AS source
+           CASE WHEN json_valid(meta_json) THEN json_extract(meta_json, '$.source') END AS source,
+           CASE WHEN json_valid(meta_json) THEN json_object(
+             'module', json_extract(meta_json, '$.module'), 'files', json_extract(meta_json, '$.files'),
+             'period', json_extract(meta_json, '$.period'), 'periods', json_extract(meta_json, '$.periods'),
+             'folder_name', json_extract(meta_json, '$.folder_name'), 'file_count', json_extract(meta_json, '$.file_count'),
+             'score', json_extract(meta_json, '$.health.score')) END AS summary_json,
+           CASE WHEN json_valid(result_json) THEN json_extract(result_json, '$.key_figures[0]') END AS key_figure_json
     FROM analyses
     WHERE license_id = ?
     ORDER BY created_at DESC, id DESC

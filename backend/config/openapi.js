@@ -11,8 +11,8 @@ const Report = {
     summary: { type: 'string' },
     key_figures: { type: 'array', items: { type: 'object', properties: { label: { type: 'string' }, value: { type: 'string' }, note: { type: 'string' } } } },
     strengths: { type: 'array', items: { type: 'string' } },
-    priorities: { type: 'array', items: { type: 'object', properties: { title: { type: 'string' }, detail: { type: 'string' }, severity: { type: 'string', enum: ['high', 'medium', 'low'] } } } },
-    action_plan: { type: 'array', items: { type: 'object', properties: { title: { type: 'string' }, detail: { type: 'string' }, timeframe: { type: 'string' } } } },
+    priorities: { type: 'array', items: { type: 'object', properties: { title: { type: 'string' }, detail: { type: 'string' }, severity: { type: 'string', enum: ['high', 'medium', 'low'] }, link: { type: 'string', description: 'URL absoluta de la pantalla de Nokfi que lo resuelve (vacío si no hay)' } } } },
+    action_plan: { type: 'array', items: { type: 'object', properties: { title: { type: 'string' }, detail: { type: 'string' }, timeframe: { type: 'string' }, due_in_days: { type: 'integer' }, link: { type: 'string', description: 'URL absoluta de la pantalla de Nokfi que lo resuelve (vacío si no hay)' } } } },
     glossary: { type: 'array', items: { type: 'object', properties: { term: { type: 'string' }, definition: { type: 'string' } } } }
   }
 };

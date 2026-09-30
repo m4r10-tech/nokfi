@@ -225,6 +225,7 @@ export default {
   },
   config: {
     title: 'Einstellungen',
+    tabs: { perfil: 'Profil', plan: 'Tarif', compartir: 'Teilen', seguridad: 'Sicherheit', datos: 'Daten' }, notifications: 'E-Mail-Hinweise', taxIdPlaceholder: 'NIF, NIE oder CIF',
     appearance: 'Darstellung', theme: 'Design', dark: 'Dunkel', light: 'Hell',
     language: 'Sprache', profile: 'Unternehmensprofil', companyName: 'Name', sector: 'Branche',
     session: 'Sitzung', planLabel: 'Plan', deviceLabel: 'Gerät', logout: 'Abmelden',
@@ -245,7 +246,7 @@ export default {
     sectorPlaceholder: 'z. B. Gastronomie', saving: 'Wird gespeichert…', saved: 'Gespeichert', saveError: 'Speichern fehlgeschlagen',
     status_active: 'Aktiv', status_suspended: 'Gesperrt', status_expired: 'Abgelaufen', status_revoked: 'Widerrufen', status_past_due: 'Zahlung ausstehend',
     wrongPassword: 'Das Passwort ist falsch.', keyCopied: 'Schlüssel in die Zwischenablage kopiert',
-    legacyNote: 'Dies ist eine Legacy-Lizenz (lebenslang). Es gibt kein Stripe-Abonnement zu verwalten.',
+    legacyNote: 'Deine Lizenz ist eine Einmalzahlung und läuft nicht ab: Es gibt nichts zu verlängern oder zu kündigen.',
     portalError: 'Das Verwaltungsportal konnte nicht geöffnet werden. Versuche es später erneut.',
     legalForm: 'Rechtsform', legalAutonomo: 'Selbstständig', legalSociedad: 'Gesellschaft',
     taxId: 'Steuernummer (NIF / CIF)', taxIdHint: 'Damit unterscheidet die KI beim Lesen deine ausgestellten von deinen erhaltenen Rechnungen.',
@@ -294,7 +295,7 @@ export default {
     loading: 'Pläne werden geladen…'
   },
   onboarding: {
-    companyPlaceholder: 'Werkstatt García', sectorSelect: 'Branche wählen',
+    companyPlaceholder: 'Name deines Unternehmens', sectorSelect: 'Branche wählen',
     sectors: { taller: 'Kfz-Werkstatt', automocion: 'Kfz-Handel', transporte: 'Transport', industria: 'Industrie', mayorista: 'Großhandel', alojamiento: 'Beherbergung', inmobiliaria: 'Immobilien', estetica: 'Friseur und Kosmetik', deporte: 'Sport und Freizeit', asesoria: 'Steuerberatung und Buchhaltung', arquitectura: 'Architektur und Ingenieurwesen', marketing: 'Marketing und Werbung', limpieza: 'Reinigung', agricultura: 'Landwirtschaft', comercio: 'Einzelhandel', hosteleria: 'Gastgewerbe', salud: 'Gesundheit', legal: 'Recht', construccion: 'Bau', tecnologia: 'Technologie', consultoria: 'Beratung', diseno: 'Design', educacion: 'Bildung', otro: 'Sonstiges' },
     sizes: { solo: 'Nur ich (selbstständig)', s2: '2–5 Personen', s6: '6–20 Personen', s20: 'Über 20 Personen' },
     expenses: { alquiler: 'Miete', personal: 'Personal', proveedores: 'Lieferanten', marketing: 'Marketing', suministros: 'Energie & Nebenkosten', tecnologia: 'Technologie', transporte: 'Transport', otro: 'Sonstiges' },
@@ -521,7 +522,7 @@ export default {
     qvBalanceNote: 'Ein Saldo ist kumuliert: gezeigt wird sein Verlauf, nie seine Summe.'
   },
   history: {
-    title: 'Verlauf',
+    score: 'Note {n}/100',     title: 'Verlauf',
     subtitle: 'Deine gespeicherten Analysen. Öffne sie, um sie anzusehen oder zu exportieren.',
     loading: 'Verlauf wird geladen…', loadError: 'Der Verlauf konnte nicht geladen werden.',
     emptyTitle: 'Du hast noch keine Analyse erstellt',
@@ -739,6 +740,8 @@ export default {
     dataSheet: 'Daten', reportSheet: 'Bericht', colSection: 'Abschnitt', colItem: 'Element', colDetail: 'Detail', colExtra: 'Extra'
   },
   export: {
+    excelShort: 'Excel',
+    moreFormats: 'Weitere Formate',
     error: 'Die Datei konnte nicht erstellt werden. Versuche es erneut.',
     pdf: 'PDF', pdfDesc: 'Zum Senden, Drucken oder Archivieren',
     docx: 'Word (.docx)', docxDesc: 'Zum Bearbeiten oder Ergänzen des Berichts',
@@ -969,7 +972,18 @@ export default {
     infoDesc: 'Allgemeine Fragen, Vertrieb und Datenschutz.',
     includedInfo: 'Die Support-E-Mail enthält deine E-Mail, deinen Plan und die App-Version. Nie deinen Lizenzschlüssel oder deine Finanzdaten.',
     supportSubject: 'Nokfi-Support', bodyIntro: 'Erzähl uns, was passiert ist:', bodyEmail: 'E-Mail', bodyPlan: 'Plan', bodyVersion: 'Version', bodyBrowser: 'Browser',
-    more: 'Weitere Ressourcen', askAssistant: 'Assistenten fragen', apiDocs: 'API-Dokumentation'
+    more: 'Weitere Ressourcen', askAssistant: 'Assistenten fragen', apiDocs: 'API-Dokumentation',
+    person: 'Dir antwortet Mario, der Nokfi entwickelt', response: 'Meist innerhalb von 24 Arbeitsstunden.', responseMax: 'Dein Max-Tarif hat Priority-Support: Wir antworten innerhalb von 4 Arbeitsstunden.', guides: 'Kurzanleitungen',
+    faq: [
+      { q: 'Wie lese ich meine Rechnungen mit KI?', a: 'Unter Finanzen › Journal auf „Rechnungen mit KI lesen“ klicken und Fotos oder PDFs (oder einen ganzen Ordner) wählen. Jede Rechnung neben dem Dokument prüfen und speichern. Die Dateien werden nicht gespeichert, nur die bestätigten Daten.', cta: 'Zum Journal' },
+      { q: 'Was ist das Modell 303 und wie viel sollte ich zurücklegen?', a: 'Die vierteljährliche Umsatzsteuererklärung: die MwSt. auf deinen Rechnungen minus die MwSt. deiner Ausgaben. Unter Steuern siehst du den Betrag des Quartals, die Frist und was du zurückgelegt hast.', cta: 'Meine Steuern ansehen' },
+      { q: 'Und das Modell 130?', a: 'Die Einkommensteuer-Vorauszahlung für Selbstständige: 20 % deines bisherigen Jahresgewinns minus bereits Gezahltes und Einbehalte. Gesellschaften reichen es nicht ein.', cta: 'Berechnung ansehen' },
+      { q: 'Wie mahne ich eine überfällige Rechnung?', a: 'Unter Forderungen bei der Rechnung auf „Mahnen“ klicken: Nokfi schreibt die E-Mail freundlich, bestimmt oder förmlich. Du kannst auch automatische Erinnerungen aktivieren.', cta: 'Zu den Forderungen' },
+      { q: 'Kann ich meinem Steuerberater Zugriff geben?', a: 'Ja. Unter Einstellungen › Teilen erstellst du einen Nur-Lese-Link mit Ablaufdatum, den du jederzeit widerrufen kannst.', cta: 'Link erstellen' },
+      { q: 'Was passiert mit meinen Daten?', a: 'Sie gehören dir. Die KI-Anbieter, die wir nutzen, trainieren nicht damit. Unter Einstellungen › Daten kannst du alles herunterladen oder dein Konto löschen.', cta: 'Meine Daten' },
+      { q: 'Wie viele KI-Analysen habe ich?', a: 'Je nach Tarif: 10 pro Tag in Mini, 50 in Pro und 130 in Max. Das Kontingent erneuert sich täglich. E-Rechnungen und Rechner verbrauchen keine Analysen.', cta: 'Meinen Tarif ansehen' },
+      { q: 'Wie wechsle ich den Tarif oder kündige?', a: 'Unter Einstellungen › Tarif, „Abo verwalten“. Keine Mindestlaufzeit; Änderungen gelten zum Ende des bereits bezahlten Zeitraums.', cta: 'Zu meinem Tarif' }
+    ]
   },
   apiDocs: {
     // Sesión 9 — Bloque 2

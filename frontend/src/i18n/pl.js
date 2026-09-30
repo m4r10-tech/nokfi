@@ -227,6 +227,7 @@ export default {
   },
   config: {
     title: 'Ustawienia',
+    tabs: { perfil: 'Profil', plan: 'Plan', compartir: 'Udostępnianie', seguridad: 'Bezpieczeństwo', datos: 'Dane' }, notifications: 'Powiadomienia e-mail', taxIdPlaceholder: 'NIF, NIE lub CIF',
     appearance: 'Wygląd', theme: 'Motyw', dark: 'Ciemny', light: 'Jasny',
     language: 'Język', profile: 'Profil firmy', companyName: 'Nazwa', sector: 'Branża',
     session: 'Sesja', planLabel: 'Plan', deviceLabel: 'Urządzenie', logout: 'Wyloguj się',
@@ -247,7 +248,7 @@ export default {
     sectorPlaceholder: 'Np. gastronomia', saving: 'Zapisywanie…', saved: 'Zapisano', saveError: 'Nie udało się zapisać',
     status_active: 'Aktywna', status_suspended: 'Zawieszona', status_expired: 'Wygasła', status_revoked: 'Unieważniona', status_past_due: 'Płatność zaległa',
     wrongPassword: 'Hasło jest nieprawidłowe.', keyCopied: 'Klucz skopiowany do schowka',
-    legacyNote: 'To licencja starszego typu (dożywotnia). Nie ma subskrypcji Stripe do zarządzania.',
+    legacyNote: 'Twoja licencja to jednorazowa płatność i nie wygasa: nie ma czego odnawiać ani anulować.',
     portalError: 'Nie udało się otworzyć portalu zarządzania. Spróbuj później.',
     legalForm: 'Forma prawna', legalAutonomo: 'Jednoosobowa działalność', legalSociedad: 'Spółka',
     taxId: 'Numer podatkowy (NIF / CIF)', taxIdHint: 'Pozwala odróżnić faktury wystawione od otrzymanych, gdy czyta je AI.',
@@ -296,7 +297,7 @@ export default {
     loading: 'Wczytywanie planów…'
   },
   onboarding: {
-    companyPlaceholder: 'Warsztat García', sectorSelect: 'Wybierz branżę',
+    companyPlaceholder: 'Nazwa twojej firmy', sectorSelect: 'Wybierz branżę',
     sectors: { taller: 'Warsztat samochodowy', automocion: 'Motoryzacja (sprzedaż pojazdów)', transporte: 'Transport', industria: 'Przemysł', mayorista: 'Handel hurtowy', alojamiento: 'Zakwaterowanie', inmobiliaria: 'Nieruchomości', estetica: 'Fryzjerstwo i kosmetyka', deporte: 'Sport i rekreacja', asesoria: 'Księgowość i doradztwo podatkowe', arquitectura: 'Architektura i inżynieria', marketing: 'Marketing i reklama', limpieza: 'Sprzątanie', agricultura: 'Rolnictwo', comercio: 'Handel detaliczny', hosteleria: 'Gastronomia i hotelarstwo', salud: 'Zdrowie', legal: 'Prawo', construccion: 'Budownictwo', tecnologia: 'Technologia', consultoria: 'Doradztwo', diseno: 'Projektowanie', educacion: 'Edukacja', otro: 'Inne' },
     sizes: { solo: 'Tylko ja (samozatrudnienie)', s2: '2–5 osób', s6: '6–20 osób', s20: 'Ponad 20 osób' },
     expenses: { alquiler: 'Czynsz', personal: 'Personel', proveedores: 'Dostawcy', marketing: 'Marketing', suministros: 'Media', tecnologia: 'Technologia', transporte: 'Transport', otro: 'Inne' },
@@ -524,7 +525,7 @@ export default {
     qvBalanceNote: 'Saldo jest narastające: pokazujemy jego zmiany, nigdy sumę.'
   },
   history: {
-    title: 'Historia',
+    score: 'Ocena {n}/100',     title: 'Historia',
     subtitle: 'Twoje zapisane analizy. Otwórz je, aby przejrzeć lub wyeksportować.',
     loading: 'Wczytywanie historii…', loadError: 'Nie udało się wczytać historii.',
     emptyTitle: 'Nie masz jeszcze żadnej analizy',
@@ -742,6 +743,8 @@ export default {
     dataSheet: 'Dane', reportSheet: 'Raport', colSection: 'Sekcja', colItem: 'Element', colDetail: 'Szczegóły', colExtra: 'Dodatkowo'
   },
   export: {
+    excelShort: 'Excel',
+    moreFormats: 'Więcej formatów',
     error: 'Nie udało się wygenerować pliku. Spróbuj ponownie.',
     pdf: 'PDF', pdfDesc: 'Do wysłania, druku lub archiwum',
     docx: 'Word (.docx)', docxDesc: 'Do edycji lub uzupełnienia raportu',
@@ -976,7 +979,18 @@ export default {
     infoDesc: 'Pytania ogólne, informacje handlowe i prywatność.',
     includedInfo: 'E-mail do pomocy zawiera twój adres, plan i wersję aplikacji. Nigdy klucza licencyjnego ani danych finansowych.',
     supportSubject: 'Pomoc Nokfi', bodyIntro: 'Opisz, co się stało:', bodyEmail: 'E-mail', bodyPlan: 'Plan', bodyVersion: 'Wersja', bodyBrowser: 'Przeglądarka',
-    more: 'Więcej zasobów', askAssistant: 'Zapytaj asystenta', apiDocs: 'Dokumentacja API'
+    more: 'Więcej zasobów', askAssistant: 'Zapytaj asystenta', apiDocs: 'Dokumentacja API',
+    person: 'Odpowiada Mario, twórca Nokfi', response: 'Zwykle w ciągu 24 godzin roboczych.', responseMax: 'Plan Max ma wsparcie priorytetowe: odpowiadamy w ciągu 4 godzin roboczych.', guides: 'Krótkie poradniki',
+    faq: [
+      { q: 'Jak odczytać faktury za pomocą AI?', a: 'W Finanse › Księga kliknij „Czytaj faktury z AI” i wybierz zdjęcia lub PDF (albo cały folder). Sprawdź każdą fakturę obok dokumentu i zapisz. Pliki nie są przechowywane: tylko dane, które potwierdzisz.', cta: 'Przejdź do księgi' },
+      { q: 'Czym jest model 303 i ile odkładać?', a: 'To kwartalna deklaracja VAT: VAT z twoich faktur minus VAT z wydatków. W Podatkach widzisz kwotę za ten kwartał, termin i ile już odłożyłeś.', cta: 'Moje podatki' },
+      { q: 'A model 130?', a: 'To zaliczka na podatek dochodowy samozatrudnionych: 20 % tego, co zarobiłeś w roku, minus już zapłacone kwoty i potrącenia. Spółki go nie składają.', cta: 'Zobacz wyliczenie' },
+      { q: 'Jak upomnieć się o zaległą fakturę?', a: 'W Należnościach kliknij „Upomnij” przy fakturze: Nokfi napisze e-mail w tonie uprzejmym, stanowczym lub formalnym. Możesz też włączyć automatyczne przypomnienia.', cta: 'Przejdź do należności' },
+      { q: 'Czy mogę dać dostęp biuru rachunkowemu?', a: 'Tak. W Ustawienia › Udostępnianie tworzysz link tylko do odczytu z datą ważności, który możesz w każdej chwili cofnąć.', cta: 'Utwórz link' },
+      { q: 'Co dzieje się z moimi danymi?', a: 'Należą do ciebie. Dostawcy AI, z których korzystamy, nie trenują na nich. W Ustawienia › Dane możesz je wszystkie pobrać lub usunąć konto.', cta: 'Moje dane' },
+      { q: 'Ile mam analiz AI?', a: 'Zależy od planu: 10 dziennie w Mini, 50 w Pro i 130 w Max. Limit odnawia się codziennie. E-faktury i kalkulatory nie zużywają analiz.', cta: 'Mój plan' },
+      { q: 'Jak zmienić plan lub zrezygnować?', a: 'W Ustawienia › Plan, „Zarządzaj subskrypcją”. Bez zobowiązań; zmiany obowiązują od końca opłaconego okresu.', cta: 'Przejdź do planu' }
+    ]
   },
   apiDocs: {
     // Sesión 9 — Bloque 2

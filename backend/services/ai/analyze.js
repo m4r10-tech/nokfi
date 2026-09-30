@@ -43,6 +43,15 @@ const DEFAULT_TITLES = {
   folder: 'Resumen de carpeta'
 };
 
+/** Sesión 10: nombres de archivo y meses que cubren (para el título del historial). */
+function filesMeta(files) {
+  const periods = files.map(f => f.period).filter(Boolean);
+  return {
+    files: files.map(f => f.name).slice(0, 5),
+    period: periods.length ? { from: periods.map(p => p.from).sort()[0], to: periods.map(p => p.to).sort().pop() } : null
+  };
+}
+
 function bad(code, message, status = 400) {
   return { status, body: { error: code, message } };
 }
@@ -72,7 +81,7 @@ function prepare(task, input, profile, lang, licenseId) {
       const files = P.sanitizeFiles(input.files, 3, lang);
       if (!files.length) return { error: bad('invalid_input', 'Falta el contenido a analizar.') };
       const { text, chars } = P.buildExcel({ module: input.module, context: input.context, files });
-      return { plan: { parts: [{ text }], chars, schema: P.REPORT_SCHEMA, meta: { module: input.module }, family: 'single' } };
+      return { plan: { parts: [{ text }], chars, schema: P.REPORT_SCHEMA, meta: { module: input.module, ...filesMeta(files) }, family: 'single' } };
     }
     case 'compare': {
       const module = P.EXCEL_MODULES[input.module] ? input.module : 'total';
@@ -80,7 +89,12 @@ function prepare(task, input, profile, lang, licenseId) {
       const b = { label: input.periodB?.label, files: P.sanitizeFiles(input.periodB?.files, 3, lang) };
       if (!a.files.length || !b.files.length) return { error: bad('invalid_input', 'Faltan los datos de alguno de los dos periodos.') };
       const { text, chars } = P.buildCompare({ module, context: input.context, periodA: a, periodB: b, stats: input.stats });
-      return { plan: { parts: [{ text }], chars, schema: P.REPORT_SCHEMA, meta: { module, stats: input.stats || null }, family: 'single' } };
+      return {
+        plan: {
+          parts: [{ text }], chars, schema: P.REPORT_SCHEMA, family: 'single',
+          meta: { module, stats: input.stats || null, ...filesMeta([...a.files, ...b.files]), periods: [P.clean(a.label, 40), P.clean(b.label, 40)] }
+        }
+      };
     }
     case 'folder_map': {
       const files = P.sanitizeFiles(input.files, 60, lang);
@@ -218,9 +232,9 @@ async function runAnalysis({ license, task, input, lang, title, jobId, ip, sourc
 
   // Sesión 9: evento para los webhooks (también con los análisis hechos en la web).
   if (analysisId) {
-    require('../webhooks').emit(license.id, 'analysis.completed', {
+    require('../webhooks').emit(license.id, 'analysis.completed', require('./financeContext').absoluteLinks({
       id: analysisId, type: kind, title: finalTitle, source, report, health: plan.meta?.health || null
-    });
+    }));
   }
 
   return {
