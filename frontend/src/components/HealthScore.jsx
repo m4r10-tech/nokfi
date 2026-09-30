@@ -34,7 +34,8 @@ export default function HealthScore({ health, compact = false }) {
   if (!health || typeof health.score !== 'number') return null;
   const { band } = healthTone(health.score);
   const lost = (health.lost || []).slice(0, compact ? 3 : 5);
-  const sections = Object.entries(health.sections || {});
+  const sections = Object.entries(health.sections || {}).filter(([, v]) => typeof v === 'number');
+  const maxLost = Math.max(...lost.map(l => l.points), 1);
 
   return (
     <div className="flex flex-col gap-4">
@@ -64,15 +65,24 @@ export default function HealthScore({ health, compact = false }) {
       {lost.length > 0 && (
         <div>
           <p className="section-title mb-2">{t('report.healthLost')}</p>
-          <ul className="flex flex-col gap-1.5">
+          <ul className="flex flex-col gap-2.5">
             {lost.map(l => (
-              <li key={l.id} className="flex items-center justify-between gap-3 text-sm">
-                <span style={{ color: 'var(--text-secondary)' }}>{t(`questionnaire.items.${l.id}`)}</span>
-                <span className="tabular text-xs font-medium shrink-0" style={{ color: 'var(--negative)' }}>−{num(l.points, lang, 1)}</span>
+              <li key={l.id} className="grid grid-cols-[1fr_auto] gap-x-3 items-baseline text-sm">
+                <span style={{ color: 'var(--text-primary)' }}>{t(`questionnaire.items.${l.id}`)}</span>
+                <span className="tabular text-xs font-medium" style={{ color: 'var(--negative)' }}>−{num(l.points, lang, 1)}</span>
+                <span className="text-xs" style={{ color: 'var(--text-muted)' }}>
+                  {l.section && t(`questionnaire.sections.${l.section}`)}{l.partial && ` · ${t('questionnaire.opts.partial')}`}
+                </span>
+                <span className="w-16 h-1 rounded-full self-center overflow-hidden" style={{ background: 'var(--surface-2)' }}>
+                  <span className="block h-full rounded-full" style={{ width: `${(l.points / maxLost) * 100}%`, background: 'var(--negative)', opacity: 0.7 }} />
+                </span>
               </li>
             ))}
           </ul>
         </div>
+      )}
+      {!compact && health.na > 0 && (
+        <p className="text-xs" style={{ color: 'var(--text-muted)' }}>{t('report.healthNa', { n: health.na })}</p>
       )}
     </div>
   );

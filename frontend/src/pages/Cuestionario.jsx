@@ -1,6 +1,6 @@
 import { useState } from 'react';
 import { useOutletContext, Link } from 'react-router-dom';
-import { Check, X, RefreshCw, RotateCw, ArrowLeft, ArrowRight, Loader2, AlertCircle, History } from 'lucide-react';
+import { RefreshCw, RotateCw, ArrowLeft, ArrowRight, Loader2, AlertCircle, History, Info } from 'lucide-react';
 import { aiApi } from '../middleware/api';
 import { apiErrorMessage } from '../middleware/errors';
 import { useToast } from '../context/ToastContext';
@@ -21,14 +21,26 @@ const SECTIONS = [
   { key: 'reporting', items: ['dashboard', 'informe_mensual', 'comparativa_periodos', 'alertas_automaticas', 'kpi_ventas', 'gestor_externo'] }
 ];
 
+// Sesión 10: Sí / A medias / No / No aplica. "No aplica" no resta en la nota
+// (backend/utils/healthScore.js). Colores neutros: el juicio va en el informe.
+const OPTIONS = [[true, 'yes'], ['partial', 'partial'], [false, 'no'], ['na', 'na']];
+
+// Sectores que no suelen trabajar con stock: "Pedidos y stock" empieza en
+// "No aplica" (se puede cambiar).
+const NO_STOCK_SECTORS = ['Salud', 'Legal', 'Tecnología', 'Consultoría', 'Diseño', 'Educación', 'Inmobiliaria', 'Asesoría y gestoría',
+  'Arquitectura e ingeniería', 'Marketing y publicidad', 'Limpieza', 'Transporte', 'Alojamiento'];
+const initialAnswers = (sector) => (NO_STOCK_SECTORS.includes(sector)
+  ? Object.fromEntries(SECTIONS.find(s => s.key === 'pedidos').items.map(id => [id, 'na']))
+  : {});
+
 export default function Cuestionario() {
   const { profile } = useOutletContext();
   const { t, lang } = useLang();
   const toast = useToast();
   const REPORT_TITLE = t('questionnaire.reportTitle');
-  const itemName = (id) => t(`questionnaire.items.${id}`);
   const [step, setStep] = useState(0);
-  const [answers, setAnswers] = useState({});
+  const [answers, setAnswers] = useState(() => initialAnswers(profile.sector));
+  const presetNoStock = NO_STOCK_SECTORS.includes(profile.sector);
   const [phase, setPhase] = useState('form'); // form | loading | result | error
   const [report, setReport] = useState(null); // respuesta de /api/ai/analyze
   const [errorMsg, setErrorMsg] = useState(null);
@@ -53,7 +65,7 @@ export default function Cuestionario() {
     }
   };
 
-  const restart = () => { setStep(0); setAnswers({}); setPhase('form'); setReport(null); };
+  const restart = () => { setStep(0); setAnswers(initialAnswers(profile.sector)); setPhase('form'); setReport(null); };
 
   if (phase === 'loading') {
     return (
@@ -134,24 +146,28 @@ export default function Cuestionario() {
 
       <p className="text-sm mb-4" style={{ color: 'var(--text-secondary)' }}>{t('questionnaire.question')}</p>
 
-      <div key={step} className="grid grid-cols-1 sm:grid-cols-2 gap-3 mb-6">
-        {section.items.map((id, i) => {
-          const v = answers[id];
-          return (
-            <div key={id} className="card anim-enter p-4" style={{
-              '--i': i,
-              borderColor: v === true ? 'var(--positive)' : v === false ? 'var(--negative)' : 'var(--border)',
-              transition: 'border-color var(--dur-base) var(--ease-std)'
-            }}>
-              <div className="text-sm font-medium mb-3" style={{ color: 'var(--text-primary)' }}>{itemName(id)}</div>
-              <div className="flex gap-2">
-                <ToggleBtn active={v === true} color="positive" icon={Check} onClick={() => setAnswer(id, true)} label={t('common.yes')} />
-                <ToggleBtn active={v === false} color="negative" icon={X} onClick={() => setAnswer(id, false)} label={t('common.no')} />
-              </div>
+      {section.key === 'pedidos' && presetNoStock && (
+        <p className="text-xs mb-4 flex items-start gap-2 rounded-lg px-3 py-2" style={{ background: 'var(--surface-2)', color: 'var(--text-secondary)' }}>
+          <Info size={14} className="mt-0.5 shrink-0" style={{ color: 'var(--accent-text)' }} /> {t('questionnaire.noStock')}
+        </p>
+      )}
+
+      <ol key={step} className="card mb-6">
+        {section.items.map((id, i) => (
+          <li key={id} className="anim-enter p-4 sm:p-5 flex flex-col md:flex-row md:items-center gap-3 md:gap-6"
+            style={{ '--i': i, borderTop: i ? '1px solid var(--border)' : undefined }}>
+            <div className="flex-1 min-w-0">
+              <p id={`q-${id}`} className="text-sm font-medium" style={{ color: 'var(--text-primary)' }}>{t(`questionnaire.ask.${id}`)}</p>
+              <p className="text-xs mt-1" style={{ color: 'var(--text-muted)' }}>{t(`questionnaire.help.${id}`)}</p>
             </div>
-          );
-        })}
-      </div>
+            <div role="radiogroup" aria-labelledby={`q-${id}`} className="grid grid-cols-4 gap-1 p-1 rounded-lg shrink-0 md:w-[340px]" style={{ background: 'var(--surface-2)' }}>
+              {OPTIONS.map(([value, key]) => (
+                <Choice key={key} active={answers[id] === value} onClick={() => setAnswer(id, value)} label={t(`questionnaire.opts.${key}`)} />
+              ))}
+            </div>
+          </li>
+        ))}
+      </ol>
 
       <div className="flex gap-2">
         {step > 0 && (
@@ -174,17 +190,17 @@ export default function Cuestionario() {
   );
 }
 
-function ToggleBtn({ active, color, icon: Icon, onClick, label }) {
+function Choice({ active, onClick, label }) {
   return (
-    <button type="button" onClick={onClick} aria-pressed={active}
-      className="flex-1 flex items-center justify-center gap-1.5 rounded-lg h-10 sm:h-9 text-sm sm:text-xs font-medium active:scale-[0.97]"
+    <button type="button" role="radio" aria-checked={active} onClick={onClick}
+      className="rounded-md min-h-9 py-1 px-1 text-xs font-medium leading-tight active:scale-[0.97]"
       style={{
         ...(active
-          ? { background: `var(--${color})`, color: 'var(--on-accent)', border: `1px solid var(--${color})` }
-          : { background: 'var(--surface-2)', color: 'var(--text-secondary)', border: '1px solid var(--border-strong)' }),
+          ? { background: 'var(--surface-1)', color: 'var(--accent-text)', boxShadow: '0 0 0 1.5px var(--accent)' }
+          : { background: 'transparent', color: 'var(--text-secondary)' }),
         transition: 'background-color var(--dur-fast) var(--ease-std), color var(--dur-fast) var(--ease-std), transform var(--dur-fast) var(--ease-std)'
       }}>
-      <Icon size={14} /> {label}
+      {label}
     </button>
   );
 }

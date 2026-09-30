@@ -7,6 +7,9 @@
  * desglose dice exactamente por qué se pierden puntos.
  *
  * Pesos: 5 = crítico (caja/cobros/Hacienda/margen), 3 = importante, 2 = mejora.
+ *
+ * Sesión 10: además de Sí/No, "A medias" ('partial', cuenta la mitad) y
+ * "No aplica" ('na', sale del cálculo: no suma ni penaliza).
  */
 
 'use strict';
@@ -34,40 +37,53 @@ const SECTIONS = {
 
 const TOTAL_WEIGHT = Object.values(WEIGHTS).reduce((a, b) => a + b, 0);
 
-/** Filtra las respuestas a los 30 ids conocidos con valor booleano. */
+const VALUES = [true, false, 'partial', 'na'];
+const CREDIT = (v) => (v === true ? 1 : v === 'partial' ? 0.5 : 0);
+
+/** Filtra las respuestas a los 30 ids conocidos con un valor válido. */
 function cleanAnswers(answers) {
   const out = {};
   if (!answers || typeof answers !== 'object') return out;
   for (const id of Object.keys(WEIGHTS)) {
-    if (answers[id] === true || answers[id] === false) out[id] = answers[id];
+    if (VALUES.includes(answers[id])) out[id] = answers[id];
   }
   return out;
 }
 
 /**
- * @returns {{ score:number, sections:Object<string,number>, lost:Array<{id,points}>, answered:number }}
- *   lost = áreas NO gestionadas ordenadas por puntos perdidos (desglose).
+ * @returns {{ score:number, sections:Object<string,number|null>, lost:Array<{id,points,partial?,section}>, answered:number, na:number }}
+ *   lost = áreas no gestionadas (o a medias) ordenadas por puntos perdidos.
+ *   Una sección con todo "No aplica" vale null.
  */
 function computeHealth(answers) {
   const a = cleanAnswers(answers);
+  const applies = (id) => a[id] !== 'na';
+  const total = Object.entries(WEIGHTS).reduce((s, [id, w]) => s + (applies(id) ? w : 0), 0) || 1;
+  const sectionOf = (id) => Object.keys(SECTIONS).find(k => SECTIONS[k].includes(id));
   let got = 0;
   const lost = [];
   for (const [id, w] of Object.entries(WEIGHTS)) {
-    if (a[id] === true) got += w;
-    else lost.push({ id, points: Math.round((w / TOTAL_WEIGHT) * 1000) / 10 });
+    if (!applies(id)) continue;
+    const credit = CREDIT(a[id]);
+    got += w * credit;
+    if (credit < 1) {
+      lost.push({ id, points: Math.round((w * (1 - credit) / total) * 1000) / 10, section: sectionOf(id), ...(credit > 0 ? { partial: true } : {}) });
+    }
   }
   const sections = {};
   for (const [sec, ids] of Object.entries(SECTIONS)) {
-    const total = ids.reduce((s, id) => s + WEIGHTS[id], 0);
-    const ok = ids.reduce((s, id) => s + (a[id] === true ? WEIGHTS[id] : 0), 0);
-    sections[sec] = Math.round((ok / total) * 100);
+    const live = ids.filter(applies);
+    const secTotal = live.reduce((s, id) => s + WEIGHTS[id], 0);
+    const ok = live.reduce((s, id) => s + WEIGHTS[id] * CREDIT(a[id]), 0);
+    sections[sec] = secTotal ? Math.round((ok / secTotal) * 100) : null;
   }
   lost.sort((x, y) => y.points - x.points);
   return {
-    score: Math.round((got / TOTAL_WEIGHT) * 100),
+    score: Math.round((got / total) * 100),
     sections,
     lost,
-    answered: Object.keys(a).length
+    answered: Object.keys(a).length,
+    na: Object.values(a).filter(v => v === 'na').length
   };
 }
 

@@ -1476,6 +1476,8 @@ async function main() {
   await require('./session4.tests')({ post, put, get, call, check, checkAsync, getDB });
   // Sesión 9 — API Bloque 2: async, webhooks, idempotencia, eventos, nk_test_, panel.
   await require('./session9.tests')({ post, put, get, call, check, checkAsync, getDB });
+  // Sesión 10 — frontend P2 (lo que toca el backend).
+  await require('./session10.tests')({ post, put, get, call, check, checkAsync, getDB });
 
   } catch (e) {
     console.error('TEST CRASH:', e.message);

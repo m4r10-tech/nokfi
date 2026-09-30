@@ -202,10 +202,12 @@ const QUESTIONNAIRE_ITEMS = {
 };
 
 function buildQuestionnaire({ answers, health, finance }) {
-  const yes = [], no = [];
+  const yes = [], no = [], partial = [], na = [];
   for (const [id, name] of Object.entries(QUESTIONNAIRE_ITEMS)) {
     if (answers[id] === true) yes.push(name);
     else if (answers[id] === false) no.push(name);
+    else if (answers[id] === 'partial') partial.push(name);
+    else if (answers[id] === 'na') na.push(name);
   }
   const text = `TAREA: diagnóstico financiero del negocio. Cruza el cuestionario (cómo dice que se gestiona) con los datos del libro de Nokfi (lo que de verdad está pasando) y di qué hacer primero.
 
@@ -216,6 +218,12 @@ ${yes.map(i => '- ' + i).join('\n') || '- Ninguna'}
 Áreas que NO gestiona (${no.length}):
 ${no.map(i => '- ' + i).join('\n') || '- Ninguna'}
 
+Áreas que gestiona A MEDIAS (${partial.length}; se pueden mejorar, sin tratarlas como inexistentes):
+${partial.map(i => '- ' + i).join('\n') || '- Ninguna'}
+${na.length ? `
+Áreas que NO APLICAN a este negocio (${na.length}; no las menciones ni las propongas):
+${na.map(i => '- ' + i).join('\n')}
+` : ''}
 Nota de salud calculada por Nokfi con reglas fijas: ${health.score}/100. Ya se muestra en un medidor: no la pongas en key_figures ni la repitas en el resumen.
 
 DATOS — Libro de Nokfi (calculados por Nokfi, fiables; copia las cifras y fechas tal cual):

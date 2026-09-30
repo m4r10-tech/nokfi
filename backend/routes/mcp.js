@@ -55,7 +55,7 @@ const TOOLS = [
   {
     name: 'analyze',
     title: 'Run a financial analysis',
-    description: 'Run a Nokfi analysis and get a structured report (summary, key figures, strengths, priorities, action plan). type: excel (data: { module: stock|ventas|servicios|entradas|caja|total, files: [{ name, rows: [ {column: value} ] }] }), compare (data: { module, periodA: { label, files }, periodB: { label, files } }), folder (data: { instruction, files: [{ name, text }] }) or cuestionario (data: { answers: { id: true|false } }). Figures are computed by Nokfi from all rows; the AI only explains them. Saved in the user\'s history. Uses 1 analysis of the daily quota.',
+    description: 'Run a Nokfi analysis and get a structured report (summary, key figures, strengths, priorities, action plan). type: excel (data: { module: stock|ventas|servicios|entradas|caja|total, files: [{ name, rows: [ {column: value} ] }] }), compare (data: { module, periodA: { label, files }, periodB: { label, files } }), folder (data: { instruction, files: [{ name, text }] }) or cuestionario (data: { answers: { id: true|false|"partial"|"na" } }). Figures are computed by Nokfi from all rows; the AI only explains them. Saved in the user\'s history. Uses 1 analysis of the daily quota.',
     inputSchema: {
       type: 'object',
       properties: {
