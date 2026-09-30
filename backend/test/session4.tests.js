@@ -466,8 +466,8 @@ module.exports = async function session4Tests({ post, put, get, call, check, che
       r => r.status === 200 && r.data.result.protocolVersion === '2025-06-18' && r.data.result.capabilities.tools && r.data.result.serverInfo.name === 'nokfi');
     await checkAsync('S7 MCP: notificación → 202 sin cuerpo',
       post('/api/mcp', { jsonrpc: '2.0', method: 'notifications/initialized' }, apiKey), r => r.status === 202);
-    await checkAsync('S7 MCP: tools/list → 5 herramientas con inputSchema',
-      rpc('tools/list', {}), r => r.status === 200 && r.data.result.tools.length === 5
+    await checkAsync('S7 MCP: tools/list → herramientas con inputSchema (5 de la sesión 7 + 5 fiscales de la 9)',
+      rpc('tools/list', {}), r => r.status === 200 && r.data.result.tools.length === 10
         && ['extract_invoices', 'analyze', 'get_usage', 'list_analyses', 'get_analysis'].every(n => r.data.result.tools.some(t => t.name === n && t.inputSchema)));
     await checkAsync('S7 MCP: tools/call get_usage → structuredContent con la cuota',
       rpc('tools/call', { name: 'get_usage', arguments: {} }), r => r.status === 200 && r.data.result.structuredContent.daily_quota === 50 && !r.data.result.isError);

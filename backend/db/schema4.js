@@ -16,6 +16,9 @@
  *   ai_provider_usage consumo diario por proveedor de IA (tope de seguridad, sesión 7)
  *   api_calls       registro mínimo de llamadas a la API v1 (sesión 7)
  *   leak_dismissals proveedores descartados en Fugas ("No es una fuga", sesión 6)
+ *   api_jobs, idempotency_keys, webhook_endpoints, webhook_deliveries,
+ *   event_marks     API Bloque 2: trabajos asíncronos, idempotencia, webhooks
+ *                   firmados y eventos (sesión 9)
  *
  * Columnas nuevas:
  *   analyses.result_json / meta_json   F1 — salida estructurada + metadatos (C1)
@@ -170,7 +173,87 @@ function runSession4Schema(db) {
       created_at  TEXT    NOT NULL DEFAULT (datetime('now')),
       PRIMARY KEY (license_id, party_key)
     );
+
+    -- Sesión 9 (API, Bloque 2): trabajos asíncronos. La entrada vive solo en
+    -- memoria mientras se procesa; aquí queda el estado y, 24 h, el resultado.
+    CREATE TABLE IF NOT EXISTS api_jobs (
+      id            TEXT    PRIMARY KEY,
+      license_id    INTEGER NOT NULL REFERENCES licenses(id) ON DELETE CASCADE,
+      key_id        INTEGER REFERENCES api_keys(id) ON DELETE SET NULL,
+      kind          TEXT    NOT NULL,
+      livemode      INTEGER NOT NULL DEFAULT 1,
+      status        TEXT    NOT NULL DEFAULT 'queued' CHECK(status IN ('queued','running','succeeded','failed')),
+      result_json   TEXT    DEFAULT NULL,
+      error_code    TEXT    NOT NULL DEFAULT '',
+      error_message TEXT    NOT NULL DEFAULT '',
+      created_at    TEXT    NOT NULL DEFAULT (datetime('now')),
+      finished_at   TEXT    DEFAULT NULL
+    );
+    CREATE INDEX IF NOT EXISTS idx_api_jobs_license ON api_jobs(license_id, created_at);
+
+    -- Sesión 9: Idempotency-Key. Un reintento con la misma clave devuelve la
+    -- respuesta guardada (24 h) sin ejecutar ni cobrar dos veces.
+    CREATE TABLE IF NOT EXISTS idempotency_keys (
+      license_id    INTEGER NOT NULL REFERENCES licenses(id) ON DELETE CASCADE,
+      idem_key      TEXT    NOT NULL,
+      request_hash  TEXT    NOT NULL,
+      status        INTEGER DEFAULT NULL,
+      response_json TEXT    DEFAULT NULL,
+      created_at    TEXT    NOT NULL DEFAULT (datetime('now')),
+      PRIMARY KEY (license_id, idem_key)
+    );
+
+    -- Sesión 9: webhooks salientes (firmados con HMAC-SHA256).
+    CREATE TABLE IF NOT EXISTS webhook_endpoints (
+      id              INTEGER PRIMARY KEY AUTOINCREMENT,
+      license_id      INTEGER NOT NULL REFERENCES licenses(id) ON DELETE CASCADE,
+      url             TEXT    NOT NULL,
+      events          TEXT    NOT NULL DEFAULT '*',
+      description     TEXT    NOT NULL DEFAULT '',
+      secret          TEXT    NOT NULL,
+      enabled         INTEGER NOT NULL DEFAULT 1,
+      disabled_reason TEXT    NOT NULL DEFAULT '',
+      failure_streak  INTEGER NOT NULL DEFAULT 0,
+      created_at      TEXT    NOT NULL DEFAULT (datetime('now'))
+    );
+    CREATE INDEX IF NOT EXISTS idx_webhook_endpoints_license ON webhook_endpoints(license_id);
+
+    -- Cada envío de un evento a un endpoint. El cuerpo (payload_json) se borra
+    -- a las 24 h; la fila (tipo, estado, intentos) se guarda 30 días.
+    CREATE TABLE IF NOT EXISTS webhook_deliveries (
+      id              INTEGER PRIMARY KEY AUTOINCREMENT,
+      endpoint_id     INTEGER NOT NULL REFERENCES webhook_endpoints(id) ON DELETE CASCADE,
+      license_id      INTEGER NOT NULL REFERENCES licenses(id) ON DELETE CASCADE,
+      event_id        TEXT    NOT NULL,
+      event_type      TEXT    NOT NULL,
+      livemode        INTEGER NOT NULL DEFAULT 1,
+      payload_json    TEXT    DEFAULT NULL,
+      status          TEXT    NOT NULL DEFAULT 'pending' CHECK(status IN ('pending','delivered','failed')),
+      attempts        INTEGER NOT NULL DEFAULT 0,
+      next_attempt_at TEXT    DEFAULT (datetime('now')),
+      last_status     INTEGER DEFAULT NULL,
+      last_error      TEXT    NOT NULL DEFAULT '',
+      last_ms         INTEGER DEFAULT NULL,
+      delivered_at    TEXT    DEFAULT NULL,
+      created_at      TEXT    NOT NULL DEFAULT (datetime('now'))
+    );
+    CREATE INDEX IF NOT EXISTS idx_webhook_deliveries_endpoint ON webhook_deliveries(endpoint_id, id);
+    CREATE INDEX IF NOT EXISTS idx_webhook_deliveries_due ON webhook_deliveries(status, next_attempt_at);
+
+    -- Sesión 9: eventos que solo se emiten una vez (umbral de cuota del día,
+    -- plazo fiscal a N días). Anti-duplicado aunque el proceso se reinicie.
+    CREATE TABLE IF NOT EXISTS event_marks (
+      license_id  INTEGER NOT NULL REFERENCES licenses(id) ON DELETE CASCADE,
+      mark        TEXT    NOT NULL,
+      created_at  TEXT    NOT NULL DEFAULT (datetime('now')),
+      PRIMARY KEY (license_id, mark)
+    );
   `);
+  // Sesión 9: claves de prueba (nk_test_) junto a las reales, y "Clientes"
+  // (opción B): etiqueta libre para agrupar claves por cliente final.
+  ensureColumn(db, 'api_keys', 'mode', "TEXT NOT NULL DEFAULT 'live'");
+  ensureColumn(db, 'api_keys', 'client', "TEXT NOT NULL DEFAULT ''");
+  ensureColumn(db, 'api_calls', 'livemode', 'INTEGER NOT NULL DEFAULT 1');
 
   ensureColumn(db, 'analyses', 'result_json', 'TEXT DEFAULT NULL');
   ensureColumn(db, 'analyses', 'meta_json', 'TEXT DEFAULT NULL');

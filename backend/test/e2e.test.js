@@ -1474,6 +1474,8 @@ async function main() {
   // Sesión 4 — núcleo de valor, API v1, RGPD… (test/session4.tests.js)
   // ═══════════════════════════════════════════════════════════
   await require('./session4.tests')({ post, put, get, call, check, checkAsync, getDB });
+  // Sesión 9 — API Bloque 2: async, webhooks, idempotencia, eventos, nk_test_, panel.
+  await require('./session9.tests')({ post, put, get, call, check, checkAsync, getDB });
 
   } catch (e) {
     console.error('TEST CRASH:', e.message);

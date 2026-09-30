@@ -216,6 +216,13 @@ async function runAnalysis({ license, task, input, lang, title, jobId, ip, sourc
     console.error('[AI] No se pudo persistir el análisis en el historial:', persistErr.message);
   }
 
+  // Sesión 9: evento para los webhooks (también con los análisis hechos en la web).
+  if (analysisId) {
+    require('../webhooks').emit(license.id, 'analysis.completed', {
+      id: analysisId, type: kind, title: finalTitle, source, report, health: plan.meta?.health || null
+    });
+  }
+
   return {
     status: 200,
     body: {
@@ -232,4 +239,20 @@ async function runAnalysis({ license, task, input, lang, title, jobId, ip, sourc
   };
 }
 
-module.exports = { runAnalysis, REPORT_TASKS, ALL_TASKS, MAX_INVOICES_PER_CALL, MAX_FOLDER_BATCHES, MAX_INVOICE_BATCHES };
+/**
+ * Sesión 9: solo la validación de la entrada (sin IA ni cuota). La usan las
+ * claves de prueba (misma respuesta de error que en real) y los trabajos
+ * asíncronos (los errores de entrada se devuelven al momento, no en job.failed).
+ * Devuelve null si la entrada es válida, o { status, body }.
+ */
+function checkInput({ license, task, input, lang }) {
+  if (!ALL_TASKS.includes(task)) return bad('invalid_task', 'Tipo de análisis desconocido.');
+  const { error, plan } = prepare(task, input, getCompanyProfile(license.id), lang, license.id);
+  if (error) return error;
+  if (!plan.inline && plan.chars > P.MAX_INPUT_CHARS) {
+    return bad('prompt_too_long', `El contenido supera el límite permitido (${P.MAX_INPUT_CHARS} caracteres).`);
+  }
+  return null;
+}
+
+module.exports = { runAnalysis, checkInput, REPORT_TASKS, ALL_TASKS, MAX_INVOICES_PER_CALL, MAX_FOLDER_BATCHES, MAX_INVOICE_BATCHES };

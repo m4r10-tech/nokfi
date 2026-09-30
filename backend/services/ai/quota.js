@@ -88,6 +88,8 @@ function reserveOrThrow(license, ip) {
     audit('AI_LICENSE_DAILY_LIMIT_REACHED', { license_id: license.id, ip, detail: `used=${used}/${limit} plan=${license.plan}` });
     throw new QuotaError(limit);
   }
+  // Sesión 9: aviso por webhook al pasar el 80 % y el 100 % de la cuota del día.
+  require('../webhooks').quotaThreshold(license, countAiAnalysesToday(license.id), limit);
   return r;
 }
 

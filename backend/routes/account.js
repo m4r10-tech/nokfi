@@ -25,7 +25,7 @@ const { API_PLANS } = require('../middleware/requireApiKey');
 const {
   getDB, getCompanyProfile, listAnalyses, getAnalysis, deleteLicense, audit, aiQuotaForPlan, countAiAnalysesToday
 } = require('../db/database');
-const { createApiKey, listApiKeys, revokeApiKey, callsTodayByKey, apiSummary } = require('../db/apikeys');
+const { createApiKey, setApiKeyClient, listApiKeys, revokeApiKey, callsTodayByKey, apiSummary } = require('../db/apikeys');
 const { listActions } = require('../db/actions');
 const { listLedger } = require('../db/finance');
 const { verifyPassword } = require('../utils/password');
@@ -38,7 +38,8 @@ const telemetry = express.Router();
 /* ── F4 ── */
 keys.get('/', requireLicense, (req, res) => {
   const calls = callsTodayByKey(req.license.id);
-  res.json({ keys: listApiKeys(req.license.id).map(k => ({ ...k, calls_today: calls[k.id] || 0 })), available: API_PLANS.includes(req.license.plan) });
+  // available = claves reales (Pro/Max); las de prueba, en todos los planes (sesión 9).
+  res.json({ keys: listApiKeys(req.license.id).map(k => ({ ...k, calls_today: calls[k.id] || 0 })), available: API_PLANS.includes(req.license.plan), test_available: true });
 });
 
 // Sesión 7 — Resumen de Desarrolladores: llamadas de hoy, cuota, claves activas y último error.
@@ -59,14 +60,24 @@ function keyCounts(list) {
 }
 
 keys.post('/', requireLicense, (req, res) => {
-  // El plan se valida SIEMPRE en el backend, no solo en la UI.
-  if (!API_PLANS.includes(req.license.plan)) {
-    return res.status(403).json({ error: 'api_plan_required', message: 'Las claves de API están disponibles en los planes Pro y Max.' });
+  const mode = req.body?.mode === 'test' ? 'test' : 'live';
+  // El plan se valida SIEMPRE en el backend, no solo en la UI. Las claves de
+  // prueba (sesión 9) están en todos los planes.
+  if (mode === 'live' && !API_PLANS.includes(req.license.plan)) {
+    return res.status(403).json({ error: 'api_plan_required', message: 'Las claves de API reales están disponibles en los planes Pro y Max. Puedes crear una clave de prueba.' });
   }
-  const out = createApiKey(req.license.id, sanitizeFreeText(req.body?.name || ''));
+  const out = createApiKey(req.license.id, sanitizeFreeText(req.body?.name || ''), { mode, client: sanitizeFreeText(req.body?.client || '') });
   if (out.error) return res.status(400).json({ error: out.error, message: 'Has alcanzado el máximo de claves activas.' });
-  audit('API_KEY_CREATED', { license_id: req.license.id, ip: req.ip, detail: `id=${out.id}` });
+  audit('API_KEY_CREATED', { license_id: req.license.id, ip: req.ip, detail: `id=${out.id} mode=${mode}` });
   res.status(201).json(out);
+});
+
+// Sesión 9 — Clientes: asignar una clave a un cliente final ('' = sin cliente).
+keys.patch('/:id', requireLicense, (req, res) => {
+  const id = Number(req.params.id);
+  if (!Number.isInteger(id) || typeof req.body?.client !== 'string') return res.status(400).json({ error: 'invalid_input' });
+  if (!setApiKeyClient(req.license.id, id, sanitizeFreeText(req.body.client).trim())) return res.status(404).json({ error: 'not_found' });
+  res.json({ success: true });
 });
 
 keys.delete('/:id', requireLicense, (req, res) => {
@@ -100,7 +111,10 @@ me.get('/export', requireLicense, (req, res) => {
     tax_reserves: db.prepare('SELECT year, quarter, amount, updated_at FROM tax_reserves WHERE license_id = ?').all(l.id),
     leak_dismissals: db.prepare('SELECT party_key, party_name, created_at FROM leak_dismissals WHERE license_id = ?').all(l.id),
     api_calls: db.prepare('SELECT key_id, method, path, status, error_code, ms, created_at FROM api_calls WHERE license_id = ? ORDER BY id DESC LIMIT 5000').all(l.id),
-    api_keys: listApiKeys(l.id)
+    api_keys: listApiKeys(l.id),
+    webhook_endpoints: db.prepare('SELECT id, url, events, description, enabled, created_at FROM webhook_endpoints WHERE license_id = ?').all(l.id),
+    webhook_deliveries: db.prepare('SELECT endpoint_id, event_id, event_type, status, attempts, last_status, created_at FROM webhook_deliveries WHERE license_id = ? ORDER BY id DESC LIMIT 5000').all(l.id),
+    api_jobs: db.prepare('SELECT id, kind, status, error_code, created_at, finished_at FROM api_jobs WHERE license_id = ? ORDER BY created_at DESC LIMIT 5000').all(l.id)
   });
 });
 
