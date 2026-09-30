@@ -16,6 +16,7 @@ export default {
     step1Cta: 'Crear clave',
     step2: 'Prueba una llamada con el ejemplo de la documentación (curl o el nodo HTTP Request de n8n).',
     step2Cta: 'Ver documentación',
+    stepDone: 'Hecho',
     step3: 'Revisa aquí las llamadas y los errores de cada clave.',
     lockedTitle: 'La API está disponible en los planes Pro y Max',
     lockedDesc: 'Puedes ver la documentación y preparar tus flujos; para crear claves, mejora tu plan desde «Gestionar suscripción».',
@@ -170,14 +171,23 @@ export default {
   },
   onboarding: {
     companyPlaceholder: 'Taller García', sectorSelect: 'Selecciona un sector',
-    sectors: { comercio: 'Comercio', hosteleria: 'Hostelería', salud: 'Salud', legal: 'Legal', construccion: 'Construcción', tecnologia: 'Tecnología', consultoria: 'Consultoría', diseno: 'Diseño', educacion: 'Educación', otro: 'Otro' },
+    sectors: { taller: 'Taller mecánico', automocion: 'Automoción (venta de vehículos)', transporte: 'Transporte', industria: 'Industria', mayorista: 'Comercio mayorista', alojamiento: 'Alojamiento', inmobiliaria: 'Inmobiliaria', estetica: 'Peluquería y estética', deporte: 'Deporte y ocio', asesoria: 'Asesoría y gestoría', arquitectura: 'Arquitectura e ingeniería', marketing: 'Marketing y publicidad', limpieza: 'Limpieza', agricultura: 'Agricultura', comercio: 'Comercio minorista', hosteleria: 'Hostelería', salud: 'Salud', legal: 'Legal', construccion: 'Construcción', tecnologia: 'Tecnología', consultoria: 'Consultoría', diseno: 'Diseño', educacion: 'Educación', otro: 'Otro' },
     sizes: { solo: 'Solo (autónomo)', s2: '2–5 personas', s6: '6–20 personas', s20: '+20 personas' },
     expenses: { alquiler: 'Alquiler', personal: 'Personal', proveedores: 'Proveedores', marketing: 'Marketing', suministros: 'Suministros', tecnologia: 'Tecnología', transporte: 'Transporte', otro: 'Otro' },
     welcome: 'Bienvenido a Nokfi', subtitle: 'Cuéntanos un poco sobre tu negocio para personalizar tus análisis',
     companyName: 'Nombre de la empresa', sector: 'Sector', size: 'Tamaño',
-    mainExpenses: 'Principales gastos del negocio', start: 'Empezar a usar Nokfi'
+    mainExpenses: 'Principales gastos del negocio', start: 'Empezar a usar Nokfi',
+    legalHint: 'Cambia el cálculo de impuestos', optional: 'Opcional', reminders: 'Avisarme antes de cada plazo fiscal', remindersHint: 'Te escribimos por email unos días antes del 303, el 130 y el resto de modelos.', skip: 'Omitir por ahora', privacy: 'Solo usamos estos datos para adaptar tus análisis. No se comparten con nadie.', change: 'Cambiar', sectorSearch: 'Busca tu sector: taller, tienda, transporte…'
   },
   home: {
+    guideStart: 'Empieza por aquí', guideGo: 'Empezar', deadlineTitle: 'Próximo plazo fiscal',
+    deadlineToday: 'Vence hoy', deadlineDays: 'Faltan {n} días', deadlineDays_one: 'Falta {n} día',
+    deadlineModels: 'Modelos {m} · {period}', deadlineSee: 'Ver calendario', moneyTitle: 'Tu dinero',
+    mTaxSave: 'A apartar para Hacienda ({q})', mTaxCompensate: 'IVA a compensar ({q})', mTaxCompensateHint: 'No se paga: se descuenta en los próximos trimestres',
+    mTaxNone: 'Hacienda ({q})', mOverdue: 'Por cobrar vencido', mOverdueTop: '{name} · hace {n} días',
+    mOverdueTop_one: '{name} · hace {n} día', mNoOverdue: 'Nada vencido', actionsFrom: 'De «{title}»',
+    actionDone: 'Marcar como hecha: {title}', usageTotal: '{n} análisis realizados', usageTotal_one: '{n} análisis realizado',
+    usageToday: '{used} de {quota} análisis de IA hoy (se renueva a las {time})',
     welcomeCard: 'Tu panel está listo. Empieza por donde quieras: no hay un orden obligatorio.',
     startQuestionnaire: 'Hacer el diagnóstico', uploadData: 'Subir mis datos',
     goodMorning: 'Buenos días', goodAfternoon: 'Buenas tardes', goodEvening: 'Buenas noches',
@@ -639,7 +649,7 @@ export default {
     taxes: {
       headline: 'Este trimestre ({q}) te tocará pagar, aproximadamente:', dueBy: 'Plazo: hasta el {date}',
       reserved: 'Llevas apartado {v}', missing: 'Te faltan {v}', covered: 'Cubierto', setAside: 'Lo que llevo apartado para Hacienda (€)',
-      vatRefund: 'Este trimestre el IVA te sale a devolver o compensar: {v}.', vatCompensate: 'Este trimestre el IVA te sale a compensar: {v}. En el 1T-3T no se pide la devolución; se descuenta en los próximos trimestres (la devolución se solicita en el 4T, salvo inscritos en el REDEME).',
+      vatRefund: 'Puedes pedir la devolución en el modelo 303 del 4T o dejarlo para compensar el año siguiente.', vatCompensate: 'No se paga ni se devuelve ahora: se descuenta del IVA de los próximos trimestres. La devolución solo se pide en el 4T (salvo inscritos en el REDEME).',
       vatTitle: 'IVA trimestral (modelo 303)', vatOutput: 'IVA repercutido', vatInput: 'IVA soportado', result: 'Resultado',
       vatExplain: 'IVA de tus facturas emitidas menos el IVA de tus gastos del trimestre.',
       irpfTitle: 'Pago fraccionado IRPF (modelo 130)', accIncome: 'Ingresos acumulados del año', accExpense: 'Gastos acumulados del año',

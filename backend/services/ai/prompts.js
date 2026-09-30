@@ -236,7 +236,9 @@ const REPORT_RULES = `REGLAS DEL INFORME (obligatorias):
 - Coherencia: lo que es un punto fuerte no aparece como prioridad ni como paso del plan.
 - Gravedad: un plazo fiscal a menos de 30 días con algo por pagar o por preparar es "high". Si el IVA sale a compensar, no digas que hay que pagarlo.
 - Plan de acción: due_in_days = días desde hoy para hacerlo (0 = hoy) y timeframe = ese mismo plazo en palabras. Lo que depende de un plazo fiscal se hace antes de ese plazo. Ordénalo de más urgente a menos.
-- No repitas la misma cifra en varias partes del informe salvo que haga falta para explicar una prioridad.`;
+- No repitas la misma cifra en varias partes del informe salvo que haga falta para explicar una prioridad.
+- Los datos del libro son hechos: las facturas que aparecen YA están registradas en Nokfi (no propongas registrarlas). "Vencido" es solo lo marcado como "venció"; lo que "vence" más adelante aún no se debe y no se reclama como impagado.
+- Cifras clave: como mucho 4, cada una distinta (no pongas a la vez un total y una parte suya con otra etiqueta). La nota solo si aporta un hecho de los datos; si no, déjala vacía.`;
 
 /* ── Excel (6 módulos) ── */
 const EXCEL_MODULES = {

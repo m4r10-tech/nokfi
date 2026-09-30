@@ -16,6 +16,7 @@ export default {
     step1Cta: 'Utwórz klucz',
     step2: 'Wypróbuj wywołanie z przykładu w dokumentacji (curl lub węzeł HTTP Request w n8n).',
     step2Cta: 'Zobacz dokumentację',
+    stepDone: 'Zrobione',
     step3: 'Sprawdzaj tu wywołania i błędy każdego klucza.',
     lockedTitle: 'API jest dostępne w planach Pro i Max',
     lockedDesc: 'Możesz czytać dokumentację i przygotować przepływy; aby tworzyć klucze, zmień plan w „Zarządzaj subskrypcją”.',
@@ -172,14 +173,24 @@ export default {
   },
   onboarding: {
     companyPlaceholder: 'Warsztat García', sectorSelect: 'Wybierz branżę',
-    sectors: { comercio: 'Handel', hosteleria: 'Gastronomia i hotelarstwo', salud: 'Zdrowie', legal: 'Prawo', construccion: 'Budownictwo', tecnologia: 'Technologia', consultoria: 'Doradztwo', diseno: 'Projektowanie', educacion: 'Edukacja', otro: 'Inne' },
+    sectors: { taller: 'Warsztat samochodowy', automocion: 'Motoryzacja (sprzedaż pojazdów)', transporte: 'Transport', industria: 'Przemysł', mayorista: 'Handel hurtowy', alojamiento: 'Zakwaterowanie', inmobiliaria: 'Nieruchomości', estetica: 'Fryzjerstwo i kosmetyka', deporte: 'Sport i rekreacja', asesoria: 'Księgowość i doradztwo podatkowe', arquitectura: 'Architektura i inżynieria', marketing: 'Marketing i reklama', limpieza: 'Sprzątanie', agricultura: 'Rolnictwo', comercio: 'Handel detaliczny', hosteleria: 'Gastronomia i hotelarstwo', salud: 'Zdrowie', legal: 'Prawo', construccion: 'Budownictwo', tecnologia: 'Technologia', consultoria: 'Doradztwo', diseno: 'Projektowanie', educacion: 'Edukacja', otro: 'Inne' },
     sizes: { solo: 'Tylko ja (samozatrudnienie)', s2: '2–5 osób', s6: '6–20 osób', s20: 'Ponad 20 osób' },
     expenses: { alquiler: 'Czynsz', personal: 'Personel', proveedores: 'Dostawcy', marketing: 'Marketing', suministros: 'Media', tecnologia: 'Technologia', transporte: 'Transport', otro: 'Inne' },
     welcome: 'Witaj w Nokfi', subtitle: 'Opowiedz nam trochę o swojej firmie, abyśmy mogli dopasować analizy',
     companyName: 'Nazwa firmy', sector: 'Branża', size: 'Wielkość',
-    mainExpenses: 'Główne wydatki firmy', start: 'Zacznij korzystać z Nokfi'
+    mainExpenses: 'Główne wydatki firmy', start: 'Zacznij korzystać z Nokfi',
+    legalHint: 'Zmienia sposób liczenia podatków', optional: 'Opcjonalnie', reminders: 'Przypominaj mi przed każdym terminem podatkowym', remindersHint: 'Napiszemy do Ciebie kilka dni przed deklaracją 303, 130 i pozostałymi.', skip: 'Pomiń na razie', privacy: 'Używamy tych danych tylko do dopasowania analiz. Nikomu ich nie udostępniamy.', change: 'Zmień', sectorSearch: 'Wyszukaj branżę: warsztat, sklep, transport…'
   },
   home: {
+    deadlineDays_few: 'Zostały {n} dni', usageTotal_few: 'Wykonano {n} analizy',
+    guideStart: 'Zacznij tutaj', guideGo: 'Zacznij', deadlineTitle: 'Najbliższy termin podatkowy',
+    deadlineToday: 'Termin dziś', deadlineDays: 'Zostało {n} dni', deadlineDays_one: 'Został {n} dzień',
+    deadlineModels: 'Deklaracje {m} · {period}', deadlineSee: 'Zobacz kalendarz', moneyTitle: 'Twoje pieniądze',
+    mTaxSave: 'Do odłożenia na podatki ({q})', mTaxCompensate: 'VAT do rozliczenia ({q})', mTaxCompensateHint: 'Nic do zapłaty: pomniejsza kolejne kwartały',
+    mTaxNone: 'Podatki ({q})', mOverdue: 'Zaległe należności', mOverdueTop: '{name} · {n} dni temu',
+    mOverdueTop_one: '{name} · {n} dzień temu', mNoOverdue: 'Nic zaległego', actionsFrom: 'Z „{title}”',
+    actionDone: 'Oznacz jako zrobione: {title}', usageTotal: 'Wykonano {n} analiz', usageTotal_one: 'Wykonano {n} analizę',
+    usageToday: '{used} z {quota} analiz AI dziś (odnowienie o {time})',
     welcomeCard: 'Twój panel jest gotowy. Zacznij od czego chcesz — nie ma obowiązkowej kolejności.',
     startQuestionnaire: 'Zrób diagnozę', uploadData: 'Wgraj moje dane',
     goodMorning: 'Dzień dobry', goodAfternoon: 'Dzień dobry', goodEvening: 'Dobry wieczór',
@@ -638,7 +649,7 @@ export default {
     taxes: {
       headline: 'W tym kwartale ({q}) zapłacisz mniej więcej:', dueBy: 'Termin: do {date}',
       reserved: 'Odłożono {v}', missing: 'Brakuje {v}', covered: 'Pokryte', setAside: 'Ile odłożyłem na podatki (€)',
-      vatRefund: 'W tym kwartale VAT wychodzi do zwrotu lub rozliczenia: {v}.', vatCompensate: 'W tym kwartale VAT jest ujemny: {v} do rozliczenia. W 1.–3. kwartale nie wnioskuje się o zwrot; kwota pomniejsza kolejne kwartały (o zwrot wnioskuje się w 4. kwartale, chyba że firma jest w rejestrze REDEME).',
+      vatRefund: 'Możesz wnioskować o zwrot w deklaracji 303 za 4. kwartał albo przenieść kwotę do rozliczenia w kolejnym roku.', vatCompensate: 'Teraz nic nie płacisz ani nie odzyskujesz: kwota pomniejsza VAT kolejnych kwartałów. O zwrot wnioskuje się tylko w 4. kwartale (chyba że firma jest w rejestrze REDEME).',
       vatTitle: 'Kwartalny VAT (modelo 303)', vatOutput: 'VAT należny', vatInput: 'VAT naliczony', result: 'Wynik',
       vatExplain: 'VAT z twoich wystawionych faktur minus VAT z wydatków w kwartale.',
       irpfTitle: 'Zaliczka na podatek dochodowy (modelo 130)', accIncome: 'Przychody narastająco w roku', accExpense: 'Wydatki narastająco w roku',

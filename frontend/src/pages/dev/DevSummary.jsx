@@ -1,6 +1,6 @@
 import { useState, useEffect, useCallback } from 'react';
 import { Link } from 'react-router-dom';
-import { KeyRound, BookOpen, AlertTriangle, ArrowRight } from 'lucide-react';
+import { KeyRound, BookOpen, AlertTriangle, ArrowRight, Check } from 'lucide-react';
 import { keysApi } from '../../middleware/api';
 import { apiErrorMessage, isConnectivityError } from '../../middleware/errors';
 import { useLang } from '../../context/LangContext';
@@ -65,15 +65,18 @@ export default function DevSummary() {
           <Section title={t('dev.startTitle')}>
             <ol className="flex flex-col gap-3 text-sm">
               {[
-                { n: 1, text: t('dev.step1'), to: '/app/dev/claves', icon: KeyRound, cta: t('dev.step1Cta') },
-                { n: 2, text: t('dev.step2'), href: '/api-docs', icon: BookOpen, cta: t('dev.step2Cta') },
+                { n: 1, text: t('dev.step1'), to: '/app/dev/claves', icon: KeyRound, cta: t('dev.step1Cta'), done: data.keys_total > 0 },
+                { n: 2, text: t('dev.step2'), href: '/api-docs', icon: BookOpen, cta: t('dev.step2Cta'), done: !!data.last_call_at },
                 { n: 3, text: t('dev.step3') }
               ].map(s => (
                 <li key={s.n} className="flex flex-col sm:flex-row sm:items-center gap-2 sm:gap-3">
-                  <span className="shrink-0 w-6 h-6 rounded-full grid place-items-center text-xs font-semibold" style={{ background: 'var(--surface-2)', color: 'var(--text-secondary)' }}>{s.n}</span>
-                  <span className="flex-1" style={{ color: 'var(--text-primary)' }}>{s.text}</span>
-                  {s.to && <Link to={s.to} className="btn btn-secondary btn-sm self-start"><s.icon size={14} /> {s.cta}</Link>}
-                  {s.href && <a href={s.href} target="_blank" rel="noopener" className="btn btn-secondary btn-sm self-start"><s.icon size={14} /> {s.cta} <ArrowRight size={13} /></a>}
+                  <span className="shrink-0 w-6 h-6 rounded-full grid place-items-center text-xs font-semibold"
+                    style={s.done ? { background: 'var(--positive-soft)', color: 'var(--positive)' } : { background: 'var(--surface-2)', color: 'var(--text-secondary)' }}>
+                    {s.done ? <Check size={13} strokeWidth={3} aria-label={t('dev.stepDone')} /> : s.n}
+                  </span>
+                  <span className="flex-1" style={{ color: s.done ? 'var(--text-muted)' : 'var(--text-primary)' }}>{s.text}</span>
+                  {!s.done && s.to && <Link to={s.to} className="btn btn-secondary btn-sm self-start"><s.icon size={14} /> {s.cta}</Link>}
+                  {!s.done && s.href && <a href={s.href} target="_blank" rel="noopener" className="btn btn-secondary btn-sm self-start"><s.icon size={14} /> {s.cta} <ArrowRight size={13} /></a>}
                 </li>
               ))}
             </ol>

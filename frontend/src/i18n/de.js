@@ -16,6 +16,7 @@ export default {
     step1Cta: 'Schlüssel erstellen',
     step2: 'Teste einen Aufruf mit dem Beispiel aus der Doku (curl oder der HTTP-Request-Node von n8n).',
     step2Cta: 'Doku ansehen',
+    stepDone: 'Erledigt',
     step3: 'Prüfe hier die Aufrufe und Fehler jedes Schlüssels.',
     lockedTitle: 'Die API gibt es in den Tarifen Pro und Max',
     lockedDesc: 'Du kannst die Doku lesen und Workflows vorbereiten; um Schlüssel zu erstellen, wechsle über „Abo verwalten“ den Tarif.',
@@ -170,14 +171,23 @@ export default {
   },
   onboarding: {
     companyPlaceholder: 'Werkstatt García', sectorSelect: 'Branche wählen',
-    sectors: { comercio: 'Handel', hosteleria: 'Gastgewerbe', salud: 'Gesundheit', legal: 'Recht', construccion: 'Bau', tecnologia: 'Technologie', consultoria: 'Beratung', diseno: 'Design', educacion: 'Bildung', otro: 'Sonstiges' },
+    sectors: { taller: 'Kfz-Werkstatt', automocion: 'Kfz-Handel', transporte: 'Transport', industria: 'Industrie', mayorista: 'Großhandel', alojamiento: 'Beherbergung', inmobiliaria: 'Immobilien', estetica: 'Friseur und Kosmetik', deporte: 'Sport und Freizeit', asesoria: 'Steuerberatung und Buchhaltung', arquitectura: 'Architektur und Ingenieurwesen', marketing: 'Marketing und Werbung', limpieza: 'Reinigung', agricultura: 'Landwirtschaft', comercio: 'Einzelhandel', hosteleria: 'Gastgewerbe', salud: 'Gesundheit', legal: 'Recht', construccion: 'Bau', tecnologia: 'Technologie', consultoria: 'Beratung', diseno: 'Design', educacion: 'Bildung', otro: 'Sonstiges' },
     sizes: { solo: 'Nur ich (selbstständig)', s2: '2–5 Personen', s6: '6–20 Personen', s20: 'Über 20 Personen' },
     expenses: { alquiler: 'Miete', personal: 'Personal', proveedores: 'Lieferanten', marketing: 'Marketing', suministros: 'Energie & Nebenkosten', tecnologia: 'Technologie', transporte: 'Transport', otro: 'Sonstiges' },
     welcome: 'Willkommen bei Nokfi', subtitle: 'Erzähl uns kurz von deinem Unternehmen, damit wir deine Analysen personalisieren können',
     companyName: 'Name des Unternehmens', sector: 'Branche', size: 'Größe',
-    mainExpenses: 'Wichtigste Ausgaben', start: 'Nokfi nutzen'
+    mainExpenses: 'Wichtigste Ausgaben', start: 'Nokfi nutzen',
+    legalHint: 'Ändert die Steuerberechnung', optional: 'Optional', reminders: 'Vor jeder Steuerfrist erinnern', remindersHint: 'Wir schreiben dir einige Tage vor Modell 303, 130 und den übrigen Erklärungen.', skip: 'Vorerst überspringen', privacy: 'Wir nutzen diese Angaben nur, um deine Analysen anzupassen. Sie werden nicht weitergegeben.', change: 'Ändern', sectorSearch: 'Branche suchen: Werkstatt, Laden, Transport…'
   },
   home: {
+    guideStart: 'Hier anfangen', guideGo: 'Loslegen', deadlineTitle: 'Nächste Steuerfrist',
+    deadlineToday: 'Heute fällig', deadlineDays: 'Noch {n} Tage', deadlineDays_one: 'Noch {n} Tag',
+    deadlineModels: 'Modelle {m} · {period}', deadlineSee: 'Kalender ansehen', moneyTitle: 'Dein Geld',
+    mTaxSave: 'Für Steuern zurücklegen ({q})', mTaxCompensate: 'USt.-Guthaben ({q})', mTaxCompensateHint: 'Nichts zu zahlen: wird in den nächsten Quartalen verrechnet',
+    mTaxNone: 'Steuern ({q})', mOverdue: 'Überfällige Forderungen', mOverdueTop: '{name} · vor {n} Tagen',
+    mOverdueTop_one: '{name} · vor {n} Tag', mNoOverdue: 'Nichts überfällig', actionsFrom: 'Aus „{title}“',
+    actionDone: 'Als erledigt markieren: {title}', usageTotal: '{n} Analysen durchgeführt', usageTotal_one: '{n} Analyse durchgeführt',
+    usageToday: '{used} von {quota} KI-Analysen heute (Erneuerung um {time})',
     welcomeCard: 'Dein Dashboard ist bereit. Fang an, wo du willst – es gibt keine feste Reihenfolge.',
     startQuestionnaire: 'Diagnose starten', uploadData: 'Meine Daten hochladen',
     goodMorning: 'Guten Morgen', goodAfternoon: 'Guten Tag', goodEvening: 'Guten Abend',
@@ -636,7 +646,7 @@ export default {
     taxes: {
       headline: 'In diesem Quartal ({q}) zahlst du voraussichtlich:', dueBy: 'Frist: bis {date}',
       reserved: 'Zurückgelegt: {v}', missing: 'Es fehlen {v}', covered: 'Gedeckt', setAside: 'Für Steuern zurückgelegt (€)',
-      vatRefund: 'In diesem Quartal ergibt sich ein USt.-Guthaben (Erstattung oder Verrechnung): {v}.', vatCompensate: 'In diesem Quartal ergibt sich ein USt.-Guthaben von {v} zur Verrechnung. Im 1.–3. Quartal kann keine Erstattung beantragt werden; es wird mit den Folgequartalen verrechnet (Erstattung im 4. Quartal, außer bei Eintragung im REDEME).',
+      vatRefund: 'Du kannst die Erstattung im Modell 303 des 4. Quartals beantragen oder das Guthaben ins nächste Jahr vortragen.', vatCompensate: 'Jetzt ist nichts zu zahlen oder zu erstatten: Das Guthaben wird mit der USt. der Folgequartale verrechnet. Eine Erstattung wird nur im 4. Quartal beantragt (außer bei Eintragung im REDEME).',
       vatTitle: 'Quartals-Umsatzsteuer (Modelo 303)', vatOutput: 'Umsatzsteuer', vatInput: 'Vorsteuer', result: 'Ergebnis',
       vatExplain: 'USt. deiner ausgestellten Rechnungen minus Vorsteuer deiner Ausgaben im Quartal.',
       irpfTitle: 'Einkommensteuer-Vorauszahlung (Modelo 130)', accIncome: 'Einnahmen seit Jahresbeginn', accExpense: 'Ausgaben seit Jahresbeginn',

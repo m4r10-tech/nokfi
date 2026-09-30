@@ -48,10 +48,15 @@ keys.get('/summary', requireLicense, (req, res) => {
     plan: req.license.plan,
     available: API_PLANS.includes(req.license.plan),
     quota: { daily: aiQuotaForPlan(req.license.plan), used_today: countAiAnalysesToday(id) },
-    keys_active: listApiKeys(id).filter(k => !k.revoked_at).length,
+    ...keyCounts(listApiKeys(id)),
     ...apiSummary(id)
   });
 });
+
+// keys_total incluye las revocadas: sirve para marcar "Crea una clave" como hecho.
+function keyCounts(list) {
+  return { keys_active: list.filter(k => !k.revoked_at).length, keys_total: list.length };
+}
 
 keys.post('/', requireLicense, (req, res) => {
   // El plan se valida SIEMPRE en el backend, no solo en la UI.

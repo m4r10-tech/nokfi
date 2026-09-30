@@ -1,6 +1,6 @@
 import { useState, useEffect, useCallback } from 'react';
 import { Link } from 'react-router-dom';
-import { Landmark, PiggyBank, Loader2, CalendarDays, Info } from 'lucide-react';
+import { Landmark, Loader2, CalendarDays, Info } from 'lucide-react';
 import { financeApi } from '../../middleware/api';
 import { apiErrorMessage, isConnectivityError } from '../../middleware/errors';
 import { useLang } from '../../context/LangContext';
@@ -73,7 +73,6 @@ export default function Taxes() {
 
           <section className="card p-5 md:p-6 flex flex-col gap-4" style={{ borderColor: 'var(--border-strong)' }}>
             <div className="flex items-start gap-3">
-              <span className="w-10 h-10 rounded-xl grid place-items-center shrink-0" style={{ background: 'var(--accent-soft)', color: 'var(--accent-text)' }}><PiggyBank size={19} /></span>
               <div className="min-w-0">
                 {toPay ? (
                   <>
@@ -113,7 +112,7 @@ export default function Taxes() {
               </label>
               <button type="submit" disabled={saving} className="btn btn-secondary">{saving && <Loader2 size={14} className="animate-spin" />} {t('common.save')}</button>
             </form>}
-            {s.vat_refund > 0 && <Notice tone="positive">{t(quarter === 4 ? 'finance.taxes.vatRefund' : 'finance.taxes.vatCompensate', { v: eur(s.vat_refund, lang) })}</Notice>}
+            {s.vat_refund > 0 && <Notice tone="positive">{t(quarter === 4 ? 'finance.taxes.vatRefund' : 'finance.taxes.vatCompensate')}</Notice>}
           </section>
 
           <div className="grid md:grid-cols-2 gap-4">
@@ -131,8 +130,8 @@ export default function Taxes() {
                 <Row label={t('finance.taxes.accExpense')} value={eur(s.irpf130.expense, lang)} />
                 <Row label={t('finance.taxes.netIncome')} value={eur(s.irpf130.net, lang)} />
                 <Row label={t('finance.taxes.twentyPct')} value={eur(s.irpf130.gross, lang)} />
-                <Row label={t('finance.taxes.prevPayments')} value={`− ${eur(s.irpf130.previous_payments, lang)}`} />
-                <Row label={t('finance.taxes.withholdings')} value={`− ${eur(s.irpf130.withholdings, lang)}`} />
+                <Row label={t('finance.taxes.prevPayments')} value={minus(s.irpf130.previous_payments, lang)} />
+                <Row label={t('finance.taxes.withholdings')} value={minus(s.irpf130.withholdings, lang)} />
                 <Row label={t('finance.taxes.result')} value={eur(s.irpf130.result, lang)} strong />
               </Section>
             ) : (
@@ -155,4 +154,9 @@ function Row({ label, value, strong }) {
       <span className="tabular" style={{ color: 'var(--text-primary)', fontWeight: strong ? 600 : 400 }}>{value}</span>
     </div>
   );
+}
+
+/** Resta en la tabla del 130: sin signo cuando es cero ("0,00 €", no "− 0,00 €"). */
+function minus(n, lang) {
+  return n > 0 ? `− ${eur(n, lang)}` : eur(0, lang);
 }

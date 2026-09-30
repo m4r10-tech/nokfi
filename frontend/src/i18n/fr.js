@@ -16,6 +16,7 @@ export default {
     step1Cta: 'Créer une clé',
     step2: 'Testez un appel avec l’exemple de la documentation (curl ou le nœud HTTP Request de n8n).',
     step2Cta: 'Voir la documentation',
+    stepDone: 'Fait',
     step3: 'Suivez ici les appels et les erreurs de chaque clé.',
     lockedTitle: 'L’API est disponible dans les offres Pro et Max',
     lockedDesc: 'Vous pouvez lire la documentation et préparer vos flux ; pour créer des clés, passez à une offre supérieure depuis « Gérer l’abonnement ».',
@@ -170,14 +171,23 @@ export default {
   },
   onboarding: {
     companyPlaceholder: 'Atelier García', sectorSelect: 'Choisissez un secteur',
-    sectors: { comercio: 'Commerce', hosteleria: 'Hôtellerie-restauration', salud: 'Santé', legal: 'Juridique', construccion: 'Construction', tecnologia: 'Technologie', consultoria: 'Conseil', diseno: 'Design', educacion: 'Éducation', otro: 'Autre' },
+    sectors: { taller: 'Garage automobile', automocion: 'Automobile (vente de véhicules)', transporte: 'Transport', industria: 'Industrie', mayorista: 'Commerce de gros', alojamiento: 'Hébergement', inmobiliaria: 'Immobilier', estetica: 'Coiffure et esthétique', deporte: 'Sport et loisirs', asesoria: 'Expertise comptable et conseil', arquitectura: 'Architecture et ingénierie', marketing: 'Marketing et publicité', limpieza: 'Nettoyage', agricultura: 'Agriculture', comercio: 'Commerce de détail', hosteleria: 'Hôtellerie-restauration', salud: 'Santé', legal: 'Juridique', construccion: 'Construction', tecnologia: 'Technologie', consultoria: 'Conseil', diseno: 'Design', educacion: 'Éducation', otro: 'Autre' },
     sizes: { solo: 'Seul (indépendant)', s2: '2–5 personnes', s6: '6–20 personnes', s20: 'Plus de 20 personnes' },
     expenses: { alquiler: 'Loyer', personal: 'Personnel', proveedores: 'Fournisseurs', marketing: 'Marketing', suministros: 'Énergie et fournitures', tecnologia: 'Technologie', transporte: 'Transport', otro: 'Autre' },
     welcome: 'Bienvenue sur Nokfi', subtitle: 'Parlez-nous un peu de votre activité pour personnaliser vos analyses',
     companyName: 'Nom de l’entreprise', sector: 'Secteur', size: 'Taille',
-    mainExpenses: 'Principales dépenses de l’activité', start: 'Commencer à utiliser Nokfi'
+    mainExpenses: 'Principales dépenses de l’activité', start: 'Commencer à utiliser Nokfi',
+    legalHint: 'Change le calcul des impôts', optional: 'Facultatif', reminders: 'Me prévenir avant chaque échéance fiscale', remindersHint: 'Nous vous écrivons quelques jours avant le 303, le 130 et les autres déclarations.', skip: 'Passer pour l\'instant', privacy: 'Ces données servent uniquement à adapter vos analyses. Elles ne sont jamais partagées.', change: 'Changer', sectorSearch: 'Cherchez votre secteur : garage, boutique, transport…'
   },
   home: {
+    guideStart: 'Commencez ici', guideGo: 'Commencer', deadlineTitle: 'Prochaine échéance fiscale',
+    deadlineToday: 'Échéance aujourd\'hui', deadlineDays: 'Plus que {n} jours', deadlineDays_one: 'Plus qu\'{n} jour',
+    deadlineModels: 'Modèles {m} · {period}', deadlineSee: 'Voir le calendrier', moneyTitle: 'Votre argent',
+    mTaxSave: 'À mettre de côté pour les impôts ({q})', mTaxCompensate: 'TVA à reporter ({q})', mTaxCompensateHint: 'Rien à payer : elle se déduit des prochains trimestres',
+    mTaxNone: 'Impôts ({q})', mOverdue: 'Impayés échus', mOverdueTop: '{name} · il y a {n} jours',
+    mOverdueTop_one: '{name} · il y a {n} jour', mNoOverdue: 'Rien d\'échu', actionsFrom: 'De « {title} »',
+    actionDone: 'Marquer comme faite : {title}', usageTotal: '{n} analyses réalisées', usageTotal_one: '{n} analyse réalisée',
+    usageToday: '{used} sur {quota} analyses IA aujourd\'hui (renouvelé à {time})',
     welcomeCard: 'Votre tableau de bord est prêt. Commencez par où vous voulez : il n’y a pas d’ordre imposé.',
     startQuestionnaire: 'Faire le diagnostic', uploadData: 'Importer mes données',
     goodMorning: 'Bonjour', goodAfternoon: 'Bon après-midi', goodEvening: 'Bonsoir',
@@ -636,7 +646,7 @@ export default {
     taxes: {
       headline: 'Ce trimestre ({q}), vous devrez payer environ :', dueBy: 'Échéance : {date}',
       reserved: 'Vous avez mis de côté {v}', missing: 'Il manque {v}', covered: 'Couvert', setAside: 'Ce que j’ai mis de côté pour les impôts (€)',
-      vatRefund: 'Ce trimestre, votre TVA est remboursable ou reportable : {v}.', vatCompensate: 'Ce trimestre, votre TVA est négative : {v} à reporter. Du 1T au 3T, on ne demande pas de remboursement ; elle se déduit des trimestres suivants (le remboursement se demande au 4T, sauf inscription au REDEME).',
+      vatRefund: 'Vous pouvez demander le remboursement dans le modèle 303 du 4T ou le reporter sur l\'année suivante.', vatCompensate: 'Rien à payer ni à récupérer maintenant : le montant se déduit de la TVA des trimestres suivants. Le remboursement ne se demande qu\'au 4T (sauf inscription au REDEME).',
       vatTitle: 'TVA trimestrielle (modèle 303)', vatOutput: 'TVA collectée', vatInput: 'TVA déductible', result: 'Résultat',
       vatExplain: 'TVA de vos factures émises moins la TVA de vos dépenses du trimestre.',
       irpfTitle: 'Acompte d’impôt sur le revenu (modèle 130)', accIncome: 'Recettes cumulées de l’année', accExpense: 'Dépenses cumulées de l’année',

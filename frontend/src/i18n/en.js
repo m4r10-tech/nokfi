@@ -16,6 +16,7 @@ export default {
     step1Cta: 'Create key',
     step2: 'Try a call with the example in the docs (curl or n8n’s HTTP Request node).',
     step2Cta: 'View docs',
+    stepDone: 'Done',
     step3: 'Check each key’s calls and errors here.',
     lockedTitle: 'The API is available on the Pro and Max plans',
     lockedDesc: 'You can read the docs and plan your workflows; to create keys, upgrade from “Manage subscription”.',
@@ -170,14 +171,23 @@ export default {
   },
   onboarding: {
     companyPlaceholder: 'García Workshop', sectorSelect: 'Choose a sector',
-    sectors: { comercio: 'Retail', hosteleria: 'Hospitality', salud: 'Health', legal: 'Legal', construccion: 'Construction', tecnologia: 'Technology', consultoria: 'Consulting', diseno: 'Design', educacion: 'Education', otro: 'Other' },
+    sectors: { taller: 'Car repair garage', automocion: 'Motor trade (vehicle sales)', transporte: 'Transport', industria: 'Manufacturing', mayorista: 'Wholesale', alojamiento: 'Accommodation', inmobiliaria: 'Real estate', estetica: 'Hair and beauty', deporte: 'Sport and leisure', asesoria: 'Accounting and tax advice', arquitectura: 'Architecture and engineering', marketing: 'Marketing and advertising', limpieza: 'Cleaning', agricultura: 'Agriculture', comercio: 'Retail', hosteleria: 'Hospitality', salud: 'Health', legal: 'Legal', construccion: 'Construction', tecnologia: 'Technology', consultoria: 'Consulting', diseno: 'Design', educacion: 'Education', otro: 'Other' },
     sizes: { solo: 'Just me (freelancer)', s2: '2–5 people', s6: '6–20 people', s20: '20+ people' },
     expenses: { alquiler: 'Rent', personal: 'Staff', proveedores: 'Suppliers', marketing: 'Marketing', suministros: 'Utilities', tecnologia: 'Technology', transporte: 'Transport', otro: 'Other' },
     welcome: 'Welcome to Nokfi', subtitle: 'Tell us a bit about your business to personalize your analyses',
     companyName: 'Company name', sector: 'Sector', size: 'Size',
-    mainExpenses: 'Main business expenses', start: 'Start using Nokfi'
+    mainExpenses: 'Main business expenses', start: 'Start using Nokfi',
+    legalHint: 'Changes how taxes are estimated', optional: 'Optional', reminders: 'Remind me before each tax deadline', remindersHint: 'We email you a few days before form 303, form 130 and the other filings.', skip: 'Skip for now', privacy: 'We only use this to tailor your analyses. It is never shared.', change: 'Change', sectorSearch: 'Find your sector: garage, shop, transport…'
   },
   home: {
+    guideStart: 'Start here', guideGo: 'Start', deadlineTitle: 'Next tax deadline',
+    deadlineToday: 'Due today', deadlineDays: '{n} days left', deadlineDays_one: '{n} day left',
+    deadlineModels: 'Forms {m} · {period}', deadlineSee: 'See calendar', moneyTitle: 'Your money',
+    mTaxSave: 'To set aside for tax ({q})', mTaxCompensate: 'VAT to offset ({q})', mTaxCompensateHint: 'Nothing to pay: it is deducted in the next quarters',
+    mTaxNone: 'Tax ({q})', mOverdue: 'Overdue receivables', mOverdueTop: '{name} · {n} days ago',
+    mOverdueTop_one: '{name} · {n} day ago', mNoOverdue: 'Nothing overdue', actionsFrom: 'From “{title}”',
+    actionDone: 'Mark as done: {title}', usageTotal: '{n} analyses run', usageTotal_one: '{n} analysis run',
+    usageToday: '{used} of {quota} AI analyses today (resets at {time})',
     welcomeCard: 'Your dashboard is ready. Start wherever you like — there is no required order.',
     startQuestionnaire: 'Run diagnosis', uploadData: 'Upload my data',
     goodMorning: 'Good morning', goodAfternoon: 'Good afternoon', goodEvening: 'Good evening',
@@ -636,7 +646,7 @@ export default {
     taxes: {
       headline: 'This quarter ({q}) you will have to pay approximately:', dueBy: 'Deadline: {date}',
       reserved: 'You have set aside {v}', missing: '{v} still missing', covered: 'Covered', setAside: 'What I have set aside for taxes (€)',
-      vatRefund: 'This quarter your VAT is refundable or can be offset: {v}.', vatCompensate: 'This quarter your VAT is negative: {v} to offset. In Q1–Q3 you cannot request a refund; it is deducted in the following quarters (refunds are requested in Q4, except for businesses in the REDEME scheme).',
+      vatRefund: 'You can request the refund in the Q4 form 303 or carry it forward to offset next year.', vatCompensate: 'Nothing to pay or reclaim now: it is deducted from the VAT of the following quarters. Refunds are only requested in Q4 (except for businesses in the REDEME scheme).',
       vatTitle: 'Quarterly VAT (form 303)', vatOutput: 'Output VAT', vatInput: 'Input VAT', result: 'Result',
       vatExplain: 'VAT on your issued invoices minus VAT on your expenses for the quarter.',
       irpfTitle: 'Income tax instalment (form 130)', accIncome: 'Income so far this year', accExpense: 'Expenses so far this year',

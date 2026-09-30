@@ -16,6 +16,7 @@ export default {
     step1Cta: 'Crea chiave',
     step2: 'Prova una chiamata con l’esempio della documentazione (curl o il nodo HTTP Request di n8n).',
     step2Cta: 'Vedi documentazione',
+    stepDone: 'Fatto',
     step3: 'Controlla qui le chiamate e gli errori di ogni chiave.',
     lockedTitle: 'L’API è disponibile nei piani Pro e Max',
     lockedDesc: 'Puoi leggere la documentazione e preparare i flussi; per creare chiavi, passa a un piano superiore da «Gestisci abbonamento».',
@@ -170,14 +171,23 @@ export default {
   },
   onboarding: {
     companyPlaceholder: 'Officina García', sectorSelect: 'Scegli un settore',
-    sectors: { comercio: 'Commercio', hosteleria: 'Ristorazione e ospitalità', salud: 'Salute', legal: 'Legale', construccion: 'Edilizia', tecnologia: 'Tecnologia', consultoria: 'Consulenza', diseno: 'Design', educacion: 'Istruzione', otro: 'Altro' },
+    sectors: { taller: 'Officina meccanica', automocion: 'Automotive (vendita di veicoli)', transporte: 'Trasporti', industria: 'Industria', mayorista: 'Commercio all\'ingrosso', alojamiento: 'Alloggio', inmobiliaria: 'Immobiliare', estetica: 'Parrucchiere ed estetica', deporte: 'Sport e tempo libero', asesoria: 'Consulenza fiscale e contabile', arquitectura: 'Architettura e ingegneria', marketing: 'Marketing e pubblicità', limpieza: 'Pulizie', agricultura: 'Agricoltura', comercio: 'Commercio al dettaglio', hosteleria: 'Ristorazione e ospitalità', salud: 'Salute', legal: 'Legale', construccion: 'Edilizia', tecnologia: 'Tecnologia', consultoria: 'Consulenza', diseno: 'Design', educacion: 'Istruzione', otro: 'Altro' },
     sizes: { solo: 'Da solo (autonomo)', s2: '2–5 persone', s6: '6–20 persone', s20: 'Più di 20 persone' },
     expenses: { alquiler: 'Affitto', personal: 'Personale', proveedores: 'Fornitori', marketing: 'Marketing', suministros: 'Utenze', tecnologia: 'Tecnologia', transporte: 'Trasporti', otro: 'Altro' },
     welcome: 'Benvenuto in Nokfi', subtitle: 'Raccontaci un po’ della tua attività per personalizzare le analisi',
     companyName: 'Nome dell’azienda', sector: 'Settore', size: 'Dimensione',
-    mainExpenses: 'Principali spese dell’attività', start: 'Inizia a usare Nokfi'
+    mainExpenses: 'Principali spese dell’attività', start: 'Inizia a usare Nokfi',
+    legalHint: 'Cambia il calcolo delle tasse', optional: 'Facoltativo', reminders: 'Avvisami prima di ogni scadenza fiscale', remindersHint: 'Ti scriviamo qualche giorno prima del 303, del 130 e degli altri modelli.', skip: 'Salta per ora', privacy: 'Usiamo questi dati solo per adattare le tue analisi. Non vengono condivisi.', change: 'Cambia', sectorSearch: 'Cerca il tuo settore: officina, negozio, trasporti…'
   },
   home: {
+    guideStart: 'Inizia da qui', guideGo: 'Inizia', deadlineTitle: 'Prossima scadenza fiscale',
+    deadlineToday: 'Scade oggi', deadlineDays: 'Mancano {n} giorni', deadlineDays_one: 'Manca {n} giorno',
+    deadlineModels: 'Modelli {m} · {period}', deadlineSee: 'Vedi calendario', moneyTitle: 'I tuoi soldi',
+    mTaxSave: 'Da accantonare per le tasse ({q})', mTaxCompensate: 'IVA a credito ({q})', mTaxCompensateHint: 'Niente da pagare: si scala nei prossimi trimestri',
+    mTaxNone: 'Tasse ({q})', mOverdue: 'Crediti scaduti', mOverdueTop: '{name} · {n} giorni fa',
+    mOverdueTop_one: '{name} · {n} giorno fa', mNoOverdue: 'Niente di scaduto', actionsFrom: 'Da «{title}»',
+    actionDone: 'Segna come fatta: {title}', usageTotal: '{n} analisi eseguite', usageTotal_one: '{n} analisi eseguita',
+    usageToday: '{used} di {quota} analisi IA oggi (si rinnova alle {time})',
     welcomeCard: 'La tua dashboard è pronta. Inizia da dove vuoi: non c’è un ordine obbligatorio.',
     startQuestionnaire: 'Fai la diagnosi', uploadData: 'Carica i miei dati',
     goodMorning: 'Buongiorno', goodAfternoon: 'Buon pomeriggio', goodEvening: 'Buonasera',
@@ -636,7 +646,7 @@ export default {
     taxes: {
       headline: 'Questo trimestre ({q}) dovrai pagare circa:', dueBy: 'Scadenza: entro il {date}',
       reserved: 'Hai accantonato {v}', missing: 'Mancano {v}', covered: 'Coperto', setAside: 'Quanto ho accantonato per le imposte (€)',
-      vatRefund: 'Questo trimestre l’IVA è a credito (rimborso o compensazione): {v}.', vatCompensate: 'Questo trimestre l’IVA è a credito: {v} da compensare. Dal 1° al 3° trimestre non si chiede il rimborso; si scala nei trimestri successivi (il rimborso si chiede nel 4° trimestre, salvo iscrizione al REDEME).',
+      vatRefund: 'Puoi chiedere il rimborso nel modello 303 del 4° trimestre o riportarlo in compensazione all\'anno successivo.', vatCompensate: 'Niente da pagare né da chiedere ora: si scala dall\'IVA dei trimestri successivi. Il rimborso si chiede solo nel 4° trimestre (salvo iscrizione al REDEME).',
       vatTitle: 'IVA trimestrale (modello 303)', vatOutput: 'IVA a debito', vatInput: 'IVA a credito', result: 'Risultato',
       vatExplain: 'IVA delle fatture emesse meno l’IVA delle spese del trimestre.',
       irpfTitle: 'Acconto IRPF (modello 130)', accIncome: 'Entrate cumulate dell’anno', accExpense: 'Uscite cumulate dell’anno',

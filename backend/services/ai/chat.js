@@ -140,6 +140,10 @@ function sanitizeMessages(messages) {
   return list;
 }
 
+// gpt-oss escribe espacios estrechos (U+202F) y guiones no separables (U+2011)
+// que la fuente de la app pinta sin ancho: "2.904,00€", "14de agosto".
+const tidy = (text) => String(text).replace(/[\u00a0\u2007\u2009\u202f]/g, ' ').replace(/[\u2010\u2011]/g, '-').trim().slice(0, 6000);
+
 /** @returns {Promise<{ text, provider }>} — lanza { code:'chat_unavailable' } si todos fallan. */
 async function chat({ profile, lang, analysisContext, financeText, messages }) {
   const system = chatSystemPrompt({ profile, lang, analysisContext, financeText });
@@ -147,7 +151,7 @@ async function chat({ profile, lang, analysisContext, financeText, messages }) {
   for (const name of order) {
     try {
       const text = await PROVIDERS[name].call(system, messages);
-      return { text: String(text).trim().slice(0, 6000), provider: name };
+      return { text: tidy(text), provider: name };
     } catch (e) {
       console.warn(`[CHAT] proveedor ${name} falló: ${e.message}`);
       audit('AI_PROVIDER_FAILED', { detail: `chat ${name}: ${String(e.message).slice(0, 120)}` });
@@ -163,7 +167,7 @@ async function freeText({ system, prompt }) {
   for (const name of providerOrder()) {
     try {
       const text = await PROVIDERS[name].call(system, [{ role: 'user', content: prompt }]);
-      return { text: String(text).trim().slice(0, 6000), provider: name };
+      return { text: tidy(text), provider: name };
     } catch (e) {
       console.warn(`[CHAT] proveedor ${name} falló: ${e.message}`);
       audit('AI_PROVIDER_FAILED', { detail: `chat ${name}: ${String(e.message).slice(0, 120)}` });
