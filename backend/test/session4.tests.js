@@ -538,6 +538,13 @@ module.exports = async function session4Tests({ post, put, get, call, check, che
       put('/api/profile', { sector: 'Taller mecánico', size: 'solo' }, tok), r => r.status === 200 && r.data.profile.sector === 'Taller mecánico');
     await checkAsync('S8: comparación con el sector para "Taller mecánico" (CNAE 452)', get('/api/finance/benchmark', tok),
       r => r.status === 200 && JSON.stringify(r.data).includes('452'));
+    {
+      const { compare } = require('../utils/benchmark');
+      const e = [{ type: 'income', invoice_date: new Date().toISOString().slice(0, 10), base: 1000 }, { type: 'expense', invoice_date: new Date().toISOString().slice(0, 10), base: 300, category: 'Proveedores' }];
+      const staff = (size) => compare({ sector: 'Taller mecánico', size }, e).metrics.find(m => m.key === 'staff_costs');
+      check('S8: con empleados y sin gastos de Personal no se "gana" al sector con un 0 %', () =>
+        staff('2-5').yours === null && staff('2-5').verdict === null && staff('2-5').note === 'no_staff_entries' && staff('solo').yours === 0);
+    }
     await checkAsync('S8: el resumen de Desarrolladores cuenta también las claves revocadas', get('/api/keys/summary', tok),
       r => r.status === 200 && typeof r.data.keys_total === 'number' && r.data.keys_total >= r.data.keys_active);
 

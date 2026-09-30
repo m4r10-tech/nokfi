@@ -90,6 +90,7 @@ export default function Benchmark() {
                     <td className="p-2">
                       <span className="block font-medium" style={{ color: 'var(--text-primary)' }}>{t(`finance.bench.m_${m.key}`)}</span>
                       <span className="block text-xs" style={{ color: 'var(--text-muted)' }}>{t(`finance.bench.h_${m.key}`)}</span>
+                      {m.note && <span className="block text-xs mt-0.5" style={{ color: 'var(--warning)' }}>{t(`finance.bench.note_${m.note}`)}</span>}
                     </td>
                     <td className="p-2 text-right tabular font-semibold" style={{ color: 'var(--text-primary)' }}>{m.yours == null ? '—' : `${num(m.yours, lang, 1)} %`}</td>
                     <td className="p-2 text-right tabular" style={{ color: 'var(--text-secondary)' }}>{m.sector == null ? '—' : `${num(m.sector, lang, 1)} %`}</td>

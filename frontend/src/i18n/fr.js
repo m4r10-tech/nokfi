@@ -595,6 +595,7 @@ export default {
     emptyTitle: 'Votre registre est vide', emptyDesc: 'Importez des photos ou des PDF de vos factures (ou un dossier entier) et l’IA les ajoutera au registre. Vous n’avez qu’à vérifier.',
     days: '{n} jours', days_one: '{n} jour',
     bench: {
+      note_no_staff_entries: 'Aucun frais de personnel dans votre livre : ajoutez les salaires et charges sociales (catégorie Personnel) pour comparer.',
       source: 'Source : {name}, données {year}.',
       missingTitle: 'Indiquez votre secteur et votre taille',
       missingDesc: 'Pour vous comparer à votre secteur, nous devons savoir ce que vous faites et combien vous êtes. Vous pouvez l’indiquer dans les Paramètres.',

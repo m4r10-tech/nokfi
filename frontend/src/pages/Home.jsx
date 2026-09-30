@@ -308,8 +308,8 @@ function ActionsCard({ actions, t, onChange, className = '' }) {
                 </span>
               </button>
               {toolLabelKey(a.link) && (
-                <Link to={a.link} className="btn btn-ghost btn-sm shrink-0 mt-1.5" title={t('report.goTo', { name: t(toolLabelKey(a.link)) })}>
-                  {t(toolLabelKey(a.link))} <ArrowRight size={13} />
+                <Link to={a.link} className="btn btn-ghost btn-sm shrink-0 mt-1.5" title={t('report.goTo', { name: t(toolLabelKey(a.link)) })} aria-label={t('report.goTo', { name: t(toolLabelKey(a.link)) })}>
+                  <span className="hidden sm:inline">{t(toolLabelKey(a.link))}</span> <ArrowRight size={13} />
                 </Link>
               )}
             </li>

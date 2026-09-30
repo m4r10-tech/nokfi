@@ -55,6 +55,8 @@ function verdict(yours, ref, higherIsBetter) {
   return up === higherIsBetter ? 'better' : 'worse';
 }
 
+const staffMissing = (yours, size) => yours.available && yours.staff_costs_pct === 0 && size !== 'solo';
+
 function compare(profile, entries) {
   const source = BENCH.source;
   const ref = profile?.sector ? referenceFor(profile.sector, profile.size) : null;
@@ -63,7 +65,10 @@ function compare(profile, entries) {
   const yours = yourMetrics(entries);
   const metrics = [
     { key: 'operating_margin', higher_is_better: true, yours: yours.operating_margin_pct ?? null, sector: ref.operating_margin_pct },
-    { key: 'staff_costs', higher_is_better: false, yours: yours.staff_costs_pct ?? null, sector: ref.staff_costs_pct },
+    // Con empleados y sin ningún gasto de "Personal" en el libro, el 0 % es un dato que falta, no un punto a favor.
+    staffMissing(yours, profile.size)
+      ? { key: 'staff_costs', higher_is_better: false, yours: null, sector: ref.staff_costs_pct, note: 'no_staff_entries' }
+      : { key: 'staff_costs', higher_is_better: false, yours: yours.staff_costs_pct ?? null, sector: ref.staff_costs_pct },
     { key: 'purchases', higher_is_better: false, yours: yours.purchases_pct ?? null, sector: ref.purchases_pct }
   ].map(m => ({ ...m, verdict: verdict(m.yours, m.sector, m.higher_is_better) }));
   return {

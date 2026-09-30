@@ -36,7 +36,7 @@ function listActions(license_id, { limit = 100 } = {}) {
            an.title AS analysis_title
     FROM action_items a LEFT JOIN analyses an ON an.id = a.analysis_id
     WHERE a.license_id = ?
-    ORDER BY a.done ASC, a.created_at DESC, a.position ASC, a.id ASC
+    ORDER BY a.done ASC, a.created_at DESC, a.analysis_id DESC, a.position ASC, a.id ASC
     LIMIT ?
   `).all(license_id, limit).map(r => ({ ...r, done: !!r.done }));
 }

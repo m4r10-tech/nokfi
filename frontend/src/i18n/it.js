@@ -595,6 +595,7 @@ export default {
     emptyTitle: 'Il tuo registro è vuoto', emptyDesc: 'Carica foto o PDF delle tue fatture (o una cartella intera) e l’IA le inserirà nel registro. Tu devi solo controllare.',
     days: '{n} giorni', days_one: '{n} giorno',
     bench: {
+      note_no_staff_entries: 'Nel tuo libro non ci sono costi del personale: aggiungi stipendi e contributi (categoria Personale) per confrontare.',
       source: 'Fonte: {name}, dati {year}.',
       missingTitle: 'Indica settore e dimensione',
       missingDesc: 'Per confrontarti con il tuo settore dobbiamo sapere di cosa ti occupi e quante persone siete. Puoi indicarlo nelle Impostazioni.',

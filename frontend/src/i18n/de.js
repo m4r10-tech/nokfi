@@ -595,6 +595,7 @@ export default {
     emptyTitle: 'Dein Journal ist leer', emptyDesc: 'Lade Fotos oder PDFs deiner Rechnungen hoch (oder einen ganzen Ordner) und die KI trägt sie ins Journal ein. Du prüfst nur noch.',
     days: '{n} Tage', days_one: '{n} Tag',
     bench: {
+      note_no_staff_entries: 'In deinem Buch gibt es keine Personalkosten: Füge Löhne und Sozialabgaben (Kategorie Personal) hinzu, um zu vergleichen.',
       source: 'Quelle: {name}, Daten {year}.',
       missingTitle: 'Branche und Größe angeben',
       missingDesc: 'Für den Branchenvergleich müssen wir wissen, was du machst und wie viele ihr seid. Du kannst es in den Einstellungen angeben.',

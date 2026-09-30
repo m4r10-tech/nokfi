@@ -20,7 +20,10 @@ export const SECTORS = [
 /** Sectores ordenados por su nombre en el idioma de la app ("Otro" siempre al final). */
 export function sortedSectors(t, lang) {
   return SECTORS
-    .map(s => ({ ...s, label: t(`onboarding.sectors.${s.key}`) }))
+    .map(s => {
+      const aliases = t(`onboarding.sectorAliases.${s.key}`);
+      return { ...s, label: t(`onboarding.sectors.${s.key}`), aliases: aliases.startsWith('onboarding.') ? '' : aliases };
+    })
     .sort((a, b) => (a.key === 'otro') - (b.key === 'otro') || a.label.localeCompare(b.label, lang));
 }
 
@@ -145,7 +148,7 @@ export default function OnboardingModal({ onComplete }) {
             <button type="button" onClick={skip} className="btn btn-ghost w-full">{t('onboarding.skip')}</button>
           </div>
           <p className="text-xs text-center" style={{ color: 'var(--text-muted)' }}>
-            {t('onboarding.privacy')} <Link to="/privacidad" className="underline">{t('chat.privacyMore')}</Link>
+            {t('onboarding.privacy')} <Link to="/privacidad" target="_blank" rel="noopener" className="underline">{t('chat.privacyMore')}</Link>
           </p>
         </form>
       </div>
@@ -160,7 +163,8 @@ function SectorPicker({ value, onChange }) {
   const listId = useId();
   const all = useMemo(() => sortedSectors(t, lang), [t, lang]);
   const selected = all.find(s => s.value === value);
-  const matches = query ? all.filter(s => fold(s.label).includes(fold(query))) : all;
+  // Busca en el nombre y en palabras habituales ("bar" → Hostelería, "coche" → Taller).
+  const matches = query ? all.filter(s => fold(`${s.label} ${s.aliases}`).includes(fold(query.trim()))) : all;
   // Si no encaja ninguno, se ofrece "Otro".
   const shown = matches.length ? matches : all.filter(s => s.key === 'otro');
 

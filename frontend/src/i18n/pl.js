@@ -598,6 +598,7 @@ export default {
     emptyTitle: 'Twój rejestr jest pusty', emptyDesc: 'Wgraj zdjęcia lub PDF faktur (albo cały folder), a AI doda je do rejestru. Ty tylko sprawdzasz.',
     days: '{n} dnia', days_one: '{n} dzień', days_few: '{n} dni', days_many: '{n} dni',
     bench: {
+      note_no_staff_entries: 'W Twojej księdze nie ma kosztów personelu: dodaj wynagrodzenia i składki (kategoria Personel), aby porównać.',
       source: 'Źródło: {name}, dane za {year}.',
       missingTitle: 'Podaj branżę i wielkość firmy',
       missingDesc: 'Aby porównać cię z branżą, musimy wiedzieć, czym się zajmujesz i ile osób liczy firma. Możesz to ustawić w Ustawieniach.',

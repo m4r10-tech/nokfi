@@ -172,6 +172,7 @@ export default {
   onboarding: {
     companyPlaceholder: 'García Workshop', sectorSelect: 'Choose a sector',
     sectors: { taller: 'Car repair garage', automocion: 'Motor trade (vehicle sales)', transporte: 'Transport', industria: 'Manufacturing', mayorista: 'Wholesale', alojamiento: 'Accommodation', inmobiliaria: 'Real estate', estetica: 'Hair and beauty', deporte: 'Sport and leisure', asesoria: 'Accounting and tax advice', arquitectura: 'Architecture and engineering', marketing: 'Marketing and advertising', limpieza: 'Cleaning', agricultura: 'Agriculture', comercio: 'Retail', hosteleria: 'Hospitality', salud: 'Health', legal: 'Legal', construccion: 'Construction', tecnologia: 'Technology', consultoria: 'Consulting', diseno: 'Design', educacion: 'Education', otro: 'Other' },
+    sectorAliases: { taller: 'car mechanic tyres bodywork', automocion: 'dealership cars motorbikes', transporte: 'lorry courier delivery removals logistics taxi', industria: 'factory manufacturing metal', comercio: 'shop store retail bakery', mayorista: 'distribution warehouse', hosteleria: 'bar restaurant cafe hospitality', alojamiento: 'hotel hostel holiday lets', construccion: 'building renovation plumber electrician', inmobiliaria: 'property estate agent lettings', salud: 'clinic doctor dentist physio', estetica: 'barber nails spa salon', deporte: 'gym fitness', educacion: 'school training tutoring', legal: 'lawyer solicitor', asesoria: 'accountant bookkeeping tax adviser', consultoria: 'consultant', arquitectura: 'architect engineer', tecnologia: 'software IT web developer', marketing: 'agency social media', diseno: 'graphic designer photography', limpieza: 'cleaning maintenance', agricultura: 'farm farming' },
     sizes: { solo: 'Just me (freelancer)', s2: '2–5 people', s6: '6–20 people', s20: '20+ people' },
     expenses: { alquiler: 'Rent', personal: 'Staff', proveedores: 'Suppliers', marketing: 'Marketing', suministros: 'Utilities', tecnologia: 'Technology', transporte: 'Transport', otro: 'Other' },
     welcome: 'Welcome to Nokfi', subtitle: 'Tell us a bit about your business to personalize your analyses',
@@ -595,6 +596,7 @@ export default {
     emptyTitle: 'Your ledger is empty', emptyDesc: 'Upload photos or PDFs of your invoices (or a whole folder) and the AI will add them to the ledger. You just review.',
     days: '{n} days', days_one: '{n} day',
     bench: {
+      note_no_staff_entries: 'There are no staff costs in your ledger: add payroll and social security (Staff category) to compare.',
       source: 'Source: {name}, {year} data.',
       missingTitle: 'Tell us your sector and size',
       missingDesc: 'To compare you with your sector we need to know what you do and how many people you are. You can set it in Settings.',

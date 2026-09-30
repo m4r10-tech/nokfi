@@ -172,6 +172,7 @@ export default {
   onboarding: {
     companyPlaceholder: 'Taller García', sectorSelect: 'Selecciona un sector',
     sectors: { taller: 'Taller mecánico', automocion: 'Automoción (venta de vehículos)', transporte: 'Transporte', industria: 'Industria', mayorista: 'Comercio mayorista', alojamiento: 'Alojamiento', inmobiliaria: 'Inmobiliaria', estetica: 'Peluquería y estética', deporte: 'Deporte y ocio', asesoria: 'Asesoría y gestoría', arquitectura: 'Arquitectura e ingeniería', marketing: 'Marketing y publicidad', limpieza: 'Limpieza', agricultura: 'Agricultura', comercio: 'Comercio minorista', hosteleria: 'Hostelería', salud: 'Salud', legal: 'Legal', construccion: 'Construcción', tecnologia: 'Tecnología', consultoria: 'Consultoría', diseno: 'Diseño', educacion: 'Educación', otro: 'Otro' },
+    sectorAliases: { taller: 'coche mecánica neumáticos chapa pintura electricidad del automóvil', automocion: 'concesionario coches motos compraventa', transporte: 'camión mensajería reparto mudanzas logística taxi', industria: 'fábrica taller industrial metal carpintería', comercio: 'tienda minorista boutique frutería panadería', mayorista: 'distribución almacén', hosteleria: 'bar restaurante cafetería', alojamiento: 'hotel hostal apartamentos turísticos casa rural', construccion: 'obras reformas albañil fontanero electricista', inmobiliaria: 'pisos alquiler agencia', salud: 'clínica médico dentista fisioterapia psicología', estetica: 'barbería uñas spa', deporte: 'gimnasio academia de baile', educacion: 'academia formación clases', legal: 'abogado despacho', asesoria: 'gestoría contabilidad asesor fiscal', consultoria: 'consultor', arquitectura: 'arquitecto ingeniero estudio', tecnologia: 'software informática programación web', marketing: 'agencia redes sociales', diseno: 'diseñador gráfico fotografía', limpieza: 'limpiezas mantenimiento', agricultura: 'campo ganadería granja' },
     sizes: { solo: 'Solo (autónomo)', s2: '2–5 personas', s6: '6–20 personas', s20: '+20 personas' },
     expenses: { alquiler: 'Alquiler', personal: 'Personal', proveedores: 'Proveedores', marketing: 'Marketing', suministros: 'Suministros', tecnologia: 'Tecnología', transporte: 'Transporte', otro: 'Otro' },
     welcome: 'Bienvenido a Nokfi', subtitle: 'Cuéntanos un poco sobre tu negocio para personalizar tus análisis',
@@ -598,6 +599,7 @@ export default {
     emptyTitle: 'Tu libro está vacío', emptyDesc: 'Sube fotos o PDF de tus facturas (o una carpeta entera) y la IA las pasará al libro. Tú solo revisas.',
     days: '{n} días', days_one: '{n} día',
     bench: {
+      note_no_staff_entries: 'No hay gastos de personal en tu libro: añade las nóminas y los seguros sociales (categoría Personal) para comparar.',
       source: 'Fuente: {name}, datos de {year}.',
       missingTitle: 'Indica tu sector y tamaño',
       missingDesc: 'Para compararte con tu sector necesitamos saber a qué te dedicas y cuántas personas sois. Puedes indicarlo en Configuración.',
