@@ -1,6 +1,6 @@
 {
 	"name": "n8n-nodes-nokfi",
-	"version": "0.1.0",
+	"version": "0.1.1",
 	"description": "n8n node for Nokfi: extract and validate invoices (PDF, image or text) and run financial analyses for small businesses.",
 	"license": "MIT",
 	"homepage": "https://nokfi.app/api-docs",
