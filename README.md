@@ -1,82 +1,101 @@
-# Nokfi — Análisis financiero con IA para autónomos y pymes
+# Nokfi — Finanzas claras para autónomos y pymes
 
-SaaS de diagnóstico financiero que combina un cuestionario interactivo con el
-análisis de archivos Excel/PDF mediante IA, generando informes estilo consultoría
-con recomendaciones concretas y exportables a PDF/Excel.
+Nokfi lee tus facturas, te dice cuánto apartar para Hacienda, quién te debe y
+cómo irá tu caja, y te da un diagnóstico del negocio con un plan de acción.
+Web (PWA) en 6 idiomas y API para automatizaciones.
 
-**En producción** 🟢 — `https://nokfi.app/` (HTTPS, Cloudflare edge, cobros
-reales Stripe).
+**En producción** 🟢 — `https://nokfi.app/` (HTTPS, Cloudflare, cobros reales con
+Stripe).
 
 ## Qué hace Nokfi
 
-- **Cuestionario de diagnóstico** — 5 bloques × 6 preguntas Sí/No sobre la salud
-  financiera del negocio
-- **Análisis de Excel/PDF con IA** — 6 subapartados: stock, ventas, servicios,
-  entrada de productos, caja y profit total
-- **Informes exportables** — PDF y Excel con cifras, gráficas y recomendaciones
-- **Calculadoras financieras** — punto de equilibrio, margen, ROI
+**Para el negocio** (`/app`)
+- **Libro de facturas** — a mano o **leídas por IA** (fotos y PDF, revisión en
+  tarjetas junto al documento). Las **facturas electrónicas** (Facturae, UBL,
+  Factur-X/ZUGFeRD) se leen al instante, sin IA.
+- **Impuestos** — estimación del modelo 303 (IVA) y 130 (IRPF), lo que llevas
+  apartado y el **calendario fiscal** con avisos por email.
+- **Cobros** — facturas vencidas, email de reclamación redactado por IA y
+  recordatorios automáticos.
+- **Fugas, previsión de caja a 90 días y comparativa con tu sector** (datos INE).
+- **Diagnóstico** — 30 preguntas (Sí / A medias / No / No aplica) → nota de salud
+  calculada con reglas fijas + informe con prioridades y plan enlazado a la app.
+- **Análisis de Excel, carpetas y comparación de periodos** con IA.
+- **Asistente** con el contexto de tu libro.
+- **Calculadoras españolas** — IVA, retención IRPF, cuota de autónomos, coste de
+  un empleado, precio por hora, punto de equilibrio, márgenes y ROI.
+- **Enlace de solo lectura para la gestoría** y exportación a PDF, Excel, Word,
+  CSV, ODS, ODT, PowerPoint y JSON.
+
+**Para desarrolladores** (`/app/dev`, planes Pro y Max)
+- **API REST** `/api/v1` (análisis, lectura de facturas, herramientas fiscales sin
+  IA: NIF, IVA, retención, 130, trimestre, calendario), con modo asíncrono,
+  `Idempotency-Key` y claves de prueba `nk_test_`.
+- **Webhooks firmados** (HMAC, reintentos) y servidor **MCP** (`/api/mcp`).
+- **Nodo de n8n**: [`n8n-nodes-nokfi`](https://www.npmjs.com/package/n8n-nodes-nokfi)
+  (código en `integrations/n8n`).
+- Panel con claves, Playground, registro de llamadas y clientes.
 
 ## Modelo de negocio
 
-**Suscripción mensual** vía Stripe (sin permanencia, cancelable a fin de periodo):
+**Suscripción mensual** vía Stripe (sin permanencia, cambios a fin de periodo):
 
-| Plan | Precio/mes | Análisis IA/día | Trial |
+| Plan | Precio/mes | Análisis IA/día | Extra |
 |------|-----------|-----------------|-------|
-| **mini** | 5 € | 10 | **14 días gratis** (tarjeta obligatoria) |
-| **pro** | 20 € | 50 | — |
-| **max** | 50 € | 130 | — |
+| **Mini** | 5 € | 10 | **14 días gratis** |
+| **Pro** | 20 € | 50 | API para automatizaciones |
+| **Max** | 50 € | 130 | API + soporte prioritario (< 4 h laborables) |
 
-- Modelo de billing Stripe: **3 Products separados** (Mini/Pro/Max), un Price
-  recurrente mensual EUR cada uno, Customer Portal con prorrateo a fin de periodo
-  (cambiar de plan = €0 hoy, se aplica al terminar el periodo en curso).
-- Precios env-driven **y** vía catálogo público `GET /api/payments/plans` — el
-  frontend nunca hardcodea precios (anti-drift: la web y Stripe cobran lo mismo).
-- **Auth**: email + clave de licencia (`XXXX-XXXX-XXXX-XXXX`) + contraseña (hash
-  scrypt). Anti-sharing por **cuota diaria de IA por licencia**.
+- Stripe: **3 Products** (Mini/Pro/Max), un Price mensual EUR cada uno; Customer
+  Portal con cambios a fin de periodo. El catálogo público
+  `GET /api/payments/plans` evita que la web y Stripe muestren precios distintos.
+- **Acceso**: email + clave de licencia (`XXXX-XXXX-XXXX-XXXX`) + contraseña
+  (scrypt). Tokens hasheados en reposo.
 
 ## Stack
 
 | Capa | Tecnología |
 |------|------------|
 | Backend | Node.js 22 + Express + SQLite (`better-sqlite3`) |
-| IA | Google Gemini (`gemini-flash-latest`) |
-| Frontend | React + Vite + Tailwind CSS + PWA |
+| IA | Groq → Cloudflare Workers AI → Cerebras (en cadena; proveedores que no entrenan con los datos) |
+| Frontend | React + Vite + Tailwind CSS + PWA, i18n (es, en, fr, it, de, pl) |
 | Gráficas | Recharts |
-| Excel/PDF | `xlsx` (SheetJS), `jspdf`, `pdfjs-dist` |
-| Pagos | **Stripe** (PayPal/Revolut/Coinbase retirados) |
+| Archivos | `xlsx` (SheetJS), `jspdf`, `pdfjs-dist`, `docx`, `pptxgenjs` |
+| Pagos | Stripe |
 | Email | Resend |
-| Infra | Ubuntu 24.04 · PM2 · Nginx · Cloudflare (edge, Full strict) |
+| Infra | Ubuntu 24.04 · PM2 · Nginx · Cloudflare (Full strict) · copia diaria de la BD |
 
 ## Estructura
 
 ```
 nokfi/
-├── backend/            # API REST — Express + SQLite + Gemini (e2e 107/107)
+├── backend/            # API — Express + SQLite; test/ (e2e 362/362)
 ├── frontend/           # PWA — React + Vite + Tailwind (build same-origin /api)
-├── deploy/             # nginx-nokfi.conf (site) + nginx-cloudflare-realip.conf
-├── docs/               # documentación (proyecto, API, deploy)
-└── README.md           # este archivo
+├── integrations/n8n/   # nodo de n8n (publicado en npm)
+├── deploy/             # nginx-nokfi.conf + nginx-cloudflare-realip.conf
+├── docs/               # proyecto, API, despliegue
+└── README.md
 ```
 
 ## Documentación
 
 | Doc | Contenido |
 |-----|-----------|
-| [`docs/proyecto.md`](docs/proyecto.md) | Visión de producto, modelo de negocio, esquema de DB, seguridad, diseño |
-| [`docs/api.md`](docs/api.md) | **Contrato Backend↔Frontend** (fuente de verdad técnica) |
-| [`docs/deploy.md`](docs/deploy.md) | Despliegue, Cloudflare, Stripe, operación del VPS, deudas |
-| [`frontend/README.md`](frontend/README.md) | Frontend: instalar, build, auditoría `xlsx` |
+| [`docs/proyecto.md`](docs/proyecto.md) | Visión de producto, modelo de negocio, esquema de DB, seguridad |
+| [`docs/api.md`](docs/api.md) | Contrato backend ↔ frontend |
+| [`docs/deploy.md`](docs/deploy.md) | Despliegue, Cloudflare, Stripe y operación del VPS |
+| `https://nokfi.app/api-docs` | Documentación pública de la API v1 (OpenAPI en `/api/v1/openapi.json`) |
 
 ## Arranque rápido (desarrollo local)
 
 ### Backend
 ```bash
 cd backend
-cp .env.example .env   # editar: ADMIN_SECRET(≥32), Gemini, Stripe, email, PLAN_PRICE_*_EUR
-npm install
+cp .env.example .env   # ADMIN_SECRET (≥32), claves de IA, Stripe, Resend, PLAN_PRICE_*_EUR
+npm install --omit=optional
 npm run dev            # → http://localhost:3001
 ```
-Verifica: `cd backend && node test/e2e.test.js` (**107/107 PASS offline**).
+Tests: `cd backend && node test/e2e.test.js` (**362/362**, sin red: la IA se simula).
 
 ### Frontend
 ```bash
@@ -85,21 +104,18 @@ npm install
 npm run dev            # → http://localhost:5173
 ```
 
-> El `.env` nunca se sube al repositorio (gitignore). Usa `.env.example` como
-> referencia. **`DB_PATH=./db/nokfi.db` es relativa** — arranca el backend desde
-> su directorio.
+> El `.env` nunca se sube al repositorio. **`DB_PATH=./db/nokfi.db` es
+> relativa**: arranca el backend desde su carpeta. Las capturas de la landing se
+> regeneran con `node backend/scripts/landing-screens.js` (cuenta de ejemplo local).
 
-## Estado
+## Estado (octubre de 2026)
 
-- ✅ Backend completo, **107/107 e2e PASS**, desplegado y funcional
-- ✅ Frontend con build exitoso y PWA (bundle same-origin `/api`, sin IP fija)
-- ✅ **Producción HTTPS viva** con Cloudflare (Full strict) y Let's Encrypt
-- ✅ **Stripe LIVE cobrando de verdad** (pago real verificado, trial 14d)
-- ✅ Mailer Resend funcionando (`noreply@nokfi.app`)
-- ✅ Deudas I (validar plan) y K (invoice del trial) resueltas
-
-Deudas abiertas (opcionales, no bloqueantes) y operación: ver
-[`docs/deploy.md`](docs/deploy.md).
+- ✅ En producción con pagos reales, emails y copia diaria de la base de datos
+- ✅ Sesiones 6-10 completadas: libro, impuestos, cobros, previsión, diagnóstico,
+  asistente con datos, API v1 + webhooks + MCP + nodo n8n, pulido de la interfaz
+- ✅ e2e **362/362**
+- 🔜 Factura electrónica B2B y VERI\*FACTU (app y API), posicionamiento, y
+  apps para Play Store y App Store
 
 ## Donaciones — Apoya el proyecto
 
