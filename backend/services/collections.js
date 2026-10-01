@@ -59,8 +59,11 @@ async function runAutoCollections(now = new Date()) {
     const profile = getCompanyProfile(lic.id) || {};
     const done = sentStages(lic.id);
     // Sesión 11: nunca se reclama una factura que el cliente ha rechazado.
-    const entries = db.prepare(`SELECT * FROM ledger_entries WHERE license_id = ? AND type = 'income' AND paid = 0 AND party_email != ''
-      AND (invoice_id IS NULL OR invoice_id NOT IN (SELECT id FROM invoices WHERE customer_status = 'rejected'))`).all(lic.id);
+    // Lo que se reclama es lo que queda tras las rectificativas; ni estas ni lo ya saldado se reclaman.
+    const entries = db.prepare(`SELECT l.*, l.total + COALESCE((SELECT SUM(r.total) FROM invoices r WHERE r.rectifies_id = l.invoice_id AND r.status = 'issued'), 0) AS due_total
+      FROM ledger_entries l WHERE l.license_id = ? AND l.type = 'income' AND l.paid = 0 AND l.party_email != ''
+      AND (l.invoice_id IS NULL OR l.invoice_id NOT IN (SELECT id FROM invoices WHERE customer_status = 'rejected' OR rectifies_id IS NOT NULL))`)
+      .all(lic.id).filter(e => e.due_total > 0.005).map(e => ({ ...e, total: Math.round(e.due_total * 100) / 100 }));
     let n = 0;
     for (const e of entries) {
       if (n >= MAX_PER_RUN) break;

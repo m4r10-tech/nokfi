@@ -333,6 +333,9 @@ async function tanda3({ post, put, get, check, checkAsync, getDB }) {
     ([a, b]) => a.status === 409 && a.data.error === 'status_conflict' && b.status === 409 && b.data.error === 'status_unchanged');
   await checkAsync('S11 estados: una factura rechazada no sale en Cobros', get('/api/finance/receivables', tok),
     r => r.status === 200 && !r.data.pending.some(p => p.invoice_number === re.number) && r.data.pending.some(p => p.invoice_number === f1.number));
+  await checkAsync('S11 cobros: la rectificativa se descuenta de su factura (y no sale como cobro aparte)', get('/api/finance/receivables', tok),
+    r => { const p = r.data.pending.find(x => x.invoice_number === f1.number);
+      return !!p && Math.abs(p.total - Math.round((f1.total + r1.total) * 100) / 100) < 0.001 && !r.data.pending.some(x => x.invoice_number === r1.number); });
   await checkAsync('S11 estados: revertir el rechazo → aceptada', st(re, { status: 'accepted' }), r => r.status === 200 && r.data.customer_status === 'accepted');
   await checkAsync('S11 estados: fecha de pago futura → 400', st(f1, { status: 'paid', date: '2099-01-01' }), r => r.status === 400 && r.data.field === 'date');
   await checkAsync('S11 estados: cobrada con fecha → el libro la marca cobrada', st(f1, { status: 'paid', date: f1.issue_date }),

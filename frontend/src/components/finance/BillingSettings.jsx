@@ -5,7 +5,7 @@ import { useLang } from '../../context/LangContext';
 import { useToast } from '../../context/ToastContext';
 import { Modal, Field, ErrorBox } from '../ui';
 import Skeleton from '../Skeleton';
-import { VAT_RATES, IRPF_RATES, INVOICE_LANGS, invoiceError } from './invoiceUtils';
+import { VAT_RATES, IRPF_RATES, INVOICE_LANGS, invoiceError, withProvince } from './invoiceUtils';
 
 /**
  * Sesión 11: datos del emisor que salen en cada factura (razón social, NIF,
@@ -26,7 +26,7 @@ export default function BillingSettings({ onClose, onSaved }) {
     });
   }, [t]);
 
-  const set = (k, v) => setP(prev => ({ ...prev, [k]: v }));
+  const set = (k, v) => setP(prev => withProvince({ ...prev, [k]: v }, prev));
   const input = (k, props = {}) => (
     <input id={`bs-${k}`} value={p[k] ?? ''} onChange={(e) => set(k, e.target.value)} className="input" {...props} />
   );

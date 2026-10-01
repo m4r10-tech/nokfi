@@ -76,3 +76,19 @@ export const EINVOICE_FORMATS = ['facturx', 'ubl', 'facturae'];
 export function emptyLine(vat = 21) {
   return { description: '', quantity: 1, unit: '', unit_price: '', discount_pct: 0, vat_rate: vat };
 }
+
+// Provincia por los dos primeros dígitos del código postal (INE), como en Facturae.
+const PROVINCES = ['', 'Álava', 'Albacete', 'Alicante', 'Almería', 'Ávila', 'Badajoz', 'Illes Balears', 'Barcelona', 'Burgos', 'Cáceres',
+  'Cádiz', 'Castellón', 'Ciudad Real', 'Córdoba', 'A Coruña', 'Cuenca', 'Girona', 'Granada', 'Guadalajara', 'Gipuzkoa', 'Huelva', 'Huesca',
+  'Jaén', 'León', 'Lleida', 'La Rioja', 'Lugo', 'Madrid', 'Málaga', 'Murcia', 'Navarra', 'Ourense', 'Asturias', 'Palencia', 'Las Palmas',
+  'Pontevedra', 'Salamanca', 'S.C. Tenerife', 'Cantabria', 'Segovia', 'Sevilla', 'Soria', 'Tarragona', 'Teruel', 'Toledo', 'Valencia',
+  'Valladolid', 'Bizkaia', 'Zamora', 'Zaragoza', 'Ceuta', 'Melilla'];
+
+/** Al escribir un código postal español completo, rellena la provincia si está vacía. */
+export function withProvince(next, prev) {
+  const cp = String(next.postal_code || '');
+  if ((next.country || 'ES') === 'ES' && /^\d{5}$/.test(cp) && cp !== prev.postal_code && !String(next.province || '').trim()) {
+    return { ...next, province: PROVINCES[Number(cp.slice(0, 2))] || '' };
+  }
+  return next;
+}

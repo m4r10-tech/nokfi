@@ -13,6 +13,7 @@ import {
 } from '../../components/finance/invoiceUtils';
 import { eur, todayIso } from '../../utils/money';
 
+const groupIban = (s) => String(s || '').replace(/\s+/g, '').replace(/(.{4})/g, '$1 ').trim();
 const addDays = (iso, d) => { const x = new Date(`${iso}T00:00:00Z`); x.setUTCDate(x.getUTCDate() + d); return x.toISOString().slice(0, 10); };
 
 /**
@@ -53,7 +54,7 @@ export default function InvoiceEditor() {
       const today = todayIso();
       const base = {
         issue_date: today, due_date: addDays(today, p.payment_terms_days), operation_date: '', irpf_rate: p.default_irpf_rate,
-        exemption: 'E1', payment_method: 'transfer', iban: p.iban, notes: '', lang: p.invoice_lang, equivalence_surcharge: false,
+        exemption: 'E1', payment_method: 'transfer', iban: groupIban(p.iban), notes: '', lang: p.invoice_lang, equivalence_surcharge: false,
         lines: [emptyLine(p.default_vat_rate)], rectification_kind: 'R1', rectification_reason: ''
       };
       const inv = src?.ok ? src.data.invoice : null;
@@ -76,7 +77,7 @@ export default function InvoiceEditor() {
   const surcharge = mode === 'saved' ? !!selected?.equivalence_surcharge : mode === 'new' ? !!customer.equivalence_surcharge : false;
   const totals = useMemo(() => (f ? computeTotals(f.lines.filter(l => l.description || l.unit_price !== ''), f.irpf_rate, original ? f.equivalence_surcharge : surcharge) : null), [f, surcharge, original]);
   const hasZero = f?.lines.some(l => Number(l.vat_rate) === 0);
-  const noNif = original ? !original.customer?.tax_id : mode === 'none' || (mode === 'new' && !customer.tax_id.trim()) || (mode === 'saved' && !selected?.tax_id);
+  const noNif = original ? !original.customer?.tax_id : mode === 'none' || (mode === 'new' && !customer.tax_id.trim()) || (mode === 'saved' && !!selected && !selected.tax_id);
 
   const body = () => {
     const out = {
@@ -137,7 +138,12 @@ export default function InvoiceEditor() {
       ) : (
         <Section title={t('finance.client')}>
           <div className="flex flex-col gap-3">
-            <Segmented value={mode} onChange={setMode} size="sm" label={t('finance.client')} options={[
+            <Segmented value={mode} onChange={(m) => {
+              setMode(m);
+              // Un ticket sin cliente se cobra al momento: efectivo y sin vencimiento.
+              if (m === 'none') setF(prev => ({ ...prev, payment_method: 'cash', due_date: prev.issue_date }));
+              else if (mode === 'none') setF(prev => ({ ...prev, payment_method: 'transfer', due_date: addDays(prev.issue_date, settings.profile.payment_terms_days) }));
+            }} size="sm" label={t('finance.client')} options={[
               ...(customers.length ? [{ value: 'saved', label: t('invoices.savedCustomer') }] : []),
               { value: 'new', label: t('invoices.newCustomer') }, { value: 'none', label: t('invoices.noCustomerOption') }
             ]} />
@@ -226,12 +232,12 @@ export default function InvoiceEditor() {
 
       <Section>
         <dl className="ml-auto w-full sm:w-80 grid grid-cols-2 gap-y-1 text-sm tabular">
+          <dt style={{ color: 'var(--text-muted)' }}>{t('finance.base')}</dt><dd className="text-right">{eur(totals.base, lang)}</dd>
           {totals.taxes.map(g => (
             <div key={`${g.vat_rate}-${g.re_rate}`} className="contents">
-              <dt style={{ color: 'var(--text-muted)' }}>{t('finance.vat')} {g.vat_rate} % · {eur(g.base, lang)}</dt><dd className="text-right">{eur(g.vat_amount, lang)}</dd>
+              <dt style={{ color: 'var(--text-muted)' }}>{t('finance.vat')} {g.vat_rate} %{totals.taxes.length > 1 ? ` · ${eur(g.base, lang)}` : ''}</dt><dd className="text-right">{eur(g.vat_amount, lang)}</dd>
             </div>
           ))}
-          <dt style={{ color: 'var(--text-muted)' }}>{t('finance.base')}</dt><dd className="text-right">{eur(totals.base, lang)}</dd>
           {totals.re_amount !== 0 && <><dt style={{ color: 'var(--text-muted)' }}>{t('invoices.surchargeShort')}</dt><dd className="text-right">{eur(totals.re_amount, lang)}</dd></>}
           {totals.irpf_amount !== 0 && <><dt style={{ color: 'var(--text-muted)' }}>{t('finance.irpf')} ({f.irpf_rate} %)</dt><dd className="text-right">{eur(-totals.irpf_amount, lang)}</dd></>}
           <dt className="font-semibold pt-1 text-base" style={{ color: 'var(--text-primary)', borderTop: '1px solid var(--border)' }}>{t('finance.total')}</dt>

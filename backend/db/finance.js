@@ -99,9 +99,13 @@ function listLedger(license_id, { from, to, type } = {}) {
 }
 
 function allEntries(license_id) {
-  return getDB().prepare(`SELECT l.*, (i.customer_status = 'rejected') AS invoice_rejected FROM ledger_entries l
-    LEFT JOIN invoices i ON i.id = l.invoice_id WHERE l.license_id = ? ORDER BY l.invoice_date ASC, l.id ASC`)
-    .all(license_id).map(r => ({ ...r, party_name: nameCase(r.party_name), paid: !!r.paid, invoice_rejected: !!r.invoice_rejected }));
+  // Sesión 11: de una factura emitida en Nokfi se cobra lo que queda tras sus
+  // rectificativas (rectified_total, en negativo si restan); las rectificativas
+  // no son un cobro aparte (is_rectification).
+  return getDB().prepare(`SELECT l.*, (i.customer_status = 'rejected') AS invoice_rejected, (i.rectifies_id IS NOT NULL) AS is_rectification,
+      COALESCE((SELECT SUM(r.total) FROM invoices r WHERE r.rectifies_id = l.invoice_id AND r.status = 'issued'), 0) AS rectified_total
+    FROM ledger_entries l LEFT JOIN invoices i ON i.id = l.invoice_id WHERE l.license_id = ? ORDER BY l.invoice_date ASC, l.id ASC`)
+    .all(license_id).map(r => ({ ...r, party_name: nameCase(r.party_name), paid: !!r.paid, invoice_rejected: !!r.invoice_rejected, is_rectification: !!r.is_rectification }));
 }
 
 function getEntry(license_id, id) {

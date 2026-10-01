@@ -14,6 +14,9 @@ import Customers from '../../components/finance/Customers';
 import { invoiceState, invoiceError, EINVOICE_FORMATS } from '../../components/finance/invoiceUtils';
 import { eur, isoDate, num, currentQuarter, todayIso } from '../../utils/money';
 
+/** Precio unitario con al menos 2 decimales (35,90; 0,1250). */
+const price = (n, lang) => new Intl.NumberFormat(lang, { minimumFractionDigits: 2, maximumFractionDigits: 4 }).format(n);
+
 /**
  * Sesión 11 (tanda 2) — Finanzas › Facturas: emitir facturas (y rectificarlas
  * o anularlas, nunca editarlas), descargar el PDF y enviarlo al cliente. Cada
@@ -47,11 +50,14 @@ export default function Invoices() {
 
   const totals = useMemo(() => {
     const s = { billed: 0, pending: 0, count: 0 };
+    const unpaid = new Set();
     for (const i of list || []) {
       if (i.status !== 'issued') continue;
       s.billed += i.base; s.count++;
-      if (!i.paid && !i.kind.startsWith('R')) s.pending += i.total;
+      if (!i.paid && !i.kind.startsWith('R') && i.customer_status !== 'rejected') { s.pending += i.total; unpaid.add(i.id); }
     }
+    // Lo que resta una rectificativa se descuenta de lo pendiente de su factura.
+    for (const i of list || []) if (i.status === 'issued' && i.rectifies_id && unpaid.has(i.rectifies_id)) s.pending += i.total;
     return s;
   }, [list]);
 
@@ -314,10 +320,10 @@ function InvoiceDetail({ id, onClose, onChanged }) {
               <p style={{ color: 'var(--text-primary)' }}>{inv.customer?.name || t('invoices.noCustomer')}</p>
               {inv.customer?.tax_id && <p className="text-xs" style={{ color: 'var(--text-muted)' }}>{t('finance.nif')} {inv.customer.tax_id}</p>}
             </div>
-            <div>
+            {!inv.kind.startsWith('R') && <div>
               <p className="field-label">{t('invoices.paymentMethod')}</p>
               <p style={{ color: 'var(--text-primary)' }}>{t(`invoices.methods.${inv.payment_method}`)}{inv.iban ? ` · ${inv.iban.replace(/(.{4})/g, '$1 ').trim()}` : ''}</p>
-            </div>
+            </div>}
           </div>
           <div className="overflow-x-auto -mx-1">
             <table className="w-full text-sm min-w-[460px]">
@@ -330,7 +336,7 @@ function InvoiceDetail({ id, onClose, onChanged }) {
                 <tr key={l.position} style={{ borderTop: '1px solid var(--border)' }}>
                   <td className="px-1 py-1.5" style={{ color: 'var(--text-primary)' }}>{l.description}</td>
                   <td className="px-1 py-1.5 text-right tabular">{num(l.quantity, lang, 3)}{l.unit ? ` ${l.unit}` : ''}</td>
-                  <td className="px-1 py-1.5 text-right tabular">{num(l.unit_price, lang, 4)}{l.discount_pct ? ` −${l.discount_pct} %` : ''}</td>
+                  <td className="px-1 py-1.5 text-right tabular">{price(l.unit_price, lang)}{l.discount_pct ? ` −${l.discount_pct} %` : ''}</td>
                   <td className="px-1 py-1.5 text-right tabular">{l.vat_rate} %</td>
                   <td className="px-1 py-1.5 text-right tabular">{eur(l.amount, lang)}</td>
                 </tr>

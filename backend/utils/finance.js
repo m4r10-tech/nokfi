@@ -104,14 +104,15 @@ function receivables(entries, refDate = today()) {
   }
   const avgDays = (k) => { const c = byClient.get(k); return c ? Math.round(c.sum / c.n) : null; };
   // Sesión 11: una factura rechazada por el cliente no es un cobro pendiente (se rectifica o se anula).
-  const pending = incomes.filter(e => !e.paid && !e.invoice_rejected).map(e => {
+  // Las rectificativas se descuentan de su factura original (no son un cobro aparte).
+  const pending = incomes.filter(e => !e.paid && !e.invoice_rejected && !e.is_rectification && r2(e.total + (e.rectified_total || 0)) > 0).map(e => {
     const age = daysBetween(e.invoice_date, refDate);
     // Sin vencimiento: emisión + 30 días (igual que el recordatorio automático).
     const due = e.due_date || addDays(e.invoice_date, 30);
     const overdue = daysBetween(due, refDate);
     return {
       id: e.id, party_name: e.party_name, party_nif: e.party_nif, party_email: e.party_email || '', invoice_number: e.invoice_number,
-      invoice_date: e.invoice_date, due_date: e.due_date, effective_due_date: due, total: r2(e.total),
+      invoice_date: e.invoice_date, due_date: e.due_date, effective_due_date: due, total: r2(e.total + (e.rectified_total || 0)),
       days_outstanding: age, days_overdue: Math.max(0, overdue), days_to_due: Math.max(0, -overdue), is_overdue: overdue > 0,
       level: overdue > 60 ? 'critical' : overdue > 30 ? 'high' : overdue > 0 ? 'medium' : 'ok',
       client_avg_days: avgDays(partyKey(e))

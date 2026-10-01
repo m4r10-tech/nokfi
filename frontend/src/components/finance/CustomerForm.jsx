@@ -1,5 +1,6 @@
 import { useLang } from '../../context/LangContext';
 import { Field } from '../ui';
+import { withProvince } from './invoiceUtils';
 
 /**
  * Sesión 11: campos de un cliente (libreta y factura nueva). Controlado:
@@ -9,7 +10,7 @@ export const emptyCustomer = () => ({ name: '', tax_id: '', email: '', address: 
 
 export default function CustomerForm({ value, onChange, idPrefix = 'cu' }) {
   const { t } = useLang();
-  const set = (k, v) => onChange({ ...value, [k]: v });
+  const set = (k, v) => onChange(withProvince({ ...value, [k]: v }, value));
   const input = (k, props = {}) => (
     <input id={`${idPrefix}-${k}`} value={value[k] ?? ''} onChange={(e) => set(k, e.target.value)} className="input" {...props} />
   );
