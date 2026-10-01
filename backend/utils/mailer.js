@@ -26,14 +26,14 @@ const FROM_NAME = process.env.EMAIL_FROM_NAME || 'Nokfi';
    DISPATCH — único punto de contacto con la API externa (Resend)
 ════════════════════════════════════════════════════════════ */
 
-async function dispatch({ to, subject, html, fromName, replyTo }) {
+async function dispatch({ to, subject, html, fromName, replyTo, attachments }) {
   if (!process.env.RESEND_API_KEY) {
     // En desarrollo sin clave configurada, no rompemos el flujo: solo avisamos.
     console.warn(`[MAILER] Sin RESEND_API_KEY — email NO enviado a ${to}. Asunto: "${subject}"`);
     return { skipped: true };
   }
   try {
-    return await dispatchViaResend({ to, subject, html, fromName, replyTo });
+    return await dispatchViaResend({ to, subject, html, fromName, replyTo, attachments });
   } catch (e) {
     // Sin destinatario ni contenido: solo el fallo, para el email diario de salud.
     try { require('../db/database').audit('EMAIL_FAILED', { detail: String(e.message).slice(0, 200) }); } catch { /* nada */ }
@@ -41,7 +41,7 @@ async function dispatch({ to, subject, html, fromName, replyTo }) {
   }
 }
 
-async function dispatchViaResend({ to, subject, html, fromName, replyTo }) {
+async function dispatchViaResend({ to, subject, html, fromName, replyTo, attachments }) {
   // Timeout 15s: el envío es fire-and-forget (los callers ya capturan el fallo),
   // pero sin límite un Resend colgado retendría el socket para siempre.
   const { fetchWithTimeout } = require('./http');
@@ -56,9 +56,11 @@ async function dispatchViaResend({ to, subject, html, fromName, replyTo }) {
       to: [to],
       ...(replyTo ? { reply_to: replyTo } : {}),
       subject,
-      html
+      html,
+      // Sesión 11: adjuntos (PDF/XML de facturas) → [{ filename, content: base64 }].
+      ...(attachments?.length ? { attachments: attachments.map(a => ({ filename: a.filename, content: Buffer.isBuffer(a.content) ? a.content.toString('base64') : a.content })) } : {})
     })
-  }, 15000);
+  }, 30000);
 
   if (!res.ok) {
     const body = await res.text().catch(() => '');
@@ -463,6 +465,48 @@ async function sendCollectionEmail({ to, replyTo, lang, stage, company, entry })
   return dispatch({ to, subject, html, replyTo, fromName: name ? `${name} (vía Nokfi)` : undefined });
 }
 
+/* ── Sesión 11: envío de una factura emitida a su cliente ── */
+const INVOICE_TEXTS = {
+  es: { subject: 'Factura {n} de {company}', hello: (n) => `Hola${n ? ` ${n}` : ''}:`, body: 'Te enviamos la factura {n} del {date} por un importe de {total}. La tienes adjunta en PDF.', due: 'Vencimiento: {due}.', thanks: 'Un saludo,', footer: (c) => `Este email lo envía ${c} a través de Nokfi. Si tienes cualquier duda, responde a este mensaje.` },
+  en: { subject: 'Invoice {n} from {company}', hello: (n) => `Hello${n ? ` ${n}` : ''},`, body: 'Please find attached invoice {n} dated {date} for {total} (PDF).', due: 'Due date: {due}.', thanks: 'Kind regards,', footer: (c) => `This email is sent by ${c} via Nokfi. If you have any questions, just reply to this message.` },
+  fr: { subject: 'Facture {n} de {company}', hello: (n) => `Bonjour${n ? ` ${n}` : ''},`, body: 'Veuillez trouver ci-joint la facture {n} du {date} d\'un montant de {total} (PDF).', due: 'Échéance : {due}.', thanks: 'Cordialement,', footer: (c) => `Cet email est envoyé par ${c} via Nokfi. Pour toute question, répondez simplement à ce message.` },
+  it: { subject: 'Fattura {n} di {company}', hello: (n) => `Buongiorno${n ? ` ${n}` : ''},`, body: 'In allegato la fattura {n} del {date} per un importo di {total} (PDF).', due: 'Scadenza: {due}.', thanks: 'Cordiali saluti,', footer: (c) => `Questa email è inviata da ${c} tramite Nokfi. Per qualsiasi domanda, rispondi a questo messaggio.` },
+  de: { subject: 'Rechnung {n} von {company}', hello: (n) => `Hallo${n ? ` ${n}` : ''},`, body: 'anbei erhalten Sie die Rechnung {n} vom {date} über {total} (PDF).', due: 'Fällig am: {due}.', thanks: 'Mit freundlichen Grüßen', footer: (c) => `Diese E-Mail wird von ${c} über Nokfi gesendet. Bei Fragen antworten Sie einfach auf diese Nachricht.` },
+  pl: { subject: 'Faktura {n} od {company}', hello: (n) => `Dzień dobry${n ? ` ${n}` : ''},`, body: 'w załączniku przesyłamy fakturę {n} z dnia {date} na kwotę {total} (PDF).', due: 'Termin płatności: {due}.', thanks: 'Z poważaniem', footer: (c) => `Ten e-mail wysyła ${c} za pośrednictwem Nokfi. W razie pytań po prostu odpowiedz na tę wiadomość.` }
+};
+
+function buildInvoiceEmail({ invoice, message }) {
+  const l = INVOICE_TEXTS[invoice.lang] ? invoice.lang : 'es';
+  const tx = INVOICE_TEXTS[l];
+  const loc = LOCALES[l];
+  const date = (s) => new Date(`${s}T00:00:00Z`).toLocaleDateString(loc, { day: 'numeric', month: 'long', year: 'numeric', timeZone: 'UTC' });
+  const company = invoice.issuer?.name || '';
+  const vars = { n: invoice.number, company, date: date(invoice.issue_date), due: invoice.due_date ? date(invoice.due_date) : '',
+    total: Number(invoice.total || 0).toLocaleString(loc, { style: 'currency', currency: 'EUR' }) };
+  const fill = (s) => s.replace(/\{(\w+)\}/g, (_, k) => vars[k] ?? '');
+  const subject = fill(tx.subject);
+  const p = (txt, extra = '') => `<p style="margin:0 0 14px;line-height:1.6;${extra}">${escapeHtml(txt)}</p>`;
+  const custom = String(message || '').trim().slice(0, 2000);
+  const html = `<!DOCTYPE html><html lang="${l}"><head><meta charset="UTF-8"><title>${escapeHtml(subject)}</title></head>
+  <body style="margin:0;padding:0;background:#ffffff;font-family:-apple-system,Segoe UI,Roboto,Arial,sans-serif;color:#1f2328;font-size:15px;">
+    <div style="max-width:560px;margin:0 auto;padding:32px 24px;">
+      ${p(tx.hello(invoice.customer?.name || ''))}
+      ${p(fill(tx.body))}
+      ${invoice.due_date && !invoice.kind.startsWith('R') ? p(fill(tx.due)) : ''}
+      ${custom ? custom.split(/\n{2,}/).map(par => p(par)).join('') : ''}
+      <p style="margin:0 0 14px;line-height:1.6;">${escapeHtml(tx.thanks)}<br><strong>${escapeHtml(company)}</strong></p>
+      ${p(tx.footer(company), 'color:#8b949e;font-size:12px;margin-top:28px;')}
+    </div>
+  </body></html>`;
+  return { subject, html };
+}
+
+async function sendInvoiceEmail({ to, replyTo, invoice, message, attachments }) {
+  const { subject, html } = buildInvoiceEmail({ invoice, message });
+  const name = headerName(invoice.issuer?.name);
+  return dispatch({ to, subject, html, replyTo, attachments, fromName: name ? `${name} (vía Nokfi)` : undefined });
+}
+
 /* ── Informe diario de salud para el dueño (services/opsReport.js) ── */
 async function sendOpsReportEmail({ to, report: r }) {
   const warn = r.alerts.length > 0;
@@ -493,6 +537,7 @@ async function sendOpsReportEmail({ to, report: r }) {
 }
 
 module.exports = {
+  sendInvoiceEmail, buildInvoiceEmail,
   sendOpsReportEmail,
   sendCollectionEmail,
   buildCollectionEmail,

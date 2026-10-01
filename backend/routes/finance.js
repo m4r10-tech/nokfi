@@ -78,13 +78,16 @@ ledger.patch('/:id', requireLicense, (req, res) => {
   if (!Number.isInteger(id)) return res.status(400).json({ error: 'invalid_id' });
   const out = F.updateEntry(req.license.id, id, req.body || {});
   if (!out) return res.status(404).json({ error: 'not_found', message: 'Apunte no encontrado.' });
+  if (out.error === 'invoice_locked') return res.status(409).json({ error: 'invoice_locked', message: 'Este apunte es de una factura emitida en Nokfi: para cambiarlo, rectifica la factura.' });
   if (out.error) return res.status(400).json({ error: 'invalid_input', field: out.error });
   res.json({ entry: out });
 });
 
 ledger.delete('/:id', requireLicense, (req, res) => {
   const id = Number(req.params.id);
-  if (!Number.isInteger(id) || !F.deleteEntry(req.license.id, id)) return res.status(404).json({ error: 'not_found' });
+  const out = Number.isInteger(id) ? F.deleteEntry(req.license.id, id) : false;
+  if (out?.error) return res.status(409).json({ error: 'invoice_locked', message: 'Este apunte es de una factura emitida en Nokfi: para quitarlo, anula la factura.' });
+  if (!out) return res.status(404).json({ error: 'not_found' });
   res.json({ success: true });
 });
 

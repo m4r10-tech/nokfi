@@ -138,6 +138,44 @@ export const financeApi = {
 };
 export const dashboardApi = { get: () => request('/dashboard', { auth: true }) };
 
+/** Descarga un archivo con la sesión (PDF de una factura). Devuelve { ok, status, data? }. */
+async function download(path, fallbackName) {
+  let res;
+  try {
+    res = await fetch(`${API_BASE}${path}`, { headers: sessionToken ? { Authorization: `Bearer ${sessionToken}` } : {} });
+  } catch {
+    return { ok: false, status: 0, data: { error: 'network_error' } };
+  }
+  if (!res.ok) {
+    const data = (res.headers.get('content-type') || '').includes('application/json') ? await res.json().catch(() => ({})) : {};
+    return { ok: false, status: res.status, data };
+  }
+  const blob = await res.blob();
+  const name = (res.headers.get('content-disposition') || '').match(/filename="([^"]+)"/)?.[1] || fallbackName;
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement('a');
+  a.href = url; a.download = name;
+  document.body.appendChild(a); a.click(); a.remove();
+  setTimeout(() => URL.revokeObjectURL(url), 10000);
+  return { ok: true, status: res.status };
+}
+
+/* ── Sesión 11: emisión de facturas ── */
+export const invoicingApi = {
+  settings: () => request('/invoicing/settings', { auth: true }),
+  saveSettings: (data) => request('/invoicing/settings', { method: 'PUT', auth: true, body: data }),
+  customers: (q) => request(`/invoicing/customers${qs({ q })}`, { auth: true }),
+  createCustomer: (data) => request('/invoicing/customers', { method: 'POST', auth: true, body: data }),
+  updateCustomer: (id, data) => request(`/invoicing/customers/${encodeURIComponent(id)}`, { method: 'PATCH', auth: true, body: data }),
+  removeCustomer: (id) => request(`/invoicing/customers/${encodeURIComponent(id)}`, { method: 'DELETE', auth: true }),
+  list: (filters) => request(`/invoicing/invoices${qs(filters)}`, { auth: true }),
+  get: (id) => request(`/invoicing/invoices/${encodeURIComponent(id)}`, { auth: true }),
+  issue: (data) => request('/invoicing/invoices', { method: 'POST', auth: true, body: data }),
+  cancel: (id, reason) => request(`/invoicing/invoices/${encodeURIComponent(id)}/cancel`, { method: 'POST', auth: true, body: { reason } }),
+  send: (id, data) => request(`/invoicing/invoices/${encodeURIComponent(id)}/send`, { method: 'POST', auth: true, body: data }),
+  pdf: (id, number) => download(`/invoicing/invoices/${encodeURIComponent(id)}/pdf`, `factura_${number || id}.pdf`)
+};
+
 // F4 — claves de API; C9 — mis datos (descargar / borrar la cuenta).
 export const keysApi = {
   list: () => request('/keys', { auth: true }),

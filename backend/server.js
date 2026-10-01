@@ -261,6 +261,7 @@ app.use('/api/chat', chatRoutes);           // asistente con modelos gratuitos (
 app.use('/api/ledger', financeRoutes.ledger);       // libro de facturas (V1)
 app.use('/api/finance', financeRoutes.finance);     // impuestos, cobros, fugas, previsión, calendario (V2-V5, C4)
 app.use('/api/dashboard', financeRoutes.dashboard); // resumen del panel de inicio
+app.use('/api/invoicing', require('./routes/invoicing')); // sesión 11: emisión de facturas
 app.use('/api/keys', accountRoutes.keys);           // claves de API (F4)
 app.use('/api/me', accountRoutes.me);               // descargar / borrar mis datos (C9)
 app.use('/api/client-errors', accountRoutes.telemetry); // errores del frontend (C8)

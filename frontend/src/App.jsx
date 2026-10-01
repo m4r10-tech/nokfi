@@ -50,6 +50,8 @@ const DevClients = lazy(() => import('./pages/dev/DevClients'));
 const Ayuda = lazy(() => import('./pages/Ayuda'));
 const FinanceLayout = lazy(() => import('./pages/finance/FinanceLayout'));
 const Ledger = lazy(() => import('./pages/finance/Ledger'));
+const Invoices = lazy(() => import('./pages/finance/Invoices'));
+const InvoiceEditor = lazy(() => import('./pages/finance/InvoiceEditor'));
 const Taxes = lazy(() => import('./pages/finance/Taxes'));
 const Receivables = lazy(() => import('./pages/finance/Receivables'));
 const Leaks = lazy(() => import('./pages/finance/Leaks'));
@@ -103,6 +105,8 @@ export default function App() {
               <Route path="finanzas" element={<FinanceLayout />}>
                 <Route index element={<Navigate to="libro" replace />} />
                 <Route path="libro" element={<Ledger />} />
+                <Route path="facturas" element={<Invoices />} />
+                <Route path="facturas/nueva" element={<InvoiceEditor />} />
                 <Route path="impuestos" element={<Taxes />} />
                 <Route path="cobros" element={<Receivables />} />
                 <Route path="fugas" element={<Leaks />} />

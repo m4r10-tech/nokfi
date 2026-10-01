@@ -108,9 +108,14 @@ function getEntry(license_id, id) {
   return r ? { ...r, party_name: nameCase(r.party_name), paid: !!r.paid, needs_review: !!r.needs_review } : null;
 }
 
+// Sesión 11: el apunte de una factura emitida en Nokfi solo admite marcar el
+// cobro y la categoría; lo demás se cambia rectificando la factura.
+const INVOICE_EDITABLE = ['paid', 'paid_at', 'category', 'party_email'];
+
 function updateEntry(license_id, id, partial) {
   const current = getEntry(license_id, id);
   if (!current) return null;
+  if (current.invoice_id && Object.keys(partial).some(k => !INVOICE_EDITABLE.includes(k) && partial[k] !== current[k])) return { error: 'invoice_locked' };
   const { entry, error } = normalizeEntry({ ...partial }, { partial: true });
   if (error) return { error };
   if (entry.paid === 1 && !current.paid && partial.paid_at === undefined) entry.paid_at = new Date().toISOString().slice(0, 10);
@@ -126,6 +131,9 @@ function updateEntry(license_id, id, partial) {
 }
 
 function deleteEntry(license_id, id) {
+  const e = getDB().prepare('SELECT invoice_id FROM ledger_entries WHERE id = ? AND license_id = ?').get(id, license_id);
+  if (!e) return false;
+  if (e.invoice_id) return { error: 'invoice_locked' };
   return getDB().prepare('DELETE FROM ledger_entries WHERE id = ? AND license_id = ?').run(id, license_id).changes > 0;
 }
 

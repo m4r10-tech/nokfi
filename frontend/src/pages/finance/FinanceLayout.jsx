@@ -1,5 +1,5 @@
 import { NavLink, Outlet, useOutletContext, useLocation } from 'react-router-dom';
-import { BookOpen, Landmark, HandCoins, Droplets, LineChart, CalendarDays, BarChart3 } from 'lucide-react';
+import { BookOpen, FileText, Landmark, HandCoins, Droplets, LineChart, CalendarDays, BarChart3 } from 'lucide-react';
 import { useLang } from '../../context/LangContext';
 import PageHeader from '../../components/PageHeader';
 
@@ -11,6 +11,7 @@ import PageHeader from '../../components/PageHeader';
  */
 export const FINANCE_TABS = [
   { to: 'libro', icon: BookOpen, key: 'finance.tabLedger' },
+  { to: 'facturas', icon: FileText, key: 'finance.tabInvoices' },
   { to: 'impuestos', icon: Landmark, key: 'finance.tabTaxes' },
   { to: 'cobros', icon: HandCoins, key: 'finance.tabReceivables' },
   { to: 'fugas', icon: Droplets, key: 'finance.tabLeaks' },

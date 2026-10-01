@@ -1,6 +1,6 @@
 import { useState, useEffect, useCallback, useMemo } from 'react';
-import { useOutletContext } from 'react-router-dom';
-import { Plus, ScanLine, Pencil, Trash2, AlertTriangle, BookOpen, Check, Search } from 'lucide-react';
+import { useOutletContext, Link } from 'react-router-dom';
+import { Plus, ScanLine, Pencil, Trash2, AlertTriangle, BookOpen, Check, Search, FileText } from 'lucide-react';
 import { ledgerApi } from '../../middleware/api';
 import { apiErrorMessage, isConnectivityError } from '../../middleware/errors';
 import { useLang } from '../../context/LangContext';
@@ -180,8 +180,13 @@ export default function Ledger() {
                 </button>
                 {/* Sesión 10: iconos discretos en escritorio (aparecen al pasar por la fila) y
                     solo el lápiz en móvil, para que se lea el nombre. */}
-                <button onClick={() => { setFormError(null); setEditing(e); }} className="btn btn-ghost btn-sm !px-2 sm:opacity-40 sm:group-hover:opacity-100 focus-visible:opacity-100" aria-label={t('finance.editEntry')}><Pencil size={14} /></button>
-                <button onClick={() => setDeleting(e)} className="btn btn-ghost btn-sm !px-2 hidden sm:inline-flex sm:opacity-40 sm:group-hover:opacity-100 focus-visible:opacity-100" aria-label={t('finance.delete')}><Trash2 size={14} /></button>
+                {/* Sesión 11: el apunte de una factura emitida en Nokfi se cambia rectificando la factura. */}
+                {e.invoice_id ? (
+                  <Link to={`/app/finanzas/facturas?open=${e.invoice_id}`} className="btn btn-ghost btn-sm !px-2" title={t('invoices.openInvoice')} aria-label={t('invoices.openInvoice')}><FileText size={14} /></Link>
+                ) : (<>
+                  <button onClick={() => { setFormError(null); setEditing(e); }} className="btn btn-ghost btn-sm !px-2 sm:opacity-40 sm:group-hover:opacity-100 focus-visible:opacity-100" aria-label={t('finance.editEntry')}><Pencil size={14} /></button>
+                  <button onClick={() => setDeleting(e)} className="btn btn-ghost btn-sm !px-2 hidden sm:inline-flex sm:opacity-40 sm:group-hover:opacity-100 focus-visible:opacity-100" aria-label={t('finance.delete')}><Trash2 size={14} /></button>
+                </>)}
               </li>
             ))}
           </ul>

@@ -20,7 +20,8 @@
     "express-rate-limit": "^7.4.0",
     "helmet": "^7.1.0",
     "morgan": "^1.10.0",
-    "pdfjs-dist": "^4.10.38"
+    "pdfjs-dist": "^4.10.38",
+    "pdfkit": "^0.17.2"
   },
   "license": "UNLICENSED"
 }

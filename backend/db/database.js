@@ -267,6 +267,7 @@ function initDB() {
       runRecoveryPurposeMigration(db);
       hashTokensAtRest(db); // ⚠️ auditoría: hashear tokens planos preexistentes
       require('./schema4').runSession4Schema(db); // sesión 4: IA estructurada, libro, API keys…
+      require('./invoicing').runInvoicingSchema(db); // sesión 11: emisión de facturas
 
       console.log('✅  Base de datos inicializada en', DB_PATH);
       resolve(db);
