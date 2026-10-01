@@ -10,7 +10,7 @@
 export const DPA = {
   es: {
     title: 'Contrato de encargo de tratamiento',
-    updated: 'Última actualización: 30 de septiembre de 2026',
+    updated: 'Última actualización: 2 de octubre de 2026',
     intro: 'Cuando usas Nokfi tratas datos personales de terceros (por ejemplo, el nombre, NIF y email de tus clientes y proveedores). Para esos datos tú eres el responsable del tratamiento y Nokfi actúa como encargado, conforme al artículo 28 del Reglamento General de Protección de Datos (RGPD) y a la Ley Orgánica 3/2018. Este contrato forma parte de los términos de uso y se acepta al activar la licencia.',
     sections: [
       { h: '1. Partes', list: [
@@ -18,12 +18,12 @@ export const DPA = {
         'Encargado: {OWNER}.'
       ] },
       { h: '2. Objeto, duración y finalidad', ps: [
-        'Nokfi trata los datos solo para prestarte el servicio contratado: guardar tu libro de facturas, calcular impuestos, cobros y previsiones, generar informes, enviar los recordatorios de cobro que actives y mostrar los enlaces de solo lectura que crees.',
+        'Nokfi trata los datos solo para prestarte el servicio contratado: emitir tus facturas con su registro de facturación y su factura electrónica, guardar tu libro de facturas, calcular impuestos, cobros y previsiones, generar informes, enviar los recordatorios de cobro que actives y mostrar los enlaces de solo lectura que crees.',
         'El encargo dura lo mismo que tu licencia. Nokfi no usa estos datos para fines propios, no los vende ni los cede, y los proveedores de inteligencia artificial que intervienen no entrenan modelos con ellos.'
       ] },
       { h: '3. Datos e interesados', list: [
         'Interesados: tus clientes, proveedores y, en su caso, otras personas que aparezcan en los documentos que analizas.',
-        'Datos: identificativos y de contacto (nombre o razón social, NIF, email) y económicos (número, fecha, importes, impuestos y estado de pago de las facturas).',
+        'Datos: identificativos y de contacto (nombre o razón social, NIF, dirección, email) y económicos (número, fecha, conceptos, importes, impuestos y estado de pago de las facturas).',
         'No debes introducir categorías especiales de datos (salud, ideología, etc.). Nokfi no las necesita para funcionar.'
       ] },
       { h: '4. Obligaciones de Nokfi como encargado', list: [
@@ -41,6 +41,7 @@ export const DPA = {
         'Separación de datos por licencia en todas las consultas; límites de peticiones frente a abusos.',
         'Los archivos que analizas se leen en tu navegador y no se guardan en nuestros servidores.',
         'API: el registro de llamadas no guarda el contenido (90 días); los resultados de los trabajos asíncronos y el contenido de los webhooks se borran a las 24 h. Los webhooks solo envían datos a las URL que tú configuras, firmados con HMAC y solo a direcciones públicas por https.',
+        'Las facturas emitidas, sus líneas y sus registros de facturación no se pueden modificar ni borrar (bloqueo en la base de datos y huella encadenada, Real Decreto 1007/2023).',
         'Copias de seguridad periódicas de la base de datos y registro de eventos de seguridad.'
       ] },
       { h: '6. Subencargados', ps: [
@@ -53,7 +54,8 @@ export const DPA = {
         'Resend (Plus Five Five, Inc.): envío de emails, incluidos los recordatorios de cobro a tus clientes. EE. UU., con cláusulas contractuales tipo.'
       ], after: [
         'Si incorporamos o sustituimos un subencargado (por ejemplo, otro proveedor de IA que no entrene con los datos), lo publicaremos en esta página y te avisaremos con al menos 15 días de antelación; podrás oponerte cancelando tu licencia.',
-        'Stripe trata los datos de pago de tu propia suscripción como responsable independiente; no accede a los datos de tus clientes.'
+        'Stripe trata los datos de pago de tu propia suscripción como responsable independiente; no accede a los datos de tus clientes.',
+        'Si activas el envío de registros a la Agencia Tributaria (VERI*FACTU), los registros de tus facturas, con los datos de tus clientes que contienen, se comunicarán a la AEAT por obligación legal: la AEAT es destinataria por ley, no subencargada. Ese envío está desactivado por ahora.'
       ] },
       { h: '7. Tus obligaciones como responsable', list: [
         'Tener una base legal para tratar los datos de tus clientes y proveedores (normalmente, la relación comercial y el interés legítimo en cobrar las facturas) e informarles cuando corresponda.',
@@ -61,14 +63,14 @@ export const DPA = {
         'No introducir datos innecesarios ni categorías especiales.'
       ] },
       { h: '8. Fin del encargo', ps: [
-        'Al borrar tu cuenta (Configuración → Mis datos) se eliminan de inmediato tus datos y los de tus clientes y proveedores de la base de datos activa. Las copias de seguridad se sobrescriben en su ciclo normal, como máximo en 30 días. Antes de borrarla puedes descargar todos tus datos.'
+        'Al borrar tu cuenta (Configuración → Mis datos) se eliminan de inmediato tus datos y los de tus clientes y proveedores de la base de datos activa. Las copias de seguridad se sobrescriben en su ciclo normal, como máximo en 30 días. Antes de borrarla puedes descargar todos tus datos. Se borran también las facturas que hayas emitido y sus registros: la obligación de conservarlas durante el plazo legal es tuya, así que descárgalas antes.'
       ] },
       { h: '9. Contacto', ps: ['Para cualquier cuestión sobre este contrato: info@nokfi.app.'] }
     ]
   },
   en: {
     title: 'Data processing agreement',
-    updated: 'Last updated: 30 September 2026',
+    updated: 'Last updated: 2 October 2026',
     intro: 'When you use Nokfi you process personal data of third parties (for example, the name, tax ID and email of your clients and suppliers). For that data you are the controller and Nokfi acts as processor, under Article 28 of the General Data Protection Regulation (GDPR). This agreement is part of the terms of use and is accepted when you activate your licence. The Spanish version prevails in case of discrepancy.',
     sections: [
       { h: '1. Parties', list: [
@@ -76,12 +78,12 @@ export const DPA = {
         'Processor: {OWNER}.'
       ] },
       { h: '2. Subject, duration and purpose', ps: [
-        'Nokfi processes the data only to provide the service: storing your invoice ledger, computing taxes, receivables and forecasts, generating reports, sending the payment reminders you enable and serving the read-only links you create.',
+        'Nokfi processes the data only to provide the service: issuing your invoices with their billing record and e-invoice, storing your invoice ledger, computing taxes, receivables and forecasts, generating reports, sending the payment reminders you enable and serving the read-only links you create.',
         'The processing lasts as long as your licence. Nokfi does not use this data for its own purposes, does not sell or share it, and the AI providers involved do not train models with it.'
       ] },
       { h: '3. Data and data subjects', list: [
         'Data subjects: your clients, suppliers and any other people appearing in the documents you analyse.',
-        'Data: identification and contact (name or company name, tax ID, email) and financial (invoice number, date, amounts, taxes and payment status).',
+        'Data: identification and contact (name or company name, tax ID, address, email) and financial (invoice number, date, items, amounts, taxes and payment status).',
         'You must not enter special categories of data (health, beliefs, etc.). Nokfi does not need them.'
       ] },
       { h: '4. Nokfi’s obligations as processor', list: [
@@ -99,6 +101,7 @@ export const DPA = {
         'Data separated per licence in every query; rate limits against abuse.',
         'Files you analyse are read in your browser and not stored on our servers.',
         'API: the call log never stores content (90 days); async job results and webhook contents are deleted after 24 h. Webhooks only send data to the URLs you configure, HMAC-signed and only to public https addresses.',
+        'Issued invoices, their lines and their billing records cannot be changed or deleted (database lock and chained fingerprint, Royal Decree 1007/2023).',
         'Regular database backups and security event logging.'
       ] },
       { h: '6. Sub-processors', ps: ['You authorise Nokfi to use the following sub-processors, bound by data protection obligations equivalent to this agreement:'], list: [
@@ -109,14 +112,15 @@ export const DPA = {
         'Resend (Plus Five Five, Inc.): email delivery, including payment reminders to your clients. USA, with standard contractual clauses.'
       ], after: [
         'If we add or replace a sub-processor (for example another AI provider that does not train on data), we will publish it here and notify you at least 15 days in advance; you may object by cancelling your licence.',
-        'Stripe processes the payment data of your own subscription as an independent controller; it has no access to your clients’ data.'
+        'Stripe processes the payment data of your own subscription as an independent controller; it has no access to your clients’ data.',
+        'If you turn on sending records to the Spanish Tax Agency (VERI*FACTU), the records of your invoices, with the client data they contain, will be communicated to the AEAT under a legal obligation: the AEAT is a recipient by law, not a sub-processor. Sending is turned off for now.'
       ] },
       { h: '7. Your obligations as controller', list: [
         'Have a legal basis to process your clients’ and suppliers’ data (usually the business relationship and the legitimate interest in collecting invoices) and inform them where required.',
         'Make sure the data is accurate and that the payment reminders you enable are justified.',
         'Do not enter unnecessary data or special categories.'
       ] },
-      { h: '8. End of processing', ps: ['When you delete your account (Settings → My data), your data and your clients’ and suppliers’ data are removed immediately from the live database. Backups are overwritten in their normal cycle, within 30 days at most. You can download all your data before deleting it.'] },
+      { h: '8. End of processing', ps: ['When you delete your account (Settings → My data), your data and your clients’ and suppliers’ data are removed immediately from the live database. Backups are overwritten in their normal cycle, within 30 days at most. You can download all your data before deleting it. The invoices you issued and their records are deleted too: keeping them for the legal period is your obligation, so download them first.'] },
       { h: '9. Contact', ps: ['For any question about this agreement: info@nokfi.app.'] }
     ]
   }

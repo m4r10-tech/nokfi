@@ -708,7 +708,7 @@ export default {
   },
   privacy: {
     title: 'Informativa sulla privacy',
-    updated: 'Ultimo aggiornamento: 30 settembre 2026',
+    updated: 'Ultimo aggiornamento: 2 ottobre 2026',
     intro: 'Questa informativa descrive, senza clausole nascoste, quali dati tratta Nokfi (nokfi.app), per quale scopo e quali servizi di terze parti intervengono. Riflette esattamente il funzionamento dell’applicazione.',
     sections: [
       { h: 'Titolare e contatti', ps: ['Il titolare del trattamento dei dati del tuo account è {OWNER}. Per qualsiasi questione di privacy o per esercitare i tuoi diritti, scrivi a info@nokfi.app. Per problemi con l’account o i pagamenti, a soporte@nokfi.app.'] },
@@ -717,6 +717,7 @@ export default {
         'Profilo aziendale: nome, settore, dimensione, spese principali e, se li indichi, forma giuridica, codice fiscale, saldo di cassa e lingua preferita. Servono a personalizzare analisi e calcoli.',
         'Cronologia delle analisi: conserviamo il report generato dall’IA, le tue risposte sì/no della diagnosi e la dimensione del contenuto analizzato — non il contenuto completo dei tuoi file.',
         'Registro delle fatture: se usi la lettura delle fatture, conserviamo i DATI che controlli e confermi (emittente o cliente, codice fiscale, data, numero, importi, IVA, ritenuta e se è pagata). Il file della fattura non viene conservato.',
+        "Fatture che emetti: i tuoi dati di fatturazione (ragione sociale, codice fiscale, indirizzo, IBAN), quelli dei tuoi clienti, le righe, gli importi e il registro VERI*FACTU di ogni fattura con la sua impronta. Una fattura emessa e il suo registro non si possono modificare né cancellare finché esiste il tuo account.",
         'Piano d’azione, quanto hai accantonato per le imposte e le tue chiavi API (conservate solo come hash).',
         'API (automazioni): di ogni chiamata conserviamo data, percorso, risultato e durata, mai il contenuto, per 90 giorni. In modalità asincrona il risultato del job viene conservato 24 h perché il tuo flusso lo recuperi. I webhook inviano i risultati agli URL che configuri tu (scegli tu la destinazione) e il contenuto di ogni avviso viene cancellato dopo 24 h.',
         'Abbonamento: identificativi cliente e abbonamento di Stripe, piano e stato. Non vediamo né conserviamo mai i dati della tua carta.',
@@ -733,11 +734,12 @@ export default {
         'Groq: genera le analisi, legge le fatture e risponde nell’assistente; se non è disponibile, si usa Cloudflare Workers AI. Il suo contratto gli vieta di usare i tuoi dati per addestrare o perfezionare modelli, e abbiamo attivato la conservazione zero (le richieste non vengono salvate). Tratta i dati negli Stati Uniti, con clausole contrattuali tipo.',
         'Cerebras: fornitore di IA di riserva, usato solo se Groq e Cloudflare non sono disponibili (stesse attività). Il suo contratto gli consente di usare i tuoi dati solo per fornire il servizio (non per addestrare modelli) e di conservarli lo stretto necessario. Tratta i dati negli Stati Uniti, con clausole contrattuali tipo.',
         'Resend: invia le email (la tua chiave di licenza, il recupero della password e, se attivati, gli avvisi del calendario fiscale, il riepilogo mensile e i solleciti di pagamento ai tuoi clienti).',
-        'Cloudflare: rete di distribuzione e sicurezza che protegge l’accesso al sito. Usiamo il paese della tua connessione (indicato da Cloudflare) solo per scegliere la lingua iniziale del sito; non lo conserviamo.'
+        'Cloudflare: rete di distribuzione e sicurezza che protegge l’accesso al sito. Usiamo il paese della tua connessione (indicato da Cloudflare) solo per scegliere la lingua iniziale del sito; non lo conserviamo.',
+        "Agenzia delle entrate spagnola (AEAT): se per il tuo account viene attivato l'invio dei registri VERI*FACTU, i registri delle tue fatture le vengono trasmessi per obbligo di legge. Per ora è disattivato."
       ] },
       { h: 'Dati dei tuoi clienti e fornitori', ps: ['Per i dati di terzi che inserisci in Nokfi (clienti e fornitori delle tue fatture), tu sei il titolare e Nokfi agisce come responsabile del trattamento: li usiamo solo per fornirti il servizio. Le condizioni sono nell’accordo sul trattamento dei dati (nokfi.app/encargo-tratamiento). Se attivi i solleciti automatici, partono con il nome della tua azienda e le risposte arrivano direttamente alla tua email.'] },
       { h: 'Cookie e analisi', ps: ['Nokfi non usa cookie di tracciamento né strumenti di analisi di terze parti. Sessione, lingua e tema sono conservati nella memoria locale del tuo browser.'] },
-      { h: 'Conservazione ed eliminazione', ps: ['Conserviamo i tuoi dati finché la licenza esiste. Da Impostazioni → I miei dati puoi scaricare tutti i tuoi dati in un file o eliminare l’account: insieme a esso vengono eliminati profilo, cronologia, registro delle fatture, attività, chiavi API e sessioni. I report tecnici di errore vengono eliminati dopo 30 giorni.'] },
+      { h: 'Conservazione ed eliminazione', ps: ['Conserviamo i tuoi dati finché la licenza esiste. Da Impostazioni → I miei dati puoi scaricare tutti i tuoi dati in un file o eliminare l’account: insieme a esso vengono eliminati profilo, cronologia, registro delle fatture, attività, chiavi API e sessioni. I report tecnici di errore vengono eliminati dopo 30 giorni. Eliminando l\'account si eliminano anche le fatture emesse e i loro registri; conservarle per il periodo previsto dalla legge è un tuo obbligo, quindi scaricale prima.'] },
       { h: 'I tuoi diritti', ps: ['Puoi esercitare i diritti di accesso, rettifica, cancellazione, portabilità e opposizione dalle Impostazioni o scrivendo a info@nokfi.app. Puoi anche presentare reclamo all’Agenzia spagnola per la protezione dei dati (aepd.es).'] },
       { h: 'Sicurezza', ps: ['Applichiamo HTTPS su tutto il servizio, password con hash scrypt, token di sessione, di recupero e chiavi API conservati come hash e backup periodici del database sul server.'] }
     ]

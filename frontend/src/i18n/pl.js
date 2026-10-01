@@ -711,7 +711,7 @@ export default {
   },
   privacy: {
     title: 'Polityka prywatności',
-    updated: 'Ostatnia aktualizacja: 30 września 2026',
+    updated: 'Ostatnia aktualizacja: 2 października 2026',
     intro: 'Ta polityka opisuje bez drobnego druku, jakie dane przetwarza Nokfi (nokfi.app), w jakim celu i jakie usługi zewnętrzne w tym uczestniczą. Odzwierciedla dokładnie działanie aplikacji.',
     sections: [
       { h: 'Administrator i kontakt', ps: ['Administratorem danych twojego konta jest {OWNER}. W sprawach prywatności lub aby skorzystać ze swoich praw, napisz na info@nokfi.app. W sprawach konta lub płatności — na soporte@nokfi.app.'] },
@@ -720,6 +720,7 @@ export default {
         'Profil firmy: nazwa, branża, wielkość, główne wydatki oraz — jeśli je podasz — forma prawna, numer podatkowy, saldo gotówki i preferowany język. Służą do dopasowania analiz i obliczeń.',
         'Historia analiz: przechowujemy raport wygenerowany przez AI, twoje odpowiedzi tak/nie z diagnozy i rozmiar analizowanej treści — nie pełną zawartość plików.',
         'Rejestr faktur: jeśli korzystasz z czytania faktur, przechowujemy DANE, które sprawdzasz i zatwierdzasz (wystawca lub klient, numer podatkowy, data, numer, kwoty, VAT, potrącenie i status płatności). Samego pliku faktury nie przechowujemy.',
+        "Faktury, które wystawiasz: Twoje dane do faktur (nazwa firmy, NIP, adres, IBAN), dane Twoich klientów, pozycje, kwoty i rekord VERI*FACTU każdej faktury z jego odciskiem. Wystawionej faktury ani jej rekordu nie można zmienić ani usunąć, dopóki istnieje Twoje konto.",
         'Plan działania, kwoty odłożone na podatki i twoje klucze API (przechowywane tylko jako skrót).',
         'API (automatyzacje): przy każdym wywołaniu zapisujemy datę, ścieżkę, wynik i czas trwania, nigdy treść, przez 90 dni. W trybie asynchronicznym wynik zadania jest przechowywany 24 h, aby Twój przepływ mógł go odebrać. Webhooki wysyłają wyniki na adresy URL, które sam konfigurujesz (Ty wybierasz odbiorcę), a treść każdego powiadomienia jest usuwana po 24 h.',
         'Subskrypcja: identyfikatory klienta i subskrypcji Stripe, plan i status. Nigdy nie widzimy ani nie przechowujemy danych twojej karty.',
@@ -736,11 +737,12 @@ export default {
         'Groq: generuje analizy, czyta faktury i odpowiada w asystencie; gdy jest niedostępny, używany jest Cloudflare Workers AI. Umowa zabrania mu używania twoich danych do trenowania lub dostrajania modeli, a my mamy włączone zerowe przechowywanie (zapytania nie są zapisywane). Przetwarza dane w USA, na podstawie standardowych klauzul umownych.',
         'Cerebras: zapasowy dostawca AI, używany tylko, gdy Groq i Cloudflare są niedostępne (te same zadania). Umowa pozwala mu używać twoich danych wyłącznie do świadczenia usługi (nie do trenowania modeli) i przechowywać je tylko tak długo, jak to konieczne. Przetwarza dane w USA, na podstawie standardowych klauzul umownych.',
         'Resend: wysyła e-maile (twój klucz licencyjny, odzyskiwanie hasła oraz — jeśli je włączysz — przypomnienia kalendarza podatkowego, miesięczne podsumowanie i przypomnienia o płatności do twoich klientów).',
-        'Cloudflare: sieć dostarczania i bezpieczeństwa chroniąca dostęp do strony. Kraju twojego połączenia (podawanego przez Cloudflare) używamy tylko do wyboru początkowego języka strony; nie przechowujemy go.'
+        'Cloudflare: sieć dostarczania i bezpieczeństwa chroniąca dostęp do strony. Kraju twojego połączenia (podawanego przez Cloudflare) używamy tylko do wyboru początkowego języka strony; nie przechowujemy go.',
+        "Hiszpański urząd skarbowy (AEAT): jeśli dla Twojego konta zostanie włączona wysyłka rekordów VERI*FACTU, rekordy Twoich faktur będą mu przekazywane z mocy prawa. Na razie jest wyłączona."
       ] },
       { h: 'Dane twoich klientów i dostawców', ps: ['W przypadku danych osób trzecich, które wprowadzasz do Nokfi (klienci i dostawcy z faktur), ty jesteś administratorem, a Nokfi podmiotem przetwarzającym: używamy ich wyłącznie do świadczenia usługi. Warunki opisuje umowa powierzenia przetwarzania danych (nokfi.app/encargo-tratamiento). Jeśli włączysz automatyczne przypomnienia, wychodzą one w imieniu twojej firmy, a odpowiedzi trafiają bezpośrednio na twój e-mail.'] },
       { h: 'Pliki cookie i analityka', ps: ['Nokfi nie używa śledzących plików cookie ani zewnętrznych narzędzi analitycznych. Sesja, język i motyw są przechowywane w pamięci lokalnej przeglądarki.'] },
-      { h: 'Przechowywanie i usuwanie', ps: ['Przechowujemy dane, dopóki istnieje twoja licencja. W Ustawienia → Moje dane możesz pobrać wszystkie dane w pliku lub usunąć konto: razem z nim usuwamy profil, historię, rejestr faktur, zadania, klucze API i sesje. Techniczne raporty błędów usuwamy po 30 dniach.'] },
+      { h: 'Przechowywanie i usuwanie', ps: ['Przechowujemy dane, dopóki istnieje twoja licencja. W Ustawienia → Moje dane możesz pobrać wszystkie dane w pliku lub usunąć konto: razem z nim usuwamy profil, historię, rejestr faktur, zadania, klucze API i sesje. Techniczne raporty błędów usuwamy po 30 dniach. Usunięcie konta usuwa też wystawione faktury i ich rekordy; obowiązek ich przechowywania przez okres ustawowy spoczywa na Tobie, więc najpierw je pobierz.'] },
       { h: 'Twoje prawa', ps: ['Możesz skorzystać z prawa dostępu, sprostowania, usunięcia, przenoszenia i sprzeciwu w Ustawieniach lub pisząc na info@nokfi.app. Możesz też złożyć skargę do hiszpańskiego organu ochrony danych (aepd.es).'] },
       { h: 'Bezpieczeństwo', ps: ['Stosujemy HTTPS w całej usłudze, hasła haszowane algorytmem scrypt, tokeny sesji i odzyskiwania oraz klucze API przechowywane jako skróty, a także regularne kopie zapasowe bazy danych na serwerze.'] }
     ]
