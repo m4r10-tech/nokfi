@@ -17,6 +17,9 @@
  * Eventos: analysis.completed, job.completed, job.failed, quota.threshold
  * (80 % y 100 % de la cuota del día) y fiscal.deadline (7 y 1 días antes de
  * cada plazo del calendario fiscal). "ping" solo se envía con "Enviar prueba".
+ * Sesión 11: invoice.issued, invoice.cancelled, invoice.rejected,
+ * invoice.accepted, invoice.paid, invoice.unpaid (services/invoicing) y
+ * verifactu.accepted / verifactu.rejected (services/verifactu).
  */
 
 'use strict';

@@ -112,7 +112,7 @@ me.get('/export', requireLicense, (req, res) => {
     // Sesión 11: facturación.
     billing_profile: require('../db/invoicing').getBillingProfile(l.id),
     customers: require('../db/invoicing').listCustomers(l.id),
-    invoices: require('../db/invoicing').listInvoices(l.id, { limit: 1000 }).map(i => require('../db/invoicing').getInvoice(l.id, i.id)),
+    invoices: [true, false].flatMap(livemode => require('../db/invoicing').listInvoices(l.id, { limit: 1000, livemode })).map(i => require('../db/invoicing').getInvoice(l.id, i.id)),
     tax_reserves: db.prepare('SELECT year, quarter, amount, updated_at FROM tax_reserves WHERE license_id = ?').all(l.id),
     leak_dismissals: db.prepare('SELECT party_key, party_name, created_at FROM leak_dismissals WHERE license_id = ?').all(l.id),
     api_calls: db.prepare('SELECT key_id, method, path, status, error_code, ms, created_at FROM api_calls WHERE license_id = ? ORDER BY id DESC LIMIT 5000').all(l.id),

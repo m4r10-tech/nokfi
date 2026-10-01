@@ -91,7 +91,10 @@ const OPERATIONS = {
   'tax.model-130': { method: 'POST', path: '/api/v1/tax/model-130', run: (c) => T.model130(c.license, c.body) },
   'tax.quarter': { method: 'GET', path: '/api/v1/tax/quarter', run: (c) => T.quarter(c.license, c.body) },
   'tax.calendar': { method: 'GET', path: '/api/v1/tax/calendar', run: (c) => T.calendar(c.license, c.body) },
-  'usage': { method: 'GET', path: '/api/v1/usage', run: (c) => ({ status: 200, body: H.usage(c.license, c.livemode) }) }
+  'usage': { method: 'GET', path: '/api/v1/usage', run: (c) => ({ status: 200, body: H.usage(c.license, c.livemode) }) },
+  // Facturas: en el Playground solo en modo prueba (TEST-…), para no emitir una factura real por accidente.
+  'invoices.issue': { method: 'POST', path: '/api/v1/invoices', testOnly: true, run: (c) => H.issueInvoice(c) },
+  'invoices.list': { method: 'GET', path: '/api/v1/invoices', run: (c) => require('../services/invoicing').list({ license: c.license, query: c.body, livemode: c.livemode }) }
 };
 
 const playgroundLimiter = rateLimit({
@@ -106,6 +109,9 @@ router.post('/playground', playgroundLimiter, async (req, res) => {
   const livemode = req.body?.mode === 'live';
   if (livemode && !API_PLANS.includes(req.license.plan)) {
     return res.status(403).json({ error: 'api_plan_required', message: 'El modo real está en los planes Pro y Max. En modo prueba puedes probarlo todo.' });
+  }
+  if (livemode && op.testOnly) {
+    return res.status(400).json({ error: 'test_only', message: 'En el Playground las facturas se emiten solo en modo prueba. Para emitir una real usa la API o la app.' });
   }
   const input = req.body?.input && typeof req.body.input === 'object' ? req.body.input : {};
   const started = Date.now();

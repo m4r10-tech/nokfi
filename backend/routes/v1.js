@@ -19,6 +19,18 @@
  *   /api/v1/webhooks[/:id][/test]          endpoints de webhook (los usa el Trigger de n8n)
  *   /api/v1/tax/*                          herramientas sin IA (no gastan cuota)
  *
+ * Sesión 11b (emisión de facturas, misma lógica que la app: services/invoicing):
+ *   POST /api/v1/invoices                  emitir (Idempotency-Key OBLIGATORIA)
+ *   GET  /api/v1/invoices[?from&to&status&q&limit]
+ *   GET  /api/v1/invoices/:id              con eventos y registro VERI*FACTU
+ *   POST /api/v1/invoices/:id/rectify      rectificativa (Idempotency-Key OBLIGATORIA)
+ *   POST /api/v1/invoices/:id/cancel       { reason }
+ *   POST /api/v1/invoices/:id/status       { status: rejected|accepted|paid|unpaid, reason?, date? }
+ *   GET  /api/v1/invoices/:id/pdf
+ *   GET  /api/v1/invoices/:id/xml?format=ubl|facturae|facturx|cii
+ *   GET/POST /api/v1/customers
+ *   Claves nk_test_: facturas de prueba (TEST-…) que no entran al libro ni van a la AEAT.
+ *
  * Nunca acepta prompts libres: los tipos son los de la web y el backend arma
  * el prompt (F2).
  */
@@ -273,6 +285,56 @@ router.post('/webhooks/:id/test', requireApiKey, async (req, res) => {
   return r ? res.json(r) : res.status(404).json({ error: 'not_found' });
 });
 
+/* ── Sesión 11b: emisión de facturas ── */
+const S = require('../services/invoicing');
+const DI = require('../db/invoicing');
+
+/** Emitir sin Idempotency-Key puede duplicar una factura si se reintenta: es obligatoria. */
+function requireIdempotencyKey(req, res, next) {
+  if (req.get('Idempotency-Key') === undefined) {
+    return res.status(400).json({ error: 'idempotency_key_required', message: 'Para emitir facturas hace falta la cabecera Idempotency-Key (evita facturas duplicadas al reintentar).' });
+  }
+  next();
+}
+
+const ctx = (req) => ({ license: req.license, livemode: req.livemode, ip: req.ip });
+const body = (req) => (req.body && typeof req.body === 'object' && !Array.isArray(req.body) ? req.body : {});
+
+function issueInvoice({ license, body: b, livemode, ip, source = 'api' }) {
+  const { rectifies_id: _r, ...rest } = b || {};
+  return S.issue({ license, body: rest, source, livemode, ip });
+}
+function rectifyInvoice({ license, id, body: b, livemode, ip, source = 'api' }) {
+  return S.issue({ license, body: { ...(b || {}), rectifies_id: id }, source, livemode, ip });
+}
+
+function listCustomers(license, q) {
+  return { status: 200, body: { customers: DI.listCustomers(license.id, q || '') } };
+}
+function createCustomer(license, b, livemode) {
+  // Con una clave de prueba no se escribe en la libreta real: se valida y se devuelve.
+  const out = livemode ? DI.createCustomer(license.id, b || {}) : DI.validateCustomer(b || {});
+  if (out.error) return { status: 400, body: { error: 'invalid_input', field: out.error, message: 'Dato del cliente no válido.' } };
+  return { status: livemode ? 201 : 200, body: out.customer };
+}
+
+async function sendFile(res, out) {
+  if (!out.file) return res.status(out.status).json(out.body);
+  res.set({ 'Content-Type': out.file.contentType, 'Content-Disposition': `attachment; filename="${out.file.filename}"`, 'Cache-Control': 'no-store' });
+  res.send(out.file.body);
+}
+
+router.post('/invoices', requireApiKey, requireIdempotencyKey, idempotency, (req, res) => send(res, issueInvoice({ ...ctx(req), body: body(req) })));
+router.get('/invoices', requireApiKey, (req, res) => send(res, S.list({ license: req.license, query: req.query, livemode: req.livemode })));
+router.get('/invoices/:id', requireApiKey, (req, res) => send(res, S.get({ license: req.license, id: idParam(req), livemode: req.livemode })));
+router.post('/invoices/:id/rectify', requireApiKey, requireIdempotencyKey, idempotency, (req, res) => send(res, rectifyInvoice({ ...ctx(req), id: idParam(req), body: body(req) })));
+router.post('/invoices/:id/cancel', requireApiKey, idempotency, (req, res) => send(res, S.cancel({ ...ctx(req), id: idParam(req), reason: body(req).reason })));
+router.post('/invoices/:id/status', requireApiKey, idempotency, (req, res) => send(res, S.setStatus({ ...ctx(req), id: idParam(req), body: body(req) })));
+router.get('/invoices/:id/pdf', requireApiKey, async (req, res) => sendFile(res, await S.pdf({ license: req.license, id: idParam(req), livemode: req.livemode })));
+router.get('/invoices/:id/xml', requireApiKey, async (req, res) => sendFile(res, await S.einvoice({ license: req.license, id: idParam(req), format: req.query.format, livemode: req.livemode })));
+router.get('/customers', requireApiKey, (req, res) => send(res, listCustomers(req.license, req.query.q)));
+router.post('/customers', requireApiKey, idempotency, (req, res) => send(res, createCustomer(req.license, body(req), req.livemode)));
+
 /* ── Sesión 9: herramientas fiscales sin IA (no gastan cuota) ── */
 const input = (req) => (req.method === 'GET' ? req.query : req.body) || {};
 const nif = (req, res) => send(res, T.taxId(input(req).value ?? input(req).nif));
@@ -287,5 +349,6 @@ router.get('/tax/calendar', requireApiKey, (req, res) => send(res, T.calendar(re
 module.exports = router;
 module.exports.handlers = {
   analyze, extractInvoices, readInvoiceFiles, usage, listApiAnalyses, getApiAnalysis, createWebhook, updateWebhook, deleteWebhook,
+  issueInvoice, rectifyInvoice, listCustomers, createCustomer,
   TYPES, INVOICE_MAX_FILES
 };

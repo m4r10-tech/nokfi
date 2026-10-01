@@ -2,6 +2,7 @@
 
 This is an n8n community node for [Nokfi](https://nokfi.app): the AI for small-business documents and finance.
 
+- **Issue invoices** in your name: gap-free numbering, VAT, IRPF withholding and equivalence surcharge computed by Nokfi, added to your books, with PDF, e-invoice (UBL 2.5, Facturae, Factur-X) and the VERI*FACTU record. Rectify, cancel, mark as paid or rejected, and download them.
 - **Extract invoices** from PDFs, images or text and get the same JSON every time, with **validation done by Nokfi, not by the AI**: totals (base + VAT − withholding = total), Spanish NIF/CIF/NIE check digits, dates and usual VAT rates.
 - **Run financial analyses** (sales, cash, stock, purchases, profit, two-period comparison, document folders) and get a structured report: summary, key figures, priorities and an action plan.
 - **Spanish tax tools without AI** (no quota): validate NIF/NIE/CIF, VAT with the equivalence surcharge, IRPF withholding, Modelo 130 and the tax calendar.
@@ -30,6 +31,12 @@ The credential test calls `GET /api/v1/usage`.
 
 | Resource | Operation | What it does |
 |---|---|---|
+| Invoice | Issue | Issues an invoice: customer from your address book (ID), typed in (saved to the address book) or none (simplified invoice, up to 400 € VAT included); one or more lines; optional withholding, equivalence surcharge, exemption, dates, series and language. Returns the invoice with its number and totals. |
+| Invoice | Rectify | Corrective invoice for the difference (lines usually with a negative quantity) and a reason. |
+| Invoice | Cancel | Cancels an invoice issued by mistake: kept as cancelled, out of your books, with its VERI*FACTU cancellation record. |
+| Invoice | Set Status | Rejected (with reason) or accepted again; paid (with date) or unpaid. |
+| Invoice | Get / Get Many | An invoice with lines, events and VERI*FACTU record; or the list, with date, status and search filters. |
+| Invoice | Download | PDF or e-invoice (UBL 2.5, Facturae 3.2.2, Factur-X, CII) into a binary field, ready to attach to an email. |
 | Invoice | Extract | Reads up to 5 documents per request (PDF, JPG, PNG, WebP or text). Use `*` as the binary field to send every attachment of the item. Outputs one item per invoice (or one item with all of them). |
 | Analysis | Create | Runs an analysis. For spreadsheets, "All Input Items as Rows" sends the whole input (e.g. a Google Sheets node) as one table. |
 | Analysis | Get / Get Many | Reads reports you already have. |
@@ -40,7 +47,9 @@ The credential test calls `GET /api/v1/usage`.
 | Tax | Get Fiscal Calendar | Upcoming deadlines (303, 130, 111, 115, 390…) with days left, one item each. |
 | Usage | Get | Plan, daily quota and analyses used today. |
 
-Every invoice request and every analysis uses **1 analysis from your daily quota** (the same quota as the web app); the tax tools use none. Maximum 30 requests per minute per key. Requests carry an `Idempotency-Key`, so n8n's *Retry On Fail* never charges twice.
+Issuing and managing invoices uses no AI and no quota; your issuer details (legal name, tax ID, address) are filled in once in the Nokfi app. Issued invoices are never edited: rectify or cancel them. With a test key, invoices are test documents (`TEST-` numbering) that never reach your books or the tax agency. Every Issue and Rectify request carries an `Idempotency-Key` (set your own, e.g. the order ID, in *Additional Fields*).
+
+Every invoice extraction and every analysis uses **1 analysis from your daily quota** (the same quota as the web app); the tax tools use none. Maximum 30 requests per minute per key. Requests carry an `Idempotency-Key`, so n8n's *Retry On Fail* never charges twice.
 
 **Run in Background**: Invoice › Extract and Analysis › Create can return a job right away (`?async=true`). Pair it with the Nokfi Trigger (*Job Completed*) to get the result.
 
@@ -54,6 +63,8 @@ Choose the events and activate the workflow: the trigger registers its webhook i
 | Job Completed / Job Failed | A background job finished. Includes the result or the error. |
 | Quota Threshold | You reached 80 % or 100 % of today's quota. |
 | Fiscal Deadline | A tax deadline is 7 days or 1 day away (according to your legal form). |
+| Invoice Issued / Cancelled / Paid / Unpaid / Rejected / Rejection Undone | Something happened to an invoice (from the API, the MCP or the web app). Includes a summary: id, number, totals, customer, status. |
+| VERI*FACTU Record Accepted / Rejected | The Spanish tax agency answered an invoice record (with the error code when rejected). |
 
 ### Invoice output
 
@@ -76,6 +87,8 @@ Documents that cannot be read come out as items with `is_invoice: false` and an 
 - **Weekly sales report**: Schedule Trigger → Google Sheets (read) → Nokfi (Analysis › Create, Sales, All Input Items as Rows) → Send Email with `{{ $json.report.summary }}`.
 - **Tax deadline reminder to Slack**: Nokfi Trigger (Fiscal Deadline) → Slack with `{{ $json.data.models.join(', ') }} due on {{ $json.data.date }}`.
 - **Background invoice batch**: Nokfi (Invoice › Extract, Run in Background) in one workflow, Nokfi Trigger (Job Completed) → Google Sheets in another.
+- **Invoice every paid order**: Shopify/WooCommerce Trigger (order paid) → Nokfi (Invoice › Issue, Idempotency Key `{{ $json.id }}`) → Nokfi (Invoice › Download, PDF) → Gmail (send with the attachment).
+- **Chase rejected invoices**: Nokfi Trigger (Invoice Rejected) → Slack with `{{ $json.data.number }}: {{ $json.data.reason }}`.
 - **AI Agent tool**: the node can be used as a tool by n8n's AI Agent.
 
 ## Resources

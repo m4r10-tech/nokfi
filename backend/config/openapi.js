@@ -82,7 +82,7 @@ const WebhookEndpoint = {
   type: 'object',
   properties: {
     id: { type: 'integer' }, url: { type: 'string' },
-    events: { type: 'array', items: { type: 'string', enum: ['*', 'analysis.completed', 'job.completed', 'job.failed', 'quota.threshold', 'fiscal.deadline'] } },
+    events: { type: 'array', items: { type: 'string', enum: ['*', ...require('../db/webhooks').EVENT_TYPES] } },
     description: { type: 'string' }, enabled: { type: 'boolean' }, disabled_reason: { type: 'string', nullable: true },
     secret: { type: 'string', description: 'Solo al crear: whsec_… para comprobar la firma.' }
   }
@@ -91,21 +91,89 @@ const WebhookEndpoint = {
 const WEBHOOKS_DOC = [
   '**Webhooks.** Nokfi envía un POST JSON `{ id, type, created_at, livemode, data }` a tus endpoints.',
   'Eventos: `analysis.completed` (informe terminado, también los de la web), `job.completed`, `job.failed`,',
-  '`quota.threshold` (80 % y 100 % de la cuota del día) y `fiscal.deadline` (7 días y 1 día antes de cada plazo).',
+  '`quota.threshold` (80 % y 100 % de la cuota del día), `fiscal.deadline` (7 días y 1 día antes de cada plazo),',
+  '`invoice.issued`, `invoice.cancelled`, `invoice.rejected`, `invoice.accepted` (rechazo deshecho), `invoice.paid`, `invoice.unpaid`',
+  '(facturas emitidas, también desde la web) y `verifactu.accepted` / `verifactu.rejected` (respuesta de la AEAT a cada registro).',
   'Firma: cabecera `Nokfi-Signature: t=<unix>,v1=<hex>` con v1 = HMAC-SHA256(secreto, "<t>.<cuerpo tal cual>"); rechaza firmas de más de 5 min.',
   'Otras cabeceras: `Nokfi-Event`, `Nokfi-Event-Id` (úsalo para descartar duplicados) y `Nokfi-Delivery`.',
   'Responde 2xx en menos de 10 s; si no, se reintenta 6 veces en ~20 h (1 min, 5 min, 30 min, 2 h, 6 h, 12 h). Solo https y direcciones públicas.'
 ].join(' ');
 
 const num = { type: 'number' };
+
+const Party = {
+  type: 'object',
+  properties: {
+    name: { type: 'string' }, tax_id: { type: 'string', description: 'NIF/CIF/NIE (España) o NIF-IVA' }, email: { type: 'string' },
+    address: { type: 'string' }, postal_code: { type: 'string', description: '5 cifras en España' }, city: { type: 'string' }, province: { type: 'string' },
+    country: { type: 'string', description: 'ISO 3166-1 alfa-2 (ES por defecto)' }
+  }
+};
+
+const InvoiceLine = {
+  type: 'object',
+  required: ['description', 'unit_price'],
+  properties: {
+    description: { type: 'string' }, quantity: { type: 'number', default: 1 }, unit: { type: 'string', example: 'h' },
+    unit_price: { type: 'number', description: 'Sin IVA (hasta 4 decimales)' }, discount_pct: { type: 'number', default: 0 },
+    vat_rate: { type: 'number', enum: [21, 10, 5, 4, 0], default: 21 }
+  }
+};
+
+const InvoiceInput = {
+  type: 'object',
+  required: ['lines'],
+  description: 'Tipo automático: F1 con NIF del cliente; F2 (simplificada, máx. 400 € IVA incluido) sin él. El IVA se calcula por tipo sobre la suma de bases (EN 16931).',
+  properties: {
+    customer_id: { type: 'integer', description: 'Cliente de la libreta (GET /customers)' },
+    customer: { ...Party, description: 'Cliente escrito a mano (se guarda en la libreta salvo save_customer=false)' },
+    save_customer: { type: 'boolean', default: true },
+    lines: { type: 'array', minItems: 1, maxItems: 200, items: { $ref: '#/components/schemas/InvoiceLine' } },
+    irpf_rate: { type: 'number', enum: [0, 1, 2, 7, 15, 19], default: 0 },
+    equivalence_surcharge: { type: 'boolean', description: 'Recargo de equivalencia (cliente minorista)' },
+    exemption: { type: 'string', enum: ['E1', 'E2', 'E3', 'E4', 'E5', 'E6', 'N1', 'N2', 'S2'], description: 'Causa de las líneas al 0 % (exenta, no sujeta, inversión del sujeto pasivo)' },
+    series: { type: 'string', description: 'F por defecto (las rectificativas, R)' },
+    issue_date: { type: 'string', format: 'date', description: 'Hoy por defecto; nunca futura ni anterior a la última de la serie' },
+    operation_date: { type: 'string', format: 'date', description: 'Si es distinta (no posterior a la de expedición)' },
+    due_date: { type: 'string', format: 'date' },
+    payment_method: { type: 'string', enum: ['transfer', 'direct_debit', 'card', 'cash', 'other'] },
+    iban: { type: 'string' }, notes: { type: 'string' }, lang: { type: 'string', enum: ['es', 'en', 'fr', 'it', 'de', 'pl'] }
+  }
+};
+
+const IssuedInvoice = {
+  type: 'object',
+  properties: {
+    id: { type: 'integer' }, number: { type: 'string', example: 'F2026-0001' }, series: { type: 'string' },
+    kind: { type: 'string', enum: ['F1', 'F2', 'R1', 'R2', 'R3', 'R4', 'R5'] }, status: { type: 'string', enum: ['issued', 'cancelled'] },
+    issue_date: { type: 'string' }, operation_date: { type: 'string', nullable: true }, due_date: { type: 'string', nullable: true },
+    issuer: Party, customer: { ...Party, nullable: true }, customer_id: { type: 'integer', nullable: true },
+    lines: { type: 'array', items: { $ref: '#/components/schemas/InvoiceLine' } },
+    taxes: { type: 'array', items: { type: 'object', properties: { vat_rate: num, re_rate: num, base: num, vat_amount: num, re_amount: num } } },
+    base: num, vat_amount: num, re_amount: num, irpf_rate: num, irpf_amount: num, total: num, currency: { type: 'string' },
+    customer_status: { type: 'string', enum: ['accepted', 'rejected'] }, paid: { type: 'boolean' }, paid_at: { type: 'string', nullable: true },
+    rectifies_id: { type: 'integer', nullable: true }, rectified_by: { type: 'array', items: { type: 'object' } },
+    livemode: { type: 'boolean', description: 'false: factura de prueba (clave nk_test_, numeración TEST-…)' }, source: { type: 'string', enum: ['web', 'api', 'mcp'] },
+    verifactu: { type: 'array', description: 'Solo en GET /invoices/{id}: registros de alta/anulación con su huella y el estado del envío a la AEAT', items: { type: 'object' } }
+  }
+};
+
+const INVOICING_DOC = 'Emite facturas en nombre de tu cuenta con la misma lógica que la app: numeración correlativa sin huecos, libro, PDF, factura electrónica (UBL 2.5, Facturae 3.2.2, Factur-X) y registro VERI*FACTU con huella encadenada. Una factura emitida no se edita ni se borra: se rectifica o se anula. Con claves nk_test_ son facturas de prueba (TEST-…) que no entran en el libro ni van a la AEAT. Los datos del emisor se completan en la app (Finanzas › Facturas › Mis datos); si faltan, 422 issuer_incomplete.';
+
+const idPath = { name: 'id', in: 'path', required: true, schema: { type: 'integer' } };
+const IdemRequired = { name: 'Idempotency-Key', in: 'header', required: true, schema: { type: 'string', maxLength: 255 }, description: 'OBLIGATORIA: evita emitir dos veces la misma factura al reintentar. Sin ella → 400 idempotency_key_required.' };
+const invoiceResp = (code, desc) => ({ [code]: { description: desc, content: { 'application/json': { schema: { $ref: '#/components/schemas/IssuedInvoice' } } } } });
+const invoiceErrors = { 400: { description: 'invalid_input (field: line_description, customer_tax_id, issue_date…)' }, 404: { description: 'No existe (o es del otro modo: real/prueba)' }, 409: { description: 'Estado incompatible (anulada, con rectificativas…)' }, 422: { description: 'issuer_incomplete, customer_tax_id_required…' } };
+
+
 const taxOk = (desc) => ({ 200: { description: desc }, 400: { description: 'invalid_input (con el motivo en message)' } });
 
 module.exports = {
   openapi: '3.0.3',
   info: {
     title: 'Nokfi API',
-    version: '1.1.0',
-    description: 'API de Nokfi para automatizaciones (n8n, Make, Zapier…). Claves reales (nk_live_) en los planes Pro y Max; cada análisis o extracción consume 1 de la cuota diaria del plan, igual que en la web. Claves de prueba (nk_test_) en todos los planes: devuelven datos de ejemplo con la misma forma, validan la entrada igual y no gastan cuota. Las herramientas fiscales (/tax/*) no usan IA ni gastan cuota. Todos los POST admiten Idempotency-Key (24 h): un reintento con la misma clave devuelve la misma respuesta sin ejecutarse ni cobrarse dos veces. ' + WEBHOOKS_DOC
+    version: '1.2.0',
+    description: 'API de Nokfi para automatizaciones (n8n, Make, Zapier…). Claves reales (nk_live_) en los planes Pro y Max; cada análisis o extracción consume 1 de la cuota diaria del plan, igual que en la web. Claves de prueba (nk_test_) en todos los planes: devuelven datos de ejemplo con la misma forma, validan la entrada igual y no gastan cuota. Las herramientas fiscales (/tax/*) y la emisión de facturas (/invoices, /customers) no usan IA ni gastan cuota. Todos los POST admiten Idempotency-Key (24 h): un reintento con la misma clave devuelve la misma respuesta sin ejecutarse ni cobrarse dos veces. ' + WEBHOOKS_DOC
   },
   servers: [{ url: 'https://nokfi.app/api/v1' }],
   components: {
@@ -113,7 +181,7 @@ module.exports = {
     parameters: {
       IdempotencyKey: { name: 'Idempotency-Key', in: 'header', schema: { type: 'string', maxLength: 255 }, description: 'Hasta 255 caracteres. Misma clave + mismo cuerpo → misma respuesta (Idempotent-Replayed: true). Otro cuerpo → 422 idempotency_key_reused; aún en curso → 409.' }
     },
-    schemas: { Report, FileInput, Invoice, Job, WebhookEndpoint }
+    schemas: { Report, FileInput, Invoice, Job, WebhookEndpoint, InvoiceLine, InvoiceInput, IssuedInvoice, Customer: Party }
   },
   security: [{ bearer: [] }],
   paths: {
@@ -227,6 +295,67 @@ module.exports = {
       delete: { summary: 'Borrar un webhook', parameters: [{ name: 'id', in: 'path', required: true, schema: { type: 'integer' } }], responses: { 200: { description: 'Borrado' } } }
     },
     '/webhooks/{id}/test': { post: { summary: 'Enviar un evento ping de prueba', parameters: [{ name: 'id', in: 'path', required: true, schema: { type: 'integer' } }], responses: { 200: { description: '{ ok, status, error, ms }' } } } },
+
+    '/invoices': {
+      get: {
+        summary: 'Listar facturas emitidas', description: INVOICING_DOC,
+        parameters: [
+          { name: 'from', in: 'query', schema: { type: 'string', format: 'date' } }, { name: 'to', in: 'query', schema: { type: 'string', format: 'date' } },
+          { name: 'status', in: 'query', schema: { type: 'string', enum: ['issued', 'cancelled'] } }, { name: 'q', in: 'query', schema: { type: 'string' }, description: 'Número, cliente o NIF' },
+          { name: 'limit', in: 'query', schema: { type: 'integer', maximum: 500 } }
+        ],
+        responses: { 200: { description: '{ invoices: [...] } (sin líneas)' } }
+      },
+      post: {
+        summary: 'Emitir una factura', description: INVOICING_DOC,
+        parameters: [IdemRequired],
+        requestBody: { required: true, content: { 'application/json': { schema: { $ref: '#/components/schemas/InvoiceInput' },
+          example: { customer: { name: 'Bodegas Sur SA', tax_id: 'A58818501', email: 'pagos@bodegassur.es', address: 'Ctra. Jerez 4', postal_code: '11401', city: 'Jerez' }, irpf_rate: 15, lines: [{ description: 'Diseño de etiqueta', quantity: 1, unit_price: 800, vat_rate: 21 }] } } } },
+        responses: { ...invoiceResp(201, 'Emitida'), ...invoiceErrors }
+      }
+    },
+    '/invoices/{id}': { get: { summary: 'Obtener una factura (líneas, eventos y VERI*FACTU)', parameters: [idPath], responses: { ...invoiceResp(200, 'OK'), 404: invoiceErrors[404] } } },
+    '/invoices/{id}/rectify': {
+      post: {
+        summary: 'Emitir una rectificativa', description: 'Por diferencias: las líneas son la corrección (normalmente en negativo). Va a la serie R y al cliente de la original salvo que indiques otro.',
+        parameters: [idPath, IdemRequired],
+        requestBody: { required: true, content: { 'application/json': { schema: { allOf: [{ $ref: '#/components/schemas/InvoiceInput' }, { type: 'object', required: ['rectification_reason'], properties: { rectification_reason: { type: 'string' }, rectification_kind: { type: 'string', enum: ['R1', 'R2', 'R3', 'R4', 'R5'], description: 'R1 por defecto (R5 si la original es simplificada)' } } }] },
+          example: { rectification_reason: 'Descuento pactado', lines: [{ description: 'Descuento', quantity: -1, unit_price: 100, vat_rate: 21 }] } } } },
+        responses: { ...invoiceResp(201, 'Emitida'), ...invoiceErrors }
+      }
+    },
+    '/invoices/{id}/cancel': {
+      post: {
+        summary: 'Anular una factura emitida por error', description: 'No se borra: queda anulada, sale del libro y genera el registro de anulación de VERI*FACTU. No se puede si tiene rectificativas.',
+        parameters: [idPath, { $ref: '#/components/parameters/IdempotencyKey' }],
+        requestBody: { content: { 'application/json': { schema: { type: 'object', properties: { reason: { type: 'string' } } } } } },
+        responses: { ...invoiceResp(200, 'Anulada'), ...invoiceErrors }
+      }
+    },
+    '/invoices/{id}/status': {
+      post: {
+        summary: 'Estado para el cliente: rechazada / aceptada, cobrada / no cobrada', description: 'Las facturas se consideran aceptadas por defecto (RD 238/2026). Para cambiar un estado primero se revierte el anterior.',
+        parameters: [idPath, { $ref: '#/components/parameters/IdempotencyKey' }],
+        requestBody: { required: true, content: { 'application/json': { schema: { type: 'object', required: ['status'], properties: { status: { type: 'string', enum: ['rejected', 'accepted', 'paid', 'unpaid'] }, reason: { type: 'string', description: 'Obligatorio al rechazar' }, date: { type: 'string', format: 'date', description: 'Fecha del cobro (hoy por defecto)' } } } } } },
+        responses: { ...invoiceResp(200, 'OK'), ...invoiceErrors }
+      }
+    },
+    '/invoices/{id}/pdf': { get: { summary: 'PDF de la factura (con el QR tributario si se remite a la AEAT)', parameters: [idPath], responses: { 200: { description: 'application/pdf' }, 404: invoiceErrors[404] } } },
+    '/invoices/{id}/xml': {
+      get: {
+        summary: 'Factura electrónica', parameters: [idPath, { name: 'format', in: 'query', schema: { type: 'string', enum: ['ubl', 'facturae', 'facturx', 'cii'], default: 'ubl' } }],
+        responses: { 200: { description: 'XML (UBL 2.5, Facturae 3.2.2 sin firmar, CII) o PDF Factur-X' }, 404: invoiceErrors[404], 422: { description: 'customer_incomplete, format_unsupported' } }
+      }
+    },
+    '/customers': {
+      get: { summary: 'Libreta de clientes', parameters: [{ name: 'q', in: 'query', schema: { type: 'string' } }], responses: { 200: { description: '{ customers: [...] }' } } },
+      post: {
+        summary: 'Añadir un cliente', description: 'Con clave nk_test_ valida y devuelve el cliente sin guardarlo (200, id null).',
+        parameters: [{ $ref: '#/components/parameters/IdempotencyKey' }],
+        requestBody: { required: true, content: { 'application/json': { schema: { allOf: [{ $ref: '#/components/schemas/Customer' }, { type: 'object', required: ['name'], properties: { equivalence_surcharge: { type: 'boolean' } } }] } } } },
+        responses: { 201: { description: 'Creado' }, 400: { description: 'invalid_input (field: customer_name, customer_tax_id, customer_postal_code)' } }
+      }
+    },
 
     '/tax/nif': {
       get: {

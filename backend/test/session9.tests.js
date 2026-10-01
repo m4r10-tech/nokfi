@@ -339,10 +339,10 @@ module.exports = async function session9Tests({ post, put, get, call, check, che
     // ── MCP: herramientas fiscales y modo prueba ──
     {
       const rpc = (method, params, key) => post('/api/mcp', { jsonrpc: '2.0', id: 1, method, params }, key);
-      await checkAsync('S9 MCP: 10 herramientas, validate_tax_id y analyze con clave de prueba',
+      await checkAsync('S9 MCP: 15 herramientas, validate_tax_id y analyze con clave de prueba',
         Promise.all([rpc('tools/list', {}, live), rpc('tools/call', { name: 'validate_tax_id', arguments: { value: 'B12345674' } }, live),
           rpc('tools/call', { name: 'analyze', arguments: excelBody }, test)]),
-        ([l, v, a]) => l.data.result.tools.length === 10 && v.data.result.structuredContent.valid === true
+        ([l, v, a]) => l.data.result.tools.length === 15 && v.data.result.structuredContent.valid === true
           && a.data.result.structuredContent.test === true);
     }
 

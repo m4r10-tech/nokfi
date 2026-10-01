@@ -33,7 +33,7 @@ export default function DevPlayground() {
   const parsed = useMemo(() => { try { const v = JSON.parse(text || '{}'); return v && typeof v === 'object' && !Array.isArray(v) ? v : null; } catch { return null; } }, [text]);
   const code = useMemo(() => (parsed ? snippets(op, parsed, { test: mode === 'test' }) : null), [op, parsed, mode]);
 
-  const pick = (id) => { setOpId(id); setText(JSON.stringify(opById(id).example, null, 2)); setResult(null); setError(null); };
+  const pick = (id) => { setOpId(id); setText(JSON.stringify(opById(id).example, null, 2)); setResult(null); setError(null); if (opById(id).testOnly) setMode('test'); };
 
   const run = async (e) => {
     e.preventDefault();
@@ -60,6 +60,9 @@ export default function DevPlayground() {
                 <optgroup label={t('dev.pgGroupAi')}>
                   {OPERATIONS.filter(o => o.ai).map(o => <option key={o.id} value={o.id}>{t(`dev.op_${o.id.replace(/[.-]/g, '_')}`)}</option>)}
                 </optgroup>
+                <optgroup label={t('dev.pgGroupInvoicing')}>
+                  {OPERATIONS.filter(o => o.group === 'invoicing').map(o => <option key={o.id} value={o.id}>{t(`dev.op_${o.id.replace(/[.-]/g, '_')}`)}</option>)}
+                </optgroup>
                 <optgroup label={t('dev.pgGroupAccount')}>
                   <option value="usage">{t('dev.op_usage')}</option>
                 </optgroup>
@@ -67,13 +70,14 @@ export default function DevPlayground() {
             </Field>
             <div className="flex flex-col">
               <span className="field-label">{t('dev.modeLabel')}</span>
-              <Segmented value={mode} onChange={(v) => { if (v === 'live' && !liveOk) return; setMode(v); }} label={t('dev.modeLabel')}
+              <Segmented value={mode} onChange={(v) => { if (v === 'live' && (!liveOk || op.testOnly)) return; setMode(v); }} label={t('dev.modeLabel')}
                 options={[{ value: 'test', label: t('dev.modeTest') }, { value: 'live', label: t('dev.modeLive') }]} />
             </div>
           </div>
           <p className="text-xs -mt-2" style={{ color: 'var(--text-muted)' }}>
             <code>{op.method} /api/v1{op.path}</code> · {op.ai ? (mode === 'live' ? t('dev.pgUsesQuota') : t('dev.pgSample')) : t('dev.pgNoQuota')}
             {!liveOk && ` · ${t('dev.pgLiveLocked')}`}
+            {op.testOnly && ` · ${t('dev.pgTestOnly')}`}
           </p>
 
           <Field label={t('dev.pgInput')} htmlFor="pg-input" hint={parsed ? null : t('dev.pgBadJson')}>

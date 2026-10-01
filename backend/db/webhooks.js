@@ -12,7 +12,10 @@
 const crypto = require('crypto');
 const { getDB } = require('./database');
 
-const EVENT_TYPES = ['analysis.completed', 'job.completed', 'job.failed', 'quota.threshold', 'fiscal.deadline'];
+const EVENT_TYPES = ['analysis.completed', 'job.completed', 'job.failed', 'quota.threshold', 'fiscal.deadline',
+  // Sesión 11: facturas emitidas y VERI*FACTU.
+  'invoice.issued', 'invoice.cancelled', 'invoice.rejected', 'invoice.accepted', 'invoice.paid', 'invoice.unpaid',
+  'verifactu.accepted', 'verifactu.rejected'];
 const MAX_ENDPOINTS = 10;
 
 const newSecret = () => 'whsec_' + crypto.randomBytes(24).toString('base64url');

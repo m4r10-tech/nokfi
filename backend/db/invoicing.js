@@ -227,6 +227,12 @@ function customerData(raw) {
   return { data: { ...p, equivalence_surcharge: raw.equivalence_surcharge ? 1 : 0 } };
 }
 
+/** Valida un cliente sin guardarlo (claves de prueba de la API). */
+function validateCustomer(raw) {
+  const { data, error } = customerData(raw || {});
+  return error ? { error } : { customer: { id: null, ...data, equivalence_surcharge: !!data.equivalence_surcharge } };
+}
+
 function createCustomer(license_id, raw) {
   const { data, error } = customerData(raw || {});
   if (error) return { error };
@@ -285,9 +291,10 @@ function getInvoice(license_id, id) {
   return rowToInvoice(getDB().prepare('SELECT * FROM invoices WHERE id = ? AND license_id = ?').get(id, license_id));
 }
 
-function listInvoices(license_id, { from, to, status, q, limit = 500 } = {}) {
-  const where = ['license_id = ?'];
-  const args = [license_id];
+/** Listado. livemode: true (por defecto, facturas reales) o false (las de prueba de la API). */
+function listInvoices(license_id, { from, to, status, q, limit = 500, livemode = true } = {}) {
+  const where = ['license_id = ?', 'livemode = ?'];
+  const args = [license_id, livemode ? 1 : 0];
   const ISO = /^\d{4}-\d{2}-\d{2}$/;
   if (from && ISO.test(from)) { where.push('issue_date >= ?'); args.push(from); }
   if (to && ISO.test(to)) { where.push('issue_date <= ?'); args.push(to); }
@@ -344,17 +351,20 @@ function ledgerFields(inv) {
 function issueInvoice(license_id, inv, { customer_id = null, source = 'web', livemode = true, ip = null } = {}) {
   const db = getDB();
   const year = Number(inv.issue_date.slice(0, 4));
+  // Las facturas de prueba (claves nk_test_) llevan su propia numeración
+  // (TEST-F2026-0001): nunca dejan huecos en la serie real.
+  const seriesKey = livemode ? inv.series : `test:${inv.series}`;
   let id;
   try {
     db.transaction(() => {
-      const s = db.prepare('SELECT last_number, last_date FROM invoice_series WHERE license_id = ? AND code = ? AND year = ?').get(license_id, inv.series, year);
+      const s = db.prepare('SELECT last_number, last_date FROM invoice_series WHERE license_id = ? AND code = ? AND year = ?').get(license_id, seriesKey, year);
       // Orden cronológico dentro de la serie: no se puede emitir con fecha anterior a la última.
       if (s?.last_date && inv.issue_date < s.last_date) { const e = new Error('date_before_last'); e.code = 'date_before_last'; e.last_date = s.last_date; throw e; }
       const seq = (s?.last_number || 0) + 1;
       db.prepare(`INSERT INTO invoice_series (license_id, code, year, last_number, last_date) VALUES (?, ?, ?, ?, ?)
         ON CONFLICT(license_id, code, year) DO UPDATE SET last_number = excluded.last_number, last_date = excluded.last_date`)
-        .run(license_id, inv.series, year, seq, inv.issue_date);
-      inv.number = M.formatNumber(inv.series, year, seq);
+        .run(license_id, seriesKey, year, seq, inv.issue_date);
+      inv.number = (livemode ? '' : 'TEST-') + M.formatNumber(inv.series, year, seq);
       const info = db.prepare(`INSERT INTO invoices (license_id, series, year, seq, number, kind, issue_date, operation_date, due_date, currency, lang,
           issuer_json, customer_id, customer_json, base, vat_amount, re_amount, irpf_rate, irpf_amount, total, taxes_json, equivalence_surcharge,
           exemption, payment_method, iban, notes, rectifies_id, rectification_reason, livemode, source)
@@ -475,6 +485,6 @@ function rememberCustomer(license_id, customer, surcharge) {
 module.exports = {
   runInvoicingSchema,
   getBillingProfile, saveBillingProfile, issuerFromProfile,
-  listCustomers, getCustomer, createCustomer, updateCustomer, deleteCustomer, resolveCustomer, rememberCustomer,
+  listCustomers, getCustomer, createCustomer, validateCustomer, updateCustomer, deleteCustomer, resolveCustomer, rememberCustomer,
   listInvoices, getInvoice, listEvents, addEvent, issueInvoice, cancelInvoice, setCustomerStatus
 };

@@ -81,4 +81,34 @@ function idempotency(req, res, next) {
   next();
 }
 
-module.exports = { idempotency, isAsync };
+/**
+ * La misma idempotencia fuera de Express (herramientas del MCP): run() se
+ * ejecuta una vez por clave y cuerpo; los reintentos devuelven lo guardado.
+ * → { status, body, replayed? }
+ */
+async function runIdempotent({ license_id, mode = 'live', key, scope, payload, run }) {
+  const k = String(key || '').trim();
+  if (!k || k.length > 255) return { status: 400, body: { error: 'invalid_idempotency_key', message: 'idempotency_key debe tener entre 1 y 255 caracteres.' } };
+  const idemKey = `${mode}:${k}`;
+  const hash = crypto.createHash('sha256').update(JSON.stringify(['MCP', scope, payload ?? null])).digest('hex');
+  const db = getDB();
+  const claim = () => db.prepare('INSERT OR IGNORE INTO idempotency_keys (license_id, idem_key, request_hash) VALUES (?, ?, ?)').run(license_id, idemKey, hash).changes > 0;
+  if (!claim()) {
+    const row = db.prepare("SELECT *, created_at < datetime('now', '-24 hours') AS expired FROM idempotency_keys WHERE license_id = ? AND idem_key = ?").get(license_id, idemKey);
+    if (row?.expired) {
+      db.prepare('DELETE FROM idempotency_keys WHERE license_id = ? AND idem_key = ?').run(license_id, idemKey);
+      if (!claim()) return { status: 409, body: { error: 'idempotency_in_progress', message: 'Ya hay una petición en curso con esta clave.' } };
+    } else if (row) {
+      if (row.request_hash !== hash) return { status: 422, body: { error: 'idempotency_key_reused', message: 'Esta clave de idempotencia ya se usó con otra petición distinta.' } };
+      if (row.status === null) return { status: 409, body: { error: 'idempotency_in_progress', message: 'Ya hay una petición en curso con esta clave.' } };
+      return { status: row.status, body: JSON.parse(row.response_json), replayed: true };
+    }
+  }
+  let out;
+  try { out = await run(); } catch (e) { db.prepare('DELETE FROM idempotency_keys WHERE license_id = ? AND idem_key = ? AND status IS NULL').run(license_id, idemKey); throw e; }
+  if (out.status >= 500 || out.status === 409 || out.status === 429) db.prepare('DELETE FROM idempotency_keys WHERE license_id = ? AND idem_key = ? AND status IS NULL').run(license_id, idemKey);
+  else db.prepare('UPDATE idempotency_keys SET status = ?, response_json = ? WHERE license_id = ? AND idem_key = ?').run(out.status, JSON.stringify(out.body ?? null), license_id, idemKey);
+  return out;
+}
+
+module.exports = { idempotency, isAsync, runIdempotent };

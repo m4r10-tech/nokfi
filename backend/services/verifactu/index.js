@@ -127,6 +127,10 @@ async function sendBatch(license_id) {
     V.markResult(r.id, { status, error_code: line.codigo, error_message: line.descripcion, csv: out.csv, env });
     counts[status]++;
     addEvent(license_id, r.invoice_id, EVENT[status], [r.type, line.codigo, line.descripcion].filter(Boolean).join(' · '));
+    require('../webhooks').emit(license_id, status === 'rejected' ? 'verifactu.rejected' : 'verifactu.accepted', {
+      record_id: r.id, invoice_id: r.invoice_id, number: r.number, type: r.type, status, env,
+      error_code: line.codigo || null, error_message: line.descripcion || null, csv: out.csv || null
+    });
   }
   return { sent: batch.length, estado: out.estadoEnvio, ...counts };
 }

@@ -1,7 +1,14 @@
 /**
  * services/invoicing/index.js — sesión 11: lógica de emisión compartida por
- * la app (routes/invoicing.js) y, en la 11b, por la API v1, el MCP y n8n.
+ * la app (routes/invoicing.js), la API v1, el MCP y n8n (routes/v1.js).
  * Cada función devuelve { status, body }, como routes/v1.js.
+ *
+ * livemode: la app y las claves nk_live_ trabajan con facturas reales; las
+ * claves nk_test_ con facturas de prueba (numeración TEST-…, sin libro, sin
+ * VERI*FACTU). Un modo nunca ve ni toca las facturas del otro (404).
+ *
+ * Webhooks: invoice.issued, invoice.cancelled, invoice.rejected,
+ * invoice.accepted (rechazo deshecho), invoice.paid e invoice.unpaid.
  */
 
 'use strict';
@@ -25,6 +32,22 @@ const MESSAGES = {
 };
 
 const fail = (status, error, extra = {}) => ({ status, body: { error, message: MESSAGES[error] || 'Dato no válido.', ...extra } });
+const notFound = () => ({ status: 404, body: { error: 'not_found', message: 'No existe esa factura.' } });
+
+/** Factura del modo pedido (real o de prueba) o null. */
+function find(license, id, livemode = true) {
+  const inv = D.getInvoice(license.id, Number(id));
+  return inv && inv.livemode === !!livemode ? inv : null;
+}
+
+/** Resumen de la factura para los webhooks. */
+const eventData = (inv, extra = {}) => ({
+  id: inv.id, number: inv.number, kind: inv.kind, status: inv.status, issue_date: inv.issue_date, due_date: inv.due_date,
+  base: inv.base, vat_amount: inv.vat_amount, total: inv.total, currency: inv.currency,
+  customer: inv.customer ? { name: inv.customer.name, tax_id: inv.customer.tax_id, email: inv.customer.email } : null,
+  customer_status: inv.customer_status, paid: inv.paid, paid_at: inv.paid_at, rectifies_id: inv.rectifies_id, ...extra
+});
+const emit = (license, type, inv, extra) => require('../webhooks').emit(license.id, type, eventData(inv, extra), { livemode: inv.livemode });
 
 /** Emite una factura (o una rectificativa si body.rectifies_id). */
 function issue({ license, body = {}, source = 'web', livemode = true, ip = null }) {
@@ -33,7 +56,7 @@ function issue({ license, body = {}, source = 'web', livemode = true, ip = null 
 
   let original = null;
   if (body.rectifies_id !== undefined && body.rectifies_id !== null && body.rectifies_id !== '') {
-    original = D.getInvoice(license.id, Number(body.rectifies_id));
+    original = find(license, body.rectifies_id, livemode);
     if (!original) return fail(404, 'original_not_found');
     if (original.status !== 'issued') return fail(409, 'original_cancelled');
   }
@@ -63,24 +86,44 @@ function issue({ license, body = {}, source = 'web', livemode = true, ip = null 
     const { error, ...extra } = out;
     return fail(400, error, extra);
   }
+  emit(license, 'invoice.issued', out.invoice);
   return { status: 201, body: out.invoice };
 }
 
-function cancel({ license, id, reason, ip = null }) {
+function cancel({ license, id, reason, ip = null, livemode = true }) {
+  if (!find(license, id, livemode)) return notFound();
   const out = D.cancelInvoice(license.id, Number(id), reason, ip);
-  if (!out) return fail(404, 'not_found');
   if (out.error) return fail(409, out.error);
+  emit(license, 'invoice.cancelled', out.invoice, { cancel_reason: out.invoice.cancel_reason });
   return { status: 200, body: out.invoice };
 }
 
-function setStatus({ license, id, body = {}, ip = null }) {
+const STATUS_EVENT = { rejected: 'invoice.rejected', accepted: 'invoice.accepted', paid: 'invoice.paid', unpaid: 'invoice.unpaid' };
+
+function setStatus({ license, id, body = {}, ip = null, livemode = true }) {
+  if (!find(license, id, livemode)) return notFound();
   const out = D.setCustomerStatus(license.id, Number(id), { status: body.status, reason: body.reason, date: body.date }, ip);
-  if (!out) return fail(404, 'not_found');
   if (out.error) {
     const { error, ...extra } = out;
     return fail(error === 'invalid_input' ? 400 : 409, error, extra);
   }
+  emit(license, STATUS_EVENT[body.status], out.invoice, body.status === 'rejected' ? { reason: out.invoice.customer_status_reason } : {});
   return { status: 200, body: out.invoice };
+}
+
+/** Una factura con sus eventos y su registro VERI*FACTU (API). */
+function get({ license, id, livemode = true }) {
+  const inv = find(license, id, livemode);
+  if (!inv) return notFound();
+  const vf = require('../../db/verifactu').recordsForInvoice(license.id, inv.id)
+    .map(r => ({ id: r.id, type: r.type, status: r.status, hash: r.hash, generated_at: r.generated_at, sent_at: r.sent_at, error_code: r.error_code, error_message: r.error_message, fixed_by: r.fixed_by }));
+  return { status: 200, body: { ...inv, events: D.listEvents(license.id, inv.id), verifactu: vf } };
+}
+
+/** Listado (API): query { from, to, status, q, limit }. */
+function list({ license, query = {}, livemode = true }) {
+  const limit = Math.min(Math.max(Number(query.limit) || 100, 1), 500);
+  return { status: 200, body: { invoices: D.listInvoices(license.id, { from: query.from, to: query.to, status: query.status, q: query.q, limit, livemode }) } };
 }
 
 /** Opciones del PDF: pie del emisor y, si la factura se remite a la AEAT, el QR de VERI*FACTU. */
@@ -92,17 +135,17 @@ async function pdfOptions(license, inv) {
 const pdfName = (inv) => `factura_${inv.number.replace(/[^\w.-]+/g, '_')}.pdf`;
 
 /** PDF de la factura → { status, file? }. */
-async function pdf({ license, id }) {
-  const inv = D.getInvoice(license.id, Number(id));
-  if (!inv) return fail(404, 'not_found');
+async function pdf({ license, id, livemode = true }) {
+  const inv = find(license, id, livemode);
+  if (!inv) return notFound();
   const body = await require('./pdf').renderInvoicePdf(inv, await pdfOptions(license, inv));
   return { status: 200, file: { body, contentType: 'application/pdf', filename: pdfName(inv) }, invoice: inv };
 }
 
 /** Factura en formato electrónico → { status, body?, file? }. */
-async function einvoice({ license, id, format }) {
-  const inv = D.getInvoice(license.id, Number(id));
-  if (!inv) return fail(404, 'not_found');
+async function einvoice({ license, id, format, livemode = true }) {
+  const inv = find(license, id, livemode);
+  if (!inv) return notFound();
   const { renderEInvoice } = require('./xml');
   const r = await renderEInvoice(inv, String(format || 'ubl').toLowerCase(), await pdfOptions(license, inv));
   if (r.error) {
@@ -113,4 +156,4 @@ async function einvoice({ license, id, format }) {
   return { status: 200, file: r };
 }
 
-module.exports = { issue, cancel, setStatus, einvoice, pdf, pdfOptions, pdfName, MESSAGES };
+module.exports = { issue, cancel, setStatus, get, list, einvoice, pdf, pdfOptions, pdfName, MESSAGES };

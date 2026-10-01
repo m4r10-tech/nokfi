@@ -79,13 +79,13 @@ router.delete('/customers/:id', (req, res) => {
 });
 
 /* ── Facturas ── */
-router.get('/invoices', (req, res) => res.json({ invoices: D.listInvoices(req.license.id, req.query) }));
+router.get('/invoices', (req, res) => res.json({ invoices: D.listInvoices(req.license.id, { ...req.query, livemode: true }) }));
 
 router.post('/invoices', (req, res) => send(res, S.issue({ license: req.license, body: req.body || {}, source: 'web', ip: req.ip })));
 
 router.get('/invoices/:id', (req, res) => {
   const inv = D.getInvoice(req.license.id, idOf(req));
-  if (!inv) return res.status(404).json({ error: 'not_found' });
+  if (!inv || !inv.livemode) return res.status(404).json({ error: 'not_found' });
   res.json({ invoice: inv, events: D.listEvents(req.license.id, inv.id), verifactu: V.recordsForInvoice(req.license.id, inv.id) });
 });
 
@@ -135,7 +135,7 @@ const EMAIL = /^[^\s@<>"',;]+@[^\s@<>"',;]+\.[a-z]{2,}$/i;
 
 router.post('/invoices/:id/send', async (req, res) => {
   const inv = D.getInvoice(req.license.id, idOf(req));
-  if (!inv) return res.status(404).json({ error: 'not_found' });
+  if (!inv || !inv.livemode) return res.status(404).json({ error: 'not_found' });
   if (inv.status !== 'issued') return res.status(409).json({ error: 'invoice_cancelled', message: 'No se envía una factura anulada.' });
   const to = String(req.body?.to || inv.customer?.email || '').trim().toLowerCase();
   if (!EMAIL.test(to)) return res.status(400).json({ error: 'invalid_input', field: 'to', message: 'Falta un email válido del cliente.' });

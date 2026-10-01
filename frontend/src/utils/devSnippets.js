@@ -21,7 +21,12 @@ export const OPERATIONS = [
   { id: 'tax.calendar', method: 'GET', path: '/tax/calendar', ai: false, example: { limit: 4 } },
   { id: 'invoices.extract', method: 'POST', path: '/invoices/extract', ai: true, example: { files: [{ name: 'factura-017.txt', text: 'Recambios Norte, S.L. · CIF B12345674 · Factura RN-2026-0412 · 14/09/2026 · Base 842,10 € · IVA 21 % 176,84 € · Total 1.018,94 €' }] } },
   { id: 'analyze', method: 'POST', path: '/analyze', ai: true, example: EXCEL },
-  { id: 'usage', method: 'GET', path: '/usage', ai: false, example: {} }
+  { id: 'usage', method: 'GET', path: '/usage', ai: false, example: {} },
+  { id: 'invoices.issue', method: 'POST', path: '/invoices', ai: false, group: 'invoicing', testOnly: true, example: {
+    customer: { name: 'Bodegas Sur SA', tax_id: 'A58818501', email: 'pagos@bodegassur.es', address: 'Ctra. Jerez 4', postal_code: '11401', city: 'Jerez' },
+    irpf_rate: 15, lines: [{ description: 'Diseño de etiqueta', quantity: 1, unit_price: 800, vat_rate: 21 }]
+  } },
+  { id: 'invoices.list', method: 'GET', path: '/invoices', ai: false, group: 'invoicing', example: { limit: 10 } }
 ];
 
 export const opById = (id) => OPERATIONS.find(o => o.id === id);

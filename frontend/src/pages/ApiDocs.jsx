@@ -110,6 +110,19 @@ const CURL_ASYNC = `curl -X POST "https://nokfi.app/api/v1/invoices/extract?asyn
 curl https://nokfi.app/api/v1/jobs/job_3f9c… -H "Authorization: Bearer nk_live_TU_CLAVE"
 # → { "status": "succeeded", "result": { "invoices": [ … ] } }`;
 
+const CURL_ISSUE = `curl -X POST https://nokfi.app/api/v1/invoices \\
+  -H "Authorization: Bearer nk_live_TU_CLAVE" \\
+  -H "Idempotency-Key: pedido-1001" \\
+  -H "Content-Type: application/json" \\
+  -d '{ "customer": { "name": "Bodegas Sur SA", "tax_id": "A58818501",
+        "address": "Ctra. Jerez 4", "postal_code": "11401", "city": "Jerez" },
+        "irpf_rate": 15,
+        "lines": [{ "description": "Diseño de etiqueta", "quantity": 1, "unit_price": 800, "vat_rate": 21 }] }'
+# → 201 { "id": 42, "number": "F2026-0001", "kind": "F1", "base": 800, "vat_amount": 168,
+#         "irpf_amount": 120, "total": 848, "livemode": true, … }
+
+curl https://nokfi.app/api/v1/invoices/42/pdf -H "Authorization: Bearer nk_live_TU_CLAVE" -o F2026-0001.pdf`;
+
 const EVENT = `POST https://tu-servidor/webhook
 Nokfi-Signature: t=1790000000,v1=5f2b…   (HMAC-SHA256 de "t.cuerpo" con tu whsec_…)
 Nokfi-Event: job.completed
@@ -126,6 +139,13 @@ const ENDPOINTS = [
   ['GET', '/api/v1/analyses', 'list'],
   ['GET', '/api/v1/analyses/{id}', 'get'],
   ['GET', '/api/v1/jobs/{id}', 'job'],
+  ['POST', '/api/v1/invoices', 'issue'],
+  ['GET', '/api/v1/invoices/{id}', 'invoice_get'],
+  ['POST', '/api/v1/invoices/{id}/rectify', 'rectify'],
+  ['POST', '/api/v1/invoices/{id}/cancel', 'cancel'],
+  ['POST', '/api/v1/invoices/{id}/status', 'status'],
+  ['GET', '/api/v1/invoices/{id}/pdf · /xml', 'files'],
+  ['GET · POST', '/api/v1/customers', 'customers'],
   ['GET · POST', '/api/v1/webhooks', 'webhooks'],
   ['GET', '/api/v1/tax/nif', 'tax_nif'],
   ['POST', '/api/v1/tax/vat', 'tax_vat'],
@@ -181,6 +201,12 @@ export default function ApiDocs() {
           <Code text={INVOICE_RESPONSE} onCopy={copy} />
         </Block>
 
+        <Block icon={Receipt} title={t('apiDocs.issueTitle')}>
+          <p>{t('apiDocs.issueText')}</p>
+          <Code text={CURL_ISSUE} onCopy={copy} />
+          <p>{t('apiDocs.issueRules')}</p>
+        </Block>
+
         <Block icon={Calculator} title={t('apiDocs.taxTitle')}>
           <p>{t('apiDocs.taxText')}</p>
           <Code text={CURL_TAX} onCopy={copy} />
@@ -190,7 +216,7 @@ export default function ApiDocs() {
           <p>{t('apiDocs.asyncText')}</p>
           <Code text={CURL_ASYNC} onCopy={copy} />
           <p>{t('apiDocs.idemText')}</p>
-          <p>{t('apiDocs.webhooksText')}</p>
+          <p>{t('apiDocs.webhooksText')} {t('apiDocs.webhooksInvoices')}</p>
           <Code text={EVENT} onCopy={copy} />
         </Block>
 

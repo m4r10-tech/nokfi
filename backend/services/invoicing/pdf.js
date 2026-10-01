@@ -31,7 +31,7 @@ const L = {
     due: 'Vencimiento', customer: 'Cliente', nif: 'NIF', description: 'Descripción', qty: 'Cant.', price: 'Precio', disc: 'Dto.', vat: 'IVA', amount: 'Importe',
     base: 'Base imponible', vatAmount: 'Cuota IVA', re: 'Recargo de equivalencia', irpf: 'Retención IRPF', total: 'TOTAL', breakdown: 'Desglose de impuestos',
     rate: 'Tipo', payment: 'Forma de pago', iban: 'IBAN', notes: 'Observaciones', rectifies: 'Rectifica la factura', reason: 'Motivo',
-    cancelled: 'ANULADA', page: 'Página', footer: 'Factura emitida con Nokfi',
+    cancelled: 'ANULADA', test: 'PRUEBA', page: 'Página', footer: 'Factura emitida con Nokfi',
     methods: { transfer: 'Transferencia bancaria', direct_debit: 'Domiciliación bancaria', card: 'Tarjeta', cash: 'Efectivo', other: 'Otro' },
     exemptions: { E1: 'Operación exenta (art. 20 LIVA)', E2: 'Exportación exenta (art. 21 LIVA)', E3: 'Operación exenta (art. 22 LIVA)', E4: 'Operación exenta (arts. 23 y 24 LIVA)', E5: 'Entrega intracomunitaria exenta (art. 25 LIVA)', E6: 'Operación exenta', N1: 'Operación no sujeta (arts. 7 y 14 LIVA)', N2: 'Operación no sujeta por reglas de localización', S2: 'Inversión del sujeto pasivo (art. 84.Uno.2.º LIVA)' }
   },
@@ -40,7 +40,7 @@ const L = {
     due: 'Due date', customer: 'Customer', nif: 'Tax ID', description: 'Description', qty: 'Qty', price: 'Price', disc: 'Disc.', vat: 'VAT', amount: 'Amount',
     base: 'Taxable amount', vatAmount: 'VAT', re: 'Equivalence surcharge', irpf: 'Income tax withholding', total: 'TOTAL', breakdown: 'Tax breakdown',
     rate: 'Rate', payment: 'Payment method', iban: 'IBAN', notes: 'Notes', rectifies: 'Corrects invoice', reason: 'Reason',
-    cancelled: 'CANCELLED', page: 'Page', footer: 'Invoice issued with Nokfi',
+    cancelled: 'CANCELLED', test: 'TEST', page: 'Page', footer: 'Invoice issued with Nokfi',
     methods: { transfer: 'Bank transfer', direct_debit: 'Direct debit', card: 'Card', cash: 'Cash', other: 'Other' },
     exemptions: { E1: 'VAT exempt (art. 20 Spanish VAT Act)', E2: 'Exempt export (art. 21 Spanish VAT Act)', E3: 'VAT exempt (art. 22 Spanish VAT Act)', E4: 'VAT exempt (arts. 23-24 Spanish VAT Act)', E5: 'Exempt intra-EU supply (art. 25 Spanish VAT Act)', E6: 'VAT exempt', N1: 'Not subject to VAT (arts. 7 and 14 Spanish VAT Act)', N2: 'Not subject to Spanish VAT (place of supply rules)', S2: 'Reverse charge' }
   },
@@ -49,7 +49,7 @@ const L = {
     due: 'Échéance', customer: 'Client', nif: 'N° fiscal', description: 'Description', qty: 'Qté', price: 'Prix', disc: 'Rem.', vat: 'TVA', amount: 'Montant',
     base: 'Base imposable', vatAmount: 'TVA', re: "Supplément d'équivalence", irpf: "Retenue à la source (IRPF)", total: 'TOTAL', breakdown: 'Détail des taxes',
     rate: 'Taux', payment: 'Mode de paiement', iban: 'IBAN', notes: 'Observations', rectifies: 'Rectifie la facture', reason: 'Motif',
-    cancelled: 'ANNULÉE', page: 'Page', footer: 'Facture émise avec Nokfi',
+    cancelled: 'ANNULÉE', test: 'TEST', page: 'Page', footer: 'Facture émise avec Nokfi',
     methods: { transfer: 'Virement bancaire', direct_debit: 'Prélèvement', card: 'Carte', cash: 'Espèces', other: 'Autre' },
     exemptions: { E1: 'Opération exonérée (art. 20 LIVA)', E2: 'Exportation exonérée (art. 21 LIVA)', E3: 'Opération exonérée (art. 22 LIVA)', E4: 'Opération exonérée (art. 23 et 24 LIVA)', E5: 'Livraison intracommunautaire exonérée (art. 25 LIVA)', E6: 'Opération exonérée', N1: 'Opération non soumise (art. 7 et 14 LIVA)', N2: 'Opération non soumise (règles de localisation)', S2: 'Autoliquidation' }
   },
@@ -58,7 +58,7 @@ const L = {
     due: 'Scadenza', customer: 'Cliente', nif: 'Cod. fiscale', description: 'Descrizione', qty: 'Q.tà', price: 'Prezzo', disc: 'Sc.', vat: 'IVA', amount: 'Importo',
     base: 'Imponibile', vatAmount: 'IVA', re: 'Sovrattassa di equivalenza', irpf: "Ritenuta d'acconto (IRPF)", total: 'TOTALE', breakdown: 'Riepilogo imposte',
     rate: 'Aliquota', payment: 'Pagamento', iban: 'IBAN', notes: 'Note', rectifies: 'Rettifica la fattura', reason: 'Motivo',
-    cancelled: 'ANNULLATA', page: 'Pagina', footer: 'Fattura emessa con Nokfi',
+    cancelled: 'ANNULLATA', test: 'PROVA', page: 'Pagina', footer: 'Fattura emessa con Nokfi',
     methods: { transfer: 'Bonifico bancario', direct_debit: 'Addebito diretto', card: 'Carta', cash: 'Contanti', other: 'Altro' },
     exemptions: { E1: 'Operazione esente (art. 20 LIVA)', E2: 'Esportazione esente (art. 21 LIVA)', E3: 'Operazione esente (art. 22 LIVA)', E4: 'Operazione esente (artt. 23 e 24 LIVA)', E5: 'Cessione intracomunitaria esente (art. 25 LIVA)', E6: 'Operazione esente', N1: 'Operazione non soggetta (artt. 7 e 14 LIVA)', N2: 'Operazione non soggetta (regole di territorialità)', S2: 'Inversione contabile' }
   },
@@ -67,7 +67,7 @@ const L = {
     due: 'Fällig am', customer: 'Kunde', nif: 'Steuernr.', description: 'Beschreibung', qty: 'Menge', price: 'Preis', disc: 'Rab.', vat: 'MwSt.', amount: 'Betrag',
     base: 'Nettobetrag', vatAmount: 'MwSt.', re: 'Ausgleichszuschlag', irpf: 'Quellensteuer (IRPF)', total: 'GESAMT', breakdown: 'Steueraufstellung',
     rate: 'Satz', payment: 'Zahlungsart', iban: 'IBAN', notes: 'Hinweise', rectifies: 'Korrigiert Rechnung', reason: 'Grund',
-    cancelled: 'STORNIERT', page: 'Seite', footer: 'Rechnung erstellt mit Nokfi',
+    cancelled: 'STORNIERT', test: 'TEST', page: 'Seite', footer: 'Rechnung erstellt mit Nokfi',
     methods: { transfer: 'Überweisung', direct_debit: 'Lastschrift', card: 'Karte', cash: 'Bar', other: 'Sonstige' },
     exemptions: { E1: 'Steuerbefreit (Art. 20 span. UStG)', E2: 'Steuerfreie Ausfuhr (Art. 21 span. UStG)', E3: 'Steuerbefreit (Art. 22 span. UStG)', E4: 'Steuerbefreit (Art. 23 und 24 span. UStG)', E5: 'Steuerfreie innergemeinschaftliche Lieferung (Art. 25 span. UStG)', E6: 'Steuerbefreit', N1: 'Nicht steuerbar (Art. 7 und 14 span. UStG)', N2: 'Nicht steuerbar (Ortsregeln)', S2: 'Steuerschuldnerschaft des Leistungsempfängers' }
   },
@@ -76,7 +76,7 @@ const L = {
     due: 'Termin płatności', customer: 'Nabywca', nif: 'NIP', description: 'Opis', qty: 'Ilość', price: 'Cena', disc: 'Rab.', vat: 'VAT', amount: 'Kwota',
     base: 'Wartość netto', vatAmount: 'VAT', re: 'Dopłata wyrównawcza', irpf: 'Zaliczka na podatek (IRPF)', total: 'RAZEM', breakdown: 'Zestawienie podatków',
     rate: 'Stawka', payment: 'Forma płatności', iban: 'IBAN', notes: 'Uwagi', rectifies: 'Koryguje fakturę', reason: 'Przyczyna',
-    cancelled: 'ANULOWANA', page: 'Strona', footer: 'Faktura wystawiona w Nokfi',
+    cancelled: 'ANULOWANA', test: 'TEST', page: 'Strona', footer: 'Faktura wystawiona w Nokfi',
     methods: { transfer: 'Przelew', direct_debit: 'Polecenie zapłaty', card: 'Karta', cash: 'Gotówka', other: 'Inna' },
     exemptions: { E1: 'Zwolnione (art. 20 hiszp. ustawy o VAT)', E2: 'Eksport zwolniony (art. 21)', E3: 'Zwolnione (art. 22)', E4: 'Zwolnione (art. 23 i 24)', E5: 'Zwolniona dostawa wewnątrzwspólnotowa (art. 25)', E6: 'Zwolnione', N1: 'Niepodlegające (art. 7 i 14)', N2: 'Niepodlegające (miejsce świadczenia)', S2: 'Odwrotne obciążenie' }
   }
@@ -293,15 +293,18 @@ function renderInvoicePdf(inv, opts = {}) {
   para(t.notes, inv.notes);
   if (opts.footer) para('', opts.footer);
 
-  /* ── Anulada: marca de agua ── */
-  if (inv.status === 'cancelled') {
+  /* ── Anulada o de prueba (clave nk_test_ de la API): marca de agua ── */
+  const stamps = [inv.status === 'cancelled' && t.cancelled, inv.livemode === false && t.test].filter(Boolean);
+  if (stamps.length) {
     const range = doc.bufferedPageRange();
     for (let i = range.start; i < range.start + range.count; i++) {
       doc.switchToPage(i);
       doc.page.margins.bottom = 0;
-      doc.save().rotate(-30, { origin: [W / 2, doc.page.height / 2] })
-        .font('bold').fontSize(80).fillColor('#DC2626').fillOpacity(0.12)
-        .text(t.cancelled, 0, doc.page.height / 2 - 50, { width: W, align: 'center', lineBreak: false }).restore();
+      stamps.forEach((word, k) => {
+        doc.save().rotate(-30, { origin: [W / 2, doc.page.height / 2] })
+          .font('bold').fontSize(80).fillColor('#DC2626').fillOpacity(0.12)
+          .text(word, 0, doc.page.height / 2 - 50 + k * 100, { width: W, align: 'center', lineBreak: false }).restore();
+      });
       doc.fillOpacity(1);
     }
   }
