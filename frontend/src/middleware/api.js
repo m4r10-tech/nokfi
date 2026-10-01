@@ -175,7 +175,11 @@ export const invoicingApi = {
   send: (id, data) => request(`/invoicing/invoices/${encodeURIComponent(id)}/send`, { method: 'POST', auth: true, body: data }),
   pdf: (id, number) => download(`/invoicing/invoices/${encodeURIComponent(id)}/pdf`, `factura_${number || id}.pdf`),
   einvoice: (id, number, format) => download(`/invoicing/invoices/${encodeURIComponent(id)}/xml${qs({ format })}`, `factura_${number || id}_${format}`),
-  setStatus: (id, body) => request(`/invoicing/invoices/${encodeURIComponent(id)}/status`, { method: 'POST', auth: true, body })
+  setStatus: (id, body) => request(`/invoicing/invoices/${encodeURIComponent(id)}/status`, { method: 'POST', auth: true, body }),
+  verifactu: (filter) => request(`/invoicing/verifactu${qs({ filter })}`, { auth: true }),
+  verifactuChain: () => request('/invoicing/verifactu/chain', { auth: true }),
+  verifactuRetry: () => request('/invoicing/verifactu/retry', { method: 'POST', auth: true }),
+  verifactuResubmit: (id) => request(`/invoicing/verifactu/records/${encodeURIComponent(id)}/resubmit`, { method: 'POST', auth: true })
 };
 
 // F4 — claves de API; C9 — mis datos (descargar / borrar la cuenta).

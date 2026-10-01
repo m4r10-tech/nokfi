@@ -808,6 +808,53 @@ export default {
     invalidTitle: 'Link non valido',
     invalidDesc: 'Questo link è scaduto, è stato revocato o non esiste. Chiedine uno nuovo a chi te lo ha inviato.'
   },
+  verifactu: {
+    title: "VERI*FACTU",
+    intro: "Ogni fattura emessa crea il suo registro di fatturazione con un'impronta concatenata alla precedente, come richiede il regolamento spagnolo VERI*FACTU (RD 1007/2023). Non viene mai modificato né cancellato.",
+    env: {
+      off: "L'invio all'AEAT è disattivato: i registri vengono conservati e saranno inviati quando verrà attivato (VERI*FACTU è obbligatorio dal 2027).",
+      test: "I registri vengono inviati all'ambiente di prova dell'AEAT, non a quello reale.",
+      prod: "I registri vengono inviati all'AEAT."
+    },
+    reason: {
+      certificate: "Manca il certificato elettronico per l'invio: i registri attendono in coda.",
+      producer_nif: "La configurazione dell'invio è incompleta: i registri attendono in coda."
+    },
+    kpi: {
+      accepted: "Accettati",
+      pending: "In attesa",
+      errors: "Da correggere"
+    },
+    filter: {
+      all: "Tutti",
+      pending: "In attesa",
+      sent: "Accettati",
+      errors: "Con errori"
+    },
+    type: {
+      alta: "Emissione",
+      anulacion: "Annullamento"
+    },
+    status: {
+      pending: "In attesa",
+      accepted: "Accettato",
+      accepted_errors: "Accettato con errori",
+      rejected: "Rifiutato",
+      fixed: "Corretto"
+    },
+    hash: "Impronta",
+    resubmit: "Correggi",
+    resubmitted: "Registro di correzione creato: partirà con il prossimo invio.",
+    retry: "Riprova l'invio",
+    retried: "Nuovo tentativo tra pochi secondi.",
+    lastError: "Ultimo errore di invio: {e}",
+    checkChain: "Verifica la catena",
+    chainOk: "Catena integra: {n} registri verificati.",
+    chainBroken: "La catena non corrisponde al registro n. {id}.",
+    empty: "Ancora nessun registro: si creano all'emissione delle fatture.",
+    record: "Registro VERI*FACTU",
+    fixedBy: "corretto dal n. {id}"
+  },
   invoices: {
     "new": "Nuova fattura",
     "invoice": "Fattura",
@@ -955,7 +1002,11 @@ export default {
       "rejected": "Rifiutata",
       "accepted": "Rifiuto annullato",
       "paid": "Incassata",
-      "unpaid": "Incasso annullato"
+      "unpaid": "Incasso annullato",
+      "verifactu_accepted": "Registro accettato dall'AEAT",
+      "verifactu_errors": "Registro accettato con errori dall'AEAT",
+      "verifactu_rejected": "Registro rifiutato dall'AEAT",
+      "verifactu_resubmitted": "Registro corretto"
     },
     "openInvoice": "Vedi la fattura",
     "errors": {
@@ -977,7 +1028,7 @@ export default {
       "issue_date": "La data della fattura non è valida.",
       "issue_date_future": "La data della fattura non può essere futura.",
       "issue_date_before_last": "La data non può essere precedente a quella dell'ultima fattura della serie ({date}).",
-      "operation_date": "La data dell'operazione non è valida.",
+      "operation_date": "La data dell'operazione non è valida (non può essere successiva a quella della fattura).",
       "due_date": "La scadenza non può essere precedente alla data della fattura.",
       "iban": "L'IBAN non è valido.",
       "payment_terms_days": "I giorni alla scadenza devono essere tra 0 e 120.",
@@ -1001,7 +1052,8 @@ export default {
       "status_unchanged": "La fattura ha già questo stato.",
       "status_conflict": "Questo cambio non è possibile: prima annulla lo stato precedente.",
       "customer_incomplete": "Per questo formato il cliente deve avere codice fiscale e indirizzo completo (CAP di 5 cifre in Spagna).",
-      "format_unsupported": "Factur-X non supporta la sovrattassa di equivalenza: usa UBL o Facturae."
+      "format_unsupported": "Factur-X non supporta la sovrattassa di equivalenza: usa UBL o Facturae.",
+      "not_fixable": "Si può correggere solo un registro di emissione rifiutato o accettato con errori."
     },
     "download": "Scarica",
     "formats": {

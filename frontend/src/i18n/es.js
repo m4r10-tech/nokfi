@@ -812,6 +812,53 @@ export default {
     invalidTitle: 'Enlace no válido',
     invalidDesc: 'Este enlace ha caducado, se ha revocado o no existe. Pide uno nuevo a quien te lo envió.'
   },
+  verifactu: {
+    title: "VERI*FACTU",
+    intro: "Cada factura que emites genera su registro de facturación con una huella encadenada a la anterior, como pide el reglamento VERI*FACTU (RD 1007/2023). Nunca se modifican ni se borran.",
+    env: {
+      off: "El envío a la AEAT está desactivado: los registros se guardan y se enviarán cuando se active (VERI*FACTU es obligatorio desde 2027).",
+      test: "Los registros se envían al entorno de pruebas de la AEAT, no al real.",
+      prod: "Los registros se envían a la AEAT."
+    },
+    reason: {
+      certificate: "Falta el certificado electrónico para enviar: los registros esperan en cola.",
+      producer_nif: "Falta completar la configuración del envío: los registros esperan en cola."
+    },
+    kpi: {
+      accepted: "Aceptados",
+      pending: "Pendientes",
+      errors: "Por subsanar"
+    },
+    filter: {
+      all: "Todos",
+      pending: "Pendientes",
+      sent: "Aceptados",
+      errors: "Con errores"
+    },
+    type: {
+      alta: "Alta",
+      anulacion: "Anulación"
+    },
+    status: {
+      pending: "Pendiente",
+      accepted: "Aceptado",
+      accepted_errors: "Aceptado con errores",
+      rejected: "Rechazado",
+      fixed: "Subsanado"
+    },
+    hash: "Huella",
+    resubmit: "Subsanar",
+    resubmitted: "Registro de subsanación creado: se enviará en el próximo envío.",
+    retry: "Reintentar el envío",
+    retried: "Se reintentará en unos segundos.",
+    lastError: "Último error de envío: {e}",
+    checkChain: "Comprobar la cadena",
+    chainOk: "Cadena íntegra: {n} registros comprobados.",
+    chainBroken: "La cadena no cuadra en el registro #{id}.",
+    empty: "Aún no hay registros: se crean al emitir facturas.",
+    record: "Registro VERI*FACTU",
+    fixedBy: "subsanado por #{id}"
+  },
   invoices: {
     "new": "Nueva factura",
     "invoice": "Factura",
@@ -959,7 +1006,11 @@ export default {
       "rejected": "Rechazada",
       "accepted": "Rechazo deshecho",
       "paid": "Cobrada",
-      "unpaid": "Cobro deshecho"
+      "unpaid": "Cobro deshecho",
+      "verifactu_accepted": "Registro aceptado por la AEAT",
+      "verifactu_errors": "Registro aceptado con errores por la AEAT",
+      "verifactu_rejected": "Registro rechazado por la AEAT",
+      "verifactu_resubmitted": "Registro subsanado"
     },
     "openInvoice": "Ver la factura",
     "errors": {
@@ -981,7 +1032,7 @@ export default {
       "issue_date": "La fecha de la factura no es válida.",
       "issue_date_future": "La fecha de la factura no puede ser futura.",
       "issue_date_before_last": "La fecha no puede ser anterior a la de la última factura de la serie ({date}).",
-      "operation_date": "La fecha de la operación no es válida.",
+      "operation_date": "La fecha de la operación no es válida (no puede ser posterior a la de la factura).",
       "due_date": "El vencimiento no puede ser anterior a la fecha de la factura.",
       "iban": "El IBAN no es válido.",
       "payment_terms_days": "Los días de vencimiento deben estar entre 0 y 120.",
@@ -1005,7 +1056,8 @@ export default {
       "status_unchanged": "La factura ya tiene ese estado.",
       "status_conflict": "Ese cambio no es posible: primero deshaz el estado anterior.",
       "customer_incomplete": "Para este formato el cliente necesita NIF y dirección completa (y código postal de 5 cifras en España).",
-      "format_unsupported": "Factur-X no admite el recargo de equivalencia: usa UBL o Facturae."
+      "format_unsupported": "Factur-X no admite el recargo de equivalencia: usa UBL o Facturae.",
+      "not_fixable": "Solo se subsana un registro de alta rechazado o aceptado con errores."
     },
     "download": "Descargar",
     "formats": {

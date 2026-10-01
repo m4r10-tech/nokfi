@@ -219,6 +219,8 @@ function buildInvoice(body, ctx) {
   let operationDate = null;
   if (body.operation_date) {
     if (!ISO.test(String(body.operation_date))) return { error: 'invalid_input', field: 'operation_date' };
+    // VERI*FACTU rechaza una fecha de operación posterior a la de expedición (salvo claves 14/15).
+    if (String(body.operation_date) > issueDate) return { error: 'invalid_input', field: 'operation_date' };
     if (body.operation_date !== issueDate) operationDate = String(body.operation_date);
   }
 

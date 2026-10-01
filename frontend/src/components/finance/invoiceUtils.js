@@ -57,7 +57,7 @@ const KNOWN_FIELDS = ['lines', 'too_many_lines', 'line_description', 'line_quant
   'issue_date_before_last', 'operation_date', 'due_date', 'iban', 'payment_terms_days', 'to', 'customer_postal_code', 'format', 'reason', 'date'];
 const KNOWN_ERRORS = ['issuer_incomplete', 'customer_tax_id_required', 'customer_not_found', 'original_not_found', 'original_cancelled',
   'already_cancelled', 'has_rectifications', 'invoice_locked', 'invoice_cancelled', 'send_rate_limited', 'email_unavailable', 'email_failed',
-  'status_unchanged', 'status_conflict', 'customer_incomplete', 'format_unsupported'];
+  'status_unchanged', 'status_conflict', 'customer_incomplete', 'format_unsupported', 'not_fixable'];
 
 /** Error de la API de facturas → texto en el idioma del usuario. */
 export function invoiceError(t, res) {
@@ -91,4 +91,13 @@ export function withProvince(next, prev) {
     return { ...next, province: PROVINCES[Number(cp.slice(0, 2))] || '' };
   }
   return next;
+}
+
+/** Estado visible de un registro VERI*FACTU (insignia). */
+export function verifactuState(r) {
+  if (r.fixed_by) return { key: 'fixed', tone: 'muted' };
+  if (r.status === 'accepted') return { key: 'accepted', tone: 'positive' };
+  if (r.status === 'accepted_errors') return { key: 'accepted_errors', tone: 'warning' };
+  if (r.status === 'rejected') return { key: 'rejected', tone: 'negative' };
+  return { key: 'pending', tone: 'muted' };
 }

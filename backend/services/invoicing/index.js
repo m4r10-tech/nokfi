@@ -83,13 +83,28 @@ function setStatus({ license, id, body = {}, ip = null }) {
   return { status: 200, body: out.invoice };
 }
 
+/** Opciones del PDF: pie del emisor y, si la factura se remite a la AEAT, el QR de VERI*FACTU. */
+async function pdfOptions(license, inv) {
+  const footer = D.getBillingProfile(license.id).footer;
+  return { footer, ...(await require('../verifactu').pdfOptions(license.id, inv)) };
+}
+
+const pdfName = (inv) => `factura_${inv.number.replace(/[^\w.-]+/g, '_')}.pdf`;
+
+/** PDF de la factura → { status, file? }. */
+async function pdf({ license, id }) {
+  const inv = D.getInvoice(license.id, Number(id));
+  if (!inv) return fail(404, 'not_found');
+  const body = await require('./pdf').renderInvoicePdf(inv, await pdfOptions(license, inv));
+  return { status: 200, file: { body, contentType: 'application/pdf', filename: pdfName(inv) }, invoice: inv };
+}
+
 /** Factura en formato electrónico → { status, body?, file? }. */
 async function einvoice({ license, id, format }) {
   const inv = D.getInvoice(license.id, Number(id));
   if (!inv) return fail(404, 'not_found');
   const { renderEInvoice } = require('./xml');
-  const footer = D.getBillingProfile(license.id).footer;
-  const r = await renderEInvoice(inv, String(format || 'ubl').toLowerCase(), { footer });
+  const r = await renderEInvoice(inv, String(format || 'ubl').toLowerCase(), await pdfOptions(license, inv));
   if (r.error) {
     const { error, ...extra } = r;
     return fail(error === 'invalid_input' ? 400 : 422, error, extra);
@@ -98,4 +113,4 @@ async function einvoice({ license, id, format }) {
   return { status: 200, file: r };
 }
 
-module.exports = { issue, cancel, setStatus, einvoice, MESSAGES };
+module.exports = { issue, cancel, setStatus, einvoice, pdf, pdfOptions, pdfName, MESSAGES };

@@ -808,6 +808,53 @@ export default {
     invalidTitle: 'Lien non valide',
     invalidDesc: 'Ce lien a expiré, a été révoqué ou n’existe pas. Demandez-en un nouveau à la personne qui vous l’a envoyé.'
   },
+  verifactu: {
+    title: "VERI*FACTU",
+    intro: "Chaque facture émise crée son enregistrement de facturation avec une empreinte chaînée à la précédente, comme l'exige le règlement espagnol VERI*FACTU (RD 1007/2023). Il n'est jamais modifié ni supprimé.",
+    env: {
+      off: "L'envoi à l'AEAT est désactivé : les enregistrements sont conservés et seront envoyés dès son activation (VERI*FACTU est obligatoire à partir de 2027).",
+      test: "Les enregistrements sont envoyés à l'environnement de test de l'AEAT, pas au réel.",
+      prod: "Les enregistrements sont envoyés à l'AEAT."
+    },
+    reason: {
+      certificate: "Le certificat électronique pour l'envoi manque : les enregistrements attendent dans la file.",
+      producer_nif: "La configuration de l'envoi est incomplète : les enregistrements attendent dans la file."
+    },
+    kpi: {
+      accepted: "Acceptés",
+      pending: "En attente",
+      errors: "À corriger"
+    },
+    filter: {
+      all: "Tous",
+      pending: "En attente",
+      sent: "Acceptés",
+      errors: "Avec erreurs"
+    },
+    type: {
+      alta: "Émission",
+      anulacion: "Annulation"
+    },
+    status: {
+      pending: "En attente",
+      accepted: "Accepté",
+      accepted_errors: "Accepté avec erreurs",
+      rejected: "Rejeté",
+      fixed: "Corrigé"
+    },
+    hash: "Empreinte",
+    resubmit: "Corriger",
+    resubmitted: "Enregistrement de correction créé : il partira lors du prochain envoi.",
+    retry: "Réessayer l'envoi",
+    retried: "Nouvel essai dans quelques secondes.",
+    lastError: "Dernière erreur d'envoi : {e}",
+    checkChain: "Vérifier la chaîne",
+    chainOk: "Chaîne intègre : {n} enregistrements vérifiés.",
+    chainBroken: "La chaîne ne correspond pas à l'enregistrement n° {id}.",
+    empty: "Aucun enregistrement pour l'instant : ils sont créés à l'émission des factures.",
+    record: "Enregistrement VERI*FACTU",
+    fixedBy: "corrigé par n° {id}"
+  },
   invoices: {
     "new": "Nouvelle facture",
     "invoice": "Facture",
@@ -955,7 +1002,11 @@ export default {
       "rejected": "Refusée",
       "accepted": "Refus annulé",
       "paid": "Encaissée",
-      "unpaid": "Encaissement annulé"
+      "unpaid": "Encaissement annulé",
+      "verifactu_accepted": "Enregistrement accepté par l'AEAT",
+      "verifactu_errors": "Enregistrement accepté avec erreurs par l'AEAT",
+      "verifactu_rejected": "Enregistrement rejeté par l'AEAT",
+      "verifactu_resubmitted": "Enregistrement corrigé"
     },
     "openInvoice": "Voir la facture",
     "errors": {
@@ -977,7 +1028,7 @@ export default {
       "issue_date": "La date de facture n'est pas valide.",
       "issue_date_future": "La date de facture ne peut pas être future.",
       "issue_date_before_last": "La date ne peut pas être antérieure à celle de la dernière facture de la série ({date}).",
-      "operation_date": "La date de l'opération n'est pas valide.",
+      "operation_date": "La date de l'opération n'est pas valide (elle ne peut pas être postérieure à celle de la facture).",
       "due_date": "L'échéance ne peut pas précéder la date de facture.",
       "iban": "L'IBAN n'est pas valide.",
       "payment_terms_days": "Les jours avant échéance doivent être compris entre 0 et 120.",
@@ -1001,7 +1052,8 @@ export default {
       "status_unchanged": "La facture a déjà ce statut.",
       "status_conflict": "Ce changement n'est pas possible : annulez d'abord le statut précédent.",
       "customer_incomplete": "Pour ce format, le client doit avoir un numéro fiscal et une adresse complète (code postal à 5 chiffres en Espagne).",
-      "format_unsupported": "Factur-X ne gère pas le supplément d'équivalence : utilisez UBL ou Facturae."
+      "format_unsupported": "Factur-X ne gère pas le supplément d'équivalence : utilisez UBL ou Facturae.",
+      "not_fixable": "Seul un enregistrement d'émission rejeté ou accepté avec erreurs peut être corrigé."
     },
     "download": "Télécharger",
     "formats": {

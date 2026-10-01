@@ -811,6 +811,53 @@ export default {
     invalidTitle: 'Nieprawidłowy link',
     invalidDesc: 'Ten link wygasł, został unieważniony lub nie istnieje. Poproś nadawcę o nowy.'
   },
+  verifactu: {
+    title: "VERI*FACTU",
+    intro: "Każda wystawiona faktura tworzy rekord fakturowania z odciskiem powiązanym z poprzednim, jak wymaga hiszpańskie rozporządzenie VERI*FACTU (RD 1007/2023). Nigdy nie jest zmieniany ani usuwany.",
+    env: {
+      off: "Wysyłka do AEAT jest wyłączona: rekordy są przechowywane i zostaną wysłane po jej włączeniu (VERI*FACTU jest obowiązkowe od 2027 r.).",
+      test: "Rekordy trafiają do środowiska testowego AEAT, nie do rzeczywistego.",
+      prod: "Rekordy są wysyłane do AEAT."
+    },
+    reason: {
+      certificate: "Brakuje certyfikatu elektronicznego do wysyłki: rekordy czekają w kolejce.",
+      producer_nif: "Konfiguracja wysyłki jest niekompletna: rekordy czekają w kolejce."
+    },
+    kpi: {
+      accepted: "Przyjęte",
+      pending: "Oczekujące",
+      errors: "Do poprawy"
+    },
+    filter: {
+      all: "Wszystkie",
+      pending: "Oczekujące",
+      sent: "Przyjęte",
+      errors: "Z błędami"
+    },
+    type: {
+      alta: "Wystawienie",
+      anulacion: "Anulowanie"
+    },
+    status: {
+      pending: "Oczekuje",
+      accepted: "Przyjęty",
+      accepted_errors: "Przyjęty z błędami",
+      rejected: "Odrzucony",
+      fixed: "Poprawiony"
+    },
+    hash: "Odcisk",
+    resubmit: "Popraw",
+    resubmitted: "Utworzono rekord korekty: zostanie wysłany przy następnej wysyłce.",
+    retry: "Ponów wysyłkę",
+    retried: "Ponowna próba za kilka sekund.",
+    lastError: "Ostatni błąd wysyłki: {e}",
+    checkChain: "Sprawdź łańcuch",
+    chainOk: "Łańcuch nienaruszony: sprawdzono {n} rekordów.",
+    chainBroken: "Łańcuch się nie zgadza przy rekordzie nr {id}.",
+    empty: "Brak rekordów: powstają przy wystawianiu faktur.",
+    record: "Rekord VERI*FACTU",
+    fixedBy: "poprawiony przez nr {id}"
+  },
   invoices: {
     "new": "Nowa faktura",
     "invoice": "Faktura",
@@ -958,7 +1005,11 @@ export default {
       "rejected": "Odrzucona",
       "accepted": "Odrzucenie cofnięte",
       "paid": "Opłacona",
-      "unpaid": "Płatność cofnięta"
+      "unpaid": "Płatność cofnięta",
+      "verifactu_accepted": "Rekord przyjęty przez AEAT",
+      "verifactu_errors": "Rekord przyjęty przez AEAT z błędami",
+      "verifactu_rejected": "Rekord odrzucony przez AEAT",
+      "verifactu_resubmitted": "Rekord poprawiony"
     },
     "openInvoice": "Zobacz fakturę",
     "errors": {
@@ -980,7 +1031,7 @@ export default {
       "issue_date": "Data faktury jest nieprawidłowa.",
       "issue_date_future": "Data faktury nie może być w przyszłości.",
       "issue_date_before_last": "Data nie może być wcześniejsza niż data ostatniej faktury w serii ({date}).",
-      "operation_date": "Data sprzedaży jest nieprawidłowa.",
+      "operation_date": "Data sprzedaży jest nieprawidłowa (nie może być późniejsza niż data faktury).",
       "due_date": "Termin płatności nie może być wcześniejszy niż data faktury.",
       "iban": "IBAN jest nieprawidłowy.",
       "payment_terms_days": "Liczba dni do terminu musi wynosić od 0 do 120.",
@@ -1004,7 +1055,8 @@ export default {
       "status_unchanged": "Faktura ma już ten status.",
       "status_conflict": "Ta zmiana nie jest możliwa: najpierw cofnij poprzedni status.",
       "customer_incomplete": "Dla tego formatu klient musi mieć numer podatkowy i pełny adres (5-cyfrowy kod pocztowy w Hiszpanii).",
-      "format_unsupported": "Factur-X nie obsługuje dopłaty wyrównawczej: użyj UBL lub Facturae."
+      "format_unsupported": "Factur-X nie obsługuje dopłaty wyrównawczej: użyj UBL lub Facturae.",
+      "not_fixable": "Poprawić można tylko odrzucony lub przyjęty z błędami rekord wystawienia."
     },
     "download": "Pobierz",
     "formats": {

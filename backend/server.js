@@ -338,6 +338,8 @@ initDB()
       if (n) console.log(`[JOBS] ${n} trabajos interrumpidos por el reinicio marcados como fallidos`);
     }
     require('./services/webhooks').startApiScheduler();
+    // Sesión 11 — cola de envío de VERI*FACTU (no hace nada con VERIFACTU_ENV=off).
+    require('./services/verifactu').startScheduler();
 
     app.listen(PORT, () => {
       console.log(`\n✅  Nokfi Backend corriendo en puerto ${PORT}`);

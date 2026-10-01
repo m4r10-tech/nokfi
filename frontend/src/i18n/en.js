@@ -809,6 +809,53 @@ export default {
     invalidTitle: 'Invalid link',
     invalidDesc: 'This link has expired, been revoked or does not exist. Ask whoever sent it for a new one.'
   },
+  verifactu: {
+    title: "VERI*FACTU",
+    intro: "Every invoice you issue creates its billing record with a fingerprint chained to the previous one, as the Spanish VERI*FACTU regulation requires (RD 1007/2023). Records are never changed or deleted.",
+    env: {
+      off: "Sending to the AEAT is turned off: records are stored and will be sent once it is turned on (VERI*FACTU is mandatory from 2027).",
+      test: "Records are sent to the AEAT's test environment, not the real one.",
+      prod: "Records are sent to the AEAT."
+    },
+    reason: {
+      certificate: "The digital certificate for sending is missing: records are waiting in the queue.",
+      producer_nif: "The sending setup is incomplete: records are waiting in the queue."
+    },
+    kpi: {
+      accepted: "Accepted",
+      pending: "Pending",
+      errors: "To correct"
+    },
+    filter: {
+      all: "All",
+      pending: "Pending",
+      sent: "Accepted",
+      errors: "With errors"
+    },
+    type: {
+      alta: "Issue",
+      anulacion: "Cancellation"
+    },
+    status: {
+      pending: "Pending",
+      accepted: "Accepted",
+      accepted_errors: "Accepted with errors",
+      rejected: "Rejected",
+      fixed: "Corrected"
+    },
+    hash: "Fingerprint",
+    resubmit: "Correct",
+    resubmitted: "Correction record created: it goes out with the next submission.",
+    retry: "Retry sending",
+    retried: "It will be retried in a few seconds.",
+    lastError: "Last sending error: {e}",
+    checkChain: "Check the chain",
+    chainOk: "Chain intact: {n} records checked.",
+    chainBroken: "The chain doesn't match at record #{id}.",
+    empty: "No records yet: they are created when you issue invoices.",
+    record: "VERI*FACTU record",
+    fixedBy: "corrected by #{id}"
+  },
   invoices: {
     "new": "New invoice",
     "invoice": "Invoice",
@@ -956,7 +1003,11 @@ export default {
       "rejected": "Rejected",
       "accepted": "Rejection undone",
       "paid": "Paid",
-      "unpaid": "Payment undone"
+      "unpaid": "Payment undone",
+      "verifactu_accepted": "Record accepted by the AEAT",
+      "verifactu_errors": "Record accepted with errors by the AEAT",
+      "verifactu_rejected": "Record rejected by the AEAT",
+      "verifactu_resubmitted": "Record corrected"
     },
     "openInvoice": "View invoice",
     "errors": {
@@ -978,7 +1029,7 @@ export default {
       "issue_date": "The invoice date isn't valid.",
       "issue_date_future": "The invoice date can't be in the future.",
       "issue_date_before_last": "The date can't be earlier than the last invoice in the series ({date}).",
-      "operation_date": "The date of supply isn't valid.",
+      "operation_date": "The date of supply isn't valid (it can't be later than the invoice date).",
       "due_date": "The due date can't be before the invoice date.",
       "iban": "The IBAN isn't valid.",
       "payment_terms_days": "Days until due must be between 0 and 120.",
@@ -1002,7 +1053,8 @@ export default {
       "status_unchanged": "The invoice already has that status.",
       "status_conflict": "That change isn't possible: undo the previous status first.",
       "customer_incomplete": "For this format the customer needs a tax ID and a full address (5-digit postcode in Spain).",
-      "format_unsupported": "Factur-X doesn't support the equivalence surcharge: use UBL or Facturae."
+      "format_unsupported": "Factur-X doesn't support the equivalence surcharge: use UBL or Facturae.",
+      "not_fixable": "Only a rejected or accepted-with-errors issue record can be corrected."
     },
     "download": "Download",
     "formats": {

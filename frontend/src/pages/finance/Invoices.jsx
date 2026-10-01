@@ -1,6 +1,6 @@
 import { useState, useEffect, useCallback, useMemo } from 'react';
 import { Link, useNavigate, useSearchParams } from 'react-router-dom';
-import { Plus, FileText, Users, Building2, Download, Send, Copy, Undo2, Ban, Loader2, Search, AlertTriangle, ChevronDown, Check, XCircle } from 'lucide-react';
+import { Plus, FileText, Users, Building2, Download, Send, Copy, Undo2, Ban, Loader2, Search, AlertTriangle, ChevronDown, Check, XCircle, ShieldCheck } from 'lucide-react';
 import { invoicingApi } from '../../middleware/api';
 import { apiErrorMessage, isConnectivityError } from '../../middleware/errors';
 import { useLang } from '../../context/LangContext';
@@ -11,7 +11,8 @@ import Skeleton from '../../components/Skeleton';
 import { Section, Kpi, Segmented, Badge, Modal, Field, ErrorBox, Notice } from '../../components/ui';
 import BillingSettings from '../../components/finance/BillingSettings';
 import Customers from '../../components/finance/Customers';
-import { invoiceState, invoiceError, EINVOICE_FORMATS } from '../../components/finance/invoiceUtils';
+import Verifactu from '../../components/finance/Verifactu';
+import { invoiceState, invoiceError, verifactuState, EINVOICE_FORMATS } from '../../components/finance/invoiceUtils';
 import { eur, isoDate, num, currentQuarter, todayIso } from '../../utils/money';
 
 /** Precio unitario con al menos 2 decimales (35,90; 0,1250). */
@@ -32,7 +33,7 @@ export default function Invoices() {
   const [list, setList] = useState(null);
   const [failure, setFailure] = useState(null);
   const [missing, setMissing] = useState([]);
-  const [modal, setModal] = useState(null); // 'settings' | 'customers'
+  const [modal, setModal] = useState(null); // 'settings' | 'customers' | 'verifactu'
   const openId = Number(params.get('open')) || null;
 
   const load = useCallback(async () => {
@@ -76,6 +77,7 @@ export default function Invoices() {
           <Link to="/app/finanzas/facturas/nueva" className={`btn btn-primary btn-sm ${canIssue ? '' : 'opacity-60 pointer-events-none'}`} aria-disabled={!canIssue}><Plus size={14} /> {t('invoices.new')}</Link>
           <button onClick={() => setModal('customers')} className="btn btn-secondary btn-sm"><Users size={14} /> {t('invoices.customers')}</button>
           <button onClick={() => setModal('settings')} className="btn btn-secondary btn-sm"><Building2 size={14} /> {t('invoices.settings')}</button>
+          <button onClick={() => setModal('verifactu')} className="btn btn-secondary btn-sm"><ShieldCheck size={14} /> {t('verifactu.title')}</button>
         </div>
       </div>
 
@@ -144,6 +146,7 @@ export default function Invoices() {
       {openId && <InvoiceDetail id={openId} onClose={() => open(null)} onChanged={load} />}
       {modal === 'settings' && <BillingSettings onClose={() => setModal(null)} onSaved={(d) => setMissing(d.missing)} />}
       {modal === 'customers' && <Customers onClose={() => setModal(null)} />}
+      {modal === 'verifactu' && <Verifactu onClose={() => setModal(null)} onOpenInvoice={(id) => { setModal(null); open(id); }} />}
     </div>
   );
 }
@@ -352,11 +355,23 @@ function InvoiceDetail({ id, onClose, onChanged }) {
             <dd className="text-right font-semibold pt-1" style={{ color: 'var(--text-primary)', borderTop: '1px solid var(--border)' }}>{eur(inv.total, lang)}</dd>
           </dl>
           {inv.notes && <p className="text-xs whitespace-pre-line" style={{ color: 'var(--text-secondary)' }}>{inv.notes}</p>}
+          {data.verifactu?.length > 0 && (() => {
+            const r = data.verifactu[data.verifactu.length - 1];
+            const vs = verifactuState(r);
+            return (
+              <div className="flex flex-wrap items-center gap-2 text-xs" style={{ color: 'var(--text-muted)' }}>
+                <ShieldCheck size={14} style={{ color: 'var(--text-secondary)' }} />
+                <span style={{ color: 'var(--text-secondary)' }}>{t('verifactu.record')} · {t(`verifactu.type.${r.type}`)}</span>
+                <Badge tone={vs.tone}>{t(`verifactu.status.${vs.key}`)}</Badge>
+                <span className="font-mono truncate" title={r.hash}>{t('verifactu.hash')} {r.hash.slice(0, 16)}…</span>
+              </div>
+            );
+          })()}
           {data.events.length > 0 && (
             <div>
               <p className="field-label">{t('invoices.history')}</p>
               <ul className="text-xs flex flex-col gap-0.5" style={{ color: 'var(--text-muted)' }}>
-                {data.events.map((e, k) => <li key={k}>{isoDate(e.created_at.slice(0, 10), lang)} · {t(`invoices.events.${e.type}`)}{['emailed', 'rejected'].includes(e.type) && e.detail ? ` (${e.detail})` : e.type === 'exported' ? ` (${t(`invoices.formats.${e.detail}`)})` : e.type === 'paid' && e.detail ? ` (${isoDate(e.detail, lang)})` : ''}</li>)}
+                {data.events.map((e, k) => <li key={k}>{isoDate(e.created_at.slice(0, 10), lang)} · {t(`invoices.events.${e.type}`)}{['emailed', 'rejected', 'verifactu_rejected', 'verifactu_errors'].includes(e.type) && e.detail ? ` (${e.detail})` : e.type === 'exported' ? ` (${t(`invoices.formats.${e.detail}`)})` : e.type === 'paid' && e.detail ? ` (${isoDate(e.detail, lang)})` : ''}</li>)}
               </ul>
             </div>
           )}

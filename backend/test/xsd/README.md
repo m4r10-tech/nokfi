@@ -8,3 +8,4 @@ con `xmllint`. No se cargan en producción.
 | `ubl-2.5/` | OASIS UBL 2.5 CSD01, esquemas "runtime" (`xsdrt/maindoc` y `xsdrt/common`) — docs.oasis-open.org/ubl/csd01-UBL-2.5/ |
 | `facturae-3.2.2/` | Facturae 3.2.2 — facturae.gob.es. El `import` de la firma apunta a una copia local del esquema xmldsig de la W3C (la que trae UBL) para validar sin red. |
 | `facturx-1.09/` | Factur-X 1.09, perfil EN 16931 (FNFE-MPE / FeRD) |
+| `verifactu-1.0/` | VERI*FACTU — `SuministroLR.xsd`, `SuministroInformacion.xsd` y `RespuestaSuministro.xsd` de la sede de la AEAT (www2.agenciatributaria.gob.es/static_files/common/internet/dep/aplicaciones/es/aeat/tike/cont/ws/). El `import` de la firma apunta a la copia local de xmldsig de `facturae-3.2.2/`. |

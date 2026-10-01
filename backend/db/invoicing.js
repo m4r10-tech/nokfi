@@ -9,6 +9,8 @@
  *                     tal como estaban al emitir (una factura no cambia nunca)
  *   invoice_lines     líneas
  *   invoice_events    registro de eventos (emitida, anulada, rectificada, enviada…)
+ *   verifactu_records (db/verifactu.js) registro VERI*FACTU de alta/anulación,
+ *                     creado en la misma transacción que emite o anula
  *   ledger_entries.invoice_id  el apunte del libro que generó la factura
  *
  * Una factura emitida NO se edita ni se borra: se rectifica o se anula.
@@ -19,6 +21,7 @@
 const { getDB, audit } = require('./database');
 const { ensureColumn } = require('./schema4');
 const M = require('../services/invoicing/model');
+const V = require('./verifactu');
 
 function runInvoicingSchema(db) {
   db.exec(`
@@ -370,6 +373,8 @@ function issueInvoice(license_id, inv, { customer_id = null, source = 'web', liv
           .run(license_id, id, ...cols.map(c => e[c]));
         db.prepare('UPDATE invoices SET ledger_entry_id = ? WHERE id = ?').run(Number(le.lastInsertRowid), id);
       }
+      // VERI*FACTU: registro de alta encadenado (solo facturas reales).
+      if (livemode) V.createAlta(license_id, id, inv, { original: inv.rectifies_id ? getInvoice(license_id, inv.rectifies_id) : null });
       addEvent(license_id, id, 'issued', `${inv.kind} ${inv.number} total=${inv.total}`);
       if (inv.rectifies_id) addEvent(license_id, inv.rectifies_id, 'rectified', `por ${inv.number}`);
     })();
@@ -395,6 +400,7 @@ function cancelInvoice(license_id, id, reason = '', ip = null) {
       db.prepare('DELETE FROM ledger_entries WHERE id = ? AND license_id = ?').run(inv.ledger_entry_id, license_id);
       db.prepare('UPDATE invoices SET ledger_entry_id = NULL WHERE id = ?').run(id);
     }
+    if (inv.livemode) V.createAnulacion(license_id, id, inv);
     addEvent(license_id, id, 'cancelled', why);
   })();
   audit('INVOICE_CANCELLED', { license_id, ip, detail: `id=${id} ${inv.number}` });

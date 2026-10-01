@@ -808,6 +808,53 @@ export default {
     invalidTitle: 'Ungültiger Link',
     invalidDesc: 'Dieser Link ist abgelaufen, wurde widerrufen oder existiert nicht. Bitte fordere einen neuen an.'
   },
+  verifactu: {
+    title: "VERI*FACTU",
+    intro: "Jede ausgestellte Rechnung erzeugt ihren Rechnungsdatensatz mit einem an den vorherigen verketteten Fingerabdruck, wie es die spanische VERI*FACTU-Verordnung verlangt (RD 1007/2023). Er wird nie geändert oder gelöscht.",
+    env: {
+      off: "Die Übermittlung an die AEAT ist ausgeschaltet: Die Datensätze werden gespeichert und nach dem Einschalten gesendet (VERI*FACTU ist ab 2027 Pflicht).",
+      test: "Die Datensätze gehen an die Testumgebung der AEAT, nicht an die echte.",
+      prod: "Die Datensätze werden an die AEAT gesendet."
+    },
+    reason: {
+      certificate: "Das elektronische Zertifikat für den Versand fehlt: Die Datensätze warten in der Warteschlange.",
+      producer_nif: "Die Versandeinrichtung ist unvollständig: Die Datensätze warten in der Warteschlange."
+    },
+    kpi: {
+      accepted: "Angenommen",
+      pending: "Ausstehend",
+      errors: "Zu berichtigen"
+    },
+    filter: {
+      all: "Alle",
+      pending: "Ausstehend",
+      sent: "Angenommen",
+      errors: "Mit Fehlern"
+    },
+    type: {
+      alta: "Ausstellung",
+      anulacion: "Stornierung"
+    },
+    status: {
+      pending: "Ausstehend",
+      accepted: "Angenommen",
+      accepted_errors: "Mit Fehlern angenommen",
+      rejected: "Abgelehnt",
+      fixed: "Berichtigt"
+    },
+    hash: "Fingerabdruck",
+    resubmit: "Berichtigen",
+    resubmitted: "Berichtigungsdatensatz erstellt: Er geht mit der nächsten Übermittlung raus.",
+    retry: "Versand erneut versuchen",
+    retried: "Wird in wenigen Sekunden erneut versucht.",
+    lastError: "Letzter Versandfehler: {e}",
+    checkChain: "Kette prüfen",
+    chainOk: "Kette intakt: {n} Datensätze geprüft.",
+    chainBroken: "Die Kette stimmt bei Datensatz Nr. {id} nicht.",
+    empty: "Noch keine Datensätze: Sie entstehen beim Ausstellen von Rechnungen.",
+    record: "VERI*FACTU-Datensatz",
+    fixedBy: "berichtigt durch Nr. {id}"
+  },
   invoices: {
     "new": "Neue Rechnung",
     "invoice": "Rechnung",
@@ -955,7 +1002,11 @@ export default {
       "rejected": "Abgelehnt",
       "accepted": "Ablehnung rückgängig",
       "paid": "Bezahlt",
-      "unpaid": "Zahlung rückgängig"
+      "unpaid": "Zahlung rückgängig",
+      "verifactu_accepted": "Datensatz von der AEAT angenommen",
+      "verifactu_errors": "Datensatz von der AEAT mit Fehlern angenommen",
+      "verifactu_rejected": "Datensatz von der AEAT abgelehnt",
+      "verifactu_resubmitted": "Datensatz berichtigt"
     },
     "openInvoice": "Rechnung ansehen",
     "errors": {
@@ -977,7 +1028,7 @@ export default {
       "issue_date": "Das Rechnungsdatum ist ungültig.",
       "issue_date_future": "Das Rechnungsdatum darf nicht in der Zukunft liegen.",
       "issue_date_before_last": "Das Datum darf nicht vor dem der letzten Rechnung der Serie liegen ({date}).",
-      "operation_date": "Das Leistungsdatum ist ungültig.",
+      "operation_date": "Das Leistungsdatum ist ungültig (es darf nicht nach dem Rechnungsdatum liegen).",
       "due_date": "Die Fälligkeit darf nicht vor dem Rechnungsdatum liegen.",
       "iban": "Die IBAN ist ungültig.",
       "payment_terms_days": "Das Zahlungsziel muss zwischen 0 und 120 Tagen liegen.",
@@ -1001,7 +1052,8 @@ export default {
       "status_unchanged": "Die Rechnung hat diesen Status bereits.",
       "status_conflict": "Diese Änderung ist nicht möglich: Mache zuerst den vorherigen Status rückgängig.",
       "customer_incomplete": "Für dieses Format braucht der Kunde eine Steuernummer und eine vollständige Adresse (5-stellige PLZ in Spanien).",
-      "format_unsupported": "Factur-X unterstützt den Ausgleichszuschlag nicht: Nutze UBL oder Facturae."
+      "format_unsupported": "Factur-X unterstützt den Ausgleichszuschlag nicht: Nutze UBL oder Facturae.",
+      "not_fixable": "Nur ein abgelehnter oder mit Fehlern angenommener Ausstellungsdatensatz kann berichtigt werden."
     },
     "download": "Herunterladen",
     "formats": {

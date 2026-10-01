@@ -15,6 +15,10 @@
  *   POST   /api/invoicing/invoices/:id/send   { to?, message?, format? }  email al cliente con el PDF
  *   GET    /api/invoicing/invoices/:id/xml?format=ubl|facturae|facturx|cii   factura electrónica (tanda 3)
  *   POST   /api/invoicing/invoices/:id/status { status: rejected|accepted|paid|unpaid, reason?, date? }
+ *   GET    /api/invoicing/verifactu?filter=all|pending|sent|errors   estado del envío a la AEAT y registros (tanda 4)
+ *   GET    /api/invoicing/verifactu/chain     comprueba la cadena de huellas
+ *   POST   /api/invoicing/verifactu/retry     reintenta ya los pendientes con error de envío
+ *   POST   /api/invoicing/verifactu/records/:id/resubmit   subsana un registro rechazado
  *
  * Todo scopeado por req.license.id (requireLicense).
  */
@@ -29,6 +33,8 @@ const S = require('../services/invoicing');
 const M = require('../services/invoicing/model');
 const { renderInvoicePdf } = require('../services/invoicing/pdf');
 const { sendInvoiceEmail } = require('../utils/mailer');
+const V = require('../db/verifactu');
+const VF = require('../services/verifactu');
 
 const router = express.Router();
 router.use(requireLicense);
@@ -80,22 +86,16 @@ router.post('/invoices', (req, res) => send(res, S.issue({ license: req.license,
 router.get('/invoices/:id', (req, res) => {
   const inv = D.getInvoice(req.license.id, idOf(req));
   if (!inv) return res.status(404).json({ error: 'not_found' });
-  res.json({ invoice: inv, events: D.listEvents(req.license.id, inv.id) });
+  res.json({ invoice: inv, events: D.listEvents(req.license.id, inv.id), verifactu: V.recordsForInvoice(req.license.id, inv.id) });
 });
 
 router.post('/invoices/:id/cancel', (req, res) => send(res, S.cancel({ license: req.license, id: idOf(req), reason: req.body?.reason, ip: req.ip })));
 
-function pdfName(inv) {
-  return `factura_${inv.number.replace(/[^\w.-]+/g, '_')}.pdf`;
-}
-
 router.get('/invoices/:id/pdf', async (req, res) => {
-  const inv = D.getInvoice(req.license.id, idOf(req));
-  if (!inv) return res.status(404).json({ error: 'not_found' });
-  const footer = D.getBillingProfile(req.license.id).footer;
-  const pdf = await renderInvoicePdf(inv, { footer });
-  res.set({ 'Content-Type': 'application/pdf', 'Content-Disposition': `attachment; filename="${pdfName(inv)}"`, 'Cache-Control': 'no-store' });
-  res.send(pdf);
+  const out = await S.pdf({ license: req.license, id: idOf(req) });
+  if (!out.file) return send(res, out);
+  res.set({ 'Content-Type': 'application/pdf', 'Content-Disposition': `attachment; filename="${out.file.filename}"`, 'Cache-Control': 'no-store' });
+  res.send(out.file.body);
 });
 
 router.get('/invoices/:id/xml', async (req, res) => {
@@ -106,6 +106,18 @@ router.get('/invoices/:id/xml', async (req, res) => {
 });
 
 router.post('/invoices/:id/status', (req, res) => send(res, S.setStatus({ license: req.license, id: idOf(req), body: req.body || {}, ip: req.ip })));
+
+/* ── VERI*FACTU ── */
+router.get('/verifactu', (req, res) => {
+  const filter = ['pending', 'sent', 'errors'].includes(req.query.filter) ? req.query.filter : 'all';
+  res.json({ ...VF.status(req.license.id), records: V.listRecords(req.license.id, { filter }) });
+});
+
+router.get('/verifactu/chain', (req, res) => res.json(V.verifyChain(req.license.id)));
+
+router.post('/verifactu/retry', (req, res) => res.json({ queued: V.retryNow(req.license.id) }));
+
+router.post('/verifactu/records/:id/resubmit', (req, res) => send(res, VF.resubmit(req.license.id, idOf(req))));
 
 // Tope de envíos por cuenta (evita usar Nokfi para spam): 30 por hora.
 const SEND_LIMIT = 30;
@@ -139,7 +151,7 @@ router.post('/invoices/:id/send', async (req, res) => {
       attachments.push({ filename: e.file.filename, content: Buffer.isBuffer(e.file.body) ? e.file.body : Buffer.from(e.file.body, 'utf8') });
     }
     // Factur-X ya es el PDF (con el XML dentro); con UBL/Facturae va también el PDF.
-    if (format !== 'facturx') attachments.unshift({ filename: pdfName(inv), content: await renderInvoicePdf(inv, { footer: profile.footer }) });
+    if (format !== 'facturx') attachments.unshift({ filename: S.pdfName(inv), content: await renderInvoicePdf(inv, await S.pdfOptions(req.license, inv)) });
     const r = await sendInvoiceEmail({ to, replyTo, invoice: inv, message: req.body?.message, attachments });
     if (r?.skipped) return res.status(503).json({ error: 'email_unavailable', message: 'El envío de emails no está disponible ahora mismo.' });
     D.addEvent(req.license.id, inv.id, 'emailed', format ? `${to} (${format})` : to);

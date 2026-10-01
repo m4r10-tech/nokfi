@@ -7,7 +7,7 @@
  * datos del emisor y del cliente, descripción, base, tipo y cuota por tipo,
  * y la referencia a la factura rectificada cuando corresponde.
  *
- * opts.qr (PNG) y opts.qrLegend quedan preparados para VERI*FACTU (11b).
+ * opts.qr (PNG) y opts.qrLegend: QR tributario de VERI*FACTU (services/verifactu).
  */
 
 'use strict';
@@ -141,8 +141,21 @@ function renderInvoicePdf(inv, opts = {}) {
   const width = right - left;
   const title = inv.kind.startsWith('R') ? t.R : t[inv.kind];
 
+  /* ── QR tributario (VERI*FACTU): arriba y centrado, antes del contenido;
+     30 mm, «QR tributario:» encima y la leyenda debajo, con letra no menor
+     que la del resto de datos (art. 21 de la Orden HAC/1177/2024 y
+     especificaciones del QR de la AEAT). ── */
+  let top = 48;
+  if (opts.qr) {
+    const qrSize = 85; // 30 mm
+    doc.font('bold').fontSize(9).fillColor(INK).text('QR tributario:', left, top, { width, align: 'center' });
+    doc.image(opts.qr, left + (width - qrSize) / 2, top + 14, { width: qrSize, height: qrSize });
+    if (opts.qrLegend) doc.font('bold').fontSize(9).fillColor(INK).text(opts.qrLegend, left, top + 14 + qrSize + 4, { width, align: 'center' });
+    top += 14 + qrSize + 4 + (opts.qrLegend ? 12 : 0) + 16;
+  }
+
   /* ── Cabecera: emisor a la izquierda, título y datos a la derecha ── */
-  let y = 48;
+  let y = top;
   doc.font('bold').fontSize(14).fillColor(INK).text(inv.issuer.name, left, y, { width: width * 0.55 });
   doc.font('regular').fontSize(9).fillColor(MUTED);
   for (const line of partyLines(inv.issuer, t)) doc.text(line, { width: width * 0.55 });
@@ -150,25 +163,19 @@ function renderInvoicePdf(inv, opts = {}) {
 
   const rx = left + width * 0.58;
   const rw = width * 0.42;
-  const qrSize = opts.qr ? 64 : 0;
-  doc.font('bold').fontSize(16).fillColor(GREEN).text(title, rx, 48, { width: rw - qrSize - (qrSize ? 8 : 0), align: 'right' });
+  doc.font('bold').fontSize(16).fillColor(GREEN).text(title, rx, top, { width: rw, align: 'right' });
   doc.moveDown(0.3);
   const meta = [[t.number, inv.number], [t.date, f.date(inv.issue_date)]];
   if (inv.operation_date) meta.push([t.operation, f.date(inv.operation_date)]);
   if (inv.due_date && !inv.kind.startsWith('R')) meta.push([t.due, f.date(inv.due_date)]);
-  const metaW = rw - (qrSize ? qrSize + 8 : 0);
   let my = doc.y;
   for (const [k, v] of meta) {
-    doc.font('regular').fontSize(9).fillColor(MUTED).text(k, rx, my, { width: metaW * 0.5 });
-    doc.font('bold').fontSize(9).fillColor(INK).text(v, rx + metaW * 0.5, my, { width: metaW * 0.5, align: 'right' });
+    doc.font('regular').fontSize(9).fillColor(MUTED).text(k, rx, my, { width: rw * 0.5 });
+    doc.font('bold').fontSize(9).fillColor(INK).text(v, rx + rw * 0.5, my, { width: rw * 0.5, align: 'right' });
     my += 13;
   }
   doc.y = my;
-  if (opts.qr) {
-    doc.image(opts.qr, right - qrSize, 48, { width: qrSize, height: qrSize });
-    if (opts.qrLegend) doc.font('bold').fontSize(7).fillColor(INK).text(opts.qrLegend, right - qrSize - 10, 48 + qrSize + 2, { width: qrSize + 20, align: 'center' });
-  }
-  y = Math.max(issuerBottom, doc.y, 48 + qrSize + 14) + 18;
+  y = Math.max(issuerBottom, doc.y) + 18;
 
   /* ── Cliente ── */
   if (inv.customer) {
