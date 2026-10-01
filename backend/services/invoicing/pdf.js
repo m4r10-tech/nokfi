@@ -125,7 +125,8 @@ function renderInvoicePdf(inv, opts = {}) {
   const f = formatters(inv.lang);
   const doc = new PDFDocument({
     size: 'A4', margin: 48, bufferPages: true,
-    info: { Title: `${t[inv.kind.startsWith('R') ? 'R' : inv.kind]} ${inv.number}`, Author: inv.issuer.name, Creator: 'Nokfi', Producer: 'Nokfi' },
+    // pdfkit copia Title/Author al XMP sin escapar: fuera &, < y >.
+    info: { Title: `${t[inv.kind.startsWith('R') ? 'R' : inv.kind]} ${inv.number}`, Author: String(inv.issuer.name).replace(/[&<>]/g, ' '), Creator: 'Nokfi', Producer: 'Nokfi' },
     ...(opts.pdfOptions || {})
   });
   doc.registerFont('regular', FONT_REGULAR);

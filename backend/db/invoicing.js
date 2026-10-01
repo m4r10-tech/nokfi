@@ -136,6 +136,11 @@ function runInvoicingSchema(db) {
     CREATE INDEX IF NOT EXISTS idx_invoice_events_invoice ON invoice_events(invoice_id, id);
   `);
   ensureColumn(db, 'ledger_entries', 'invoice_id', 'INTEGER DEFAULT NULL');
+  // Tanda 3: estado de la factura para el cliente (RD 238/2026: aceptada por
+  // defecto; se comunican el rechazo y el pago).
+  ensureColumn(db, 'invoices', 'customer_status', "TEXT NOT NULL DEFAULT 'accepted'");
+  ensureColumn(db, 'invoices', 'customer_status_reason', "TEXT NOT NULL DEFAULT ''");
+  ensureColumn(db, 'invoices', 'customer_status_at', 'TEXT DEFAULT NULL');
 }
 
 /* ── Datos del emisor ── */
@@ -215,6 +220,7 @@ function customerData(raw) {
   const p = M.normalizeParty(raw);
   if (!p.name) return { error: 'customer_name' };
   if (p.tax_id && p.country === 'ES' && !require('../services/invoiceChecks').validSpanishTaxId(p.tax_id)) return { error: 'customer_tax_id' };
+  if (p.postal_code && p.country === 'ES' && !/^\d{5}$/.test(p.postal_code)) return { error: 'customer_postal_code' };
   return { data: { ...p, equivalence_surcharge: raw.equivalence_surcharge ? 1 : 0 } };
 }
 
@@ -256,12 +262,17 @@ function rowToInvoice(r, { lines = true } = {}) {
     payment_method: r.payment_method, iban: r.iban, notes: r.notes,
     rectifies_id: r.rectifies_id, rectification_reason: r.rectification_reason,
     ledger_entry_id: r.ledger_entry_id, livemode: !!r.livemode, source: r.source,
-    cancelled_at: r.cancelled_at, cancel_reason: r.cancel_reason, created_at: r.created_at
+    cancelled_at: r.cancelled_at, cancel_reason: r.cancel_reason, created_at: r.created_at,
+    customer_status: r.customer_status || 'accepted', customer_status_reason: r.customer_status_reason || '', customer_status_at: r.customer_status_at || null
   };
   const entry = r.ledger_entry_id ? db.prepare('SELECT paid, paid_at FROM ledger_entries WHERE id = ?').get(r.ledger_entry_id) : null;
   out.paid = !!entry?.paid;
   out.paid_at = entry?.paid_at || null;
-  if (r.rectifies_id) out.rectifies_number = db.prepare('SELECT number FROM invoices WHERE id = ?').get(r.rectifies_id)?.number || null;
+  if (r.rectifies_id) {
+    const o = db.prepare('SELECT number, issue_date FROM invoices WHERE id = ?').get(r.rectifies_id);
+    out.rectifies_number = o?.number || null;
+    out.rectifies_date = o?.issue_date || null;
+  }
   out.rectified_by = db.prepare("SELECT id, number FROM invoices WHERE rectifies_id = ? AND status = 'issued' ORDER BY id").all(r.id);
   if (lines) out.lines = db.prepare('SELECT position, description, quantity, unit, unit_price, discount_pct, vat_rate, re_rate, amount FROM invoice_lines WHERE invoice_id = ? ORDER BY position').all(r.id);
   return out;
@@ -390,6 +401,45 @@ function cancelInvoice(license_id, id, reason = '', ip = null) {
   return { invoice: getInvoice(license_id, id) };
 }
 
+/**
+ * Estado de la factura para el cliente: 'rejected' (con motivo) o 'accepted'
+ * (deshace el rechazo); 'paid' (con fecha) o 'unpaid' (deshace el pago).
+ * Como en la SPFE, para cambiar un estado primero se revierte el anterior.
+ */
+function setCustomerStatus(license_id, id, { status, reason = '', date = null }, ip = null) {
+  const db = getDB();
+  const inv = getInvoice(license_id, id);
+  if (!inv) return null;
+  if (inv.status !== 'issued') return { error: 'invoice_cancelled' };
+  const why = String(reason || '').replace(/[\u0000-\u001F]/g, ' ').slice(0, 300).trim();
+  const ISO = /^\d{4}-\d{2}-\d{2}$/;
+  const today = M.todayMadrid();
+  if (status === 'rejected') {
+    if (inv.customer_status === 'rejected') return { error: 'status_unchanged' };
+    if (inv.paid) return { error: 'status_conflict' };
+    if (!why) return { error: 'invalid_input', field: 'reason' };
+    db.prepare("UPDATE invoices SET customer_status = 'rejected', customer_status_reason = ?, customer_status_at = datetime('now') WHERE id = ?").run(why, id);
+    addEvent(license_id, id, 'rejected', why);
+  } else if (status === 'accepted') {
+    if (inv.customer_status !== 'rejected') return { error: 'status_unchanged' };
+    db.prepare("UPDATE invoices SET customer_status = 'accepted', customer_status_reason = '', customer_status_at = datetime('now') WHERE id = ?").run(id);
+    addEvent(license_id, id, 'accepted');
+  } else if (status === 'paid' || status === 'unpaid') {
+    if (!inv.ledger_entry_id) return { error: 'status_conflict' };
+    if ((status === 'paid') === inv.paid) return { error: 'status_unchanged' };
+    if (status === 'paid' && inv.customer_status === 'rejected') return { error: 'status_conflict' };
+    const paidAt = status === 'paid' ? (date || today) : null;
+    if (paidAt && (!ISO.test(paidAt) || paidAt > today || paidAt < inv.issue_date)) return { error: 'invalid_input', field: 'date' };
+    db.prepare('UPDATE ledger_entries SET paid = ?, paid_at = ?, updated_at = datetime(\'now\') WHERE id = ? AND license_id = ?')
+      .run(status === 'paid' ? 1 : 0, paidAt, inv.ledger_entry_id, license_id);
+    addEvent(license_id, id, status, paidAt || '');
+  } else {
+    return { error: 'invalid_input', field: 'status' };
+  }
+  audit('INVOICE_STATUS', { license_id, ip, detail: `id=${id} ${status}` });
+  return { invoice: getInvoice(license_id, id) };
+}
+
 /** Busca o guarda el cliente de una factura. Devuelve { customer, customer_id } o { error }. */
 function resolveCustomer(license_id, body) {
   if (body.customer_id) {
@@ -420,5 +470,5 @@ module.exports = {
   runInvoicingSchema,
   getBillingProfile, saveBillingProfile, issuerFromProfile,
   listCustomers, getCustomer, createCustomer, updateCustomer, deleteCustomer, resolveCustomer, rememberCustomer,
-  listInvoices, getInvoice, listEvents, addEvent, issueInvoice, cancelInvoice
+  listInvoices, getInvoice, listEvents, addEvent, issueInvoice, cancelInvoice, setCustomerStatus
 };

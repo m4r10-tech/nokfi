@@ -16,7 +16,12 @@ const MESSAGES = {
   original_not_found: 'No existe la factura que quieres rectificar.',
   original_cancelled: 'No se puede rectificar una factura anulada.',
   already_cancelled: 'La factura ya está anulada.',
-  has_rectifications: 'La factura tiene rectificativas: no se puede anular.'
+  has_rectifications: 'La factura tiene rectificativas: no se puede anular.',
+  invoice_cancelled: 'La factura está anulada.',
+  status_unchanged: 'La factura ya tiene ese estado.',
+  status_conflict: 'Ese cambio de estado no es posible: primero revierte el estado anterior.',
+  customer_incomplete: 'Faltan datos del cliente para este formato (NIF y dirección completa).',
+  format_unsupported: 'Este formato no admite el recargo de equivalencia: usa UBL o Facturae.'
 };
 
 const fail = (status, error, extra = {}) => ({ status, body: { error, message: MESSAGES[error] || 'Dato no válido.', ...extra } });
@@ -68,4 +73,29 @@ function cancel({ license, id, reason, ip = null }) {
   return { status: 200, body: out.invoice };
 }
 
-module.exports = { issue, cancel, MESSAGES };
+function setStatus({ license, id, body = {}, ip = null }) {
+  const out = D.setCustomerStatus(license.id, Number(id), { status: body.status, reason: body.reason, date: body.date }, ip);
+  if (!out) return fail(404, 'not_found');
+  if (out.error) {
+    const { error, ...extra } = out;
+    return fail(error === 'invalid_input' ? 400 : 409, error, extra);
+  }
+  return { status: 200, body: out.invoice };
+}
+
+/** Factura en formato electrónico → { status, body?, file? }. */
+async function einvoice({ license, id, format }) {
+  const inv = D.getInvoice(license.id, Number(id));
+  if (!inv) return fail(404, 'not_found');
+  const { renderEInvoice } = require('./xml');
+  const footer = D.getBillingProfile(license.id).footer;
+  const r = await renderEInvoice(inv, String(format || 'ubl').toLowerCase(), { footer });
+  if (r.error) {
+    const { error, ...extra } = r;
+    return fail(error === 'invalid_input' ? 400 : 422, error, extra);
+  }
+  D.addEvent(license.id, inv.id, 'exported', String(format || 'ubl'));
+  return { status: 200, file: r };
+}
+
+module.exports = { issue, cancel, setStatus, einvoice, MESSAGES };

@@ -4,6 +4,8 @@
  * Tanda 1: lectura de facturas electrónicas por la API, el MCP y el
  * Playground, sin IA y sin gastar cuota.
  * Tanda 2: emisión de facturas (numeración, rectificativas, anulación, libro, PDF).
+ * Tanda 3: factura electrónica (UBL 2.5, Facturae 3.2.2, Factur-X) validada con
+ * los XSD oficiales (test/xsd, con xmllint si está instalado) y estados.
  */
 
 'use strict';
@@ -11,6 +13,7 @@
 module.exports = async function session11Tests({ post, put, get, call, check, checkAsync, getDB }) {
   await tanda1({ post, get, check, checkAsync });
   await tanda2({ post, put, get, call, check, checkAsync, getDB });
+  await tanda3({ post, put, get, check, checkAsync, getDB });
 };
 
 async function tanda1({ post, get, check, checkAsync }) {
@@ -244,4 +247,113 @@ async function tanda2({ post, put, get, call, check, checkAsync, getDB }) {
     getDB().prepare('DELETE FROM licenses WHERE id = ?').run(lid);
     return !getDB().prepare('SELECT 1 FROM invoices WHERE license_id = ?').get(lid) && !getDB().prepare('SELECT 1 FROM invoice_lines il JOIN invoices i ON i.id = il.invoice_id WHERE i.license_id = ?').get(lid);
   });
+}
+
+async function tanda3({ post, put, get, check, checkAsync, getDB }) {
+  const path = require('path');
+  const { spawnSync } = require('child_process');
+  const E = require('../services/einvoice');
+  const XSD = {
+    Invoice: path.join(__dirname, 'xsd/ubl-2.5/maindoc/UBL-Invoice-2.5.xsd'),
+    CreditNote: path.join(__dirname, 'xsd/ubl-2.5/maindoc/UBL-CreditNote-2.5.xsd'),
+    Facturae: path.join(__dirname, 'xsd/facturae-3.2.2/Facturaev3_2_2.xsd'),
+    CrossIndustryInvoice: path.join(__dirname, 'xsd/facturx-1.09/Factur-X_EN16931.xsd')
+  };
+  const hasXmllint = spawnSync('xmllint', ['--version']).status === 0;
+  /** Valida contra el XSD oficial (true si xmllint no está: se avisa una vez). */
+  const xsdOk = (xml) => {
+    if (!hasXmllint) return true;
+    const root = xml.match(/<(?:\w+:)?(Invoice|CreditNote|Facturae|CrossIndustryInvoice)[\s>]/)?.[1];
+    const r = spawnSync('xmllint', ['--noout', '--schema', XSD[root], '-'], { input: xml });
+    if (r.status !== 0) console.log(String(r.stderr).split('\n').slice(0, 4).join('\n'));
+    return r.status === 0;
+  };
+  if (!hasXmllint) console.log('⚠️  xmllint no está instalado: se omite la validación XSD (apt install libxml2-utils).');
+
+  const c = await post('/api/admin/licenses', { email: 'xml11@nokfi.local', plan: 'pro', password: 'XmlOnce11!' }, 'admin');
+  const tok = (await post('/api/auth/login', { email: 'xml11@nokfi.local', license_key: c.data.key, password: 'XmlOnce11!' })).data.token;
+  await checkAsync('S11 XML: código postal español de 4 cifras → el emisor queda incompleto',
+    put('/api/invoicing/settings', { legal_name: 'Soft Norte & Cía SL', tax_id: 'B12345674', address: 'Gran Vía 1', postal_code: '2801', city: 'Madrid' }, tok),
+    r => r.status === 200 && r.data.missing.includes('postal_code'));
+  await put('/api/invoicing/settings', { postal_code: '28013', email: 'hola@softnorte.es', iban: 'ES9121000418450200051332' }, tok);
+  const cust = { name: 'Ana López Pérez', tax_id: '12345678Z', email: 'ana@ejemplo.es', address: 'Av. Sol 5', postal_code: '41001', city: 'Sevilla' };
+  await checkAsync('S11 XML: código postal del cliente no válido → 400', post('/api/invoicing/invoices', { customer: { ...cust, postal_code: '4100' }, lines: [{ description: 'x', quantity: 1, unit_price: 5 }] }, tok),
+    r => r.status === 400 && r.data.field === 'customer_postal_code');
+
+  const issue = (body) => post('/api/invoicing/invoices', body, tok).then(r => r.data);
+  const f1 = await issue({ customer: cust, irpf_rate: 15, notes: 'Gracias', lines: [{ description: 'Consultoría', quantity: 3, unit: 'h', unit_price: 45, discount_pct: 10, vat_rate: 21 }, { description: 'Libro', quantity: 2, unit_price: 15, vat_rate: 4 }] });
+  const re = await issue({ customer_id: f1.customer_id, equivalence_surcharge: true, lines: [{ description: 'Género', quantity: 10, unit_price: 12.5, vat_rate: 21 }] });
+  const ex = await issue({ customer: { name: 'Dupont SARL', tax_id: 'FR40303265045', address: '1 rue de Paris', postal_code: '75001', city: 'Paris', country: 'FR' }, exemption: 'E5', lines: [{ description: 'Entrega intracomunitaria', quantity: 1, unit_price: 1000, vat_rate: 0 }] });
+  const f2 = await issue({ payment_method: 'cash', lines: [{ description: 'Mostrador', quantity: 2, unit_price: 10, vat_rate: 10 }] });
+  const r1 = await issue({ rectifies_id: f1.id, irpf_rate: 15, rectification_reason: 'Una hora de más', lines: [{ description: 'Abono 1 h', quantity: -1, unit: 'h', unit_price: 45, vat_rate: 21 }] });
+  check('S11 XML: facturas de prueba emitidas', () => [f1, re, ex, f2, r1].every(i => i?.id));
+
+  const xml = (inv, format) => get(`/api/invoicing/invoices/${inv.id}/xml?format=${format}`, tok);
+  const roundtrip = async (x, inv, { vatIncludesRe = true } = {}) => {
+    const [p] = (await E.parseXml(x, 'x')) || [];
+    const vat = vatIncludesRe ? Math.round((inv.vat_amount + inv.re_amount) * 100) / 100 : inv.vat_amount;
+    return !!p && p.invoice_number === inv.number && p.base === inv.base && p.vat_amount === vat && p.irpf_amount === inv.irpf_amount && p.total === inv.total;
+  };
+
+  for (const [name, inv] of [['F1 con retención y descuento', f1], ['recargo de equivalencia', re], ['exenta intracomunitaria', ex], ['simplificada', f2], ['rectificativa (abono)', r1]]) {
+    await checkAsync(`S11 XML: UBL 2.5 válido (XSD) y se lee igual — ${name}`, xml(inv, 'ubl'),
+      async r => r.status === 200 && typeof r.data === 'string' && xsdOk(r.data) && await roundtrip(r.data, inv));
+  }
+  await checkAsync('S11 XML: la rectificativa que resta sale como CreditNote 381 con referencia a la original', xml(r1, 'ubl'),
+    r => r.data.includes('<CreditNote') && r.data.includes('<cbc:CreditNoteTypeCode>381<') && r.data.includes(`<cbc:ID>${f1.number}</cbc:ID>`));
+  for (const [name, inv] of [['F1', f1], ['recargo', re], ['extranjero', ex], ['rectificativa', r1]]) {
+    await checkAsync(`S11 XML: Facturae 3.2.2 válido (XSD) y se lee igual — ${name}`, xml(inv, 'facturae'),
+      async r => r.status === 200 && xsdOk(r.data) && await roundtrip(r.data, inv));
+  }
+  await checkAsync('S11 XML: Facturae sin cliente (simplificada) → 422 customer_incomplete', xml(f2, 'facturae'),
+    r => r.status === 422 && r.data.error === 'customer_incomplete');
+  for (const [name, inv] of [['F1', f1], ['simplificada', f2], ['rectificativa', r1]]) {
+    await checkAsync(`S11 XML: CII (Factur-X EN 16931) válido (XSD) y se lee igual — ${name}`, xml(inv, 'cii'),
+      async r => r.status === 200 && xsdOk(r.data) && await roundtrip(r.data, inv, { vatIncludesRe: false }));
+  }
+  await checkAsync('S11 XML: Factur-X con recargo de equivalencia → 422 format_unsupported', xml(re, 'facturx'),
+    r => r.status === 422 && r.data.error === 'format_unsupported');
+  await checkAsync('S11 XML: Factur-X = PDF/A-3 con factur-x.xml dentro, que se lee sin IA', xml(f1, 'facturx'),
+    async r => {
+      if (r.status !== 200 || !String(r.data).startsWith('%PDF')) return false;
+      const raw = String(r.data);
+      const [p] = (await E.parsePdf(Buffer.from(raw, 'latin1').toString('base64'), 'fx.pdf')) || [];
+      return raw.includes('pdfaid:part>3') && raw.includes('fx:ConformanceLevel>EN 16931') && raw.includes('/AFRelationship /Alternative') && p?.total === f1.total;
+    });
+  await checkAsync('S11 XML: formato desconocido → 400', xml(f1, 'pdf'), r => r.status === 400 && r.data.field === 'format');
+
+  // ── Estados (RD 238/2026: aceptada por defecto; se comunican rechazo y pago) ──
+  const st = (inv, body) => post(`/api/invoicing/invoices/${inv.id}/status`, body, tok);
+  check('S11 estados: una factura nueva está aceptada', () => f1.customer_status === 'accepted');
+  await checkAsync('S11 estados: rechazar sin motivo → 400', st(re, { status: 'rejected' }), r => r.status === 400 && r.data.field === 'reason');
+  await checkAsync('S11 estados: rechazada con motivo', st(re, { status: 'rejected', reason: 'Precio no acordado' }),
+    r => r.status === 200 && r.data.customer_status === 'rejected' && r.data.customer_status_reason === 'Precio no acordado');
+  await checkAsync('S11 estados: no se cobra una rechazada (409) ni se rechaza dos veces',
+    Promise.all([st(re, { status: 'paid' }), st(re, { status: 'rejected', reason: 'x' })]),
+    ([a, b]) => a.status === 409 && a.data.error === 'status_conflict' && b.status === 409 && b.data.error === 'status_unchanged');
+  await checkAsync('S11 estados: una factura rechazada no sale en Cobros', get('/api/finance/receivables', tok),
+    r => r.status === 200 && !r.data.pending.some(p => p.invoice_number === re.number) && r.data.pending.some(p => p.invoice_number === f1.number));
+  await checkAsync('S11 estados: revertir el rechazo → aceptada', st(re, { status: 'accepted' }), r => r.status === 200 && r.data.customer_status === 'accepted');
+  await checkAsync('S11 estados: fecha de pago futura → 400', st(f1, { status: 'paid', date: '2099-01-01' }), r => r.status === 400 && r.data.field === 'date');
+  await checkAsync('S11 estados: cobrada con fecha → el libro la marca cobrada', st(f1, { status: 'paid', date: f1.issue_date }),
+    r => r.status === 200 && r.data.paid === true && r.data.paid_at === f1.issue_date
+      && getDB().prepare('SELECT paid FROM ledger_entries WHERE invoice_id = ?').get(f1.id)?.paid === 1);
+  await checkAsync('S11 estados: no se rechaza una cobrada (409)', st(f1, { status: 'rejected', reason: 'x' }), r => r.status === 409 && r.data.error === 'status_conflict');
+  await checkAsync('S11 estados: revertir el cobro', st(f1, { status: 'unpaid' }), r => r.status === 200 && r.data.paid === false);
+  await checkAsync('S11 estados: el historial guarda rechazo, aceptación, cobro y exportaciones', get(`/api/invoicing/invoices/${re.id}`, tok),
+    r => ['rejected', 'accepted', 'exported'].every(t => r.data.events.some(e => e.type === t)));
+
+  {
+    const saved = { fetch: global.fetch, key: process.env.RESEND_API_KEY };
+    const sent = [];
+    process.env.RESEND_API_KEY = 're_test';
+    global.fetch = async (url, o) => { sent.push(JSON.parse(o.body)); return { ok: true, status: 200, text: async () => '', json: async () => ({ id: 'x' }) }; };
+    await checkAsync('S11 XML: enviar con UBL → PDF + XML; con Factur-X → solo el PDF híbrido',
+      Promise.all([post(`/api/invoicing/invoices/${f1.id}/send`, { format: 'ubl' }, tok), post(`/api/invoicing/invoices/${f1.id}/send`, { format: 'facturx' }, tok)]),
+      ([a, b]) => a.status === 200 && b.status === 200 && sent.length === 2
+        && sent.some(m => m.attachments.length === 2 && m.attachments[1].filename.endsWith('_ubl.xml'))
+        && sent.some(m => m.attachments.length === 1 && m.attachments[0].filename.endsWith('_facturx.pdf')));
+    global.fetch = saved.fetch;
+    if (saved.key === undefined) delete process.env.RESEND_API_KEY; else process.env.RESEND_API_KEY = saved.key;
+  }
 }

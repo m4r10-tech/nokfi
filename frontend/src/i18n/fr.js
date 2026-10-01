@@ -827,7 +827,8 @@ export default {
       "collected": "Encaissée",
       "cancelled": "Annulée",
       "rectification": "Rectificative",
-      "rectified": "Rectifiée"
+      "rectified": "Rectifiée",
+      "rejected": "Refusée"
     },
     "kind": {
       "F1": "Facture",
@@ -949,7 +950,12 @@ export default {
       "issued": "Émise",
       "cancelled": "Annulée",
       "rectified": "Rectifiée",
-      "emailed": "Envoyée par email"
+      "emailed": "Envoyée par email",
+      "exported": "Téléchargée",
+      "rejected": "Refusée",
+      "accepted": "Refus annulé",
+      "paid": "Encaissée",
+      "unpaid": "Encaissement annulé"
     },
     "openInvoice": "Voir la facture",
     "errors": {
@@ -987,8 +993,54 @@ export default {
       "invoice_cancelled": "Une facture annulée ne s'envoie pas.",
       "send_rate_limited": "Vous avez envoyé beaucoup de factures en peu de temps. Patientez un peu.",
       "email_unavailable": "L'envoi d'emails n'est pas disponible pour le moment.",
-      "email_failed": "L'email n'a pas pu être envoyé. Réessayez."
-    }
+      "email_failed": "L'email n'a pas pu être envoyé. Réessayez.",
+      "customer_postal_code": "Le code postal du client n'est pas valide (5 chiffres en Espagne).",
+      "format": "Format non valide.",
+      "reason": "Indiquez le motif.",
+      "date": "La date n'est pas valide (entre la date de facture et aujourd'hui).",
+      "status_unchanged": "La facture a déjà ce statut.",
+      "status_conflict": "Ce changement n'est pas possible : annulez d'abord le statut précédent.",
+      "customer_incomplete": "Pour ce format, le client doit avoir un numéro fiscal et une adresse complète (code postal à 5 chiffres en Espagne).",
+      "format_unsupported": "Factur-X ne gère pas le supplément d'équivalence : utilisez UBL ou Facturae."
+    },
+    "download": "Télécharger",
+    "formats": {
+      "pdf": "PDF",
+      "facturx": "Factur-X (PDF + XML)",
+      "ubl": "UBL 2.5 (XML)",
+      "facturae": "Facturae 3.2.2 (XML)",
+      "cii": "CII (XML)"
+    },
+    "formatsHint": {
+      "pdf": "Pour lire et imprimer.",
+      "facturx": "PDF contenant la facture électronique. Lisible par les personnes et les logiciels.",
+      "ubl": "Le format de la solution publique de l'AEAT et de Peppol.",
+      "facturae": "Le format espagnol (administrations et nombreuses entreprises). Non signé.",
+      "cii": "XML Factur-X/ZUGFeRD."
+    },
+    "sendFormat": "Joindre",
+    "sendFormats": {
+      "facturx": "Factur-X (PDF avec XML)",
+      "ubl": "PDF + UBL 2.5 (XML)",
+      "facturae": "PDF + Facturae 3.2.2 (XML)"
+    },
+    "markPaid": "Marquer encaissée",
+    "markPaidTitle": "Encaissement de {n}",
+    "markPaidText": "Indiquez quand le client vous a payé. Le registre la marquera comme encaissée.",
+    "paidOn": "Date d'encaissement",
+    "paidOnDate": "Encaissée le {date}",
+    "paidOk": "Facture marquée comme encaissée",
+    "unmarkPaid": "Annuler l'encaissement",
+    "unpaidOk": "Encaissement annulé",
+    "rejected": "Refusée par le client",
+    "reject": "Marquer refusée",
+    "rejectTitle": "Refus de {n}",
+    "rejectText": "Si le client n'accepte pas la facture, notez le motif. Vous pourrez ensuite la rectifier ou l'annuler.",
+    "rejectReason": "Motif du refus",
+    "rejectedOk": "Facture marquée comme refusée",
+    "undoReject": "Annuler le refus",
+    "acceptedOk": "Refus annulé",
+    "statusPending": "Acceptée · à encaisser"
   },
   finance: {
     title: 'Finances', subtitle: 'Votre registre de factures, vos impôts, vos encaissements et votre trésorerie, toujours à jour.',

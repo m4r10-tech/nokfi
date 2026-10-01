@@ -92,13 +92,14 @@ function issuerMissing(issuer) {
   if (!issuer.name) miss.push('legal_name');
   if (!issuer.tax_id || !validSpanishTaxId(issuer.tax_id)) miss.push('tax_id');
   if (!issuer.address) miss.push('address');
-  if (!issuer.postal_code) miss.push('postal_code');
+  if (!issuer.postal_code || (issuer.country === 'ES' && !/^\d{5}$/.test(issuer.postal_code))) miss.push('postal_code');
   if (!issuer.city) miss.push('city');
   return miss;
 }
 
 function customerError(c) {
   if (!c.name) return 'customer_name';
+  if (c.postal_code && c.country === 'ES' && !/^\d{5}$/.test(c.postal_code)) return 'customer_postal_code';
   if (c.tax_id) {
     if (c.country === 'ES' && !validSpanishTaxId(c.tax_id)) return 'customer_tax_id';
     if (c.country !== 'ES' && c.tax_id.length < 2) return 'customer_tax_id';

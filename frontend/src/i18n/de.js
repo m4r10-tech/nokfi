@@ -827,7 +827,8 @@ export default {
       "collected": "Bezahlt",
       "cancelled": "Storniert",
       "rectification": "Korrektur",
-      "rectified": "Korrigiert"
+      "rectified": "Korrigiert",
+      "rejected": "Abgelehnt"
     },
     "kind": {
       "F1": "Rechnung",
@@ -949,7 +950,12 @@ export default {
       "issued": "Gestellt",
       "cancelled": "Storniert",
       "rectified": "Korrigiert",
-      "emailed": "Per E-Mail gesendet"
+      "emailed": "Per E-Mail gesendet",
+      "exported": "Heruntergeladen",
+      "rejected": "Abgelehnt",
+      "accepted": "Ablehnung rückgängig",
+      "paid": "Bezahlt",
+      "unpaid": "Zahlung rückgängig"
     },
     "openInvoice": "Rechnung ansehen",
     "errors": {
@@ -987,8 +993,54 @@ export default {
       "invoice_cancelled": "Eine stornierte Rechnung wird nicht gesendet.",
       "send_rate_limited": "Du hast in kurzer Zeit viele Rechnungen gesendet. Bitte warte etwas.",
       "email_unavailable": "Der E-Mail-Versand ist gerade nicht verfügbar.",
-      "email_failed": "Die E-Mail konnte nicht gesendet werden. Bitte versuche es erneut."
-    }
+      "email_failed": "Die E-Mail konnte nicht gesendet werden. Bitte versuche es erneut.",
+      "customer_postal_code": "Die PLZ des Kunden ist ungültig (5 Ziffern in Spanien).",
+      "format": "Ungültiges Format.",
+      "reason": "Gib den Grund an.",
+      "date": "Das Datum ist ungültig (zwischen Rechnungsdatum und heute).",
+      "status_unchanged": "Die Rechnung hat diesen Status bereits.",
+      "status_conflict": "Diese Änderung ist nicht möglich: Mache zuerst den vorherigen Status rückgängig.",
+      "customer_incomplete": "Für dieses Format braucht der Kunde eine Steuernummer und eine vollständige Adresse (5-stellige PLZ in Spanien).",
+      "format_unsupported": "Factur-X unterstützt den Ausgleichszuschlag nicht: Nutze UBL oder Facturae."
+    },
+    "download": "Herunterladen",
+    "formats": {
+      "pdf": "PDF",
+      "facturx": "Factur-X (PDF + XML)",
+      "ubl": "UBL 2.5 (XML)",
+      "facturae": "Facturae 3.2.2 (XML)",
+      "cii": "CII (XML)"
+    },
+    "formatsHint": {
+      "pdf": "Zum Lesen und Drucken.",
+      "facturx": "PDF mit der E-Rechnung darin. Für Menschen und Programme lesbar.",
+      "ubl": "Das Format der öffentlichen Lösung der spanischen Steuerbehörde und von Peppol.",
+      "facturae": "Das spanische Format (Behörden und viele Unternehmen). Unsigniert.",
+      "cii": "Factur-X/ZUGFeRD-XML."
+    },
+    "sendFormat": "Anhängen",
+    "sendFormats": {
+      "facturx": "Factur-X (PDF mit XML)",
+      "ubl": "PDF + UBL 2.5 (XML)",
+      "facturae": "PDF + Facturae 3.2.2 (XML)"
+    },
+    "markPaid": "Als bezahlt markieren",
+    "markPaidTitle": "Zahlung von {n}",
+    "markPaidText": "Gib an, wann der Kunde bezahlt hat. Das Journal markiert sie als bezahlt.",
+    "paidOn": "Zahlungsdatum",
+    "paidOnDate": "Bezahlt am {date}",
+    "paidOk": "Rechnung als bezahlt markiert",
+    "unmarkPaid": "Zahlung rückgängig",
+    "unpaidOk": "Zahlung rückgängig gemacht",
+    "rejected": "Vom Kunden abgelehnt",
+    "reject": "Als abgelehnt markieren",
+    "rejectTitle": "Ablehnung von {n}",
+    "rejectText": "Wenn der Kunde die Rechnung nicht akzeptiert, notiere den Grund. Danach kannst du sie korrigieren oder stornieren.",
+    "rejectReason": "Grund der Ablehnung",
+    "rejectedOk": "Rechnung als abgelehnt markiert",
+    "undoReject": "Ablehnung rückgängig",
+    "acceptedOk": "Ablehnung rückgängig gemacht",
+    "statusPending": "Akzeptiert · offen"
   },
   finance: {
     title: 'Finanzen', subtitle: 'Rechnungsjournal, Steuern, Forderungen und Liquidität – immer aktuell.',

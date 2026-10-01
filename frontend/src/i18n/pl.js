@@ -830,7 +830,8 @@ export default {
       "collected": "Opłacona",
       "cancelled": "Anulowana",
       "rectification": "Korygująca",
-      "rectified": "Skorygowana"
+      "rectified": "Skorygowana",
+      "rejected": "Odrzucona"
     },
     "kind": {
       "F1": "Faktura",
@@ -952,7 +953,12 @@ export default {
       "issued": "Wystawiona",
       "cancelled": "Anulowana",
       "rectified": "Skorygowana",
-      "emailed": "Wysłana e-mailem"
+      "emailed": "Wysłana e-mailem",
+      "exported": "Pobrana",
+      "rejected": "Odrzucona",
+      "accepted": "Odrzucenie cofnięte",
+      "paid": "Opłacona",
+      "unpaid": "Płatność cofnięta"
     },
     "openInvoice": "Zobacz fakturę",
     "errors": {
@@ -990,8 +996,54 @@ export default {
       "invoice_cancelled": "Anulowanej faktury się nie wysyła.",
       "send_rate_limited": "Wysłałeś dużo faktur w krótkim czasie. Odczekaj chwilę.",
       "email_unavailable": "Wysyłka e-maili jest teraz niedostępna.",
-      "email_failed": "Nie udało się wysłać e-maila. Spróbuj ponownie."
-    }
+      "email_failed": "Nie udało się wysłać e-maila. Spróbuj ponownie.",
+      "customer_postal_code": "Kod pocztowy klienta jest nieprawidłowy (5 cyfr w Hiszpanii).",
+      "format": "Nieprawidłowy format.",
+      "reason": "Podaj przyczynę.",
+      "date": "Data jest nieprawidłowa (między datą faktury a dziś).",
+      "status_unchanged": "Faktura ma już ten status.",
+      "status_conflict": "Ta zmiana nie jest możliwa: najpierw cofnij poprzedni status.",
+      "customer_incomplete": "Dla tego formatu klient musi mieć numer podatkowy i pełny adres (5-cyfrowy kod pocztowy w Hiszpanii).",
+      "format_unsupported": "Factur-X nie obsługuje dopłaty wyrównawczej: użyj UBL lub Facturae."
+    },
+    "download": "Pobierz",
+    "formats": {
+      "pdf": "PDF",
+      "facturx": "Factur-X (PDF + XML)",
+      "ubl": "UBL 2.5 (XML)",
+      "facturae": "Facturae 3.2.2 (XML)",
+      "cii": "CII (XML)"
+    },
+    "formatsHint": {
+      "pdf": "Do czytania i drukowania.",
+      "facturx": "PDF z e-fakturą w środku. Czytelny dla ludzi i programów.",
+      "ubl": "Format publicznego rozwiązania hiszpańskiej administracji skarbowej i Peppol.",
+      "facturae": "Format hiszpański (administracja i wiele firm). Bez podpisu.",
+      "cii": "XML Factur-X/ZUGFeRD."
+    },
+    "sendFormat": "Załącz",
+    "sendFormats": {
+      "facturx": "Factur-X (PDF z XML)",
+      "ubl": "PDF + UBL 2.5 (XML)",
+      "facturae": "PDF + Facturae 3.2.2 (XML)"
+    },
+    "markPaid": "Oznacz jako opłaconą",
+    "markPaidTitle": "Płatność za {n}",
+    "markPaidText": "Podaj, kiedy klient zapłacił. Rejestr oznaczy ją jako opłaconą.",
+    "paidOn": "Data płatności",
+    "paidOnDate": "Opłacona {date}",
+    "paidOk": "Faktura oznaczona jako opłacona",
+    "unmarkPaid": "Cofnij płatność",
+    "unpaidOk": "Płatność cofnięta",
+    "rejected": "Odrzucona przez klienta",
+    "reject": "Oznacz jako odrzuconą",
+    "rejectTitle": "Odrzucenie {n}",
+    "rejectText": "Jeśli klient nie akceptuje faktury, zapisz przyczynę. Potem możesz ją skorygować lub anulować.",
+    "rejectReason": "Przyczyna odrzucenia",
+    "rejectedOk": "Faktura oznaczona jako odrzucona",
+    "undoReject": "Cofnij odrzucenie",
+    "acceptedOk": "Odrzucenie cofnięte",
+    "statusPending": "Zaakceptowana · do zapłaty"
   },
   finance: {
     title: 'Finanse', subtitle: 'Rejestr faktur, podatki, należności i gotówka — zawsze aktualne.',

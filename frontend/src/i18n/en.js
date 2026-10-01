@@ -828,7 +828,8 @@ export default {
       "collected": "Paid",
       "cancelled": "Cancelled",
       "rectification": "Corrective",
-      "rectified": "Corrected"
+      "rectified": "Corrected",
+      "rejected": "Rejected"
     },
     "kind": {
       "F1": "Invoice",
@@ -950,7 +951,12 @@ export default {
       "issued": "Issued",
       "cancelled": "Cancelled",
       "rectified": "Corrected",
-      "emailed": "Sent by email"
+      "emailed": "Sent by email",
+      "exported": "Downloaded",
+      "rejected": "Rejected",
+      "accepted": "Rejection undone",
+      "paid": "Paid",
+      "unpaid": "Payment undone"
     },
     "openInvoice": "View invoice",
     "errors": {
@@ -988,8 +994,54 @@ export default {
       "invoice_cancelled": "A cancelled invoice isn't sent.",
       "send_rate_limited": "You've sent a lot of invoices in a short time. Please wait a while.",
       "email_unavailable": "Email sending isn't available right now.",
-      "email_failed": "The email couldn't be sent. Please try again."
-    }
+      "email_failed": "The email couldn't be sent. Please try again.",
+      "customer_postal_code": "The customer's postcode isn't valid (5 digits in Spain).",
+      "format": "Invalid format.",
+      "reason": "Give the reason.",
+      "date": "The date isn't valid (between the invoice date and today).",
+      "status_unchanged": "The invoice already has that status.",
+      "status_conflict": "That change isn't possible: undo the previous status first.",
+      "customer_incomplete": "For this format the customer needs a tax ID and a full address (5-digit postcode in Spain).",
+      "format_unsupported": "Factur-X doesn't support the equivalence surcharge: use UBL or Facturae."
+    },
+    "download": "Download",
+    "formats": {
+      "pdf": "PDF",
+      "facturx": "Factur-X (PDF + XML)",
+      "ubl": "UBL 2.5 (XML)",
+      "facturae": "Facturae 3.2.2 (XML)",
+      "cii": "CII (XML)"
+    },
+    "formatsHint": {
+      "pdf": "To read and print.",
+      "facturx": "PDF with the e-invoice inside. Readable by people and software.",
+      "ubl": "The format of the Spanish Tax Agency's public solution and Peppol.",
+      "facturae": "The Spanish format (public sector and many companies). Unsigned.",
+      "cii": "Factur-X/ZUGFeRD XML."
+    },
+    "sendFormat": "Attach",
+    "sendFormats": {
+      "facturx": "Factur-X (PDF with XML inside)",
+      "ubl": "PDF + UBL 2.5 (XML)",
+      "facturae": "PDF + Facturae 3.2.2 (XML)"
+    },
+    "markPaid": "Mark as paid",
+    "markPaidTitle": "Payment of {n}",
+    "markPaidText": "Enter when the customer paid you. The ledger will mark it as paid.",
+    "paidOn": "Payment date",
+    "paidOnDate": "Paid on {date}",
+    "paidOk": "Invoice marked as paid",
+    "unmarkPaid": "Undo payment",
+    "unpaidOk": "Payment undone",
+    "rejected": "Rejected by customer",
+    "reject": "Mark as rejected",
+    "rejectTitle": "Rejection of {n}",
+    "rejectText": "If the customer doesn't accept the invoice, note the reason. You can then correct or cancel it.",
+    "rejectReason": "Reason for rejection",
+    "rejectedOk": "Invoice marked as rejected",
+    "undoReject": "Undo rejection",
+    "acceptedOk": "Rejection undone",
+    "statusPending": "Accepted · awaiting payment"
   },
   finance: {
     title: 'Finance', subtitle: 'Your invoice ledger, taxes, receivables and cash, always up to date.',

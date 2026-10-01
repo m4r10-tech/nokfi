@@ -103,7 +103,8 @@ function receivables(entries, refDate = today()) {
     byClient.set(k, c);
   }
   const avgDays = (k) => { const c = byClient.get(k); return c ? Math.round(c.sum / c.n) : null; };
-  const pending = incomes.filter(e => !e.paid).map(e => {
+  // Sesión 11: una factura rechazada por el cliente no es un cobro pendiente (se rectifica o se anula).
+  const pending = incomes.filter(e => !e.paid && !e.invoice_rejected).map(e => {
     const age = daysBetween(e.invoice_date, refDate);
     // Sin vencimiento: emisión + 30 días (igual que el recordatorio automático).
     const due = e.due_date || addDays(e.invoice_date, 30);

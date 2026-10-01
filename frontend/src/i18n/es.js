@@ -831,7 +831,8 @@ export default {
       "collected": "Cobrada",
       "cancelled": "Anulada",
       "rectification": "Rectificativa",
-      "rectified": "Rectificada"
+      "rectified": "Rectificada",
+      "rejected": "Rechazada"
     },
     "kind": {
       "F1": "Factura",
@@ -953,7 +954,12 @@ export default {
       "issued": "Emitida",
       "cancelled": "Anulada",
       "rectified": "Rectificada",
-      "emailed": "Enviada por email"
+      "emailed": "Enviada por email",
+      "exported": "Descargada",
+      "rejected": "Rechazada",
+      "accepted": "Rechazo deshecho",
+      "paid": "Cobrada",
+      "unpaid": "Cobro deshecho"
     },
     "openInvoice": "Ver la factura",
     "errors": {
@@ -991,8 +997,54 @@ export default {
       "invoice_cancelled": "Una factura anulada no se envía.",
       "send_rate_limited": "Has enviado muchas facturas en poco tiempo. Espera un rato.",
       "email_unavailable": "El envío de emails no está disponible ahora mismo.",
-      "email_failed": "No se ha podido enviar el email. Inténtalo de nuevo."
-    }
+      "email_failed": "No se ha podido enviar el email. Inténtalo de nuevo.",
+      "customer_postal_code": "El código postal del cliente no es válido (5 cifras en España).",
+      "format": "Formato no válido.",
+      "reason": "Indica el motivo.",
+      "date": "La fecha no es válida (entre la de la factura y hoy).",
+      "status_unchanged": "La factura ya tiene ese estado.",
+      "status_conflict": "Ese cambio no es posible: primero deshaz el estado anterior.",
+      "customer_incomplete": "Para este formato el cliente necesita NIF y dirección completa (y código postal de 5 cifras en España).",
+      "format_unsupported": "Factur-X no admite el recargo de equivalencia: usa UBL o Facturae."
+    },
+    "download": "Descargar",
+    "formats": {
+      "pdf": "PDF",
+      "facturx": "Factur-X (PDF + XML)",
+      "ubl": "UBL 2.5 (XML)",
+      "facturae": "Facturae 3.2.2 (XML)",
+      "cii": "CII (XML)"
+    },
+    "formatsHint": {
+      "pdf": "Para leer e imprimir.",
+      "facturx": "PDF con la factura electrónica dentro. Lo abren personas y programas.",
+      "ubl": "El formato de la Solución Pública de la AEAT y Peppol.",
+      "facturae": "El formato español (Administraciones y muchas empresas). Sin firmar.",
+      "cii": "XML de Factur-X/ZUGFeRD."
+    },
+    "sendFormat": "Adjuntar",
+    "sendFormats": {
+      "facturx": "Factur-X (PDF con XML dentro)",
+      "ubl": "PDF + UBL 2.5 (XML)",
+      "facturae": "PDF + Facturae 3.2.2 (XML)"
+    },
+    "markPaid": "Marcar cobrada",
+    "markPaidTitle": "Cobro de {n}",
+    "markPaidText": "Indica cuándo te pagó el cliente. El libro la marcará como cobrada.",
+    "paidOn": "Fecha de cobro",
+    "paidOnDate": "Cobrada el {date}",
+    "paidOk": "Factura marcada como cobrada",
+    "unmarkPaid": "Deshacer cobro",
+    "unpaidOk": "Cobro deshecho",
+    "rejected": "Rechazada por el cliente",
+    "reject": "Marcar rechazada",
+    "rejectTitle": "Rechazo de {n}",
+    "rejectText": "Si el cliente no acepta la factura, anota el motivo. Después podrás rectificarla o anularla.",
+    "rejectReason": "Motivo del rechazo",
+    "rejectedOk": "Factura marcada como rechazada",
+    "undoReject": "Deshacer rechazo",
+    "acceptedOk": "Rechazo deshecho",
+    "statusPending": "Aceptada · pendiente de cobro"
   },
   finance: {
     title: 'Finanzas', subtitle: 'Tu libro de facturas, impuestos, cobros y caja, siempre al día.',

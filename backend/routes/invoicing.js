@@ -12,7 +12,9 @@
  *   GET    /api/invoicing/invoices/:id        detalle con líneas y eventos
  *   POST   /api/invoicing/invoices/:id/cancel { reason }  anular (nunca se borra)
  *   GET    /api/invoicing/invoices/:id/pdf
- *   POST   /api/invoicing/invoices/:id/send   { to?, message? }  email al cliente con el PDF
+ *   POST   /api/invoicing/invoices/:id/send   { to?, message?, format? }  email al cliente con el PDF
+ *   GET    /api/invoicing/invoices/:id/xml?format=ubl|facturae|facturx|cii   factura electrónica (tanda 3)
+ *   POST   /api/invoicing/invoices/:id/status { status: rejected|accepted|paid|unpaid, reason?, date? }
  *
  * Todo scopeado por req.license.id (requireLicense).
  */
@@ -96,6 +98,15 @@ router.get('/invoices/:id/pdf', async (req, res) => {
   res.send(pdf);
 });
 
+router.get('/invoices/:id/xml', async (req, res) => {
+  const out = await S.einvoice({ license: req.license, id: idOf(req), format: req.query.format });
+  if (!out.file) return send(res, out);
+  res.set({ 'Content-Type': out.file.contentType, 'Content-Disposition': `attachment; filename="${out.file.filename}"`, 'Cache-Control': 'no-store' });
+  res.send(out.file.body);
+});
+
+router.post('/invoices/:id/status', (req, res) => send(res, S.setStatus({ license: req.license, id: idOf(req), body: req.body || {}, ip: req.ip })));
+
 // Tope de envíos por cuenta (evita usar Nokfi para spam): 30 por hora.
 const SEND_LIMIT = 30;
 const sendLog = new Map();
@@ -120,10 +131,18 @@ router.post('/invoices/:id/send', async (req, res) => {
   const profile = D.getBillingProfile(req.license.id);
   const replyTo = profile.email || req.license.email;
   try {
-    const pdf = await renderInvoicePdf(inv, { footer: profile.footer });
-    const r = await sendInvoiceEmail({ to, replyTo, invoice: inv, message: req.body?.message, attachments: [{ filename: pdfName(inv), content: pdf }] });
+    const format = ['ubl', 'facturae', 'facturx'].includes(req.body?.format) ? req.body.format : null;
+    const attachments = [];
+    if (format) {
+      const e = await S.einvoice({ license: req.license, id: inv.id, format });
+      if (!e.file) return send(res, e);
+      attachments.push({ filename: e.file.filename, content: Buffer.isBuffer(e.file.body) ? e.file.body : Buffer.from(e.file.body, 'utf8') });
+    }
+    // Factur-X ya es el PDF (con el XML dentro); con UBL/Facturae va también el PDF.
+    if (format !== 'facturx') attachments.unshift({ filename: pdfName(inv), content: await renderInvoicePdf(inv, { footer: profile.footer }) });
+    const r = await sendInvoiceEmail({ to, replyTo, invoice: inv, message: req.body?.message, attachments });
     if (r?.skipped) return res.status(503).json({ error: 'email_unavailable', message: 'El envío de emails no está disponible ahora mismo.' });
-    D.addEvent(req.license.id, inv.id, 'emailed', to);
+    D.addEvent(req.license.id, inv.id, 'emailed', format ? `${to} (${format})` : to);
     audit('INVOICE_EMAILED', { license_id: req.license.id, ip: req.ip, detail: `id=${inv.id}` });
     res.json({ sent: true, to });
   } catch (e) {

@@ -827,7 +827,8 @@ export default {
       "collected": "Incassata",
       "cancelled": "Annullata",
       "rectification": "Rettificativa",
-      "rectified": "Rettificata"
+      "rectified": "Rettificata",
+      "rejected": "Rifiutata"
     },
     "kind": {
       "F1": "Fattura",
@@ -949,7 +950,12 @@ export default {
       "issued": "Emessa",
       "cancelled": "Annullata",
       "rectified": "Rettificata",
-      "emailed": "Inviata per email"
+      "emailed": "Inviata per email",
+      "exported": "Scaricata",
+      "rejected": "Rifiutata",
+      "accepted": "Rifiuto annullato",
+      "paid": "Incassata",
+      "unpaid": "Incasso annullato"
     },
     "openInvoice": "Vedi la fattura",
     "errors": {
@@ -987,8 +993,54 @@ export default {
       "invoice_cancelled": "Una fattura annullata non si invia.",
       "send_rate_limited": "Hai inviato molte fatture in poco tempo. Attendi un po'.",
       "email_unavailable": "L'invio di email non è disponibile in questo momento.",
-      "email_failed": "Non è stato possibile inviare l'email. Riprova."
-    }
+      "email_failed": "Non è stato possibile inviare l'email. Riprova.",
+      "customer_postal_code": "Il CAP del cliente non è valido (5 cifre in Spagna).",
+      "format": "Formato non valido.",
+      "reason": "Indica il motivo.",
+      "date": "La data non è valida (tra la data della fattura e oggi).",
+      "status_unchanged": "La fattura ha già questo stato.",
+      "status_conflict": "Questo cambio non è possibile: prima annulla lo stato precedente.",
+      "customer_incomplete": "Per questo formato il cliente deve avere codice fiscale e indirizzo completo (CAP di 5 cifre in Spagna).",
+      "format_unsupported": "Factur-X non supporta la sovrattassa di equivalenza: usa UBL o Facturae."
+    },
+    "download": "Scarica",
+    "formats": {
+      "pdf": "PDF",
+      "facturx": "Factur-X (PDF + XML)",
+      "ubl": "UBL 2.5 (XML)",
+      "facturae": "Facturae 3.2.2 (XML)",
+      "cii": "CII (XML)"
+    },
+    "formatsHint": {
+      "pdf": "Da leggere e stampare.",
+      "facturx": "PDF con la fattura elettronica all'interno. Leggibile da persone e programmi.",
+      "ubl": "Il formato della soluzione pubblica dell'AEAT e di Peppol.",
+      "facturae": "Il formato spagnolo (pubblica amministrazione e molte aziende). Non firmato.",
+      "cii": "XML Factur-X/ZUGFeRD."
+    },
+    "sendFormat": "Allega",
+    "sendFormats": {
+      "facturx": "Factur-X (PDF con XML)",
+      "ubl": "PDF + UBL 2.5 (XML)",
+      "facturae": "PDF + Facturae 3.2.2 (XML)"
+    },
+    "markPaid": "Segna incassata",
+    "markPaidTitle": "Incasso di {n}",
+    "markPaidText": "Indica quando ti ha pagato il cliente. Il registro la segnerà come incassata.",
+    "paidOn": "Data di incasso",
+    "paidOnDate": "Incassata il {date}",
+    "paidOk": "Fattura segnata come incassata",
+    "unmarkPaid": "Annulla incasso",
+    "unpaidOk": "Incasso annullato",
+    "rejected": "Rifiutata dal cliente",
+    "reject": "Segna rifiutata",
+    "rejectTitle": "Rifiuto di {n}",
+    "rejectText": "Se il cliente non accetta la fattura, annota il motivo. Poi potrai rettificarla o annullarla.",
+    "rejectReason": "Motivo del rifiuto",
+    "rejectedOk": "Fattura segnata come rifiutata",
+    "undoReject": "Annulla rifiuto",
+    "acceptedOk": "Rifiuto annullato",
+    "statusPending": "Accettata · da incassare"
   },
   finance: {
     title: 'Finanze', subtitle: 'Registro delle fatture, imposte, incassi e cassa, sempre aggiornati.',

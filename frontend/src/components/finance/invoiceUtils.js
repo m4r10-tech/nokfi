@@ -45,6 +45,7 @@ export function computeTotals(lines, irpfRate, surcharge) {
 /** Estado visible de una factura (para la insignia del listado). */
 export function invoiceState(inv) {
   if (inv.status === 'cancelled') return { key: 'cancelled', tone: 'negative' };
+  if (inv.customer_status === 'rejected') return { key: 'rejected', tone: 'negative' };
   if (inv.kind?.startsWith('R')) return { key: 'rectification', tone: 'accent' };
   if (inv.rectified_by?.length) return { key: 'rectified', tone: 'muted' };
   if (inv.paid) return { key: 'collected', tone: 'positive' };
@@ -53,9 +54,10 @@ export function invoiceState(inv) {
 
 const KNOWN_FIELDS = ['lines', 'too_many_lines', 'line_description', 'line_quantity', 'line_unit_price', 'line_discount', 'line_vat_rate', 'irpf_rate',
   'customer_name', 'customer_tax_id', 'rectification_kind', 'rectification_reason', 'total', 'exemption', 'series', 'issue_date', 'issue_date_future',
-  'issue_date_before_last', 'operation_date', 'due_date', 'iban', 'payment_terms_days', 'to'];
+  'issue_date_before_last', 'operation_date', 'due_date', 'iban', 'payment_terms_days', 'to', 'customer_postal_code', 'format', 'reason', 'date'];
 const KNOWN_ERRORS = ['issuer_incomplete', 'customer_tax_id_required', 'customer_not_found', 'original_not_found', 'original_cancelled',
-  'already_cancelled', 'has_rectifications', 'invoice_locked', 'invoice_cancelled', 'send_rate_limited', 'email_unavailable', 'email_failed'];
+  'already_cancelled', 'has_rectifications', 'invoice_locked', 'invoice_cancelled', 'send_rate_limited', 'email_unavailable', 'email_failed',
+  'status_unchanged', 'status_conflict', 'customer_incomplete', 'format_unsupported'];
 
 /** Error de la API de facturas → texto en el idioma del usuario. */
 export function invoiceError(t, res) {
@@ -67,6 +69,9 @@ export function invoiceError(t, res) {
   if (KNOWN_ERRORS.includes(d.error)) return t(`invoices.errors.${d.error}`, { max: SIMPLIFIED_MAX });
   return apiErrorMessage(t, res);
 }
+
+/** Formatos de factura electrónica que se pueden descargar o adjuntar. */
+export const EINVOICE_FORMATS = ['facturx', 'ubl', 'facturae'];
 
 export function emptyLine(vat = 21) {
   return { description: '', quantity: 1, unit: '', unit_price: '', discount_pct: 0, vat_rate: vat };

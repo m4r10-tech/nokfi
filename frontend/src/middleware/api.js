@@ -173,7 +173,9 @@ export const invoicingApi = {
   issue: (data) => request('/invoicing/invoices', { method: 'POST', auth: true, body: data }),
   cancel: (id, reason) => request(`/invoicing/invoices/${encodeURIComponent(id)}/cancel`, { method: 'POST', auth: true, body: { reason } }),
   send: (id, data) => request(`/invoicing/invoices/${encodeURIComponent(id)}/send`, { method: 'POST', auth: true, body: data }),
-  pdf: (id, number) => download(`/invoicing/invoices/${encodeURIComponent(id)}/pdf`, `factura_${number || id}.pdf`)
+  pdf: (id, number) => download(`/invoicing/invoices/${encodeURIComponent(id)}/pdf`, `factura_${number || id}.pdf`),
+  einvoice: (id, number, format) => download(`/invoicing/invoices/${encodeURIComponent(id)}/xml${qs({ format })}`, `factura_${number || id}_${format}`),
+  setStatus: (id, body) => request(`/invoicing/invoices/${encodeURIComponent(id)}/status`, { method: 'POST', auth: true, body })
 };
 
 // F4 — claves de API; C9 — mis datos (descargar / borrar la cuenta).

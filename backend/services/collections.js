@@ -58,7 +58,9 @@ async function runAutoCollections(now = new Date()) {
   for (const lic of licenses) {
     const profile = getCompanyProfile(lic.id) || {};
     const done = sentStages(lic.id);
-    const entries = db.prepare(`SELECT * FROM ledger_entries WHERE license_id = ? AND type = 'income' AND paid = 0 AND party_email != ''`).all(lic.id);
+    // Sesión 11: nunca se reclama una factura que el cliente ha rechazado.
+    const entries = db.prepare(`SELECT * FROM ledger_entries WHERE license_id = ? AND type = 'income' AND paid = 0 AND party_email != ''
+      AND (invoice_id IS NULL OR invoice_id NOT IN (SELECT id FROM invoices WHERE customer_status = 'rejected'))`).all(lic.id);
     let n = 0;
     for (const e of entries) {
       if (n >= MAX_PER_RUN) break;

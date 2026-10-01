@@ -99,8 +99,9 @@ function listLedger(license_id, { from, to, type } = {}) {
 }
 
 function allEntries(license_id) {
-  return getDB().prepare('SELECT * FROM ledger_entries WHERE license_id = ? ORDER BY invoice_date ASC, id ASC')
-    .all(license_id).map(r => ({ ...r, party_name: nameCase(r.party_name), paid: !!r.paid }));
+  return getDB().prepare(`SELECT l.*, (i.customer_status = 'rejected') AS invoice_rejected FROM ledger_entries l
+    LEFT JOIN invoices i ON i.id = l.invoice_id WHERE l.license_id = ? ORDER BY l.invoice_date ASC, l.id ASC`)
+    .all(license_id).map(r => ({ ...r, party_name: nameCase(r.party_name), paid: !!r.paid, invoice_rejected: !!r.invoice_rejected }));
 }
 
 function getEntry(license_id, id) {
