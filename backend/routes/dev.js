@@ -120,7 +120,7 @@ router.post('/playground', playgroundLimiter, async (req, res) => {
   try {
     logApiCall({ license_id: req.license.id, key_id: null, method: op.method, path: op.path, status: out.status, error_code: out.body?.error || '', ms, livemode });
   } catch (_) { /* el registro nunca rompe la respuesta */ }
-  res.json({ status: out.status, body: out.body, ms, livemode, request: { method: op.method, path: op.path }, uses_quota: !!op.ai && livemode });
+  res.json({ status: out.status, body: out.body, ms, livemode, request: { method: op.method, path: op.path }, uses_quota: !!op.ai && livemode && out.body?.ai_used !== false });
 });
 
 module.exports = router;

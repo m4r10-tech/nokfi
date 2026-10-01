@@ -156,8 +156,8 @@ module.exports = {
     },
     '/invoices/extract': {
       post: {
-        summary: 'Extraer facturas (PDF, imagen o texto) con validaciones',
-        description: 'Hasta 5 documentos por petición; cada petición gasta 1 análisis de la cuota. PDF digital: el texto se extrae en el servidor; PDF escaneado: envíalo como imagen. No se guarda el archivo; en modo asíncrono el resultado se guarda 24 h para que puedas recogerlo.',
+        summary: 'Extraer facturas (PDF, imagen, texto o factura electrónica XML) con validaciones',
+        description: 'Hasta 5 documentos por petición. Las facturas electrónicas (Facturae 3.2.x/.xsig, UBL 2.x Invoice/CreditNote, CII y Factur-X/ZUGFeRD con el XML embebido en el PDF) se leen tal cual, sin IA: el resultado es exacto, lleva source_format y no gasta cuota (ai_used: false). Si hay algún documento que necesita la IA, la petición gasta 1 análisis de la cuota. PDF digital: el texto se extrae en el servidor; PDF escaneado: envíalo como imagen. No se guarda el archivo; en modo asíncrono el resultado se guarda 24 h para que puedas recogerlo.',
         parameters: AsyncParams,
         requestBody: {
           required: true,
@@ -170,9 +170,9 @@ module.exports = {
                     type: 'array', maxItems: 5,
                     items: { type: 'object', properties: {
                       name: { type: 'string' },
-                      mime: { type: 'string', enum: ['application/pdf', 'image/jpeg', 'image/png', 'image/webp'] },
+                      mime: { type: 'string', enum: ['application/pdf', 'image/jpeg', 'image/png', 'image/webp', 'application/xml', 'text/xml'] },
                       data: { type: 'string', description: 'Archivo en base64 (máx. 5 MB)' },
-                      text: { type: 'string', description: 'Alternativa a data: texto ya extraído' }
+                      text: { type: 'string', description: 'Alternativa a data: texto ya extraído o el XML de la factura electrónica' }
                     } }
                   },
                   lang: { type: 'string', enum: ['es', 'en', 'fr', 'it', 'de', 'pl'] }
@@ -184,8 +184,9 @@ module.exports = {
         },
         responses: {
           200: { description: 'Facturas y documentos no leídos', content: { 'application/json': { schema: { type: 'object', properties: {
-            invoices: { type: 'array', items: { $ref: '#/components/schemas/Invoice' } },
-            errors: { type: 'array', items: { type: 'object', properties: { file_name: { type: 'string' }, error: { type: 'string', enum: ['pdf_scanned', 'unsupported_type', 'file_too_large', 'empty_file', 'unreadable_file'] }, message: { type: 'string' } } } }
+            invoices: { type: 'array', items: { allOf: [{ $ref: '#/components/schemas/Invoice' }, { type: 'object', properties: { source_format: { type: 'string', enum: ['Facturae', 'UBL', 'Factur-X'], description: 'Solo en facturas electrónicas leídas sin IA' } } }] } },
+            errors: { type: 'array', items: { type: 'object', properties: { file_name: { type: 'string' }, error: { type: 'string', enum: ['pdf_scanned', 'unsupported_type', 'unsupported_xml', 'file_too_large', 'empty_file', 'unreadable_file'] }, message: { type: 'string' } } } },
+            ai_used: { type: 'boolean', description: 'false si todo eran facturas electrónicas: no se ha gastado cuota' }
           } } } } },
           202: { description: 'Trabajo en cola (?async=true)', content: { 'application/json': { schema: { $ref: '#/components/schemas/Job' } } } },
           400: { description: 'invalid_input, too_many_files o no_readable_files (sin gastar cuota)' },

@@ -74,5 +74,6 @@ export default defineConfig({
       }
     })
   ],
-  server: { port: 5173, host: true }
+  // shared/ (sesión 11) queda fuera de frontend/: se permite servirlo en desarrollo.
+  server: { port: 5173, host: true, fs: { allow: ['..'] } }
 });

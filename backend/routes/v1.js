@@ -10,6 +10,7 @@
  *   GET  /api/v1/analyses/:id       informe completo (JSON estructurado)
  *   POST /api/v1/invoices/extract   { files: [{ name, mime, data } | { name, text }] }
  *                                   → facturas con checks y warnings (sesión 7)
+ *                                   XML/Factur-X: lectura exacta sin IA ni cuota (sesión 11)
  *
  * Sesión 9 (Bloque 2):
  *   ?async=true | Prefer: respond-async   en analyze e invoices/extract → 202 + job
@@ -34,6 +35,7 @@ const { listAnalyses, getAnalysis, aiQuotaForPlan, countAiAnalysesToday, audit }
 const { listActionsForAnalysis } = require('../db/actions');
 const openapi = require('../config/openapi');
 const { pdfText } = require('../utils/pdfText');
+const einvoice = require('../services/einvoice');
 const { checkInvoice } = require('../services/invoiceChecks');
 const jobs = require('../services/jobs');
 const webhooks = require('../services/webhooks');
@@ -101,50 +103,75 @@ router.get('/analyses/:id', requireApiKey, (req, res) => {
  * Hasta 5 documentos por petición (1 análisis de la cuota por petición).
  * PDF digital → se extrae el texto aquí; imagen (JPG/PNG/WebP) → la lee el
  * modelo con visión; texto → tal cual. No se guarda nada: ni el archivo ni
- * los datos extraídos (a diferencia de la web, aquí no hay libro). */
+ * los datos extraídos (a diferencia de la web, aquí no hay libro).
+ *
+ * Sesión 11: las facturas ELECTRÓNICAS (Facturae, UBL, CII, Factur-X/ZUGFeRD
+ * embebido en PDF) se leen tal cual, sin IA. Si todos los documentos lo son,
+ * la petición no gasta cuota (ai_used: false). */
 const INVOICE_MAX_FILES = 5;
 const INVOICE_IMAGE_MIMES = ['image/jpeg', 'image/png', 'image/webp'];
 const MAX_FILE_B64 = 7 * 1024 * 1024;
 
-/** Lee y valida los documentos (sin IA). Devuelve { error } o { files, errors }. */
+/**
+ * Lee y valida los documentos. Devuelve { error } o
+ * { files (para la IA), structured (facturas ya leídas), errors }.
+ * Cada entrada lleva su posición (_i) para devolver el resultado en orden.
+ */
 async function readInvoiceFiles(body) {
   const raw = Array.isArray(body?.files) ? body.files : [];
   if (!raw.length) return { error: { status: 400, body: { error: 'invalid_input', message: 'Envía al menos un documento en "files".' } } };
   if (raw.length > INVOICE_MAX_FILES) return { error: { status: 400, body: { error: 'too_many_files', message: `Máximo ${INVOICE_MAX_FILES} documentos por petición.` } } };
   const files = [];
+  const structured = [];
   const errors = [];
   for (const [i, f] of raw.entries()) {
     const name = String(f?.name || `documento-${i + 1}`).slice(0, 120);
     const mime = String(f?.mime || '').toLowerCase();
     try {
-      if (typeof f?.text === 'string' && f.text.trim()) { files.push({ name, text: f.text.slice(0, 12000) }); continue; }
+      if ((typeof f?.data === 'string' && f.data.length > MAX_FILE_B64) || (typeof f?.text === 'string' && f.text.length > MAX_FILE_B64)) {
+        errors.push({ file_name: name, error: 'file_too_large', message: 'El archivo supera 5 MB.' }); continue;
+      }
+      const s = await einvoice.readStructured(f, name, mime);
+      if (s?.error) { errors.push({ file_name: name, error: s.error, message: 'XML no reconocido: se admiten Facturae 3.2.x, UBL 2.x (Invoice/CreditNote) y CII (Factur-X/ZUGFeRD).' }); continue; }
+      if (s) { structured.push(...s.invoices.map(inv => ({ ...inv, _i: i }))); continue; }
+      if (typeof f?.text === 'string' && f.text.trim()) { files.push({ name, text: f.text.slice(0, 12000), _i: i }); continue; }
       if (typeof f?.data !== 'string' || !f.data) { errors.push({ file_name: name, error: 'empty_file', message: 'Falta "data" (base64) o "text".' }); continue; }
-      if (f.data.length > MAX_FILE_B64) { errors.push({ file_name: name, error: 'file_too_large', message: 'El archivo supera 5 MB.' }); continue; }
       if (mime === 'application/pdf') {
         const text = await pdfText(f.data);
         if (text.replace(/\s/g, '').length < 30) { errors.push({ file_name: name, error: 'pdf_scanned', message: 'El PDF no tiene texto (está escaneado): envíalo como imagen JPG o PNG.' }); continue; }
-        files.push({ name, text });
+        files.push({ name, text, _i: i });
       } else if (INVOICE_IMAGE_MIMES.includes(mime)) {
-        files.push({ name, mime, data: f.data });
+        files.push({ name, mime, data: f.data, _i: i });
       } else {
-        errors.push({ file_name: name, error: 'unsupported_type', message: 'Formatos admitidos: application/pdf, image/jpeg, image/png, image/webp o texto.' });
+        errors.push({ file_name: name, error: 'unsupported_type', message: 'Formatos admitidos: application/pdf, image/jpeg, image/png, image/webp, application/xml (factura electrónica) o texto.' });
       }
     } catch {
       errors.push({ file_name: name, error: 'unreadable_file', message: 'No se ha podido leer el archivo.' });
     }
   }
-  if (!files.length) return { error: { status: 400, body: { error: 'no_readable_files', message: 'Ningún documento se ha podido leer.', errors } } };
-  return { files, errors };
+  if (!files.length && !structured.length) return { error: { status: 400, body: { error: 'no_readable_files', message: 'Ningún documento se ha podido leer.', errors } } };
+  return { files, structured, errors };
 }
+
+/** ¿Hace falta la IA (y por tanto cuota) para estos documentos? */
+const needsAi = (parsed) => parsed.files.length > 0;
+
+const withChecks = ({ check_ok, _i, ...inv }) => ({ ...inv, ...checkInvoice(inv) });
 
 async function extractInvoices({ license, body, ip, source = 'api', livemode = true, parsed = null }) {
   const p = parsed || await readInvoiceFiles(body);
   if (p.error) return p.error;
-  if (!livemode) return { status: 200, body: { invoices: sampleInvoices(p.files), errors: p.errors, test: true } };
-  const out = await runAnalysis({ license, task: 'invoices', input: { files: p.files }, lang: body?.lang, ip, source });
-  if (out.status !== 200) return out;
-  const invoices = out.body.invoices.map(({ check_ok, ...inv }) => ({ ...inv, ...checkInvoice(inv) }));
-  return { status: 200, body: { invoices, errors: p.errors } };
+  let fromAi = [];
+  if (needsAi(p)) {
+    if (!livemode) fromAi = sampleInvoices(p.files).map((inv, k) => ({ ...inv, _i: p.files[k]._i }));
+    else {
+      const out = await runAnalysis({ license, task: 'invoices', input: { files: p.files.map(({ _i, ...f }) => f) }, lang: body?.lang, ip, source });
+      if (out.status !== 200) return out;
+      fromAi = out.body.invoices.map((inv, k) => ({ ...inv, _i: p.files[k]?._i ?? 99 }));
+    }
+  }
+  const invoices = [...p.structured, ...fromAi].sort((a, b) => a._i - b._i).map(withChecks);
+  return { status: 200, body: { invoices, errors: p.errors, ai_used: needsAi(p), ...(livemode ? {} : { test: true }) } };
 }
 
 /**
@@ -159,7 +186,7 @@ async function respond(req, res, { kind, validate, run }) {
   }
   const pre = await validate();
   if (pre?.error) return res.status(pre.error.status).json(pre.error.body);
-  if (req.livemode) {
+  if (req.livemode && (pre?.files ? needsAi(pre) : true)) {
     const limit = aiQuotaForPlan(req.license.plan);
     if (countAiAnalysesToday(req.license.id) >= limit) {
       return res.status(429).json({ error: 'license_daily_limit_reached', message: quotaMessage(limit) });

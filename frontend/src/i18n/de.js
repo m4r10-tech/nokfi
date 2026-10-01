@@ -1018,7 +1018,7 @@ export default {
     spec: 'Vollständige Spezifikation:', createKey: 'Schlüssel erstellen',
     ep_invoices: 'Rechnungen mit Prüfungen auslesen',
     invoicesTitle: 'Rechnungen: vom PDF zum geprüften JSON',
-    invoicesText: 'Sende bis zu 5 Rechnungen pro Anfrage (PDF, JPG, PNG oder WebP als Base64 oder bereits extrahierten Text) und erhalte immer dasselbe JSON. Jede Anfrage verbraucht 1 Analyse deines Kontingents. Wir speichern weder die Datei noch die Daten (im asynchronen Modus bleibt das Ergebnis 24 h abrufbar).',
+    invoicesText: 'Sende bis zu 5 Rechnungen pro Anfrage (PDF, JPG, PNG oder WebP als Base64 oder bereits extrahierten Text) und erhalte immer dasselbe JSON. Jede Anfrage verbraucht 1 Analyse deines Kontingents. Wir speichern weder die Datei noch die Daten (im asynchronen Modus bleibt das Ergebnis 24 h abrufbar). E-Rechnungen (Facturae, UBL, CII oder Factur-X/ZUGFeRD mit dem XML im PDF) werden direkt gelesen, ohne KI: Das Ergebnis ist exakt und verbraucht kein Kontingent.',
     invoicesChecks: 'Nokfi prüft jede Rechnung selbst, ohne der KI zu vertrauen: Netto + MwSt. − Einbehalt muss den Gesamtbetrag ergeben, Prüfziffer der spanischen NIF/CIF/NIE, gültiges und nicht zukünftiges Datum, üblicher MwSt.-Satz. Was nicht passt, kommt in warnings. Gescannte PDFs kommen in errors zurück (pdf_scanned): sende sie als Bild.',
     mcpTitle: 'MCP-Server für KI-Agenten',
     mcpText: 'Binde Nokfi als Tool in Claude, ChatGPT, Cursor oder den AI Agent von n8n ein. Gleicher API-Schlüssel, gleiches Kontingent und gleiche Regeln wie die API.',

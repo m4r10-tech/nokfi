@@ -11,6 +11,7 @@ import { NodeConnectionTypes, NodeOperationError } from 'n8n-workflow';
 
 const MAX_DOCS_PER_REQUEST = 5;
 const IMAGE_TYPES = ['image/jpeg', 'image/png', 'image/webp'];
+const XML_TYPES = ['application/xml', 'text/xml'];
 
 export class Nokfi implements INodeType {
 	description: INodeTypeDescription = {
@@ -55,7 +56,7 @@ export class Nokfi implements INodeType {
 						value: 'extract',
 						action: 'Extract invoice data',
 						description:
-							'Read invoices (PDF, JPG, PNG, WebP or text) and return structured data with validation checks',
+							'Read invoices (PDF, JPG, PNG, WebP, text or e-invoice XML) and return structured data with validation checks',
 					},
 				],
 				default: 'extract',
@@ -478,7 +479,10 @@ export class Nokfi implements INodeType {
 							const mime = (meta.mimeType || '').toLowerCase();
 							const buffer = await this.helpers.getBinaryDataBuffer(i, name);
 							const fileName = meta.fileName || name;
-							if (mime === 'application/pdf' || IMAGE_TYPES.includes(mime)) {
+							if (XML_TYPES.includes(mime) || /\.(xml|xsig)$/i.test(fileName)) {
+								// E-invoice (Facturae, UBL, CII): read exactly, no AI, no quota.
+								docs.push({ name: fileName, mime: 'application/xml', data: buffer.toString('base64') });
+							} else if (mime === 'application/pdf' || IMAGE_TYPES.includes(mime)) {
 								docs.push({ name: fileName, mime, data: buffer.toString('base64') });
 							} else if (mime.startsWith('text/')) {
 								docs.push({ name: fileName, text: buffer.toString('utf8') });

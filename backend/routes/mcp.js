@@ -24,13 +24,13 @@ const SERVER_INFO = { name: 'nokfi', title: 'Nokfi', version: '1.1.0' };
 const PROTOCOL_VERSIONS = ['2025-11-25', '2025-06-18', '2025-03-26'];
 const LANGS = ['es', 'en', 'fr', 'it', 'de', 'pl'];
 
-const INSTRUCTIONS = 'Nokfi is an AI for small-business documents and finance (Spain). Use extract_invoices to turn invoices (PDF/image as base64, or text) into validated JSON: the checks object is computed by Nokfi, not by the AI. Use analyze for financial reports. Every extract_invoices call and every analysis uses 1 analysis of the user\'s daily quota; check get_usage first when running many. The tax tools (validate_tax_id, calculate_vat, calculate_withholding, estimate_model_130, fiscal_calendar) are deterministic Spanish tax calculations and do NOT use quota: prefer them over doing the math yourself. With a test key (nk_test_) AI tools return realistic sample data.';
+const INSTRUCTIONS = 'Nokfi is an AI for small-business documents and finance (Spain). Use extract_invoices to turn invoices (PDF/image as base64, or text) into validated JSON: the checks object is computed by Nokfi, not by the AI. Structured e-invoices (Facturae, UBL, CII, Factur-X/ZUGFeRD PDF) are read exactly, without AI and without quota. Use analyze for financial reports. Every analysis and every extract_invoices call that needs the AI uses 1 analysis of the user\'s daily quota; check get_usage first when running many. The tax tools (validate_tax_id, calculate_vat, calculate_withholding, estimate_model_130, fiscal_calendar) are deterministic Spanish tax calculations and do NOT use quota: prefer them over doing the math yourself. With a test key (nk_test_) AI tools return realistic sample data.';
 
 const TOOLS = [
   {
     name: 'extract_invoices',
     title: 'Extract invoices',
-    description: 'Extract structured data from up to 5 invoices (PDF, JPG, PNG, WebP as base64, or plain text). Returns issuer, NIF, number, dates, base, VAT, withholding and total, plus deterministic checks (totals, Spanish NIF/CIF/NIE check digit, date, VAT rate) and warnings. Nothing is stored. Uses 1 analysis of the daily quota.',
+    description: 'Extract structured data from up to 5 invoices (PDF, JPG, PNG, WebP as base64, plain text, or e-invoice XML). Returns issuer, NIF, number, dates, base, VAT, withholding and total, plus deterministic checks (totals, Spanish NIF/CIF/NIE check digit, date, VAT rate) and warnings. Nothing is stored. E-invoices (Facturae 3.2.x, UBL 2.x, CII, Factur-X/ZUGFeRD embedded in a PDF) are read exactly without AI and do not use quota (ai_used: false, source_format set); otherwise uses 1 analysis of the daily quota.',
     inputSchema: {
       type: 'object',
       properties: {
@@ -40,9 +40,9 @@ const TOOLS = [
             type: 'object',
             properties: {
               name: { type: 'string', description: 'File name' },
-              mime: { type: 'string', enum: ['application/pdf', 'image/jpeg', 'image/png', 'image/webp'] },
+              mime: { type: 'string', enum: ['application/pdf', 'image/jpeg', 'image/png', 'image/webp', 'application/xml', 'text/xml'] },
               data: { type: 'string', description: 'File content in base64 (max 5 MB)' },
-              text: { type: 'string', description: 'Alternative to data: invoice text' }
+              text: { type: 'string', description: 'Alternative to data: invoice text or e-invoice XML' }
             }
           }
         },

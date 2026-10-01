@@ -1478,6 +1478,8 @@ async function main() {
   await require('./session9.tests')({ post, put, get, call, check, checkAsync, getDB });
   // Sesión 10 — frontend P2 (lo que toca el backend).
   await require('./session10.tests')({ post, put, get, call, check, checkAsync, getDB });
+  // Sesión 11 — factura electrónica B2B + VERI*FACTU.
+  await require('./session11.tests')({ post, put, get, call, check, checkAsync, getDB });
 
   } catch (e) {
     console.error('TEST CRASH:', e.message);

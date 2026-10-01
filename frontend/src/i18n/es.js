@@ -1022,7 +1022,7 @@ export default {
     spec: 'Especificación completa:', createKey: 'Crear una clave',
     ep_invoices: 'Extraer facturas con validaciones',
     invoicesTitle: 'Facturas: del PDF al JSON validado',
-    invoicesText: 'Envía hasta 5 facturas por petición (PDF, JPG, PNG o WebP en base64, o el texto ya extraído) y recibe siempre el mismo JSON. Cada petición gasta 1 análisis de tu cuota. No guardamos el archivo ni los datos (en modo asíncrono, el resultado se guarda 24 h para que lo recojas).',
+    invoicesText: 'Envía hasta 5 facturas por petición (PDF, JPG, PNG o WebP en base64, o el texto ya extraído) y recibe siempre el mismo JSON. Cada petición gasta 1 análisis de tu cuota. No guardamos el archivo ni los datos (en modo asíncrono, el resultado se guarda 24 h para que lo recojas). Las facturas electrónicas (Facturae, UBL, CII o Factur-X/ZUGFeRD con el XML dentro del PDF) se leen tal cual, sin IA: el resultado es exacto y no gastan cuota.',
     invoicesChecks: 'Nokfi comprueba cada factura por su cuenta, sin fiarse de la IA: que base + IVA − retención cuadre con el total, el dígito de control del NIF/CIF/NIE, que la fecha sea válida y no futura y que el tipo de IVA sea habitual. Lo que no cuadra llega en warnings. Los PDF escaneados vuelven en errors (pdf_scanned): envíalos como imagen.',
     mcpTitle: 'Servidor MCP para agentes de IA',
     mcpText: 'Conecta Nokfi como herramienta de Claude, ChatGPT, Cursor o el AI Agent de n8n. Usa la misma clave de API, la misma cuota y las mismas reglas que la API.',

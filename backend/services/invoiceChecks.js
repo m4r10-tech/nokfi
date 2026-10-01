@@ -44,7 +44,8 @@ const today = () => new Date().toISOString().slice(0, 10);
 function checkInvoice(inv, refDate = today()) {
   const warnings = [];
   const w = (code, message) => warnings.push({ code, message });
-  const hasAmounts = inv.total > 0 || inv.base > 0;
+  // Las rectificativas (abonos) llegan en negativo y también tienen importes.
+  const hasAmounts = inv.total !== 0 || inv.base !== 0;
   const totals_ok = hasAmounts && Math.abs(inv.base + inv.vat_amount - inv.irpf_amount - inv.total) <= 0.05;
   if (!hasAmounts) w('amounts_missing', 'No se han podido leer los importes.');
   else if (!totals_ok) w('totals_mismatch', 'Base + IVA − retención no coincide con el total.');

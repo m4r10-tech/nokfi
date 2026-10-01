@@ -1019,7 +1019,7 @@ export default {
     spec: 'Full specification:', createKey: 'Create a key',
     ep_invoices: 'Extract invoices with validation',
     invoicesTitle: 'Invoices: from PDF to validated JSON',
-    invoicesText: 'Send up to 5 invoices per request (PDF, JPG, PNG or WebP in base64, or text you already extracted) and always get the same JSON back. Each request uses 1 analysis from your quota. We store neither the file nor the data (in async mode, the result is kept for 24 h so you can collect it).',
+    invoicesText: 'Send up to 5 invoices per request (PDF, JPG, PNG or WebP in base64, or text you already extracted) and always get the same JSON back. Each request uses 1 analysis from your quota. We store neither the file nor the data (in async mode, the result is kept for 24 h so you can collect it). E-invoices (Facturae, UBL, CII or Factur-X/ZUGFeRD with the XML inside the PDF) are read as they are, without AI: the result is exact and they don\'t use quota.',
     invoicesChecks: 'Nokfi checks every invoice itself, without trusting the AI: base + VAT − withholding must match the total, the NIF/CIF/NIE check digit, a valid, non-future date and a usual VAT rate. Anything that doesn’t add up comes back in warnings. Scanned PDFs come back in errors (pdf_scanned): send them as images.',
     mcpTitle: 'MCP server for AI agents',
     mcpText: 'Connect Nokfi as a tool for Claude, ChatGPT, Cursor or n8n’s AI Agent. It uses the same API key, the same quota and the same rules as the API.',

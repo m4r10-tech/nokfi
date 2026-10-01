@@ -1,5 +1,9 @@
 # Changelog
 
+## Unreleased
+
+- Invoice › Extract reads **e-invoices** exactly, without AI and without using quota: Facturae 3.2.x (.xml/.xsig), UBL 2.x, CII and Factur-X/ZUGFeRD PDFs (`source_format` in the output, `ai_used: false`).
+
 ## 0.2.0
 
 - New **Nokfi Trigger** node: starts a workflow on Analysis Completed, Job Completed, Job Failed, Quota Threshold (80 % / 100 %) or Fiscal Deadline (7 days and 1 day before). Registers and deletes its webhook automatically and verifies the `Nokfi-Signature` HMAC.

@@ -1025,7 +1025,7 @@ export default {
     spec: 'Pełna specyfikacja:', createKey: 'Utwórz klucz',
     ep_invoices: 'Odczyt faktur z walidacją',
     invoicesTitle: 'Faktury: z PDF do zweryfikowanego JSON',
-    invoicesText: 'Wyślij do 5 faktur na żądanie (PDF, JPG, PNG lub WebP w base64 albo już wyodrębniony tekst) i zawsze otrzymasz ten sam JSON. Każde żądanie zużywa 1 analizę z limitu. Nie przechowujemy ani pliku, ani danych (w trybie asynchronicznym wynik jest dostępny przez 24 h).',
+    invoicesText: 'Wyślij do 5 faktur na żądanie (PDF, JPG, PNG lub WebP w base64 albo już wyodrębniony tekst) i zawsze otrzymasz ten sam JSON. Każde żądanie zużywa 1 analizę z limitu. Nie przechowujemy ani pliku, ani danych (w trybie asynchronicznym wynik jest dostępny przez 24 h). E-faktury (Facturae, UBL, CII lub Factur-X/ZUGFeRD z XML wewnątrz PDF) są odczytywane bezpośrednio, bez AI: wynik jest dokładny i nie zużywają limitu.',
     invoicesChecks: 'Nokfi sam sprawdza każdą fakturę, bez ufania AI: netto + VAT − potrącenie równe sumie, cyfra kontrolna hiszpańskiego NIF/CIF/NIE, poprawna i nieprzyszła data, typowa stawka VAT. To, co się nie zgadza, trafia do warnings. Zeskanowane PDF wracają w errors (pdf_scanned): wyślij je jako obraz.',
     mcpTitle: 'Serwer MCP dla agentów AI',
     mcpText: 'Podłącz Nokfi jako narzędzie w Claude, ChatGPT, Cursor lub AI Agent w n8n. Ten sam klucz API, ten sam limit i te same zasady co API.',
