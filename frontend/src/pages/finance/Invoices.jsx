@@ -300,7 +300,7 @@ function InvoiceDetail({ id, onClose, onChanged }) {
               ) : inv.paid ? (
                 <button onClick={() => changeStatus({ status: 'unpaid' }, 'invoices.unpaidOk')} disabled={busy} className="btn btn-secondary btn-sm"><Undo2 size={14} /> {t('invoices.unmarkPaid')}</button>
               ) : (<>
-                <button onClick={() => { setError(null); setReason(''); setStep('reject'); }} className="btn btn-ghost btn-sm" style={{ color: 'var(--negative)' }}><XCircle size={14} /> {t('invoices.rejected')}</button>
+                <button onClick={() => { setError(null); setReason(''); setStep('reject'); }} className="btn btn-ghost btn-sm" style={{ color: 'var(--negative)' }}><XCircle size={14} /> {t('invoices.reject')}</button>
                 <button onClick={() => { setError(null); setPaidDate(todayIso()); setStep('paid'); }} className="btn btn-secondary btn-sm"><Check size={14} /> {t('invoices.markPaid')}</button>
               </>)}
             </div>
