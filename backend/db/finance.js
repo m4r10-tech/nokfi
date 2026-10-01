@@ -94,8 +94,10 @@ function listLedger(license_id, { from, to, type } = {}) {
   if (from && ISO.test(from)) { where.push('invoice_date >= ?'); args.push(from); }
   if (to && ISO.test(to)) { where.push('invoice_date <= ?'); args.push(to); }
   if (type === 'income' || type === 'expense') { where.push('type = ?'); args.push(type); }
-  return getDB().prepare(`SELECT * FROM ledger_entries WHERE ${where.join(' AND ')} ORDER BY invoice_date DESC, id DESC LIMIT 5000`)
-    .all(...args).map(r => ({ ...r, party_name: nameCase(r.party_name), paid: !!r.paid, needs_review: !!r.needs_review }));
+  // Sesión 11: is_rectification marca el apunte de una rectificativa emitida en Nokfi.
+  return getDB().prepare(`SELECT l.*, EXISTS(SELECT 1 FROM invoices i WHERE i.id = l.invoice_id AND i.rectifies_id IS NOT NULL) AS is_rectification
+    FROM ledger_entries l WHERE ${where.map(w => `l.${w}`).join(' AND ')} ORDER BY l.invoice_date DESC, l.id DESC LIMIT 5000`)
+    .all(...args).map(r => ({ ...r, party_name: nameCase(r.party_name), paid: !!r.paid, needs_review: !!r.needs_review, is_rectification: !!r.is_rectification }));
 }
 
 function allEntries(license_id) {

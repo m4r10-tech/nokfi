@@ -170,14 +170,15 @@ export default function Ledger() {
                 </div>
                 <div className="text-right shrink-0">
                   <p className="text-sm font-semibold tabular" style={{ color: e.type === 'income' ? 'var(--positive)' : 'var(--text-primary)' }}>
-                    {e.type === 'income' ? '+' : '−'}{eur(e.total, lang)}
+                    {(e.type === 'income') === (e.total >= 0) ? '+' : '−'}{eur(Math.abs(e.total), lang)}
                   </p>
                   <p className="text-[11px] tabular" style={{ color: 'var(--text-muted)' }}>{t('finance.vat')} {eur(e.vat_amount, lang)}</p>
                 </div>
+                {e.is_rectification ? <span className="shrink-0 hidden sm:inline-flex"><Badge tone="accent">{t('invoices.state.rectification')}</Badge></span> : (
                 <button onClick={() => togglePaid(e)} className="shrink-0 hidden sm:inline-flex" title={e.type === 'income' ? t('finance.markCollected') : t('finance.markPaid')}>
                   {e.paid ? <Badge tone="positive"><Check size={11} /> {e.type === 'income' ? t('finance.collected') : t('finance.paid')}</Badge>
                     : <Badge tone={e.type === 'income' ? 'warning' : 'muted'}>{e.type === 'income' ? t('finance.pendingCollection') : t('finance.pendingPayment')}</Badge>}
-                </button>
+                </button>)}
                 {/* Sesión 10: iconos discretos en escritorio (aparecen al pasar por la fila) y
                     solo el lápiz en móvil, para que se lea el nombre. */}
                 {/* Sesión 11: el apunte de una factura emitida en Nokfi se cambia rectificando la factura. */}
