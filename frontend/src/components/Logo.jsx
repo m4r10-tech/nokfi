@@ -28,17 +28,18 @@ export default function Logo({ variant = 'default', size = 'md' }) {
     return (
       <div className={`inline-flex items-center gap-2 px-4 py-2 rounded-lg ${fontSize} font-semibold tracking-tight`}
         style={{ background: 'var(--accent)', color: '#FFFFFF' }}>
-        <img src="/icons/icon-192.png" alt="Nokfi" width={iconSize} height={iconSize} />
+        <img src="/icons/icon-192.png" alt="" width={iconSize} height={iconSize} />
         nokfi
       </div>
     );
   }
 
   // Default: marca (N azul transparente) + texto. Sidebar, login, reset, etc.
+  // alt="" (sesión 12): el texto «nokfi» ya da el nombre; sin repetirlo.
   return (
     <span className={`inline-flex items-center gap-2 ${fontSize} font-semibold tracking-tight select-none`}
       style={{ color: 'var(--text-primary)' }}>
-      <img src="/favicon.svg" alt="Nokfi" width={iconSize} height={iconSize} />
+      <img src="/favicon.svg" alt="" width={iconSize} height={iconSize} />
       nokfi
     </span>
   );

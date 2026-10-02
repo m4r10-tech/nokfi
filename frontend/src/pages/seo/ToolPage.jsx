@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import { Link } from 'react-router-dom';
 import { CalendarDays, CheckCircle2, XCircle, ShieldCheck } from 'lucide-react';
 import { IvaCalc, IrpfCalc, AutonomoCalc, EmpleadoCalc, HoraCalc } from '../../components/calculators';
@@ -8,6 +8,7 @@ import { SITE, pageById, CALENDAR_YEARS } from '../../seo/routes';
 import { deadlinesFor } from '../../utils/fiscalCalendar';
 import { validSpanishTaxId } from '../../utils/invoiceDoubts';
 import { isoDate } from '../../utils/money';
+import { track } from '../../utils/track';
 import {
   SeoShell, Breadcrumbs, PageIntro, ContentSections, Faq, TrialCta, RelatedGuides, RelatedTools,
   useSeoContent, useUpdatedLabel, toolKey, CONTENT_UPDATED
@@ -47,13 +48,18 @@ export default function ToolPage({ id }) {
   });
 
   const Calc = CALCS[key];
+  // Primer uso de la herramienta en esta visita (escribir, elegir una opción…).
+  const used = useRef(false);
+  const onUse = () => { if (!used.current) { used.current = true; track('tool_use'); } };
   return (
     <SeoShell>
       <Breadcrumbs trail={[[ui.home, path('home')], [h1, page.paths[l]]]} />
       <PageIntro h1={h1} intro={fill(tool.intro, vars)} updated={useUpdatedLabel()} />
-      {Calc && <Calc ledger={null} />}
-      {key === 'calendario' && <CalendarTool year={page.year} />}
-      {key === 'nif' && <NifTool />}
+      <div onInput={onUse} onClick={(e) => { if (e.target.closest('button, select, input')) onUse(); }}>
+        {Calc && <Calc ledger={null} />}
+        {key === 'calendario' && <CalendarTool year={page.year} />}
+        {key === 'nif' && <NifTool />}
+      </div>
       <p className="mt-3 text-xs flex items-start gap-1.5" style={{ color: 'var(--text-muted)' }}>
         <ShieldCheck size={13} className="shrink-0 mt-0.5" /> {ui.privacyNote} {ui.disclaimer}
       </p>
@@ -89,6 +95,8 @@ function CalendarTool({ year }) {
         ]} />
         {other && <Link to={path(`calendario-${other}`)} className="text-sm hover:underline" style={{ color: 'var(--accent-text)' }}>{fill(C.otherYear, { y: other })} →</Link>}
       </div>
+      {/* Hueco reservado: el próximo plazo se calcula en el navegador (sin salto al aparecer). */}
+      <div className="min-h-[52px]">
       {next && (
         <div className="rounded-xl p-4 flex items-center gap-3" style={{ background: 'var(--accent-soft)' }} aria-live="polite">
           <CalendarDays size={18} style={{ color: 'var(--accent-text)' }} />
@@ -98,6 +106,7 @@ function CalendarTool({ year }) {
           </p>
         </div>
       )}
+      </div>
       <div className="flex flex-col gap-5">
         {Object.entries(byMonth).map(([m, items]) => (
           <section key={m}>
@@ -105,7 +114,7 @@ function CalendarTool({ year }) {
             <ul className="flex flex-col gap-1.5">
               {items.map(d => (
                 <li key={d.key} className="flex items-center gap-3 rounded-xl px-3 py-2.5"
-                  style={{ background: 'var(--surface-2)', opacity: today && d.date < today ? 0.55 : 1 }}>
+                  style={{ background: 'var(--surface-2)', opacity: today && d.date < today ? 0.8 : 1 }}>
                   <time dateTime={d.date} className="text-sm tabular w-16 shrink-0 font-medium" style={{ color: 'var(--text-primary)' }}>{isoDate(d.date, l, { day: 'numeric', month: 'short' })}</time>
                   <span className="flex-1 min-w-0">
                     <span className="block text-sm font-medium" style={{ color: 'var(--text-primary)' }}>{fill(C.models, { m: d.models.join(', ') })} · {d.period}</span>

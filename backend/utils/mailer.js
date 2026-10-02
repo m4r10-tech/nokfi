@@ -531,6 +531,10 @@ async function sendOpsReportEmail({ to, report: r }) {
         li(`Cobros de Stripe: ${a.paid} · pagos fallidos: ${a.payment_failed} · cancelaciones: ${a.cancelled}`),
         li(`Inicios de sesión: ${a.logins} · facturas añadidas al libro: ${a.ledger_entries}`)
       ])}
+      ${r.web ? block(`Web pública (${r.web.day}; visitas en Cloudflare Web Analytics)`, [
+        li(`Clics en «Probar gratis»: ${r.web.totals.cta_trial} · pagos empezados: ${r.web.totals.checkout_start} · usos de herramientas: ${r.web.totals.tool_use}`),
+        ...r.web.top.map(e => li(`${e.count}× ${e.name} ${e.path || '(sin ruta)'}`))
+      ]) : ''}
     `
   });
   return dispatch({ to, subject, html });

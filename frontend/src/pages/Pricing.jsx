@@ -12,6 +12,7 @@ import { PublicHeader, PublicFooter, usePublicPath } from '../components/PublicC
 import { useShake } from '../hooks/useShake';
 import { usePlans } from '../hooks/usePlans';
 import { useSeo, ldGraph, softwareLd } from '../seo/useSeo';
+import { track } from '../utils/track';
 import { localeOf } from '../utils/dates';
 import { EMAIL_REGEX } from '../utils/license';
 
@@ -90,6 +91,7 @@ export default function Pricing() {
     if (res.ok && res.data.checkout_url) {
       // El spinner se mantiene hasta que el navegador sale hacia Stripe
       // (evita un segundo clic que crearía otra sesión de checkout).
+      track('checkout_start');
       window.location.href = res.data.checkout_url;
       return;
     }

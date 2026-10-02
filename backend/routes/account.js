@@ -164,4 +164,13 @@ telemetry.post('/', errorLimiter, (req, res) => {
   res.status(204).end();
 });
 
-module.exports = { keys, me, telemetry, recordError };
+/* ── Sesión 12: eventos de la web pública (sin cookies, solo recuentos) ── */
+const webEvents = express.Router();
+const eventLimiter = rateLimit({ windowMs: 60 * 1000, max: 30, standardHeaders: true, legacyHeaders: false, message: { error: 'rate_limited' } });
+webEvents.post('/', eventLimiter, (req, res) => {
+  const { recordEvent } = require('../services/webEvents');
+  if (!recordEvent(req.body?.name, req.body?.path)) return res.status(400).json({ error: 'invalid_input' });
+  res.status(204).end();
+});
+
+module.exports = { keys, me, telemetry, webEvents, recordError };

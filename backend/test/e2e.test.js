@@ -1481,6 +1481,8 @@ async function main() {
   // Sesión 11 — factura electrónica B2B + VERI*FACTU.
   await require('./session11.tests')({ post, put, get, call, check, checkAsync, getDB });
   await require('./session11b.tests')({ post, put, get, call, check, checkAsync, getDB });
+  // Sesión 12 — SEO: eventos de la web pública sin cookies.
+  await require('./session12.tests')({ post, put, get, call, check, checkAsync, getDB });
 
   } catch (e) {
     console.error('TEST CRASH:', e.message);

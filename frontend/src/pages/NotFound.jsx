@@ -1,7 +1,7 @@
 import { Link } from 'react-router-dom';
 import { Compass } from 'lucide-react';
 import { useLang } from '../context/LangContext';
-import { usePageMeta } from '../hooks/usePageMeta';
+import { useSeo } from '../seo/useSeo';
 import Logo from '../components/Logo';
 import { usePublicPath } from '../components/PublicChrome';
 
@@ -15,7 +15,8 @@ import { usePublicPath } from '../components/PublicChrome';
 export default function NotFound() {
   const { t } = useLang();
   const pub = usePublicPath();
-  usePageMeta(t('meta.notFoundTitle'));
+  // Sesión 12: noindex para que Google no la tome por una página normal (soft 404).
+  useSeo({ title: t('meta.notFoundTitle'), noindex: true });
 
   return (
     <div className="min-h-screen flex flex-col items-center justify-center px-4" style={{ background: 'var(--bg-base)' }}>

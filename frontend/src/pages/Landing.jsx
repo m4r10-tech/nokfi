@@ -10,6 +10,7 @@ import PlanCards from '../components/PlanCards';
 import { PublicHeader, PublicFooter, usePublicPath } from '../components/PublicChrome';
 import { usePlans } from '../hooks/usePlans';
 import { useSeo, ldGraph, faqLd, softwareLd } from '../seo/useSeo';
+import { track } from '../utils/track';
 import { useReveal, useCountUp } from '../hooks/useReveal';
 import { localeOf } from '../utils/dates';
 
@@ -102,7 +103,7 @@ export default function Landing() {
               {t('landing.heroSubtitle')}
             </p>
             <div className="anim-enter mt-8 flex flex-col sm:flex-row gap-3 w-full sm:w-auto" style={{ '--i': 3 }}>
-              <button onClick={() => navigate(pub('pricing'))} className="btn btn-primary !h-12 !px-6 !text-[15px]">
+              <button onClick={() => { track('cta_trial'); navigate(pub('pricing')); }} className="btn btn-primary !h-12 !px-6 !text-[15px]">
                 {t('landing.heroCta')} <ArrowRight size={16} />
               </button>
               <a href="#como-funciona" className="btn btn-secondary !h-12 !px-6 !text-[15px]">{t('landing.heroSecondary')}</a>
@@ -165,7 +166,7 @@ export default function Landing() {
         <Section id="precios" eyebrow={t('landing.navPricing')} title={t('landing.plansHeading')} subtitle={t('landing.plansSubtitle')}>
           <div className="flex flex-col items-center">
             <PlanCards plans={plans} notLoaded={notLoaded} failed={failed}
-              ctaLabel={t('landing.choosePlan')} onChoose={(id) => navigate(`${pub('pricing')}?plan=${encodeURIComponent(id)}`)} loadingId={null} />
+              ctaLabel={t('landing.choosePlan')} onChoose={(id) => { track('cta_trial'); navigate(`${pub('pricing')}?plan=${encodeURIComponent(id)}`); }} loadingId={null} />
           </div>
         </Section>
 
@@ -218,7 +219,7 @@ export default function Landing() {
             <h2 className="relative text-3xl md:text-4xl font-semibold tracking-tight max-w-xl" style={{ color: 'var(--text-primary)' }}>{t('landing.finalTitle')}</h2>
             <p className="relative text-base max-w-md" style={{ color: 'var(--text-secondary)' }}>{t('landing.finalSubtitle')}</p>
             <div className="relative flex flex-col sm:flex-row gap-3 w-full sm:w-auto mt-1">
-              <button onClick={() => navigate(pub('pricing'))} className="btn btn-primary !h-12 !px-6 !text-[15px]">
+              <button onClick={() => { track('cta_trial'); navigate(pub('pricing')); }} className="btn btn-primary !h-12 !px-6 !text-[15px]">
                 {t('landing.finalCta')} <ArrowRight size={16} />
               </button>
               <Link to="/login" className="btn btn-ghost !h-12 !px-6 !text-[15px]">{t('landing.finalLogin')}</Link>

@@ -265,6 +265,7 @@ app.use('/api/invoicing', require('./routes/invoicing')); // sesión 11: emisió
 app.use('/api/keys', accountRoutes.keys);           // claves de API (F4)
 app.use('/api/me', accountRoutes.me);               // descargar / borrar mis datos (C9)
 app.use('/api/client-errors', accountRoutes.telemetry); // errores del frontend (C8)
+app.use('/api/events', accountRoutes.webEvents);       // eventos de la web pública, sin cookies (sesión 12)
 app.use('/api/share', shareRoutes.share);          // enlaces de solo lectura para la gestoría
 app.use('/api/shared', shareRoutes.shared);        // vista pública del enlace (token)
 app.use('/api/v1', v1Routes);                       // API pública para automatizaciones (F4)

@@ -5,6 +5,7 @@ import { PublicHeader, PublicFooter } from '../../components/PublicChrome';
 import { pathFor, seoLang, pageById, TOOL_IDS, CALENDAR_YEARS } from '../../seo/routes';
 import { AUTONOMO_TABLE, EMPLOYER_RATES } from '../../utils/spainRates';
 import { formatNumber } from '../../utils/money';
+import { track } from '../../utils/track';
 import es from '../../seo/content/es';
 import en from '../../seo/content/en';
 
@@ -182,7 +183,7 @@ export function TrialCta() {
       <h2 className="text-lg font-semibold" style={{ color: 'var(--text-primary)' }}>{ui.ctaTitle}</h2>
       <p className="mt-2 text-[15px] leading-relaxed" style={{ color: 'var(--text-secondary)' }}>{ui.ctaText}</p>
       <div className="mt-5 flex flex-wrap gap-3">
-        <Link to={path('pricing')} className="btn btn-primary">{ui.ctaButton} <ArrowRight size={16} /></Link>
+        <Link to={path('pricing')} onClick={() => track('cta_trial')} className="btn btn-primary">{ui.ctaButton} <ArrowRight size={16} /></Link>
         <Link to={path('home')} className="btn btn-secondary">{ui.ctaSecondary}</Link>
       </div>
     </aside>

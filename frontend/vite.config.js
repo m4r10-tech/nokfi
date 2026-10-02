@@ -27,10 +27,17 @@ export default defineConfig({
         assetFileNames: (info) => (/\.mjs$/.test(info.name || '') ? 'assets/[name]-[hash].js' : 'assets/[name]-[hash][extname]'),
         // C7: librerías pesadas en chunks con nombre propio (se cargan bajo
         // demanda y las de exportación no se precachean en la PWA).
+        // Sesión 12: React, el runtime de Babel y DOMPurify van aparte. Sin
+        // esto, Rollup metía React en vendor-charts y el helper de precarga de
+        // Vite en vendor-jspdf, y la landing descargaba ~1,3 MB que no usa.
         manualChunks(id) {
+          if (id.includes('vite/preload-helper')) return 'vendor-runtime';
           if (!id.includes('node_modules')) return undefined;
+          if (/[\\/]node_modules[\\/](react|react-dom|scheduler|react-router|react-router-dom|@remix-run[\\/]router)[\\/]/.test(id)) return 'vendor-react';
+          if (/[\\/]@babel[\\/]runtime[\\/]/.test(id)) return 'vendor-runtime';
+          if (/[\\/]dompurify[\\/]/.test(id)) return 'vendor-purify';
           if (/[\\/](docx|pptxgenjs|jszip)[\\/]/.test(id)) return 'vendor-export';
-          if (/[\\/](jspdf|jspdf-autotable|html2canvas|canvg|dompurify)[\\/]/.test(id)) return 'vendor-jspdf';
+          if (/[\\/](jspdf|jspdf-autotable|html2canvas|canvg)[\\/]/.test(id)) return 'vendor-jspdf';
           if (/[\\/]pdfjs-dist[\\/]/.test(id)) return 'vendor-pdfjs';
           if (/[\\/]xlsx[\\/]/.test(id)) return 'vendor-xlsx';
           if (/[\\/](recharts|d3-[a-z]+|victory-vendor)[\\/]/.test(id)) return 'vendor-charts';

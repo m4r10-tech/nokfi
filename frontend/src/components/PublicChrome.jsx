@@ -108,17 +108,17 @@ export function PublicFooter() {
       <div className="max-w-6xl mx-auto px-4 pt-8 grid gap-6 sm:grid-cols-[minmax(0,2fr)_minmax(0,1fr)]">
         <nav aria-label={t('seo.toolsHeading')}>
           <p className="text-xs font-semibold mb-2" style={{ color: 'var(--text-primary)' }}>{t('seo.toolsHeading')}</p>
-          <ul className="grid grid-cols-1 min-[420px]:grid-cols-2 gap-x-5 gap-y-1.5 text-xs" style={{ color: 'var(--text-secondary)' }}>
+          <ul className="grid grid-cols-1 min-[420px]:grid-cols-2 gap-x-5 gap-y-0.5 text-xs" style={{ color: 'var(--text-secondary)' }}>
             {TOOL_IDS.map(id => (
-              <li key={id}><Link to={pub(id)} className="hover:underline">{t(`seo.tool_${id.startsWith('calendario') ? 'calendario' : id}`)}</Link></li>
+              <li key={id}><Link to={pub(id)} className="inline-flex items-center min-h-6 hover:underline">{t(`seo.tool_${id.startsWith('calendario') ? 'calendario' : id}`)}</Link></li>
             ))}
           </ul>
         </nav>
         <nav aria-label={t('seo.guidesHeading')}>
           <p className="text-xs font-semibold mb-2" style={{ color: 'var(--text-primary)' }}>{t('seo.resourcesHeading')}</p>
-          <ul className="flex flex-col gap-y-1.5 text-xs" style={{ color: 'var(--text-secondary)' }}>
-            <li><Link to={pub('guides')} className="hover:underline">{t('seo.guidesHeading')}</Link></li>
-            <li><Link to={pub('api-docs')} className="hover:underline">{t('help.apiDocs')}</Link></li>
+          <ul className="flex flex-col gap-y-0.5 text-xs" style={{ color: 'var(--text-secondary)' }}>
+            <li><Link to={pub('guides')} className="inline-flex items-center min-h-6 hover:underline">{t('seo.guidesHeading')}</Link></li>
+            <li><Link to={pub('api-docs')} className="inline-flex items-center min-h-6 hover:underline">{t('help.apiDocs')}</Link></li>
           </ul>
         </nav>
       </div>
@@ -127,12 +127,12 @@ export function PublicFooter() {
           <Logo variant="icon" size="sm" />
           <p className="text-xs" style={{ color: 'var(--text-muted)' }}>© {new Date().getFullYear()} Nokfi · {t('footer.rights')}</p>
         </div>
-        <nav className="flex flex-wrap justify-center items-center gap-x-5 gap-y-2 text-xs" style={{ color: 'var(--text-secondary)' }}>
-          <Link to={pub('pricing')} className="hover:underline">{t('landing.plansHeading')}</Link>
-          <Link to="/privacidad" className="hover:underline">{t('landing.privacyLink')}</Link>
-          <Link to="/terminos" className="hover:underline">{t('legal.terms')}</Link>
-          <Link to={`${pub('home')}#contacto`} className="hover:underline">{t('landing.contactLink')}</Link>
-          <Link to="/login" className="hover:underline">{t('landing.login')}</Link>
+        <nav className="flex flex-wrap justify-center items-center gap-x-5 gap-y-1 text-xs" style={{ color: 'var(--text-secondary)' }}>
+          <Link to={pub('pricing')} className="inline-flex items-center min-h-6 hover:underline">{t('landing.plansHeading')}</Link>
+          <Link to="/privacidad" className="inline-flex items-center min-h-6 hover:underline">{t('landing.privacyLink')}</Link>
+          <Link to="/terminos" className="inline-flex items-center min-h-6 hover:underline">{t('legal.terms')}</Link>
+          <Link to={`${pub('home')}#contacto`} className="inline-flex items-center min-h-6 hover:underline">{t('landing.contactLink')}</Link>
+          <Link to="/login" className="inline-flex items-center min-h-6 hover:underline">{t('landing.login')}</Link>
         </nav>
         <LangSwitch />
       </div>

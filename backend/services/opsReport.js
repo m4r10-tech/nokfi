@@ -79,12 +79,15 @@ function buildOpsReport(now = new Date()) {
   const mailFails = db.prepare(`SELECT detail, COUNT(*) c FROM audit_log WHERE ts >= ${since} AND event = 'EMAIL_FAILED'
     GROUP BY detail ORDER BY c DESC LIMIT 5`).all();
 
+  const yesterday = new Date(now.getTime() - 86400000).toISOString().slice(0, 10);
+  const web = require('./webEvents').eventsForDay(yesterday);
   const backup = backupStatus(now.getTime());
   const disk = diskStatus();
   const report = {
     date: now.toISOString().slice(0, 10),
     backup, disk,
     errors, errorsTotal: errors.reduce((s, e) => s + e.c, 0),
+    web: { day: yesterday, ...web },
     ai: { ok: ev('AI_ANALYSIS_GENERATED'), failed: ev('AI_ANALYSIS_FAILED'), providerFails: aiFails, usage: providerUsage(now) },
     mail: { failed: mailFails },
     activity: {

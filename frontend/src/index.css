@@ -1,4 +1,23 @@
-@import url('https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700&display=swap');
+/* Sesión 12: Plus Jakarta Sans alojada en Nokfi (public/fonts, licencia OFL).
+   Antes venía de Google Fonts: bloqueaba el primer pintado (~0,8 s en móvil) y
+   enviaba la IP de cada visita a Google. Fuente variable: un archivo por
+   alfabeto cubre los pesos 400-700. latin-ext: polaco y otros acentos. */
+@font-face {
+  font-family: 'Plus Jakarta Sans';
+  font-style: normal;
+  font-weight: 400 700;
+  font-display: swap;
+  src: url('/fonts/PlusJakartaSans-latin.woff2') format('woff2');
+  unicode-range: U+0000-00FF, U+0131, U+0152-0153, U+02BB-02BC, U+02C6, U+02DA, U+02DC, U+0304, U+0308, U+0329, U+2000-206F, U+20AC, U+2122, U+2191, U+2193, U+2212, U+2215, U+FEFF, U+FFFD;
+}
+@font-face {
+  font-family: 'Plus Jakarta Sans';
+  font-style: normal;
+  font-weight: 400 700;
+  font-display: swap;
+  src: url('/fonts/PlusJakartaSans-latin-ext.woff2') format('woff2');
+  unicode-range: U+0100-02BA, U+02BD-02C5, U+02C7-02CC, U+02CE-02D7, U+02DD-02FF, U+0304, U+0308, U+0329, U+1D00-1DBF, U+1E00-1E9F, U+1EF2-1EFF, U+2020, U+20A0-20AB, U+20AD-20C0, U+2113, U+2C60-2C7F, U+A720-A7FF;
+}
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
@@ -19,7 +38,7 @@ html.theme-dark {
 
   --text-primary: #FFFFFF;
   --text-secondary: #A3A3A3;
-  --text-muted: #6B7280;
+  --text-muted: #818896; /* sesión 12: ≥ 4,5:1 sobre bg-base, surface-1 y surface-2 (WCAG AA); antes #6B7280 (3,5:1) */
 
   --accent: #1456A2;
   --accent-hover: #0F427D;
@@ -46,7 +65,7 @@ html.theme-light {
 
   --text-primary: #0F172A;
   --text-secondary: #475569;
-  --text-muted: #94A3B8;
+  --text-muted: #5F6B7E; /* sesión 12: ≥ 4,5:1 sobre blanco y surfaces (WCAG AA); antes #94A3B8 (2,5:1) */
 
   --accent: #3B82F6;
   --accent-hover: #2563EB;
