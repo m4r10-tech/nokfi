@@ -3,7 +3,7 @@ import { useParams } from 'react-router-dom';
 import { Eye, Loader2, Link2Off } from 'lucide-react';
 import { useLang } from '../context/LangContext';
 import { shareApi } from '../middleware/api';
-import { usePageMeta } from '../hooks/usePageMeta';
+import { useSeo } from '../seo/useSeo';
 import { PublicHeader, PublicFooter } from '../components/PublicChrome';
 import { Section, Kpi } from '../components/ui';
 import ExportMenu from '../components/ExportMenu';
@@ -22,7 +22,8 @@ export default function Compartido() {
   const [year, setYear] = useState(null);
   const [data, setData] = useState(null);
   const [failed, setFailed] = useState(false);
-  usePageMeta(t('share.metaTitle'));
+  // Sesión 12: enlace privado de solo lectura → fuera de Google.
+  useSeo({ title: t('share.metaTitle'), noindex: true });
 
   useEffect(() => {
     const meta = document.createElement('meta');

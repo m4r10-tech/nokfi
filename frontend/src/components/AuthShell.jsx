@@ -1,5 +1,6 @@
 import { Link } from 'react-router-dom';
 import Logo from './Logo';
+import { usePublicPath } from './PublicChrome';
 
 /**
  * Carcasa de las pantallas de acceso (login, recuperar, reset, reveal) —
@@ -7,11 +8,12 @@ import Logo from './Logo';
  * pie con enlaces. En móvil la tarjeta pierde el borde y ocupa el ancho.
  */
 export default function AuthShell({ children, footer }) {
+  const pub = usePublicPath();
   return (
     <div className="min-h-[100dvh] flex flex-col items-center justify-center px-4 py-10" style={{ background: 'var(--bg-base)' }}>
       <div className="w-full max-w-sm anim-enter">
         <div className="flex justify-center mb-8">
-          <Link to="/home" aria-label="Nokfi" className="rounded-lg"><Logo size="lg" /></Link>
+          <Link to={pub('home')} aria-label="Nokfi" className="rounded-lg"><Logo size="lg" /></Link>
         </div>
         <div className="rounded-2xl p-6 sm:p-8" style={{ background: 'var(--surface-1)', border: '1px solid var(--border)' }}>
           {children}

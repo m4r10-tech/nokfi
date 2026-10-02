@@ -3,6 +3,7 @@ import { Compass } from 'lucide-react';
 import { useLang } from '../context/LangContext';
 import { usePageMeta } from '../hooks/usePageMeta';
 import Logo from '../components/Logo';
+import { usePublicPath } from '../components/PublicChrome';
 
 /**
  * Página 404 — antes cualquier ruta desconocida redirigía a /login (Navigate),
@@ -13,6 +14,7 @@ import Logo from '../components/Logo';
  */
 export default function NotFound() {
   const { t } = useLang();
+  const pub = usePublicPath();
   usePageMeta(t('meta.notFoundTitle'));
 
   return (
@@ -23,7 +25,7 @@ export default function NotFound() {
         <Compass size={36} style={{ color: 'var(--accent-text)' }} />
         <h1 className="text-xl font-semibold" style={{ color: 'var(--text-primary)' }}>{t('notFound.title')}</h1>
         <p className="text-sm" style={{ color: 'var(--text-secondary)' }}>{t('notFound.desc')}</p>
-        <Link to="/home" className="btn btn-primary mt-2">
+        <Link to={pub('home')} className="btn btn-primary mt-2">
           {t('notFound.cta')}
         </Link>
       </div>

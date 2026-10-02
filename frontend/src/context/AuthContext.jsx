@@ -1,4 +1,4 @@
-import { createContext, useContext, useEffect, useState, useCallback } from 'react';
+import { createContext, useContext, useEffect, useState, useCallback, startTransition } from 'react';
 import { authApi, setSessionToken, setSessionExpiredHandler } from '../middleware/api';
 import { useToast } from './ToastContext';
 import { useLang } from './LangContext';
@@ -36,7 +36,9 @@ export function AuthProvider({ children }) {
 
   useEffect(() => {
     const stored = sessionStorage.getItem(SESSION_STORAGE_KEY);
-    if (!stored) { setStatus('unauthenticated'); return; }
+    // startTransition (sesión 12): en una página prerenderizada este cambio
+    // llega mientras React aún hidrata; así no obliga a repintarla.
+    if (!stored) { startTransition(() => setStatus('unauthenticated')); return; }
     setSessionToken(stored);
 
     // #2 (sesión 2): solo un rechazo DEFINITIVO del servidor (401/403) cierra
@@ -53,8 +55,10 @@ export function AuthProvider({ children }) {
       authApi.verify().then(({ ok, status: st, data }) => {
         if (cancelled) return;
         if (ok && data.valid) {
-          setLicense(data.license);
-          setStatus('authenticated');
+          startTransition(() => {
+            setLicense(data.license);
+            setStatus('authenticated');
+          });
           return;
         }
         if (st === 401 || st === 403) { handleLogout(); return; }

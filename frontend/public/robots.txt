@@ -1,16 +1,20 @@
 # Nokfi — robots.txt
-# Zonas públicas indexables: /home (landing; / redirige a /home), /pricing, /privacidad.
-# Zonas privadas o sin valor de indexación: /app/* (requiere sesión),
-# /login, /reset-password, /recuperar, /reveal (lleva la clave del comprador).
+# Indexable: la landing (/home y /en), precios, las herramientas y guías
+# públicas (sesión 12, en castellano en la raíz y en inglés bajo /en/), la
+# documentación de la API y los textos legales. Lista completa: sitemap.xml
+# (generado en el build desde src/seo/routes.js).
+# Fuera de Google: /app/* (requiere sesión), el acceso, /reveal (lleva la clave
+# del comprador), /compartido (enlaces privados de solo lectura; además noindex)
+# y la API.
 
 User-agent: *
-Allow: /$
-Allow: /home
-Allow: /pricing
-Allow: /privacidad
+Allow: /
 Disallow: /app
 Disallow: /login
 Disallow: /reset-password
 Disallow: /recuperar
 Disallow: /reveal
+Disallow: /compartido/
 Disallow: /api/
+
+Sitemap: https://nokfi.app/sitemap.xml

@@ -703,8 +703,8 @@ export default {
     backToLogin: 'Wróć do logowania'
   },
   meta: {
-    landingTitle: 'Nokfi — Twoja firma pod kontrolą',
-    landingDesc: 'Nokfi — diagnoza finansowa i analiza danych z AI dla samozatrudnionych i MŚP.',
+    landingTitle: 'Nokfi — Faktury, podatki i finanse dla samozatrudnionych i MŚP',
+    landingDesc: 'Odczytuj faktury z AI, licz VAT i podatek dochodowy w Hiszpanii, wystawiaj faktury VERI*FACTU i pilnuj płatności oraz terminów. 14 dni za darmo.',
     pricingTitle: 'Plany i ceny — Nokfi',
     pricingDesc: 'Plany subskrypcji Nokfi: Mini, Pro i Max. 14 dni za darmo, bez zobowiązań.',
     loginTitle: 'Logowanie — Nokfi',
@@ -1349,5 +1349,7 @@ export default {
     mcpTools: 'Narzędzia: extract_invoices, analyze, validate_tax_id, calculate_vat, calculate_withholding, estimate_model_130, fiscal_calendar, get_usage, list_analyses, get_analysis, issue_invoice, list_invoices, get_invoice, cancel_invoice i set_invoice_status.'
   },
   crash: { title: 'Coś poszło nie tak', desc: 'Zarejestrowaliśmy błąd, aby go naprawić. Odśwież stronę, aby kontynuować.', reload: 'Odśwież' },
-  update: { available: 'Dostępna jest nowa wersja Nokfi.', reload: 'Odśwież' }
+  update: { available: 'Dostępna jest nowa wersja Nokfi.', reload: 'Odśwież' },
+  // Sesión 12 (SEO): pie de las páginas públicas.
+  seo: { toolsHeading: 'Darmowe narzędzia', resourcesHeading: 'Zasoby', guidesHeading: 'Poradniki dla samozatrudnionych i MŚP', tool_autonomo: 'Kalkulator składek samozatrudnionych (Hiszpania)', tool_iva: 'Kalkulator VAT (Hiszpania)', tool_irpf: 'Kalkulator potrącenia IRPF', tool_empleado: 'Kalkulator kosztu pracownika', tool_hora: 'Kalkulator stawki godzinowej', tool_calendario: 'Kalendarz podatkowy (Hiszpania)', tool_nif: 'Walidator NIF, NIE i CIF' }
 };

@@ -1,5 +1,7 @@
-import { createContext, useContext, useState, useMemo, useEffect, useCallback } from 'react';
+import { createContext, useContext, useState, useMemo, useEffect, useCallback, startTransition } from 'react';
+import { useLocation } from 'react-router-dom';
 import { translate, loadLanguage, isSupported } from '../i18n';
+import { effectiveLang } from '../seo/routes';
 
 const LangContext = createContext(null);
 const STORAGE_KEY = 'nokfi_lang';
@@ -16,6 +18,10 @@ const API_BASE = import.meta.env.VITE_API_URL || 'http://localhost:3001/api';
  *      no se guarda) — desempata cuando el navegador está en otro idioma;
  *   4) inglés si el navegador habla un idioma no soportado; castellano si no
  *      hay ninguna pista.
+ *
+ * Sesión 12 (SEO): en las páginas públicas con URL por idioma (/calculadora-iva
+ * y /en/spain-vat-calculator) se muestra el idioma de la URL (seo/routes.js →
+ * effectiveLang). `lang` es el idioma mostrado; `userLang`, el del visitante.
  */
 const COUNTRY_LANG = {
   ES: 'es', MX: 'es', AR: 'es', CO: 'es', CL: 'es', PE: 'es', VE: 'es', EC: 'es', GT: 'es', CU: 'es', BO: 'es', DO: 'es',
@@ -42,13 +48,18 @@ function storedLang() {
 
 export function LangProvider({ children }) {
   const initial = storedLang() || browserLang().code || 'es';
-  const [lang, setLangState] = useState(initial);
+  const [userLang, setLangState] = useState(initial);
+  const { pathname } = useLocation();
+  const lang = effectiveLang(pathname, userLang);
   const [, setLoaded] = useState(0); // fuerza re-render cuando llega un diccionario
 
   const apply = useCallback(async (code) => {
     await loadLanguage(code).catch(() => {});
-    setLoaded(x => x + 1);
-    setLangState(code);
+    // startTransition (sesión 12): no interrumpe la hidratación de una página prerenderizada.
+    startTransition(() => {
+      setLoaded(x => x + 1);
+      setLangState(code);
+    });
   }, []);
 
   // Carga el diccionario inicial si no va en el bundle, y detecta por país
@@ -80,7 +91,7 @@ export function LangProvider({ children }) {
 
   const t = useMemo(() => (key, vars) => translate(lang, key, vars), [lang]);
 
-  return <LangContext.Provider value={{ lang, setLang, t }}>{children}</LangContext.Provider>;
+  return <LangContext.Provider value={{ lang, userLang, setLang, t }}>{children}</LangContext.Provider>;
 }
 
 export function useLang() {

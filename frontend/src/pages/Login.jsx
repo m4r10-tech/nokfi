@@ -8,6 +8,7 @@ import { useAuth } from '../context/AuthContext';
 import { useLang } from '../context/LangContext';
 import PasswordGenerator from '../components/PasswordGenerator';
 import AuthShell, { FormMessage } from '../components/AuthShell';
+import { usePublicPath } from '../components/PublicChrome';
 import FormField from '../components/FormField';
 import { useShake } from '../hooks/useShake';
 import { formatLicenseKey, KEY_REGEX, EMAIL_REGEX } from '../utils/license';
@@ -35,6 +36,7 @@ export default function Login() {
 
   const { applySession } = useAuth();
   const { t } = useLang();
+  const pub = usePublicPath();
   const navigate = useNavigate();
   usePageMeta(t('meta.loginTitle'));
 
@@ -119,7 +121,7 @@ export default function Login() {
   return (
     <AuthShell footer={<>
       <Link to="/recuperar" className="hover:underline" style={{ color: 'var(--text-secondary)' }}>{t('login.forgotKey')} →</Link>
-      <Link to="/pricing" className="hover:underline" style={{ color: 'var(--text-secondary)' }}>{t('login.noLicense')} →</Link>
+      <Link to={pub('pricing')} className="hover:underline" style={{ color: 'var(--text-secondary)' }}>{t('login.noLicense')} →</Link>
     </>}>
       <h1 className="text-xl font-semibold tracking-tight" style={{ color: 'var(--text-primary)' }}>
         {mode === 'activate' ? t('login.activateTitle') : t('login.title')}

@@ -8,6 +8,8 @@ import ProtectedRoute from './components/ProtectedRoute';
 import ErrorBoundary from './components/ErrorBoundary';
 import UpdatePrompt from './components/UpdatePrompt';
 import lazyWithReload from './utils/lazyWithReload';
+import { SEO_PAGES } from './seo/routes';
+import { useLang } from './context/LangContext';
 
 // La home pública y el login van en el bundle inicial (primera visita).
 import Landing from './pages/Landing';
@@ -25,6 +27,10 @@ const ApiDocs = lazy(() => import('./pages/ApiDocs'));
 const Compartido = lazy(() => import('./pages/Compartido'));
 const Legal = lazy(() => import('./pages/Legal'));
 const NotFound = lazy(() => import('./pages/NotFound'));
+// Sesión 12 (SEO): páginas públicas de herramientas y guías.
+const ToolPage = lazy(() => import('./pages/seo/ToolPage'));
+const GuidePage = lazy(() => import('./pages/seo/GuidePage'));
+const GuidesIndex = lazy(() => import('./pages/seo/GuidesIndex'));
 const DashboardLayout = lazy(() => import('./layouts/DashboardLayout'));
 const Home = lazy(() => import('./pages/Home'));
 const Cuestionario = lazy(() => import('./pages/Cuestionario'));
@@ -72,17 +78,15 @@ export default function App() {
             {/* Sesión 3 (Tanda H): la home pública vive en /home; "/" redirige
                 CONSERVANDO query y hash (Stripe vuelve a /?cancelled=true). */}
             <Route path="/" element={<RootRedirect />} />
-            <Route path="/home" element={<Landing />} />
+            {/* Sesión 12: páginas públicas indexables (es en la raíz, en bajo /en), desde seo/routes.js */}
+            {SEO_PAGES.flatMap(page => Object.values(page.paths).map(path => (
+              <Route key={path} path={path} element={seoElement(page, path)} />
+            )))}
             <Route path="/login" element={<Login />} />
             <Route path="/reset-password" element={<ResetPassword />} />
             <Route path="/recuperar" element={<Recuperar />} />
             <Route path="/reveal" element={<Reveal />} />
-            <Route path="/pricing" element={<Pricing />} />
-            <Route path="/privacidad" element={<Privacidad />} />
-            <Route path="/api-docs" element={<ApiDocs />} />
             <Route path="/compartido/:token" element={<Compartido />} />
-            <Route path="/terminos" element={<Legal kind="terms" />} />
-            <Route path="/encargo-tratamiento" element={<Legal kind="dpa" />} />
 
             <Route
               path="/app"
@@ -145,7 +149,24 @@ export default function App() {
 
 function RootRedirect() {
   const { search, hash } = useLocation();
-  return <Navigate to={`/home${search}${hash}`} replace />;
+  const { userLang } = useLang();
+  return <Navigate to={`${userLang === 'en' ? '/en' : '/home'}${search}${hash}`} replace />;
+}
+
+/** Componente de cada página pública de seo/routes.js. `key` = ruta: cambiar de herramienta reinicia su estado. */
+function seoElement(page, path) {
+  if (page.tool || page.toolId) return <ToolPage key={path} id={page.id} />;
+  if (page.guide) return <GuidePage key={path} id={page.guide} />;
+  switch (page.id) {
+    case 'home': return <Landing />;
+    case 'pricing': return <Pricing />;
+    case 'api-docs': return <ApiDocs />;
+    case 'privacy': return <Privacidad />;
+    case 'terms': return <Legal kind="terms" />;
+    case 'dpa': return <Legal kind="dpa" />;
+    case 'guides': return <GuidesIndex key={path} />;
+    default: return <NotFound />;
+  }
 }
 
 function RouteFallback() {

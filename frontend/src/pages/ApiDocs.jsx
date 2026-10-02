@@ -2,7 +2,7 @@ import { Link } from 'react-router-dom';
 import { Copy, KeyRound, Workflow, FileJson, Lock, Receipt, Bot, Calculator, Webhook, FlaskConical } from 'lucide-react';
 import { useLang } from '../context/LangContext';
 import { useToast } from '../context/ToastContext';
-import { usePageMeta } from '../hooks/usePageMeta';
+import { useSeo } from '../seo/useSeo';
 import { PublicHeader, PublicFooter } from '../components/PublicChrome';
 import { N8N_TEMPLATES } from './dev/templates';
 
@@ -159,7 +159,7 @@ const ENDPOINTS = [
 export default function ApiDocs() {
   const { t } = useLang();
   const toast = useToast();
-  usePageMeta(t('apiDocs.metaTitle'), t('apiDocs.metaDesc'));
+  useSeo({ title: t('apiDocs.metaTitle'), description: t('apiDocs.metaDesc') });
   const copy = async (text) => { try { await navigator.clipboard.writeText(text); toast.success(t('common.copied')); } catch { /* nada */ } };
 
   return (

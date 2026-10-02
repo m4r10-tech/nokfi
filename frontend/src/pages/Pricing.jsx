@@ -8,10 +8,10 @@ import { useLang } from '../context/LangContext';
 import PlanCards from '../components/PlanCards';
 import FormField from '../components/FormField';
 import { FormMessage } from '../components/AuthShell';
-import { PublicHeader, PublicFooter } from '../components/PublicChrome';
+import { PublicHeader, PublicFooter, usePublicPath } from '../components/PublicChrome';
 import { useShake } from '../hooks/useShake';
 import { usePlans } from '../hooks/usePlans';
-import { usePageMeta } from '../hooks/usePageMeta';
+import { useSeo, ldGraph, softwareLd } from '../seo/useSeo';
 import { localeOf } from '../utils/dates';
 import { EMAIL_REGEX } from '../utils/license';
 
@@ -40,7 +40,8 @@ export default function Pricing() {
   const checkoutRef = useRef(null);
   const emailRef = useRef(null);
   const [formRef, shake] = useShake();
-  usePageMeta(t('meta.pricingTitle'), t('meta.pricingDesc'));
+  const pub = usePublicPath();
+  useSeo({ title: t('meta.pricingTitle'), description: t('meta.pricingDesc'), jsonLd: ldGraph(softwareLd(plans, t('meta.pricingDesc'))) });
 
   const selected = plans.find(p => p.id === selectedId) || null;
 
@@ -155,7 +156,7 @@ export default function Pricing() {
         )}
 
         <div className="mt-12 flex flex-col sm:flex-row items-center gap-3 sm:gap-6 text-sm">
-          <Link to="/home#faq" className="hover:underline" style={{ color: 'var(--text-secondary)' }}>{t('pricing.faqLink')} →</Link>
+          <Link to={`${pub('home')}#faq`} className="hover:underline" style={{ color: 'var(--text-secondary)' }}>{t('pricing.faqLink')} →</Link>
           <Link to="/login" className="hover:underline" style={{ color: 'var(--text-secondary)' }}>{t('pricing.goLogin')} →</Link>
         </div>
       </main>

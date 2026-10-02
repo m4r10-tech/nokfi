@@ -700,8 +700,8 @@ export default {
     backToLogin: 'Zurück zur Anmeldung'
   },
   meta: {
-    landingTitle: 'Nokfi — Dein Unternehmen im Griff',
-    landingDesc: 'Nokfi — Finanzdiagnose und Datenanalyse mit KI für Selbstständige und KMU.',
+    landingTitle: 'Nokfi — Rechnungen, Steuern und Finanzen für Selbstständige und KMU',
+    landingDesc: 'Rechnungen mit KI lesen, MwSt. und Einkommensteuer in Spanien berechnen, VERI*FACTU-Rechnungen ausstellen, Zahlungen und Fristen im Blick. 14 Tage kostenlos.',
     pricingTitle: 'Pläne und Preise — Nokfi',
     pricingDesc: 'Nokfi-Abos: Mini, Pro und Max. 14 Tage gratis testen, ohne Bindung.',
     loginTitle: 'Anmelden — Nokfi',
@@ -1342,5 +1342,7 @@ export default {
     mcpTools: 'Tools: extract_invoices, analyze, validate_tax_id, calculate_vat, calculate_withholding, estimate_model_130, fiscal_calendar, get_usage, list_analyses, get_analysis, issue_invoice, list_invoices, get_invoice, cancel_invoice und set_invoice_status.'
   },
   crash: { title: 'Etwas ist schiefgelaufen', desc: 'Wir haben den Fehler protokolliert, um ihn zu beheben. Lade die Seite neu, um fortzufahren.', reload: 'Neu laden' },
-  update: { available: 'Eine neue Version von Nokfi ist verfügbar.', reload: 'Neu laden' }
+  update: { available: 'Eine neue Version von Nokfi ist verfügbar.', reload: 'Neu laden' },
+  // Sesión 12 (SEO): pie de las páginas públicas.
+  seo: { toolsHeading: 'Kostenlose Tools', resourcesHeading: 'Ressourcen', guidesHeading: 'Leitfäden für Selbstständige und KMU', tool_autonomo: 'Rechner für Selbstständigenbeiträge (Spanien)', tool_iva: 'MwSt.-Rechner (Spanien)', tool_irpf: 'IRPF-Einbehaltsrechner', tool_empleado: 'Arbeitgeberkosten-Rechner', tool_hora: 'Stundensatz-Rechner', tool_calendario: 'Steuerkalender (Spanien)', tool_nif: 'NIF-, NIE- und CIF-Prüfer' }
 };

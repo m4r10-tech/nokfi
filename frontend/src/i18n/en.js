@@ -701,8 +701,8 @@ export default {
     backToLogin: 'Back to sign in'
   },
   meta: {
-    landingTitle: 'Nokfi — Your business, under control',
-    landingDesc: 'Nokfi — AI-powered financial diagnosis and data analysis for freelancers and small businesses.',
+    landingTitle: 'Nokfi — Invoices, taxes and finances for freelancers and SMEs',
+    landingDesc: 'Read invoices with AI, work out Spanish VAT (303) and income tax (130), issue VERI*FACTU invoices and track payments and tax deadlines. Try it free for 14 days.',
     pricingTitle: 'Plans & pricing — Nokfi',
     pricingDesc: 'Nokfi subscription plans: Mini, Pro and Max. 14-day free trial, no lock-in.',
     loginTitle: 'Sign in — Nokfi',
@@ -1343,5 +1343,7 @@ export default {
     mcpTools: 'Tools: extract_invoices, analyze, validate_tax_id, calculate_vat, calculate_withholding, estimate_model_130, fiscal_calendar, get_usage, list_analyses, get_analysis, issue_invoice, list_invoices, get_invoice, cancel_invoice and set_invoice_status.'
   },
   crash: { title: 'Something went wrong', desc: 'We have logged the error so we can fix it. Reload the page to continue.', reload: 'Reload' },
-  update: { available: 'A new version of Nokfi is available.', reload: 'Reload' }
+  update: { available: 'A new version of Nokfi is available.', reload: 'Reload' },
+  // Sesión 12 (SEO): pie de las páginas públicas.
+  seo: { toolsHeading: 'Free tools', resourcesHeading: 'Resources', guidesHeading: 'Guides for freelancers and small businesses', tool_autonomo: 'Spain self-employed quota calculator', tool_iva: 'Spain VAT calculator', tool_irpf: 'IRPF withholding calculator', tool_empleado: 'Employee cost calculator', tool_hora: 'Hourly rate calculator', tool_calendario: 'Spain tax calendar', tool_nif: 'Spanish NIF, NIE and CIF validator' }
 };

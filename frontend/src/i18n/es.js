@@ -704,8 +704,8 @@ export default {
     backToLogin: 'Volver al inicio de sesión'
   },
   meta: {
-    landingTitle: 'Nokfi — Tu negocio, bajo control',
-    landingDesc: 'Nokfi — Diagnóstico financiero y análisis de datos con IA para autónomos y pymes.',
+    landingTitle: 'Nokfi — Facturas, impuestos y finanzas para autónomos y pymes',
+    landingDesc: 'Lee tus facturas con IA, calcula el 303 y el 130, emite facturas con VERI*FACTU y controla cobros y plazos fiscales. Para autónomos y pymes. 14 días gratis.',
     pricingTitle: 'Planes y precios — Nokfi',
     pricingDesc: 'Planes de suscripción de Nokfi: Mini, Pro y Max. Prueba gratis 14 días, sin permanencia.',
     loginTitle: 'Iniciar sesión — Nokfi',
@@ -1346,5 +1346,7 @@ export default {
     mcpTools: 'Herramientas: extract_invoices, analyze, validate_tax_id, calculate_vat, calculate_withholding, estimate_model_130, fiscal_calendar, get_usage, list_analyses, get_analysis, issue_invoice, list_invoices, get_invoice, cancel_invoice y set_invoice_status.'
   },
   crash: { title: 'Algo ha fallado', desc: 'Hemos registrado el error para arreglarlo. Recarga la página para seguir.', reload: 'Recargar' },
-  update: { available: 'Hay una versión nueva de Nokfi.', reload: 'Recargar' }
+  update: { available: 'Hay una versión nueva de Nokfi.', reload: 'Recargar' },
+  // Sesión 12 (SEO): pie de las páginas públicas.
+  seo: { toolsHeading: 'Herramientas gratis', resourcesHeading: 'Recursos', guidesHeading: 'Guías para autónomos y pymes', tool_autonomo: 'Calculadora de cuota de autónomos', tool_iva: 'Calculadora de IVA', tool_irpf: 'Calculadora de retención de IRPF', tool_empleado: 'Calculadora del coste de un empleado', tool_hora: 'Calculadora de precio por hora', tool_calendario: 'Calendario fiscal', tool_nif: 'Validador de NIF, NIE y CIF' }
 };

@@ -4,12 +4,13 @@ const ThemeContext = createContext(null);
 const STORAGE_KEY = 'nokfi_theme';
 
 export function ThemeProvider({ children }) {
-  const [theme, setTheme] = useState(() => localStorage.getItem(STORAGE_KEY) || 'dark');
+  // try: en el prerender (Node) no hay localStorage → oscuro, el tema por defecto.
+  const [theme, setTheme] = useState(() => { try { return localStorage.getItem(STORAGE_KEY) || 'dark'; } catch { return 'dark'; } });
 
   useEffect(() => {
     document.documentElement.classList.remove('theme-dark', 'theme-light');
     document.documentElement.classList.add(`theme-${theme}`);
-    localStorage.setItem(STORAGE_KEY, theme);
+    try { localStorage.setItem(STORAGE_KEY, theme); } catch { /* storage bloqueado */ }
   }, [theme]);
 
   const toggleTheme = () => setTheme(t => (t === 'dark' ? 'light' : 'dark'));

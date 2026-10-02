@@ -19,23 +19,43 @@ import { paymentsApi } from '../middleware/api';
  *
  * No lanza: si la red cae, falla a `failed:true` y la app degrada con elegancia.
  */
+/**
+ * Sesión 12 (SEO): el prerender pide el catálogo a la API, lo pasa con
+ * setPrerenderPlans() y lo deja en el HTML (<script id="nokfi-plans">).
+ * Así la página prerenderizada lleva los precios y, al hidratar, el navegador
+ * arranca con los mismos datos; después se piden igualmente a la API.
+ */
+let prerenderPlans = null;
+export function setPrerenderPlans(raw) { prerenderPlans = raw; }
+
+const toPlans = (raw) => raw.map(p => ({
+  id: p.id,
+  name: p.name,
+  price: String(p.price_eur),
+  highlight: p.id === 'pro',
+  trial: !!p.trial
+}));
+
+function initialPlans() {
+  if (prerenderPlans) return toPlans(prerenderPlans);
+  if (typeof document === 'undefined') return null;
+  try {
+    const raw = JSON.parse(document.getElementById('nokfi-plans')?.textContent || 'null');
+    return Array.isArray(raw) && raw.length ? toPlans(raw) : null;
+  } catch { return null; }
+}
+
 export function usePlans() {
-  const [plans, setPlans] = useState([]);
+  const [plans, setPlans] = useState(() => initialPlans() || []);
   const [failed, setFailed] = useState(false);
-  const [notLoaded, setNotLoaded] = useState(true);
+  const [notLoaded, setNotLoaded] = useState(() => !plans.length);
 
   useEffect(() => {
     let cancelled = false;
     paymentsApi.getPlans().then(({ ok, data }) => {
       if (cancelled) return;
       if (ok && Array.isArray(data.plans) && data.plans.length) {
-        setPlans(data.plans.map(p => ({
-          id: p.id,
-          name: p.name,
-          price: String(p.price_eur),
-          highlight: p.id === 'pro',
-          trial: !!p.trial
-        })));
+        setPlans(toPlans(data.plans));
         setFailed(false);
       } else {
         setFailed(true);

@@ -700,8 +700,8 @@ export default {
     backToLogin: 'Retour à la connexion'
   },
   meta: {
-    landingTitle: 'Nokfi — Votre activité, sous contrôle',
-    landingDesc: 'Nokfi — Diagnostic financier et analyse de données avec l’IA pour indépendants et PME.',
+    landingTitle: 'Nokfi — Factures, impôts et finances pour indépendants et PME',
+    landingDesc: 'Lisez vos factures avec l’IA, calculez la TVA et l’impôt trimestriels en Espagne, émettez des factures VERI*FACTU et suivez paiements et échéances. 14 jours offerts.',
     pricingTitle: 'Offres et tarifs — Nokfi',
     pricingDesc: 'Abonnements Nokfi : Mini, Pro et Max. 14 jours d’essai gratuit, sans engagement.',
     loginTitle: 'Connexion — Nokfi',
@@ -1342,5 +1342,7 @@ export default {
     mcpTools: 'Outils : extract_invoices, analyze, validate_tax_id, calculate_vat, calculate_withholding, estimate_model_130, fiscal_calendar, get_usage, list_analyses, get_analysis, issue_invoice, list_invoices, get_invoice, cancel_invoice et set_invoice_status.'
   },
   crash: { title: 'Un problème est survenu', desc: 'Nous avons enregistré l’erreur pour la corriger. Rechargez la page pour continuer.', reload: 'Recharger' },
-  update: { available: 'Une nouvelle version de Nokfi est disponible.', reload: 'Recharger' }
+  update: { available: 'Une nouvelle version de Nokfi est disponible.', reload: 'Recharger' },
+  // Sesión 12 (SEO): pie de las páginas públicas.
+  seo: { toolsHeading: 'Outils gratuits', resourcesHeading: 'Ressources', guidesHeading: 'Guides pour indépendants et PME', tool_autonomo: 'Calculateur de cotisation des indépendants (Espagne)', tool_iva: 'Calculateur de TVA (Espagne)', tool_irpf: 'Calculateur de retenue IRPF', tool_empleado: 'Calculateur du coût d’un salarié', tool_hora: 'Calculateur de tarif horaire', tool_calendario: 'Calendrier fiscal (Espagne)', tool_nif: 'Validateur de NIF, NIE et CIF' }
 };

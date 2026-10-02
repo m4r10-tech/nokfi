@@ -1,6 +1,6 @@
 import { Link } from 'react-router-dom';
 import { useLang } from '../context/LangContext';
-import { usePageMeta } from '../hooks/usePageMeta';
+import { useSeo } from '../seo/useSeo';
 import { PublicHeader, PublicFooter } from './PublicChrome';
 import { OWNER, HOSTING, ownerLine } from '../legal/owner';
 
@@ -12,7 +12,7 @@ import { OWNER, HOSTING, ownerLine } from '../legal/owner';
  */
 export default function LegalDoc({ doc, metaDesc, fallbackNote }) {
   const { t, lang } = useLang();
-  usePageMeta(`${doc.title} — Nokfi`, metaDesc);
+  useSeo({ title: `${doc.title} — Nokfi`, description: metaDesc });
   const hl = lang === 'es' ? 'es' : 'en';
   const hosting = HOSTING.name?.[hl] ? `${HOSTING.name[hl]} (${HOSTING.location[hl]}): ${hl === 'es' ? 'aloja la aplicación y la base de datos' : 'hosts the application and the database'}.` : null;
   const fill = (s) => String(s).replace('{OWNER}', ownerLine(lang)).replace('{HOSTING}', hosting || '');
