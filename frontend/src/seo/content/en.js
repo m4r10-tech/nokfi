@@ -486,7 +486,7 @@ export default {
         { q: 'Can I charge interest for late payment?', a: 'Between businesses, yes: Act 3/2004 lets you claim late-payment interest and €40 compensation per invoice.' },
         { q: 'Do I need a lawyer for a monitorio?', a: 'Not for debts up to €2,000. Above that, you need a lawyer and a court agent.' }
       ],
-      tool: 'nif', guides: ['factura', 'apartar']
+      guides: ['factura', 'apartar']
     }
   }
 };

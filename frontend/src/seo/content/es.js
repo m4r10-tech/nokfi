@@ -492,7 +492,7 @@ export default {
         { q: '¿Puedo cobrar intereses por el retraso?', a: 'Entre empresas, sí: la Ley 3/2004 permite reclamar intereses de demora y una indemnización de 40 € por factura.' },
         { q: '¿Necesito abogado para el monitorio?', a: 'No si la deuda es de hasta 2.000 €. Por encima, sí necesitas abogado y procurador.' }
       ],
-      tool: 'nif', guides: ['factura', 'apartar']
+      guides: ['factura', 'apartar']
     }
   }
 };
