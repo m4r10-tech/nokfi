@@ -187,7 +187,7 @@ export function AutonomoCalc({ ledger }) {
         <input type="checkbox" checked={flat} onChange={(e) => setFlat(e.target.checked)} className="w-4 h-4" /> {t('calc.autonomo.flat')}
       </label>
       <Result label={t('calc.autonomo.quota')} value={filled(income) ? f.eur(quota) : null}
-        hint={flat ? t('calc.autonomo.flatHint', { v: f.eur(AUTONOMO_FLAT_RATE) }) : t('calc.autonomo.bracket', { n: q.bracket, total: AUTONOMO_TABLE.length })}
+        hint={!filled(income) ? null : flat ? t('calc.autonomo.flatHint', { v: f.eur(AUTONOMO_FLAT_RATE) }) : t('calc.autonomo.bracket', { n: q.bracket, total: AUTONOMO_TABLE.length })}
         lines={[[t('calc.autonomo.netYield'), f.eur(r2(net))], [t('calc.autonomo.perYear'), f.eur(quota * 12), true]]} />
     </Panel>
   );
