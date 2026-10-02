@@ -4,12 +4,17 @@
 > que se usa para construir el frontend en concordancia exacta. Cualquier cambio
 > en las rutas del backend debe reflejarse aquí ANTES de tocar el frontend.
 >
-> Estado actual: **Fase 3** — modelo de **suscripción mensual** vía **Stripe**,
-> **3 Products separados** (Nokfi Mini / Pro / Max) con un Price recurrente
-> mensual EUR cada uno (Deuda B). Trial de 14 días en mini. Auth por
-> **email + clave + contraseña** (el viejo modelo de device-fingerprint se
-> eliminó en `f9385af`; el anti-sharing es la cuota diaria de IA por licencia).
-> PayPal / Revolut / Coinbase retirados — **Stripe es la única pasarela**.
+> Estado actual (**2026-10-02, sesión 12**): suscripción mensual con **Stripe**
+> (3 Products: Mini / Pro / Max; trial de 14 días en Mini; precios desde el
+> `.env`, catálogo en `GET /api/payments/plans`). Auth por **email + clave +
+> contraseña**. IA con **Groq → Cloudflare Workers AI → Cerebras** (Cerebras
+> caduca el 2026-10-29; topes en `utils/aiBudget.js`). Emisión de facturas con
+> **VERI*FACTU** (envío a la AEAT apagado: `VERIFACTU_ENV=off`), API pública
+> **v1**, servidor **MCP 1.2.0** y nodo **n8n 0.3.0**. e2e: **520**.
+>
+> §1-§6 son el contrato de la web; §8-§14 (al final) recogen lo añadido de la
+> sesión 4 a la 12. El detalle de la API pública está en
+> `GET /api/v1/openapi.json` y en la página pública `/api-docs`.
 
 ---
 
@@ -190,35 +195,33 @@ Cambia la contraseña SOLO de la licencia indicada (del email verificado) y
 
 ---
 
-## 2. Proxy de IA (`/api/proxy/ai`)  *(auth: Bearer)*
+## 2. Análisis con IA (`/api/ai/analyze`)  *(auth: Bearer)*
 
-Único punto de acceso a la IA — requiere sesión (`requireLicense`).
+> **`POST /api/proxy/ai` está retirado** (sesión 4, F2): responde
+> `410 { error: "client_outdated" }` para que una pestaña con el bundle viejo pida
+> recargar. El navegador ya no construye prompts.
 
-**Body:** `{ prompt (≤50.000), max_tokens? (default 1500, rango [100,4000]), kind? ('excel'|'cuestionario'|libre, ≤40), title? (≤120) }`
+**`POST /api/ai/analyze`** — `{ task, input, lang?, title?, job? }`; `task` = `cuestionario`, `excel`, `compare`, `folder` (informes), `folder_map` (notas de una carpeta) o `invoices` (leer facturas con IA).
+El backend arma el prompt (`services/ai/prompts.js`), llama a los proveedores en
+orden (`AI_PROVIDERS`, hoy `groq,cloudflare,cerebras`; si uno falla pasa al
+siguiente) y guarda el informe estructurado en `analyses` con su plan de acción
+(`action_items`, `GET/PATCH /api/actions`).
 
-**Efecto lateral (200):** además de `{ text }`, persiste el análisis en la tabla
-`analyses` (best-effort; un fallo de escritura nunca bloquea la respuesta). Solo
-guarda `kind`, `title`, `result_html`, `prompt_chars` (el conteo, **no** el prompt).
-
-**Cuota diaria por licencia (Deuda H, ATOMICA):** el límite se aplica reservando
-un slot en la tabla `ai_usage` (PK `license_id+day+slot`) mediante `reserveAiSlot`
-**antes** de llamar a Gemini. Como el INSERT es atómico (mejor-sqlite3 síncrono),
-no hay ventana TOCTOU: dos peticiones concurrentes nunca consiguen el mismo slot
-ni "ven" la cuota más vacía de lo que está. Si una petición **falla tras
-reservar** (502/503 o excepción), se llama a `releaseAiSlot` y el slot se libera
-→ el análisis fallido **NO consume cuota**. Solo un `200` mantiene el slot.
-
-Todos los errores incluyen `message` (texto en español para mostrar al usuario);
-el `error` (snake_case) sigue siendo el código estable para la lógica del frontend.
+**Cuota diaria por licencia (atómica):** `reserveAiSlot` reserva un hueco en
+`ai_usage` (PK `license_id+day+slot`) **antes** de llamar a la IA; si el análisis
+falla, `releaseAiSlot` lo libera (un fallo no gasta cuota). Mini 10, Pro 50,
+Max 130 al día; la API v1 comparte la misma cuota.
 
 | Status | Body | Cuándo |
 |--------|------|--------|
-| 200 | `{ text }` | Éxito (+ persistencia best-effort) |
-| 400 | `{ error: "invalid_prompt" \| "prompt_too_long" }` | Vacío o >50.000 |
-| 429 | `{ error: "license_daily_limit_reached", message: "Has agotado tu cuota diaria de N análisis…" }` | **Esta licencia** no tiene más slots hoy (cuota mini 10 / pro 50 / max 130) |
-| 500 | `{ error: "ai_not_configured", message }` | Falta `GEMINI_API_KEY` (o error interno genérico) |
-| 502 | `{ error: "ai_provider_error" \| "ai_empty_response", message }` | Gemini error / respuesta vacía (slot se libera) |
-| 503 | `{ error: "ai_quota_exceeded", message }` | Cuota free-tier global de Gemini (~1.500/día) — distinto del 429 (slot se libera) |
+| 200 | informe (`{ analysis_id, kind, title, report, health, actions, … }`), `{ notes }` (folder_map) o `{ invoices }` | Éxito |
+| 400 | `{ error: "invalid_input", message }` | Tipo o datos no válidos |
+| 429 | `{ error: "license_daily_limit_reached", message }` | Cuota del día agotada |
+| 500 | `{ error: "ai_not_configured", message }` | Ningún proveedor configurado |
+| 502 | `{ error: "ai_provider_error" \| "ai_empty_response", message }` | Fallaron todos los proveedores (no gasta cuota) |
+| 503 | `{ error: "ai_quota_exceeded", message }` | Tope global de gasto de IA del día (`utils/aiBudget.js`) |
+
+El asistente (`POST /api/chat`) usa `CHAT_PROVIDERS` y su propio límite por minuto (`CHAT_PER_MINUTE`).
 
 ---
 
@@ -423,6 +426,97 @@ Aplica a `/api/proxy/ai`, `/api/analyses`, `/api/profile`,
 
 > Ya **no** existe `device_mismatch` (era del modelo fingerprint, eliminado).
 > Centralizar este manejo en un interceptor único del cliente HTTP.
+
+---
+
+## 8. Libro, impuestos y panel  *(auth: Bearer)*
+
+| Ruta | Qué hace |
+|---|---|
+| `GET/POST /api/ledger`, `PATCH/DELETE /api/ledger/:id` | Libro de facturas recibidas y emitidas (base, IVA, IRPF, total, cobro) |
+| `GET /api/finance/taxes` · `PUT /api/finance/reserve` | 303 y 130 del trimestre desde el libro; lo apartado para Hacienda |
+| `GET /api/finance/receivables` · `POST /api/finance/collection-email` | Cobros pendientes y email de reclamación (amable, firme, formal) |
+| `GET /api/finance/leaks` · `POST/DELETE /api/finance/leaks/dismiss` | Fugas de dinero (suscripciones, subidas de proveedores…) |
+| `GET /api/finance/forecast` · `GET /api/finance/benchmark` | Previsión de caja y comparación con el sector |
+| `GET /api/finance/calendar?year=` | Calendario fiscal (`utils/fiscalCalendar.js`; la web pública usa una copia en `frontend/src/utils/fiscalCalendar.js`, comprobada con `npm run check:seo`) |
+| `GET /api/dashboard` | Resumen del panel de inicio |
+
+## 9. Emisión de facturas (`/api/invoicing`, sesión 11)  *(auth: Bearer)*
+
+Misma lógica para la app, la API v1 y el MCP (`services/invoicing`).
+
+| Ruta | Qué hace |
+|---|---|
+| `GET/PUT /settings` | Datos de facturación del emisor, series y numeración |
+| `GET/POST /customers`, `PATCH/DELETE /customers/:id` | Clientes |
+| `GET/POST /invoices`, `GET /invoices/:id` | Listar, emitir (con rectificativas) y ver con eventos y registro VERI*FACTU |
+| `POST /invoices/:id/cancel` · `POST /invoices/:id/status` | Anular (registro de anulación) · estado `rejected|accepted|paid|unpaid` |
+| `GET /invoices/:id/pdf` · `GET /invoices/:id/xml?format=ubl|facturae|facturx|cii` | PDF con QR y factura electrónica |
+| `POST /invoices/:id/send` | Enviar por email al cliente |
+| `GET /verifactu`, `GET /verifactu/chain`, `POST /verifactu/retry`, `POST /verifactu/records/:id/resubmit` | Panel VERI*FACTU: registros encadenados (SHA-256), comprobación de la cadena y reintentos |
+
+VERI*FACTU: `VERIFACTU_ENV=off|test|prod` (prod, además, `VERIFACTU_PROD_ENABLED=1`),
+`VERIFACTU_LICENSES` (licencias con envío), certificado `VERIFACTU_CERT_PATH` +
+`VERIFACTU_CERT_PASSWORD`, productor `VERIFACTU_PRODUCER_NAME` / `_NIF`. En producción
+está **apagado**: los registros se generan y quedan pendientes, no se envían.
+
+## 10. Cuenta, desarrolladores y telemetría
+
+| Ruta | Auth | Qué hace |
+|---|---|---|
+| `GET/POST /api/keys`, `GET /api/keys/summary`, `PATCH/DELETE /api/keys/:id` | Bearer | Claves de API: `nk_live_` (Pro y Max) y `nk_test_` (todos los planes) |
+| `GET /api/me/export` · `DELETE /api/me` | Bearer | Descargar todos mis datos · borrar la cuenta (RGPD) |
+| `GET/POST /api/share`, `DELETE /api/share/:id` · `GET /api/shared/:token` | Bearer · público | Enlaces de solo lectura para la gestoría (la página `/compartido/:token` lleva `noindex`) |
+| `/api/dev/*` (webhooks, deliveries, calls, clients, jobs, playground) | Bearer | Panel de Desarrolladores de la app |
+| `POST /api/client-errors` | público, 20/min | Errores técnicos del frontend (`client_errors`) |
+| `POST /api/events` | público, 30/min | **Sesión 12**: `{ name: 'cta_trial'|'checkout_start'|'tool_use', path }` → recuento por día, evento y ruta en `web_events` (sin IP, sin user-agent, sin cookies). Sale en el informe diario. 204 / 400 |
+| `GET /api/geo` | público | País de la conexión (cabecera de Cloudflare) para el idioma inicial; no se guarda |
+
+## 11. API pública v1 (`/api/v1`)  *(auth: `Bearer nk_live_…` o `nk_test_…`)*
+
+Para n8n, Make, Zapier o código propio. Límite `API_RATE_PER_MINUTE` (30/min por
+defecto) y la cuota diaria de IA de la licencia. `Idempotency-Key` en todos los
+POST (obligatoria al emitir y rectificar). `?async=true` o `Prefer: respond-async`
+en `analyze` e `invoices/extract` → `202` + job (`GET /api/v1/jobs/:id`, 24 h).
+Con `nk_test_` todo funciona sin gastar cuota: datos de ejemplo y facturas `TEST-…`
+que no entran al libro ni van a la AEAT.
+
+| Grupo | Rutas |
+|---|---|
+| Especificación | `GET /openapi.json` (pública) |
+| Cuota | `GET /usage` |
+| Análisis | `POST /analyze`, `GET /analyses`, `GET /analyses/:id` |
+| Facturas recibidas | `POST /invoices/extract` (PDF, imagen o texto con IA; XML UBL/Facturae/CII y Factur-X sin IA ni cuota) |
+| Emisión | `POST/GET /invoices`, `GET /invoices/:id`, `POST /invoices/:id/rectify`, `/cancel`, `/status`, `GET /invoices/:id/pdf`, `/xml?format=` · `GET/POST /customers` |
+| Herramientas sin IA | `GET/POST /tax/nif`, `POST /tax/vat`, `/tax/withholding`, `/tax/model-130`, `GET /tax/quarter`, `/tax/calendar` |
+| Jobs y webhooks | `GET /jobs[/:id]` · `GET/POST /webhooks`, `GET/PATCH/DELETE /webhooks/:id`, `POST /webhooks/:id/test` |
+
+## 12. Webhooks salientes
+
+Firmados con HMAC (secreto por endpoint, rotable), reintentos con espera
+creciente (1 min → 12 h) y reenvío manual desde el panel. Eventos:
+
+`analysis.completed` · `job.completed` · `job.failed` · `quota.threshold` (80 % y 100 %) ·
+`fiscal.deadline` (7 y 1 días antes) · `invoice.issued` · `invoice.cancelled` ·
+`invoice.rejected` · `invoice.accepted` · `invoice.paid` · `invoice.unpaid` ·
+`verifactu.accepted` · `verifactu.rejected`.
+
+(No confundir con `POST /api/webhooks/stripe`, el webhook **entrante** de Stripe de §4.)
+
+## 13. Servidor MCP (`/api/mcp`, versión 1.2.0)
+
+MCP por HTTP (`POST /api/mcp`, JSON-RPC) con la misma clave de API. Herramientas:
+`extract_invoices`, `analyze`, `validate_tax_id`, `calculate_vat`,
+`calculate_withholding`, `estimate_model_130`, `fiscal_calendar`, `get_usage`,
+`issue_invoice`, `list_invoices`, `get_invoice`, `cancel_invoice`,
+`set_invoice_status`, `list_analyses`, `get_analysis`.
+
+## 14. Nodo de n8n (`n8n-nodes-nokfi` 0.3.0)
+
+Paquete npm en el repositorio hermano `../n8n-nodes-nokfi`: nodo de acciones
+(análisis, facturas recibidas, emisión, herramientas fiscales) y Trigger por
+webhooks (crea y borra su endpoint con `/api/v1/webhooks`). Publicado en npm
+el 2026-10-02.
 
 ---
 

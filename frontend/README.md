@@ -19,7 +19,17 @@ npm run dev            # → http://localhost:5173
 
 ```bash
 npm run build          # → dist/ (listo para Nginx o cualquier servidor estático)
+npm run build:spa      # solo la SPA, sin prerender (más rápido para probar)
+npm run check:i18n     # mismas claves en los 6 idiomas
+npm run check:seo      # páginas públicas con contenido es/en y calendario igual que el backend
 ```
+
+`npm run build` hace tres pasos (sesión 12, SEO): `vite build` (la SPA),
+`vite build --ssr src/entry-server.jsx` y `scripts/prerender.mjs`, que renderiza
+con React en Node cada página pública de `src/seo/routes.js` y escribe
+`dist/<ruta>/index.html` (contenido + title, canonical, hreflang, JSON-LD) y
+`dist/sitemap.xml`. Los precios los pide a `https://nokfi.app/api/payments/plans`
+(`PRERENDER_API=<url>` para usar otro backend).
 
 Incluye el manifest de PWA y el service worker. En producción el frontend y el
 backend comparten origen (Nginx proxyea `/api` → `localhost:3001`), así el bundle
@@ -34,25 +44,21 @@ se construye con `VITE_API_URL=/api` y no lleva IP/dominio hardcodeado.
 
 ```
 src/
-├── main.jsx              punto de entrada
-├── App.jsx               todas las rutas
-├── index.css             variables de tema + estilos base
+├── main.jsx              punto de entrada (hidrata las páginas prerenderizadas)
+├── entry-server.jsx      render en Node para el prerender (sesión 12)
+├── App.jsx               todas las rutas (las públicas salen de seo/routes.js)
+├── index.css             variables de tema + estilos base + fuente
 ├── context/              Auth, Theme, Lang (React Context)
-├── middleware/
-│   ├── api.js            único punto de comunicación con el backend
-│   ├── sanitize.js       sanitizeAiHtml + sanitizeFreeText
-│   ├── pdfExtract.js     extracción de texto de PDF en el cliente
-│   └── exportUtils.js    exportación a PDF/Excel
-├── hooks/
-│   └── useCompanyProfile.js    puente API con GET/PUT /api/profile
-├── components/           Logo, Sidebar, OnboardingModal, PlanCards, HistoryBrowser...
-├── layouts/
-│   └── DashboardLayout.jsx     sidebar + onboarding + outlet
+├── seo/                  routes.js (páginas públicas es/en), useSeo, content/{es,en}.js
+├── middleware/           api.js (único cliente del backend), sanitize, exports…
+├── hooks/                useCompanyProfile, usePlans, usePageMeta…
+├── components/           calculators.jsx, PublicChrome, Sidebar, PlanCards…
+├── layouts/              DashboardLayout (sidebar + onboarding + outlet)
+├── i18n/                 es, en, fr, it, de, pl
 └── pages/
-    ├── Landing.jsx             home pública (ruta /)
-    ├── Login, Activate, Reveal, ResetPassword   (fuera del dashboard)
-    └── Home, Cuestionario, ExcelHub, excel/*, Historial, Calculadoras,
-        Informes, Configuracion          (dentro de /app)
+    ├── Landing, Pricing, Legal, ApiDocs, Login, Reveal…   (públicas)
+    ├── seo/              herramientas (ToolPage), guías (GuidePage, GuidesIndex)
+    └── Home, finance/, excel/, dev/, Historial, Calculadoras, Configuracion  (dentro de /app)
 ```
 
 ---

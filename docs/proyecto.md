@@ -1,11 +1,33 @@
 # Nokfi — Documento maestro del producto
 
-> Última actualización: **2026-09-14**. Estado: **producción en vivo bajo HTTPS con
-> Cloudflare (Full strict) y cobros reales Stripe**.
+> Última actualización: **2026-10-02 (sesión 12)**. Estado: **producción en vivo
+> bajo HTTPS con Cloudflare (Full strict) y cobros reales Stripe**.
 >
 > Este es el documento de referencia del producto Nokfi. Para el contrato técnico
 > Backend↔Frontend ver [`api.md`](api.md); para el despliegue y operación del VPS
-> ver [`deploy.md`](deploy.md).
+> ver [`deploy.md`](deploy.md). Las secciones 20-23 son históricas (handoffs).
+
+## 0. Estado actual (2026-10-02)
+
+- **Producto**: diagnóstico y finanzas para autónomos y pymes de España. Libro de
+  facturas (lectura con IA de PDF, fotos y facturas electrónicas), impuestos del
+  trimestre (303 y 130) y lo apartado, cobros con reclamación, fugas, previsión,
+  comparación con el sector, calendario fiscal con avisos, **emisión de facturas
+  con VERI*FACTU** (registros encadenados y QR; envío a la AEAT apagado) y
+  factura electrónica (UBL 2.5, Facturae 3.2.2, Factur-X, CII), cuestionario y
+  análisis de Excel con IA, asistente, calculadoras y enlaces para la gestoría.
+- **Espacios**: Negocio y Desarrolladores (claves `nk_live_`/`nk_test_`,
+  webhooks, Playground, registro, clientes).
+- **IA**: Groq → Cloudflare Workers AI → Cerebras (Cerebras se quita el
+  2026-10-29); topes de gasto en `utils/aiBudget.js`. Gemini ya no se usa por
+  defecto (queda como proveedor opcional en el código).
+- **Integraciones**: API pública v1, servidor MCP 1.2.0, nodo n8n 0.3.0 (npm).
+- **Web pública (sesión 12)**: landing, precios, 5 calculadoras, calendario
+  fiscal, validador de NIF y 8 guías, en castellano (raíz) e inglés (`/en/…`),
+  prerenderizadas en el build y con `sitemap.xml`. Ver §24.
+- **Idiomas de la app**: es, en, fr, it, de, pl.
+- **Tests**: `cd backend && node test/e2e.test.js` → **520**. Frontend:
+  `npm run check:i18n`, `npm run check:seo`, `npm run test:einvoice`.
 
 ---
 
@@ -13,7 +35,7 @@
 
 SaaS de **diagnóstico financiero** para autónomos y pymes. Combina un **cuestionario
 interactivo** (5 bloques × 6 preguntas Sí/No) con el **análisis de archivos
-Excel/PDF** mediante IA (Google Gemini), generando **informes estilo consultoría**
+Excel/PDF** mediante IA (Groq / Cloudflare Workers AI), generando **informes estilo consultoría**
 con cifras, gráficas y recomendaciones concretas exportables a PDF/Excel.
 
 - Cuestionario de diagnóstico → salud financiera del negocio
@@ -97,40 +119,61 @@ cobro en Stripe. Esto impide la farmación de claves sin pagar.
 
 | Capa | Tecnología |
 |------|------------|
-| Backend | Node.js 22 + Express + SQLite (`better-sqlite3`) |
-| IA | Google Gemini (`gemini-flash-latest`) |
-| Frontend | React + Vite + Tailwind CSS + PWA |
+| Backend | Node.js 22 + Express + SQLite (`better-sqlite3` 13) |
+| IA | Groq, Cloudflare Workers AI y Cerebras (orden en `AI_PROVIDERS` / `CHAT_PROVIDERS`) |
+| Frontend | React 18 + Vite 5 + Tailwind CSS + PWA; páginas públicas prerenderizadas (SSR en el build) |
 | Gráficas | Recharts |
-| Excel/PDF | `xlsx` (SheetJS), `jspdf`, `pdfjs-dist` |
+| Excel/PDF | `xlsx` (SheetJS), `jspdf`, `pdfjs-dist`, `docx`, `pptxgenjs` |
 | Pagos | **Stripe** (suscripción mensual; PayPal/Revolut/Coinbase retirados) |
-| Email | Resend (provider único; SendGrid retirado) |
+| Email | Resend |
+| Analítica | Cloudflare Web Analytics (sin cookies) + recuentos propios en `web_events` |
 | Despliegue | Ubuntu 24.04 + PM2 + Nginx + **Cloudflare (edge)** |
 
 ```
 nokfi/
-├── backend/            # API REST — Express + SQLite + Gemini
+├── backend/            # API REST — Express + SQLite
 │   ├── server.js       # Punto de entrada: Helmet, CORS, rate limiters, raw webhook
-│   ├── config/         # plans.js (precios/cuotas/trial) + stripe-version.js
-│   ├── db/             # database.js (esquema, migraciones, acceso a datos)
-│   ├── middleware/     # requireLicense.js
-│   ├── routes/         # auth.js, proxy.js, payments.js, webhooks.js, admin.js, profile.js, analyses
-│   ├── utils/          # password.js (scrypt), mailer.js (Resend), sanitize.js
-│   └── test/           # e2e.test.js (107/107 PASS)
+│   ├── config/         # plans.js, openapi.js, stripe-version.js
+│   ├── db/             # database.js + schema4.js y módulos por área (finance, webhooks…)
+│   ├── middleware/     # requireLicense, requireApiKey, idempotency…
+│   ├── routes/         # auth, payments, webhooks (Stripe), admin, profile, analyses,
+│   │                   # ai, chat, finance, invoicing, account (keys, me, client-errors,
+│   │                   # events), share, v1, mcp, dev
+│   ├── services/       # ai/, invoicing/ (PDF, XML), verifactu/, einvoice, taxTools,
+│   │                   # webhooks, jobs, reminders, monthlySummary, opsReport, webEvents
+│   ├── utils/          # password (scrypt), mailer (Resend), aiBudget, fiscalCalendar, finance
+│   └── test/           # e2e.test.js + session*.tests.js (520)
 ├── frontend/           # PWA — React + Vite + Tailwind
+│   ├── scripts/        # prerender.mjs (SEO), check-i18n, check-seo, test-einvoice
 │   └── src/
-│       ├── pages/      # Landing, Login, Reveal, ResetPassword, Pricing, Home,
-│       │               # Cuestionario, ExcelHub + excel/ (6 subapartados), Historial,
-│       │               # Calculadoras, Informes, Configuracion
-│       ├── middleware/ # api.js (cliente HTTP), sanitize.js, exportUtils.js, pdfExtract.js
-│       ├── context/    # AuthContext, ThemeContext, LangContext
-│       └── hooks/      # useApi, useCompanyProfile...
-├── deploy/             # nginx-nokfi.conf (site) + nginx-cloudflare-realip.conf (real-IP)
+│       ├── pages/      # Landing, Pricing, Login, app (Home, finance/, excel/, dev/…),
+│       │               # seo/ (herramientas y guías públicas)
+│       ├── seo/        # routes.js (páginas públicas), useSeo, content/{es,en}.js
+│       ├── components/ # calculators.jsx (app y web pública), PublicChrome…
+│       ├── entry-server.jsx  # render en Node para el prerender
+│       └── i18n/       # es, en, fr, it, de, pl
+├── shared/             # einvoice.mjs (lector de facturas electrónicas, navegador y Node)
+├── deploy/             # nginx-nokfi.conf + nginx-cloudflare-realip.conf
 └── docs/               # esta documentación
 ```
 
 > Ubicación real y operación del VPS: ver [`deploy.md`](deploy.md).
 
 ## 6. Esquema de base de datos
+
+**Tablas (2026-10-02):** `licenses`, `sessions`, `reset_tokens`, `otp_codes`,
+`auth_request_log`, `audit_log`, `payment_events`, `company_profiles`,
+`analyses`, `action_items`, `ai_usage`, `ai_provider_usage`, `ledger_entries`,
+`tax_reserves`, `leak_dismissals`, `reminders_sent`, `share_links`,
+`client_errors`, `api_keys`, `api_calls`, `api_jobs`, `idempotency_keys`,
+`webhook_endpoints`, `webhook_deliveries`, `event_marks`, `billing_profiles`,
+`customers`, `invoice_series`, `invoices`, `invoice_lines`, `invoice_events`,
+`verifactu_records`, `verifactu_flow` y `web_events` (sesión 12: día, evento,
+ruta y recuento; sin datos personales). Las de la sesión 4 en adelante se crean
+con `CREATE TABLE IF NOT EXISTS` al arrancar (`db/schema4.js` y módulos).
+
+Variables de entorno: ver `backend/.env.example` (IA, Stripe, Resend, R2,
+VERI*FACTU…). Detalle de las tablas originales:
 
 SQLite (`better-sqlite3`), db relativa a `backend/` (`DB_PATH=./db/nokfi.db`).
 Tablas:
@@ -199,7 +242,11 @@ Detalle de cada endpoint y sus códigos de error: ver [`api.md`](api.md).
 | Área | Ruta | Auth |
 |------|------|------|
 | Auth | `/api/auth/{activate,login,verify,logout,reveal-key,change-password,request-password-reset,confirm-password-reset}` | según ruta |
-| IA | `/api/proxy/ai` | Bearer |
+| IA | `POST /api/ai/analyze`, `/api/actions`, `POST /api/chat` (`/api/proxy/ai` responde 410) | Bearer |
+| Finanzas | `/api/ledger`, `/api/finance/*`, `/api/dashboard`, `/api/invoicing/*` | Bearer |
+| Cuenta | `/api/keys`, `/api/me`, `/api/share`, `/api/dev/*` | Bearer |
+| Público | `/api/shared/:token`, `/api/client-errors`, `/api/events`, `/api/geo` | sin auth (con límite) |
+| API v1 / MCP | `/api/v1/*`, `/api/mcp` | clave `nk_live_` / `nk_test_` |
 | Historial | `/api/analyses`, `/api/analyses/:id` | Bearer (scoped por licencia) |
 | Perfil | `GET/PUT /api/profile` | Bearer (scoped por licencia) |
 | Pagos | `GET /api/payments/plans`, `POST .../stripe/create-checkout`, `POST .../create-portal-session`, `GET .../stripe/reveal` | según ruta |
@@ -216,10 +263,11 @@ claro/oscuro.
 
 ## 10. Formato del informe de IA
 
-El backend pide a Gemini un **HTML seguro** marcado con el tipo de subapartado,
-que el frontend renderiza con `sanitizeAiHtml` (nunca `dangerouslySetInnerHTML`
-directo — datos generados de usuario, no se confían). El informe incluye cifras,
-gráficas (Recharts) y recomendaciones concretas.
+Desde la sesión 4 el backend arma el prompt y pide a la IA un **JSON
+estructurado** (resumen, puntuación de salud, hallazgos con cifras, plan de
+acción marcable en `action_items`) que el frontend pinta con sus componentes y
+exporta a PDF, Excel, Word y PowerPoint. Los informes antiguos en HTML se siguen
+mostrando con `sanitizeAiHtml`.
 
 ## 11. Idiomas
 
@@ -504,3 +552,28 @@ cd frontend && npm run build          # OK
 **Nota de deploy**: al arrancar en el VPS, `runRecoveryPurposeMigration`
 reconstruirá `reset_tokens` (copia íntegra de filas, no destructivo). Los
 emails de OTP salen por Resend con el dominio ya verificado — sin config nueva.
+
+---
+
+## 24. Sesión 12 — SEO (2026-10-02)
+
+- **Páginas públicas** en `frontend/src/seo/routes.js` (lista única): castellano
+  en la raíz e inglés bajo `/en/…`, enlazadas con `hreflang`. fr/it/de/pl siguen
+  en la app sin URL propia. En estas páginas manda el idioma de la URL
+  (`effectiveLang`); en la landing y precios, si el visitante usa fr/it/de/pl,
+  se le muestra su idioma.
+- **Prerender**: `npm run build` = `vite build` + `vite build --ssr
+  src/entry-server.jsx` + `scripts/prerender.mjs`, que renderiza cada ruta con
+  React en Node y escribe `dist/<ruta>/index.html` con title, description,
+  canonical, hreflang, Open Graph y JSON-LD, más `dist/sitemap.xml`. El navegador
+  hidrata ese HTML (`main.jsx`). Nginx no cambia: `try_files $uri $uri/ /index.html`.
+- **Contenido** en `src/seo/content/{es,en}.js` (herramientas, guías, FAQ).
+  Cifras de cotización 2026 del BOE (Orden PJC/297/2026) en `utils/spainRates.js`:
+  revisar cada año, igual que el calendario fiscal (dos copias comprobadas con
+  `npm run check:seo`).
+- **Medición**: Cloudflare Web Analytics (visitas, sin cookies; se activa en el
+  panel de Cloudflare) y `POST /api/events` (clics en «Probar gratis», pagos
+  empezados y usos de herramientas) en el informe diario.
+- **Rendimiento**: React aparte de las librerías pesadas y fuente alojada en
+  Nokfi; Lighthouse móvil: SEO, accesibilidad y buenas prácticas 100.
+
