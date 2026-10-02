@@ -104,6 +104,10 @@ async function tanda4({ post, put, get, check, checkAsync, getDB }) {
     post('/api/invoicing/invoices', { customer: cust, operation_date: '2099-01-01', lines: [{ description: 'x', quantity: 1, unit_price: 10 }] }, tok),
     r => r.status === 400 && r.data.field === 'operation_date');
 
+  await checkAsync('S11 VERI*FACTU: emitir con IVA del 5 % → 400 (ya no existe; la AEAT lo rechaza)',
+    post('/api/invoicing/invoices', { customer: cust, lines: [{ description: 'x', quantity: 1, unit_price: 10, vat_rate: 5 }] }, tok),
+    r => r.status === 400 && r.data.field === 'line_vat_rate');
+
   const f1 = await issue({ customer: cust, irpf_rate: 15, lines: [{ description: 'Consultoría', quantity: 2, unit_price: 100, vat_rate: 21 }, { description: 'Libro', quantity: 1, unit_price: 20, vat_rate: 4 }] });
   const f2 = await issue({ payment_method: 'cash', lines: [{ description: 'Mostrador', quantity: 1, unit_price: 10, vat_rate: 21 }] });
   const re = await issue({ customer: cust, equivalence_surcharge: true, lines: [{ description: 'Género', quantity: 10, unit_price: 10, vat_rate: 21 }] });

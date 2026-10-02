@@ -6,7 +6,8 @@
 
 import { apiErrorMessage } from '../../middleware/errors';
 
-export const VAT_RATES = [21, 10, 5, 4, 0];
+// Tipos para EMITIR: sin el 5 % (solo existió de 7-2022 a 9-2024; la AEAT lo rechaza).
+export const VAT_RATES = [21, 10, 4, 0];
 export const IRPF_RATES = [0, 1, 2, 7, 15, 19];
 export const RE_RATES = { 21: 5.2, 10: 1.4, 5: 0.62, 4: 0.5, 0: 0 };
 export const EXEMPTIONS = ['E1', 'E2', 'E3', 'E4', 'E5', 'E6', 'N1', 'N2', 'S2'];

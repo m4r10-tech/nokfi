@@ -157,7 +157,7 @@ const TOOLS = [
           type: 'array', minItems: 1, maxItems: 200,
           items: {
             type: 'object',
-            properties: { description: { type: 'string' }, quantity: { type: 'number' }, unit: { type: 'string' }, unit_price: { type: 'number', description: 'Without VAT' }, discount_pct: { type: 'number' }, vat_rate: { type: 'number', enum: [21, 10, 5, 4, 0] } },
+            properties: { description: { type: 'string' }, quantity: { type: 'number' }, unit: { type: 'string' }, unit_price: { type: 'number', description: 'Without VAT' }, discount_pct: { type: 'number' }, vat_rate: { type: 'number', enum: [21, 10, 4, 0] } },
             required: ['description', 'unit_price']
           }
         },

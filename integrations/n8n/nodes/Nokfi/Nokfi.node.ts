@@ -144,7 +144,6 @@ export class Nokfi implements INodeType {
 									{ name: '10 %', value: 10 },
 									{ name: '21 %', value: 21 },
 									{ name: '4 %', value: 4 },
-									{ name: '5 %', value: 5 },
 								],
 								default: 21,
 							},

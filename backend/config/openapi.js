@@ -116,7 +116,7 @@ const InvoiceLine = {
   properties: {
     description: { type: 'string' }, quantity: { type: 'number', default: 1 }, unit: { type: 'string', example: 'h' },
     unit_price: { type: 'number', description: 'Sin IVA (hasta 4 decimales)' }, discount_pct: { type: 'number', default: 0 },
-    vat_rate: { type: 'number', enum: [21, 10, 5, 4, 0], default: 21 }
+    vat_rate: { type: 'number', enum: [21, 10, 4, 0], default: 21 }
   }
 };
 

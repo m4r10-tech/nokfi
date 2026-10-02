@@ -79,6 +79,8 @@ export default function Home() {
         </div>
       )}
 
+      <NewsNotice t={t} />
+
       {failure ? (
         <ErrorState compact offline={isConnectivityError(failure)} message={apiErrorMessage(t, failure)} onRetry={load} />
       ) : !ready ? (
@@ -91,6 +93,32 @@ export default function Home() {
         <WithoutData dash={dash} stats={stats} items={items} profile={profile} onChange={load}
           onDismiss={() => updateProfile({ welcomeCardDismissed: true })} t={t} lang={lang} />
       )}
+    </div>
+  );
+}
+
+/**
+ * Aviso de novedad (sesión 11, 2-10-2026): emisión de facturas y términos
+ * actualizados. Se cierra por dispositivo (es solo informativo).
+ */
+const NEWS_KEY = 'nokfi.news.2026-10-invoicing';
+function NewsNotice({ t }) {
+  const [open, setOpen] = useState(() => { try { return !localStorage.getItem(NEWS_KEY); } catch { return true; } });
+  if (!open) return null;
+  const close = () => { try { localStorage.setItem(NEWS_KEY, '1'); } catch { /* nada */ } setOpen(false); };
+  return (
+    <div className="flex items-start gap-3 rounded-xl px-4 py-3 text-sm" style={{ background: 'var(--accent-soft)', color: 'var(--text-primary)', border: '1px solid var(--border)' }}>
+      <FileText size={16} className="shrink-0 mt-0.5" style={{ color: 'var(--accent-text)' }} />
+      <div className="flex-1">
+        <p><span className="font-semibold">{t('home.newsTitle')}</span> {t('home.newsText')}</p>
+        <p className="mt-1 flex flex-wrap gap-x-3 gap-y-1">
+          <Link to="/app/finanzas/facturas" className="link font-medium">{t('home.newsCta')}</Link>
+          <Link to="/terminos" className="link">{t('home.newsTerms')}</Link>
+          <Link to="/encargo-tratamiento" className="link">{t('home.newsDpa')}</Link>
+          <Link to="/privacidad" className="link">{t('home.newsPrivacy')}</Link>
+        </p>
+      </div>
+      <button onClick={close} className="btn btn-ghost btn-sm !px-2 -mr-1 -mt-1" aria-label={t('common.close')} title={t('common.close')}><X size={15} /></button>
     </div>
   );
 }
