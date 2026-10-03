@@ -1,0 +1,19 @@
+[
+  { "id": "2026-10-13-modelo-130", "formato": "post", "laminas": [
+    { "plantilla": "portada", "etiqueta": "Modelo 130", "titulo": "El 130 **no es un impuesto extra**", "texto": "Es un adelanto de tu IRPF. Así se calcula." },
+    { "plantilla": "paso", "numero": 1, "titulo": "Tu beneficio **desde el 1 de enero**", "texto": "Ingresos menos gastos deducibles, acumulados hasta el final del trimestre." },
+    { "plantilla": "paso", "numero": 2, "titulo": "Calcula **el 20 %**", "texto": "Y resta lo que ya pagaste en trimestres anteriores y las retenciones que te han hecho." },
+    { "plantilla": "dato", "etiqueta": "Ejemplo hasta junio", "dato": "1.300 €", "titulo": "2.800 € − **1.200 €** − **300 €**", "texto": "20 % de 14.000 € de rendimiento, menos el 1T pagado y las retenciones." },
+    { "plantilla": "paso", "numero": "!", "titulo": "Quién **no lo presenta**", "texto": "Si el año pasado al menos el 70 % de tus ingresos llevaron retención. Las sociedades tampoco." },
+    { "plantilla": "cierre", "titulo": "Plazo del 3T: **20 de octubre**", "texto": "Guía completa del modelo 130, gratis en nokfi.app" } ] },
+  { "id": "2026-10-13-modelo-130-x", "formato": "horizontal", "laminas": [
+    { "plantilla": "dato", "etiqueta": "Modelo 130", "dato": "20 %", "titulo": "de tu beneficio acumulado **− lo ya pagado − retenciones**" } ] },
+  { "id": "2026-10-14-domiciliar-15oct", "formato": "vertical", "laminas": [
+    { "plantilla": "dato", "etiqueta": "Mañana", "dato": "15 oct", "titulo": "Último día para **domiciliar** el 303 y el 130", "texto": "Después, hasta el 20, pagas tú con NRC o tarjeta." } ] },
+  { "id": "2026-10-16-video-errores-303", "formato": "vertical", "tema": "azul", "laminas": [
+    { "plantilla": "lista", "etiqueta": "Portada del vídeo", "titulo": "3 errores del **IVA trimestral**", "puntos": ["El tique sin tu NIF", "Gastos personales", "El tercero duele…"] } ] },
+  { "id": "2026-10-18-funcion-libro", "formato": "post", "laminas": [
+    { "plantilla": "captura", "captura": "libro", "desde": 203, "etiqueta": "Libro de facturas", "titulo": "Foto de la factura. **La IA la apunta.**", "texto": "Tú la revisas y la exportas para tu gestoría." } ] },
+  { "id": "2026-10-18-funcion-libro-x", "formato": "horizontal", "laminas": [
+    { "plantilla": "captura", "captura": "libro", "desde": 203, "etiqueta": "Libro de facturas", "titulo": "Foto de la factura. **La IA la apunta.**", "texto": "Ingresos y gastos ordenados, listos para tu gestoría en Excel o CSV." } ] }
+]
