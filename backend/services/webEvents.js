@@ -6,13 +6,16 @@
  * empiezan y cuántas veces se usa cada herramienta pública. Las visitas las
  * cuenta Cloudflare Web Analytics; esto completa lo que Cloudflare no mide.
  * Se ven en el informe diario (services/opsReport.js).
+ *
+ * Sesión 13 (redes): ref_x, ref_instagram y ref_tiktok cuentan las entradas
+ * desde los enlaces de cada red (?utm_source=…), por página de llegada.
  */
 
 'use strict';
 
 const { getDB } = require('../db/database');
 
-const EVENTS = ['cta_trial', 'checkout_start', 'tool_use'];
+const EVENTS = ['cta_trial', 'checkout_start', 'tool_use', 'ref_x', 'ref_instagram', 'ref_tiktok'];
 const MAX_ROWS_PER_DAY = 500; // tope ante envíos falsos con rutas inventadas
 
 let ready = false;

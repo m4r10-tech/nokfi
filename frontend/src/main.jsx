@@ -3,10 +3,13 @@ import { createRoot, hydrateRoot } from 'react-dom/client';
 import { BrowserRouter } from 'react-router-dom';
 import App from './App';
 import { installGlobalErrorHandlers } from './middleware/errorReporter';
+import { trackSocialReferral } from './utils/track';
 import './index.css';
 
 // C8 (sesión 4): errores no capturados → /api/client-errors (sin datos del usuario).
 installGlobalErrorHandlers();
+// Sesión 13: entradas desde X, Instagram y TikTok (sin cookies, solo recuentos).
+trackSocialReferral();
 
 const container = document.getElementById('root');
 const app = (

@@ -1,0 +1,16 @@
+[
+  { "id": "muestra-carrusel", "formato": "post", "laminas": [
+    { "plantilla": "portada", "etiqueta": "Modelo 303 · 3T", "titulo": "El **20 de octubre** se presenta el IVA del tercer trimestre", "texto": "Qué entra, qué no y cómo llegar sabiendo cuánto te toca." },
+    { "plantilla": "paso", "numero": 1, "titulo": "Suma el IVA de **tus facturas emitidas**", "texto": "Julio, agosto y septiembre. Es el IVA repercutido: el que cobraste a tus clientes." },
+    { "plantilla": "lista", "titulo": "Errores que más se repiten", "puntos": ["Meter facturas de gasto **sin tu NIF**", "Olvidar las facturas de **septiembre** que llegan en octubre", "No restar el IVA a **compensar** de trimestres anteriores"] },
+    { "plantilla": "captura", "captura": "impuestos", "titulo": "Nokfi te lo **calcula mientras facturas**", "texto": "Cuánto apartar para el 303 y el 130, trimestre a trimestre." },
+    { "plantilla": "cierre", "texto": "Guía completa del modelo 303 gratis en nokfi.app" } ] },
+  { "id": "muestra-dato-cuadrado", "formato": "cuadrado", "laminas": [
+    { "plantilla": "dato", "etiqueta": "Calendario fiscal", "dato": "20 oct", "titulo": "Último día para el **303, 130, 111 y 115** del 3T", "texto": "Si domicilias el pago, el plazo acaba el 15 de octubre." } ] },
+  { "id": "muestra-vertical", "formato": "vertical", "laminas": [
+    { "plantilla": "captura", "captura": "cobros", "etiqueta": "Cobros", "titulo": "¿Quién te debe **y desde cuándo**?", "texto": "Facturas vencidas ordenadas por días de retraso." } ] },
+  { "id": "muestra-horizontal-claro", "formato": "horizontal", "tema": "claro", "laminas": [
+    { "plantilla": "captura", "captura": "libro", "etiqueta": "Libro de facturas", "titulo": "Sube la foto de la factura. **La IA la apunta.**", "texto": "Ingresos y gastos ordenados, listos para tu gestoría." } ] },
+  { "id": "muestra-azul", "formato": "cuadrado", "tema": "azul", "laminas": [
+    { "plantilla": "cierre", "titulo": "¿Cuánto pagas de **cuota de autónomos** en 2026?", "texto": "Calcúlalo con tus rendimientos netos en 10 segundos.", "boton": "Calculadora gratis" } ] }
+]

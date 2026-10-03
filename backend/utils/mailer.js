@@ -533,6 +533,7 @@ async function sendOpsReportEmail({ to, report: r }) {
       ])}
       ${r.web ? block(`Web pública (${r.web.day}; visitas en Cloudflare Web Analytics)`, [
         li(`Clics en «Probar gratis»: ${r.web.totals.cta_trial} · pagos empezados: ${r.web.totals.checkout_start} · usos de herramientas: ${r.web.totals.tool_use}`),
+        li(`Entradas desde redes: X ${r.web.totals.ref_x} · Instagram ${r.web.totals.ref_instagram} · TikTok ${r.web.totals.ref_tiktok}`),
         ...r.web.top.map(e => li(`${e.count}× ${e.name} ${e.path || '(sin ruta)'}`))
       ]) : ''}
     `

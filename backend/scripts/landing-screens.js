@@ -12,6 +12,7 @@
  * Uso (desde backend/, con el frontend compilado):
  *   PLAYWRIGHT_CORE=/ruta/node_modules/playwright-core node scripts/landing-screens.js
  * Salida: frontend/public/screens/<pantalla>-<tema>.jpg
+ * Redes (sesión 13): SHOTS_OUT=<carpeta> (móvil) y SHOTS_DATE=2026-09-29 (3T con datos).
  */
 
 'use strict';
@@ -207,7 +208,8 @@ async function main() {
       localStorage.setItem('nokfi_lang', 'es');
     }, [token, theme]);
     // Media mañana de hoy, para que el saludo sea "Buenos días".
-    const d = new Date(); d.setHours(10, 30, 0, 0);
+    // SHOTS_DATE=AAAA-MM-DD (sesión 13): otro día, p. ej. dentro del 3T de los datos de ejemplo.
+    const d = process.env.SHOTS_DATE ? new Date(`${process.env.SHOTS_DATE}T00:00:00`) : new Date(); d.setHours(10, 30, 0, 0);
     await ctx.clock.setFixedTime(d);
     const page = await ctx.newPage();
     for (const [name, url] of shots) {
