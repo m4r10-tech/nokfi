@@ -71,6 +71,10 @@ export default defineConfig({
       },
       workbox: {
         globIgnores: ['**/vendor-export-*.js', '**/vendor-jspdf-*.js', '**/pdf.worker*', '**/fonts/**'],
+        // Sesión 12: la copia de la SPA del service worker solo para la app.
+        // Las páginas públicas (prerenderizadas) se piden siempre al servidor:
+        // así llevan su contenido y el script de Cloudflare Web Analytics.
+        navigateFallbackAllowlist: [/^\/app(\/|$)/, /^\/(login|reset-password|recuperar|reveal)(\/|$)/, /^\/compartido\//],
         maximumFileSizeToCacheInBytes: 3 * 1024 * 1024,
         runtimeCaching: [
           { urlPattern: ({ url }) => url.pathname.startsWith('/api/'), handler: 'NetworkOnly' },
