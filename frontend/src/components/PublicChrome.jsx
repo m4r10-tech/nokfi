@@ -58,10 +58,15 @@ function smoothTo(e, href) {
 }
 
 export function PublicHeader({ links = [] }) {
-  const { theme, toggleTheme } = useTheme();
+  const { theme: realTheme, toggleTheme } = useTheme();
   const { t } = useLang();
   const pub = usePublicPath();
   const [scrolled, setScrolled] = useState(false);
+  // Sesión 12: hasta montar se pinta como el HTML prerenderizado (tema oscuro);
+  // si no, con el tema claro React no podía hidratar y repintaba la página.
+  const [mounted, setMounted] = useState(false);
+  useEffect(() => { setMounted(true); }, []);
+  const theme = mounted ? realTheme : 'dark';
 
   useEffect(() => {
     const onScroll = () => setScrolled(window.scrollY > 8);
