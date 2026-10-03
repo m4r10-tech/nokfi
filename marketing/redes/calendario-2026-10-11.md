@@ -17,8 +17,8 @@ Ley 3/2004 (morosidad).
 
 ## Semana 1 · 5-11 oct · El 303 del tercer trimestre
 
-### 1.1 · lun 6 oct · Carrusel «El 303 del 3T» · IG (post) + TT (fotos) + X
-`id: 2026-10-06-303-3t` · enlace: `/guias/modelo-303-iva-trimestral`
+### 1.1 · lun 5 oct · Carrusel «El 303 del 3T» · IG (post) + TT (fotos) + X
+`id: 2026-10-05-303-3t` · enlace: `/guias/modelo-303-iva-trimestral`
 Láminas: portada → 1 suma el IVA cobrado → 2 resta el IVA de tus gastos →
 3 ejemplo (10.000 € → 2.100 − 630 = 1.470 €) → 4 errores → 5 captura Impuestos → cierre.
 
@@ -34,10 +34,10 @@ Láminas: portada → 1 suma el IVA cobrado → 2 resta el IVA de tus gastos →
 > IVA cobrado − IVA de tus gastos = lo que pagas.
 > 10.000 € al 21 % (2.100 €) − 3.000 € de gastos (630 €) = 1.470 €.
 > Guía paso a paso 👇
-> nokfi.app/guias/modelo-303-iva-trimestral?utm_source=x&utm_medium=social&utm_campaign=2026-10-06-303-3t
+> nokfi.app/guias/modelo-303-iva-trimestral?utm_source=x&utm_medium=social&utm_campaign=2026-10-05-303-3t
 
-### 1.2 · mié 8 oct · Dato «20 oct» · IG (cuadrado) + X
-`id: 2026-10-08-plazo-20oct` · enlace: `/calendario-fiscal-2026`
+### 1.2 · mié 7 oct · Dato «20 oct» · IG (cuadrado) + X
+`id: 2026-10-07-plazo-20oct` · enlace: `/calendario-fiscal-2026`
 
 **IG:**
 > 20 de octubre: último día para el 303, el 130, el 111 y el 115 del tercer trimestre.
@@ -48,18 +48,18 @@ Láminas: portada → 1 suma el IVA cobrado → 2 resta el IVA de tus gastos →
 **X:**
 > Recordatorio: el 20 de octubre acaba el plazo del 303, 130, 111 y 115 del 3T.
 > Si lo domicilias, el 15.
-> Calendario fiscal 2026: nokfi.app/calendario-fiscal-2026?utm_source=x&utm_medium=social&utm_campaign=2026-10-08-plazo-20oct
+> Calendario fiscal 2026: nokfi.app/calendario-fiscal-2026?utm_source=x&utm_medium=social&utm_campaign=2026-10-07-plazo-20oct
 
-### 1.3 · jue 9 oct · Vídeo «¿Cuánto me toca pagar este trimestre?» · TT + IG (Reel)
-`id: 2026-10-09-video-cuanto-pago` · guion V1 (abajo) · enlace: `/calculadora-iva`
+### 1.3 · jue 8 oct · Vídeo «¿Cuánto me toca pagar este trimestre?» · TT + IG (Reel)
+`id: 2026-10-08-video-cuanto-pago` · guion V1 (abajo) · enlace: `/calculadora-iva`
 
 **TT/IG:**
 > El trimestre no tiene por qué pillarte por sorpresa. Así lo ves en 10 segundos 👀
 > (Cuenta de ejemplo con datos ficticios.) Calculadora de IVA gratis: enlace en la bio.
 > #autonomos #iva #modelo303 #finanzas
 
-### 1.4 · sáb 11 oct · Pregunta · IG (historia con encuesta) + X (encuesta)
-`id: 2026-10-11-pregunta-apartar`
+### 1.4 · sáb 10 oct · Pregunta · IG (historia con encuesta) + X (encuesta)
+`id: 2026-10-10-pregunta-apartar`
 
 > ¿Apartas el IVA cada vez que cobras o te pilla el trimestre?
 > 🅰️ Lo aparto cada mes · 🅱️ Me pilla siempre · 🅲 Lo lleva mi gestoría
@@ -68,8 +68,8 @@ Láminas: portada → 1 suma el IVA cobrado → 2 resta el IVA de tus gastos →
 
 ## Semana 2 · 12-18 oct · El 130 y la domiciliación
 
-### 2.1 · lun 13 oct · Carrusel «Modelo 130 sin líos» · IG + TT (fotos) + X
-`id: 2026-10-13-modelo-130` · enlace: `/guias/modelo-130-pago-fraccionado-irpf`
+### 2.1 · lun 12 oct · Carrusel «Modelo 130 sin líos» · IG + TT (fotos) + X
+`id: 2026-10-12-modelo-130` · enlace: `/guias/modelo-130-pago-fraccionado-irpf`
 Láminas: portada → es un adelanto del IRPF → 20 % del rendimiento acumulado →
 ejemplo (14.000 € → 2.800 − 1.200 − 300 = 1.300 €) → quién no lo presenta (70 % con retención) → cierre.
 
@@ -83,9 +83,9 @@ ejemplo (14.000 € → 2.800 − 1.200 − 300 = 1.300 €) → quién no lo pr
 **X:**
 > Modelo 130 en una línea: 20 % de (ingresos − gastos) desde enero − lo ya pagado − retenciones.
 > Ejemplo: 14.000 € de rendimiento → 2.800 − 1.200 − 300 = 1.300 €.
-> nokfi.app/guias/modelo-130-pago-fraccionado-irpf?utm_source=x&utm_medium=social&utm_campaign=2026-10-13-modelo-130
+> nokfi.app/guias/modelo-130-pago-fraccionado-irpf?utm_source=x&utm_medium=social&utm_campaign=2026-10-12-modelo-130
 
-### 2.2 · mar 14 oct · Dato «15 oct» · IG (historia) + X
+### 2.2 · mié 14 oct · Dato «15 oct» · IG (historia) + X
 `id: 2026-10-14-domiciliar-15oct`
 
 **IG (historia):** «Mañana, 15 de octubre, último día para presentar y domiciliar el pago del 303 y el 130. Después, hasta el 20, pagando con NRC o tarjeta.»
@@ -94,16 +94,16 @@ ejemplo (14.000 € → 2.800 − 1.200 − 300 = 1.300 €) → quién no lo pr
 > Mañana, 15 de octubre, último día para presentar con domiciliación el 303 y el 130 del 3T.
 > Después, hasta el 20, pagas tú con NRC o tarjeta.
 
-### 2.3 · jue 16 oct · Vídeo «3 errores del 303» · TT + IG (Reel)
-`id: 2026-10-16-video-errores-303` · guion V2 · enlace: `/guias/modelo-303-iva-trimestral`
+### 2.3 · jue 15 oct · Vídeo «3 errores del 303» · TT + IG (Reel)
+`id: 2026-10-15-video-errores-303` · guion V2 · enlace: `/guias/modelo-303-iva-trimestral`
 
 **TT/IG:**
 > 3 errores del IVA trimestral que vemos una y otra vez (el tercero duele) 😬
 > Guía del 303: enlace en la bio.
 > #autonomos #iva #modelo303 #errores
 
-### 2.4 · sáb 18 oct · Función «Libro con IA» · IG (post con captura) + X (horizontal)
-`id: 2026-10-18-funcion-libro` · enlace: `/home`
+### 2.4 · sáb 17 oct · Función «Libro con IA» · IG (post con captura) + X (horizontal)
+`id: 2026-10-17-funcion-libro` · enlace: `/home`
 
 **IG:**
 > Haces una foto a la factura y la IA la apunta en tu libro de ingresos y gastos: fecha, proveedor, base, IVA y total. Tú lo revisas y lo exportas para tu gestoría.
@@ -112,7 +112,7 @@ ejemplo (14.000 € → 2.800 − 1.200 − 300 = 1.300 €) → quién no lo pr
 
 **X:**
 > Foto de la factura → la IA la apunta en tu libro → la revisas → la exportas a tu gestoría en Excel o CSV.
-> 14 días gratis: nokfi.app/?utm_source=x&utm_medium=social&utm_campaign=2026-10-18-funcion-libro
+> 14 días gratis: nokfi.app/?utm_source=x&utm_medium=social&utm_campaign=2026-10-17-funcion-libro
 
 ---
 
@@ -141,15 +141,15 @@ Láminas: portada → el IVA, entero → IRPF: un 20 % del beneficio (25-30 % si
 > · ~20 % del beneficio para el IRPF (25-30 % si ganas más)
 > Ejemplo paso a paso: nokfi.app/guias/cuanto-apartar-para-impuestos?utm_source=x&utm_medium=social&utm_campaign=2026-10-21-cuanto-apartar
 
-### 3.3 · jue 23 oct · Vídeo «La cuenta para Hacienda» · TT + IG (Reel)
-`id: 2026-10-23-video-cuenta-hacienda` · guion V3
+### 3.3 · jue 22 oct · Vídeo «La cuenta para Hacienda» · TT + IG (Reel)
+`id: 2026-10-22-video-cuenta-hacienda` · guion V3
 
 **TT/IG:**
 > El truco más simple para que el trimestre no te pille sin dinero 🏦
 > #autonomos #ahorro #impuestos #consejos
 
-### 3.4 · vie 24 oct · Pregunta · X + IG (historia)
-`id: 2026-10-24-pregunta-trimestre`
+### 3.4 · vie 23 oct · Pregunta · X + IG (historia)
+`id: 2026-10-23-pregunta-trimestre`
 
 > ¿Qué es lo que más te cuesta del trimestre?
 > 🅰️ Reunir las facturas · 🅱️ Saber cuánto pagar · 🅲 Tener el dinero · 🅳 Entender los modelos
