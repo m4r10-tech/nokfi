@@ -212,8 +212,9 @@ async function main() {
     const lista = [].concat(JSON.parse(fs.readFileSync(fich, 'utf8')));
     for (const pieza of lista) {
       const dir = path.join(SALIDA, pieza.id);
-      fs.rmSync(dir, { recursive: true, force: true });
+      // Se rehacen las láminas; el vídeo grabado (video.mp4) se queda.
       fs.mkdirSync(dir, { recursive: true });
+      for (const n of fs.readdirSync(dir)) if (n.endsWith('.png')) fs.rmSync(path.join(dir, n));
       for (const [i, lam] of pieza.laminas.entries()) {
         const { f, doc } = html(pieza, { ...lam, contador: lam.contador ?? (pieza.laminas.length > 1 ? `${i + 1}/${pieza.laminas.length}` : null) });
         const page = await browser.newPage({ viewport: { width: f.w, height: f.h } });

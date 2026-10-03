@@ -22,3 +22,25 @@ module.exports = async function session13Tests({ post, check }) {
   check('S13: se agrupan por página de llegada sin la query', () =>
     day.top.some(r => r.name === 'ref_instagram' && r.path === '/calculadora-cuota-autonomos' && r.count === 2));
 };
+
+/** Imágenes de las publicaciones para Buffer: /api/redes-media/<pieza>/<archivo>. */
+module.exports.media = async function session13MediaTests({ get, check }) {
+  const fs = require('fs');
+  const path = require('path');
+  const dir = path.join(process.env.SOCIAL_MEDIA_DIR, '2026-10-06-303-3t');
+  fs.mkdirSync(dir, { recursive: true });
+  fs.writeFileSync(path.join(dir, '01-portada.png'), Buffer.from('89504e470d0a1a0a', 'hex'));
+  fs.writeFileSync(path.join(dir, 'notas.txt'), 'privado');
+  fs.writeFileSync(path.join(process.env.SOCIAL_MEDIA_DIR, '.env'), 'SECRETO=1');
+
+  const ok = await get('/api/redes-media/2026-10-06-303-3t/01-portada.png');
+  check('S13: una imagen de redes se sirve sin sesión (200)', () => ok.status === 200);
+  const missing = await get('/api/redes-media/2026-10-06-303-3t/99-nada.png');
+  check('S13: imagen inexistente → 404', () => missing.status === 404);
+  const txt = await get('/api/redes-media/2026-10-06-303-3t/notas.txt');
+  const dot = await get('/api/redes-media/.env');
+  const up = await get('/api/redes-media/..%2F..%2Fserver.js');
+  const listing = await get('/api/redes-media/2026-10-06-303-3t/');
+  check('S13: solo PNG/JPG/MP4 dentro de una pieza (ni .txt, ni .env, ni rutas hacia arriba, ni listados)', () =>
+    [txt, dot, up, listing].every(r => r.status === 404));
+};

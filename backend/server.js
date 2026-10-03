@@ -233,6 +233,17 @@ app.use('/api/proxy/', aiLimiter);
 app.use('/api/ai/', aiLimiter);
 app.use('/api/webhooks/', webhookLimiter);
 app.use('/api/admin/', adminLimiter);
+/* Sesión 13 (redes): imágenes y vídeos de las publicaciones programadas en
+   Buffer, que solo acepta URLs públicas (no tiene subida de archivos). Carpeta
+   fuera del repo (SOCIAL_MEDIA_DIR, por defecto ../media-redes), que se llena
+   con rsync desde marketing/redes/salida. Solo <pieza>/<archivo>.png|jpg|mp4. */
+const SOCIAL_MEDIA_DIR = process.env.SOCIAL_MEDIA_DIR || require('path').join(__dirname, '../media-redes');
+app.use('/api/redes-media', (req, res, next) => {
+  if (!/^\/[a-z0-9-]{1,80}\/[a-z0-9-]{1,80}\.(png|jpe?g|mp4)$/.test(req.path)) return res.status(404).json({ error: 'not_found' });
+  next();
+}, express.static(SOCIAL_MEDIA_DIR, { index: false, dotfiles: 'deny', maxAge: '7d', redirect: false }),
+  (_req, res) => res.status(404).json({ error: 'not_found' }));
+
 app.use('/api/', generalLimiter);
 
 /* ════════════════════════════════════════════════════════════

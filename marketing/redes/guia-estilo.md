@@ -124,3 +124,19 @@ voz o subtítulos; gancho en los 2 primeros segundos.
   con tu gestoría» + guía pública si existe.
 - Quejas o soporte: llevar a `soporte@nokfi.app` (24 h; 4 h en Max).
 - Nunca discutir en público; nunca pedir datos por privado.
+
+### Respuestas tipo (borradores; se adaptan a cada caso)
+
+- **Duda general:** «¡Buena pregunta! En general, [respuesta corta]. Lo tienes
+  explicado paso a paso en nokfi.app/guias/[guía]. Si tu caso tiene algo
+  especial, mejor confírmalo con tu gestoría.»
+- **Duda de su caso concreto:** «Depende de varios datos de tu caso (régimen,
+  ingresos, gastos…), así que no queremos darte una cifra a ciegas. Tu gestoría
+  te lo puede confirmar; como orientación, [guía o calculadora].»
+- **«¿Cuánto cuesta?»:** «Hay tres planes y el Mini tiene 14 días de prueba
+  gratis, sin permanencia. Los precios están en nokfi.app/pricing.»
+- **Problema con la app:** «¡Vaya! Escríbenos a soporte@nokfi.app con lo que
+  ves y lo miramos hoy mismo. Gracias por avisar.»
+- **Crítica:** «Gracias por decírnoslo. ¿Nos cuentas qué echas en falta? Nos
+  ayuda a mejorar.» (Nunca discutir.)
+- **Elogio:** «¡Gracias! Nos alegra que te sirva. 🙌»

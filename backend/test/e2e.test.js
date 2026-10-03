@@ -13,6 +13,7 @@
 process.env.NODE_ENV = 'test';
 process.env.PORT = '3999';               // fijo: server.js auto-listen al requerirlo
 process.env.DB_PATH = __dirname + '/test-e2e.db';
+process.env.SOCIAL_MEDIA_DIR = require('fs').mkdtempSync(require('path').join(require('os').tmpdir(), 'nokfi-redes-media-')); // sesión 13
 process.env.ADMIN_SECRET = 'a1b2c3d4e5f6a1b2c3d4e5f6a1b2c3d4e5f6a1b2c3d4e5f6a1b2c3d4e5f6a1b2c3d4';
 process.env.BASE_URL = 'http://localhost:3999';
 // Determinismo: forzamos los precios del catálogo /plans a los defaults 5/20/50
@@ -1484,6 +1485,7 @@ async function main() {
   // Sesión 12 — SEO: eventos de la web pública sin cookies.
   await require('./session12.tests')({ post, put, get, call, check, checkAsync, getDB });
   await require('./session13.tests')({ post, check });
+  await require('./session13.tests').media({ get, check });
 
   } catch (e) {
     console.error('TEST CRASH:', e.message);
@@ -1496,6 +1498,7 @@ async function main() {
     const db = getDB();
     db.close();
   } catch {}
+  fs.rmSync(process.env.SOCIAL_MEDIA_DIR, { recursive: true, force: true }); // sesión 13
   // pequeño delay para que suelte el archivo WAL antes de unlink
   await new Promise(r => setTimeout(r, 300));
   try {
