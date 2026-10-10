@@ -89,9 +89,23 @@ export const ORGANIZATION_LD = {
   email: 'info@nokfi.app'
 };
 
+/**
+ * WebSite (sesión 13): el nombre del sitio que Google muestra en los
+ * resultados y con el que asocia búsquedas de marca como «nokfi».
+ */
+export const WEBSITE_LD = {
+  '@type': 'WebSite',
+  '@id': `${SITE}/#website`,
+  name: 'Nokfi',
+  alternateName: ['nokfi.app', 'Nokfi App'],
+  url: `${SITE}/`,
+  inLanguage: ['es-ES', 'en'],
+  publisher: { '@id': `${SITE}/#organization` }
+};
+
 /** Bloque JSON-LD con @context y @graph. */
 export function ldGraph(...nodes) {
-  return { '@context': 'https://schema.org', '@graph': [ORGANIZATION_LD, ...nodes.filter(Boolean)] };
+  return { '@context': 'https://schema.org', '@graph': [ORGANIZATION_LD, WEBSITE_LD, ...nodes.filter(Boolean)] };
 }
 
 export function faqLd(items) {
