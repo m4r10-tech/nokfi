@@ -20,7 +20,8 @@
  *
  * Publicación: { "id", "red": "x|instagram|tiktok", "cuando": "2026-10-06T13:00" (hora de Madrid),
  *   "texto", "pieza": "<carpeta de salida/>" (opcional), "tipo": "post|story|reel" (Instagram),
- *   "video": "<archivo .mp4 en salida/<pieza>/>" (opcional), "aprobado": false }
+ *   "video": "<archivo .mp4 en salida/<pieza>/>" (opcional), "titulo" y "ia" (TikTok, opcionales),
+ *   "aprobado": false }
  */
 
 import fs from 'node:fs';
@@ -119,9 +120,13 @@ async function canalDe(red, lista) {
 }
 
 async function crear(pub, channelId, borrador) {
+  // Vídeo: la primera lámina PNG de la pieza hace de portada.
+  const portada = pub.video ? fs.readdirSync(path.join(SALIDA, pub.pieza)).filter(n => n.endsWith('.png')).sort()[0] : null;
   const assets = archivos(pub).map(n => {
     const url = `${MEDIA_BASE}/${pub.pieza}/${n}`;
-    return n.endsWith('.mp4') ? { video: { url } } : { image: { url } };
+    return n.endsWith('.mp4')
+      ? { video: { url, ...(portada ? { thumbnailUrl: `${MEDIA_BASE}/${pub.pieza}/${portada}` } : {}) } }
+      : { image: { url } };
   });
   const input = {
     text: pub.texto,
@@ -131,6 +136,8 @@ async function crear(pub, channelId, borrador) {
     dueAt: madridAUtc(pub.cuando),
     ...(assets.length ? { assets } : {}),
     ...(pub.red === 'instagram' ? { metadata: { instagram: { type: pub.tipo || 'post', shouldShareToFeed: true } } } : {}),
+    // TikTok: título del vídeo y etiqueta de contenido generado con IA («ia»: true).
+    ...(pub.red === 'tiktok' ? { metadata: { tiktok: { ...(pub.titulo ? { title: pub.titulo } : {}), isAiGenerated: !!pub.ia } } } : {}),
     ...(borrador ? { saveToDraft: true } : {})
   };
   const d = await gql(`mutation($input: CreatePostInput!) { createPost(input: $input) {
