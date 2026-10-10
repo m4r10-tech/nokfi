@@ -17,10 +17,15 @@ export function render(url, { plans } = {}) {
   let head = null;
   const collect = (h) => { head = h; };
   return new Promise((resolve, reject) => {
-    let html = '';
+    // Se juntan los bytes y se decodifican una sola vez: decodificar cada trozo
+    // por separado rompe las letras con tilde que caen entre dos trozos.
+    const chunks = [];
     const sink = new Writable({
-      write(chunk, _enc, cb) { html += chunk.toString(); cb(); },
-      final(cb) { resolve({ html, head }); cb(); }
+      write(chunk, _enc, cb) { chunks.push(Buffer.from(chunk)); cb(); },
+      // React 18.3 mete a veces un byte nulo (\u0000) delante de una letra con
+      // tilde al partir sus búferes (visto en /guias, /guias/iva-a-compensar y
+      // la calculadora de cuota): sobra, el texto llega entero, así que se quita.
+      final(cb) { resolve({ html: Buffer.concat(chunks).toString('utf8').replace(/\u0000/g, ''), head }); cb(); }
     });
     const stream = renderToPipeableStream(
       <SeoCollector.Provider value={collect}>
