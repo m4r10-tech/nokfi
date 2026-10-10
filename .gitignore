@@ -21,3 +21,6 @@ md/
 docs/sesion*.md
 marketing/redes/salida/
 media-redes/
+marketing/redes/video/voz/*
+!marketing/redes/video/voz/LEER-*.md
+marketing/redes/video/musica/*

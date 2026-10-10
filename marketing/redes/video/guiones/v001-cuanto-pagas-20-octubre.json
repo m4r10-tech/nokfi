@@ -1,0 +1,126 @@
+{
+  "id": "v001-cuanto-pagas-20-octubre",
+  "titulo": "¿Cuánto te toca pagar el 20 de octubre?",
+  "texto": "El 20 de octubre se paga el IVA y el IRPF del trimestre. Así lo sabes antes 👀 (cuenta de ejemplo con datos ficticios)\n\nEnvíaselo a ese amigo autónomo que siempre va justo 🙃\n\n#autonomos #iva #modelo303 #hacienda #emprendedores",
+  "pilar": "demo",
+  "gancho": "¿Cuánto te toca pagar el **20 de octubre**?",
+  "clips": [
+    {
+      "id": "impuestos",
+      "pasos": [
+        {
+          "ir": "/app/home"
+        },
+        {
+          "marca": "inicio"
+        },
+        {
+          "esperar": 700
+        },
+        {
+          "tocar": "nav a:has-text('Finanzas')"
+        },
+        {
+          "esperar": 600
+        },
+        {
+          "tocar": "a:has-text('Impuestos')"
+        },
+        {
+          "marca": "impuestos"
+        },
+        {
+          "esperar": 2600
+        },
+        {
+          "marca": "apartar"
+        },
+        {
+          "escribir": {
+            "en": "input[type=number]",
+            "texto": "2500"
+          }
+        },
+        {
+          "tocar": "button:has-text('Guardar')"
+        },
+        {
+          "esperar": 1600
+        },
+        {
+          "marca": "guardado"
+        },
+        {
+          "esperar": 1200
+        },
+        {
+          "bajar": 560
+        },
+        {
+          "marca": "303"
+        },
+        {
+          "esperar": 2800
+        },
+        {
+          "bajar": 520
+        },
+        {
+          "marca": "130"
+        },
+        {
+          "esperar": 3200
+        }
+      ]
+    }
+  ],
+  "escenas": [
+    {
+      "clip": "impuestos",
+      "marca": "impuestos",
+      "voz": "El 20 de octubre toca pagar el IVA. ¿Sabes ya cuánto te toca?",
+      "congelar": true,
+      "y": 0.35,
+      "zoom": 0.08
+    },
+    {
+      "clip": "impuestos",
+      "marca": "inicio",
+      "voz": "Yo lo miro en Nokfi: Finanzas, Impuestos."
+    },
+    {
+      "clip": "impuestos",
+      "marca": "impuestos",
+      "voz": "Entre IVA e IRPF, unos **5.963 €** este trimestre.",
+      "congelar": true,
+      "y": 0.35,
+      "zoomInicial": 1.12,
+      "zoom": 0.1
+    },
+    {
+      "clip": "impuestos",
+      "marca": "apartar",
+      "voz": "Apunto lo que ya tengo guardado y me dice **cuánto me falta**."
+    },
+    {
+      "clip": "impuestos",
+      "marca": "303",
+      "voz": "Abajo, el **303**: el IVA que cobré menos el de mis gastos."
+    },
+    {
+      "clip": "impuestos",
+      "marca": "130",
+      "voz": "Y el **130**, el adelanto del IRPF."
+    },
+    {
+      "clip": "impuestos",
+      "marca": "130",
+      "voz": "Todo sale solo de las facturas que voy subiendo."
+    }
+  ],
+  "cierre": {
+    "voz": "Envíaselo a ese amigo autónomo que siempre va justo el día 20.",
+    "titulo": "Envíaselo a quien **siempre va justo** 🙃",
+    "texto": "nokfi.app · 14 días gratis"
+  }
+}
