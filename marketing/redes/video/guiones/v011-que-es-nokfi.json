@@ -1,0 +1,190 @@
+{
+ "id": "v011-que-es-nokfi",
+ "titulo": "Todo lo que hace Nokfi en 40 segundos",
+ "texto": "Nokfi en 40 segundos: facturas con IA, impuestos, cobros, caja, plazos, facturación y API 📲 (cuenta de ejemplo con datos ficticios; cálculos orientativos)\n\nPruébalo 14 días gratis en nokfi.app y envíaselo a ese amigo autónomo 👇\n\n#autonomos #pymes #facturas #iva #emprendedores",
+ "pilar": "resumen",
+ "musica": "3-music-promotion.mp3",
+ "gancho": "Todo lo que hace **Nokfi** en 40 segundos",
+ "clips": [
+  {
+   "id": "impuestos",
+   "pasos": [
+    {
+     "ir": "/app/finanzas/impuestos"
+    },
+    {
+     "marca": "a"
+    },
+    {
+     "esperar": 6000
+    }
+   ]
+  },
+  {
+   "id": "libro",
+   "pasos": [
+    {
+     "ir": "/app/finanzas/libro"
+    },
+    {
+     "esperar": 400
+    },
+    {
+     "bajar": 200
+    },
+    {
+     "marca": "a"
+    },
+    {
+     "esperar": 1300
+    },
+    {
+     "bajar": 420
+    },
+    {
+     "esperar": 5000
+    }
+   ]
+  },
+  {
+   "id": "cobros",
+   "pasos": [
+    {
+     "ir": "/app/finanzas/cobros"
+    },
+    {
+     "marca": "a"
+    },
+    {
+     "esperar": 1500
+    },
+    {
+     "bajar": 430
+    },
+    {
+     "esperar": 5000
+    }
+   ]
+  },
+  {
+   "id": "prevision",
+   "pasos": [
+    {
+     "ir": "/app/finanzas/prevision"
+    },
+    {
+     "marca": "a"
+    },
+    {
+     "esperar": 6000
+    }
+   ]
+  },
+  {
+   "id": "calendario",
+   "pasos": [
+    {
+     "ir": "/app/finanzas/calendario"
+    },
+    {
+     "marca": "a"
+    },
+    {
+     "esperar": 6000
+    }
+   ]
+  },
+  {
+   "id": "factura",
+   "pasos": [
+    {
+     "ir": "/app/finanzas/facturas/nueva"
+    },
+    {
+     "esperar": 400
+    },
+    {
+     "bajar": 340
+    },
+    {
+     "marca": "a"
+    },
+    {
+     "esperar": 6000
+    }
+   ]
+  },
+  {
+   "id": "dev",
+   "pasos": [
+    {
+     "ir": "/app/dev"
+    },
+    {
+     "marca": "a"
+    },
+    {
+     "esperar": 6000
+    }
+   ]
+  }
+ ],
+ "escenas": [
+  {
+   "clip": "impuestos",
+   "marca": "a",
+   "voz": "Los números de tu negocio, claros. Esto es Nokfi.",
+   "locucion": "Los números de tu negocio, claros. | Esto es Nokfi.",
+   "congelar": true,
+   "y": 0.35
+  },
+  {
+   "clip": "libro",
+   "marca": "a",
+   "voz": "Subes tus facturas y la **IA las apunta** en tu libro."
+  },
+  {
+   "clip": "impuestos",
+   "marca": "a",
+   "voz": "Te dice cuánto vas a pagar de **IVA e IRPF** antes del plazo.",
+   "locucion": "Te dice cuánto vas a pagar de iva e i erre pe efe antes del plazo.",
+   "y": 0.35
+  },
+  {
+   "clip": "cobros",
+   "marca": "a",
+   "voz": "Ves quién te debe dinero, y lo **reclama por ti**.",
+   "y": 0.35
+  },
+  {
+   "clip": "prevision",
+   "marca": "a",
+   "voz": "Sabes cómo estará tu caja en **90 días**.",
+   "locucion": "Sabes cómo estará tu caja en noventa días.",
+   "y": 0.35
+  },
+  {
+   "clip": "calendario",
+   "marca": "a",
+   "voz": "Los plazos de Hacienda, con **aviso por correo**.",
+   "y": 0.35
+  },
+  {
+   "clip": "factura",
+   "marca": "a",
+   "voz": "Emites tus **facturas** desde el móvil."
+  },
+  {
+   "clip": "dev",
+   "marca": "a",
+   "voz": "Y si automatizas, usa la **API de Nokfi**: con n8n o con agentes de IA.",
+   "locucion": "Y si automatizas, usa la API de Nokfi. | Con n8n o con agentes de IA."
+  }
+ ],
+ "cierre": {
+  "voz": "Pruébalo 14 días gratis y envíaselo a ese amigo autónomo.",
+  "locucion": "Pruébalo catorce días gratis. | Y envíaselo a ese amigo autónomo.",
+  "titulo": "Tus números, **claros**.",
+  "texto": "nokfi.app · 14 días gratis"
+ }
+}
