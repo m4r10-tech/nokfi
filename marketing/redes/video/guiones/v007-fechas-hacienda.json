@@ -1,0 +1,87 @@
+{
+ "id": "v007-fechas-hacienda",
+ "titulo": "Las fechas que Hacienda no te va a recordar",
+ "texto": "Todos los plazos fiscales del año y un aviso por correo antes de cada uno 🗓️ (cuenta de ejemplo con datos ficticios)\n\nEnvíaselo a quien siempre presenta el último día 🙃\n\n#autonomos #hacienda #calendariofiscal #modelo303 #pymes",
+ "pilar": "dolor",
+ "musica": "1-chill-lofi-theme.mp3",
+ "gancho": "Las fechas que **Hacienda no te va a recordar**",
+ "clips": [
+  {
+   "id": "calendario",
+   "pasos": [
+    {
+     "ir": "/app/finanzas/calendario"
+    },
+    {
+     "marca": "proximo"
+    },
+    {
+     "esperar": 5000
+    },
+    {
+     "bajar": 560
+    },
+    {
+     "marca": "plazos"
+    },
+    {
+     "esperar": 2200
+    },
+    {
+     "bajar": 380
+    },
+    {
+     "esperar": 1800
+    },
+    {
+     "bajar": 380
+    },
+    {
+     "esperar": 2500
+    },
+    {
+     "subir": 1070
+    },
+    {
+     "marca": "aviso"
+    },
+    {
+     "esperar": 5000
+    }
+   ]
+  }
+ ],
+ "escenas": [
+  {
+   "clip": "calendario",
+   "marca": "proximo",
+   "voz": "Hacienda no te va a recordar ninguna de estas fechas.",
+   "congelar": true,
+   "y": 0.35
+  },
+  {
+   "clip": "calendario",
+   "marca": "proximo",
+   "voz": "Yo las tengo en el calendario fiscal de Nokfi.",
+   "y": 0.35
+  },
+  {
+   "clip": "calendario",
+   "marca": "plazos",
+   "voz": "Todos los modelos del año, cada uno con su día: el **303**, el **130**, la renta…",
+   "locucion": "Todos los modelos del año, cada uno con su día: | el trescientos tres, el ciento treinta, la renta.",
+   "y": 0.35
+  },
+  {
+   "clip": "calendario",
+   "marca": "aviso",
+   "voz": "Y me avisa por correo **7 días antes** y la víspera.",
+   "locucion": "Y me avisa por correo siete días antes y la víspera."
+  }
+ ],
+ "cierre": {
+  "voz": "Envíaselo a ese amigo que siempre presenta el último día.",
+  "titulo": "Envíaselo a quien presenta **el último día** 🙃",
+  "texto": "nokfi.app · 14 días gratis"
+ }
+}

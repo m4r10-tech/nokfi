@@ -1,0 +1,88 @@
+{
+ "id": "v010-api-trimestre",
+ "titulo": "¿Y si tu agente de IA supiera cuánto IVA toca pagar?",
+ "texto": "API de Nokfi: el resumen del trimestre (IVA, IRPF y total estimado) en una llamada, para n8n o tu agente de IA 🤖 (cuenta de ejemplo con datos ficticios)\n\nEnvíaselo a quien automatiza negocios 👇\n\n#n8n #automatizacion #api #agentesia #desarrolladores",
+ "pilar": "desarrolladores",
+ "musica": "1-chill-lofi-theme.mp3",
+ "gancho": "¿Y si tu agente de IA supiera **cuánto IVA toca pagar**?",
+ "clips": [
+  {
+   "id": "playground",
+   "pasos": [
+    {
+     "ir": "/app/dev/playground"
+    },
+    {
+     "marca": "inicio"
+    },
+    {
+     "esperar": 5500
+    },
+    {
+     "marca": "elegir"
+    },
+    {
+     "esperar": 400
+    },
+    {
+     "elegir": {
+      "en": "select",
+      "valor": "tax.quarter"
+     }
+    },
+    {
+     "esperar": 1500
+    },
+    {
+     "tocar": "button:has-text('Ejecutar')"
+    },
+    {
+     "esperar": 600
+    },
+    {
+     "bajar": 640
+    },
+    {
+     "marca": "respuesta"
+    },
+    {
+     "esperar": 9000
+    }
+   ]
+  }
+ ],
+ "escenas": [
+  {
+   "clip": "playground",
+   "marca": "inicio",
+   "voz": "¿Y si tu agente de IA supiera cuánto IVA toca pagar este trimestre?",
+   "locucion": "¿Y si tu agente de IA supiera cuánto iva toca pagar este trimestre?",
+   "congelar": true,
+   "y": 0.35
+  },
+  {
+   "clip": "playground",
+   "marca": "elegir",
+   "voz": "Elijo la operación: resumen del trimestre.",
+   "y": 0.35
+  },
+  {
+   "clip": "playground",
+   "marca": "respuesta",
+   "voz": "Y responde con los datos del libro: IVA, IRPF y el **total estimado**.",
+   "locucion": "Y responde con los datos del libro: iva, i erre pe efe y el total estimado."
+  },
+  {
+   "clip": "playground",
+   "marca": "respuesta",
+   "voz": "Listo para **n8n** o para tu agente.",
+   "desplaza": 4
+  }
+ ],
+ "cierre": {
+  "voz": "Envíaselo a quien automatiza negocios con IA.",
+  "titulo": "Envíaselo a quien **automatiza** 🤖",
+  "texto": "nokfi.app · API para n8n y agentes de IA",
+  "boton": "Mira la documentación"
+ }
+}

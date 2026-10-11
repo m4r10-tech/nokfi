@@ -1,0 +1,122 @@
+{
+ "id": "v009-precio-por-hora",
+ "titulo": "¿Estás cobrando muy poco por hora?",
+ "texto": "Calculadora de precio por hora para autónomos: gratis y sin registrarte, en nokfi.app 🧮 (cálculo orientativo)\n\nEnvíaselo a quien cobra demasiado barato 😬\n\n#autonomos #freelance #precioporhora #tarifas #emprendedores",
+ "pilar": "calculadora",
+ "musica": "3-music-promotion.mp3",
+ "gancho": "¿Estás cobrando **muy poco** por hora?",
+ "clips": [
+  {
+   "id": "hora",
+   "pasos": [
+    {
+     "ir": "/calculadora-precio-hora"
+    },
+    {
+     "esperar": 500
+    },
+    {
+     "bajar": 300
+    },
+    {
+     "marca": "calc"
+    },
+    {
+     "esperar": 400
+    },
+    {
+     "escribir": {
+      "en": "main input >> nth=0",
+      "texto": "1200",
+      "limpiar": true
+     }
+    },
+    {
+     "escribir": {
+      "en": "main input >> nth=1",
+      "texto": "2500",
+      "limpiar": true
+     }
+    },
+    {
+     "escribir": {
+      "en": "main input >> nth=2",
+      "texto": "300",
+      "limpiar": true
+     }
+    },
+    {
+     "esperar": 400
+    },
+    {
+     "bajar": 360
+    },
+    {
+     "marca": "horas"
+    },
+    {
+     "esperar": 500
+    },
+    {
+     "escribir": {
+      "en": "main input >> nth=4",
+      "texto": "100",
+      "limpiar": true
+     }
+    },
+    {
+     "esperar": 500
+    },
+    {
+     "marca": "resultado"
+    },
+    {
+     "esperar": 5000
+    },
+    {
+     "marca": "resultado2"
+    },
+    {
+     "esperar": 5000
+    }
+   ]
+  }
+ ],
+ "escenas": [
+  {
+   "clip": "hora",
+   "marca": "resultado",
+   "voz": "¿Sabes cuánto tienes que cobrar por hora para que te salgan las cuentas?",
+   "congelar": true
+  },
+  {
+   "clip": "hora",
+   "marca": "calc",
+   "voz": "Pongo mis gastos fijos, lo que quiero ganar y la cuota de autónomos."
+  },
+  {
+   "clip": "hora",
+   "marca": "horas",
+   "voz": "Y las horas que de verdad facturo al mes: **100**.",
+   "locucion": "Y las horas que de verdad facturo al mes: cien."
+  },
+  {
+   "clip": "hora",
+   "marca": "resultado",
+   "voz": "Resultado: **44 € la hora**, más IVA.",
+   "locucion": "Resultado: cuarenta y cuatro euros la hora, más iva."
+  },
+  {
+   "clip": "hora",
+   "marca": "resultado2",
+   "voz": "Por debajo de **40**, pierdo dinero.",
+   "locucion": "Por debajo de cuarenta, pierdo dinero."
+  }
+ ],
+ "cierre": {
+  "voz": "Envíaselo a ese amigo que cobra demasiado barato.",
+  "titulo": "Envíaselo a quien **cobra barato** 😬",
+  "texto": "nokfi.app · calculadoras gratis",
+  "boton": "Calcula tu precio gratis"
+ }
+}

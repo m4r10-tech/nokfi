@@ -1,0 +1,94 @@
+{
+ "id": "v006-excel-hasta-el-trimestre",
+ "titulo": "Excel está bien… hasta que llega el trimestre",
+ "texto": "Tu libro de facturas con el IVA ya calculado, y un PDF o un Excel para la gestoría con un toque 📒 (cuenta de ejemplo con datos ficticios)\n\nEnvíaselo a quien todavía lo lleva todo en Excel 😅\n\n#autonomos #facturas #excel #iva #pymes",
+ "pilar": "contraste",
+ "musica": "3-music-promotion.mp3",
+ "gancho": "Excel está bien… **hasta que llega el trimestre**",
+ "clips": [
+  {
+   "id": "libro",
+   "pasos": [
+    {
+     "ir": "/app/finanzas/libro"
+    },
+    {
+     "esperar": 400
+    },
+    {
+     "bajar": 200
+    },
+    {
+     "marca": "resumen"
+    },
+    {
+     "esperar": 5000
+    },
+    {
+     "bajar": 420
+    },
+    {
+     "marca": "lista"
+    },
+    {
+     "esperar": 1500
+    },
+    {
+     "bajar": 300
+    },
+    {
+     "esperar": 2500
+    },
+    {
+     "subir": 720
+    },
+    {
+     "marca": "arriba"
+    },
+    {
+     "esperar": 5000
+    },
+    {
+     "marca": "exportar"
+    },
+    {
+     "esperar": 5000
+    }
+   ]
+  }
+ ],
+ "escenas": [
+  {
+   "clip": "libro",
+   "marca": "resumen",
+   "voz": "Excel está bien… hasta que llega el trimestre.",
+   "congelar": true
+  },
+  {
+   "clip": "libro",
+   "marca": "resumen",
+   "voz": "Este es mi libro de facturas en Nokfi."
+  },
+  {
+   "clip": "libro",
+   "marca": "lista",
+   "voz": "Cada factura, con su **IVA ya separado**."
+  },
+  {
+   "clip": "libro",
+   "marca": "arriba",
+   "voz": "Y arriba, lo que importa: más de **3.000 €** de IVA a pagar.",
+   "locucion": "Y arriba, lo que importa: más de tres mil euros de iva a pagar."
+  },
+  {
+   "clip": "libro",
+   "marca": "exportar",
+   "voz": "Para la gestoría, un **PDF o un Excel** con un toque."
+  }
+ ],
+ "cierre": {
+  "voz": "Envíaselo a ese amigo que todavía lo lleva todo en Excel.",
+  "titulo": "Envíaselo a quien **vive en Excel** 😅",
+  "texto": "nokfi.app · 14 días gratis"
+ }
+}

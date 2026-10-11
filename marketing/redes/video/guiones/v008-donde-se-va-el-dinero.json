@@ -1,0 +1,81 @@
+{
+ "id": "v008-donde-se-va-el-dinero",
+ "titulo": "¿En qué se te va el dinero cada mes?",
+ "texto": "Gastos fijos y suscripciones: cuánto suman al mes y al año, sacado de tus facturas 💸 (cuenta de ejemplo con datos ficticios)\n\nEnvíaselo a quien paga suscripciones que ya no usa 👀\n\n#autonomos #pymes #gastos #ahorro #negocio",
+ "pilar": "demo",
+ "musica": "2-bit-shift.mp3",
+ "gancho": "¿En qué se te va **el dinero cada mes**?",
+ "clips": [
+  {
+   "id": "fugas",
+   "pasos": [
+    {
+     "ir": "/app/finanzas/fugas"
+    },
+    {
+     "esperar": 400
+    },
+    {
+     "bajar": 110
+    },
+    {
+     "marca": "a"
+    },
+    {
+     "esperar": 6000
+    },
+    {
+     "marca": "b"
+    },
+    {
+     "esperar": 6000
+    },
+    {
+     "marca": "c"
+    },
+    {
+     "esperar": 6000
+    }
+   ]
+  }
+ ],
+ "escenas": [
+  {
+   "clip": "fugas",
+   "marca": "a",
+   "voz": "Cada mes se me van casi **1.500 €** antes de vender nada.",
+   "locucion": "Cada mes se me van casi mil quinientos euros antes de vender nada.",
+   "congelar": true
+  },
+  {
+   "clip": "fugas",
+   "marca": "a",
+   "voz": "Lo veo en las fugas de Nokfi.",
+   "congelar": true
+  },
+  {
+   "clip": "fugas",
+   "marca": "b",
+   "voz": "Alquiler, luz, programas… y lo que suman **al año**.",
+   "congelar": true
+  },
+  {
+   "clip": "fugas",
+   "marca": "b",
+   "voz": "Solo el alquiler: casi **14.000 €**.",
+   "locucion": "Solo el alquiler: casi catorce mil euros.",
+   "congelar": true
+  },
+  {
+   "clip": "fugas",
+   "marca": "c",
+   "voz": "Así reviso si de verdad uso todo lo que pago.",
+   "congelar": true
+  }
+ ],
+ "cierre": {
+  "voz": "Envíaselo a ese amigo que paga suscripciones que ya no usa.",
+  "titulo": "Envíaselo a quien paga **lo que no usa** 👀",
+  "texto": "nokfi.app · 14 días gratis"
+ }
+}
