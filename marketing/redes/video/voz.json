@@ -5,7 +5,7 @@
   "pausa": 0.7,
   "pronunciar": {
     "IRPF": "i erre pe efe",
-    "\\bIVA\\b": "iva",
+    "\\b[Ii][Vv][Aa]\\b": "iba",
     " €": " euros",
     "€": " euros",
     "Nokfi": "Nókfi"

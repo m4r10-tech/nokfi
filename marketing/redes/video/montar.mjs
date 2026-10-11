@@ -172,7 +172,8 @@ async function main() {
   const frases = [...g.escenas.map(e => e.voz), g.cierre?.voz].filter(Boolean);
   const vozPath = ['wav', 'm4a', 'mp3', 'ogg', 'opus'].map(e => path.join(HERE, 'voz', `${g.id}.${e}`)).find(f => fs.existsSync(f));
   const musDir = path.join(HERE, 'musica');
-  const musPath = g.musica ? path.join(musDir, g.musica)
+  // MUSICA=<archivo> y SUFIJO=<texto> permiten probar varias pistas sin tocar el guion.
+  const musPath = process.env.MUSICA ? path.join(musDir, process.env.MUSICA) : g.musica ? path.join(musDir, g.musica)
     : (fs.existsSync(musDir) ? fs.readdirSync(musDir).filter(n => /\.(mp3|m4a|wav|ogg)$/.test(n)).sort().map(n => path.join(musDir, n))[0] : null);
 
   // ── Tiempos de cada frase ──
@@ -304,14 +305,14 @@ async function main() {
   else if (musPath) { filtros.push('[mus]loudnorm=I=-14:TP=-1:LRA=11[aout]'); audio = '[aout]'; }
   else { args.push('-f', 'lavfi', '-t', finTotal.toFixed(3), '-i', 'anullsrc=r=48000:cl=stereo'); audio = `${idx}:a`; idx++; }
 
-  const video = path.join(out, 'video.mp4');
+  const video = path.join(out, process.env.SUFIJO ? `video-${process.env.SUFIJO}.mp4` : 'video.mp4');
   args.push('-filter_complex', filtros.join(';'), '-map', '[vout]', '-map', audio,
     '-t', finTotal.toFixed(3), '-c:v', 'libx264', '-profile:v', 'high', '-crf', '15', '-preset', 'slow', '-tune', 'animation', '-pix_fmt', 'yuv420p',
     '-r', String(FPS), '-c:a', 'aac', '-b:a', '192k', '-ar', '48000', '-movflags', '+faststart', video);
   sh('ffmpeg', args);
 
   // Portada: fotograma con el gancho ya en pantalla.
-  sh('ffmpeg', ['-v', 'error', '-y', '-ss', '0.9', '-i', video, '-frames:v', '1', path.join(out, '01-portada.png')]);
+  if (!process.env.SUFIJO) sh('ffmpeg', ['-v', 'error', '-y', '-ss', '0.9', '-i', video, '-frames:v', '1', path.join(out, '01-portada.png')]);
   fs.rmSync(tmp, { recursive: true, force: true });
   console.log(`✓ ${path.relative(path.resolve(REDES, '../..'), video)} · ${finTotal.toFixed(1)} s · voz: ${vozPath ? path.basename(vozPath) : 'no'} · música: ${musPath ? path.basename(musPath) : 'no'}`);
 }
