@@ -11,7 +11,8 @@
     "\\b[Ii][Vv][Aa]\\b": "iba",
     " €": " euros",
     "€": " euros",
-    "\\bn8n\\b": "ene ocho ene"
+    "\\bn8n\\b": "ene ocho ene",
+    "\\bExcel\\b": "Excél"
   },
   "pausaBreve": 0.28
 }

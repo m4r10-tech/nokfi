@@ -16,7 +16,7 @@
   estén confirmadas al 100 %.
 - Objetivo: **viralizar** entre **negocios y autónomos** y entre
   **desarrolladores de automatizaciones con IA** (n8n, Make, Zapier, MCP).
-- Ritmo: **1 vídeo al día + 1 historia al día**.
+- Ritmo: **2 vídeos al día** por ahora (13:30 y 20:00; decisión del usuario, 2026-10-11) + 1 historia al día. Se hacen tandas nuevas cada semana.
 - El usuario revisa cada vídeo antes de programarlo.
 
 ## 1. Cómo se hace un vídeo (tubería)
@@ -126,7 +126,7 @@ Aprendido con los vídeos de prueba (2026-10-11, oído del usuario):
 - Cifras largas hacen pausas raras («3.448»): **redondear** al hablar («casi tres
   mil quinientos») y dejar la cifra exacta en pantalla.
 - Pausa breve dentro de una frase: barra ` | ` en `locucion` («…en Nokfi. | Finanzas e impuestos.»).
-- IVA e IRPF suenan perfectos tal como están en `voz.json`.
+- IVA e IRPF suenan perfectos tal como están en `voz.json`. «Excel» se locuta como «Excél» (acento al final).
 - Cada frase locutada se guarda en `voz/.tomas/`: al rehacer un vídeo, las frases
   que no cambian suenan idénticas. Si una frase sale mal, `--repetir <n>` la
   locuta de nuevo (cada toma sale algo distinta).
