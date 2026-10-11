@@ -127,6 +127,7 @@ Aprendido con los vídeos de prueba (2026-10-11, oído del usuario):
   mil quinientos») y dejar la cifra exacta en pantalla.
 - Pausa breve dentro de una frase: barra ` | ` en `locucion` («…en Nokfi. | Finanzas e impuestos.»).
 - IVA e IRPF suenan perfectos tal como están en `voz.json`. «Excel» se locuta como «Excél» (acento al final).
+- «IA» al final de frase suena «ia-a»: escribir «inteligencia artificial» en `locucion`. «API» solo dentro de «la API de Nokfi».
 - Cada frase locutada se guarda en `voz/.tomas/`: al rehacer un vídeo, las frases
   que no cambian suenan idénticas. Si una frase sale mal, `--repetir <n>` la
   locuta de nuevo (cada toma sale algo distinta).
