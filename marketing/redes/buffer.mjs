@@ -120,12 +120,11 @@ async function canalDe(red, lista) {
 }
 
 async function crear(pub, channelId, borrador) {
-  // Vídeo: la primera lámina PNG de la pieza hace de portada.
-  const portada = pub.video ? fs.readdirSync(path.join(SALIDA, pub.pieza)).filter(n => n.endsWith('.png')).sort()[0] : null;
+  // Vídeo: la portada es el fotograma de los 0,9 s (gancho en pantalla); Buffer no admite una imagen aparte.
   const assets = archivos(pub).map(n => {
     const url = `${MEDIA_BASE}/${pub.pieza}/${n}`;
     return n.endsWith('.mp4')
-      ? { video: { url, ...(portada ? { thumbnailUrl: `${MEDIA_BASE}/${pub.pieza}/${portada}` } : {}) } }
+      ? { video: { url, metadata: { thumbnailOffset: 900 } } }
       : { image: { url } };
   });
   const input = {
