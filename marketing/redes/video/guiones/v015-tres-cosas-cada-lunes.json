@@ -1,0 +1,98 @@
+{
+ "id": "v015-tres-cosas-cada-lunes",
+ "titulo": "3 cosas que miro cada lunes en mi negocio",
+ "metodo": "lista de 3 + llamada a guardar",
+ "texto": "Tres cosas que mirar cada lunes: quién te debe, cómo va la caja y cuánto llevas apartado para Hacienda 📌 (cuenta de ejemplo con datos ficticios)\n\nGuárdalo para el lunes.\n\n#autonomos #pymes #negocio #rutina #emprendedores",
+ "pilar": "lista",
+ "musica": "3-music-promotion.mp3",
+ "gancho": "**3 cosas** que miro cada lunes en mi negocio",
+ "clips": [
+  {
+   "id": "cobros",
+   "pasos": [
+    {
+     "ir": "/app/finanzas/cobros"
+    },
+    {
+     "marca": "a"
+    },
+    {
+     "esperar": 1200
+    },
+    {
+     "bajar": 430
+    },
+    {
+     "esperar": 5000
+    }
+   ]
+  },
+  {
+   "id": "prevision",
+   "pasos": [
+    {
+     "ir": "/app/finanzas/prevision"
+    },
+    {
+     "marca": "a"
+    },
+    {
+     "esperar": 6000
+    }
+   ]
+  },
+  {
+   "id": "impuestos",
+   "pasos": [
+    {
+     "ir": "/app/finanzas/impuestos"
+    },
+    {
+     "marca": "a"
+    },
+    {
+     "esperar": 7000
+    }
+   ]
+  }
+ ],
+ "escenas": [
+  {
+   "clip": "cobros",
+   "marca": "a",
+   "voz": "Tres cosas que miro cada lunes en mi negocio.",
+   "congelar": true,
+   "y": 0.35
+  },
+  {
+   "clip": "cobros",
+   "marca": "a",
+   "voz": "Uno: **quién me debe** dinero.",
+   "y": 0.35
+  },
+  {
+   "clip": "prevision",
+   "marca": "a",
+   "voz": "Dos: cómo va a estar **la caja**.",
+   "y": 0.35
+  },
+  {
+   "clip": "impuestos",
+   "marca": "a",
+   "voz": "Y tres: cuánto llevo apartado **para Hacienda**.",
+   "y": 0.35
+  },
+  {
+   "clip": "impuestos",
+   "marca": "a",
+   "voz": "Y la semana empieza tranquila.",
+   "congelar": true,
+   "y": 0.35
+  }
+ ],
+ "cierre": {
+  "voz": "Guárdate este vídeo para el lunes.",
+  "titulo": "**Guárdalo** para el lunes 📌",
+  "texto": "nokfi.app · 14 días gratis"
+ }
+}

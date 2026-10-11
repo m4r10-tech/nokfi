@@ -1,0 +1,81 @@
+{
+ "id": "v017-gmail-a-sheets",
+ "titulo": "Facturas de Gmail a Google Sheets, solas",
+ "metodo": "desarrolladores: plantilla lista para usar",
+ "texto": "Plantillas de n8n con Nokfi: las facturas del correo acaban solas en tu hoja de cálculo, con el total comprobado y el NIF validado 🤖 (cuenta de ejemplo)\n\nEnvíaselo a quien vive dentro de n8n 👇\n\n#n8n #automatizacion #googlesheets #gmail #nocode",
+ "pilar": "desarrolladores",
+ "musica": "2-bit-shift.mp3",
+ "gancho": "Facturas de **Gmail a Google Sheets**, solas",
+ "clips": [
+  {
+   "id": "plantillas",
+   "pasos": [
+    {
+     "ir": "/app/dev/plantillas"
+    },
+    {
+     "esperar": 500
+    },
+    {
+     "bajar": 150
+    },
+    {
+     "marca": "a"
+    },
+    {
+     "esperar": 9000
+    },
+    {
+     "marca": "b"
+    },
+    {
+     "esperar": 6000
+    },
+    {
+     "bajar": 440
+    },
+    {
+     "marca": "c"
+    },
+    {
+     "esperar": 6000
+    }
+   ]
+  }
+ ],
+ "escenas": [
+  {
+   "clip": "plantillas",
+   "marca": "a",
+   "voz": "Las facturas llegan al correo y acaban solas en una hoja de cálculo.",
+   "congelar": true
+  },
+  {
+   "clip": "plantillas",
+   "marca": "a",
+   "voz": "Es una plantilla de n8n que viene con Nokfi."
+  },
+  {
+   "clip": "plantillas",
+   "marca": "b",
+   "voz": "Lee cada factura, comprueba el total y **valida el NIF**."
+  },
+  {
+   "clip": "plantillas",
+   "marca": "b",
+   "voz": "Descargas el archivo, lo importas y pones tus credenciales.",
+   "congelar": true
+  },
+  {
+   "clip": "plantillas",
+   "marca": "c",
+   "voz": "Y hay más: de Drive a un resumen mensual, o la caja a Telegram."
+  }
+ ],
+ "cierre": {
+  "voz": "Envíaselo a quien vive dentro de n8n.",
+  "titulo": "Envíaselo a quien **vive en n8n** 🤖",
+  "texto": "nokfi.app · API y plantillas de n8n",
+  "boton": "Mira la documentación"
+ }
+}

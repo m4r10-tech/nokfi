@@ -1,0 +1,84 @@
+{
+ "id": "v013-cobro-menos-de-lo-que-facturo",
+ "titulo": "¿Por qué cobro menos de lo que facturo?",
+ "metodo": "pregunta-misterio + calculadora pública",
+ "texto": "La retención de IRPF explicada con una factura de 1.000 €. Calculadora gratis en nokfi.app 🧮 (cálculo orientativo)\n\nEnvíaselo a quien acaba de empezar a facturar 🫡\n\n#autonomos #irpf #retencion #facturas #freelance",
+ "pilar": "calculadora",
+ "musica": "1-chill-lofi-theme.mp3",
+ "gancho": "¿Por qué cobro **menos** de lo que facturo?",
+ "clips": [
+  {
+   "id": "irpf",
+   "pasos": [
+    {
+     "ir": "/calculadora-retencion-irpf"
+    },
+    {
+     "esperar": 500
+    },
+    {
+     "bajar": 380
+    },
+    {
+     "marca": "calc"
+    },
+    {
+     "esperar": 500
+    },
+    {
+     "escribir": {
+      "en": "main input >> nth=0",
+      "texto": "1000",
+      "limpiar": true
+     }
+    },
+    {
+     "esperar": 500
+    },
+    {
+     "marca": "res"
+    },
+    {
+     "esperar": 7000
+    },
+    {
+     "marca": "res2"
+    },
+    {
+     "esperar": 7000
+    }
+   ]
+  }
+ ],
+ "escenas": [
+  {
+   "clip": "irpf",
+   "marca": "res",
+   "voz": "Facturas 1.000 € y te llegan **1.060**. ¿Y el resto?",
+   "locucion": "Facturas mil euros y te llegan mil sesenta. | ¿Y el resto?",
+   "congelar": true
+  },
+  {
+   "clip": "irpf",
+   "marca": "calc",
+   "voz": "Es la retención de IRPF."
+  },
+  {
+   "clip": "irpf",
+   "marca": "res",
+   "voz": "Sumas **210** de IVA, pero tu cliente se queda **150**.",
+   "locucion": "Sumas doscientos diez de iva, pero tu cliente se queda ciento cincuenta."
+  },
+  {
+   "clip": "irpf",
+   "marca": "res2",
+   "voz": "Los ingresa en Hacienda a tu nombre: es un adelanto, no los pierdes."
+  }
+ ],
+ "cierre": {
+  "voz": "Envíaselo a ese amigo que acaba de empezar a facturar.",
+  "titulo": "Envíaselo a quien **empieza a facturar** 🫡",
+  "texto": "nokfi.app · calculadoras gratis",
+  "boton": "Calcula tu factura gratis"
+ }
+}

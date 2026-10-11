@@ -1,0 +1,89 @@
+{
+ "id": "v018-contratar-no-cuesta-1500",
+ "titulo": "Un sueldo de 1.500 € no te cuesta 1.500 €",
+ "metodo": "mito roto + calculadora pública",
+ "texto": "Lo que cuesta de verdad un empleado, con la Seguridad Social de la empresa. Calculadora gratis en nokfi.app 🧮 (cálculo orientativo, régimen general)\n\nEnvíaselo a quien quiere contratar 👀\n\n#pymes #autonomos #contratar #seguridadsocial #negocio",
+ "pilar": "calculadora",
+ "musica": "3-music-promotion.mp3",
+ "gancho": "Un sueldo de 1.500 € **no te cuesta 1.500 €**",
+ "clips": [
+  {
+   "id": "empleado",
+   "pasos": [
+    {
+     "ir": "/calculadora-coste-empleado"
+    },
+    {
+     "esperar": 500
+    },
+    {
+     "bajar": 330
+    },
+    {
+     "marca": "calc"
+    },
+    {
+     "esperar": 500
+    },
+    {
+     "escribir": {
+      "en": "main input >> nth=0",
+      "texto": "18000",
+      "limpiar": true
+     }
+    },
+    {
+     "esperar": 500
+    },
+    {
+     "bajar": 270
+    },
+    {
+     "marca": "res"
+    },
+    {
+     "esperar": 7000
+    },
+    {
+     "marca": "res2"
+    },
+    {
+     "esperar": 7000
+    }
+   ]
+  }
+ ],
+ "escenas": [
+  {
+   "clip": "empleado",
+   "marca": "res",
+   "voz": "Un sueldo de 1.500 € no te cuesta 1.500 €.",
+   "locucion": "Un sueldo de mil quinientos euros no te cuesta mil quinientos euros.",
+   "congelar": true
+  },
+  {
+   "clip": "empleado",
+   "marca": "calc",
+   "voz": "Pongo el salario bruto del año: **18.000 €**.",
+   "locucion": "Pongo el salario bruto del año: dieciocho mil euros."
+  },
+  {
+   "clip": "empleado",
+   "marca": "res",
+   "voz": "Con la Seguridad Social, casi **2.000 € al mes**.",
+   "locucion": "Con la Seguridad Social, casi dos mil euros al mes."
+  },
+  {
+   "clip": "empleado",
+   "marca": "res2",
+   "voz": "Casi **500 € más** cada mes que no salen en la nómina.",
+   "locucion": "Casi quinientos euros más cada mes que no salen en la nómina."
+  }
+ ],
+ "cierre": {
+  "voz": "Envíaselo a ese amigo que quiere contratar.",
+  "titulo": "Envíaselo a quien quiere **contratar** 👀",
+  "texto": "nokfi.app · calculadoras gratis",
+  "boton": "Calcula el coste gratis"
+ }
+}

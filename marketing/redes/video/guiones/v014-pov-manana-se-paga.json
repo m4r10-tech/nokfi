@@ -1,0 +1,81 @@
+{
+ "id": "v014-pov-manana-se-paga",
+ "titulo": "POV: mañana se paga el IVA",
+ "metodo": "POV sin voz (solo texto y música; no lleva etiqueta de IA)",
+ "sinVoz": true,
+ "texto": "POV: mañana se paga el IVA y no sabes cuánto 😅 (cuenta de ejemplo con datos ficticios)\n\nEnvíaselo a quien lo deja para el último día 🙃\n\n#autonomos #iva #hacienda #pov #emprendedores",
+ "pilar": "dolor",
+ "musica": "2-bit-shift.mp3",
+ "gancho": "POV: **mañana se paga el IVA** y no sabes cuánto",
+ "clips": [
+  {
+   "id": "impuestos",
+   "pasos": [
+    {
+     "ir": "/app/home"
+    },
+    {
+     "marca": "inicio"
+    },
+    {
+     "esperar": 700
+    },
+    {
+     "tocar": "nav a:has-text('Finanzas')"
+    },
+    {
+     "esperar": 600
+    },
+    {
+     "tocar": "a:has-text('Impuestos')"
+    },
+    {
+     "marca": "impuestos"
+    },
+    {
+     "esperar": 4000
+    },
+    {
+     "bajar": 560
+    },
+    {
+     "marca": "303"
+    },
+    {
+     "esperar": 4000
+    }
+   ]
+  }
+ ],
+ "escenas": [
+  {
+   "clip": "impuestos",
+   "marca": "impuestos",
+   "voz": "Mañana se paga el IVA y no tienes ni idea de cuánto.",
+   "congelar": true,
+   "y": 0.35
+  },
+  {
+   "clip": "impuestos",
+   "marca": "inicio",
+   "voz": "Abres Nokfi.",
+   "desplaza": 0.6
+  },
+  {
+   "clip": "impuestos",
+   "marca": "impuestos",
+   "voz": "**5.963 €**. Ya lo sabes.",
+   "y": 0.35
+  },
+  {
+   "clip": "impuestos",
+   "marca": "303",
+   "voz": "Y de dónde sale cada euro."
+  }
+ ],
+ "cierre": {
+  "voz": "Envíaselo a quien lo deja para el último día.",
+  "titulo": "Envíaselo a quien lo deja **para el último día** 🙃",
+  "texto": "nokfi.app · 14 días gratis"
+ }
+}

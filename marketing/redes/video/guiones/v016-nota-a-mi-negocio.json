@@ -1,0 +1,79 @@
+{
+ "id": "v016-nota-a-mi-negocio",
+ "titulo": "Le he puesto nota a mi negocio: 61 sobre 100",
+ "metodo": "resultado personal / curiosidad",
+ "texto": "Un diagnóstico de 30 preguntas que le pone nota a cómo llevas el negocio y te dice por dónde empezar 📋 (cuenta de ejemplo con datos ficticios)\n\nEnvíaselo a quien lleva el negocio a ojo 👀\n\n#autonomos #pymes #negocio #finanzas #emprendedores",
+ "pilar": "demo",
+ "musica": "1-chill-lofi-theme.mp3",
+ "gancho": "Le he puesto nota a mi negocio: **61 sobre 100**",
+ "clips": [
+  {
+   "id": "diag",
+   "pasos": [
+    {
+     "ir": "/app/historial"
+    },
+    {
+     "esperar": 500
+    },
+    {
+     "tocar": "a:has-text('Diagnóstico de negocio')"
+    },
+    {
+     "esperar": 900
+    },
+    {
+     "bajar": 430
+    },
+    {
+     "marca": "nota"
+    },
+    {
+     "esperar": 6000
+    },
+    {
+     "bajar": 330
+    },
+    {
+     "marca": "puntos"
+    },
+    {
+     "esperar": 7000
+    }
+   ]
+  }
+ ],
+ "escenas": [
+  {
+   "clip": "diag",
+   "marca": "nota",
+   "voz": "Le he puesto nota a mi negocio: **61 sobre 100**.",
+   "locucion": "Le he puesto nota a mi negocio: sesenta y uno sobre cien.",
+   "congelar": true
+  },
+  {
+   "clip": "diag",
+   "marca": "nota",
+   "voz": "Son treinta preguntas sobre cómo llevo las cuentas."
+  },
+  {
+   "clip": "diag",
+   "marca": "nota",
+   "voz": "Y me dice **dónde pierdo puntos**: facturación, gastos fijos, bancos.",
+   "y": 1,
+   "congelar": true
+  },
+  {
+   "clip": "diag",
+   "marca": "nota",
+   "voz": "Ya sé por dónde empezar.",
+   "congelar": true,
+   "y": 1
+  }
+ ],
+ "cierre": {
+  "voz": "Envíaselo a ese amigo que lleva el negocio a ojo.",
+  "titulo": "Envíaselo a quien lo lleva **a ojo** 👀",
+  "texto": "nokfi.app · 14 días gratis"
+ }
+}

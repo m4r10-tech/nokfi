@@ -1,0 +1,84 @@
+{
+ "id": "v012-210-no-son-tuyos",
+ "titulo": "De esta factura, 210 € no son tuyos",
+ "metodo": "dato sorpresa + calculadora pública",
+ "texto": "El IVA que cobras no es tuyo: lo guardas para Hacienda. Calculadora de IVA gratis en nokfi.app 🧮 (cálculo orientativo)\n\nEnvíaselo a quien se gasta el IVA 😬\n\n#autonomos #iva #facturas #hacienda #emprendedores",
+ "pilar": "calculadora",
+ "musica": "2-bit-shift.mp3",
+ "gancho": "De esta factura, **210 € no son tuyos**",
+ "clips": [
+  {
+   "id": "iva",
+   "pasos": [
+    {
+     "ir": "/calculadora-iva"
+    },
+    {
+     "esperar": 500
+    },
+    {
+     "bajar": 330
+    },
+    {
+     "marca": "calc"
+    },
+    {
+     "esperar": 500
+    },
+    {
+     "escribir": {
+      "en": "main input >> nth=0",
+      "texto": "1000",
+      "limpiar": true
+     }
+    },
+    {
+     "esperar": 500
+    },
+    {
+     "marca": "res"
+    },
+    {
+     "esperar": 6000
+    },
+    {
+     "marca": "res2"
+    },
+    {
+     "esperar": 6000
+    }
+   ]
+  }
+ ],
+ "escenas": [
+  {
+   "clip": "iva",
+   "marca": "res",
+   "voz": "Facturas **1.000 €** y cobras 1.210.",
+   "locucion": "Facturas mil euros. | Y cobras mil doscientos diez.",
+   "congelar": true
+  },
+  {
+   "clip": "iva",
+   "marca": "calc",
+   "voz": "Lo pongo en la calculadora de IVA."
+  },
+  {
+   "clip": "iva",
+   "marca": "res",
+   "voz": "**210 €** son IVA: solo los guardas para Hacienda.",
+   "locucion": "Doscientos diez euros son iva: solo los guardas para Hacienda."
+  },
+  {
+   "clip": "iva",
+   "marca": "res2",
+   "voz": "Si te los gastas, el trimestre duele."
+  }
+ ],
+ "cierre": {
+  "voz": "Envíaselo a ese amigo que se gasta el IVA.",
+  "titulo": "Envíaselo a quien **se gasta el IVA** 😬",
+  "texto": "nokfi.app · calculadoras gratis",
+  "boton": "Calculadora de IVA gratis"
+ }
+}

@@ -1,0 +1,103 @@
+{
+ "id": "v019-este-nif-vale",
+ "titulo": "¿Tu factura vale? Depende de este número",
+ "metodo": "prueba en directo (mal / bien)",
+ "texto": "Comprueba el NIF de tu cliente antes de emitir la factura. Validador gratis en nokfi.app ✅ (comprueba formato y dígito de control)\n\nEnvíaselo a quien hace las facturas a mano ✍️\n\n#autonomos #facturas #nif #pymes #emprendedores",
+ "pilar": "calculadora",
+ "musica": "1-chill-lofi-theme.mp3",
+ "gancho": "¿Tu factura vale? Depende de **este número**",
+ "clips": [
+  {
+   "id": "nif",
+   "pasos": [
+    {
+     "ir": "/validar-nif"
+    },
+    {
+     "esperar": 500
+    },
+    {
+     "bajar": 230
+    },
+    {
+     "marca": "ini"
+    },
+    {
+     "esperar": 600
+    },
+    {
+     "escribir": {
+      "en": "main input >> nth=0",
+      "texto": "B12345675",
+      "limpiar": true
+     }
+    },
+    {
+     "tocar": "button:has-text('Comprobar')"
+    },
+    {
+     "marca": "mal"
+    },
+    {
+     "esperar": 6000
+    },
+    {
+     "escribir": {
+      "en": "main input >> nth=0",
+      "texto": "B12345674",
+      "limpiar": true
+     }
+    },
+    {
+     "tocar": "button:has-text('Comprobar')"
+    },
+    {
+     "marca": "bien"
+    },
+    {
+     "esperar": 7000
+    }
+   ]
+  }
+ ],
+ "escenas": [
+  {
+   "clip": "nif",
+   "marca": "mal",
+   "voz": "Un NIF mal escrito puede dejar tu factura sin valor para deducir el IVA.",
+   "locucion": "Un NIF mal escrito puede dejar tu factura sin valor para deducir el iva.",
+   "congelar": true,
+   "desplaza": 1.5
+  },
+  {
+   "clip": "nif",
+   "marca": "ini",
+   "voz": "Yo lo compruebo antes de emitirla."
+  },
+  {
+   "clip": "nif",
+   "marca": "mal",
+   "voz": "Un número cambiado: **no es válido**.",
+   "desplaza": 1
+  },
+  {
+   "clip": "nif",
+   "marca": "bien",
+   "voz": "Lo corrijo: **válido**.",
+   "desplaza": 1
+  },
+  {
+   "clip": "nif",
+   "marca": "bien",
+   "voz": "Gratis y sin registrarte.",
+   "congelar": true,
+   "desplaza": 2
+  }
+ ],
+ "cierre": {
+  "voz": "Envíaselo a ese amigo que hace las facturas a mano.",
+  "titulo": "Envíaselo a quien factura **a mano** ✍️",
+  "texto": "nokfi.app · herramientas gratis",
+  "boton": "Valida un NIF gratis"
+ }
+}

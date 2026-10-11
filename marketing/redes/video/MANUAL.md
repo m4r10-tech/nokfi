@@ -91,6 +91,18 @@ Nombrar el dolor con las palabras del público en el primer segundo.
 Prohibido: «ahorra X €», promesas fiscales, asesoramiento personalizado,
 anunciar funciones que no existen.
 
+### Formatos probados (tanda 3, 2026-10-11) — anotar cuál funciona en §9
+| Formato | Vídeo | Idea |
+|---|---|---|
+| Dato sorpresa + calculadora pública | v012 | «De esta factura, 210 € no son tuyos» |
+| Pregunta-misterio | v013 | «¿Por qué cobro menos de lo que facturo?» |
+| POV **sin voz** (solo texto y música; al no llevar voz sintética, sin etiqueta de IA) | v014 | «POV: mañana se paga el IVA» |
+| Lista de 3 + «guárdalo» | v015 | «3 cosas que miro cada lunes» |
+| Resultado personal | v016 | «Le he puesto nota a mi negocio: 61 sobre 100» |
+| Plantilla lista (desarrolladores) | v017 | «Facturas de Gmail a Google Sheets, solas» |
+| Mito roto | v018 | «Un sueldo de 1.500 € no te cuesta 1.500 €» |
+| Prueba en directo (mal / bien) | v019 | «¿Tu factura vale? Depende de este número» |
+
 ## 5. Pilares de contenido (1 vídeo al día)
 
 | Día | Pilar | Ejemplos |
@@ -170,3 +182,17 @@ Aprendido con los vídeos de prueba (2026-10-11, oído del usuario):
 | v003 | | | | |
 | v004 | | | | |
 | v005 | | | | |
+| v006 | | | | |
+| v007 | | | | |
+| v008 | | | | |
+| v009 | | | | |
+| v010 | | | | |
+| v011 | | | | |
+| v012 | | | | |
+| v013 | | | | |
+| v014 | | | | |
+| v015 | | | | |
+| v016 | | | | |
+| v017 | | | | |
+| v018 | | | | |
+| v019 | | | | |

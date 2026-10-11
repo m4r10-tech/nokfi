@@ -14,7 +14,7 @@
  *   video/musica/<archivo>                 "musica" del guion o la primera de la
  *                                         carpeta (opcional; con licencia de uso)
  * Salida (lista para buffer.mjs, pieza = <id>):
- *   salida/<id>/video.mp4       1080×1920, 30 fps, H.264 + AAC, −14 LUFS
+ *   salida/<id>/video.mp4       1080×1920, 30 fps, H.264 (~12 Mb/s) + AAC, −14 LUFS
  *   salida/<id>/01-portada.png  portada con el gancho
  *   salida/<id>/subtitulos.srt  por si se quieren subir aparte
  *
@@ -310,7 +310,10 @@ async function main() {
 
   const video = path.join(out, process.env.SUFIJO ? `video-${process.env.SUFIJO}.mp4` : 'video.mp4');
   args.push('-filter_complex', filtros.join(';'), '-map', '[vout]', '-map', audio,
-    '-t', finTotal.toFixed(3), '-c:v', 'libx264', '-profile:v', 'high', '-crf', '15', '-preset', 'slow', '-tune', 'animation', '-pix_fmt', 'yuv420p',
+    '-t', finTotal.toFixed(3), // Original «pesado» a propósito (prueba del 2026-10-11): con CRF la pantalla casi fija salía a ~0,6 Mb/s y
+    // TikTok solo servía 576×1024. Un fotograma clave cada medio segundo y bitrate alto dan un original de varios Mb/s.
+    '-c:v', 'libx264', '-profile:v', 'high', '-b:v', '12M', '-maxrate', '16M', '-bufsize', '24M', '-g', '15', '-keyint_min', '15', '-sc_threshold', '0',
+    '-preset', 'medium', '-pix_fmt', 'yuv420p', '-colorspace', 'bt709', '-color_primaries', 'bt709', '-color_trc', 'bt709',
     '-r', String(FPS), '-c:a', 'aac', '-b:a', '192k', '-ar', '48000', '-movflags', '+faststart', video);
   sh('ffmpeg', args);
 
