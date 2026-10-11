@@ -179,7 +179,10 @@ async function main() {
   // ── Tiempos de cada frase ──
   let tramos, vozTotal = 0;
   if (vozPath) {
-    const r = tramosDeVoz(vozPath, frases.length);
+    // voz.mjs deja los tiempos exactos de cada frase; una voz grabada se corta por silencios.
+    const tj = vozPath.replace(/\.\w+$/, '.tiempos.json');
+    const exactos = fs.existsSync(tj) ? JSON.parse(fs.readFileSync(tj, 'utf8')).tiempos : null;
+    const r = exactos?.length === frases.length ? { tramos: exactos, total: dur(vozPath) } : tramosDeVoz(vozPath, frases.length);
     vozTotal = r.total;
     if (r.tramos) tramos = r.tramos;
     else console.warn(`⚠️  La voz no tiene ${frases.length} pausas claras: reparto el tiempo por longitud de frase.`);

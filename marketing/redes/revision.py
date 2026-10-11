@@ -19,7 +19,9 @@ for f in sys.argv[1:]:
         if p.get('pieza') and os.path.isdir(os.path.join('salida', p['pieza'])):
             files = sorted(x for x in os.listdir(os.path.join('salida', p['pieza'])) if x.endswith('.png'))
             imgs = ''.join(f'<a href="{p["pieza"]}/{x}" target="_blank"><img src="{p["pieza"]}/{x}"></a>' for x in files)
-            if p.get('video'):
+            if p.get('video') and os.path.isfile(os.path.join('salida', p['pieza'], p['video'])):
+                imgs = f'<video src="{p["pieza"]}/{p["video"]}" controls preload="metadata" poster="{p["pieza"]}/01-portada.png"></video>'
+            elif p.get('video'):
                 imgs = '<div class="vid">🎬 Vídeo por grabar (guion en el calendario). Portada:</div>' + imgs
         estado = '✅ aprobado' if p.get('aprobado') else 'pendiente'
         out.append(f'''<section><header><span class="n">{n}</span><b class="red {p["red"]}">{RED[p["red"]]}</b> {p.get("tipo", "")}
@@ -34,7 +36,7 @@ header{font-size:15px;margin-bottom:10px} code{color:#64748b;font-size:12px;marg
 .red{padding:2px 8px;border-radius:6px;color:#fff} .x{background:#000} .instagram{background:#c13584} .tiktok{background:#25262b}
 .cols{display:flex;gap:16px} pre{white-space:pre-wrap;font-family:inherit;font-size:14px;line-height:1.45;flex:0 0 380px;margin:0;background:#f8fafc;padding:12px;border-radius:8px}
 .imgs{display:flex;gap:8px;flex-wrap:wrap;align-items:flex-start} .imgs a{flex:none} .imgs img{height:260px;border-radius:6px;border:1px solid #e2e8f0}
-.vid{width:100%;font-size:13px;color:#b45309}'''
+.vid{width:100%;font-size:13px;color:#b45309} video{height:560px;border-radius:10px;background:#000}'''
 page = f'''<!doctype html><html lang="es"><head><meta charset="utf-8"><title>Revisión de redes</title><style>{css}</style></head><body>
 <h1>Revisión de redes</h1><p>{n} publicaciones. Dime por número: ✅ vale · ✏️ cambiar (qué) · ❌ quitar. Clic en una imagen para verla a tamaño real.</p>
 {"".join(out)}</body></html>'''

@@ -15,7 +15,8 @@
  *   { "ir": "/app/finanzas/impuestos" }          navegar (la grabación empieza aquí)
  *   { "esperar": 800 }                            ms
  *   { "tocar": "text=3T" }                        selector de Playwright
- *   { "escribir": { "en": "input[name=x]", "texto": "1200" } }
+ *   { "escribir": { "en": "input[name=x]", "texto": "1200", "limpiar": true } }   limpiar: borra antes lo que hubiera
+ *   { "elegir": { "en": "select", "valor": "tax.vat" } }      opción de un desplegable
  *   { "bajar": 500 } / { "subir": 500 }           desplazamiento suave en px
  *   { "marca": "importe" }                        segundo del clip que usa el montaje (escena.marca)
  * SHOTS_DATE=AAAA-MM-DD fija el día (por defecto 2026-09-29, dentro del 3T de los datos).
@@ -107,8 +108,16 @@ async function grabarClip(browser, demo, clip, dir) {
       const b = await loc.boundingBox();
       if (b) await page.evaluate(([x, y]) => window.__nokfiTap(x, y), [b.x + b.width / 2, b.y + b.height / 2]);
       await loc.click();
+      if (paso.escribir.limpiar) { await loc.fill(''); await wait(250); }
       await loc.pressSequentially(String(paso.escribir.texto), { delay: 110 });
       await wait(500);
+    } else if (paso.elegir) {
+      const loc = page.locator(paso.elegir.en).filter({ visible: true }).first();
+      const b = await loc.boundingBox();
+      if (b) await page.evaluate(([x, y]) => window.__nokfiTap(x, y), [b.x + b.width / 2, b.y + b.height / 2]);
+      await wait(350);
+      await loc.selectOption(paso.elegir.valor);
+      await wait(700);
     } else if (paso.bajar) {
       await desplazar(page, paso.bajar);
     } else if (paso.subir) {

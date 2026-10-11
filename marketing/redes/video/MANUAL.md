@@ -6,10 +6,12 @@
 ## 0. Reglas fijas (del usuario)
 
 - Se graba **la app real** (cuenta de ejemplo). Nada de caras ni imágenes generadas.
-- **Voz sintética fija** (decisión del 2026-10-11): Piper, local y de código abierto,
-  siempre la misma voz (`voz.json`). Al ser IA, esas publicaciones llevan la
-  **etiqueta de IA de TikTok** (`"ia": true`). Si algún día graba el usuario,
-  su archivo en `voz/` tiene prioridad.
+- **Todo gratis** (regla número 1 del usuario): herramientas locales y de código
+  abierto o planes gratuitos; nada de servicios de pago.
+- **Voz sintética fija** (2026-10-11): **Supertonic 3**, local y gratuita, voz `M1`
+  (`voz.json`); sustituye a Piper, que sonaba rara. Al ser IA, esas publicaciones
+  llevan la **etiqueta de IA de TikTok** (`"ia": true`; además lo exige la licencia
+  del modelo). Si algún día graba el usuario, su archivo en `voz/` tiene prioridad.
 - **Solo se cuenta lo que Nokfi ya tiene.** Las novedades se anuncian cuando
   estén confirmadas al 100 %.
 - Objetivo: **viralizar** entre **negocios y autónomos** y entre
@@ -50,7 +52,7 @@
 - **Subtítulos** (HTML/CSS): 1-3 palabras por golpe, Jakarta 800 a 82 px, caja negra redondeada al
   80 % con sombra, **palabra que se dice sobre azul Nokfi**, **palabra clave en amarillo** (`**así**`). Altura: por
   encima del texto de la publicación (abajo) y lejos de los botones (derecha).
-- **Plano estable**: sin zoom continuo (decisión del usuario, 2026-10-11). `zoomInicial` solo para un plano fijo más cerrado; `congelar` para quedarse en una cifra.
+- **Plano estable**: sin zoom continuo (decisión del usuario, 2026-10-11). **Nunca `zoomInicial`**: la app siempre a tamaño real, a todo el ancho y sin recortar por los lados (petición del usuario, 2026-10-11). `congelar` para quedarse en una cifra.
 - Toques visibles (círculo blanco) en cada pulsación.
 - Cortes secos, sin transiciones de PowerPoint.
 - Siempre: «Cuenta de ejemplo con datos ficticios» en el texto de la publicación.
@@ -108,11 +110,26 @@ desde la app (las dejo listas en `salida/`). Las de Instagram sí se programan.
 
 ## 6. La voz
 
-**Sintética (por defecto):** `voz.json` fija modelo, hablante, velocidad (0,95) y
-la pausa entre frases (0,7 s). Reglas para que suene natural y dé confianza:
-frases cortas (≤ 14 palabras), cifras y siglas escritas como se pronuncian en
-`locucion` («cinco mil novecientos sesenta euros», «i erre pe efe»), tono de
-explicación cercana, nada de exclamaciones seguidas.
+**Sintética (por defecto):** `voz.json` fija el motor (`supertonic`), la voz
+(`M1`; hay M1-M5 y F1-F5), los pasos de calidad (16), la velocidad (1,05) y la
+pausa entre frases (0,4 s). `voz.mjs` guarda además `voz/<id>.tiempos.json` con
+el inicio y fin exactos de cada frase, y el montador los usa para los subtítulos.
+Reglas para que suene natural y dé confianza: frases cortas (≤ 14 palabras),
+cifras y siglas escritas como se pronuncian en `locucion` («cinco mil novecientos
+sesenta euros», «i erre pe efe»), tono de explicación cercana, nada de
+exclamaciones seguidas. Pendiente de afinar: el acento tira a neutro/latino
+(probar M2-M5 y la velocidad). Piper sigue disponible con `"motor": "piper"`.
+
+Aprendido con los vídeos de prueba (2026-10-11, oído del usuario):
+- «Nokfi» suena mejor **al final de una frase corta** («…de la API de Nokfi.»,
+  «Abro los cobros de Nokfi.») que al principio. No empezar frases con «Nokfi».
+- Cifras largas hacen pausas raras («3.448»): **redondear** al hablar («casi tres
+  mil quinientos») y dejar la cifra exacta en pantalla.
+- Pausa breve dentro de una frase: barra ` | ` en `locucion` («…en Nokfi. | Finanzas e impuestos.»).
+- IVA e IRPF suenan perfectos tal como están en `voz.json`.
+- Cada frase locutada se guarda en `voz/.tomas/`: al rehacer un vídeo, las frases
+  que no cambian suenan idénticas. Si una frase sale mal, `--repetir <n>` la
+  locuta de nuevo (cada toma sale algo distinta).
 
 **Grabada por una persona (si algún día):**
 
@@ -148,3 +165,7 @@ explicación cercana, nada de exclamaciones seguidas.
 | Vídeo | Retención 3 s | Visualizaciones | Compartidos | Qué cambiar |
 |---|---|---|---|---|
 | v001 | | | | |
+| v002 | | | | |
+| v003 | | | | |
+| v004 | | | | |
+| v005 | | | | |

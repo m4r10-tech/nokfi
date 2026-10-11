@@ -1,0 +1,112 @@
+{
+ "id": "v005-api-valida-nif",
+ "titulo": "Tu automatización no sabe si un NIF es válido",
+ "texto": "API de Nokfi: valida NIF, NIE y CIF, calcula IVA y modelo 130 y emite facturas desde n8n o tu agente de IA 🤖 (cuenta de ejemplo con datos ficticios)\n\nEnvíaselo a quien monta automatizaciones 👇\n\n#n8n #automatizacion #api #ia #desarrolladores",
+ "pilar": "desarrolladores",
+ "musica": "2-bit-shift.mp3",
+ "gancho": "Tu automatización no sabe si un **NIF es válido**",
+ "clips": [
+  {
+   "id": "playground",
+   "pasos": [
+    {
+     "ir": "/app/dev/playground"
+    },
+    {
+     "marca": "inicio"
+    },
+    {
+     "esperar": 6500
+    },
+    {
+     "marca": "ejecutar"
+    },
+    {
+     "esperar": 900
+    },
+    {
+     "tocar": "button:has-text('Ejecutar')"
+    },
+    {
+     "esperar": 500
+    },
+    {
+     "bajar": 430
+    },
+    {
+     "marca": "respuesta"
+    },
+    {
+     "esperar": 6500
+    },
+    {
+     "subir": 430
+    },
+    {
+     "marca": "mas"
+    },
+    {
+     "esperar": 400
+    },
+    {
+     "elegir": {
+      "en": "select",
+      "valor": "tax.model-130"
+     }
+    },
+    {
+     "esperar": 800
+    },
+    {
+     "elegir": {
+      "en": "select",
+      "valor": "invoices.issue"
+     }
+    },
+    {
+     "esperar": 4500
+    }
+   ]
+  }
+ ],
+ "escenas": [
+  {
+   "clip": "playground",
+   "marca": "inicio",
+   "voz": "Tu automatización se traga cualquier **NIF**, aunque esté mal escrito.",
+   "congelar": true,
+   "y": 0.35
+  },
+  {
+   "clip": "playground",
+   "marca": "inicio",
+   "voz": "Esto es el Playground de la **API de Nokfi**.",
+   "y": 0.35
+  },
+  {
+   "clip": "playground",
+   "marca": "ejecutar",
+   "voz": "Le paso el NIF y pulso Ejecutar.",
+   "y": 0.35
+  },
+  {
+   "clip": "playground",
+   "marca": "respuesta",
+   "voz": "Comprueba el dígito de control: **válido**, y es un CIF.",
+   "y": 0.35
+  },
+  {
+   "clip": "playground",
+   "marca": "mas",
+   "voz": "Con la misma API: IVA, modelo 130 o **emitir facturas**.",
+   "locucion": "Con la misma API: iva, modelo ciento treinta o emitir facturas.",
+   "y": 0.35
+  }
+ ],
+ "cierre": {
+  "voz": "Envíaselo a quien monta automatizaciones con n8n.",
+  "titulo": "Envíaselo a quien **automatiza** 🤖",
+  "texto": "nokfi.app · API para n8n y agentes de IA",
+  "boton": "Mira la documentación"
+ }
+}

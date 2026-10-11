@@ -1,0 +1,117 @@
+{
+ "id": "v004-cuota-autonomos",
+ "titulo": "Si eres autónomo, este número te va a doler",
+ "texto": "Calculadora de cuota de autónomos 2026: gratis y sin registrarte, en nokfi.app 🧮 (cálculo orientativo)\n\nEnvíaselo a quien se acaba de hacer autónomo 🫡\n\n#autonomos #cuotadeautonomos #seguridadsocial #emprendedores #tarifaplana",
+ "pilar": "calculadora",
+ "musica": "1-chill-lofi-theme.mp3",
+ "gancho": "Si eres autónomo, este número **te va a doler**",
+ "clips": [
+  {
+   "id": "cuota",
+   "pasos": [
+    {
+     "ir": "/calculadora-cuota-autonomos"
+    },
+    {
+     "esperar": 600
+    },
+    {
+     "bajar": 410
+    },
+    {
+     "marca": "calc"
+    },
+    {
+     "esperar": 500
+    },
+    {
+     "escribir": {
+      "en": "main input >> nth=0",
+      "texto": "2000"
+     }
+    },
+    {
+     "escribir": {
+      "en": "main input >> nth=1",
+      "texto": "500"
+     }
+    },
+    {
+     "esperar": 500
+    },
+    {
+     "marca": "resultado"
+    },
+    {
+     "esperar": 5500
+    },
+    {
+     "marca": "resultado2"
+    },
+    {
+     "esperar": 4500
+    },
+    {
+     "marca": "plana"
+    },
+    {
+     "esperar": 500
+    },
+    {
+     "tocar": "main input[type=checkbox]"
+    },
+    {
+     "esperar": 3500
+    },
+    {
+     "marca": "plana2"
+    },
+    {
+     "esperar": 4000
+    }
+   ]
+  }
+ ],
+ "escenas": [
+  {
+   "clip": "cuota",
+   "marca": "resultado",
+   "voz": "Si eres autónomo, este número te va a doler.",
+   "congelar": true
+  },
+  {
+   "clip": "cuota",
+   "marca": "calc",
+   "voz": "Pongo lo que facturo al mes y lo que gasto."
+  },
+  {
+   "clip": "cuota",
+   "marca": "resultado",
+   "voz": "Con 2.000 € de ingresos y 500 de gastos: **302 € al mes**.",
+   "locucion": "Con dos mil euros de ingresos y quinientos de gastos: trescientos dos euros al mes."
+  },
+  {
+   "clip": "cuota",
+   "marca": "resultado2",
+   "voz": "Más de **3.600 € al año** solo en cuota.",
+   "locucion": "Más de tres mil seiscientos euros al año solo en cuota."
+  },
+  {
+   "clip": "cuota",
+   "marca": "plana",
+   "voz": "¿Es tu primer año? Con la **tarifa plana**, 80 € al mes.",
+   "locucion": "¿Es tu primer año? Con la tarifa plana, ochenta euros al mes."
+  },
+  {
+   "clip": "cuota",
+   "marca": "plana2",
+   "voz": "Es gratis y no hace falta cuenta."
+  }
+ ],
+ "cierre": {
+  "voz": "Envíaselo a ese amigo que se acaba de hacer autónomo.",
+  "titulo": "Envíaselo a quien **empieza de autónomo** 🫡",
+  "texto": "nokfi.app · calculadoras gratis",
+  "boton": "Calcula tu cuota gratis"
+ }
+}

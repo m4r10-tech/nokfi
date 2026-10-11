@@ -1,0 +1,98 @@
+{
+ "id": "v002-cliente-no-paga",
+ "titulo": "Mira lo que pasa cuando un cliente no te paga",
+ "texto": "Facturas vencidas: quién te debe, desde cuándo y un recordatorio que sale solo 📩 (cuenta de ejemplo con datos ficticios)\n\nEnvíaselo a quien siempre está persiguiendo facturas 😅\n\n#autonomos #facturas #impagos #pymes #emprendedores",
+ "pilar": "dolor",
+ "musica": "2-bit-shift.mp3",
+ "gancho": "Mira lo que pasa cuando un cliente **no te paga**",
+ "clips": [
+  {
+   "id": "cobros",
+   "pasos": [
+    {
+     "ir": "/app/finanzas/cobros"
+    },
+    {
+     "marca": "resumen"
+    },
+    {
+     "esperar": 3500
+    },
+    {
+     "bajar": 430
+    },
+    {
+     "marca": "lista"
+    },
+    {
+     "esperar": 4500
+    },
+    {
+     "marca": "lista2"
+    },
+    {
+     "esperar": 4500
+    },
+    {
+     "subir": 240
+    },
+    {
+     "marca": "auto"
+    },
+    {
+     "esperar": 900
+    },
+    {
+     "tocar": "input[type=checkbox]"
+    },
+    {
+     "esperar": 3500
+    },
+    {
+     "marca": "auto2"
+    },
+    {
+     "esperar": 4500
+    }
+   ]
+  }
+ ],
+ "escenas": [
+  {
+   "clip": "cobros",
+   "marca": "resumen",
+   "voz": "Tengo casi **3.500 €** vencidos: trabajo hecho y sin cobrar.",
+   "locucion": "Tengo casi tres mil quinientos euros vencidos: trabajo hecho y sin cobrar.",
+   "congelar": true,
+   "y": 0.35
+  },
+  {
+   "clip": "cobros",
+   "marca": "lista",
+   "voz": "Abro los cobros de Nokfi. Veo **quién me debe** y desde cuándo.",
+   "locucion": "Abro los cobros de Nokfi. | Veo quién me debe y desde cuándo."
+  },
+  {
+   "clip": "cobros",
+   "marca": "lista2",
+   "voz": "Este cliente lleva **36 días** de retraso.",
+   "locucion": "Este cliente lleva treinta y seis días de retraso."
+  },
+  {
+   "clip": "cobros",
+   "marca": "auto",
+   "voz": "Activo esto y **reclama solo**: a los 7, a los 30 y a los 60 días.",
+   "locucion": "Activo esto y reclama solo: a los siete, a los treinta y a los sesenta días."
+  },
+  {
+   "clip": "cobros",
+   "marca": "auto2",
+   "voz": "Lo envía en mi nombre, y el cliente me responde a mí."
+  }
+ ],
+ "cierre": {
+  "voz": "Envíaselo a ese amigo que siempre está persiguiendo facturas.",
+  "titulo": "Envíaselo a quien **persigue facturas** 😅",
+  "texto": "nokfi.app · 14 días gratis"
+ }
+}

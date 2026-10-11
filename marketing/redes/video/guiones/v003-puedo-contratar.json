@@ -1,0 +1,105 @@
+{
+ "id": "v003-puedo-contratar",
+ "titulo": "¿Puedo permitirme contratar a alguien?",
+ "texto": "Antes de contratar, mira cómo queda tu caja en 90 días 📉 (cuenta de ejemplo con datos ficticios; cálculo orientativo)\n\nEnvíaselo a quien está pensando en contratar 👀\n\n#autonomos #pymes #negocio #contratar #emprendedores",
+ "pilar": "demo",
+ "musica": "3-music-promotion.mp3",
+ "gancho": "¿Puedo permitirme **contratar a alguien**?",
+ "clips": [
+  {
+   "id": "prevision",
+   "pasos": [
+    {
+     "ir": "/app/finanzas/prevision"
+    },
+    {
+     "marca": "saldo"
+    },
+    {
+     "esperar": 5500
+    },
+    {
+     "bajar": 640
+    },
+    {
+     "marca": "escenario"
+    },
+    {
+     "esperar": 700
+    },
+    {
+     "escribir": {
+      "en": "input[placeholder=\"0\"] >> nth=0",
+      "texto": "1800"
+     }
+    },
+    {
+     "esperar": 600
+    },
+    {
+     "tocar": "button:has-text('Aplicar')"
+    },
+    {
+     "esperar": 700
+    },
+    {
+     "subir": 640
+    },
+    {
+     "marca": "resultado"
+    },
+    {
+     "esperar": 4000
+    },
+    {
+     "marca": "resultado2"
+    },
+    {
+     "esperar": 4500
+    }
+   ]
+  }
+ ],
+ "escenas": [
+  {
+   "clip": "prevision",
+   "marca": "saldo",
+   "voz": "Hoy tengo **6.200 €** en caja. ¿Me llega para contratar?",
+   "locucion": "Hoy tengo seis mil doscientos euros en caja. ¿Me llega para contratar?",
+   "congelar": true,
+   "y": 0.35
+  },
+  {
+   "clip": "prevision",
+   "marca": "saldo",
+   "voz": "Miro la previsión de Nokfi. Ya sabe lo que voy a cobrar y a pagar en **90 días**.",
+   "locucion": "Miro la previsión de Nokfi. | Ya sabe lo que voy a cobrar y a pagar en noventa días.",
+   "y": 0.35,
+   "congelar": true
+  },
+  {
+   "clip": "prevision",
+   "marca": "escenario",
+   "voz": "Le pongo el coste: **1.800 €** al mes.",
+   "locucion": "Le pongo el coste: mil ochocientos euros al mes.",
+   "y": 0.35
+  },
+  {
+   "clip": "prevision",
+   "marca": "resultado",
+   "voz": "Y me avisa: en diciembre me quedo **en números rojos**.",
+   "y": 0.35
+  },
+  {
+   "clip": "prevision",
+   "marca": "resultado2",
+   "voz": "Mejor saberlo antes de firmar el contrato.",
+   "y": 0.35
+  }
+ ],
+ "cierre": {
+  "voz": "Envíaselo a ese amigo que está pensando en contratar.",
+  "titulo": "Envíaselo a quien quiere **contratar** 👀",
+  "texto": "nokfi.app · 14 días gratis"
+ }
+}

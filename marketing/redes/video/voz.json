@@ -1,13 +1,17 @@
 {
+  "motor": "supertonic",
+  "voz": "M1",
+  "pasos": 16,
+  "velocidad": 1.05,
+  "pausa": 0.4,
   "modelo": "es_ES-davefx-medium.onnx",
   "hablante": null,
-  "velocidad": 0.95,
-  "pausa": 0.7,
   "pronunciar": {
     "IRPF": "i erre pe efe",
     "\\b[Ii][Vv][Aa]\\b": "iba",
     " €": " euros",
     "€": " euros",
-    "Nokfi": "Nókfi"
-  }
+    "\\bn8n\\b": "ene ocho ene"
+  },
+  "pausaBreve": 0.28
 }
