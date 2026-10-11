@@ -20,22 +20,26 @@
  *
  * Sin voz, cada frase dura según sus palabras y sale solo como subtítulo.
  *
- * Escena: { clip, marca, voz, congelar?, desplaza? (s), zoom? (0.06), zoomInicial? (1), x?, y? (0-1) }
+ * Escena: { clip, marca, voz, congelar?, desplaza? (s), zoomInicial? (1, plano fijo más cerca), zoom? (0 = sin
+ *   movimiento), x?, y? (0-1) }. Texto en pantalla dibujado con HTML/CSS (ver CSS abajo).
  */
 
 import fs from 'node:fs';
 import path from 'node:path';
 import { execFileSync, spawnSync } from 'node:child_process';
 import { fileURLToPath } from 'node:url';
+import { createRequire } from 'node:module';
+import os from 'node:os';
 
 const HERE = path.dirname(fileURLToPath(import.meta.url));
 const REDES = path.resolve(HERE, '..');
 const SALIDA = path.join(REDES, 'salida');
 const FUENTES = path.join(HERE, 'fuentes');
 const W = 1080, H = 1920, FPS = 30;
-
-// Estilo (ver MANUAL.md): amarillo para la palabra clave, azul Nokfi para el gancho.
-const COLOR = { texto: '&H00FFFFFF', clave: '&H003BD4FF', borde: '&H00000000', caja: '&H00A25614' };
+const PUBLIC = path.resolve(REDES, '../../frontend/public');
+// Franja de los subtítulos: por encima del texto de la publicación de TikTok y
+// lejos de los botones de la derecha (zonas seguras, MANUAL.md §3).
+const SUB_Y = 1230, SUB_H = 440, GANCHO_Y = 270;
 
 const sh = (cmd, args, opts = {}) => execFileSync(cmd, args, { encoding: 'utf8', maxBuffer: 1 << 26, ...opts });
 const dur = (f) => +sh('ffprobe', ['-v', 'error', '-show_entries', 'format=duration', '-of', 'csv=p=0', f]).trim();
@@ -96,48 +100,66 @@ function tramosDeVoz(vozPath, n) {
   return { tramos: tramos.length === n ? tramos : null, total };
 }
 
-const tiempoAss = (s) => {
-  const h = Math.floor(s / 3600), m = Math.floor(s / 60) % 60, sec = (s % 60).toFixed(2).padStart(5, '0');
-  return `${h}:${String(m).padStart(2, '0')}:${sec}`;
-};
 const tiempoSrt = (s) => {
   const ms = Math.round(s * 1000), h = Math.floor(ms / 3600000), m = Math.floor(ms / 60000) % 60, sec = Math.floor(ms / 1000) % 60;
   return `${String(h).padStart(2, '0')}:${String(m).padStart(2, '0')}:${String(sec).padStart(2, '0')},${String(ms % 1000).padStart(3, '0')}`;
 };
-const assTexto = (tokens, clave = COLOR.clave) => tokens.map(t => (t.clave ? `{\\c${clave}}${t.w}{\\c${COLOR.texto}}` : t.w)).join(' ');
-
-function ass(lineas, gancho, total) {
-  const cab = `[Script Info]
-ScriptType: v4.00+
-PlayResX: ${W}
-PlayResY: ${H}
-WrapStyle: 0
-ScaledBorderAndShadow: yes
-
-[V4+ Styles]
-Format: Name, Fontname, Fontsize, PrimaryColour, SecondaryColour, OutlineColour, BackColour, Bold, Italic, Underline, StrikeOut, ScaleX, ScaleY, Spacing, Angle, BorderStyle, Outline, Shadow, Alignment, MarginL, MarginR, MarginV, Encoding
-Style: Sub,Jakarta ExtraBold,128,${COLOR.texto},${COLOR.texto},&H30000000,&H30000000,0,0,0,0,100,100,0,0,3,18,0,2,110,110,400,1
-Style: Gancho,Jakarta ExtraBold,128,${COLOR.texto},${COLOR.texto},${COLOR.caja},${COLOR.caja},0,0,0,0,100,100,0,0,3,30,0,8,80,80,300,1
-
-[Events]
-Format: Layer, Start, End, Style, Name, MarginL, MarginR, MarginV, Effect, Text
+/* ── Texto en pantalla dibujado con HTML/CSS (Chromium), con transparencia ── */
+// Tipografía incrustada: Chromium no carga fuentes file:// en una página sin origen.
+const fuente = (f) => `data:font/woff2;base64,${fs.readFileSync(path.join(PUBLIC, 'fonts', f)).toString('base64')}`;
+const CSS = `
+  @font-face { font-family: J; src: url('${fuente('PlusJakartaSans-latin.woff2')}') format('woff2'); font-weight: 200 800; }
+  @font-face { font-family: J; src: url('${fuente('PlusJakartaSans-latin-ext.woff2')}') format('woff2'); font-weight: 200 800; unicode-range: U+0100-024F; }
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+  html, body { background: transparent; width: ${W}px; }
+  .lienzo { width: ${W}px; display: flex; align-items: center; justify-content: center; font-family: J, sans-serif; -webkit-font-smoothing: antialiased; }
+  .sub { max-width: 920px; text-align: center; font-weight: 800; font-size: 82px; line-height: 1.16; letter-spacing: -0.015em; color: #fff;
+    background: rgba(10, 11, 14, 0.80); padding: 24px 38px 28px; border-radius: 30px;
+    box-shadow: 0 14px 44px rgba(0,0,0,.45), inset 0 0 0 1.5px rgba(255,255,255,.08); }
+  .w { display: inline; border-radius: 12px; }
+  .w.clave { color: #FFD43B; }
+  /* Palabra que se está diciendo: fondo azul Nokfi sin mover el texto (box-shadow no cambia el tamaño). */
+  .w.ahora { background: #1456A2; box-shadow: 0 0 0 9px #1456A2; color: #fff; }
+  .w.ahora.clave { color: #FFE27A; }
+  .gancho { max-width: 960px; text-align: center; font-weight: 800; font-size: 94px; line-height: 1.08; letter-spacing: -0.025em; color: #fff;
+    background: linear-gradient(180deg, #1A63B8, #1456A2); padding: 30px 46px 36px; border-radius: 36px;
+    box-shadow: 0 20px 60px rgba(0,0,0,.5), inset 0 0 0 2px rgba(255,255,255,.14); }
+  .gancho b { color: #BFE0FF; font-weight: 800; }
 `;
-  const ev = [];
+const esc = (x) => String(x).replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
+
+/** Dibuja cada estado de subtítulo (trozo + palabra activa) y el gancho como PNG transparentes. */
+async function dibujarTextos(estados, gancho, tmp) {
+  const require = createRequire(import.meta.url);
+  const { chromium } = require(process.env.PLAYWRIGHT_CORE || 'playwright-core');
+  const CHROME = fs.readdirSync(path.join(os.homedir(), '.cache/ms-playwright'))
+    .filter(d => /^chromium-\d+$/.test(d)).sort().map(d => path.join(os.homedir(), '.cache/ms-playwright', d, 'chrome-linux64/chrome'))
+    .find(f => fs.existsSync(f));
+  const browser = await chromium.launch({ executablePath: CHROME });
+  const page = await browser.newPage({ viewport: { width: W, height: SUB_H } });
+  const pintar = async (inner, alto, archivo) => {
+    await page.setViewportSize({ width: W, height: alto });
+    await page.setContent(`<!doctype html><html><head><meta charset="utf-8"><style>${CSS}</style></head><body><div class="lienzo" style="height:${alto}px">${inner}</div></body></html>`);
+    await page.evaluate(() => document.fonts.ready);
+    await page.screenshot({ path: archivo, omitBackground: true });
+  };
+  await pintar('', SUB_H, path.join(tmp, 'vacio.png'));
+  for (const [i, e] of estados.entries()) {
+    const words = e.tokens.map((t, k) => `<span class="w${t.clave ? ' clave' : ''}${k === e.activa ? ' ahora' : ''}">${esc(t.w)}</span>`).join(' ');
+    e.png = path.join(tmp, `sub-${String(i).padStart(4, '0')}.png`);
+    await pintar(`<div class="sub">${words}</div>`, SUB_H, e.png);
+  }
+  let ganchoPng = null;
   if (gancho) {
-    // En la caja azul del gancho, la palabra clave va en azul claro.
-    const g = assTexto(palabras(gancho), '&H00FFD45B');
-    ev.push(`Dialogue: 1,${tiempoAss(0.05)},${tiempoAss(Math.min(2.8, total))},Gancho,,0,0,0,,{\\fad(80,180)\\fscx85\\fscy85\\t(0,160,\\fscx100\\fscy100)}${g}`);
+    ganchoPng = path.join(tmp, 'gancho.png');
+    const inner = palabras(gancho).map(t => (t.clave ? `<b>${esc(t.w)}</b>` : esc(t.w))).join(' ');
+    await pintar(`<div class="gancho">${inner}</div>`, 520, ganchoPng);
   }
-  for (const l of lineas) {
-    if (l.cierre) continue; // la tarjeta final ya lo dice en grande
-    for (const c of l.chunks) {
-      ev.push(`Dialogue: 0,${tiempoAss(c.ini)},${tiempoAss(c.fin)},Sub,,0,0,0,,{\\fscx92\\fscy92\\t(0,90,\\fscx100\\fscy100)}${assTexto(c.tokens)}`);
-    }
-  }
-  return cab + ev.join('\n') + '\n';
+  await browser.close();
+  return ganchoPng;
 }
 
-function main() {
+async function main() {
   const guionPath = process.argv[2];
   if (!guionPath) throw new Error('Uso: node marketing/redes/video/montar.mjs <guion.json>');
   const g = JSON.parse(fs.readFileSync(guionPath, 'utf8'));
@@ -184,7 +206,30 @@ function main() {
     let t = a;
     return { cierre: !!g.cierre?.voz && i === frases.length - 1, chunks: ts.map((c, k) => { const d = (pesos[k] / suma) * (b - a); const ch = { tokens: c, ini: t, fin: t + d }; t += d; return ch; }) };
   });
-  fs.writeFileSync(path.join(tmp, 'subs.ass'), ass(lineas, g.gancho, finTotal));
+  // Estados del subtítulo: cada trozo, con la palabra que se está diciendo resaltada.
+  const estados = [];
+  for (const l of lineas) {
+    if (l.cierre) continue; // la tarjeta final ya lo dice en grande
+    for (const c of l.chunks) {
+      const pesos = c.tokens.map(t => t.w.length + 1);
+      const suma = pesos.reduce((x, y) => x + y, 0);
+      let t = c.ini;
+      c.tokens.forEach((_, k) => { const d = (pesos[k] / suma) * (c.fin - c.ini); estados.push({ tokens: c.tokens, activa: k, ini: t, fin: t + d }); t += d; });
+    }
+  }
+  const ganchoPng = await dibujarTextos(estados, g.gancho, tmp);
+  // Pista de subtítulos con transparencia: cada estado dura lo suyo; los huecos, en blanco.
+  const listaSubs = [];
+  let cursor = 0;
+  for (const e of estados) {
+    if (e.ini - cursor > 0.01) listaSubs.push(`file '${path.join(tmp, 'vacio.png')}'\nduration ${(e.ini - cursor).toFixed(3)}`);
+    listaSubs.push(`file '${e.png}'\nduration ${(e.fin - Math.max(e.ini, cursor)).toFixed(3)}`);
+    cursor = e.fin;
+  }
+  listaSubs.push(`file '${path.join(tmp, 'vacio.png')}'\nduration ${Math.max(0.1, finTotal - cursor).toFixed(3)}`, `file '${path.join(tmp, 'vacio.png')}'`);
+  fs.writeFileSync(path.join(tmp, 'subs.txt'), listaSubs.join('\n') + '\n');
+  const subsMov = path.join(tmp, 'subs.mov');
+  sh('ffmpeg', ['-v', 'error', '-y', '-f', 'concat', '-safe', '0', '-i', path.join(tmp, 'subs.txt'), '-vf', `fps=${FPS},format=rgba`, '-c:v', 'png', subsMov]);
   let n = 0;
   fs.writeFileSync(path.join(out, 'subtitulos.srt'), lineas.flatMap(l => l.chunks).map(c =>
     `${++n}\n${tiempoSrt(c.ini)} --> ${tiempoSrt(c.fin)}\n${c.tokens.map(t => t.w).join(' ')}\n`).join('\n'));
@@ -214,7 +259,7 @@ function main() {
     const d = durs[i];
     // congelar: el fotograma de la marca se queda fijo (solo el acercamiento lento).
     args.push('-ss', desde.toFixed(3), '-t', (e.congelar ? 0.1 : d + 0.5).toFixed(3), '-i', path.join(clipsDir, `${e.clip}.mp4`));
-    const z = e.zoom ?? 0.06;            // cuánto se acerca a lo largo de la escena
+    const z = e.zoom ?? 0;               // plano estable; >0 solo si una escena lo pide
     const z0 = e.zoomInicial ?? 1;       // 1 = ancho completo del móvil
     const cy = e.y ?? 0;                 // 0 arriba … 1 abajo (de lo que sobra del alto)
     const cx = e.x ?? 0.5;
@@ -232,9 +277,16 @@ function main() {
     idx++;
   }
   filtros.push(`${etiquetas.join('')}concat=n=${etiquetas.length}:v=1:a=0[vc]`);
-  const assPath = path.join(tmp, 'subs.ass').replace(/([:\\'])/g, '\\$1');
-  const fontsDir = FUENTES.replace(/([:\\'])/g, '\\$1');
-  filtros.push(`[vc]ass=${assPath}:fontsdir=${fontsDir}[vout]`);
+  // Capas de texto: subtítulos (pista con alfa) y gancho los primeros 2,8 s.
+  args.push('-i', subsMov);
+  filtros.push(`[vc][${idx}:v]overlay=0:${SUB_Y}:format=auto:shortest=0[vs]`);
+  idx++;
+  if (ganchoPng) {
+    args.push('-loop', '1', '-t', '2.8', '-i', ganchoPng);
+    filtros.push(`[${idx}:v]format=rgba,fade=t=in:st=0:d=0.14:alpha=1,fade=t=out:st=2.5:d=0.3:alpha=1[gch]`,
+      `[vs][gch]overlay=0:${GANCHO_Y}:eof_action=pass:format=auto[vout]`);
+    idx++;
+  } else filtros.push('[vs]null[vout]');
 
   // ── Audio: voz al frente; música debajo y más baja cuando habla la voz ──
   let audio = null;
@@ -254,7 +306,7 @@ function main() {
 
   const video = path.join(out, 'video.mp4');
   args.push('-filter_complex', filtros.join(';'), '-map', '[vout]', '-map', audio,
-    '-t', finTotal.toFixed(3), '-c:v', 'libx264', '-profile:v', 'high', '-crf', '19', '-preset', 'medium', '-pix_fmt', 'yuv420p',
+    '-t', finTotal.toFixed(3), '-c:v', 'libx264', '-profile:v', 'high', '-crf', '15', '-preset', 'slow', '-tune', 'animation', '-pix_fmt', 'yuv420p',
     '-r', String(FPS), '-c:a', 'aac', '-b:a', '192k', '-ar', '48000', '-movflags', '+faststart', video);
   sh('ffmpeg', args);
 
@@ -264,4 +316,4 @@ function main() {
   console.log(`✓ ${path.relative(path.resolve(REDES, '../..'), video)} · ${finTotal.toFixed(1)} s · voz: ${vozPath ? path.basename(vozPath) : 'no'} · música: ${musPath ? path.basename(musPath) : 'no'}`);
 }
 
-main();
+main().catch((e) => { console.error(e.message || e); process.exit(1); });

@@ -80,8 +80,7 @@
       "marca": "impuestos",
       "voz": "El 20 de octubre toca pagar el IVA. ¿Sabes ya cuánto te toca?",
       "congelar": true,
-      "y": 0.35,
-      "zoom": 0.08
+      "y": 0.35
     },
     {
       "clip": "impuestos",
@@ -94,8 +93,7 @@
       "voz": "Entre IVA e IRPF, unos **5.963 €** este trimestre.",
       "congelar": true,
       "y": 0.35,
-      "zoomInicial": 1.12,
-      "zoom": 0.1
+      "zoomInicial": 1.12
     },
     {
       "clip": "impuestos",

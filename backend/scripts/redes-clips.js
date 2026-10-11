@@ -74,12 +74,13 @@ async function grabarClip(browser, demo, clip, dir) {
   const frames = [];
   const cdp = await ctx.newCDPSession(page);
   cdp.on('Page.screencastFrame', ({ data, metadata, sessionId }) => {
-    const f = path.join(framesDir, `${String(frames.length).padStart(5, '0')}.jpg`);
+    const f = path.join(framesDir, `${String(frames.length).padStart(5, '0')}.png`);
     fs.writeFileSync(f, Buffer.from(data, 'base64'));
     frames.push({ f, t: metadata.timestamp });
     cdp.send('Page.screencastFrameAck', { sessionId }).catch(() => {});
   });
-  await cdp.send('Page.startScreencast', { format: 'jpeg', quality: 90, maxWidth: 1080, maxHeight: 2340, everyNthFrame: 1 });
+  // PNG: sin pérdida (el texto de la app queda nítido tras la compresión de TikTok).
+  await cdp.send('Page.startScreencast', { format: 'png', maxWidth: 1080, maxHeight: 2340, everyNthFrame: 1 });
   const ahora = () => Date.now() / 1000;
   let inicio = null;
   const marcas = {};
@@ -127,7 +128,7 @@ async function grabarClip(browser, demo, clip, dir) {
   fs.writeFileSync(listaPath, lista);
   const destino = path.join(dir, `${clip.id}.mp4`);
   require('child_process').execFileSync('ffmpeg', ['-v', 'error', '-y', '-f', 'concat', '-safe', '0', '-i', listaPath,
-    '-vf', 'fps=30,scale=1080:2340:flags=lanczos,format=yuv420p', '-c:v', 'libx264', '-crf', '18', '-preset', 'medium', destino]);
+    '-vf', 'fps=30,scale=1080:2340:flags=lanczos,format=yuv420p', '-c:v', 'libx264', '-crf', '10', '-preset', 'medium', '-tune', 'animation', destino]);
   fs.rmSync(framesDir, { recursive: true, force: true });
   const rel = (t) => Math.max(0, +(t - t0).toFixed(3));
   fs.writeFileSync(path.join(dir, `${clip.id}.json`), JSON.stringify({

@@ -40,13 +40,13 @@
 
 ## 3. Estilo visual
 
-- 1080×1920, 30 fps. La app ocupa toda la pantalla (no un móvil pequeño en medio).
+- 1080×1920, 30 fps, grabación de la app sin pérdida (PNG) y H.264 CRF 15. La app ocupa toda la pantalla.
 - **Gancho**: Jakarta ExtraBold, blanco sobre caja azul Nokfi `#1456A2`, palabra
   clave en azul claro, arriba (zona segura: debajo de las pestañas de TikTok).
-- **Subtítulos**: 1-3 palabras por golpe, Jakarta ExtraBold 128, caja negra al
-  80 %, **palabra clave en amarillo** (`**así**` en el guion). Altura: por
+- **Subtítulos** (HTML/CSS): 1-3 palabras por golpe, Jakarta 800 a 82 px, caja negra redondeada al
+  80 % con sombra, **palabra que se dice sobre azul Nokfi**, **palabra clave en amarillo** (`**así**`). Altura: por
   encima del texto de la publicación (abajo) y lejos de los botones (derecha).
-- Acercamiento lento en cada escena (`zoom`); `congelar` para quedarse en una cifra.
+- **Plano estable**: sin zoom continuo (decisión del usuario, 2026-10-11). `zoomInicial` solo para un plano fijo más cerrado; `congelar` para quedarse en una cifra.
 - Toques visibles (círculo blanco) en cada pulsación.
 - Cortes secos, sin transiciones de PowerPoint.
 - Siempre: «Cuenta de ejemplo con datos ficticios» en el texto de la publicación.
