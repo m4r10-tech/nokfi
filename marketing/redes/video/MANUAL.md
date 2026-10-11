@@ -5,8 +5,11 @@
 
 ## 0. Reglas fijas (del usuario)
 
-- **Nada generado por IA**: ni voz, ni caras, ni imágenes. Se graba la app real
-  y la **voz es siempre la misma persona** (el usuario), leyendo el guion.
+- Se graba **la app real** (cuenta de ejemplo). Nada de caras ni imágenes generadas.
+- **Voz sintética fija** (decisión del 2026-10-11): Piper, local y de código abierto,
+  siempre la misma voz (`voz.json`). Al ser IA, esas publicaciones llevan la
+  **etiqueta de IA de TikTok** (`"ia": true`). Si algún día graba el usuario,
+  su archivo en `voz/` tiene prioridad.
 - **Solo se cuenta lo que Nokfi ya tiene.** Las novedades se anuncian cuando
   estén confirmadas al 100 %.
 - Objetivo: **viralizar** entre **negocios y autónomos** y entre
@@ -19,7 +22,8 @@
 1. **Guion** `guiones/<id>.json`: gancho, escenas (clip + marca + frase de voz), cierre.
 2. **Grabación de la app** (cuenta de ejemplo, datos ficticios):
    `cd backend && PLAYWRIGHT_CORE=… node scripts/redes-clips.js ../marketing/redes/video/guiones/<id>.json`
-3. **Voz**: el usuario lee las frases del guion → `voz/<id>.m4a` (ver §6).
+3. **Voz**: `node marketing/redes/video/voz.mjs marketing/redes/video/guiones/<id>.json` → `voz/<id>.wav`
+   (cifras y siglas escritas como se dicen en `locucion`; ver §6).
 4. **Montaje**: `PLAYWRIGHT_CORE=… node marketing/redes/video/montar.mjs marketing/redes/video/guiones/<id>.json`
    → `salida/<id>/video.mp4` + `01-portada.png` + `subtitulos.srt`.
 5. **Revisión** del usuario → `publicaciones/<semana>.json` con `"video": "video.mp4"` → `buffer.mjs`.
@@ -102,7 +106,15 @@ cámaras» o el vídeo del día recortado a 10-15 s con «nuevo vídeo 👆».
 Ojo: la API de Buffer no publica historias de TikTok; las de TikTok se suben
 desde la app (las dejo listas en `salida/`). Las de Instagram sí se programan.
 
-## 6. La voz (la graba el usuario)
+## 6. La voz
+
+**Sintética (por defecto):** `voz.json` fija modelo, hablante, velocidad (0,95) y
+la pausa entre frases (0,7 s). Reglas para que suene natural y dé confianza:
+frases cortas (≤ 14 palabras), cifras y siglas escritas como se pronuncian en
+`locucion` («cinco mil novecientos sesenta euros», «i erre pe efe»), tono de
+explicación cercana, nada de exclamaciones seguidas.
+
+**Grabada por una persona (si algún día):**
 
 - Misma persona, mismo sitio y mismo micro siempre (el móvil vale).
 - Habitación con cortinas, sofá o armario abierto (menos eco); móvil a un palmo,

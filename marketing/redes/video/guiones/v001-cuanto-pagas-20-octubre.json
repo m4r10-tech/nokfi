@@ -80,7 +80,8 @@
       "marca": "impuestos",
       "voz": "El 20 de octubre toca pagar el IVA. ¿Sabes ya cuánto te toca?",
       "congelar": true,
-      "y": 0.35
+      "y": 0.35,
+      "locucion": "El veinte de octubre toca pagar el iva. ¿Sabes ya cuánto te toca?"
     },
     {
       "clip": "impuestos",
@@ -93,7 +94,8 @@
       "voz": "Entre IVA e IRPF, unos **5.963 €** este trimestre.",
       "congelar": true,
       "y": 0.35,
-      "zoomInicial": 1.12
+      "zoomInicial": 1.12,
+      "locucion": "Entre iva e i erre pe efe, unos cinco mil novecientos sesenta euros este trimestre."
     },
     {
       "clip": "impuestos",
@@ -103,12 +105,14 @@
     {
       "clip": "impuestos",
       "marca": "303",
-      "voz": "Abajo, el **303**: el IVA que cobré menos el de mis gastos."
+      "voz": "Abajo, el **303**: el IVA que cobré menos el de mis gastos.",
+      "locucion": "Abajo, el trescientos tres: el iva que cobré menos el de mis gastos."
     },
     {
       "clip": "impuestos",
       "marca": "130",
-      "voz": "Y el **130**, el adelanto del IRPF."
+      "voz": "Y el **130**, el adelanto del IRPF.",
+      "locucion": "Y el ciento treinta, el adelanto del i erre pe efe."
     },
     {
       "clip": "impuestos",
@@ -119,6 +123,7 @@
   "cierre": {
     "voz": "Envíaselo a ese amigo autónomo que siempre va justo el día 20.",
     "titulo": "Envíaselo a quien **siempre va justo** 🙃",
-    "texto": "nokfi.app · 14 días gratis"
+    "texto": "nokfi.app · 14 días gratis",
+    "locucion": "Envíaselo a ese amigo autónomo que siempre va justo el día veinte."
   }
 }

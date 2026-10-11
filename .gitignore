@@ -24,3 +24,5 @@ media-redes/
 marketing/redes/video/voz/*
 !marketing/redes/video/voz/LEER-*.md
 marketing/redes/video/musica/*
+marketing/redes/video/.piper/
+marketing/redes/video/voces/
