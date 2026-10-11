@@ -2,7 +2,7 @@
   "motor": "supertonic",
   "voz": "M1",
   "pasos": 16,
-  "velocidad": 1.05,
+  "velocidad": 1.12,
   "pausa": 0.4,
   "modelo": "es_ES-davefx-medium.onnx",
   "hablante": null,
@@ -13,7 +13,10 @@
     "€": " euros",
     "\\bn8n\\b": "ene ocho ene",
     "\\bExcel\\b": "Excél",
-    "\\bMCP\\b": "eme ce pe"
+    "\\bMCP\\b": "eme ce pe",
+    "\\b[Ww]ebhooks\\b": "webjuks",
+    "\\b[Ww]ebhook\\b": "webjuk"
   },
-  "pausaBreve": 0.28
+  "pausaBreve": 0.28,
+  "pausaDosPuntos": 0.16
 }

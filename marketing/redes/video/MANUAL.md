@@ -16,7 +16,7 @@
   estén confirmadas al 100 %.
 - Objetivo: **viralizar** entre **negocios y autónomos** y entre
   **desarrolladores de automatizaciones con IA** (n8n, Make, Zapier, MCP).
-- Ritmo: **2 vídeos al día** por ahora (13:30 y 20:00; decisión del usuario, 2026-10-11) + 1 historia al día. Se hacen tandas nuevas cada semana.
+- Ritmo: el usuario quiere **lanzar rápido** (2026-10-11 noche: 5 vídeos en media hora y el resto de la cola a uno por hora); antes, 2 al día (13:30 y 20:00) + 1 historia al día. Se hacen tandas nuevas cada semana.
 - El usuario revisa cada vídeo antes de programarlo.
 
 ## 1. Cómo se hace un vídeo (tubería)
@@ -140,8 +140,8 @@ desde la app (las dejo listas en `salida/`). Las de Instagram sí se programan.
 ## 6. La voz
 
 **Sintética (por defecto):** `voz.json` fija el motor (`supertonic`), la voz
-(`M1`; hay M1-M5 y F1-F5), los pasos de calidad (16), la velocidad (1,05) y la
-pausa entre frases (0,4 s). `voz.mjs` guarda además `voz/<id>.tiempos.json` con
+(`M1`; hay M1-M5 y F1-F5), los pasos de calidad (16), la velocidad (**1,12** desde el
+2026-10-11: el usuario quiere ritmo ágil, sin pasarse) y la pausa entre frases (0,4 s). `voz.mjs` guarda además `voz/<id>.tiempos.json` con
 el inicio y fin exactos de cada frase, y el montador los usa para los subtítulos.
 Reglas para que suene natural y dé confianza: frases cortas (≤ 14 palabras),
 cifras y siglas escritas como se pronuncian en `locucion` («cinco mil novecientos
@@ -157,6 +157,8 @@ Aprendido con los vídeos de prueba (2026-10-11, oído del usuario):
 - Pausa breve dentro de una frase: barra ` | ` en `locucion` («…en Nokfi. | Finanzas e impuestos.»).
 - IVA e IRPF suenan perfectos tal como están en `voz.json`. «Excel» se locuta como «Excél» (acento al final).
 - «IA» al final de frase suena «ia-a»: escribir «inteligencia artificial» en `locucion`. «API» solo dentro de «la API de Nokfi».
+- Tras cada «:» va sola una pausa muy corta (0,16 s, `pausaDosPuntos`): «Resultado: | mil doscientos euros».
+- «webhooks» se locuta «webjuks». Porcentajes al final de la frase («…llega al ochenta por ciento»).
 - Cada frase locutada se guarda en `voz/.tomas/`: al rehacer un vídeo, las frases
   que no cambian suenan idénticas. Si una frase sale mal, `--repetir <n>` la
   locuta de nuevo (cada toma sale algo distinta).

@@ -23,7 +23,8 @@
  *     video/voces/ (huggingface.co/rhasspy/piper-voices, es_ES).
  * Pronunciación: "locucion" en una escena sustituye al texto; además se aplica
  *   el diccionario de voz.json ("pronunciar"). Una barra « | » dentro de la frase
- *   mete una pausa breve ("pausaBreve" de voz.json) en ese punto.
+ *   mete una pausa breve ("pausaBreve" de voz.json) en ese punto, y tras cada «:» va
+ *   sola una pausa muy corta ("pausaDosPuntos").
  */
 
 import fs from 'node:fs';
@@ -57,13 +58,16 @@ function main() {
   const tmp = fs.mkdtempSync(path.join(HERE, 'voz', '.tmp-'));
   const parte = (i) => path.join(tmp, `${String(i).padStart(2, '0')}.wav`);
   // «a | b»: trozos que se locutan por separado y se unen con una pausa breve.
-  const trozos = frases.map(f => f.split('|').map(x => x.trim()).filter(Boolean));
+  // Tras «:» va además una pausa muy corta ("pausaDosPuntos"): «Resultado: | mil doscientos euros».
+  const trozos = frases.map(f => f.split('|').map(x => x.trim()).filter(Boolean)
+    .flatMap((x, j) => x.split(/(?<=:)\s+/).map((t, k) => ({ t, pausa: k ? 'dp' : j ? 'breve' : null }))));
   const tomas = path.join(HERE, 'voz', '.tomas');
   fs.mkdirSync(tomas, { recursive: true });
   const toma = (i) => path.join(tomas, crypto.createHash('sha1').update(JSON.stringify([motor, motor === 'supertonic' ? conf.voz : conf.modelo,
-    conf.hablante ?? null, conf.pasos ?? null, conf.velocidad ?? null, conf.pausaBreve ?? null, frases[i]])).digest('hex').slice(0, 16) + '.wav');
+    conf.hablante ?? null, conf.pasos ?? null, conf.velocidad ?? null, conf.pausaBreve ?? null, frases[i],
+    ...(/:\s/.test(frases[i]) ? ['dp', conf.pausaDosPuntos ?? 0.16] : [])])).digest('hex').slice(0, 16) + '.wav');
   const nueva = frases.map((_, i) => repetir.has(i + 1) || !fs.existsSync(toma(i)));
-  const sueltos = trozos.filter((_, i) => nueva[i]).flat();
+  const sueltos = trozos.filter((_, i) => nueva[i]).flat().map(x => x.t);
   try {
     let rate;
     if (!sueltos.length) rate = null;
@@ -87,12 +91,14 @@ function main() {
     let t = 0;
     const breve = path.join(tmp, 'breve.wav');
     execFileSync('ffmpeg', ['-v', 'error', '-y', '-f', 'lavfi', '-i', `anullsrc=r=${rate}:cl=mono`, '-t', String(conf.pausaBreve ?? 0.28), breve]);
+    const dosPuntos = path.join(tmp, 'dospuntos.wav');
+    execFileSync('ffmpeg', ['-v', 'error', '-y', '-f', 'lavfi', '-i', `anullsrc=r=${rate}:cl=mono`, '-t', String(conf.pausaDosPuntos ?? 0.16), dosPuntos]);
     let k = 0;
     const limpias = trozos.map((ts, i) => {
       const wav = toma(i);
       if (nueva[i]) {
-      const ins = ts.flatMap((_, j) => (j ? [breve, parte(k++)] : [parte(k++)]));
-      const filtro = ins.map((_, j) => (ins[j] === breve ? `[${j}:a]anull[a${j}]` : `[${j}:a]${recorte},areverse,${recorte},areverse[a${j}]`)).join(';')
+      const ins = ts.flatMap((x, j) => (j ? [x.pausa === 'dp' ? dosPuntos : breve, parte(k++)] : [parte(k++)]));
+      const filtro = ins.map((_, j) => (ins[j] === breve || ins[j] === dosPuntos ? `[${j}:a]anull[a${j}]` : `[${j}:a]${recorte},areverse,${recorte},areverse[a${j}]`)).join(';')
         + `;${ins.map((_, j) => `[a${j}]`).join('')}concat=n=${ins.length}:v=0:a=1[o]`;
       execFileSync('ffmpeg', ['-v', 'error', '-y', ...ins.flatMap(f => ['-i', f]), '-filter_complex', filtro, '-map', '[o]', '-ar', String(rate), '-ac', '1', wav]);
       }

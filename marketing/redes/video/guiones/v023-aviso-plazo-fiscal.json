@@ -85,8 +85,8 @@
   {
    "clip": "webhooks",
    "marca": "a",
-   "voz": "También avisa cuando termina un análisis o al llegar al **80 %** de la cuota.",
-   "locucion": "También avisa cuando termina un análisis o al llegar al ochenta por ciento de la cuota.",
+   "voz": "También avisa cuando termina un análisis, o si la cuota llega al **80 %**.",
+   "locucion": "También avisa cuando termina un análisis, o si la cuota llega al ochenta por ciento.",
    "y": 0.35
   },
   {
