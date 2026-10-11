@@ -1,0 +1,116 @@
+{
+ "id": "v024-modelo-130-una-llamada",
+ "titulo": "El modelo 130, calculado en una llamada",
+ "metodo": "terminal animada + app real + cifras",
+ "barra": true,
+ "texto": "API de Nokfi: el modelo 130 estimado en una llamada, sin IA y sin gastar cuota. Y el resumen del trimestre directamente desde tu libro 🧮 (respuesta real de la API; cálculo orientativo)\n\nEnvíaselo a quien programa para autónomos 👇\n\n#api #desarrolladores #programacion #autonomos #irpf",
+ "pilar": "desarrolladores",
+ "musica": "2-bit-shift.mp3",
+ "gancho": "El modelo 130, calculado en **una llamada**",
+ "clips": [
+  {
+   "id": "playground",
+   "pasos": [
+    {
+     "ir": "/app/dev/playground"
+    },
+    {
+     "esperar": 600
+    },
+    {
+     "elegir": {
+      "en": "select",
+      "valor": "tax.model-130"
+     }
+    },
+    {
+     "esperar": 800
+    },
+    {
+     "tocar": "button:has-text('Ejecutar')"
+    },
+    {
+     "esperar": 500
+    },
+    {
+     "bajar": 500
+    },
+    {
+     "marca": "respuesta"
+    },
+    {
+     "esperar": 9000
+    }
+   ]
+  }
+ ],
+ "escenas": [
+  {
+   "voz": "Calcular el modelo 130 a mano es pelearse con una hoja de cálculo.",
+   "locucion": "Calcular el modelo ciento treinta a mano es pelearse con una hoja de cálculo.",
+   "tarjeta": {
+    "tipo": "terminal",
+    "zona": "baja",
+    "comando": "POST /api/v1/tax/model-130",
+    "tam": 40,
+    "rotulo": "nokfi · API"
+   }
+  },
+  {
+   "voz": "Le mandas ingresos, gastos y lo que ya has pagado.",
+   "tarjeta": {
+    "tipo": "terminal",
+    "titulo": "POST /api/v1/tax/model-130",
+    "json": true,
+    "respuesta": "{\n  \"year\": 2026,\n  \"quarter\": 3,\n  \"income\": 42000,\n  \"expenses\": 18500,\n  \"previous_payments\": 2900,\n  \"withholdings\": 600\n}",
+    "rotulo": "nokfi · API",
+    "tam": 42
+   }
+  },
+  {
+   "voz": "Y te devuelve el resultado: **1.200 €**, con su fecha límite.",
+   "locucion": "Y te devuelve el resultado: mil doscientos euros, con su fecha límite.",
+   "tarjeta": {
+    "tipo": "terminal",
+    "titulo": "Respuesta",
+    "json": true,
+    "respuesta": "{\n  \"net\": 23500,\n  \"gross\": 4700,\n  \"previous_payments\": 2900,\n  \"withholdings\": 600,\n  \"result\": 1200,\n  \"due_date\": \"2026-10-20\"\n}",
+    "resalta": [
+     "\"result\"",
+     "\"due_date\""
+    ],
+    "rotulo": "nokfi · API",
+    "tam": 42
+   }
+  },
+  {
+   "clip": "playground",
+   "marca": "respuesta",
+   "voz": "Sin IA y **sin gastar cuota**: es un cálculo fijo.",
+   "locucion": "Sin inteligencia artificial y sin gastar cuota: es un cálculo fijo."
+  },
+  {
+   "voz": "Y si las facturas ya están en Nokfi, lo calcula desde tu libro.",
+   "tarjeta": {
+    "tipo": "datos",
+    "rotulo": "nokfi · API",
+    "lineas": [
+     {
+      "n": "130",
+      "t": "pago a cuenta del IRPF"
+     },
+     {
+      "n": "303",
+      "t": "IVA del trimestre"
+     }
+    ]
+   }
+  }
+ ],
+ "cierre": {
+  "voz": "Envíaselo a quien programa para autónomos.",
+  "titulo": "Envíaselo a quien **programa** para autónomos 👨‍💻",
+  "texto": "nokfi.app · API con clave de prueba",
+  "boton": "Mira la documentación"
+ }
+}

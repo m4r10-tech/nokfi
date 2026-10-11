@@ -24,7 +24,7 @@
 1. **Guion** `guiones/<id>.json`: gancho, escenas (clip + marca + frase de voz), cierre.
 2. **Grabación de la app** (cuenta de ejemplo, datos ficticios):
    `cd backend && PLAYWRIGHT_CORE=… node scripts/redes-clips.js ../marketing/redes/video/guiones/<id>.json`
-3. **Voz**: `node marketing/redes/video/voz.mjs marketing/redes/video/guiones/<id>.json` → `voz/<id>.wav`
+3. **Voz** (y, si el guion lleva tarjetas animadas, después `tarjetas.mjs`): `node marketing/redes/video/voz.mjs marketing/redes/video/guiones/<id>.json` → `voz/<id>.wav`
    (cifras y siglas escritas como se dicen en `locucion`; ver §6).
 4. **Montaje**: `PLAYWRIGHT_CORE=… node marketing/redes/video/montar.mjs marketing/redes/video/guiones/<id>.json`
    → `salida/<id>/video.mp4` + `01-portada.png` + `subtitulos.srt`.
@@ -102,6 +102,23 @@ anunciar funciones que no existen.
 | Plantilla lista (desarrolladores) | v017 | «Facturas de Gmail a Google Sheets, solas» |
 | Mito roto | v018 | «Un sueldo de 1.500 € no te cuesta 1.500 €» |
 | Prueba en directo (mal / bien) | v019 | «¿Tu factura vale? Depende de este número» |
+
+### Edición avanzada: tarjetas animadas (tanda 4, desarrolladores, 2026-10-11)
+`tarjetas.mjs` dibuja escenas animadas con HTML/CSS (después de `voz.mjs`, antes de `montar.mjs`): en el
+guion, la escena lleva `"tarjeta"` en vez de `"clip"`. Tipos: `terminal` (comando que se teclea y
+respuesta que aparece, con líneas resaltadas; sin comando es un archivo), `flujo` (nodos encadenados,
+estilo n8n), `chat` (conversación con un agente y llamadas a herramientas MCP) y `datos` (cifras grandes).
+`"barra": true` en el guion añade la barra de progreso. Reglas: los datos de las tarjetas son **respuestas
+reales de la API** (se sacan del Playground en modo prueba); líneas de código de ≤ 41 caracteres; se
+mezclan con planos de la app real; nunca enseñar la dirección `localhost` del Playground.
+
+| Formato | Vídeo | Gancho |
+|---|---|---|
+| Terminal + Playground real | v020 | «Valida un NIF español con una sola llamada» |
+| Chat con agente (MCP) + configuración | v021 | «Tu agente de IA no sabe facturar. Con esto, sí» |
+| Flujo de nodos + respuesta real + plantillas | v022 | «Este flujo de n8n lee tus facturas solo» |
+| Flujo con Trigger + calendario de la API | v023 | «Un aviso 7 días antes de cada plazo fiscal» |
+| Entrada/salida de la API + Playground | v024 | «El modelo 130, calculado en una llamada» |
 
 ## 5. Pilares de contenido (1 vídeo al día)
 
@@ -196,3 +213,8 @@ Aprendido con los vídeos de prueba (2026-10-11, oído del usuario):
 | v017 | | | | |
 | v018 | | | | |
 | v019 | | | | |
+| v020 | | | | |
+| v021 | | | | |
+| v022 | | | | |
+| v023 | | | | |
+| v024 | | | | |

@@ -1,0 +1,122 @@
+{
+ "id": "v021-mcp-agente-factura",
+ "titulo": "Tu agente de IA no sabe facturar. Con esto, sí",
+ "metodo": "chat animado + archivo de configuración + cifras",
+ "barra": true,
+ "texto": "Servidor MCP de Nokfi: tu agente de IA calcula IVA y retenciones, te pide confirmación y emite la factura. 15 herramientas con la misma clave de la API 🤖 (conversación de ejemplo; claves reales en planes Pro y Max)\n\nEnvíaselo a quien está montando agentes 👇\n\n#mcp #agentesia #ia #automatizacion #desarrolladores",
+ "pilar": "desarrolladores",
+ "musica": "2-bit-shift.mp3",
+ "gancho": "Tu agente de IA no sabe facturar. **Con esto, sí**",
+ "clips": [],
+ "escenas": [
+  {
+   "voz": "Pídele a tu agente de IA que haga una factura.",
+   "locucion": "Pídele a tu agente de inteligencia artificial que haga una factura.",
+   "tarjeta": {
+    "tipo": "chat",
+    "zona": "baja",
+    "mensajes": [
+     {
+      "de": "yo",
+      "texto": "Hazle una factura a Bodegas Sur: 800 € de diseño"
+     }
+    ],
+    "rotulo": "nokfi · MCP"
+   }
+  },
+  {
+   "voz": "Le conectas el servidor **MCP** de Nokfi.",
+   "tarjeta": {
+    "tipo": "terminal",
+    "titulo": "mcp.json · ejemplo",
+    "json": true,
+    "respuesta": "{\n \"mcpServers\": {\n  \"nokfi\": {\n   \"url\": \"https://nokfi.app/api/mcp\",\n   \"headers\": {\n    \"Authorization\": \"Bearer nk_…\"\n   }\n  }\n }\n}",
+    "resalta": [
+     "\"url\""
+    ],
+    "rotulo": "nokfi · MCP"
+   }
+  },
+  {
+   "voz": "Calcula el IVA y la retención, y **te pide confirmación**.",
+   "locucion": "Calcula el iva y la retención, y te pide confirmación.",
+   "tarjeta": {
+    "tipo": "chat",
+    "mensajes": [
+     {
+      "de": "yo",
+      "texto": "Hazle una factura a Bodegas Sur: 800 € de diseño"
+     },
+     {
+      "de": "tool",
+      "texto": "🔧 nokfi · calculate_withholding"
+     },
+     {
+      "de": "ia",
+      "texto": "Base 800 €, IVA 168 €, retención −120 €. **Total 848 €**. ¿La emito?"
+     }
+    ],
+    "desde": 1,
+    "rotulo": "nokfi · MCP"
+   }
+  },
+  {
+   "voz": "Dices que sí, y la emite: numerada, en tu libro y con su PDF.",
+   "tarjeta": {
+    "tipo": "chat",
+    "mensajes": [
+     {
+      "de": "yo",
+      "texto": "Hazle una factura a Bodegas Sur: 800 € de diseño"
+     },
+     {
+      "de": "tool",
+      "texto": "🔧 nokfi · calculate_withholding"
+     },
+     {
+      "de": "ia",
+      "texto": "Base 800 €, IVA 168 €, retención −120 €. **Total 848 €**. ¿La emito?"
+     },
+     {
+      "de": "yo",
+      "texto": "Sí, emítela"
+     },
+     {
+      "de": "tool",
+      "texto": "🔧 nokfi · issue_invoice"
+     },
+     {
+      "de": "ia",
+      "texto": "Hecho ✅ Factura emitida, con su PDF."
+     }
+    ],
+    "desde": 3,
+    "rotulo": "nokfi · MCP"
+   }
+  },
+  {
+   "voz": "**15 herramientas**, con la misma clave de la API.",
+   "locucion": "Quince herramientas, con la misma clave de la API.",
+   "tarjeta": {
+    "tipo": "datos",
+    "lineas": [
+     {
+      "n": "15",
+      "t": "herramientas para tu agente"
+     },
+     {
+      "n": "1",
+      "t": "clave: la misma de la API"
+     }
+    ],
+    "rotulo": "nokfi · MCP"
+   }
+  }
+ ],
+ "cierre": {
+  "voz": "Envíaselo a quien está montando agentes.",
+  "titulo": "Envíaselo a quien **monta agentes** 🤖",
+  "texto": "nokfi.app · servidor MCP",
+  "boton": "Mira la documentación"
+ }
+}

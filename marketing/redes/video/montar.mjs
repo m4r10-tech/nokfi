@@ -20,7 +20,7 @@
  *
  * Sin voz, cada frase dura según sus palabras y sale solo como subtítulo.
  *
- * Escena: { clip, marca, voz, congelar?, desplaza? (s), zoomInicial? (1, plano fijo más cerca), zoom? (0 = sin
+ * Escena: { clip, marca, voz (o "tarjeta" en vez de clip: ver tarjetas.mjs), congelar?, desplaza? (s), zoomInicial? (1, plano fijo más cerca), zoom? (0 = sin
  *   movimiento), x?, y? (0-1) }. Texto en pantalla dibujado con HTML/CSS (ver CSS abajo).
  */
 
@@ -258,11 +258,13 @@ async function main() {
   const filtros = [];
   const etiquetas = [];
   g.escenas.forEach((e, i) => {
-    const meta = JSON.parse(fs.readFileSync(path.join(clipsDir, `${e.clip}.json`), 'utf8'));
+    // Escena con tarjeta animada (tarjetas.mjs): su clip es t<posición> y ya mide 1080×1920.
+    const clip = e.tarjeta ? `t${i}` : e.clip;
+    const meta = JSON.parse(fs.readFileSync(path.join(clipsDir, `${clip}.json`), 'utf8'));
     const desde = Math.max(0, (e.marca ? meta.marcas[e.marca] : meta.inicio) + (e.desplaza || 0));
     const d = durs[i];
     // congelar: el fotograma de la marca se queda fijo (solo el acercamiento lento).
-    args.push('-ss', desde.toFixed(3), '-t', (e.congelar ? 0.1 : d + 0.5).toFixed(3), '-i', path.join(clipsDir, `${e.clip}.mp4`));
+    args.push('-ss', desde.toFixed(3), '-t', (e.congelar ? 0.1 : d + 0.5).toFixed(3), '-i', path.join(clipsDir, `${clip}.mp4`));
     const z = e.zoom ?? 0;               // plano estable; >0 solo si una escena lo pide
     const z0 = e.zoomInicial ?? 1;       // 1 = ancho completo del móvil
     const cy = e.y ?? 0;                 // 0 arriba … 1 abajo (de lo que sobra del alto)
@@ -291,6 +293,12 @@ async function main() {
       `[vs][gch]overlay=0:${GANCHO_Y}:eof_action=pass:format=auto[vout]`);
     idx++;
   } else filtros.push('[vs]null[vout]');
+  // "barra": true → barra de progreso fina arriba (ritmo de vídeo editado).
+  let vmap = '[vout]';
+  if (g.barra) {
+    filtros.push(`color=c=0x3B82F6:s=${W}x10:r=${FPS}:d=${finTotal.toFixed(3)}[bar]`, `[vout][bar]overlay=x='-w+w*t/${finTotal.toFixed(3)}':y=0:shortest=0[voutb]`);
+    vmap = '[voutb]';
+  }
 
   // ── Audio: voz al frente; música debajo y más baja cuando habla la voz ──
   let audio = null;
@@ -309,7 +317,7 @@ async function main() {
   else { args.push('-f', 'lavfi', '-t', finTotal.toFixed(3), '-i', 'anullsrc=r=48000:cl=stereo'); audio = `${idx}:a`; idx++; }
 
   const video = path.join(out, process.env.SUFIJO ? `video-${process.env.SUFIJO}.mp4` : 'video.mp4');
-  args.push('-filter_complex', filtros.join(';'), '-map', '[vout]', '-map', audio,
+  args.push('-filter_complex', filtros.join(';'), '-map', vmap, '-map', audio,
     '-t', finTotal.toFixed(3), // Original «pesado» a propósito (prueba del 2026-10-11): con CRF la pantalla casi fija salía a ~0,6 Mb/s y
     // TikTok solo servía 576×1024. Un fotograma clave cada medio segundo y bitrate alto dan un original de varios Mb/s.
     '-c:v', 'libx264', '-profile:v', 'high', '-b:v', '12M', '-maxrate', '16M', '-bufsize', '24M', '-g', '15', '-keyint_min', '15', '-sc_threshold', '0',

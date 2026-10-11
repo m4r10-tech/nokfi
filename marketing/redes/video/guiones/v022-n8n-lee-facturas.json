@@ -1,0 +1,120 @@
+{
+ "id": "v022-n8n-lee-facturas",
+ "titulo": "Este flujo de n8n lee tus facturas solo",
+ "metodo": "flujo de nodos animado + respuesta real + app real",
+ "barra": true,
+ "texto": "n8n + Nokfi: las facturas del correo, leídas y apuntadas en tu hoja. Nokfi comprueba que el total cuadra y que el NIF es válido; la plantilla viene hecha 🤖 (respuesta real de la API en modo prueba)\n\nEnvíaselo a quien vive dentro de n8n 👇\n\n#n8n #automatizacion #nocode #googlesheets #facturas",
+ "pilar": "desarrolladores",
+ "musica": "3-music-promotion.mp3",
+ "gancho": "Este flujo de n8n **lee tus facturas** solo",
+ "clips": [
+  {
+   "id": "plantillas",
+   "pasos": [
+    {
+     "ir": "/app/dev/plantillas"
+    },
+    {
+     "esperar": 500
+    },
+    {
+     "bajar": 150
+    },
+    {
+     "marca": "a"
+    },
+    {
+     "esperar": 9000
+    }
+   ]
+  }
+ ],
+ "escenas": [
+  {
+   "voz": "Cada factura que llega al correo, apuntada sin tocar nada.",
+   "tarjeta": {
+    "tipo": "flujo",
+    "zona": "baja",
+    "rotulo": "nokfi · n8n",
+    "nodos": [
+     {
+      "icono": "✉️",
+      "t": "Gmail"
+     },
+     {
+      "icono": "N",
+      "t": "Nokfi",
+      "nokfi": true
+     },
+     {
+      "icono": "📊",
+      "t": "Google Sheets"
+     }
+    ]
+   }
+  },
+  {
+   "voz": "Tres nodos: Gmail, Google Sheets y, en medio, el de Nokfi.",
+   "tarjeta": {
+    "tipo": "flujo",
+    "rotulo": "nokfi · n8n",
+    "nodos": [
+     {
+      "icono": "✉️",
+      "t": "Gmail",
+      "s": "Correo con una factura adjunta"
+     },
+     {
+      "icono": "N",
+      "t": "Nokfi · Extraer facturas",
+      "s": "Lee el PDF o la foto",
+      "nokfi": true
+     },
+     {
+      "icono": "📊",
+      "t": "Google Sheets",
+      "s": "Una fila por factura"
+     }
+    ]
+   }
+  },
+  {
+   "voz": "Devuelve los datos y comprueba que **el total cuadra** y que el NIF es válido.",
+   "tarjeta": {
+    "tipo": "terminal",
+    "titulo": "Respuesta de Nokfi · modo prueba",
+    "json": true,
+    "respuesta": "{\n  \"issuer_name\": \"Recambios Norte, S.L.\",\n  \"issuer_nif\": \"B12345674\",\n  \"base\": 842.1,\n  \"vat_amount\": 176.84,\n  \"total\": 1018.94,\n  \"checks\": {\n    \"totals_ok\": true,\n    \"nif_valid\": true\n  }\n}",
+    "resalta": [
+     "totals_ok",
+     "nif_valid"
+    ],
+    "rotulo": "nokfi · n8n"
+   }
+  },
+  {
+   "clip": "plantillas",
+   "marca": "a",
+   "voz": "La plantilla ya está hecha: la descargas y la importas."
+  },
+  {
+   "voz": "Y no vuelves a copiar una factura a mano.",
+   "tarjeta": {
+    "tipo": "datos",
+    "rotulo": "nokfi · n8n",
+    "lineas": [
+     {
+      "n": "0",
+      "t": "facturas copiadas a mano"
+     }
+    ]
+   }
+  }
+ ],
+ "cierre": {
+  "voz": "Envíaselo a quien vive dentro de n8n.",
+  "titulo": "Envíaselo a quien **vive en n8n** 🤖",
+  "texto": "nokfi.app · nodo y plantillas de n8n",
+  "boton": "Mira la documentación"
+ }
+}

@@ -1,0 +1,116 @@
+{
+ "id": "v023-aviso-plazo-fiscal",
+ "titulo": "Un aviso 7 días antes de cada plazo fiscal",
+ "metodo": "flujo de nodos animado + API real + app real",
+ "barra": true,
+ "texto": "Nokfi Trigger para n8n: arranca tu flujo 7 días antes y la víspera de cada plazo fiscal, cuando termina un análisis o al llegar al 80 % de la cuota. Webhooks firmados 🔔 (datos reales de la API)\n\nEnvíaselo a esa agencia que automatiza negocios 👇\n\n#n8n #automatizacion #webhooks #hacienda #desarrolladores",
+ "pilar": "desarrolladores",
+ "musica": "1-chill-lofi-theme.mp3",
+ "gancho": "Un aviso **7 días antes** de cada plazo fiscal",
+ "clips": [
+  {
+   "id": "webhooks",
+   "pasos": [
+    {
+     "ir": "/app/dev/webhooks"
+    },
+    {
+     "marca": "a"
+    },
+    {
+     "esperar": 9000
+    }
+   ]
+  }
+ ],
+ "escenas": [
+  {
+   "voz": "Que a tu cliente no se le vuelva a pasar un plazo de Hacienda.",
+   "tarjeta": {
+    "tipo": "flujo",
+    "zona": "baja",
+    "rotulo": "nokfi · n8n",
+    "nodos": [
+     {
+      "icono": "⏰",
+      "t": "Nokfi Trigger",
+      "nokfi": true
+     },
+     {
+      "icono": "💬",
+      "t": "Aviso al cliente"
+     }
+    ]
+   }
+  },
+  {
+   "voz": "El Trigger de Nokfi arranca tu flujo **7 días antes**, y también la víspera.",
+   "locucion": "El Trigger de Nokfi arranca tu flujo siete días antes, y también la víspera.",
+   "tarjeta": {
+    "tipo": "flujo",
+    "rotulo": "nokfi · n8n",
+    "nodos": [
+     {
+      "icono": "⏰",
+      "t": "Nokfi Trigger",
+      "s": "Plazo fiscal en 7 días",
+      "nokfi": true
+     },
+     {
+      "icono": "🔀",
+      "t": "Tu lógica",
+      "s": "¿A qué clientes les toca?"
+     },
+     {
+      "icono": "💬",
+      "t": "Slack, Telegram o correo",
+      "s": "Aviso con la fecha"
+     }
+    ]
+   }
+  },
+  {
+   "voz": "Y el calendario fiscal de la API te dice **qué modelos tocan**.",
+   "tarjeta": {
+    "tipo": "terminal",
+    "titulo": "GET /api/v1/tax/calendar",
+    "json": true,
+    "respuesta": "{\n  \"date\": \"2026-10-20\",\n  \"models\": [\"303\", \"130\", \"111\", \"115\"],\n  \"period\": \"3T 2026\",\n  \"days_left\": 9\n}",
+    "resalta": [
+     "\"models\""
+    ],
+    "rotulo": "nokfi · API"
+   }
+  },
+  {
+   "clip": "webhooks",
+   "marca": "a",
+   "voz": "También avisa cuando termina un análisis o al llegar al **80 %** de la cuota.",
+   "locucion": "También avisa cuando termina un análisis o al llegar al ochenta por ciento de la cuota.",
+   "y": 0.35
+  },
+  {
+   "voz": "Webhooks firmados, y se registran solos.",
+   "tarjeta": {
+    "tipo": "datos",
+    "rotulo": "nokfi · n8n",
+    "lineas": [
+     {
+      "n": "7",
+      "t": "días antes de cada plazo"
+     },
+     {
+      "n": "1",
+      "t": "día antes, por si acaso"
+     }
+    ]
+   }
+  }
+ ],
+ "cierre": {
+  "voz": "Envíaselo a esa agencia que automatiza negocios.",
+  "titulo": "Envíaselo a quien **automatiza** negocios 🔔",
+  "texto": "nokfi.app · nodo de n8n",
+  "boton": "Mira la documentación"
+ }
+}

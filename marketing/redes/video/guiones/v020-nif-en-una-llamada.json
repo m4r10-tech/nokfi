@@ -1,0 +1,108 @@
+{
+ "id": "v020-nif-en-una-llamada",
+ "titulo": "Valida un NIF español con una sola llamada",
+ "metodo": "terminal animada + app real + cifras",
+ "barra": true,
+ "texto": "Validar NIF, NIE y CIF desde tu código: una llamada a la API de Nokfi, con dígito de control, tipo y NIF-IVA. Los cálculos fiscales no gastan cuota 🤖 (respuesta real de la API)\n\nEnvíaselo a quien programa facturación en España 👇\n\n#api #desarrolladores #programacion #n8n #facturacion",
+ "pilar": "desarrolladores",
+ "musica": "2-bit-shift.mp3",
+ "gancho": "Valida un NIF español con **una sola llamada**",
+ "clips": [
+  {
+   "id": "playground",
+   "pasos": [
+    {
+     "ir": "/app/dev/playground"
+    },
+    {
+     "esperar": 800
+    },
+    {
+     "tocar": "button:has-text('Ejecutar')"
+    },
+    {
+     "esperar": 500
+    },
+    {
+     "bajar": 430
+    },
+    {
+     "marca": "respuesta"
+    },
+    {
+     "esperar": 8000
+    }
+   ]
+  }
+ ],
+ "escenas": [
+  {
+   "voz": "Validar un NIF español en tu código no debería llevarte una tarde.",
+   "tarjeta": {
+    "tipo": "terminal",
+    "zona": "baja",
+    "comando": "curl nokfi.app/api/v1/tax/nif",
+    "tam": 40
+   }
+  },
+  {
+   "voz": "Es una sola llamada a la API de Nokfi.",
+   "tarjeta": {
+    "tipo": "terminal",
+    "comando": "curl -G nokfi.app/api/v1/tax/nif \\\n  -d value=B12345674 \\\n  -H \"Authorization: Bearer $KEY\"",
+    "ritmo": 0.8
+   }
+  },
+  {
+   "voz": "Te dice si es **válido**, de qué tipo es y su NIF-IVA europeo.",
+   "locucion": "Te dice si es válido, de qué tipo es y su NIF iva europeo.",
+   "tarjeta": {
+    "tipo": "terminal",
+    "comando": "curl -G nokfi.app/api/v1/tax/nif \\\n  -d value=B12345674 \\\n  -H \"Authorization: Bearer $KEY\"",
+    "escrito": true,
+    "respuesta": "{\n  \"value\": \"B12345674\",\n  \"valid\": true,\n  \"type\": \"cif\",\n  \"vat_number\": \"ESB12345674\"\n}",
+    "resalta": [
+     "\"valid\"",
+     "\"vat_number\""
+    ]
+   }
+  },
+  {
+   "clip": "playground",
+   "marca": "respuesta",
+   "voz": "Pruébalo en el Playground: en modo prueba **no gasta cuota**.",
+   "y": 0.35
+  },
+  {
+   "voz": "Y con la misma clave: IVA, retenciones, modelo 130 y calendario fiscal.",
+   "locucion": "Y con la misma clave: iva, retenciones, modelo ciento treinta y calendario fiscal.",
+   "tarjeta": {
+    "tipo": "datos",
+    "lineas": [
+     {
+      "n": "IVA",
+      "t": "y recargo de equivalencia"
+     },
+     {
+      "n": "IRPF",
+      "t": "retenciones"
+     },
+     {
+      "n": "130",
+      "t": "modelo estimado"
+     },
+     {
+      "n": "📅",
+      "t": "calendario fiscal"
+     }
+    ]
+   }
+  }
+ ],
+ "cierre": {
+  "voz": "Envíaselo a quien programa facturación en España.",
+  "titulo": "Envíaselo a quien **programa** facturas 👨‍💻",
+  "texto": "nokfi.app · API con clave de prueba",
+  "boton": "Mira la documentación"
+ }
+}

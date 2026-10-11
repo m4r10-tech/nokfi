@@ -12,7 +12,8 @@
     " €": " euros",
     "€": " euros",
     "\\bn8n\\b": "ene ocho ene",
-    "\\bExcel\\b": "Excél"
+    "\\bExcel\\b": "Excél",
+    "\\bMCP\\b": "eme ce pe"
   },
   "pausaBreve": 0.28
 }

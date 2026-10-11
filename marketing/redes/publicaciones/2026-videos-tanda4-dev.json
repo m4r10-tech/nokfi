@@ -1,0 +1,57 @@
+[
+ {
+  "id": "v020-nif-en-una-llamada-tt",
+  "red": "tiktok",
+  "cuando": "2026-10-22T20:00",
+  "pieza": "v020-nif-en-una-llamada",
+  "video": "video.mp4",
+  "titulo": "Valida un NIF español con una sola llamada",
+  "ia": true,
+  "texto": "Validar NIF, NIE y CIF desde tu código: una llamada a la API de Nokfi, con dígito de control, tipo y NIF-IVA. Los cálculos fiscales no gastan cuota 🤖 (respuesta real de la API)\n\nEnvíaselo a quien programa facturación en España 👇\n\n#api #desarrolladores #programacion #n8n #facturacion",
+  "aprobado": false
+ },
+ {
+  "id": "v021-mcp-agente-factura-tt",
+  "red": "tiktok",
+  "cuando": "2026-10-23T20:00",
+  "pieza": "v021-mcp-agente-factura",
+  "video": "video.mp4",
+  "titulo": "Tu agente de IA no sabe facturar. Con esto, sí",
+  "ia": true,
+  "texto": "Servidor MCP de Nokfi: tu agente de IA calcula IVA y retenciones, te pide confirmación y emite la factura. 15 herramientas con la misma clave de la API 🤖 (conversación de ejemplo; claves reales en planes Pro y Max)\n\nEnvíaselo a quien está montando agentes 👇\n\n#mcp #agentesia #ia #automatizacion #desarrolladores",
+  "aprobado": false
+ },
+ {
+  "id": "v022-n8n-lee-facturas-tt",
+  "red": "tiktok",
+  "cuando": "2026-10-24T20:00",
+  "pieza": "v022-n8n-lee-facturas",
+  "video": "video.mp4",
+  "titulo": "Este flujo de n8n lee tus facturas solo",
+  "ia": true,
+  "texto": "n8n + Nokfi: las facturas del correo, leídas y apuntadas en tu hoja. Nokfi comprueba que el total cuadra y que el NIF es válido; la plantilla viene hecha 🤖 (respuesta real de la API en modo prueba)\n\nEnvíaselo a quien vive dentro de n8n 👇\n\n#n8n #automatizacion #nocode #googlesheets #facturas",
+  "aprobado": false
+ },
+ {
+  "id": "v023-aviso-plazo-fiscal-tt",
+  "red": "tiktok",
+  "cuando": "2026-10-25T20:00",
+  "pieza": "v023-aviso-plazo-fiscal",
+  "video": "video.mp4",
+  "titulo": "Un aviso 7 días antes de cada plazo fiscal",
+  "ia": true,
+  "texto": "Nokfi Trigger para n8n: arranca tu flujo 7 días antes y la víspera de cada plazo fiscal, cuando termina un análisis o al llegar al 80 % de la cuota. Webhooks firmados 🔔 (datos reales de la API)\n\nEnvíaselo a esa agencia que automatiza negocios 👇\n\n#n8n #automatizacion #webhooks #hacienda #desarrolladores",
+  "aprobado": false
+ },
+ {
+  "id": "v024-modelo-130-una-llamada-tt",
+  "red": "tiktok",
+  "cuando": "2026-10-26T20:00",
+  "pieza": "v024-modelo-130-una-llamada",
+  "video": "video.mp4",
+  "titulo": "El modelo 130, calculado en una llamada",
+  "ia": true,
+  "texto": "API de Nokfi: el modelo 130 estimado en una llamada, sin IA y sin gastar cuota. Y el resumen del trimestre directamente desde tu libro 🧮 (respuesta real de la API; cálculo orientativo)\n\nEnvíaselo a quien programa para autónomos 👇\n\n#api #desarrolladores #programacion #autonomos #irpf",
+  "aprobado": false
+ }
+]
