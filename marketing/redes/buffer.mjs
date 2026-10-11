@@ -122,7 +122,9 @@ async function canalDe(red, lista) {
 async function crear(pub, channelId, borrador) {
   // Vídeo: la portada es el fotograma de los 0,9 s (gancho en pantalla); Buffer no admite una imagen aparte.
   const assets = archivos(pub).map(n => {
-    const url = `${MEDIA_BASE}/${pub.pieza}/${n}`;
+    // ?v=<fecha del archivo>: Cloudflare guarda los medios 7 días; sin esto, un vídeo remontado
+    // con el mismo nombre se publicaría con la versión antigua.
+    const url = `${MEDIA_BASE}/${pub.pieza}/${n}?v=${Math.round(fs.statSync(path.join(SALIDA, pub.pieza, n)).mtimeMs / 1000)}`;
     return n.endsWith('.mp4')
       ? { video: { url, metadata: { thumbnailOffset: 900 } } }
       : { image: { url } };
