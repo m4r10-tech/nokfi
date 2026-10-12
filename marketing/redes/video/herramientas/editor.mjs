@@ -11,7 +11,8 @@
  *   --foto t        solo guarda el fotograma del segundo t en salida/_registro/<id>-<t>.png (para revisar el diseño)
  * Salida: salida/PARA-SUBIR/<carpeta>/ video.mp4 · portada.png · texto.txt · titulo.txt
  *
- * Guion: { id, carpeta, titulo, texto, musica, escenas: [ { tipo: "titulo|seccion|app|cierre", frases: [desde, hasta],
+ * Guion: { id, carpeta, titulo, texto, musica, ritmo: "sereno|medio|vivo", transicion: "lateral|vertical|empuje|corte",
+ *   escenas: [ { tipo: "titulo|cifra|pregunta|seccion|app|cierre", frases: [desde, hasta],
  *   tag, titulo, planos: [ { clip, desde: s | { marca, mas }, peso, foco: [x, y] (0-1 en la pantalla de la app), zoom, suelta } ],
  *   rotulos: [ { texto, en: 0-1 (momento dentro de la escena), y, lado, plano (se va con ese plano) } ], … } ] }
  * Se para solo si el equipo pasa de 72 °C y sigue al bajar de 62 °C.
@@ -27,6 +28,8 @@ const VIDEO = path.resolve(AQUI, '..');
 const SALIDA = path.resolve(VIDEO, '../salida');
 const BIBLIO = path.join(SALIDA, 'video/_biblio/clips');
 const FPS = 30, OFFSET = 0.3, COLA = 1.6;
+// Velocidad del montaje (método, documento 05, mando E): transición, arranque y duración del acercamiento, y tamaño del trozo de subtítulo.
+const RITMOS = { sereno: { tr: 0.55, zIni: 0.6, zDur: 1.0, trozo: 3, letras: 22 }, medio: { tr: 0.42, zIni: 0.45, zDur: 0.8, trozo: 3, letras: 19 }, vivo: { tr: 0.28, zIni: 0.22, zDur: 0.45, trozo: 2, letras: 15 } };
 const sh = (c, a, o = {}) => execFileSync(c, a, { stdio: ['ignore', 'pipe', 'pipe'], maxBuffer: 1 << 28, ...o });
 const dur = (f) => parseFloat(sh('ffprobe', ['-v', 'error', '-show_entries', 'format=duration', '-of', 'csv=p=0', f]).toString());
 const espera = (ms) => new Promise(r => setTimeout(r, ms));
@@ -40,6 +43,9 @@ const voz = path.join(VIDEO, 'voz', `${g.id}.wav`);
 const T = JSON.parse(fs.readFileSync(voz.replace('.wav', '.tiempos.json'), 'utf8'));
 const tiempos = T.tiempos.map(([a, b]) => [a + OFFSET, b + OFFSET]);
 const total = tiempos.at(-1)[1] + COLA;
+const RITMO = RITMOS[g.ritmo || 'medio'];
+if (!RITMO) throw new Error(`ritmo desconocido: ${g.ritmo} (sereno, medio, vivo)`);
+if (!['lateral', 'vertical', 'empuje', 'corte'].includes(g.transicion || 'lateral')) throw new Error(`transición desconocida: ${g.transicion}`);
 const tmp = path.join(SALIDA, '_registro', `.editor-${g.id}`);
 fs.rmSync(tmp, { recursive: true, force: true });
 fs.mkdirSync(tmp, { recursive: true });
@@ -92,14 +98,14 @@ T.frases.forEach((dicha, i) => {
   const cerrar = () => { if (trozo.length) { subs.push({ ini: trozo[0].ini, fin: trozo.at(-1).fin, pal: trozo }); trozo = []; } };
   for (const w of pal) {
     const ini = enT(c / sumaP); c += largo(w); const fin = enT(c / sumaP);
-    if (trozo.length && (trozo.length >= 3 || trozo.reduce((s, x) => s + x.txt.length + 1, 0) + w.length > 19)) cerrar();
+    if (trozo.length && (trozo.length >= RITMO.trozo || trozo.reduce((s, x) => s + x.txt.length + 1, 0) + w.length > RITMO.letras)) cerrar();
     trozo.push({ txt: w, ini: +ini.toFixed(3), fin: +fin.toFixed(3) });
     if (/[.,:;?!]$/.test(w)) cerrar();
   }
   cerrar();
 });
 
-fs.writeFileSync(path.join(tmp, 'data.js'), `window.DATA = ${JSON.stringify({ fps: FPS, total, escenas, subs })};`);
+fs.writeFileSync(path.join(tmp, 'data.js'), `window.DATA = ${JSON.stringify({ fps: FPS, total, escenas, subs, ritmo: RITMO, transicion: g.transicion || 'lateral' })};`);
 fs.writeFileSync(path.join(tmp, 'index.html'), fs.readFileSync(path.join(AQUI, 'editor-pagina.html'), 'utf8').replaceAll('FUENTES', `file://${path.join(VIDEO, 'recursos/fuentes')}`));
 
 // ── Dibujo fotograma a fotograma ──
@@ -155,9 +161,9 @@ await enfriar();
 sh('ffmpeg', ['-v', 'error', '-y', '-framerate', String(FPS), '-i', path.join(cuadros, '%05d.jpg'), ...ent, '-filter_complex', fil.join(';'),
   '-map', '0:v', '-map', '[a]', '-t', total.toFixed(2), '-c:v', 'libx264', '-preset', 'medium', '-crf', '17', '-pix_fmt', 'yuv420p', '-threads', '2',
   '-c:a', 'aac', '-b:a', '192k', '-movflags', '+faststart', video]);
-sh('ffmpeg', ['-v', 'error', '-y', '-ss', '0.6', '-i', video, '-frames:v', '1', path.join(carpeta, 'portada.png')]);
+sh('ffmpeg', ['-v', 'error', '-y', '-ss', '0.9', '-i', video, '-frames:v', '1', path.join(carpeta, 'portada.png')]);
 fs.writeFileSync(path.join(carpeta, 'texto.txt'), `${g.texto}\n`);
 fs.writeFileSync(path.join(carpeta, 'titulo.txt'), `${g.titulo}\n`);
-fs.writeFileSync(path.join(carpeta, 'portada-ms.txt'), '600\n');
+fs.writeFileSync(path.join(carpeta, 'portada-ms.txt'), '900\n');
 fs.rmSync(tmp, { recursive: true, force: true });
 console.log(`✓ ${path.relative(process.cwd(), video)} · ${dur(video).toFixed(1)} s · ${((Date.now() - t0) / 60000).toFixed(1)} min de dibujo`);

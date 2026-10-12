@@ -23,11 +23,15 @@
 
 ## Opciones construidas en el montador (`editor.mjs`)
 
-| Mando | Construido | Pendiente de construir |
+| Mando | Construido (campo del guion) | Pendiente de construir |
 |---|---|---|
-| C · Apertura | título + producto asomando | cifra gigante · producto ya en acción (sin título) · pregunta en pantalla · mensaje |
-| D · Movimiento | lateral con giro · subida desde abajo | vertical · empuje · corte seco · dos teléfonos |
-| E · Velocidad | medio | sereno · vivo (parámetros en el guion) |
-| F · Recurso | rótulos · sección numerada · cierre | contador · gráfico · lista · antes/después · terminal · chat · calendario |
+| C · Apertura | título + producto asomando (`tipo: "titulo"`) · cifra gigante que cuenta (`"cifra"`) · pregunta con respuestas (`"pregunta"`) · producto ya en acción (escena `"app"` sin título previo) | mensaje o notificación |
+| D · Movimiento | lateral con giro · vertical · empuje · corte seco (`transicion`) · subida desde abajo tras una sección | dos teléfonos · recorrido lento dentro del plano |
+| E · Velocidad | sereno · medio · vivo (`ritmo`) | — |
+| F · Recurso | rótulos · rótulo con contador (`cuenta`) · sección numerada · cierre | gráfico · lista que se marca · antes/después · terminal · chat · calendario (existen en `tarjetas.mjs`, de la etapa 1; hay que pasarlos) |
+
+Probado el 2026-10-12 en fotogramas fijos (cifra, pregunta, empuje, vertical, contador,
+velocidades). **Nada de esto se ha visto todavía en un vídeo reproducido**: la primera vez
+que se use cada opción, se revisa con más cuidado.
 
 Un guion solo puede pedir lo que esté en la columna «Construido».
