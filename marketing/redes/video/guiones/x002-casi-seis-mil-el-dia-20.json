@@ -5,12 +5,12 @@
  "ritmo": "medio",
  "transicion": "vertical",
  "musica": "2-bit-shift.mp3",
- "variantes": "A cifra exacta · B demostración directa · C cifra gigante · D vertical · E medio · F contador",
+ "variantes": "F2 La cifra · gancho: cifra exacta · velocidad media",
  "texto": "Lo que le toca pagar a este taller el día 20, con el desglose del 303 y el 130, antes de que llegue el plazo. Pruébalo gratis 14 días en nokfi.app\n\nCuenta de ejemplo con datos ficticios. Cálculos orientativos.\n\nGuárdalo para antes del día 20 📌\n\n#autonomos #iva #irpf #hacienda #impuestos",
  "subtitulos": {},
  "escenas": [
   {
-   "tipo": "cifra",
+   "tipo": "dato",
    "frases": [
     0,
     0
@@ -20,119 +20,203 @@
    "valor": 5963.53,
    "decimales": 2,
    "sufijo": "€",
-   "cuerpo": 190,
-   "titulo": "¿Lo tienes **apartado**?",
-   "fonoTop": 1100,
-   "fonoEscala": 0.94,
+   "cuerpo": 168,
+   "tarjeta": {
+    "x": 490,
+    "top": 730,
+    "escala": 0.68,
+    "giro": 3,
+    "alto": 980
+   },
    "planos": [
     {
      "clip": "imp",
      "foco": [
       0.5,
-      0.3
+      0.56
      ],
-     "zoom": 1.0,
-     "peso": 1,
-     "quieta": true,
-     "desde": 0.3
+     "zoom": 1.06,
+     "desde": 0.4,
+     "quieta": true
     }
-   ]
+   ],
+   "fichas": [
+    {
+     "texto": "Plazo",
+     "detalle": "20 de octubre",
+     "en": 0.55
+    }
+   ],
+   "fichasAncho": 360,
+   "subsY": 1440
   },
   {
-   "tipo": "app",
+   "tipo": "dato",
    "frases": [
     1,
     1
    ],
    "tag": "AUTÓNOMOS",
-   "titulo": "Lo sabe **hoy**",
+   "antetitulo": "A pagar el día 20",
+   "valor": 5963.53,
+   "decimales": 2,
+   "sufijo": "€",
+   "cuerpo": 168,
+   "tarjeta": {
+    "x": 490,
+    "top": 730,
+    "escala": 0.68,
+    "giro": 3,
+    "alto": 980
+   },
    "planos": [
     {
      "clip": "inicio",
      "foco": [
       0.5,
-      0.3
+      0.2
      ],
-     "zoom": 1.14,
-     "peso": 1,
+     "zoom": 1.06,
      "desde": {
       "marca": "a",
-      "mas": 0.2
+      "mas": 0.3
      }
     }
    ],
-   "rotulos": [
+   "fichas": [
     {
-     "texto": "Próximo plazo: 20 de octubre",
-     "en": 0.3,
-     "y": 1150,
-     "lado": "izq"
+     "texto": "Plazo",
+     "detalle": "20 de octubre",
+     "en": 0.55
+    },
+    {
+     "texto": "Faltan",
+     "detalle": "8 días",
+     "en": 0.3
     }
-   ]
+   ],
+   "fichasAncho": 360,
+   "subsY": 1440
   },
   {
-   "tipo": "app",
+   "tipo": "dato",
    "frases": [
     2,
     2
    ],
    "tag": "AUTÓNOMOS",
-   "titulo": "Finanzas · **Impuestos**",
+   "antetitulo": "A pagar el día 20",
+   "valor": 5963.53,
+   "decimales": 2,
+   "sufijo": "€",
+   "cuerpo": 168,
+   "tarjeta": {
+    "x": 490,
+    "top": 730,
+    "escala": 0.68,
+    "giro": 3,
+    "alto": 980
+   },
    "planos": [
     {
      "clip": "imp",
-     "desde": 0.2,
      "foco": [
-      0.6,
-      0.24
+      0.5,
+      0.2
      ],
-     "zoom": 1.2,
-     "peso": 1
+     "zoom": 1.06,
+     "desde": 0.2
     }
    ],
-   "rotulos": []
+   "fichas": [
+    {
+     "texto": "Plazo",
+     "detalle": "20 de octubre",
+     "en": 0.55
+    },
+    {
+     "texto": "Faltan",
+     "detalle": "8 días",
+     "en": 0.3
+    },
+    {
+     "texto": "Se mira en",
+     "detalle": "Impuestos",
+     "en": 0.35
+    }
+   ],
+   "fichasAncho": 360,
+   "subsY": 1440
   },
   {
-   "tipo": "app",
+   "tipo": "dato",
    "frases": [
     3,
     3
    ],
    "tag": "AUTÓNOMOS",
-   "titulo": "El total del **trimestre**",
+   "antetitulo": "El total del trimestre",
+   "valor": 5963.53,
+   "decimales": 2,
+   "sufijo": "€",
+   "cuerpo": 168,
+   "tarjeta": {
+    "x": 490,
+    "top": 730,
+    "escala": 0.68,
+    "giro": 3,
+    "alto": 980
+   },
    "planos": [
     {
      "clip": "imp",
      "foco": [
-      0.45,
-      0.59
+      0.5,
+      0.56
      ],
-     "zoom": 1.25,
-     "peso": 1,
-     "desde": 0.4
+     "zoom": 1.06,
+     "desde": 1.2
     }
    ],
-   "rotulos": [
+   "fichas": [
     {
-     "texto": "# €",
-     "en": 0.3,
-     "y": 620,
-     "lado": "der",
-     "cuenta": {
-      "hasta": 5963.53,
-      "dec": 2
-     }
+     "texto": "Plazo",
+     "detalle": "20 de octubre",
+     "en": 0.55
+    },
+    {
+     "texto": "Faltan",
+     "detalle": "8 días",
+     "en": 0.3
+    },
+    {
+     "texto": "Se mira en",
+     "detalle": "Impuestos",
+     "en": 0.35
     }
-   ]
+   ],
+   "fichasAncho": 360,
+   "subsY": 1440
   },
   {
-   "tipo": "app",
+   "tipo": "dato",
    "frases": [
     4,
     4
    ],
    "tag": "AUTÓNOMOS",
-   "titulo": "IVA · **modelo 303**",
+   "antetitulo": "El desglose",
+   "valor": 5963.53,
+   "decimales": 2,
+   "sufijo": "€",
+   "cuerpo": 168,
+   "tarjeta": {
+    "x": 490,
+    "top": 730,
+    "escala": 0.68,
+    "giro": 3,
+    "alto": 980
+   },
    "planos": [
     {
      "clip": "imp",
@@ -140,108 +224,228 @@
       0.5,
       0.22
      ],
-     "zoom": 1.2,
-     "peso": 1,
+     "zoom": 1.06,
      "desde": {
       "marca": "m303",
       "mas": 0.8
      }
     }
    ],
-   "rotulos": [
+   "fichas": [
     {
-     "texto": "3.093,93 € de IVA",
-     "en": 0.3,
-     "y": 1160,
-     "lado": "izq"
+     "texto": "IVA · modelo 303",
+     "valor": 3093.93,
+     "decimales": 2,
+     "sufijo": "€",
+     "color": "#2F7FE0",
+     "en": 0.3
     }
-   ]
+   ],
+   "barra": [
+    {
+     "pct": 51.9,
+     "color": "#2F7FE0",
+     "en": 0.3
+    }
+   ],
+   "fichasAncho": 360,
+   "subsY": 1440
   },
   {
-   "tipo": "app",
+   "tipo": "dato",
    "frases": [
     5,
     5
    ],
    "tag": "AUTÓNOMOS",
-   "titulo": "IRPF · **modelo 130**",
+   "antetitulo": "El desglose",
+   "valor": 5963.53,
+   "decimales": 2,
+   "sufijo": "€",
+   "cuerpo": 168,
+   "tarjeta": {
+    "x": 490,
+    "top": 730,
+    "escala": 0.68,
+    "giro": 3,
+    "alto": 980
+   },
    "planos": [
     {
      "clip": "imp",
      "foco": [
       0.5,
-      0.45
+      0.42
      ],
-     "zoom": 1.2,
-     "peso": 1,
+     "zoom": 1.06,
      "desde": {
       "marca": "m130",
       "mas": 0.5
      }
     }
    ],
-   "rotulos": [
+   "fichas": [
     {
-     "texto": "2.869,60 € de IRPF",
-     "en": 0.3,
-     "y": 600,
-     "lado": "der"
+     "texto": "IVA · modelo 303",
+     "valor": 3093.93,
+     "decimales": 2,
+     "sufijo": "€",
+     "color": "#2F7FE0",
+     "en": 0.3
+    },
+    {
+     "texto": "IRPF · modelo 130",
+     "valor": 2869.6,
+     "decimales": 2,
+     "sufijo": "€",
+     "color": "#F2A93B",
+     "en": 0.3
     }
-   ]
+   ],
+   "barra": [
+    {
+     "pct": 51.9,
+     "color": "#2F7FE0",
+     "en": 0.3
+    },
+    {
+     "pct": 48.1,
+     "color": "#F2A93B",
+     "en": 0.3
+    }
+   ],
+   "fichasAncho": 360,
+   "subsY": 1440
   },
   {
-   "tipo": "app",
+   "tipo": "dato",
    "frases": [
     6,
     6
    ],
    "tag": "AUTÓNOMOS",
-   "titulo": "Cuánto te **falta**",
+   "antetitulo": "Te falta por apartar",
+   "valor": 5963.53,
+   "decimales": 2,
+   "sufijo": "€",
+   "cuerpo": 168,
+   "tarjeta": {
+    "x": 490,
+    "top": 730,
+    "escala": 0.68,
+    "giro": 3,
+    "alto": 980
+   },
    "planos": [
     {
      "clip": "imp",
      "foco": [
       0.5,
-      0.72
+      0.62
      ],
-     "zoom": 1.22,
-     "peso": 1,
+     "zoom": 1.06,
      "desde": 1.5
     }
    ],
-   "rotulos": [
+   "fichas": [
     {
-     "texto": "Lo que llevas apartado",
-     "en": 0.25,
-     "y": 1180,
-     "lado": "izq"
+     "texto": "IVA · modelo 303",
+     "valor": 3093.93,
+     "decimales": 2,
+     "sufijo": "€",
+     "color": "#2F7FE0",
+     "en": 0.3
+    },
+    {
+     "texto": "IRPF · modelo 130",
+     "valor": 2869.6,
+     "decimales": 2,
+     "sufijo": "€",
+     "color": "#F2A93B",
+     "en": 0.3
     }
-   ]
+   ],
+   "barra": [
+    {
+     "pct": 51.9,
+     "color": "#2F7FE0",
+     "en": 0.3
+    },
+    {
+     "pct": 48.1,
+     "color": "#F2A93B",
+     "en": 0.3
+    }
+   ],
+   "color": "#FF6B6B",
+   "fichasAncho": 360,
+   "subsY": 1440
   },
   {
-   "tipo": "app",
+   "tipo": "dato",
    "frases": [
     7,
     7
    ],
    "tag": "AUTÓNOMOS",
-   "titulo": "Sin **sustos**",
+   "antetitulo": "Sin sustos",
+   "valor": 5963.53,
+   "decimales": 2,
+   "sufijo": "€",
+   "cuerpo": 168,
+   "tarjeta": {
+    "x": 490,
+    "top": 730,
+    "escala": 0.68,
+    "giro": 3,
+    "alto": 980
+   },
    "planos": [
     {
      "clip": "inicio",
      "foco": [
       0.5,
-      0.45
+      0.3
      ],
-     "zoom": 1.12,
-     "peso": 1,
+     "zoom": 1.06,
      "desde": {
       "marca": "a",
       "mas": 1.5
      }
     }
    ],
-   "rotulos": []
+   "fichas": [
+    {
+     "texto": "IVA · modelo 303",
+     "valor": 3093.93,
+     "decimales": 2,
+     "sufijo": "€",
+     "color": "#2F7FE0",
+     "en": 0.3
+    },
+    {
+     "texto": "IRPF · modelo 130",
+     "valor": 2869.6,
+     "decimales": 2,
+     "sufijo": "€",
+     "color": "#F2A93B",
+     "en": 0.3
+    }
+   ],
+   "barra": [
+    {
+     "pct": 51.9,
+     "color": "#2F7FE0",
+     "en": 0.3
+    },
+    {
+     "pct": 48.1,
+     "color": "#F2A93B",
+     "en": 0.3
+    }
+   ],
+   "fichasAncho": 360,
+   "subsY": 1440
   },
   {
    "tipo": "cierre",
@@ -253,5 +457,6 @@
    "linea1": "Guárdalo para el **día 20**",
    "pie": "Cuenta de ejemplo · cálculos orientativos"
   }
- ]
+ ],
+ "formato": "F2 La cifra"
 }
