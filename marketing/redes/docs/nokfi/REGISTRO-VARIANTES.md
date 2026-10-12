@@ -29,7 +29,7 @@ iban a montar como F1 con retoques; Mario vio x002 y pidió variedad real (lecci
 | Formato | Estado |
 |---|---|
 | F1 Recorrido | **construido y aprobado** (x001) |
-| F2 La cifra | pendiente (hay apertura de cifra y contador; falta la composición tipográfica con el producto en tarjeta) |
+| F2 La cifra | **construido** (escenas `dato` con `tarjeta`, `fichas` y `barra`); usado en x002, **pendiente del visto bueno de Mario** |
 | F3 El mito | pendiente |
 | F4 Paso a paso | pendiente |
 | F5 Antes / ahora | pendiente |

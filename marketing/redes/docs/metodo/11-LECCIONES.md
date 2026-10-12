@@ -18,7 +18,7 @@
 
 | # | Qué se notó | Causa | Regla | Dónde vive |
 |---|---|---|---|---|
-| V1 | «Un corte raro o pausa» al final de una frase (x002, 00:03 y 00:16) | El locutor dijo dos líneas **de corrido**, sin pausa, y el cortador metía un silencio de 0,3 s en medio de la frase | Donde no hay silencio real entre dos líneas (menos de 0,10 s), **no se corta ni se añade pausa**: se dejan pegadas, como sonaron | `partir_audio.py` (avisa: «sin pausa antes de la frase N») |
+| V1 | «Un corte raro o pausa» al final de una frase (x002, 00:03 y 00:16) | El cortador se fiaba de la marca de tiempo del reconocedor, que acaba la palabra antes de tiempo: cortaba la última sílaba («vein-») y metía un silencio de 0,3 s. Pasa sobre todo cuando el locutor enlaza dos líneas | Donde no hay silencio real entre dos líneas (menos de 0,10 s), **no se corta ni se añade pausa**: se dejan pegadas, como sonaron | `partir_audio.py` (avisa: «sin pausa antes de la frase N») |
 | V2 | Finales de palabra comidos («veinte», «tres») | El recorte a −45 dB quitaba las sílabas finales suaves | El final de frase se busca por energía a −52 dB y se dejan 90 ms de cola; cada trozo entra y sale con fundido | `partir_audio.py` |
 | V3 | El volumen sube y baja a mitad de frase | El normalizador automático de ffmpeg cambia la ganancia sobre la marcha (hasta 6 dB medidos) | **Una sola ganancia fija** por vídeo, medida antes; nunca normalización dinámica | `editor.mjs` |
 | V4 | Faltan pausas después de los dos puntos | El locutor no siempre para tras «:» | Tras «:» tiene que haber al menos 0,15 s; si no, se abre una pausa de 0,24 s en el punto más silencioso | `partir_audio.py` (avisa: «pausa abierta tras :») |
