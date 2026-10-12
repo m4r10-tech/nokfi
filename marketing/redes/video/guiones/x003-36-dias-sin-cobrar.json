@@ -3,263 +3,322 @@
  "carpeta": "003-36-dias-sin-cobrar",
  "titulo": "36 días sin pagarme una factura",
  "ritmo": "medio",
- "transicion": "lateral",
+ "transicion": "empuje",
  "musica": "1-chill-lofi-theme.mp3",
- "variantes": "A resultado primero · B caso · C producto ya en acción · D lateral · E medio · F rótulos con cifras",
+ "variantes": "F7 El caso · gancho: resultado primero · velocidad media",
  "texto": "Quién te debe dinero, cuánto y desde cuándo. Y recordatorios automáticos a los 7, 30 y 60 días, en tu nombre. Pruébalo gratis 14 días en nokfi.app\n\nCuenta de ejemplo con datos ficticios.\n\nEnvíaselo a quien odia reclamar facturas 👇\n\n#autonomos #facturas #impagos #cobros #emprendedores",
  "subtitulos": {},
  "escenas": [
   {
-   "tipo": "app",
+   "tipo": "caso",
    "frases": [
     0,
     0
    ],
    "tag": "AUTÓNOMOS",
-   "titulo": "**36 días** sin cobrar",
+   "dia": "DÍA 36",
+   "tarjeta": {
+    "x": 130,
+    "top": 560,
+    "escala": 1.08,
+    "giro": 0,
+    "alto": 740
+   },
+   "avisos": [
+    {
+     "titulo": "Transportes López",
+     "detalle": "Factura vencida hace 36 días",
+     "color": "#FF5A5F",
+     "icono": "!",
+     "en": 0.15
+    }
+   ],
    "planos": [
     {
      "clip": "cobros",
-     "foco": [
-      0.5,
-      0.5
-     ],
-     "zoom": 1.22,
-     "peso": 1,
      "desde": {
       "marca": "lista",
       "mas": 0.4
      },
-     "quieta": true
+     "foco": [
+      0.5,
+      0.5
+     ],
+     "zoom": 1.0
     }
    ],
-   "rotulos": [
-    {
-     "texto": "Vencida hace 36 días",
-     "en": 0.25,
-     "y": 620,
-     "lado": "der"
-    }
-   ]
+   "desenfoque": true,
+   "avisosY": 600
   },
   {
-   "tipo": "app",
+   "tipo": "caso",
    "frases": [
     1,
     1
    ],
    "tag": "AUTÓNOMOS",
-   "titulo": "Casi **2.300 €**",
+   "dia": "DÍA 36",
+   "tarjeta": {
+    "x": 130,
+    "top": 560,
+    "escala": 1.08,
+    "giro": 0,
+    "alto": 740
+   },
+   "avisos": [
+    {
+     "titulo": "Transportes López",
+     "detalle": "Factura vencida hace 36 días",
+     "color": "#FF5A5F",
+     "icono": "!",
+     "en": 0.15
+    },
+    {
+     "titulo": "2.286,90 € sin cobrar",
+     "color": "#FF5A5F",
+     "icono": "€",
+     "en": 0.15
+    }
+   ],
    "planos": [
     {
      "clip": "cobros",
-     "foco": [
-      0.6,
-      0.52
-     ],
-     "zoom": 1.25,
-     "peso": 1,
      "desde": {
       "marca": "lista",
       "mas": 2.5
-     }
+     },
+     "foco": [
+      0.5,
+      0.5
+     ],
+     "zoom": 1.0
     }
    ],
-   "rotulos": [
-    {
-     "texto": "# €",
-     "en": 0.2,
-     "y": 610,
-     "lado": "der",
-     "cuenta": {
-      "hasta": 2286.9,
-      "dec": 2
-     }
-    }
-   ]
+   "desenfoque": true,
+   "avisosY": 600
   },
   {
-   "tipo": "app",
+   "tipo": "caso",
    "frases": [
     2,
     2
    ],
    "tag": "AUTÓNOMOS",
-   "titulo": "Quién, cuánto y **desde cuándo**",
+   "dia": "DÍA 36",
+   "tarjeta": {
+    "x": 130,
+    "top": 560,
+    "escala": 1.08,
+    "giro": 0,
+    "alto": 740
+   },
+   "avisos": [],
    "planos": [
     {
      "clip": "cobros",
+     "desde": {
+      "marca": "lista",
+      "mas": 0.6
+     },
      "foco": [
       0.5,
-      0.4
+      0.47
      ],
-     "zoom": 1.12,
-     "peso": 1,
-     "desde": {
-      "marca": "a",
-      "mas": 0.3
-     }
+     "zoom": 1.0
     }
    ],
-   "rotulos": []
+   "titulo": "Lo veo en **Cobros**"
   },
   {
-   "tipo": "app",
+   "tipo": "caso",
    "frases": [
     3,
     3
    ],
    "tag": "AUTÓNOMOS",
-   "titulo": "Lo que te **deben**",
+   "dia": "DÍA 36",
+   "tarjeta": {
+    "x": 130,
+    "top": 560,
+    "escala": 1.08,
+    "giro": 0,
+    "alto": 740
+   },
+   "avisos": [],
    "planos": [
     {
      "clip": "cobros",
+     "desde": {
+      "marca": "a",
+      "mas": 0.5
+     },
      "foco": [
       0.5,
       0.42
      ],
-     "zoom": 1.25,
-     "peso": 1,
-     "desde": {
-      "marca": "a",
-      "mas": 1.6
-     }
+     "zoom": 1.0
     }
    ],
-   "rotulos": [
-    {
-     "texto": "4.948,90 € pendientes",
-     "en": 0.2,
-     "y": 620,
-     "lado": "izq"
-    },
-    {
-     "texto": "3.448,50 € vencidos",
-     "en": 0.6,
-     "y": 1150,
-     "lado": "der"
-    }
-   ]
+   "titulo": "Casi **5.000 €** pendientes"
   },
   {
-   "tipo": "app",
+   "tipo": "caso",
    "frases": [
     4,
     4
    ],
    "tag": "AUTÓNOMOS",
-   "titulo": "Recordatorio **automático**",
+   "dia": "HOY",
+   "tarjeta": {
+    "x": 130,
+    "top": 560,
+    "escala": 1.08,
+    "giro": 0,
+    "alto": 740
+   },
+   "avisos": [],
    "planos": [
     {
      "clip": "cobros",
-     "foco": [
-      0.4,
-      0.42
-     ],
-     "zoom": 1.2,
-     "peso": 1,
      "desde": {
       "marca": "auto",
       "mas": 0.0
-     }
+     },
+     "foco": [
+      0.5,
+      0.42
+     ],
+     "zoom": 1.0
     }
    ],
-   "rotulos": []
+   "titulo": "Recordatorio **automático**"
   },
   {
-   "tipo": "app",
+   "tipo": "caso",
    "frases": [
     5,
     5
    ],
    "tag": "AUTÓNOMOS",
-   "titulo": "Le escribe **por ti**",
+   "dia": "DÍA 7",
+   "tarjeta": {
+    "x": 130,
+    "top": 560,
+    "escala": 1.08,
+    "giro": 0,
+    "alto": 740
+   },
+   "avisos": [
+    {
+     "titulo": "Recordatorio amable",
+     "detalle": "Enviado a los 7 días",
+     "color": "#22B07D",
+     "en": 0.35
+    }
+   ],
    "planos": [
     {
      "clip": "cobros",
-     "foco": [
-      0.5,
-      0.48
-     ],
-     "zoom": 1.2,
-     "peso": 1,
      "desde": {
       "marca": "auto2",
       "mas": 0.2
-     }
+     },
+     "foco": [
+      0.5,
+      0.42
+     ],
+     "zoom": 1.0
     }
    ],
-   "rotulos": [
-    {
-     "texto": "7 días · amable",
-     "en": 0.3,
-     "y": 620,
-     "lado": "der"
-    }
-   ]
+   "desenfoque": true,
+   "avisosY": 600
   },
   {
-   "tipo": "app",
+   "tipo": "caso",
    "frases": [
     6,
     6
    ],
    "tag": "AUTÓNOMOS",
-   "titulo": "Le escribe **por ti**",
+   "dia": "DÍAS 30 Y 60",
+   "tarjeta": {
+    "x": 130,
+    "top": 560,
+    "escala": 1.08,
+    "giro": 0,
+    "alto": 740
+   },
+   "avisos": [
+    {
+     "titulo": "Recordatorio firme",
+     "detalle": "A los 30 días",
+     "color": "#F2A93B",
+     "en": 0.1
+    },
+    {
+     "titulo": "Recordatorio formal",
+     "detalle": "A los 60 días",
+     "color": "#FF5A5F",
+     "en": 0.55
+    }
+   ],
    "planos": [
     {
      "clip": "cobros",
-     "foco": [
-      0.5,
-      0.5
-     ],
-     "zoom": 1.2,
-     "peso": 1,
      "desde": {
       "marca": "auto2",
       "mas": 2.2
-     }
+     },
+     "foco": [
+      0.5,
+      0.42
+     ],
+     "zoom": 1.0
     }
    ],
-   "rotulos": [
-    {
-     "texto": "30 días · firme",
-     "en": 0.15,
-     "y": 620,
-     "lado": "der"
-    },
-    {
-     "texto": "60 días · formal",
-     "en": 0.55,
-     "y": 1150,
-     "lado": "izq"
-    }
-   ]
+   "desenfoque": true,
+   "avisosY": 600
   },
   {
-   "tipo": "app",
+   "tipo": "caso",
    "frases": [
     7,
     7
    ],
    "tag": "AUTÓNOMOS",
-   "titulo": "En tu **nombre**",
+   "dia": "SIEMPRE",
+   "tarjeta": {
+    "x": 130,
+    "top": 560,
+    "escala": 1.08,
+    "giro": 0,
+    "alto": 740
+   },
+   "avisos": [
+    {
+     "titulo": "En tu nombre",
+     "detalle": "La respuesta llega a tu correo",
+     "color": "#2F7FE0",
+     "icono": "✉",
+     "en": 0.2
+    }
+   ],
    "planos": [
     {
      "clip": "cobros",
+     "desde": {
+      "marca": "auto2",
+      "mas": 4.0
+     },
      "foco": [
       0.5,
-      0.6
+      0.42
      ],
-     "zoom": 1.12,
-     "peso": 1,
-     "desde": {
-      "marca": "lista",
-      "mas": 4.0
-     }
+     "zoom": 1.0
     }
    ],
-   "rotulos": []
+   "desenfoque": true,
+   "avisosY": 600
   },
   {
    "tipo": "cierre",
@@ -269,7 +328,8 @@
    ],
    "tag": "NOKFI",
    "linea1": "Envíaselo a quien odia **reclamar**",
-   "pie": "Cuenta de ejemplo · cálculos orientativos"
+   "pie": "Cuenta de ejemplo con datos ficticios"
   }
- ]
+ ],
+ "formato": "F7 El caso"
 }

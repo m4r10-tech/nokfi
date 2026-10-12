@@ -76,7 +76,9 @@ function camara(el, plano, t, e, dx, dy, op, giro, esc = 1, blur = 0) {
     el.style.display = 'block';
     el.style.transformOrigin = '0 0';
     el.style.transform = `translate(${T.x - 160 + dx}px, ${T.top - 430 + dy + Math.sin(t * 0.9) * 4}px) rotate(${(T.giro || 0) + giro}deg) scale(${s0 * esc})`;
-    el.style.opacity = op; el.style.filter = blur ? `blur(${blur}px)` : 'none';
+    const kE = D.escenas.indexOf(e), antD = D.escenas[kE - 1]?.desenfoque && D.escenas[kE - 1]?.tarjeta, uE = t - e.ini;
+    const des = e.desenfoque ? (antD ? 1 : ease(uE / 0.35)) : (antD ? 1 - ease(uE / 0.4) : 0);
+    el.style.opacity = op; el.style.filter = (blur || des) ? `blur(${blur + des * 10}px) brightness(${1 - des * 0.5})` : 'none';
     return;
   }
   img.style.transform = 'none'; img.style.height = '100%'; el.style.height = '1647px';
@@ -219,6 +221,21 @@ window.pinta = async (t) => {
     h += `<div style="left:96px;top:880px;width:860px;font-weight:800;font-size:96px;line-height:1.05;letter-spacing:-2px;opacity:${clamp(y * 2) * (1 - sale)};transform:translateY(${(1 - y) * 70}px)">${e.titulo}</div>`;
     h += `<div style="left:96px;top:${880 + (e.lineas || 2) * 104 + 40}px;height:10px;border-radius:5px;background:#fff;width:${out((u - 0.4) / 0.5) * 260}px;opacity:${1 - sale}"></div>`;
     full.style.opacity = 1;
+  } else if (e.tipo === 'caso') {
+    // Formato F7 «El caso»: la historia se cuenta con avisos que caen sobre el producto (desenfocado mientras se leen).
+    const antC = D.escenas[k - 1]?.tipo === 'caso', sigC = D.escenas[k + 1]?.tipo === 'caso', antes = antC ? D.escenas[k - 1] : null;
+    const fin = sigC ? 1 : 1 - ease((u - (dur - 0.25)) / 0.22);
+    const xd = antes?.dia === e.dia ? 1 : muelle((u + (antC ? 0 : 0.3)) / 0.5);
+    h += `<div style="left:96px;top:250px;display:flex;align-items:center;gap:16px;opacity:${fin}"><span style="font-weight:800;font-size:26px;letter-spacing:3px;padding:9px 20px;border-radius:999px;background:${acento}22;color:${acento};border:2px solid ${acento}66">${e.tag}</span><span style="font-weight:800;font-size:30px;letter-spacing:2px;padding:9px 20px;border-radius:999px;background:#fff;color:#0B1526;opacity:${clamp(xd * 2)};transform:scale(${0.7 + 0.3 * xd})">${e.dia || ''}</span></div>`;
+    if (e.titulo) h += `<div style="left:96px;top:322px;width:888px;font-weight:800;font-size:58px;line-height:1.1;letter-spacing:-1px;opacity:${fin}">${palabras(e.titulo).map((w, i) => { const x = antes?.titulo === e.titulo ? 1 : muelle((u - 0.06 - i * 0.055) / 0.5); return `<span style="display:inline-block;white-space:pre;opacity:${clamp(x * 2)};transform:translateY(${(1 - x) * 40}px)">${w.replace('ACENTO', acento)} </span>`; }).join('')}</div>`;
+    let y = e.avisosY || 560;
+    (e.avisos || []).forEach((a, i) => {
+      const vieja = (antes?.avisos || []).some(g => g.titulo === a.titulo), ta = (a.en || 0) * dur, x = vieja ? 1 : muelle((u - ta) / 0.55);
+      const col = a.color || acento;
+      h += `<div style="left:120px;top:${y}px;width:840px;padding:26px 30px;border-radius:30px;background:rgba(255,255,255,.96);color:#0B1526;box-shadow:0 26px 70px rgba(0,0,0,.6);display:flex;gap:22px;align-items:center;opacity:${clamp(x * 2.5) * fin};transform:translateY(${(1 - x) * -70}px) scale(${0.9 + 0.1 * x})"><div style="flex:none;width:76px;height:76px;border-radius:20px;background:${col};display:flex;align-items:center;justify-content:center">${a.icono ? `<span style="font-size:40px;color:#fff;font-weight:800">${a.icono}</span>` : LOGO(54)}</div><div><div style="font-weight:800;font-size:38px;line-height:1.12">${a.titulo}</div>${a.detalle ? `<div style="font-weight:600;font-size:30px;color:#4B5B73;margin-top:6px">${a.detalle}</div>` : ''}</div></div>`;
+      y += a.detalle ? 190 : 150;
+    });
+    full.style.opacity = 1;
   } else if (e.tipo === 'mito') {
     // Formato F3 «El mito»: la creencia entre comillas a pantalla completa; en `tacha` (0-1) una línea la tacha y cae el sello.
     const rojo = '#FF5A5F', tt = (e.tacha ?? 0.5) * dur, x0 = muelle((u + 0.3) / 0.5), tach = out((u - tt) / 0.28), sel = muelle((u - tt - 0.12) / 0.45), ver = muelle((u - tt - 0.5) / 0.55);
@@ -338,7 +355,7 @@ window.pinta = async (t) => {
 
   // ── Subtítulos: trozo actual, con la palabra que suena resaltada ──
   const c = D.subs.find(x => t >= x.ini - 0.04 && t < x.fin + 0.08);
-  $('subs').style.top = (e.tipo === 'app' ? 1368 : e.tipo === 'dato' ? (e.subsY || 1400) : e.tipo === 'duo' ? (e.subsY || 1440) : e.tipo === 'paso' ? (e.subsY || 1436) : e.tipo === 'prueba' ? (e.subsY || 1440) : e.tipo === 'mito' ? 1420 : e.tipo === 'pregunta' ? 1420 : e.tipo === 'titulo' ? 1380 : 1390) + 'px';
+  $('subs').style.top = (e.tipo === 'app' ? 1368 : e.tipo === 'dato' ? (e.subsY || 1400) : e.tipo === 'duo' ? (e.subsY || 1440) : e.tipo === 'paso' ? (e.subsY || 1436) : e.tipo === 'prueba' ? (e.subsY || 1440) : e.tipo === 'mito' ? 1420 : e.tipo === 'caso' ? (e.subsY || 1440) : e.tipo === 'pregunta' ? 1420 : e.tipo === 'titulo' ? 1380 : 1390) + 'px';
   $('subs').innerHTML = c ? `<p style="transform:scale(${0.92 + 0.08 * out((t - c.ini + 0.04) / 0.14)})">${c.pal.map(w => {
     const dicha = t >= w.ini, activa = t >= w.ini && t < w.fin;
     return `<span style="color:${dicha ? '#fff' : 'rgba(255,255,255,.45)'};background:${activa ? '#1456A2' : 'transparent'}">${w.txt}</span>`;
