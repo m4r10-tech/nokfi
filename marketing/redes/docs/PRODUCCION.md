@@ -6,6 +6,26 @@
 >
 > Estado de cada vídeo: [`ESTADO.md`](ESTADO.md) (lo genera `video/herramientas/estado.py`).
 
+## 0. El flujo en una página (acordado el 2026-10-12)
+
+```
+ A. EXISTENCIAS                        B. FABRICACIÓN                  C. ENTREGA
+ ┌──────────────────────────┐          ┌─────────────────────┐         ┌──────────────────────────┐
+ │ Grabaciones de TODA la   │          │ Guion (gancho real) │         │ salida/PARA-SUBIR/       │
+ │ app, a 1080 de ancho     │─────────▶│ + voz + grabaciones │────────▶│ vídeo + texto listos     │
+ │ Lotes de voz de Mario    │          │ = edición premium   │         │ para arrastrar a TikTok  │
+ │ (ElevenLabs, plan de     │          │ → control de calidad│         │ (o modo viaje, §8)       │
+ │ uso comercial)           │          └─────────────────────┘         └──────────────────────────┘
+ └──────────────────────────┘
+```
+
+- **Primero existencias, luego vídeos.** Se acumulan muchas grabaciones de la app y muchos
+  lotes de voz; con eso en la despensa, montar un vídeo es rápido y no depende de nadie.
+- **Edición de primera**: realista y con mucha animación, como un encargo caro (§7).
+- **Mario sube a mano** arrastrando desde `salida/PARA-SUBIR/`. Buffer automático solo como
+  «modo viaje», cuando él lo diga (§8).
+- **Nunca más ráfagas**: TikTok penalizó la cuenta por publicar muchos vídeos seguidos (§8).
+
 ## 1. Principios
 
 1. **Lotes pequeños y cerrados.** Se trabaja en lotes de 8 vídeos. Un lote no empieza hasta
@@ -18,7 +38,8 @@
 4. **Cada cifra que se dice se ve en pantalla** y sale de la app o de una respuesta real de
    la API. Los cálculos son orientativos y así se dice en el texto de la publicación.
 5. **Todo vídeo lleva voz.** Nunca solo música.
-6. **Todo gratis** salvo decisión expresa de Mario (la voz de ElevenLabs lo es).
+6. **Gratis por defecto.** La única herramienta de pago es la voz: ElevenLabs, con el plan
+   de Mario que permite uso publicitario.
 7. **El ordenador manda sobre la prisa.** Un proceso pesado cada vez, a dos núcleos y por
    debajo de 70 °C (ver §9).
 
@@ -27,9 +48,10 @@
 | Tarea | Quién |
 |---|---|
 | Guiones, grabación de la app, tarjetas, montaje, revisión técnica | Claude |
-| Locución: pegar el texto del lote en ElevenLabs y dejar el audio | Mario |
+| Locución: pegar el texto del lote en ElevenLabs y dejar el audio (cuantos más lotes en reserva, mejor) | Mario |
 | Visto bueno de cada lote | Mario |
-| Programar y publicar en Buffer / TikTok | Mario |
+| Subir a TikTok arrastrando desde `salida/PARA-SUBIR/` | Mario |
+| Modo viaje (Buffer automático), solo cuando Mario lo pide | Claude |
 | Anotar estadísticas y decidir qué formatos se repiten | Mario, con Claude |
 
 ## 3. Carpetas
@@ -59,6 +81,25 @@ marketing/redes/
 
 Nombres: `vNNN-tema-en-minusculas`. El número no se reutiliza aunque un vídeo se descarte.
 Un archivo nuevo va a su carpeta; si no encaja en ninguna, se crea la carpeta antes que el archivo.
+
+## 3b. Existencias: grabaciones y voz
+
+**Biblioteca de grabaciones** (`salida/video/_biblio/`, índice en `video/guiones/_biblio.json`).
+Objetivo: tener grabado **cada apartado de la app**, con varias tomas por pantalla (entrada,
+acción principal, resultado, detalle), para poder montar sin volver a grabar.
+
+| Zona | Apartados que hay que cubrir |
+|---|---|
+| Negocio | Inicio · Finanzas (impuestos, cobros, previsión de caja, gastos fijos) · Libro y lectura de facturas · Emitir factura · Calendario fiscal · Diagnóstico · Exportar a PDF/Excel · Ajustes |
+| Web pública | Portada · calculadoras (IVA, retención, cuota de autónomos, coste de un empleado, precio por hora) · validador de NIF · calendario · precios |
+| Desarrolladores | Claves · Playground · webhooks · plantillas de n8n · uso y cuota · documentación |
+
+Hoy hay 42 planos; el inventario de lo que falta se hace antes de grabar la siguiente tanda.
+Cada plano nuevo: 1080 px de ancho, cuenta de ejemplo, sin datos reales, sin pantallas a medio
+cargar.
+
+**Reserva de voz** (`salida/lotes-voz/`). Textos por lotes de menos de 2.400 caracteres;
+Mario los locuta cuando puede y deja `lote-NN.mp3`. Un lote repartido no se rehace.
 
 ## 4. El proceso, paso a paso
 
@@ -101,7 +142,7 @@ cd marketing/redes/salida && python3 -m http.server 8765 --bind 127.0.0.1
 
 ## 5. Norma del guion
 
-**Estructura (15-30 s; hasta 40 s solo en tutoriales)**
+**Estructura (25-45 s: guion algo más largo que en las primeras tandas, a petición de Mario)**
 
 | Tiempo | Qué | Regla |
 |---|---|---|
@@ -111,16 +152,12 @@ cd marketing/redes/salida && python3 -m http.server 8765 --bind 127.0.0.1
 | final | Recompensa | La cifra, el resultado o el «ajá» |
 | últimos 2-3 s | Cierre | Llamada a compartir o comentar + nokfi.app |
 
-**Frases**: 5-6 por vídeo, de 14 palabras como mucho, en el tono de contárselo a un amigo.
+**Frases**: 7-10 por vídeo, de 14 palabras como mucho, en el tono de contárselo a un amigo.
+Más largo no es más lento: cada frase añade un dato o un paso, nunca relleno.
 El cierre enlaza con el gancho para que el vídeo aguante en bucle.
 
-**Ganchos**: emoción o curiosidad + recompensa concreta, con las palabras del público.
-
-- Dolor o plazo: «¿Cuánto te toca pagar el **20 de octubre**?» · «El error que hace que el IVA te pille sin dinero.»
-- Demostración: «Le hago una **foto** a la factura y…» · «Esto antes me llevaba una tarde. Ahora, 10 segundos.»
-- Curiosidad: «Nadie te cuenta esto del **modelo 130**.» · «Si tienes un negocio, guárdate este vídeo.»
-- Desarrolladores: «Valida un NIF español con una sola llamada.» · «Tu agente de IA no sabe facturar. Con esto, sí.»
-- Contraste: «Excel está bien… hasta que llega el trimestre.»
+**Ganchos y métodos**: ver [`GANCHOS.md`](GANCHOS.md) (tipos que funcionan, con fuentes, y
+plantillas adaptadas a Nokfi). Todo guion nuevo declara qué tipo de gancho usa.
 
 **Prohibido**: «ahorra X €», promesas fiscales, asesoramiento personalizado, funciones que
 no existen, la dirección `localhost` del Playground, cualquier dato de un cliente real.
@@ -137,7 +174,8 @@ ficticios», una llamada a compartir y 3-5 etiquetas.
 
 ## 6. Norma de la voz
 
-- **Voz**: la de ElevenLabs que elige Mario, siempre la misma y con los mismos ajustes.
+- **Voz**: la de ElevenLabs que elige Mario (plan con licencia de uso publicitario), siempre
+  la misma y con los mismos ajustes.
   Castellano de España. Los motores de voz locales (Supertonic, Piper) se retiraron.
 - **Cómo se locuta**: un archivo por lote (`lote-NN.txt` entero, sin cambiar el orden ni
   saltarse líneas). Nombre del audio: `lote-NN.mp3`, en Descargas o en `salida/lotes-voz/`.
@@ -151,8 +189,8 @@ ficticios», una llamada a compartir y 3-5 etiquetas.
   - `|` marca una pausa breve; tras «:» va una pausa muy corta.
 - **Etiqueta de IA**: toda publicación con voz sintética se marca como contenido generado
   con IA en TikTok.
-- **Licencia**: antes de publicar, comprobar que el plan de ElevenLabs con el que se generó
-  el audio permite uso comercial.
+- **Reserva de voz**: se preparan lotes por adelantado (`lotes_voz.py`), de forma que
+  siempre haya voz grabada para varias semanas de vídeos.
 
 ## 7. Control de calidad
 
@@ -164,7 +202,8 @@ pasa: se corrige el texto del lote y se vuelve a locutar esa parte.
 **Imagen (lista, sobre el vídeo y su hoja de contactos)**
 
 - [ ] El gancho está en pantalla antes de 0,5 s y se entiende sin sonido.
-- [ ] La app sale a tamaño real, a todo el ancho, sin recortes (nunca `zoomInicial`).
+- [ ] La app se ve nítida y completa (sin recortes ni ampliaciones borrosas) y con aire a los lados.
+- [ ] La letra no es grande de más y respeta el margen lateral.
 - [ ] Ningún subtítulo tapa la cifra importante.
 - [ ] Lo que se dice coincide con lo que se ve en ese momento.
 - [ ] Nada fuera de la zona segura (arriba 220 px, abajo 400 px, derecha 140 px).
@@ -173,25 +212,59 @@ pasa: se corrige el texto del lote y se vuelve a locutar esa parte.
 - [ ] Cierre con llamada a la acción y nokfi.app.
 - [ ] Duración entre 12 y 40 s; la música no tapa la voz.
 
-**Estilo fijo**: 1080×1920 a 30 fps · gancho en Jakarta ExtraBold blanco sobre azul Nokfi
-`#1456A2` · subtítulos de 1-3 palabras con la palabra dicha sobre azul y la palabra clave en
-amarillo · plano estable, sin zoom continuo · toques visibles · cortes secos · barra de
-progreso opcional (`"barra": true`).
+**Estilo (cambia el 2026-10-12; lo anterior queda superado)**
+
+- 1080×1920 a 30 fps. Grabaciones de la app a **1080 px de ancho reales** (móvil 360×780 a 3×
+  → 1080×2340), nunca ampliadas ni borrosas.
+- **Aire a los lados**: ni la app ni los textos van pegados al borde. Margen lateral mínimo
+  de 64 px para el texto; la app puede ir enmarcada (esquinas redondeadas, sombra, fondo de
+  marca) en vez de ocupar toda la pantalla.
+- **Letra contenida**: subtítulos y titulares más pequeños que en las primeras tandas
+  (subtítulos ≈ 52-58 px en vez de 82; gancho en dos líneas como mucho). Que se lea bien
+  en el móvil sin gritar.
+- **Edición realista y muy animada**, nivel de encargo profesional:
+  - acercamientos suaves hacia donde ocurre la acción (el toque, la cifra) y vuelta;
+  - cursor/toque visible con estela; resaltado de la cifra o el campo del que se habla;
+  - cifras que cuentan hasta su valor; rótulos y flechas que entran con muelle;
+  - transiciones con sentido (deslizar, fundir con desenfoque), nunca de plantilla;
+  - subtítulos cinéticos sincronizados palabra a palabra;
+  - efectos de sonido discretos (toque, deslizamiento, acierto) bajo la voz;
+  - marco de dispositivo y fondos de marca cuando el plano lo pida.
+- **Herramienta de edición**: por decidir con un vídeo piloto. Candidatas: Remotion (vídeo
+  programado en React; gratis para particulares y empresas de hasta 3 personas) o seguir con
+  el montador propio (HTML/CSS + ffmpeg) ampliado. Criterio: calidad del resultado y que el
+  portátil lo aguante (§9).
 
 **Música**: solo las pistas de `docs/musica-licencias.md` (Pixabay, uso comercial, sin Content ID).
 
 ## 8. Publicación
 
-- La lleva **Mario en Buffer**. No hay ningún proceso automático que programe, rellene o
-  retire publicaciones (no queda ningún cron desde el 2026-10-12).
-- Ritmo acordado: una publicación cada 4-5 horas (**09:00, 13:30, 18:00, 22:30**).
-- Buffer gratis admite **10 publicaciones programadas** y su API **250 peticiones al día**;
-  por eso no se consulta en bucle.
-- `buffer/buffer.mjs` queda como herramienta manual, solo si Mario lo pide:
-  `revisar` (comprueba un archivo de publicaciones), `subir` (sube los vídeos al servidor) y
-  `programar`. `rellenar` no hace nada mientras exista `salida/_control/COLA-EN-PAUSA`.
-- Para subir a mano: el vídeo está en `salida/<id>/video.mp4`, la portada en
-  `01-portada.png` y el texto en el campo `texto` del guion.
+**Modo normal: a mano.** Cada vídeo aprobado se deja en `salida/PARA-SUBIR/NNN-tema/` con
+`video.mp4`, `portada.png` y `texto.txt` (texto de la publicación y etiquetas). Mario lo
+arrastra a TikTok y, al subirlo, mueve la carpeta a `salida/SUBIDOS/`. Así la carpeta
+`PARA-SUBIR` es siempre la cola real, en orden.
+
+**Ritmo.** TikTok **penalizó la cuenta** por publicar muchos vídeos seguidos (11-12 de
+octubre: cinco en cuatro minutos y luego uno por hora; los siguientes se quedaron en 0-10
+visualizaciones). Reglas desde entonces:
+
+- **Nunca menos de 4-5 horas entre dos vídeos.** Huecos: 09:00, 13:30, 18:00 y 22:30.
+- Recomendación de Claude mientras la cuenta se recupera: 1-2 vídeos al día y ninguno durante
+  48 horas tras un parón de visitas (ver fuentes en `GANCHOS.md` §4). La decisión es de Mario.
+- Constancia antes que volumen: mejor uno diario siempre que cuatro un día y ninguno después.
+
+**Modo viaje: Buffer automático.** Solo cuando Mario lo pida («lanza el modo viaje»), si se
+va de viaje o no puede subir:
+
+1. Se toma `PARA-SUBIR` en orden, **a partir del último vídeo publicado**.
+2. Se programan en Buffer respetando los huecos de 4-5 horas (como mucho 10 a la vez, que es
+   el tope del plan gratuito; el resto entra según se vacían).
+3. Límite de la API: 250 peticiones al día. Nada de consultas en bucle: una pasada al
+   programar y, como mucho, una al día para reponer.
+4. Al volver, Mario dice «para el modo viaje» y se retira lo que quede programado.
+
+Estado actual: `salida/_control/COLA-EN-PAUSA` existe, así que `buffer.mjs rellenar` no hace
+nada. El modo viaje está descrito pero **aún no está construido** con este diseño.
 
 ## 9. Cuidado del equipo
 
@@ -221,3 +294,5 @@ Ya aprendido:
 - Producir 49 vídeos antes de aprobar la voz obligó a rehacerlos todos: de ahí el principio 1.
 - Automatizar la cola contra Buffer cada 10 minutos agotó el cupo diario de la API y dejó
   la cola sin poder corregirse: de ahí el principio 2 y el §8.
+- Publicar en ráfaga hundió el alcance de la cuenta (0-10 visualizaciones por vídeo): de ahí
+  el ritmo del §8.
