@@ -12,7 +12,7 @@
  * Salida: salida/PARA-SUBIR/<carpeta>/ video.mp4 · portada.png · texto.txt · titulo.txt
  *
  * Guion: { id, carpeta, titulo, texto, musica, ritmo: "sereno|medio|vivo", transicion: "lateral|vertical|empuje|corte",
- *   escenas: [ { tipo: "titulo|cifra|pregunta|seccion|app|dato|duo|paso|cierre", frases: [desde, hasta],
+ *   escenas: [ { tipo: "titulo|cifra|pregunta|seccion|app|dato|duo|paso|mito|prueba|cierre", frases: [desde, hasta],
  *   tag, titulo, planos: [ { clip, desde: s | { marca, mas }, peso, foco: [x, y] (0-1 en la pantalla de la app), zoom, suelta } ],
  *   rotulos: [ { texto, en: 0-1 (momento dentro de la escena), y, lado, plano (se va con ese plano) } ], … } ] }
  * Se para solo si el equipo pasa de 72 °C y sigue al bajar de 62 °C.

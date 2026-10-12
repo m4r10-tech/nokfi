@@ -3,224 +3,198 @@
  "carpeta": "006-210-euros-no-son-tuyos",
  "titulo": "De esta factura, 210 € no son tuyos",
  "ritmo": "medio",
- "transicion": "lateral",
+ "transicion": "empuje",
  "musica": "3-music-promotion.mp3",
- "variantes": "A llevar la contraria · B mito roto · C cifra gigante · D lateral · E medio · F rótulos",
+ "variantes": "F3 El mito · gancho: llevar la contraria · velocidad media",
  "texto": "El IVA que cobras no es tuyo: lo guardas para Hacienda. Calculadora de IVA gratis, para añadirlo o quitarlo, en nokfi.app\n\nCálculo orientativo.\n\nEnvíaselo a ese amigo que se gasta el IVA 😬\n\n#autonomos #iva #facturas #hacienda #emprendedores",
  "subtitulos": {},
  "escenas": [
   {
-   "tipo": "cifra",
+   "tipo": "mito",
    "frases": [
     0,
     0
    ],
    "tag": "CALCULADORA",
-   "antetitulo": "De esta factura",
-   "valor": 210,
-   "decimales": 0,
-   "sufijo": "€",
-   "cuerpo": 300,
-   "titulo": "**no son tuyos**",
-   "fonoTop": 1100,
-   "fonoEscala": 0.94,
-   "planos": [
-    {
-     "clip": "iva1000",
-     "foco": [
-      0.5,
-      0.3
-     ],
-     "zoom": 1.0,
-     "peso": 1,
-     "desde": {
-      "marca": "r",
-      "mas": 0.5
-     },
-     "quieta": true
-    }
-   ]
+   "frase": "Cobro 1.210 €.\nSon míos.",
+   "tacha": 0.42,
+   "sello": "NO",
+   "verdad": "**210 €** no son tuyos"
   },
   {
-   "tipo": "app",
+   "tipo": "prueba",
    "frases": [
     1,
     1
    ],
    "tag": "CALCULADORA",
+   "mito": "«Cobro 1.210 €. Son míos.»",
    "titulo": "Facturas 1.000, cobras **1.210**",
-   "planos": [
-    {
-     "clip": "iva1000",
-     "foco": [
-      0.4,
-      0.4
-     ],
-     "zoom": 1.25,
-     "peso": 1,
-     "desde": {
-      "marca": "r",
-      "mas": 0.2
-     }
-    }
-   ],
-   "rotulos": [
-    {
-     "texto": "Total con IVA",
-     "en": 0.3,
-     "y": 620,
-     "lado": "der"
-    }
-   ]
-  },
-  {
-   "tipo": "app",
-   "frases": [
-    2,
-    2
-   ],
-   "tag": "CALCULADORA",
-   "titulo": "210 € son **IVA**",
+   "tarjeta": {
+    "x": 130,
+    "top": 520,
+    "escala": 1.08,
+    "giro": 0,
+    "alto": 770
+   },
    "planos": [
     {
      "clip": "iva1000",
      "foco": [
       0.5,
-      0.47
+      0.38
      ],
-     "zoom": 1.25,
-     "peso": 1,
+     "zoom": 1.0,
+     "desde": {
+      "marca": "r",
+      "mas": 0.2
+     }
+    }
+   ]
+  },
+  {
+   "tipo": "prueba",
+   "frases": [
+    2,
+    2
+   ],
+   "tag": "CALCULADORA",
+   "mito": "«Cobro 1.210 €. Son míos.»",
+   "titulo": "210 € son **IVA**",
+   "tarjeta": {
+    "x": 130,
+    "top": 520,
+    "escala": 1.08,
+    "giro": 0,
+    "alto": 770
+   },
+   "planos": [
+    {
+     "clip": "iva1000",
+     "foco": [
+      0.5,
+      0.42
+     ],
+     "zoom": 1.0,
      "desde": {
       "marca": "r",
       "mas": 2.4
      }
     }
    ],
-   "rotulos": [
-    {
-     "texto": "Los guardas para Hacienda",
-     "en": 0.3,
-     "y": 1170,
-     "lado": "izq"
-    }
-   ]
+   "veredicto": {
+    "texto": "Los guardas para Hacienda",
+    "en": 0.35,
+    "y": 1270
+   }
   },
   {
-   "tipo": "app",
+   "tipo": "prueba",
    "frases": [
     3,
     3
    ],
    "tag": "CALCULADORA",
-   "titulo": "Calculadora **gratis**",
+   "mito": "«Cobro 1.210 €. Son míos.»",
+   "titulo": "La calculadora es **gratis**",
+   "tarjeta": {
+    "x": 130,
+    "top": 520,
+    "escala": 1.08,
+    "giro": 0,
+    "alto": 770
+   },
    "planos": [
     {
      "clip": "calcs",
+     "foco": [
+      0.5,
+      0.25
+     ],
+     "zoom": 1.0,
      "desde": {
       "marca": "a",
       "mas": 0.3
-     },
-     "foco": [
-      0.5,
-      0.3
-     ],
-     "zoom": 1.14,
-     "peso": 1
+     }
     }
-   ],
-   "rotulos": []
+   ]
   },
   {
-   "tipo": "app",
+   "tipo": "prueba",
    "frases": [
     4,
     4
    ],
    "tag": "CALCULADORA",
-   "titulo": "Añadir o **quitar** IVA",
+   "mito": "«Cobro 1.210 €. Son míos.»",
+   "titulo": "Añadir o **quitar** el IVA",
+   "tarjeta": {
+    "x": 130,
+    "top": 520,
+    "escala": 1.08,
+    "giro": 0,
+    "alto": 770
+   },
    "planos": [
     {
      "clip": "ivaquitar",
      "foco": [
       0.5,
-      0.3
+      0.42
      ],
-     "zoom": 1.18,
-     "peso": 1,
-     "desde": {
-      "marca": "calc",
-      "mas": 0.3
-     }
-    },
-    {
-     "clip": "ivaquitar",
-     "foco": [
-      0.5,
-      0.4
-     ],
-     "zoom": 1.22,
-     "peso": 1.2,
+     "zoom": 1.0,
      "desde": {
       "marca": "r",
       "mas": 0.3
      }
     }
-   ],
-   "rotulos": []
+   ]
   },
   {
-   "tipo": "app",
+   "tipo": "mito",
    "frases": [
     5,
     5
    ],
    "tag": "AUTÓNOMOS",
-   "titulo": "No te lo **gastes**",
-   "planos": [
-    {
-     "clip": "imp",
-     "foco": [
-      0.5,
-      0.22
-     ],
-     "zoom": 1.2,
-     "peso": 1,
-     "desde": {
-      "marca": "m303",
-      "mas": 0.8
-     }
-    }
-   ],
-   "rotulos": [
-    {
-     "texto": "Se paga cada trimestre",
-     "en": 0.3,
-     "y": 1160,
-     "lado": "izq"
-    }
-   ]
+   "antetitulo": "EL ERROR",
+   "frase": "Ya lo pagaré\ncuando toque.",
+   "tacha": 0.45,
+   "sello": "ERROR",
+   "cuerpo": 96
   },
   {
-   "tipo": "app",
+   "tipo": "prueba",
    "frases": [
     6,
     6
    ],
-   "tag": "AUTÓNOMOS",
-   "titulo": "Apártalo al **cobrar**",
+   "tag": "CALCULADORA",
+   "mito": "«Ya lo pagaré cuando toque.»",
+   "titulo": "Apártalo el día que **cobras**",
+   "tarjeta": {
+    "x": 130,
+    "top": 520,
+    "escala": 1.08,
+    "giro": 0,
+    "alto": 770
+   },
    "planos": [
     {
      "clip": "imp",
      "foco": [
       0.5,
-      0.72
+      0.66
      ],
-     "zoom": 1.2,
-     "peso": 1,
+     "zoom": 1.0,
      "desde": 1.5
     }
    ],
-   "rotulos": []
+   "veredicto": {
+    "texto": "Apartado desde el primer día",
+    "en": 0.35,
+    "y": 1270
+   }
   },
   {
    "tipo": "cierre",
@@ -230,7 +204,8 @@
    ],
    "tag": "NOKFI",
    "linea1": "Envíaselo a quien se **gasta el IVA**",
-   "pie": "Cuenta de ejemplo · cálculos orientativos"
+   "pie": "Cálculo orientativo"
   }
- ]
+ ],
+ "formato": "F3 El mito"
 }
