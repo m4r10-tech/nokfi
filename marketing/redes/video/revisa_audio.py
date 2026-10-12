@@ -21,6 +21,7 @@ from faster_whisper import WhisperModel
 
 HERE = os.path.dirname(os.path.abspath(__file__))
 UMBRAL, RITMO_MIN, RITMO_MAX, HUECO_MAX = 0.80, 10.5, 22.0, 0.60
+RITMO_MIN_EXTERNA = 7.0
 
 U = 'cero uno dos tres cuatro cinco seis siete ocho nueve diez once doce trece catorce quince dieciseis diecisiete dieciocho diecinueve veinte'.split()
 D = {30: 'treinta', 40: 'cuarenta', 50: 'cincuenta', 60: 'sesenta', 70: 'setenta', 80: 'ochenta', 90: 'noventa'}
@@ -40,12 +41,12 @@ def numero(n):
 
 def normal(s):
     s = s.lower().replace('|', ' ').replace('%', ' por ciento ').replace('€', ' euros ')
-    s = re.sub(r'(\d)\.(\d{3})\b', r'\1\2', s)                 # 1.200 → 1200
+    s = re.sub(r'(\d)\s?\.(\d{3})\b', r'\1\2', s)              # 1.200 y «1 .200» (así lo escribe a veces Whisper) → 1200
     s = re.sub(r'(\d+),(\d+)', lambda m: f'{numero(int(m[1]))} con {numero(int(m[2]))}', s)
     s = re.sub(r'\d+', lambda m: ' ' + numero(int(m[0])) + ' ' if len(m[0]) < 7 else m[0], s)
     s = ''.join(c for c in unicodedata.normalize('NFD', s) if unicodedata.category(c) != 'Mn')
     for de, a in [(r'\bi erre pe efe\b', 'irpf'), (r'\beme ce pe\b', 'mcp'), (r'\bene ocho ene\b', 'n8n'), (r'\bn ocho n\b', 'n8n'), (r'\bwebjuks?\b', 'webhooks'),
-                  (r'\bwebhook\b', 'webhooks'), (r'\biba\b', 'iva'), (r'\b(nokia|noxfi\w*|nofi|nokfy|nocfi|nokfi\w*|noqfi|nokphi|nocfy)\b', 'nokfi'),
+                  (r'\bwebhook\b', 'webhooks'), (r'\biba\b', 'iva'), (r'\b(nokia|noxfi\w*|nofi|nokfy|nocfi|nokfi\w*|noctfi|noqfi|nokphi|nocfy)\b', 'nokfi'),
                   (r'\bpe de efe\b', 'pdf'), (r'\bveintiun\b', 'veintiuno'), (r'\bun\b', 'uno'), (r'\buna\b', 'uno')]:
         s = re.sub(de, a, s)
     return re.sub(r'[^a-z0-9ñ ]+', ' ', s).split()
@@ -59,6 +60,8 @@ def revisar(modelo, vid):
     # palabras se reparten entre las frases por su marca de tiempo.
     segs, _ = modelo.transcribe(pcm, language='es', beam_size=3, word_timestamps=True, condition_on_previous_text=False)
     PAL = [((w.start + w.end) / 2, w.word.strip()) for sg in segs for w in (sg.words or [])]
+    # La voz locutada fuera (ElevenLabs) es más pausada que la sintética: se le admite un ritmo menor.
+    ritmo_min = RITMO_MIN_EXTERNA if os.path.exists(f'{HERE}/voz/{vid}.externa.json') else RITMO_MIN
     frases = []
     for i, (texto, (a, b)) in enumerate(zip(t['frases'], t['tiempos'])):
         trozo = pcm[int(a * 16000):int(b * 16000)]
@@ -75,7 +78,7 @@ def revisar(modelo, vid):
             run = run + 1 if x else 0
             hueco = max(hueco, run)
         hueco *= 0.02
-        ok = parecido >= UMBRAL and RITMO_MIN <= ritmo <= RITMO_MAX and hueco <= HUECO_MAX
+        ok = parecido >= UMBRAL and ritmo_min <= ritmo <= RITMO_MAX and hueco <= HUECO_MAX
         frases.append({'n': i + 1, 'texto': texto, 'oido': oido, 'parecido': round(parecido, 2), 'ritmo': round(ritmo, 1), 'hueco': round(hueco, 2), 'ok': bool(ok)})
     json.dump({'id': vid, 'ok': all(f['ok'] for f in frases), 'frases': frases}, open(f'{HERE}/voz/{vid}.revision.json', 'w'), ensure_ascii=False, indent=1)
     mal = [str(f['n']) for f in frases if not f['ok']]

@@ -23,7 +23,8 @@ from revisa_audio import normal  # misma normalización que la revisión de audi
 
 HERE = os.path.dirname(os.path.abspath(__file__))
 LOTES = os.path.join(HERE, '../salida/lotes-voz/lotes.json')
-SR, PAUSA = 44100, 0.35
+SR, PAUSA = 44100, 0.30
+TEMPO = 1.06  # un punto más ágil que el original, sin cambiar el tono
 
 
 def silencio_central(pcm, a, b):
@@ -86,7 +87,7 @@ def main():
         partes, tiempos, t = [], [], 0.0
         for fr in fs:
             p = os.path.join(tmp, f"{vi}-{fr['f']}.wav")
-            subprocess.run(['ffmpeg', '-v', 'error', '-y', '-ss', f"{fr['a']:.3f}", '-to', f"{fr['b']:.3f}", '-i', audio, '-af', f'{recorte},areverse,{recorte},areverse', '-ar', str(SR), '-ac', '1', p], check=True)
+            subprocess.run(['ffmpeg', '-v', 'error', '-y', '-ss', f"{fr['a']:.3f}", '-to', f"{fr['b']:.3f}", '-i', audio, '-af', f'{recorte},areverse,{recorte},areverse,atempo={TEMPO}', '-ar', str(SR), '-ac', '1', p], check=True)
             d = float(subprocess.run(['ffprobe', '-v', 'error', '-show_entries', 'format=duration', '-of', 'csv=p=0', p], capture_output=True, text=True).stdout or 0)
             tiempos.append([round(t, 3), round(t + d, 3)]); t += d + PAUSA
             partes.append(p)

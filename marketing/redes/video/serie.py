@@ -72,9 +72,16 @@ def hueco():
 def producir(vid, encolar=True):
     gp = os.path.join(V, 'guiones', vid + '.json')
     g = json.load(open(gp))
-    if encolar and os.path.exists(COLA) and any(x['pieza'] == vid for x in json.load(open(COLA))): return   # ya hecho (reanudación tras un corte)
+    externa = os.path.exists(os.path.join(V, 'voz', vid + '.externa.json'))   # voz locutada fuera y cortada con partir_audio.py
+    if encolar and '--rehacer' not in sys.argv and os.path.exists(COLA) and any(x['pieza'] == vid for x in json.load(open(COLA))): return   # ya hecho (reanudación tras un corte)
     estado = 'OK'
-    if not g.get('sinVoz'):
+    if externa:
+        r = run(os.path.join(V, '.asr/bin/python'), os.path.join(V, 'revisa_audio.py'), vid).splitlines()[-1]
+        if not r.endswith(' OK'):
+            estado = 'DUDOSO'
+            rev = json.load(open(os.path.join(V, 'voz', vid + '.revision.json')))
+            log(f'{vid} DUDOSO audio externo → ' + ' | '.join(f"{f['n']}:{f['parecido']}/{f['ritmo']}/{f['hueco']} «{f['oido'][:60]}»" for f in rev['frases'] if not f['ok']))
+    elif not g.get('sinVoz'):
         out = run('node', 'marketing/redes/video/voz.mjs', gp, '--forzar')
         if '✓' not in out: return log(f'{vid} FALLO voz: {out[-200:]}')
         for intento in range(4):
@@ -108,7 +115,6 @@ def producir(vid, encolar=True):
                              'ia': not g.get('sinVoz', False), 'texto': g['texto'], 'aprobado': True})
                 json.dump(cola, open(COLA, 'w'), ensure_ascii=False, indent=1)
         log(f"{vid} OK · {dur:.1f} s · cola {[x['cuando'] for x in cola if x['pieza'] == vid][0]}")
-        subprocess.Popen(['bash', os.path.join(RAIZ, 'marketing/redes/rellenar-cola.sh')])
     else:
         log(f'{vid} OK · {dur:.1f} s')
 
@@ -119,4 +125,4 @@ if __name__ == '__main__':
         try: producir(vid, '--sin-cola' not in sys.argv)
         except Exception as e: log(f'{vid} ERROR {e}')
         time.sleep(30); enfriar(60)   # descanso entre vídeos
-    if '--sin-cola' not in sys.argv: log('cola: ' + run('node', 'marketing/redes/buffer.mjs', 'rellenar').replace('\n', ' · ')[-300:])
+    # Buffer lo gestiona el usuario a mano (2026-10-12): aquí ya no se programa nada (ver PRODUCCION.md §8).

@@ -210,7 +210,8 @@ async function main() {
         console.log(`↩ ${x.pub.id}: retirada de Buffer (vuelve cuando haya hueco)`);
       } catch (e) { console.log(`– ${x.pub.id}: no se pudo retirar (${e.message.slice(0, 80)})`); }
     }
-    const conectados = await canales();
+    // Buffer limita a 250 peticiones al día: no se pregunta por los canales si no hay nada que enviar.
+    const conectados = primeras.some(x => !x.pub.buffer_id) ? await canales() : [];
     let enviadas = 0;
     for (const x of primeras) {
       if (x.pub.buffer_id) continue;
