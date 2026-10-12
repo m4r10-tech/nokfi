@@ -115,17 +115,17 @@
    "titulo": "Calculadora **gratis**",
    "planos": [
     {
-     "clip": "iva1000",
+     "clip": "calcs",
+     "desde": {
+      "marca": "a",
+      "mas": 0.3
+     },
      "foco": [
       0.5,
-      0.25
+      0.3
      ],
-     "zoom": 1.15,
-     "peso": 1,
-     "desde": {
-      "marca": "calc",
-      "mas": 0.1
-     }
+     "zoom": 1.14,
+     "peso": 1
     }
    ],
    "rotulos": []

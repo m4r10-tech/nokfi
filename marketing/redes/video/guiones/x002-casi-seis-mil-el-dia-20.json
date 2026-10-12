@@ -80,17 +80,14 @@
    "titulo": "Finanzas · **Impuestos**",
    "planos": [
     {
-     "clip": "impnav",
+     "clip": "imp",
+     "desde": 0.2,
      "foco": [
-      0.5,
-      0.6
+      0.6,
+      0.24
      ],
-     "zoom": 1.08,
-     "peso": 1,
-     "desde": {
-      "marca": "inicio",
-      "mas": 0.1
-     }
+     "zoom": 1.2,
+     "peso": 1
     }
    ],
    "rotulos": []

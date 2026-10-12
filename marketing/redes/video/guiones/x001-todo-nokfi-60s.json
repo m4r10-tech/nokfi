@@ -5,44 +5,486 @@
  "gancho_tipo": "resultado primero + promesa de tiempo",
  "texto": "Todo Nokfi en 60 segundos: facturas, impuestos, cobros y caja para autónomos y negocios, y una API para quien automatiza. Pruébalo gratis 14 días en nokfi.app\n\nCuenta de ejemplo con datos ficticios. Cálculos orientativos.\n\nEnvíaselo a ese amigo autónomo que va justo el día 20 👇\n\n#autonomos #facturas #impuestos #emprendedores #n8n",
  "musica": "3-music-promotion.mp3",
- "subtitulos": { "0": "Todo lo que ofrece Nokfi en 60 segundos.", "5": "Te enseña tu caja a 90 días, antes de decidir.", "11": "14 días gratis en nokfi.app" },
+ "subtitulos": {
+  "0": "Todo lo que ofrece Nokfi en 60 segundos.",
+  "5": "Te enseña tu caja a 90 días, antes de decidir.",
+  "11": "14 días gratis en nokfi.app"
+ },
  "escenas": [
-  { "tipo": "titulo", "frases": [0, 0], "tag": "NOKFI", "titulo": "Todo lo que ofrece **Nokfi** en **60 segundos**", "fonoTop": 1040, "fonoEscala": 0.94,
-    "planos": [ { "clip": "imp", "desde": 0.3, "foco": [0.5, 0.3], "zoom": 1.0, "quieta": true } ] },
-  { "tipo": "seccion", "frases": [1, 1], "tag": "AUTÓNOMOS", "numero": "01", "titulo": "Autónomos y negocios", "lineas": 2 },
-  { "tipo": "app", "frases": [2, 2], "tag": "AUTÓNOMOS", "titulo": "Tus facturas, **apuntadas solas**",
-    "planos": [ { "clip": "libro", "desde": { "marca": "a", "mas": 0.2 }, "foco": [0.3, 0.2], "zoom": 1.22, "peso": 1 },
-                { "clip": "libro", "desde": { "marca": "lista", "mas": 0.3 }, "foco": [0.5, 0.45], "zoom": 1.12, "peso": 1.1 } ],
-    "rotulos": [ { "texto": "Foto o PDF", "en": 0.16, "y": 560, "lado": "der" }, { "texto": "La IA la apunta", "en": 0.6, "y": 1180, "lado": "izq" } ] },
-  { "tipo": "app", "frases": [3, 3], "tag": "AUTÓNOMOS", "titulo": "Cuánto pagas **este trimestre**",
-    "planos": [ { "clip": "imp", "desde": 0.4, "foco": [0.45, 0.59], "zoom": 1.25, "peso": 1.1 },
-                { "clip": "imp", "desde": { "marca": "m303", "mas": 0.8 }, "foco": [0.5, 0.3], "zoom": 1.12, "peso": 1 } ],
-    "rotulos": [ { "texto": "IVA · modelo 303", "en": 0.56, "y": 600, "lado": "izq" }, { "texto": "IRPF · modelo 130", "en": 0.74, "y": 1130, "lado": "der" } ] },
-  { "tipo": "app", "frases": [4, 4], "tag": "AUTÓNOMOS", "titulo": "Quién te debe **dinero**",
-    "planos": [ { "clip": "cobros", "desde": { "marca": "a", "mas": 0.3 }, "foco": [0.72, 0.42], "zoom": 1.25, "peso": 1 },
-                { "clip": "cobros", "desde": { "marca": "auto", "mas": 0.2 }, "foco": [0.4, 0.42], "zoom": 1.18, "peso": 1.1 } ],
-    "rotulos": [ { "texto": "3.448,50 € vencidos", "en": 0.14, "y": 1150, "lado": "izq" }, { "texto": "Recordatorios automáticos", "en": 0.62, "y": 590, "lado": "der" } ] },
-  { "tipo": "app", "frases": [5, 5], "tag": "AUTÓNOMOS", "titulo": "Tu caja a **90 días**",
-    "planos": [ { "clip": "prev", "desde": { "marca": "a", "mas": 0.3 }, "foco": [0.5, 0.7], "zoom": 1.24 } ],
-    "rotulos": [ { "texto": "30 · 60 · 90 días", "en": 0.3, "y": 600, "lado": "der" } ] },
-  { "tipo": "app", "frases": [6, 6], "tag": "AUTÓNOMOS", "titulo": "Plazos y **facturas**",
-    "planos": [ { "clip": "cal", "desde": { "marca": "a", "mas": 0.3 }, "foco": [0.5, 0.7], "zoom": 1.22, "peso": 1 },
-                { "clip": "facturarellena", "desde": { "marca": "nombre", "mas": -2.4 }, "foco": [0.5, 0.33], "zoom": 1.14, "peso": 1 } ],
-    "rotulos": [ { "texto": "Aviso 7 días antes", "en": 0.14, "y": 590, "lado": "der", "plano": 0 }, { "texto": "Factura con su PDF", "en": 0.62, "y": 1150, "lado": "izq" } ] },
-  { "tipo": "app", "frases": [7, 7], "tag": "CALCULADORA", "titulo": "Calculadoras **gratis**, sin cuenta",
-    "planos": [ { "clip": "iva1000", "desde": { "marca": "r", "mas": 0.2 }, "foco": [0.5, 0.42], "zoom": 1.22, "peso": 1.15 },
-                { "clip": "cuota2000_500", "desde": { "marca": "r", "mas": 0.2 }, "foco": [0.5, 0.42], "zoom": 1.2, "peso": 1 },
-                { "clip": "hora44", "desde": { "marca": "r", "mas": 0.2 }, "foco": [0.5, 0.42], "zoom": 1.2, "peso": 1 } ],
-    "rotulos": [ { "texto": "IVA", "en": 0.2, "y": 600, "lado": "der" }, { "texto": "Cuota de autónomos", "en": 0.5, "y": 1150, "lado": "izq" }, { "texto": "Precio por hora", "en": 0.78, "y": 600, "lado": "der" } ] },
-  { "tipo": "seccion", "frases": [8, 8], "tag": "API", "numero": "02", "titulo": "Si automatizas", "lineas": 1 },
-  { "tipo": "app", "frases": [9, 9], "tag": "API", "titulo": "Una **API** para tus números",
-    "planos": [ { "clip": "pgnif", "desde": { "marca": "ini", "mas": 0.3 }, "foco": [0.5, 0.52], "zoom": 1.15, "peso": 1 },
-                { "clip": "pgnif", "desde": { "marca": "r", "mas": 0.1 }, "foco": [0.5, 0.6], "zoom": 1.22, "peso": 1.2 } ],
-    "rotulos": [ { "texto": "Validar NIF", "en": 0.18, "y": 560, "lado": "izq" }, { "texto": "Calcular impuestos", "en": 0.4, "y": 690, "lado": "der" }, { "texto": "Leer facturas", "en": 0.62, "y": 1130, "lado": "izq" }, { "texto": "Emitirlas", "en": 0.8, "y": 1250, "lado": "der" } ] },
-  { "tipo": "app", "frases": [10, 10], "tag": "API", "titulo": "**MCP** y **n8n**, listos",
-    "planos": [ { "clip": "dev", "desde": { "marca": "a", "mas": 0.2 }, "foco": [0.5, 0.3], "zoom": 1.1, "peso": 1 },
-                { "clip": "plant", "desde": { "marca": "a", "mas": 0.3 }, "foco": [0.5, 0.42], "zoom": 1.2, "peso": 1.2 } ],
-    "rotulos": [ { "texto": "Servidor MCP para tu agente", "en": 0.12, "y": 1170, "lado": "izq" }, { "texto": "Nodo de n8n + plantillas", "en": 0.6, "y": 590, "lado": "der" } ] },
-  { "tipo": "cierre", "frases": [11, 12], "tag": "NOKFI", "cambio": 12, "linea1": "**14 días** gratis", "linea2": "Envíaselo a ese amigo **autónomo**", "pie": "Cuenta de ejemplo · cálculos orientativos" }
+  {
+   "tipo": "titulo",
+   "frases": [
+    0,
+    0
+   ],
+   "tag": "NOKFI",
+   "titulo": "Todo lo que ofrece **Nokfi** en **60 segundos**",
+   "fonoTop": 1040,
+   "fonoEscala": 0.94,
+   "planos": [
+    {
+     "clip": "imp",
+     "desde": 0.3,
+     "foco": [
+      0.5,
+      0.3
+     ],
+     "zoom": 1.0,
+     "quieta": true
+    }
+   ],
+   "reloj": true
+  },
+  {
+   "tipo": "seccion",
+   "frases": [
+    1,
+    1
+   ],
+   "tag": "AUTÓNOMOS",
+   "numero": "01",
+   "titulo": "Autónomos y negocios",
+   "lineas": 2
+  },
+  {
+   "tipo": "app",
+   "frases": [
+    2,
+    2
+   ],
+   "tag": "AUTÓNOMOS",
+   "titulo": "Tus facturas, **apuntadas solas**",
+   "planos": [
+    {
+     "clip": "libro",
+     "desde": {
+      "marca": "a",
+      "mas": 0.2
+     },
+     "foco": [
+      0.3,
+      0.2
+     ],
+     "zoom": 1.22,
+     "peso": 1
+    },
+    {
+     "clip": "libro",
+     "desde": {
+      "marca": "lista",
+      "mas": 0.3
+     },
+     "foco": [
+      0.5,
+      0.45
+     ],
+     "zoom": 1.12,
+     "peso": 1.1
+    }
+   ],
+   "rotulos": [
+    {
+     "texto": "Foto o PDF",
+     "en": 0.16,
+     "y": 560,
+     "lado": "der"
+    },
+    {
+     "texto": "La IA la apunta",
+     "en": 0.6,
+     "y": 1180,
+     "lado": "izq"
+    }
+   ]
+  },
+  {
+   "tipo": "app",
+   "frases": [
+    3,
+    3
+   ],
+   "tag": "AUTÓNOMOS",
+   "titulo": "Cuánto pagas **este trimestre**",
+   "planos": [
+    {
+     "clip": "imp",
+     "desde": 0.4,
+     "foco": [
+      0.45,
+      0.59
+     ],
+     "zoom": 1.25,
+     "peso": 1.1
+    },
+    {
+     "clip": "imp",
+     "desde": {
+      "marca": "m303",
+      "mas": 0.8
+     },
+     "foco": [
+      0.5,
+      0.3
+     ],
+     "zoom": 1.12,
+     "peso": 1
+    }
+   ],
+   "rotulos": [
+    {
+     "texto": "IVA · modelo 303",
+     "en": 0.56,
+     "y": 600,
+     "lado": "izq"
+    },
+    {
+     "texto": "IRPF · modelo 130",
+     "en": 0.74,
+     "y": 1130,
+     "lado": "der"
+    }
+   ]
+  },
+  {
+   "tipo": "app",
+   "frases": [
+    4,
+    4
+   ],
+   "tag": "AUTÓNOMOS",
+   "titulo": "Quién te debe **dinero**",
+   "planos": [
+    {
+     "clip": "cobros",
+     "desde": {
+      "marca": "a",
+      "mas": 0.3
+     },
+     "foco": [
+      0.72,
+      0.42
+     ],
+     "zoom": 1.25,
+     "peso": 1
+    },
+    {
+     "clip": "cobros",
+     "desde": {
+      "marca": "auto",
+      "mas": 0.2
+     },
+     "foco": [
+      0.4,
+      0.42
+     ],
+     "zoom": 1.18,
+     "peso": 1.1
+    }
+   ],
+   "rotulos": [
+    {
+     "texto": "3.448,50 € vencidos",
+     "en": 0.14,
+     "y": 1150,
+     "lado": "izq"
+    },
+    {
+     "texto": "Recordatorios automáticos",
+     "en": 0.62,
+     "y": 590,
+     "lado": "der"
+    }
+   ]
+  },
+  {
+   "tipo": "app",
+   "frases": [
+    5,
+    5
+   ],
+   "tag": "AUTÓNOMOS",
+   "titulo": "Tu caja a **90 días**",
+   "planos": [
+    {
+     "clip": "prev",
+     "desde": {
+      "marca": "a",
+      "mas": 0.3
+     },
+     "foco": [
+      0.5,
+      0.7
+     ],
+     "zoom": 1.24
+    }
+   ],
+   "rotulos": [
+    {
+     "texto": "30 · 60 · 90 días",
+     "en": 0.3,
+     "y": 600,
+     "lado": "der"
+    }
+   ]
+  },
+  {
+   "tipo": "app",
+   "frases": [
+    6,
+    6
+   ],
+   "tag": "AUTÓNOMOS",
+   "titulo": "Plazos y **facturas**",
+   "planos": [
+    {
+     "clip": "cal",
+     "desde": {
+      "marca": "a",
+      "mas": 0.3
+     },
+     "foco": [
+      0.5,
+      0.7
+     ],
+     "zoom": 1.22,
+     "peso": 1
+    },
+    {
+     "clip": "facturarellena",
+     "desde": {
+      "marca": "nombre",
+      "mas": -2.4
+     },
+     "foco": [
+      0.5,
+      0.33
+     ],
+     "zoom": 1.14,
+     "peso": 1
+    }
+   ],
+   "rotulos": [
+    {
+     "texto": "Aviso 7 días antes",
+     "en": 0.14,
+     "y": 590,
+     "lado": "der",
+     "plano": 0
+    },
+    {
+     "texto": "Factura con su PDF",
+     "en": 0.62,
+     "y": 1150,
+     "lado": "izq"
+    }
+   ]
+  },
+  {
+   "tipo": "app",
+   "frases": [
+    7,
+    7
+   ],
+   "tag": "CALCULADORA",
+   "titulo": "Calculadoras **gratis**, sin cuenta",
+   "planos": [
+    {
+     "clip": "iva1000",
+     "desde": {
+      "marca": "r",
+      "mas": 0.2
+     },
+     "foco": [
+      0.5,
+      0.42
+     ],
+     "zoom": 1.22,
+     "peso": 1.15
+    },
+    {
+     "clip": "cuota2000_500",
+     "desde": {
+      "marca": "r",
+      "mas": 0.2
+     },
+     "foco": [
+      0.5,
+      0.42
+     ],
+     "zoom": 1.2,
+     "peso": 1
+    },
+    {
+     "clip": "hora44",
+     "desde": {
+      "marca": "r",
+      "mas": 0.2
+     },
+     "foco": [
+      0.5,
+      0.42
+     ],
+     "zoom": 1.2,
+     "peso": 1
+    }
+   ],
+   "rotulos": [
+    {
+     "texto": "IVA",
+     "en": 0.2,
+     "y": 600,
+     "lado": "der"
+    },
+    {
+     "texto": "Cuota de autónomos",
+     "en": 0.5,
+     "y": 1150,
+     "lado": "izq"
+    },
+    {
+     "texto": "Precio por hora",
+     "en": 0.78,
+     "y": 600,
+     "lado": "der"
+    }
+   ]
+  },
+  {
+   "tipo": "seccion",
+   "frases": [
+    8,
+    8
+   ],
+   "tag": "API",
+   "numero": "02",
+   "titulo": "Si automatizas",
+   "lineas": 1
+  },
+  {
+   "tipo": "app",
+   "frases": [
+    9,
+    9
+   ],
+   "tag": "API",
+   "titulo": "Una **API** para tus números",
+   "planos": [
+    {
+     "clip": "pgnif",
+     "desde": {
+      "marca": "ini",
+      "mas": 0.3
+     },
+     "foco": [
+      0.5,
+      0.52
+     ],
+     "zoom": 1.15,
+     "peso": 1
+    },
+    {
+     "clip": "pgnif",
+     "desde": {
+      "marca": "r",
+      "mas": 0.1
+     },
+     "foco": [
+      0.5,
+      0.6
+     ],
+     "zoom": 1.22,
+     "peso": 1.2
+    }
+   ],
+   "rotulos": [
+    {
+     "texto": "Validar NIF",
+     "en": 0.18,
+     "y": 560,
+     "lado": "izq"
+    },
+    {
+     "texto": "Calcular impuestos",
+     "en": 0.4,
+     "y": 690,
+     "lado": "der"
+    },
+    {
+     "texto": "Leer facturas",
+     "en": 0.62,
+     "y": 1130,
+     "lado": "izq"
+    },
+    {
+     "texto": "Emitirlas",
+     "en": 0.8,
+     "y": 1250,
+     "lado": "der"
+    }
+   ]
+  },
+  {
+   "tipo": "app",
+   "frases": [
+    10,
+    10
+   ],
+   "tag": "API",
+   "titulo": "**MCP** y **n8n**, listos",
+   "planos": [
+    {
+     "clip": "dev",
+     "desde": {
+      "marca": "a",
+      "mas": 0.2
+     },
+     "foco": [
+      0.5,
+      0.3
+     ],
+     "zoom": 1.1,
+     "peso": 1
+    },
+    {
+     "clip": "plant",
+     "desde": {
+      "marca": "a",
+      "mas": 0.3
+     },
+     "foco": [
+      0.5,
+      0.42
+     ],
+     "zoom": 1.2,
+     "peso": 1.2
+    }
+   ],
+   "rotulos": [
+    {
+     "texto": "Servidor MCP para tu agente",
+     "en": 0.12,
+     "y": 1170,
+     "lado": "izq"
+    },
+    {
+     "texto": "Nodo de n8n + plantillas",
+     "en": 0.6,
+     "y": 590,
+     "lado": "der"
+    }
+   ]
+  },
+  {
+   "tipo": "cierre",
+   "frases": [
+    11,
+    12
+   ],
+   "tag": "NOKFI",
+   "cambio": 12,
+   "linea1": "**14 días** gratis",
+   "linea2": "Envíaselo a ese amigo **autónomo**",
+   "pie": "Cuenta de ejemplo · cálculos orientativos"
+  }
  ]
 }

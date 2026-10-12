@@ -142,7 +142,9 @@ window.pinta = async (t) => {
       return `<span style="opacity:${clamp(x * 2)};transform:translateY(${(1 - x) * 46}px)">${w.replace('ACENTO', acento)} </span>`;
     }).join('');
     cab.style.opacity = 1 - ease((u - (dur - 0.22)) / 0.2);
-    $('velo').style.display = 'block'; $('velo').style.opacity = ease(u / 0.25) * (1 - ease((u - (dur - 0.22)) / 0.2));
+    // El velo no parpadea entre dos escenas de producto seguidas: solo entra tras otra cosa y solo se va antes de otra cosa.
+    const antApp = D.escenas[k - 1]?.tipo === 'app', sigApp = D.escenas[k + 1]?.tipo === 'app';
+    $('velo').style.display = 'block'; $('velo').style.opacity = (antApp ? 1 : ease(u / 0.25)) * (sigApp ? 1 : 1 - ease((u - (dur - 0.22)) / 0.2));
   } else { cab.style.display = 'none'; $('velo').style.display = 'none'; }
 
   // ── Rótulos ──
@@ -165,7 +167,8 @@ window.pinta = async (t) => {
     h += `<div style="left:96px;top:300px;font-weight:800;font-size:28px;letter-spacing:4px;padding:10px 22px;border-radius:999px;background:${acento}22;color:${acento};border:2px solid ${acento}66">${e.tag}</div>`;
     h += `<div style="left:96px;top:392px;width:888px;font-weight:800;font-size:104px;line-height:1.04;letter-spacing:-2.5px;transform:scale(${lat});transform-origin:left top">${e.titulo.replace(/\*\*(.+?)\*\*/g, `<b style="color:${acento}">$1</b>`)}</div>`;
     const ang = clamp(u / dur) * 360;
-    h += `<div style="left:756px;top:770px;width:228px;height:228px;border-radius:50%;background:conic-gradient(${acento} ${ang}deg, rgba(255,255,255,.12) 0);display:flex;align-items:center;justify-content:center;box-shadow:0 20px 50px rgba(0,0,0,.5)"><div style="width:192px;height:192px;border-radius:50%;background:#0B1526;display:flex;flex-direction:column;align-items:center;justify-content:center;font-weight:800"><span style="font-size:84px;line-height:1">${Math.max(0, 60 - Math.floor(u / dur * 3))}</span><span style="font-size:24px;letter-spacing:3px;color:#9FB3CC">SEG</span></div></div>`;
+    // Reloj de cuenta atrás: solo si el guion lo pide ("reloj": true), p. ej. «en 60 segundos».
+    if (e.reloj) h += `<div style="left:756px;top:770px;width:228px;height:228px;border-radius:50%;background:conic-gradient(${acento} ${ang}deg, rgba(255,255,255,.12) 0);display:flex;align-items:center;justify-content:center;box-shadow:0 20px 50px rgba(0,0,0,.5)"><div style="width:192px;height:192px;border-radius:50%;background:#0B1526;display:flex;flex-direction:column;align-items:center;justify-content:center;font-weight:800"><span style="font-size:84px;line-height:1">${Math.max(0, 60 - Math.floor(u / dur * 3))}</span><span style="font-size:24px;letter-spacing:3px;color:#9FB3CC">SEG</span></div></div>`;
     full.style.opacity = 1 - ease((u - (dur - 0.25)) / 0.22);
   } else if (e.tipo === 'seccion') {
     const entra = out(u / 0.4), sale = ease((u - (dur - 0.3)) / 0.28);
@@ -179,7 +182,7 @@ window.pinta = async (t) => {
   } else if (e.tipo === 'cifra') {
     // Apertura «cifra gigante que cuenta»: antetítulo, número enorme que sube y una línea debajo.
     const v = (e.valor * (0.55 + 0.45 * out(u / 0.7))).toLocaleString('es-ES', { useGrouping: 'always', minimumFractionDigits: e.decimales || 0, maximumFractionDigits: e.decimales || 0 });
-    const a1 = muelle((u + 0.3) / 0.5), a2 = muelle((u - 0.9) / 0.6), late = 1 + Math.sin(t * 2.4) * 0.012;
+    const a1 = muelle((u + 0.3) / 0.5), a2 = muelle((u - 0.12) / 0.6), late = 1 + Math.sin(t * 2.4) * 0.012;
     h += `<div style="left:96px;top:330px;font-weight:800;font-size:28px;letter-spacing:4px;padding:10px 22px;border-radius:999px;background:${acento}22;color:${acento};border:2px solid ${acento}66">${e.tag}</div>`;
     h += `<div style="left:96px;top:440px;width:888px;font-weight:600;font-size:54px;line-height:1.15;color:#C9D6E8">${e.antetitulo || ''}</div>`;
     h += `<div style="left:96px;top:600px;width:888px;font-weight:800;font-size:${e.cuerpo || 210}px;line-height:1;letter-spacing:-6px;color:${acento};transform:scale(${(0.9 + 0.1 * a1) * late});transform-origin:left center;text-shadow:0 20px 80px ${acento}66">${e.prefijo || ''}${v}<span style="font-size:.5em;letter-spacing:0;color:#fff"> ${e.sufijo || ''}</span></div>`;
