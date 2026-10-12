@@ -33,7 +33,7 @@ iban a montar como F1 con retoques; Mario vio x002 y pidió variedad real (lecci
 | F3 El mito | **construido** (escenas `mito` y `prueba`); usado en x006, **pendiente del visto bueno de Mario** |
 | F4 Paso a paso | **construido** (escenas `paso` con `pasos` en el guion y `tarjeta`); usado en x007, **pendiente del visto bueno de Mario** |
 | F5 Antes / ahora | pendiente |
-| F6 Pregunta y respuesta | pendiente (hay la tarjeta de pregunta; falta cuenta atrás y plegado) |
+| F6 Pregunta y respuesta | **construido** (escena `pregunta` con `cuenta` + escenas `prueba` con `pregunta` y `chip`); usado en x004, **pendiente del visto bueno de Mario** |
 | F7 El caso | pendiente (hay un chat en `tarjetas.mjs`, de la etapa 1) |
 | F8 Dos casos | **construido** (escenas `duo` con `casos`, `barras` y `diferencia`); usado en x005, **pendiente del visto bueno de Mario** |
 | F9 Lista rápida | pendiente |

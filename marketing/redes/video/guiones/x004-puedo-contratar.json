@@ -5,7 +5,7 @@
  "ritmo": "sereno",
  "transicion": "empuje",
  "musica": "1-chill-lofi-theme.mp3",
- "variantes": "A bucle abierto · B pregunta → respuesta · C pregunta en pantalla · D empuje · E sereno · F rótulos",
+ "variantes": "F6 Pregunta y respuesta · gancho: bucle abierto · velocidad serena",
  "texto": "Antes de contratar, mira cómo queda tu caja a 30, 60 y 90 días con ese sueldo dentro. Pruébalo gratis 14 días en nokfi.app\n\nCuenta de ejemplo con datos ficticios. Cálculos orientativos.\n\nGuárdalo para antes de firmar un contrato 📌\n\n#autonomos #pymes #contratar #tesoreria #emprendedores",
  "subtitulos": {},
  "escenas": [
@@ -24,178 +24,219 @@
     "Depende de tu caja"
    ],
    "correcta": 2,
-   "revela": 0.62
+   "revela": 0.6,
+   "cuenta": true
   },
   {
-   "tipo": "app",
+   "tipo": "prueba",
    "frases": [
     1,
     1
    ],
    "tag": "AUTÓNOMOS",
-   "titulo": "Hoy, **6.200 €** en caja",
+   "pregunta": "¿Puedes contratar?",
+   "chip": "Depende de tu caja",
+   "color": "#2F7FE0",
+   "titulo": "Hoy: **6.200 €** en caja",
+   "tarjeta": {
+    "x": 130,
+    "top": 520,
+    "escala": 1.08,
+    "giro": 0,
+    "alto": 770
+   },
    "planos": [
     {
      "clip": "prev",
-     "foco": [
-      0.3,
-      0.7
-     ],
-     "zoom": 1.24,
-     "peso": 1,
      "desde": {
       "marca": "a",
       "mas": 0.3
-     }
+     },
+     "foco": [
+      0.5,
+      0.64
+     ],
+     "zoom": 1.0
     }
-   ],
-   "rotulos": []
+   ]
   },
   {
-   "tipo": "app",
+   "tipo": "prueba",
    "frases": [
     2,
     2
    ],
    "tag": "AUTÓNOMOS",
+   "pregunta": "¿Puedes contratar?",
+   "chip": "Depende de tu caja",
+   "color": "#2F7FE0",
    "titulo": "A 30, 60 y **90 días**",
+   "tarjeta": {
+    "x": 130,
+    "top": 520,
+    "escala": 1.08,
+    "giro": 0,
+    "alto": 770
+   },
    "planos": [
     {
      "clip": "prev",
-     "foco": [
-      0.5,
-      0.75
-     ],
-     "zoom": 1.22,
-     "peso": 1,
      "desde": {
       "marca": "a",
       "mas": 3.0
-     }
+     },
+     "foco": [
+      0.5,
+      0.76
+     ],
+     "zoom": 1.0
     }
    ],
-   "rotulos": [
-    {
-     "texto": "782,18 € a 90 días",
-     "en": 0.4,
-     "y": 620,
-     "lado": "der"
-    }
-   ]
+   "veredicto": {
+    "texto": "782,18 € a 90 días",
+    "en": 0.4,
+    "y": 1270,
+    "icono": ""
+   }
   },
   {
-   "tipo": "app",
+   "tipo": "prueba",
    "frases": [
     3,
     3
    ],
    "tag": "AUTÓNOMOS",
+   "pregunta": "¿Puedes contratar?",
+   "chip": "Depende de tu caja",
+   "color": "#2F7FE0",
    "titulo": "Cobros, gastos e **impuestos**",
+   "tarjeta": {
+    "x": 130,
+    "top": 520,
+    "escala": 1.08,
+    "giro": 0,
+    "alto": 770
+   },
    "planos": [
     {
      "clip": "prev",
+     "desde": {
+      "marca": "a",
+      "mas": 5.2
+     },
      "foco": [
       0.5,
       0.9
      ],
-     "zoom": 1.12,
-     "peso": 1,
-     "desde": {
-      "marca": "a",
-      "mas": 5.2
-     }
+     "zoom": 1.0
     }
-   ],
-   "rotulos": []
+   ]
   },
   {
-   "tipo": "app",
+   "tipo": "prueba",
    "frases": [
     4,
     4
    ],
    "tag": "AUTÓNOMOS",
-   "titulo": "Pruebo un **escenario**",
+   "pregunta": "¿Puedes contratar?",
+   "chip": "Depende de tu caja",
+   "color": "#2F7FE0",
+   "titulo": "Pruebo: un sueldo de **1.800 €**",
+   "tarjeta": {
+    "x": 130,
+    "top": 520,
+    "escala": 1.08,
+    "giro": 0,
+    "alto": 770
+   },
    "planos": [
     {
      "clip": "prev",
-     "foco": [
-      0.5,
-      0.72
-     ],
-     "zoom": 1.22,
-     "peso": 1,
      "desde": {
       "marca": "esc",
       "mas": 0.0
-     }
-    }
-   ],
-   "rotulos": [
-    {
-     "texto": "Sueldo: 1.800 € al mes",
-     "en": 0.35,
-     "y": 600,
-     "lado": "der"
+     },
+     "foco": [
+      0.5,
+      0.66
+     ],
+     "zoom": 1.0
     }
    ]
   },
   {
-   "tipo": "app",
+   "tipo": "prueba",
    "frases": [
     5,
     5
    ],
    "tag": "AUTÓNOMOS",
-   "titulo": "La caja, en **rojo**",
+   "pregunta": "¿Puedes contratar?",
+   "chip": "Depende de tu caja",
+   "color": "#2F7FE0",
+   "titulo": "La caja baja de **cero**",
+   "tarjeta": {
+    "x": 130,
+    "top": 520,
+    "escala": 1.08,
+    "giro": 0,
+    "alto": 770
+   },
    "planos": [
     {
      "clip": "prev",
-     "foco": [
-      0.5,
-      0.66
-     ],
-     "zoom": 1.22,
-     "peso": 1,
      "desde": {
       "marca": "rojo",
       "mas": 0.3
-     }
+     },
+     "foco": [
+      0.5,
+      0.68
+     ],
+     "zoom": 1.0
     }
    ],
-   "rotulos": [
-    {
-     "texto": "Bajas de 0 € el 1 de diciembre",
-     "en": 0.25,
-     "y": 1180,
-     "lado": "izq"
-    }
-   ]
+   "veredicto": {
+    "texto": "En rojo el 1 de diciembre",
+    "en": 0.3,
+    "y": 1270,
+    "color": "#FF5A5F",
+    "icono": "⚠"
+   }
   },
   {
-   "tipo": "app",
+   "tipo": "prueba",
    "frases": [
     6,
     6
    ],
    "tag": "AUTÓNOMOS",
-   "titulo": "Mejor verlo **aquí**",
+   "pregunta": "¿Puedes contratar?",
+   "chip": "Depende de tu caja",
+   "color": "#2F7FE0",
+   "titulo": "Mejor verlo **antes**",
+   "tarjeta": {
+    "x": 130,
+    "top": 520,
+    "escala": 1.08,
+    "giro": 0,
+    "alto": 770
+   },
    "planos": [
     {
      "clip": "prev",
-     "foco": [
-      0.5,
-      0.75
-     ],
-     "zoom": 1.15,
-     "peso": 1,
      "desde": {
       "marca": "rojo",
       "mas": 3.0
-     }
+     },
+     "foco": [
+      0.5,
+      0.72
+     ],
+     "zoom": 1.0
     }
-   ],
-   "rotulos": []
+   ]
   },
   {
    "tipo": "cierre",
@@ -207,5 +248,6 @@
    "linea1": "Guárdalo para antes de **firmar**",
    "pie": "Cuenta de ejemplo · cálculos orientativos"
   }
- ]
+ ],
+ "formato": "F6 Pregunta y respuesta"
 }
