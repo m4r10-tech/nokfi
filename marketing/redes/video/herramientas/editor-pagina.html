@@ -1,0 +1,192 @@
+<!doctype html>
+<!-- marketing/redes/video/herramientas/editor-pagina.html — lienzo del montador (editor.mjs).
+     Todo se dibuja en función del tiempo con window.pinta(t): nada de animaciones CSS, para que cada
+     fotograma sea exacto y repetible. editor.mjs sustituye FUENTES y carga data.js (window.DATA). -->
+<meta charset="utf-8">
+<style>
+  @font-face { font-family: J; src: url('FUENTES/Jakarta-ExtraBold.ttf'); font-weight: 800; }
+  @font-face { font-family: J; src: url('FUENTES/Jakarta-SemiBold.ttf'); font-weight: 600; }
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+  html, body { width: 1080px; height: 1920px; overflow: hidden; background: #070D18; font-family: J, sans-serif; color: #fff; }
+  #bg, #bg div { position: absolute; }
+  #bg { inset: 0; background: linear-gradient(170deg, #0B1526 0%, #070D18 55%, #050912 100%); }
+  .blob { width: 900px; height: 900px; border-radius: 50%; filter: blur(120px); opacity: .55; }
+  #rej { inset: 0; background-image: linear-gradient(rgba(255,255,255,.035) 1px, transparent 1px), linear-gradient(90deg, rgba(255,255,255,.035) 1px, transparent 1px); background-size: 90px 90px; -webkit-mask-image: radial-gradient(ellipse at 50% 40%, #000 20%, transparent 75%); }
+  .fono { position: absolute; left: 160px; top: 430px; width: 760px; height: 1647px; border-radius: 64px; background: #05080F; border: 10px solid #1B2436; box-shadow: 0 50px 120px rgba(0,0,0,.65), 0 0 0 2px rgba(255,255,255,.06), 0 0 90px rgba(20,86,162,.35); overflow: hidden; will-change: transform; }
+  .fono img { width: 100%; height: 100%; display: block; object-fit: cover; }
+  .fono::after { content: ''; position: absolute; inset: 0; border-radius: 54px; box-shadow: inset 0 0 0 1px rgba(255,255,255,.08); pointer-events: none; }
+  /* Velo bajo la cabecera: cuando la cámara sube el teléfono, se pierde por detrás del título en vez de pisarlo. */
+  #velo { position: absolute; left: 0; top: 0; width: 1080px; height: 500px; background: linear-gradient(#081120 0%, #081120 78%, rgba(8,17,32,0) 100%); }
+  #cab { position: absolute; left: 96px; top: 236px; width: 844px; }
+  #tag { display: inline-block; font-weight: 800; font-size: 26px; letter-spacing: 3px; padding: 9px 20px; border-radius: 999px; }
+  #tit { margin-top: 18px; font-weight: 800; font-size: 60px; line-height: 1.1; letter-spacing: -1px; }
+  #tit span { display: inline-block; white-space: pre; }
+  #rot div { position: absolute; background: #fff; color: #0B1526; font-weight: 800; font-size: 38px; padding: 16px 26px 16px 22px; border-radius: 22px; box-shadow: 0 18px 44px rgba(0,0,0,.5); white-space: nowrap; display: flex; align-items: center; gap: 14px; }
+  #rot i { width: 18px; height: 18px; border-radius: 50%; display: block; }
+  #subs { position: absolute; left: 96px; width: 800px; top: 1368px; text-align: center; }
+  #subs p { display: inline-block; background: rgba(5,9,18,.86); border: 1px solid rgba(255,255,255,.1); border-radius: 22px; padding: 14px 22px; font-weight: 800; font-size: 54px; line-height: 1.18; box-shadow: 0 12px 30px rgba(0,0,0,.45); }
+  #subs span { display: inline-block; padding: 0 10px; border-radius: 12px; margin: 0 -3px; }
+  #full { position: absolute; inset: 0; }
+  #full > div { position: absolute; }
+  #panel { inset: 0; }
+  .marca { display: flex; align-items: center; gap: 14px; font-weight: 800; }
+</style>
+<div id="bg"><div class="blob" id="b1"></div><div class="blob" id="b2"></div><div id="rej"></div></div>
+<div class="fono" id="f1"><img id="i1"></div>
+<div class="fono" id="f0"><img id="i0"></div>
+<div id="velo"></div>
+<div id="cab"><div id="tag"></div><div id="tit"></div></div>
+<div id="rot"></div>
+<div id="full"></div>
+<div id="subs"></div>
+<script src="data.js"></script>
+<script>
+const D = window.DATA, $ = (id) => document.getElementById(id);
+const clamp = (x, a = 0, b = 1) => Math.max(a, Math.min(b, x));
+const ease = (x) => { x = clamp(x); return x * x * (3 - 2 * x); };
+const out = (x) => { x = clamp(x); return 1 - Math.pow(1 - x, 3); };
+const muelle = (x) => x <= 0 ? 0 : 1 - Math.exp(-7 * x) * Math.cos(10 * x);
+const SERIE = { 'AUTÓNOMOS': '#2F7FE0', 'CALCULADORA': '#22B07D', 'API': '#8B5CF6', 'NOKFI': '#38BDF8' };
+const LOGO = (px, color = '#fff') => `<svg width="${px}" height="${px}" viewBox="-3 8 60 60"><g transform="translate(0,64) scale(0.085,-0.085)" fill="${color}"><path d="M482 542 c-39 -31 -71 -60 -72 -64 0 -5 14 -8 30 -8 18 0 30 -5 29 -12 0 -7 -26 -87 -57 -178 -48 -137 -60 -165 -78 -168 -11 -2 -27 4 -34 13 -11 13 -8 32 19 118 17 56 31 118 31 137 -1 58 -48 100 -113 100 -65 0 -80 -23 -149 -231 -61 -183 -62 -191 -44 -204 37 -27 52 -3 113 182 59 177 59 178 89 178 41 0 42 -29 4 -139 -40 -120 -39 -149 5 -193 33 -33 39 -35 82 -30 34 4 54 12 69 30 12 14 47 102 79 196 31 94 60 171 64 171 3 0 17 -7 29 -16 12 -8 22 -11 22 -5 0 13 -38 173 -43 177 -2 2 -35 -22 -75 -54z"/></g></svg>`;
+const PLANOS = D.escenas.flatMap((e, k) => (e.planos || []).map(p => ({ ...p, esc: k })));
+const TR = 0.42;   // duración de la transición entre planos
+const src = {};
+
+async function foto(img, plano, t) {
+  const n = clamp(Math.floor((t - plano.ini) * D.fps), 0, plano.n - 1);
+  const u = `${plano.dir}/${String(n + 1).padStart(5, '0')}.jpg`;
+  if (src[img.id] !== u) { src[img.id] = u; img.src = u; try { await img.decode(); } catch (e) {} }
+}
+
+/** Transformación del teléfono: posición base de la escena + cámara hacia el foco + entrada/salida. */
+function camara(el, plano, t, e, dx, dy, op, giro) {
+  const tl = t - plano.ini, dur = plano.fin - plano.ini;
+  // Con zoom 1 la cámara no se mueve (p. ej. el teléfono que asoma en la portada).
+  const z = (plano.zoom === 1 ? 0 : 1) * ease((tl - 0.45) / 0.8) * (plano.suelta ? 1 - ease((tl - (dur - 0.55)) / 0.5) : 1);
+  const s0 = e.fonoEscala || 1, s = s0 * (1 + ((plano.zoom || 1.16) - 1) * z);
+  const [fx, fy] = plano.foco || [0.5, 0.4];
+  const top = e.fonoTop ?? 430;
+  const ox = fx * 760, oy = fy * 1647;
+  // Aire a los lados: por mucho que se acerque, el teléfono no pasa de 40 px de cada borde.
+  let tx = (540 - (160 + ox)) * z;
+  const izq = 160 + tx + ox * (1 - s), der = 160 + tx + ox + (760 - ox) * s;
+  if (der - izq > 1000) tx += 540 - (izq + der) / 2; else if (izq < 40) tx += 40 - izq; else if (der > 1040) tx -= der - 1040;
+  tx += dx;
+  const ty = ((e.focoY || 880) - (top + oy)) * z * 0.85 + dy + (top - 430);
+  const deriva = Math.sin(t * 0.9) * 5;
+  el.style.display = 'block';
+  el.style.transformOrigin = `${ox}px ${oy}px`;
+  el.style.transform = `translate(${tx}px, ${ty + deriva}px) rotate(${giro}deg) scale(${s})`;
+  el.style.opacity = op;
+}
+
+/** Palabras del título; las que van entre ** ** (aunque sean varias seguidas) salen en el color de la serie. */
+function palabras(html) {
+  let dentro = false;
+  return html.split(' ').map(w => {
+    const abre = w.startsWith('**'), cierra = /\*\*[.,:;?!]?$/.test(w);
+    if (abre) dentro = true;
+    const txt = w.replaceAll('**', ''), r = dentro ? `<b style="color:ACENTO">${txt}</b>` : txt;
+    if (cierra) dentro = false;
+    return r;
+  });
+}
+
+window.pinta = async (t) => {
+  // Fondo vivo
+  $('b1').style.cssText = `left:${-250 + Math.sin(t * 0.35) * 160}px;top:${-200 + Math.cos(t * 0.3) * 120}px;background:#1456A2`;
+  const k = D.escenas.findIndex(e => t >= e.ini && t < e.fin), e = D.escenas[k < 0 ? D.escenas.length - 1 : k];
+  const acento = SERIE[e.tag] || '#38BDF8';
+  $('b2').style.cssText = `left:${420 + Math.cos(t * 0.28) * 180}px;top:${1100 + Math.sin(t * 0.33) * 160}px;background:${acento};opacity:.28`;
+  const u = t - e.ini, dur = e.fin - e.ini;
+
+  // ── Teléfonos ──
+  const f0 = $('f0'), f1 = $('f1');
+  f0.style.display = f1.style.display = 'none';
+  const pi = PLANOS.findIndex(p => t >= p.ini && t < p.fin);
+  if (pi >= 0) {
+    const p = PLANOS[pi], ant = PLANOS[pi - 1], sig = PLANOS[pi + 1];
+    const tl = t - p.ini, sentido = pi % 2 ? -1 : 1;
+    const seguido = ant && Math.abs(ant.fin - p.ini) < 0.02;
+    let dx = 0, dy = 0, op = 1, giro = 0;
+    if (!p.quieta && tl < TR + 0.25) {
+      const m = muelle(tl / (TR + 0.25));
+      if (seguido) { dx = (1 - m) * 1150 * sentido; giro = (1 - m) * 5 * sentido; }
+      else { dy = (1 - m) * 1300; }
+    }
+    const queda = p.fin - t;
+    if (!(sig && Math.abs(sig.ini - p.fin) < 0.02) && queda < 0.32) { const x = ease(1 - queda / 0.32); dy += x * 260; op = 1 - x; }
+    await foto($('i0'), p, t);
+    camara(f0, p, t, D.escenas[p.esc], dx, dy, op, giro);
+    if (seguido && tl < TR) {
+      const x = out(tl / TR);
+      await foto($('i1'), ant, ant.fin - 0.001);
+      camara(f1, ant, ant.fin - 0.001, D.escenas[ant.esc], -x * 1150 * sentido, 0, 1 - x * 0.6, -x * 5 * sentido);
+    }
+  }
+
+  // ── Cabecera (etiqueta de serie + título de la escena) ──
+  const cab = $('cab');
+  if (e.tipo === 'app' && e.titulo) {
+    cab.style.display = 'block';
+    $('tag').textContent = e.tag || '';
+    $('tag').style.cssText = `background:${acento}22;color:${acento};border:2px solid ${acento}66;opacity:${ease(u / 0.3)};transform:translateY(${(1 - out(u / 0.35)) * -20}px)`;
+    $('tit').innerHTML = palabras(e.titulo).map((w, i) => {
+      const x = muelle((u - 0.06 - i * 0.055) / 0.5);
+      return `<span style="opacity:${clamp(x * 2)};transform:translateY(${(1 - x) * 46}px)">${w.replace('ACENTO', acento)} </span>`;
+    }).join('');
+    cab.style.opacity = 1 - ease((u - (dur - 0.22)) / 0.2);
+    $('velo').style.display = 'block'; $('velo').style.opacity = ease(u / 0.25) * (1 - ease((u - (dur - 0.22)) / 0.2));
+  } else { cab.style.display = 'none'; $('velo').style.display = 'none'; }
+
+  // ── Rótulos ──
+  $('rot').innerHTML = (e.rotulos || []).map((r, i) => {
+    const x = muelle((t - r.t) / 0.55); if (t < r.t) return '';
+    const sale = 1 - ease((u - (dur - 0.25)) / 0.22);
+    const izq = (r.lado || (i % 2 ? 'der' : 'izq')) === 'izq';
+    const pos = izq ? `left:56px` : `right:${r.y > 880 ? 150 : 56}px`;
+    const fl = Math.sin(t * 1.6 + i) * 5;
+    return `<div style="${pos};top:${r.y + fl}px;opacity:${clamp(x * 3) * sale};transform:scale(${0.5 + 0.5 * x}) rotate(${(izq ? -2.5 : 2.5) * x}deg);transform-origin:${izq ? 'left' : 'right'} center"><i style="background:${acento}"></i>${r.texto}</div>`;
+  }).join('');
+
+  // ── Escenas a pantalla completa ──
+  const full = $('full'); let h = '';
+  if (e.tipo === 'titulo') {
+    const lat = 1 + Math.sin(t * 2.2) * 0.012;
+    h += `<div style="left:96px;top:300px;font-weight:800;font-size:28px;letter-spacing:4px;padding:10px 22px;border-radius:999px;background:${acento}22;color:${acento};border:2px solid ${acento}66">${e.tag}</div>`;
+    h += `<div style="left:96px;top:392px;width:888px;font-weight:800;font-size:104px;line-height:1.04;letter-spacing:-2.5px;transform:scale(${lat});transform-origin:left top">${e.titulo.replace(/\*\*(.+?)\*\*/g, `<b style="color:${acento}">$1</b>`)}</div>`;
+    const ang = clamp(u / dur) * 360;
+    h += `<div style="left:756px;top:770px;width:228px;height:228px;border-radius:50%;background:conic-gradient(${acento} ${ang}deg, rgba(255,255,255,.12) 0);display:flex;align-items:center;justify-content:center;box-shadow:0 20px 50px rgba(0,0,0,.5)"><div style="width:192px;height:192px;border-radius:50%;background:#0B1526;display:flex;flex-direction:column;align-items:center;justify-content:center;font-weight:800"><span style="font-size:84px;line-height:1">${Math.max(0, 60 - Math.floor(u / dur * 3))}</span><span style="font-size:24px;letter-spacing:3px;color:#9FB3CC">SEG</span></div></div>`;
+    full.style.opacity = 1 - ease((u - (dur - 0.25)) / 0.22);
+  } else if (e.tipo === 'seccion') {
+    const entra = out(u / 0.4), sale = ease((u - (dur - 0.3)) / 0.28);
+    const clip = `inset(0 ${(1 - entra) * 100}% 0 ${sale * 100}%)`;
+    h += `<div id="panel" style="background:linear-gradient(150deg, ${acento} 0%, #0B1526 85%);clip-path:${clip}"></div>`;
+    const x = muelle((u - 0.12) / 0.55), y = muelle((u - 0.25) / 0.55);
+    h += `<div style="left:96px;top:520px;font-weight:800;font-size:330px;line-height:1;letter-spacing:-10px;color:transparent;-webkit-text-stroke:5px rgba(255,255,255,.5);opacity:${clamp(x * 2) * (1 - sale)};transform:translateX(${(1 - x) * -160}px)">${e.numero}</div>`;
+    h += `<div style="left:96px;top:880px;width:860px;font-weight:800;font-size:96px;line-height:1.05;letter-spacing:-2px;opacity:${clamp(y * 2) * (1 - sale)};transform:translateY(${(1 - y) * 70}px)">${e.titulo}</div>`;
+    h += `<div style="left:96px;top:${880 + (e.lineas || 2) * 104 + 40}px;height:10px;border-radius:5px;background:#fff;width:${out((u - 0.4) / 0.5) * 260}px;opacity:${1 - sale}"></div>`;
+    full.style.opacity = 1;
+  } else if (e.tipo === 'cierre') {
+    const a = muelle(u / 0.6), seg = e.cambio != null && t >= e.cambio, v = seg ? t - e.cambio : 0;
+    h += `<div class="marca" style="left:0;width:1080px;top:470px;justify-content:center;font-size:120px;letter-spacing:-3px;opacity:${clamp(a * 2)};transform:scale(${0.6 + 0.4 * a})"><div style="width:150px;height:150px;border-radius:38px;background:#1456A2;display:flex;align-items:center;justify-content:center;box-shadow:0 20px 60px rgba(20,86,162,.6)">${LOGO(112)}</div>nokfi</div>`;
+    const b = muelle((u - 0.25) / 0.6);
+    h += `<div style="left:96px;width:888px;top:720px;text-align:center;font-weight:800;font-size:112px;line-height:1.05;letter-spacing:-3px;opacity:${clamp(b * 2) * (seg ? 1 - ease(v / 0.2) : 1)};transform:translateY(${(1 - b) * 60}px)">${e.linea1.replace(/\*\*(.+?)\*\*/g, `<b style="color:${acento}">$1</b>`)}</div>`;
+    if (seg) { const c = muelle((v - 0.12) / 0.6); h += `<div style="left:96px;width:888px;top:720px;text-align:center;font-weight:800;font-size:92px;line-height:1.08;letter-spacing:-2px;opacity:${clamp(c * 2)};transform:translateY(${(1 - c) * 60}px)">${e.linea2.replace(/\*\*(.+?)\*\*/g, `<b style="color:${acento}">$1</b>`)}</div>`; }
+    const d = muelle((u - 0.5) / 0.6), late = 1 + Math.sin(t * 5) * 0.02;
+    h += `<div style="left:0;width:1080px;top:1070px;display:flex;justify-content:center;opacity:${clamp(d * 2)}"><div style="font-weight:800;font-size:66px;padding:26px 60px;border-radius:999px;background:#fff;color:#0B1526;box-shadow:0 24px 60px rgba(0,0,0,.5);transform:scale(${(0.7 + 0.3 * d) * late})">nokfi.app</div></div>`;
+    h += `<div style="left:0;width:1080px;top:1230px;text-align:center;font-weight:600;font-size:34px;color:#9FB3CC;opacity:${clamp(d * 2)}">${e.pie || ''}</div>`;
+    full.style.opacity = 1;
+  }
+  full.innerHTML = h;
+
+  // ── Subtítulos: trozo actual, con la palabra que suena resaltada ──
+  const c = D.subs.find(x => t >= x.ini - 0.04 && t < x.fin + 0.08);
+  $('subs').style.top = (e.tipo === 'app' ? 1368 : e.tipo === 'titulo' ? 1380 : 1390) + 'px';
+  $('subs').innerHTML = c ? `<p style="transform:scale(${0.92 + 0.08 * out((t - c.ini + 0.04) / 0.14)})">${c.pal.map(w => {
+    const dicha = t >= w.ini, activa = t >= w.ini && t < w.fin;
+    return `<span style="color:${dicha ? '#fff' : 'rgba(255,255,255,.45)'};background:${activa ? '#1456A2' : 'transparent'}">${w.txt}</span>`;
+  }).join(' ')}</p>` : '';
+};
+window.lista = document.fonts.ready.then(() => true);
+</script>

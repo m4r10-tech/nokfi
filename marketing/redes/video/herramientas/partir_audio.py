@@ -24,7 +24,7 @@ from revisa_audio import normal  # misma normalización que la revisión de audi
 HERE = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))   # marketing/redes/video
 LOTES = os.path.join(HERE, '../salida/lotes-voz/lotes.json')
 SR, PAUSA = 44100, 0.30
-TEMPO = 1.06  # un punto más ágil que el original, sin cambiar el tono
+TEMPO = 1.06  # un punto más ágil que el original, sin cambiar el tono (--tempo 1 lo deja tal cual)
 
 
 def silencio_central(pcm, a, b):
@@ -41,14 +41,17 @@ def silencio_central(pcm, a, b):
 def main():
     lote, audio = sys.argv[1], sys.argv[2]
     prueba = '--prueba' in sys.argv
+    tempo = float(sys.argv[sys.argv.index('--tempo') + 1]) if '--tempo' in sys.argv else TEMPO
     videos = json.load(open(LOTES))[lote]
     pcm = np.frombuffer(subprocess.run(['ffmpeg', '-v', 'error', '-i', audio, '-ac', '1', '-ar', '16000', '-f', 'f32le', '-'], capture_output=True).stdout, dtype=np.float32)
     total = len(pcm) / 16000
     modelo = WhisperModel('small', device='cpu', compute_type='int8', cpu_threads=2)
     segs, _ = modelo.transcribe(pcm, language='es', beam_size=3, word_timestamps=True, condition_on_previous_text=False)
     oido = []   # (token, inicio, fin)
+    crudas = []  # (inicio, fin, palabra tal como la oyó Whisper), para sincronizar los subtítulos palabra a palabra
     for sg in segs:
         for w in (sg.words or []):
+            crudas.append((w.start, w.end, w.word.strip()))
             for tok in normal(w.word): oido.append((tok, w.start, w.end))
     esperado = []  # (token, vídeo, frase)
     for vi, v in enumerate(videos):
@@ -84,11 +87,14 @@ def main():
         estado = 'OK' if peor >= 0.8 else 'DUDOSO'
         print(f"{v['id']} {estado} · peor frase {peor:.2f} · {fs[0]['a']:.1f}-{fs[-1]['b']:.1f} s", flush=True)
         if prueba: continue
-        partes, tiempos, t = [], [], 0.0
+        partes, tiempos, palabras, t = [], [], [], 0.0
         for fr in fs:
             p = os.path.join(tmp, f"{vi}-{fr['f']}.wav")
-            subprocess.run(['ffmpeg', '-v', 'error', '-y', '-ss', f"{fr['a']:.3f}", '-to', f"{fr['b']:.3f}", '-i', audio, '-af', f'{recorte},areverse,{recorte},areverse,atempo={TEMPO}', '-ar', str(SR), '-ac', '1', p], check=True)
+            subprocess.run(['ffmpeg', '-v', 'error', '-y', '-ss', f"{fr['a']:.3f}", '-to', f"{fr['b']:.3f}", '-i', audio, '-af', f'{recorte},areverse,{recorte},areverse,atempo={tempo}', '-ar', str(SR), '-ac', '1', p], check=True)
             d = float(subprocess.run(['ffprobe', '-v', 'error', '-show_entries', 'format=duration', '-of', 'csv=p=0', p], capture_output=True, text=True).stdout or 0)
+            mias = [c for c in crudas if fr['a'] <= (c[0] + c[1]) / 2 < fr['b']]
+            w0 = mias[0][0] if mias else fr['a']
+            palabras.append([[round(t + max(0, (c[0] - w0) / tempo), 3), round(min(t + d, t + (c[1] - w0) / tempo), 3), c[2]] for c in mias])
             tiempos.append([round(t, 3), round(t + d, 3)]); t += d + PAUSA
             partes.append(p)
         sil = os.path.join(tmp, 'sil.wav')
@@ -97,7 +103,7 @@ def main():
         open(lista, 'w').write('\n'.join(f"file '{x}'" for k, p in enumerate(partes) for x in ([sil, p] if k else [p])) + '\n')
         destino = os.path.join(HERE, 'voz', v['id'] + '.wav')
         subprocess.run(['ffmpeg', '-v', 'error', '-y', '-f', 'concat', '-safe', '0', '-i', lista, '-c:a', 'pcm_s16le', destino], check=True)
-        json.dump({'frases': v['frases'], 'tiempos': tiempos}, open(destino.replace('.wav', '.tiempos.json'), 'w'), ensure_ascii=False, indent=1)
+        json.dump({'frases': v['frases'], 'tiempos': tiempos, 'palabras': palabras}, open(destino.replace('.wav', '.tiempos.json'), 'w'), ensure_ascii=False, indent=1)
         json.dump({'lote': lote, 'estado': estado, 'frases': [{'n': fr['f'] + 1, 'reconocido': round(fr['ok'], 2)} for fr in fs]}, open(destino.replace('.wav', '.externa.json'), 'w'), ensure_ascii=False, indent=1)
     subprocess.run(['rm', '-rf', tmp])
 
