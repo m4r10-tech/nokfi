@@ -17,7 +17,7 @@ for f in glob.glob(os.path.join(REDES, 'buffer', 'publicaciones', '*.json')):
     for x in json.load(open(f)):
         if x.get('red') == 'tiktok' and x.get('pieza'): cola[x['pieza']] = x
 lote = {}
-lj = os.path.join(SALIDA, 'lotes-voz', 'lotes.json')
+lj = os.path.join(SALIDA, 'lotes-voz', '_indice', 'lotes.json')
 if os.path.exists(lj):
     for nombre, videos in json.load(open(lj)).items():
         for v in videos: lote[v['id']] = nombre

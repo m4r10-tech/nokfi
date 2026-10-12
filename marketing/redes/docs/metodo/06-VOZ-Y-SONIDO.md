@@ -9,9 +9,10 @@
 
 ## 2. Locución por lotes
 
-- Un archivo de texto por lote, **una frase por línea** y una línea en blanco entre vídeos.
-- Se locuta el archivo entero, sin cambiar el orden ni saltarse líneas, y se guarda con el
-  mismo nombre que el texto.
+- **Una carpeta por lote**, con su texto y su audio dentro; nada de archivos sueltos.
+- En el texto, **una frase por línea** y una línea en blanco entre vídeos.
+- Se locuta el texto entero, sin cambiar el orden ni saltarse líneas, y el audio se guarda
+  en la carpeta de ese lote.
 - **Un lote repartido no se rehace**: el audio se corta contra ese texto exacto.
 - Conviene tener voz grabada para varias semanas.
 

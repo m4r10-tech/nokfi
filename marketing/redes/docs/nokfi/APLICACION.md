@@ -45,7 +45,7 @@ marketing/redes/
 │   └── nokfi/         esta aplicación, banco de ganchos, registro de variantes, estilo, música, estado
 ├── video/
 │   ├── guiones/       un JSON por vídeo (x001…) + _biblio.json (índice de grabaciones)
-│   ├── herramientas/  editor.mjs, editor-pagina.html, partir_audio.py, revisa_audio.py, lotes_voz.py, estado.py
+│   ├── herramientas/  editor.mjs, editor-pagina.html, partir_audio.py, revisa_audio.py, estado.py
 │   │                  y, de la etapa 1, montar.mjs, tarjetas.mjs y serie.py
 │   ├── recursos/      fuentes/ y musica/
 │   └── voz/           audio cortado por vídeo (no versionado)
@@ -54,7 +54,7 @@ marketing/redes/
 └── salida/            no versionado
     ├── PARA-SUBIR/    un vídeo aprobado por carpeta, en orden
     ├── SUBIDOS/       lo ya publicado
-    ├── lotes-voz/     lote-NN.txt, lote-NN.mp3, lotes.json, VOZ.txt
+    ├── lotes-voz/     una carpeta por lote (texto.txt + el audio) y _indice/ (lotes.json, VOZ.txt)
     ├── video/_biblio/ grabaciones de la app
     ├── _control/      estado del modo viaje
     ├── _registro/     versiones anteriores y hojas de revisión
@@ -79,8 +79,10 @@ Avisos sobre planos concretos: `facturanueva` enseña un aviso amarillo de datos
 (usar `factura` o `facturarellena`); el texto del `informe` dice «0 €» (usar solo la nota);
 en `ayuda` sale el nombre de Mario.
 
-**Voz** (`salida/lotes-voz/`): locutado y montado, `explicativo-60s`. Escritos y pendientes
-de leer y locutar: `lote-01.txt` (x002-x006) y `lote-02.txt` (x007-x009).
+**Voz** (`salida/lotes-voz/`, una carpeta por lote con `texto.txt` y el audio dentro): locutado
+y montado, `explicativo-60s/`. Escritos y pendientes de leer y locutar: `lote-01/` (x002-x006)
+y `lote-02/` (x007-x009). El audio se guarda **dentro de la carpeta de su lote**, con
+cualquier nombre. `_indice/lotes.json` dice qué vídeos y frases lleva cada lote.
 
 ## 5. Órdenes
 
@@ -92,8 +94,7 @@ cd backend && PLAYWRIGHT_CORE=$(realpath ../../n8n-nodes-nokfi/node_modules/play
   taskset -c 0,1 nice -n 19 node scripts/redes-clips.js <archivo-de-clips.json>
 
 # Cortar la voz de un lote (primero en prueba)
-marketing/redes/video/.asr/bin/python marketing/redes/video/herramientas/partir_audio.py lote-01 \
-  marketing/redes/salida/lotes-voz/lote-01.mp3 --tempo 1 --prueba
+marketing/redes/video/.asr/bin/python marketing/redes/video/herramientas/partir_audio.py lote-01 --tempo 1 --prueba
 
 # Fotogramas de prueba y montaje completo
 PLAYWRIGHT_CORE=$(realpath ../n8n-nodes-nokfi/node_modules/playwright-core) nice -n 19 \
@@ -166,7 +167,8 @@ Música: las tres pistas de [`musica-licencias.md`](musica-licencias.md).
 
 ## 11. Siguiente lote
 
-1. Mario lee `lote-01.txt` y `lote-02.txt`, pide cambios o los locuta.
+1. Mario lee `lote-01/texto.txt` y `lote-02/texto.txt`, pide cambios o los locuta y deja el
+   audio en la misma carpeta.
 2. Claude construye en el montador las opciones de variación que piden esos 8 vídeos
    (`REGISTRO-VARIANTES.md`) y las enseña en fotogramas fijos.
 3. Montaje, control de calidad y visto bueno, vídeo a vídeo.

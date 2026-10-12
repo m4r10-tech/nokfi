@@ -1,10 +1,11 @@
 """marketing/redes/video/herramientas/partir_audio.py — sesión 13: parte un audio largo locutado FUERA (ElevenLabs) en la voz de cada vídeo.
 
-El usuario pega marketing/redes/salida/lotes-voz/lote-NN.txt en ElevenLabs y guarda el audio. Este guion lo
+Cada lote es una carpeta marketing/redes/salida/lotes-voz/<lote>/ con texto.txt (lo que se pega en ElevenLabs) y el
+audio que deja el usuario dentro (cualquier nombre: .mp3, .wav, .m4a…). Este guion lo
 transcribe con Whisper (marcas de tiempo por palabra), lo alinea con el texto del lote y corta cada frase.
 
 Uso (venv .asr, desde la raíz del repo):
-  marketing/redes/video/.asr/bin/python marketing/redes/video/herramientas/partir_audio.py lote-01 /ruta/al/audio.mp3 [--prueba]
+  marketing/redes/video/.asr/bin/python marketing/redes/video/herramientas/partir_audio.py lote-01 [/ruta/al/audio.mp3] [--tempo 1] [--prueba]
 Salida por vídeo: voz/<id>.wav + voz/<id>.tiempos.json + voz/<id>.externa.json (calidad de la
 alineación). Una frase con menos del 80 % de palabras reconocidas deja el vídeo marcado como DUDOSO.
 --prueba no escribe en voz/: solo informa.
@@ -22,7 +23,8 @@ sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
 from revisa_audio import normal  # misma normalización que la revisión de audio
 
 HERE = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))   # marketing/redes/video
-LOTES = os.path.join(HERE, '../salida/lotes-voz/lotes.json')
+DIR_LOTES = os.path.join(HERE, '../salida/lotes-voz')
+LOTES = os.path.join(DIR_LOTES, '_indice/lotes.json')   # qué vídeos y frases lleva cada lote
 SR, PAUSA = 44100, 0.30
 TEMPO = 1.06  # un punto más ágil que el original, sin cambiar el tono (--tempo 1 lo deja tal cual)
 
@@ -39,7 +41,12 @@ def silencio_central(pcm, a, b):
 
 
 def main():
-    lote, audio = sys.argv[1], sys.argv[2]
+    lote = sys.argv[1]
+    audio = sys.argv[2] if len(sys.argv) > 2 and not sys.argv[2].startswith('--') else None
+    if not audio:   # sin ruta: el audio que haya dentro de la carpeta del lote
+        hay = sorted(f for f in os.listdir(os.path.join(DIR_LOTES, lote)) if f.lower().endswith(('.mp3', '.wav', '.m4a', '.mpeg', '.ogg', '.flac')))
+        if len(hay) != 1: sys.exit(f"En lotes-voz/{lote}/ hay {len(hay)} audios ({', '.join(hay) or 'ninguno'}): tiene que haber exactamente uno.")
+        audio = os.path.join(DIR_LOTES, lote, hay[0])
     prueba = '--prueba' in sys.argv
     tempo = float(sys.argv[sys.argv.index('--tempo') + 1]) if '--tempo' in sys.argv else TEMPO
     videos = json.load(open(LOTES))[lote]
