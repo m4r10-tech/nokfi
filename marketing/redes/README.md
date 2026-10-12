@@ -5,14 +5,14 @@ que es quien programa en Buffer.
 
 | Carpeta | Qué hay |
 |---|---|
-| `docs/` | [`PRODUCCION.md`](docs/PRODUCCION.md) (norma de trabajo), [`ESTADO.md`](docs/ESTADO.md) (en qué paso está cada vídeo), `guia-estilo.md`, `musica-licencias.md` |
+| `docs/` | [`PRODUCCION.md`](docs/PRODUCCION.md) (norma de trabajo), [`GANCHOS.md`](docs/GANCHOS.md) (métodos y ganchos con fuentes), [`PORTADAS.md`](docs/PORTADAS.md), `ESTADO.md`, `guia-estilo.md`, `musica-licencias.md` |
 | `video/guiones/` | un JSON por vídeo |
 | `video/herramientas/` | montaje, tarjetas, corte y revisión de la voz, tablero |
 | `video/recursos/` | fuentes y música |
 | `video/voz/` | audio de cada vídeo (no se versiona) |
-| `plantillas/` | portadas |
-| `buffer/` | herramienta de Buffer (uso manual), claves (`.env`, no se versiona) y registro de lo enviado |
-| `salida/` | vídeos terminados, audios de los lotes y hojas de contactos (no se versiona) |
+| `plantillas/` | tarjeta de cierre |
+| `buffer/` | `viaje.mjs` (modo viaje: Buffer automático solo cuando Mario lo pide), claves (`.env`, no se versiona) e historial |
+| `salida/` | `PARA-SUBIR/` (vídeos listos para arrastrar a TikTok), `SUBIDOS/`, grabaciones de la app y audios (no se versiona) |
 
 Tablero al día: `python3 marketing/redes/video/herramientas/estado.py`
 

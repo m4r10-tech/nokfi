@@ -26,6 +26,11 @@
   «modo viaje», cuando él lo diga (§8).
 - **Nunca más ráfagas**: TikTok penalizó la cuenta por publicar muchos vídeos seguidos (§8).
 
+> **Borrón y cuenta nueva (2026-10-12, noche).** Todo lo fabricado en la etapa 1 (vídeos, voces
+> y lotes) está en `salida/_PAPELERA/etapa-1/`. Se conservan las grabaciones de la app y los
+> guiones como banco de ideas. El primer vídeo de la etapa nueva es el explicativo «Todo lo
+> que ofrece Nokfi en 60 segundos» (`salida/lotes-voz/explicativo-60s.txt`).
+
 ## 1. Principios
 
 1. **Lotes pequeños y cerrados.** Se trabaja en lotes de 8 vídeos. Un lote no empieza hasta
@@ -61,21 +66,21 @@ Ningún archivo suelto: cada cosa tiene su carpeta. Solo `README.md` vive en la 
 ```
 marketing/redes/
 ├── README.md               entrada: qué hay y dónde
-├── docs/                   PRODUCCION.md (esto), ESTADO.md (tablero), guia-estilo.md, musica-licencias.md
+├── docs/                   PRODUCCION.md (esto), GANCHOS.md, PORTADAS.md, ESTADO.md, guia-estilo.md, musica-licencias.md
 ├── video/
 │   ├── guiones/            un JSON por vídeo + _biblio.json (planos reutilizables)
 │   ├── herramientas/       montar, tarjetas, serie, lotes_voz, partir_audio, revisa_audio, estado
 │   ├── recursos/           fuentes/ y musica/
 │   └── voz/                audio cortado por vídeo (no versionado)
-├── plantillas/             portadas (render.mjs)
-├── buffer/                 buffer.mjs, .env (claves) y publicaciones/ (registro de lo enviado)
+├── plantillas/             tarjeta de cierre (render.mjs)
+├── buffer/                 viaje.mjs (modo viaje), .env (claves) y publicaciones/ (historial de la etapa 1)
 └── salida/                 no versionado
-    ├── vNNN-…/             video.mp4, 01-portada.png, subtitulos.srt
+    ├── PARA-SUBIR/         un vídeo aprobado por carpeta, en orden (ver PORTADAS.md §6)
+    ├── SUBIDOS/            lo ya publicado
     ├── video/              grabaciones de la app (clips) y biblioteca de planos
     ├── lotes-voz/          lote-NN.txt (texto) y lote-NN.mp3 (audio de Mario)
-    ├── _hojas/             hoja de contactos de cada vídeo (6 fotogramas)
-    ├── _control/           COLA-EN-PAUSA, pendientes y dudosos
-    ├── _registro/          serie.log
+    ├── _control/           estado del modo viaje
+    ├── _registro/          registros de montaje
     └── _PAPELERA/          lo retirado en la limpieza; se puede borrar entero
 ```
 
@@ -253,18 +258,25 @@ visualizaciones). Reglas desde entonces:
   48 horas tras un parón de visitas (ver fuentes en `GANCHOS.md` §4). La decisión es de Mario.
 - Constancia antes que volumen: mejor uno diario siempre que cuatro un día y ninguno después.
 
-**Modo viaje: Buffer automático.** Solo cuando Mario lo pida («lanza el modo viaje»), si se
-va de viaje o no puede subir:
+**Modo viaje: Buffer automático** (`buffer/viaje.mjs`). Solo cuando Mario lo pida («lanza el
+modo viaje»), si se va de viaje o no puede subir:
 
-1. Se toma `PARA-SUBIR` en orden, **a partir del último vídeo publicado**.
-2. Se programan en Buffer respetando los huecos de 4-5 horas (como mucho 10 a la vez, que es
-   el tope del plan gratuito; el resto entra según se vacían).
-3. Límite de la API: 250 peticiones al día. Nada de consultas en bucle: una pasada al
-   programar y, como mucho, una al día para reponer.
-4. Al volver, Mario dice «para el modo viaje» y se retira lo que quede programado.
+```bash
+node marketing/redes/buffer/viaje.mjs estado              # qué hay pendiente y programado (sin red)
+node marketing/redes/buffer/viaje.mjs lanzar --simular    # enseña el plan sin tocar nada
+node marketing/redes/buffer/viaje.mjs lanzar [--al-dia N] # programa (N = 1-4; por defecto 2: 13:30 y 22:30)
+node marketing/redes/buffer/viaje.mjs parar               # retira de Buffer lo que quede
+```
 
-Estado actual: `salida/_control/COLA-EN-PAUSA` existe, así que `buffer.mjs rellenar` no hace
-nada. El modo viaje está descrito pero **aún no está construido** con este diseño.
+- Toma `PARA-SUBIR` en orden, **a partir del último vídeo publicado**; el primer hueco es al
+  menos 4 horas después de lo último que salió.
+- Llena Buffer hasta 10 (tope del plan gratuito). Para viajes de más de 10 vídeos se pone un
+  cron de **una pasada al día** mientras dure el viaje, y se quita al volver.
+- Lo ya publicado pasa solo de `PARA-SUBIR` a `SUBIDOS`.
+- Límite de la API: 250 peticiones al día; el guion se frena solo a las 200 y no hace bucles.
+- Probado en simulación; **la primera vez contra Buffer de verdad se hace con Mario delante**.
+
+No hay ningún proceso que programe nada. Lo que dejó programado la herramienta antigua se retira con `viaje.mjs vaciar-antiguo`.
 
 ## 9. Cuidado del equipo
 
