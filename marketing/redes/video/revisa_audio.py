@@ -83,6 +83,6 @@ def revisar(modelo, vid):
 
 
 if __name__ == '__main__':
-    m = WhisperModel('small', device='cpu', compute_type='int8', cpu_threads=4)
+    m = WhisperModel('small', device='cpu', compute_type='int8', cpu_threads=2)
     for vid in sys.argv[1:]:
         revisar(m, vid)

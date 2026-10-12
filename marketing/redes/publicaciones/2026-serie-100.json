@@ -63,5 +63,53 @@
   "aprobado": true,
   "buffer_id": "6acc1a6863ff33d8c99c8654",
   "buffer_estado": "programada"
+ },
+ {
+  "id": "v025-mito-iva-es-tuyo-tt",
+  "red": "tiktok",
+  "cuando": "2026-10-12T13:30",
+  "pieza": "v025-mito-iva-es-tuyo",
+  "video": "video.mp4",
+  "titulo": "¿Verdad o mito? El IVA que cobras es dinero tuyo.",
+  "ia": true,
+  "texto": "El IVA que cobras no es tuyo: lo guardas para Hacienda. Calculadora de IVA gratis en nokfi.app 🧮 (cálculos orientativos)\n\n#autonomos #iva #facturas #hacienda #emprendedores",
+  "aprobado": true,
+  "buffer_id": "6acca7f65ed0a74562aa2c4f",
+  "buffer_estado": "programada"
+ },
+ {
+  "id": "v036-antes-ahora-cobros-tt",
+  "red": "tiktok",
+  "cuando": "2026-10-12T22:30",
+  "pieza": "v036-antes-ahora-cobros",
+  "video": "video.mp4",
+  "titulo": "Cobrar facturas: antes y ahora",
+  "ia": true,
+  "texto": "Facturas vencidas: quién te debe, desde cuándo y un recordatorio que sale solo. (cuenta de ejemplo con datos ficticios; cálculos orientativos)\n\n#autonomos #pymes #hacienda #emprendedores #negocio",
+  "aprobado": true,
+  "buffer_id": "6accc15d52632410b3dcb70f",
+  "buffer_estado": "programada"
+ },
+ {
+  "id": "v026-mito-retencion-se-pierde-tt",
+  "red": "tiktok",
+  "cuando": "2026-10-16T18:00",
+  "pieza": "v026-mito-retencion-se-pierde",
+  "video": "video.mp4",
+  "titulo": "¿Verdad o mito? Lo que te retiene un cliente lo pierdes.",
+  "ia": true,
+  "texto": "La retención de IRPF no se pierde: es un adelanto que tu cliente ingresa a tu nombre. Calculadora gratis en nokfi.app 🧮 (cálculos orientativos)\n\n#autonomos #iva #facturas #hacienda #emprendedores",
+  "aprobado": true
+ },
+ {
+  "id": "v032-pov-gestor-pide-facturas-tt",
+  "red": "tiktok",
+  "cuando": "2026-10-16T22:30",
+  "pieza": "v032-pov-gestor-pide-facturas",
+  "video": "video.mp4",
+  "titulo": "POV: tu gestor te pide las facturas del trimestre",
+  "ia": true,
+  "texto": "POV: tu gestor te pide las facturas y las tienes en un toque 📒 (cuenta de ejemplo con datos ficticios; cálculos orientativos)\n\n#autonomos #pymes #hacienda #emprendedores #negocio",
+  "aprobado": true
  }
 ]

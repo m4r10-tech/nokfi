@@ -41,27 +41,27 @@
   {
     "id": "v009-precio-por-hora-tt",
     "red": "tiktok",
-    "cuando": "2026-10-12T20:00",
+    "cuando": "2026-10-13T09:00",
     "pieza": "v009-precio-por-hora",
     "video": "video.mp4",
     "titulo": "¿Estás cobrando muy poco por hora?",
     "ia": true,
     "texto": "Calculadora de precio por hora para autónomos: gratis y sin registrarte, en nokfi.app 🧮 (cálculo orientativo)\n\nEnvíaselo a quien cobra demasiado barato 😬\n\n#autonomos #freelance #precioporhora #tarifas #emprendedores",
     "aprobado": true,
-    "buffer_id": "6acca6473cf8dc33d1cfc1b0",
+    "buffer_id": "6accc15e0b1f16abcb04e332",
     "buffer_estado": "programada"
   },
   {
     "id": "v010-api-trimestre-tt",
     "red": "tiktok",
-    "cuando": "2026-10-13T09:00",
+    "cuando": "2026-10-13T13:30",
     "pieza": "v010-api-trimestre",
     "video": "video.mp4",
     "titulo": "¿Y si tu agente de IA supiera cuánto IVA toca pagar?",
     "ia": true,
     "texto": "API de Nokfi: el resumen del trimestre (IVA, IRPF y total estimado) en una llamada, para n8n o tu agente de IA 🤖 (cuenta de ejemplo con datos ficticios)\n\nEnvíaselo a quien automatiza negocios 👇\n\n#n8n #automatizacion #api #agentesia #desarrolladores",
     "aprobado": true,
-    "buffer_id": "6acca648b4c6a9782a0d4df8",
+    "buffer_id": "6accc16032da9d8379eac4e6",
     "buffer_estado": "programada"
   }
 ]
