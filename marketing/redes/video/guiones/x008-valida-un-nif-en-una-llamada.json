@@ -1,0 +1,247 @@
+{
+ "id": "x008-valida-un-nif-en-una-llamada",
+ "carpeta": "008-valida-un-nif-en-una-llamada",
+ "titulo": "Valida un NIF español con una sola llamada",
+ "ritmo": "vivo",
+ "transicion": "corte",
+ "musica": "2-bit-shift.mp3",
+ "variantes": "A resultado primero · B demostración directa · C producto ya en acción · D corte seco · E vivo · F rótulos",
+ "texto": "Validar NIF, NIE y CIF con una llamada a la API de Nokfi: formato, dígito de control, tipo y NIF-IVA. En modo prueba no gasta cuota. nokfi.app\n\nNo consulta el censo de la AEAT ni VIES.\n\nEnvíaselo a quien valida NIF con una expresión regular 👇\n\n#api #desarrolladores #n8n #automatizacion #nif",
+ "subtitulos": {},
+ "escenas": [
+  {
+   "tipo": "app",
+   "frases": [
+    0,
+    0
+   ],
+   "tag": "API",
+   "titulo": "Un NIF, **una llamada**",
+   "planos": [
+    {
+     "clip": "pgnif",
+     "foco": [
+      0.5,
+      0.55
+     ],
+     "zoom": 1.2,
+     "peso": 1,
+     "desde": {
+      "marca": "r",
+      "mas": 0.3
+     },
+     "quieta": true
+    }
+   ],
+   "rotulos": [
+    {
+     "texto": "\"valid\": true",
+     "en": 0.3,
+     "y": 620,
+     "lado": "der"
+    }
+   ]
+  },
+  {
+   "tipo": "app",
+   "frases": [
+    1,
+    1
+   ],
+   "tag": "API",
+   "titulo": "El **Playground** de la API",
+   "planos": [
+    {
+     "clip": "pgnif",
+     "foco": [
+      0.5,
+      0.25
+     ],
+     "zoom": 1.12,
+     "peso": 1,
+     "desde": {
+      "marca": "ini",
+      "mas": 0.0
+     }
+    }
+   ],
+   "rotulos": []
+  },
+  {
+   "tipo": "app",
+   "frases": [
+    2,
+    2
+   ],
+   "tag": "API",
+   "titulo": "Elegir, pegar y **Ejecutar**",
+   "planos": [
+    {
+     "clip": "pgnif",
+     "foco": [
+      0.4,
+      0.75
+     ],
+     "zoom": 1.22,
+     "peso": 1,
+     "desde": {
+      "marca": "ini",
+      "mas": 1.5
+     }
+    }
+   ],
+   "rotulos": []
+  },
+  {
+   "tipo": "app",
+   "frases": [
+    3,
+    3
+   ],
+   "tag": "API",
+   "titulo": "Válido: es un **CIF**",
+   "planos": [
+    {
+     "clip": "pgnif",
+     "foco": [
+      0.5,
+      0.52
+     ],
+     "zoom": 1.25,
+     "peso": 1,
+     "desde": {
+      "marca": "r",
+      "mas": 0.2
+     }
+    }
+   ],
+   "rotulos": [
+    {
+     "texto": "Sociedad limitada",
+     "en": 0.3,
+     "y": 1170,
+     "lado": "izq"
+    }
+   ]
+  },
+  {
+   "tipo": "app",
+   "frases": [
+    4,
+    4
+   ],
+   "tag": "API",
+   "titulo": "Su **NIF-IVA** europeo",
+   "planos": [
+    {
+     "clip": "pgnif",
+     "foco": [
+      0.5,
+      0.6
+     ],
+     "zoom": 1.25,
+     "peso": 1,
+     "desde": {
+      "marca": "r",
+      "mas": 1.8
+     }
+    }
+   ],
+   "rotulos": [
+    {
+     "texto": "ESB12345674",
+     "en": 0.2,
+     "y": 620,
+     "lado": "der"
+    }
+   ]
+  },
+  {
+   "tipo": "app",
+   "frases": [
+    5,
+    5
+   ],
+   "tag": "API",
+   "titulo": "Formato y **dígito de control**",
+   "planos": [
+    {
+     "clip": "pgnif",
+     "foco": [
+      0.5,
+      0.68
+     ],
+     "zoom": 1.22,
+     "peso": 1,
+     "desde": {
+      "marca": "r",
+      "mas": 3.0
+     }
+    }
+   ],
+   "rotulos": [
+    {
+     "texto": "No consulta el censo",
+     "en": 0.3,
+     "y": 1180,
+     "lado": "izq"
+    }
+   ]
+  },
+  {
+   "tipo": "app",
+   "frases": [
+    6,
+    6
+   ],
+   "tag": "API",
+   "titulo": "Modo prueba: **no gasta cuota**",
+   "planos": [
+    {
+     "clip": "claves",
+     "foco": [
+      0.5,
+      0.72
+     ],
+     "zoom": 1.18,
+     "peso": 1,
+     "desde": {
+      "marca": "a",
+      "mas": 0.3
+     }
+    },
+    {
+     "clip": "pgnif",
+     "foco": [
+      0.5,
+      0.88
+     ],
+     "zoom": 1.15,
+     "peso": 1,
+     "desde": {
+      "marca": "r",
+      "mas": 4.5
+     }
+    }
+   ],
+   "rotulos": [
+    {
+     "texto": "curl · JavaScript · Python",
+     "en": 0.6,
+     "y": 620,
+     "lado": "der"
+    }
+   ]
+  },
+  {
+   "tipo": "cierre",
+   "frases": [
+    7,
+    7
+   ],
+   "tag": "NOKFI",
+   "linea1": "Envíaselo a quien usa una **expresión regular**",
+   "pie": "Modo prueba · no gasta cuota"
+  }
+ ]
+}

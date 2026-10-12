@@ -1,0 +1,266 @@
+{
+ "id": "x009-n8n-facturas-de-gmail",
+ "carpeta": "009-n8n-facturas-de-gmail",
+ "titulo": "Este flujo de n8n lee tus facturas de Gmail",
+ "ritmo": "medio",
+ "transicion": "empuje",
+ "musica": "3-music-promotion.mp3",
+ "variantes": "A resultado primero · B problema → solución · C producto ya en acción · D empuje · E medio · F rótulos",
+ "texto": "Plantillas de n8n listas para importar: facturas de Gmail a Google Sheets, carpeta de Drive a resumen mensual e informe semanal de caja a Telegram. nokfi.app\n\nEnvíaselo a quien todavía copia facturas a mano 👇\n\n#n8n #automatizacion #facturas #gmail #googlesheets",
+ "subtitulos": {},
+ "escenas": [
+  {
+   "tipo": "app",
+   "frases": [
+    0,
+    0
+   ],
+   "tag": "API",
+   "titulo": "De **Gmail** a una hoja, solo",
+   "planos": [
+    {
+     "clip": "plant",
+     "foco": [
+      0.5,
+      0.35
+     ],
+     "zoom": 1.18,
+     "peso": 1,
+     "desde": {
+      "marca": "a",
+      "mas": 0.3
+     },
+     "quieta": true
+    }
+   ],
+   "rotulos": [
+    {
+     "texto": "Plantilla de n8n",
+     "en": 0.3,
+     "y": 620,
+     "lado": "der"
+    }
+   ]
+  },
+  {
+   "tipo": "app",
+   "frases": [
+    1,
+    1
+   ],
+   "tag": "API",
+   "titulo": "Lista para **importar**",
+   "planos": [
+    {
+     "clip": "plant",
+     "foco": [
+      0.35,
+      0.5
+     ],
+     "zoom": 1.22,
+     "peso": 1,
+     "desde": {
+      "marca": "a",
+      "mas": 2.0
+     }
+    }
+   ],
+   "rotulos": [
+    {
+     "texto": "Descargar JSON",
+     "en": 0.3,
+     "y": 1170,
+     "lado": "izq"
+    }
+   ]
+  },
+  {
+   "tipo": "app",
+   "frases": [
+    2,
+    2
+   ],
+   "tag": "API",
+   "titulo": "Cada hora mira tu **correo**",
+   "planos": [
+    {
+     "clip": "plant",
+     "foco": [
+      0.5,
+      0.58
+     ],
+     "zoom": 1.22,
+     "peso": 1,
+     "desde": {
+      "marca": "a",
+      "mas": 3.5
+     }
+    }
+   ],
+   "rotulos": [
+    {
+     "texto": "PDF o foto",
+     "en": 0.3,
+     "y": 620,
+     "lado": "der"
+    }
+   ]
+  },
+  {
+   "tipo": "app",
+   "frases": [
+    3,
+    3
+   ],
+   "tag": "API",
+   "titulo": "Una fila **por factura**",
+   "planos": [
+    {
+     "clip": "plant",
+     "foco": [
+      0.5,
+      0.66
+     ],
+     "zoom": 1.22,
+     "peso": 1,
+     "desde": {
+      "marca": "a",
+      "mas": 5.0
+     }
+    }
+   ],
+   "rotulos": [
+    {
+     "texto": "Google Sheets",
+     "en": 0.3,
+     "y": 1180,
+     "lado": "izq"
+    }
+   ]
+  },
+  {
+   "tipo": "app",
+   "frases": [
+    4,
+    4
+   ],
+   "tag": "API",
+   "titulo": "Total y NIF, **comprobados**",
+   "planos": [
+    {
+     "clip": "plant",
+     "foco": [
+      0.5,
+      0.4
+     ],
+     "zoom": 1.2,
+     "peso": 1,
+     "desde": {
+      "marca": "a",
+      "mas": 6.2
+     }
+    }
+   ],
+   "rotulos": []
+  },
+  {
+   "tipo": "app",
+   "frases": [
+    5,
+    5
+   ],
+   "tag": "API",
+   "titulo": "De **Drive** a un resumen",
+   "planos": [
+    {
+     "clip": "plant",
+     "foco": [
+      0.5,
+      0.35
+     ],
+     "zoom": 1.2,
+     "peso": 1,
+     "desde": {
+      "marca": "b",
+      "mas": 0.3
+     }
+    }
+   ],
+   "rotulos": [
+    {
+     "texto": "Resumen mensual por email",
+     "en": 0.3,
+     "y": 1180,
+     "lado": "izq"
+    }
+   ]
+  },
+  {
+   "tipo": "app",
+   "frases": [
+    6,
+    6
+   ],
+   "tag": "API",
+   "titulo": "Caja semanal en **Telegram**",
+   "planos": [
+    {
+     "clip": "plant",
+     "foco": [
+      0.5,
+      0.35
+     ],
+     "zoom": 1.2,
+     "peso": 1,
+     "desde": {
+      "marca": "c",
+      "mas": 0.3
+     }
+    }
+   ],
+   "rotulos": [
+    {
+     "texto": "Cada lunes",
+     "en": 0.3,
+     "y": 620,
+     "lado": "der"
+    }
+   ]
+  },
+  {
+   "tipo": "app",
+   "frases": [
+    7,
+    7
+   ],
+   "tag": "API",
+   "titulo": "Descargar, importar y **tu clave**",
+   "planos": [
+    {
+     "clip": "claves",
+     "foco": [
+      0.5,
+      0.75
+     ],
+     "zoom": 1.2,
+     "peso": 1,
+     "desde": {
+      "marca": "a",
+      "mas": 0.3
+     }
+    }
+   ],
+   "rotulos": []
+  },
+  {
+   "tipo": "cierre",
+   "frases": [
+    8,
+    8
+   ],
+   "tag": "NOKFI",
+   "linea1": "Envíaselo a quien copia facturas **a mano**",
+   "pie": "Plantillas en Desarrolladores → Plantillas"
+  }
+ ]
+}
