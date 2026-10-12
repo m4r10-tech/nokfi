@@ -1,0 +1,211 @@
+{
+ "id": "x004-puedo-contratar",
+ "carpeta": "004-puedo-contratar",
+ "titulo": "¿Puedes permitirte contratar a alguien?",
+ "ritmo": "sereno",
+ "transicion": "empuje",
+ "musica": "1-chill-lofi-theme.mp3",
+ "variantes": "A bucle abierto · B pregunta → respuesta · C pregunta en pantalla · D empuje · E sereno · F rótulos",
+ "texto": "Antes de contratar, mira cómo queda tu caja a 30, 60 y 90 días con ese sueldo dentro. Pruébalo gratis 14 días en nokfi.app\n\nCuenta de ejemplo con datos ficticios. Cálculos orientativos.\n\nGuárdalo para antes de firmar un contrato 📌\n\n#autonomos #pymes #contratar #tesoreria #emprendedores",
+ "subtitulos": {},
+ "escenas": [
+  {
+   "tipo": "pregunta",
+   "frases": [
+    0,
+    0
+   ],
+   "tag": "AUTÓNOMOS",
+   "titulo": "¿Puedes permitirte **contratar**?",
+   "lineas": 3,
+   "opciones": [
+    "Sí, claro",
+    "Ni idea",
+    "Depende de tu caja"
+   ],
+   "correcta": 2,
+   "revela": 0.62
+  },
+  {
+   "tipo": "app",
+   "frases": [
+    1,
+    1
+   ],
+   "tag": "AUTÓNOMOS",
+   "titulo": "Hoy, **6.200 €** en caja",
+   "planos": [
+    {
+     "clip": "prev",
+     "foco": [
+      0.3,
+      0.7
+     ],
+     "zoom": 1.24,
+     "peso": 1,
+     "desde": {
+      "marca": "a",
+      "mas": 0.3
+     }
+    }
+   ],
+   "rotulos": []
+  },
+  {
+   "tipo": "app",
+   "frases": [
+    2,
+    2
+   ],
+   "tag": "AUTÓNOMOS",
+   "titulo": "A 30, 60 y **90 días**",
+   "planos": [
+    {
+     "clip": "prev",
+     "foco": [
+      0.5,
+      0.75
+     ],
+     "zoom": 1.22,
+     "peso": 1,
+     "desde": {
+      "marca": "a",
+      "mas": 3.0
+     }
+    }
+   ],
+   "rotulos": [
+    {
+     "texto": "782,18 € a 90 días",
+     "en": 0.4,
+     "y": 620,
+     "lado": "der"
+    }
+   ]
+  },
+  {
+   "tipo": "app",
+   "frases": [
+    3,
+    3
+   ],
+   "tag": "AUTÓNOMOS",
+   "titulo": "Cobros, gastos e **impuestos**",
+   "planos": [
+    {
+     "clip": "prev",
+     "foco": [
+      0.5,
+      0.9
+     ],
+     "zoom": 1.12,
+     "peso": 1,
+     "desde": {
+      "marca": "a",
+      "mas": 5.2
+     }
+    }
+   ],
+   "rotulos": []
+  },
+  {
+   "tipo": "app",
+   "frases": [
+    4,
+    4
+   ],
+   "tag": "AUTÓNOMOS",
+   "titulo": "Pruebo un **escenario**",
+   "planos": [
+    {
+     "clip": "prev",
+     "foco": [
+      0.5,
+      0.72
+     ],
+     "zoom": 1.22,
+     "peso": 1,
+     "desde": {
+      "marca": "esc",
+      "mas": 0.0
+     }
+    }
+   ],
+   "rotulos": [
+    {
+     "texto": "Sueldo: 1.800 € al mes",
+     "en": 0.35,
+     "y": 600,
+     "lado": "der"
+    }
+   ]
+  },
+  {
+   "tipo": "app",
+   "frases": [
+    5,
+    5
+   ],
+   "tag": "AUTÓNOMOS",
+   "titulo": "La caja, en **rojo**",
+   "planos": [
+    {
+     "clip": "prev",
+     "foco": [
+      0.5,
+      0.66
+     ],
+     "zoom": 1.22,
+     "peso": 1,
+     "desde": {
+      "marca": "rojo",
+      "mas": 0.3
+     }
+    }
+   ],
+   "rotulos": [
+    {
+     "texto": "Bajas de 0 € el 1 de diciembre",
+     "en": 0.25,
+     "y": 1180,
+     "lado": "izq"
+    }
+   ]
+  },
+  {
+   "tipo": "app",
+   "frases": [
+    6,
+    6
+   ],
+   "tag": "AUTÓNOMOS",
+   "titulo": "Mejor verlo **aquí**",
+   "planos": [
+    {
+     "clip": "prev",
+     "foco": [
+      0.5,
+      0.75
+     ],
+     "zoom": 1.15,
+     "peso": 1,
+     "desde": {
+      "marca": "rojo",
+      "mas": 3.0
+     }
+    }
+   ],
+   "rotulos": []
+  },
+  {
+   "tipo": "cierre",
+   "frases": [
+    7,
+    7
+   ],
+   "tag": "NOKFI",
+   "linea1": "Guárdalo para antes de **firmar**",
+   "pie": "Cuenta de ejemplo · cálculos orientativos"
+  }
+ ]
+}

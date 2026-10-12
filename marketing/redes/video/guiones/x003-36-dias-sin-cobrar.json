@@ -1,0 +1,275 @@
+{
+ "id": "x003-36-dias-sin-cobrar",
+ "carpeta": "003-36-dias-sin-cobrar",
+ "titulo": "36 días sin pagarme una factura",
+ "ritmo": "medio",
+ "transicion": "lateral",
+ "musica": "1-chill-lofi-theme.mp3",
+ "variantes": "A resultado primero · B caso · C producto ya en acción · D lateral · E medio · F rótulos con cifras",
+ "texto": "Quién te debe dinero, cuánto y desde cuándo. Y recordatorios automáticos a los 7, 30 y 60 días, en tu nombre. Pruébalo gratis 14 días en nokfi.app\n\nCuenta de ejemplo con datos ficticios.\n\nEnvíaselo a quien odia reclamar facturas 👇\n\n#autonomos #facturas #impagos #cobros #emprendedores",
+ "subtitulos": {},
+ "escenas": [
+  {
+   "tipo": "app",
+   "frases": [
+    0,
+    0
+   ],
+   "tag": "AUTÓNOMOS",
+   "titulo": "**36 días** sin cobrar",
+   "planos": [
+    {
+     "clip": "cobros",
+     "foco": [
+      0.5,
+      0.5
+     ],
+     "zoom": 1.22,
+     "peso": 1,
+     "desde": {
+      "marca": "lista",
+      "mas": 0.4
+     },
+     "quieta": true
+    }
+   ],
+   "rotulos": [
+    {
+     "texto": "Vencida hace 36 días",
+     "en": 0.25,
+     "y": 620,
+     "lado": "der"
+    }
+   ]
+  },
+  {
+   "tipo": "app",
+   "frases": [
+    1,
+    1
+   ],
+   "tag": "AUTÓNOMOS",
+   "titulo": "Casi **2.300 €**",
+   "planos": [
+    {
+     "clip": "cobros",
+     "foco": [
+      0.6,
+      0.52
+     ],
+     "zoom": 1.25,
+     "peso": 1,
+     "desde": {
+      "marca": "lista",
+      "mas": 2.5
+     }
+    }
+   ],
+   "rotulos": [
+    {
+     "texto": "# €",
+     "en": 0.2,
+     "y": 1160,
+     "lado": "izq",
+     "cuenta": {
+      "hasta": 2286.9,
+      "dec": 2
+     }
+    }
+   ]
+  },
+  {
+   "tipo": "app",
+   "frases": [
+    2,
+    2
+   ],
+   "tag": "AUTÓNOMOS",
+   "titulo": "Quién, cuánto y **desde cuándo**",
+   "planos": [
+    {
+     "clip": "cobros",
+     "foco": [
+      0.5,
+      0.4
+     ],
+     "zoom": 1.12,
+     "peso": 1,
+     "desde": {
+      "marca": "a",
+      "mas": 0.3
+     }
+    }
+   ],
+   "rotulos": []
+  },
+  {
+   "tipo": "app",
+   "frases": [
+    3,
+    3
+   ],
+   "tag": "AUTÓNOMOS",
+   "titulo": "Lo que te **deben**",
+   "planos": [
+    {
+     "clip": "cobros",
+     "foco": [
+      0.5,
+      0.42
+     ],
+     "zoom": 1.25,
+     "peso": 1,
+     "desde": {
+      "marca": "a",
+      "mas": 1.6
+     }
+    }
+   ],
+   "rotulos": [
+    {
+     "texto": "4.948,90 € pendientes",
+     "en": 0.2,
+     "y": 620,
+     "lado": "izq"
+    },
+    {
+     "texto": "3.448,50 € vencidos",
+     "en": 0.6,
+     "y": 1150,
+     "lado": "der"
+    }
+   ]
+  },
+  {
+   "tipo": "app",
+   "frases": [
+    4,
+    4
+   ],
+   "tag": "AUTÓNOMOS",
+   "titulo": "Recordatorio **automático**",
+   "planos": [
+    {
+     "clip": "cobros",
+     "foco": [
+      0.4,
+      0.42
+     ],
+     "zoom": 1.2,
+     "peso": 1,
+     "desde": {
+      "marca": "auto",
+      "mas": 0.0
+     }
+    }
+   ],
+   "rotulos": []
+  },
+  {
+   "tipo": "app",
+   "frases": [
+    5,
+    5
+   ],
+   "tag": "AUTÓNOMOS",
+   "titulo": "Le escribe **por ti**",
+   "planos": [
+    {
+     "clip": "cobros",
+     "foco": [
+      0.5,
+      0.48
+     ],
+     "zoom": 1.2,
+     "peso": 1,
+     "desde": {
+      "marca": "auto2",
+      "mas": 0.2
+     }
+    }
+   ],
+   "rotulos": [
+    {
+     "texto": "7 días · amable",
+     "en": 0.3,
+     "y": 620,
+     "lado": "der"
+    }
+   ]
+  },
+  {
+   "tipo": "app",
+   "frases": [
+    6,
+    6
+   ],
+   "tag": "AUTÓNOMOS",
+   "titulo": "Le escribe **por ti**",
+   "planos": [
+    {
+     "clip": "cobros",
+     "foco": [
+      0.5,
+      0.5
+     ],
+     "zoom": 1.2,
+     "peso": 1,
+     "desde": {
+      "marca": "auto2",
+      "mas": 2.2
+     }
+    }
+   ],
+   "rotulos": [
+    {
+     "texto": "30 días · firme",
+     "en": 0.15,
+     "y": 620,
+     "lado": "der"
+    },
+    {
+     "texto": "60 días · formal",
+     "en": 0.55,
+     "y": 1150,
+     "lado": "izq"
+    }
+   ]
+  },
+  {
+   "tipo": "app",
+   "frases": [
+    7,
+    7
+   ],
+   "tag": "AUTÓNOMOS",
+   "titulo": "En tu **nombre**",
+   "planos": [
+    {
+     "clip": "cobros",
+     "foco": [
+      0.5,
+      0.6
+     ],
+     "zoom": 1.12,
+     "peso": 1,
+     "desde": {
+      "marca": "lista",
+      "mas": 4.0
+     }
+    }
+   ],
+   "rotulos": []
+  },
+  {
+   "tipo": "cierre",
+   "frases": [
+    8,
+    8
+   ],
+   "tag": "NOKFI",
+   "linea1": "Envíaselo a quien odia **reclamar**",
+   "pie": "Cuenta de ejemplo · cálculos orientativos"
+  }
+ ]
+}

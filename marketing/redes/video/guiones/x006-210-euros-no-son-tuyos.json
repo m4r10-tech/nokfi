@@ -1,0 +1,236 @@
+{
+ "id": "x006-210-euros-no-son-tuyos",
+ "carpeta": "006-210-euros-no-son-tuyos",
+ "titulo": "De esta factura, 210 € no son tuyos",
+ "ritmo": "medio",
+ "transicion": "lateral",
+ "musica": "3-music-promotion.mp3",
+ "variantes": "A llevar la contraria · B mito roto · C cifra gigante · D lateral · E medio · F rótulos",
+ "texto": "El IVA que cobras no es tuyo: lo guardas para Hacienda. Calculadora de IVA gratis, para añadirlo o quitarlo, en nokfi.app\n\nCálculo orientativo.\n\nEnvíaselo a ese amigo que se gasta el IVA 😬\n\n#autonomos #iva #facturas #hacienda #emprendedores",
+ "subtitulos": {},
+ "escenas": [
+  {
+   "tipo": "cifra",
+   "frases": [
+    0,
+    0
+   ],
+   "tag": "CALCULADORA",
+   "antetitulo": "De esta factura",
+   "valor": 210,
+   "decimales": 0,
+   "sufijo": "€",
+   "cuerpo": 300,
+   "titulo": "**no son tuyos**",
+   "fonoTop": 1100,
+   "fonoEscala": 0.94,
+   "planos": [
+    {
+     "clip": "iva1000",
+     "foco": [
+      0.5,
+      0.3
+     ],
+     "zoom": 1.0,
+     "peso": 1,
+     "desde": {
+      "marca": "r",
+      "mas": 0.5
+     },
+     "quieta": true
+    }
+   ]
+  },
+  {
+   "tipo": "app",
+   "frases": [
+    1,
+    1
+   ],
+   "tag": "CALCULADORA",
+   "titulo": "Facturas 1.000, cobras **1.210**",
+   "planos": [
+    {
+     "clip": "iva1000",
+     "foco": [
+      0.4,
+      0.4
+     ],
+     "zoom": 1.25,
+     "peso": 1,
+     "desde": {
+      "marca": "r",
+      "mas": 0.2
+     }
+    }
+   ],
+   "rotulos": [
+    {
+     "texto": "Total con IVA",
+     "en": 0.3,
+     "y": 620,
+     "lado": "der"
+    }
+   ]
+  },
+  {
+   "tipo": "app",
+   "frases": [
+    2,
+    2
+   ],
+   "tag": "CALCULADORA",
+   "titulo": "210 € son **IVA**",
+   "planos": [
+    {
+     "clip": "iva1000",
+     "foco": [
+      0.5,
+      0.47
+     ],
+     "zoom": 1.25,
+     "peso": 1,
+     "desde": {
+      "marca": "r",
+      "mas": 2.4
+     }
+    }
+   ],
+   "rotulos": [
+    {
+     "texto": "Los guardas para Hacienda",
+     "en": 0.3,
+     "y": 1170,
+     "lado": "izq"
+    }
+   ]
+  },
+  {
+   "tipo": "app",
+   "frases": [
+    3,
+    3
+   ],
+   "tag": "CALCULADORA",
+   "titulo": "Calculadora **gratis**",
+   "planos": [
+    {
+     "clip": "iva1000",
+     "foco": [
+      0.5,
+      0.25
+     ],
+     "zoom": 1.15,
+     "peso": 1,
+     "desde": {
+      "marca": "calc",
+      "mas": 0.1
+     }
+    }
+   ],
+   "rotulos": []
+  },
+  {
+   "tipo": "app",
+   "frases": [
+    4,
+    4
+   ],
+   "tag": "CALCULADORA",
+   "titulo": "Añadir o **quitar** IVA",
+   "planos": [
+    {
+     "clip": "ivaquitar",
+     "foco": [
+      0.5,
+      0.3
+     ],
+     "zoom": 1.18,
+     "peso": 1,
+     "desde": {
+      "marca": "calc",
+      "mas": 0.3
+     }
+    },
+    {
+     "clip": "ivaquitar",
+     "foco": [
+      0.5,
+      0.4
+     ],
+     "zoom": 1.22,
+     "peso": 1.2,
+     "desde": {
+      "marca": "r",
+      "mas": 0.3
+     }
+    }
+   ],
+   "rotulos": []
+  },
+  {
+   "tipo": "app",
+   "frases": [
+    5,
+    5
+   ],
+   "tag": "AUTÓNOMOS",
+   "titulo": "No te lo **gastes**",
+   "planos": [
+    {
+     "clip": "imp",
+     "foco": [
+      0.5,
+      0.22
+     ],
+     "zoom": 1.2,
+     "peso": 1,
+     "desde": {
+      "marca": "m303",
+      "mas": 0.8
+     }
+    }
+   ],
+   "rotulos": [
+    {
+     "texto": "Se paga cada trimestre",
+     "en": 0.3,
+     "y": 1160,
+     "lado": "izq"
+    }
+   ]
+  },
+  {
+   "tipo": "app",
+   "frases": [
+    6,
+    6
+   ],
+   "tag": "AUTÓNOMOS",
+   "titulo": "Apártalo al **cobrar**",
+   "planos": [
+    {
+     "clip": "imp",
+     "foco": [
+      0.5,
+      0.72
+     ],
+     "zoom": 1.2,
+     "peso": 1,
+     "desde": 1.5
+    }
+   ],
+   "rotulos": []
+  },
+  {
+   "tipo": "cierre",
+   "frases": [
+    7,
+    7
+   ],
+   "tag": "NOKFI",
+   "linea1": "Envíaselo a quien se **gasta el IVA**",
+   "pie": "Cuenta de ejemplo · cálculos orientativos"
+  }
+ ]
+}

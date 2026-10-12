@@ -1,0 +1,233 @@
+{
+ "id": "x005-cuota-de-autonomos",
+ "carpeta": "005-cuota-de-autonomos",
+ "titulo": "¿Cuánto vas a pagar de cuota de autónomos?",
+ "ritmo": "vivo",
+ "transicion": "corte",
+ "musica": "2-bit-shift.mp3",
+ "variantes": "A orden directa · B comparación · C título + producto · D corte seco · E vivo · F contador",
+ "texto": "Calculadora de cuota de autónomos 2026, gratis y sin cuenta, con tarifa plana incluida: nokfi.app\n\nCálculo orientativo; no sustituye a tu gestoría.\n\nEnvíaselo a quien está pensando en darse de alta 👇\n\n#autonomos #cuotadeautonomos #tarifaplana #emprender #freelance",
+ "subtitulos": {
+  "1": "Lo calculo gratis, sin cuenta, en nokfi.app"
+ },
+ "escenas": [
+  {
+   "tipo": "titulo",
+   "frases": [
+    0,
+    0
+   ],
+   "tag": "CALCULADORA",
+   "titulo": "¿Cuánto pagas de **cuota de autónomos**?",
+   "fonoTop": 1040,
+   "fonoEscala": 0.94,
+   "planos": [
+    {
+     "clip": "cuota2000_500",
+     "foco": [
+      0.5,
+      0.3
+     ],
+     "zoom": 1.0,
+     "peso": 1,
+     "desde": {
+      "marca": "r",
+      "mas": 0.5
+     },
+     "quieta": true
+    }
+   ]
+  },
+  {
+   "tipo": "app",
+   "frases": [
+    1,
+    1
+   ],
+   "tag": "CALCULADORA",
+   "titulo": "Gratis y **sin cuenta**",
+   "planos": [
+    {
+     "clip": "calcs",
+     "foco": [
+      0.5,
+      0.25
+     ],
+     "zoom": 1.12,
+     "peso": 1,
+     "desde": {
+      "marca": "a",
+      "mas": 0.3
+     }
+    }
+   ],
+   "rotulos": []
+  },
+  {
+   "tipo": "app",
+   "frases": [
+    2,
+    2
+   ],
+   "tag": "CALCULADORA",
+   "titulo": "Ingresos y **gastos**",
+   "planos": [
+    {
+     "clip": "cuota2000_500",
+     "foco": [
+      0.5,
+      0.2
+     ],
+     "zoom": 1.2,
+     "peso": 1,
+     "desde": {
+      "marca": "calc",
+      "mas": 0.2
+     }
+    }
+   ],
+   "rotulos": [
+    {
+     "texto": "2.000 € de ingresos",
+     "en": 0.2,
+     "y": 1150,
+     "lado": "izq"
+    },
+    {
+     "texto": "500 € de gastos",
+     "en": 0.6,
+     "y": 620,
+     "lado": "der"
+    }
+   ]
+  },
+  {
+   "tipo": "app",
+   "frases": [
+    3,
+    3
+   ],
+   "tag": "CALCULADORA",
+   "titulo": "Tu cuota: **unos 300 €**",
+   "planos": [
+    {
+     "clip": "cuota2000_500",
+     "foco": [
+      0.4,
+      0.4
+     ],
+     "zoom": 1.25,
+     "peso": 1,
+     "desde": {
+      "marca": "r",
+      "mas": 0.4
+     }
+    }
+   ],
+   "rotulos": [
+    {
+     "texto": "# € al mes",
+     "en": 0.2,
+     "y": 1160,
+     "lado": "izq",
+     "cuenta": {
+      "hasta": 302.65,
+      "dec": 2
+     }
+    }
+   ]
+  },
+  {
+   "tipo": "app",
+   "frases": [
+    4,
+    4
+   ],
+   "tag": "CALCULADORA",
+   "titulo": "Tramo y **rendimiento**",
+   "planos": [
+    {
+     "clip": "cuota2000_500",
+     "foco": [
+      0.5,
+      0.48
+     ],
+     "zoom": 1.2,
+     "peso": 1,
+     "desde": {
+      "marca": "r",
+      "mas": 2.5
+     }
+    }
+   ],
+   "rotulos": []
+  },
+  {
+   "tipo": "app",
+   "frases": [
+    5,
+    5
+   ],
+   "tag": "CALCULADORA",
+   "titulo": "Tarifa plana: **80 €**",
+   "planos": [
+    {
+     "clip": "cuota2000_500",
+     "foco": [
+      0.4,
+      0.4
+     ],
+     "zoom": 1.25,
+     "peso": 1,
+     "desde": {
+      "marca": "plana",
+      "mas": 0.3
+     }
+    }
+   ],
+   "rotulos": [
+    {
+     "texto": "Primer año",
+     "en": 0.25,
+     "y": 620,
+     "lado": "der"
+    }
+   ]
+  },
+  {
+   "tipo": "app",
+   "frases": [
+    6,
+    6
+   ],
+   "tag": "CALCULADORA",
+   "titulo": "Cálculo **orientativo**",
+   "planos": [
+    {
+     "clip": "cuota2000_500",
+     "foco": [
+      0.5,
+      0.62
+     ],
+     "zoom": 1.1,
+     "peso": 1,
+     "desde": {
+      "marca": "plana",
+      "mas": 2.5
+     }
+    }
+   ],
+   "rotulos": []
+  },
+  {
+   "tipo": "cierre",
+   "frases": [
+    7,
+    7
+   ],
+   "tag": "NOKFI",
+   "linea1": "Envíaselo a quien va a **darse de alta**",
+   "pie": "Cuenta de ejemplo · cálculos orientativos"
+  }
+ ]
+}
