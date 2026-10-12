@@ -167,8 +167,9 @@ const JS = `(() => {
     },
     pregunta(p) {
       const h = zona.querySelector('h2'), os = [...zona.querySelectorAll('.op')];
-      h.style.opacity = ease(p / 0.1);
-      os.forEach((el, i) => { const a = ease((p - 0.12 - i * 0.1) / 0.1); el.style.opacity = a; el.style.transform = 'translateY(' + (1 - a) * 30 + 'px)';
+      const ya = (T.revela ?? 0.72) < 0.5;   // escena que continúa la pregunta: todo visible desde el principio
+      h.style.opacity = ya ? 1 : ease(p / 0.1);
+      os.forEach((el, i) => { const a = ya ? 1 : ease((p - 0.12 - i * 0.1) / 0.1); el.style.opacity = a; el.style.transform = 'translateY(' + (1 - a) * 30 + 'px)';
         const rev = p > (T.revela ?? 0.72); el.classList.toggle('si', rev && i === T.correcta); el.classList.toggle('no', rev && i !== T.correcta); if (rev && i !== T.correcta) el.style.opacity = 0.35; });
     },
     lista(p) {

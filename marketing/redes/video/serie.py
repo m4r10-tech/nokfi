@@ -32,7 +32,7 @@ def enfriar(objetivo=62, tope=900):
 
 
 def run(*a, **k):
-    # Cada orden pesada se PAUSA (SIGSTOP) si el equipo pasa de 74 °C y sigue al bajar de 62 °C.
+    # Cada orden pesada se PAUSA (SIGSTOP) si el equipo pasa de 70 °C y sigue al bajar de 60 °C.
     enfriar(66)
     p = subprocess.Popen(a, cwd=RAIZ, env=ENV, stdout=subprocess.PIPE, stderr=subprocess.STDOUT, text=True, start_new_session=True, **k)
     import threading
@@ -41,8 +41,8 @@ def run(*a, **k):
     parado = False
     while p.poll() is None:
         t = temperatura()
-        if not parado and t >= 74: os.killpg(p.pid, signal.SIGSTOP); parado = True
-        elif parado and t <= 62: os.killpg(p.pid, signal.SIGCONT); parado = False
+        if not parado and t >= 70: os.killpg(p.pid, signal.SIGSTOP); parado = True
+        elif parado and t <= 60: os.killpg(p.pid, signal.SIGCONT); parado = False
         time.sleep(2)
     hilo.join(5)
     return ''.join(salida).strip()

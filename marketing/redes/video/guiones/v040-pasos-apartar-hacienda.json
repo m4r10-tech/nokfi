@@ -27,10 +27,11 @@
    "locucion": "Uno: subes tus facturas y la inteligencia artificial las apunta."
   },
   {
-   "clip": "impnav",
-   "marca": "inicio",
+   "clip": "imp",
+   "marca": "a",
    "voz": "Dos: abres Finanzas, Impuestos.",
-   "desplaza": 0.6
+   "congelar": true,
+   "y": 0.35
   },
   {
    "clip": "imp",

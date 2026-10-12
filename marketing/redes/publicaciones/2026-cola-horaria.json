@@ -73,7 +73,9 @@
     "titulo": "Este flujo de n8n lee tus facturas solo",
     "ia": true,
     "texto": "n8n + Nokfi: las facturas del correo, leídas y apuntadas en tu hoja. Nokfi comprueba que el total cuadra y que el NIF es válido; la plantilla viene hecha 🤖 (respuesta real de la API en modo prueba)\n\nEnvíaselo a quien vive dentro de n8n 👇\n\n#n8n #automatizacion #nocode #googlesheets #facturas",
-    "aprobado": true
+    "aprobado": true,
+    "buffer_id": "6accc4bc5e5ffb1101e49f1c",
+    "buffer_estado": "programada"
   },
   {
     "id": "v016-nota-a-mi-negocio-tt",

@@ -4,6 +4,7 @@
 # prioridad mínima y se pausa sola si el equipo se calienta (serie.py). Quitar: crontab -e y borrar la línea.
 cd "$(dirname "$0")/../../.." || exit 1
 export PATH="$HOME/.nvm/versions/node/v24.20.0/bin:$PATH"
+[ -f marketing/redes/salida/SERIE-EN-PAUSA ] && exit 0   # pausa manual: borrar ese archivo para seguir
 exec 8>/tmp/nokfi-serie-produccion.lock; flock -n 8 || exit 0
 IDS=$(python3 - <<'PY'
 import glob, json, os
