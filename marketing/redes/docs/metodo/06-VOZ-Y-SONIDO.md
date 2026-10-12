@@ -21,8 +21,13 @@
 - El audio se alinea con el texto mediante reconocimiento de voz y se corta frase a frase
   por el punto más silencioso entre dos frases.
 - Se guardan los tiempos **de cada palabra**: los subtítulos van con la palabra, no con la frase.
-- Entre frases, **0,30 s** de silencio. Antes de la primera, 0,3 s (el primer fotograma llega
-  antes que la voz).
+- Entre frases se respeta **la pausa del locutor**, acotada entre 0,28 y 0,50 s. Antes de la
+  primera, 0,3 s (el primer fotograma llega antes que la voz).
+- **Si el locutor dijo dos líneas de corrido, no se separan**: un silencio metido ahí se oye
+  como un corte.
+- El final de cada frase conserva 90 ms de cola y todo trozo entra y sale con fundido.
+- Tras «:» hay pausa: si falta, se abre una de 0,24 s.
+- Cada frase se guarda suelta, para poder sustituir una sola.
 - Velocidad: tal cual se grabó o, como mucho, un 6 % más rápida sin cambiar el tono.
 
 ## 4. Revisión automática (obligatoria)
@@ -39,7 +44,7 @@ Una frase que no pasa se vuelve a locutar; no se parchea en el montaje.
 
 | Pista | Nivel | Notas |
 |---|---|---|
-| Voz | −15 LUFS, pico −1,5 dB | siempre delante |
+| Voz | −15 LUFS, pico −1,5 dB | siempre delante; **ganancia fija**, nunca normalización automática sobre la marcha |
 | Música | 8-10 % del volumen | entra en 0,8 s, se va en 1,4 s; sin letra |
 | Efectos | 25-75 % según el efecto | nunca tapan una sílaba |
 

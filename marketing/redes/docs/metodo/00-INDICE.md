@@ -20,6 +20,8 @@
 | 08 | [PUBLICACIÓN](08-PUBLICACION.md) | ¿Cuándo, cada cuánto y con qué texto? |
 | 09 | [CONTROL DE CALIDAD](09-CONTROL-DE-CALIDAD.md) | ¿Qué se comprueba antes de dar un vídeo por terminado? |
 | 10 | [APRENDIZAJE](10-APRENDIZAJE.md) | ¿Cómo se decide qué repetir y qué dejar de hacer? |
+| 11 | [LECCIONES](11-LECCIONES.md) | ¿Qué se ha corregido ya y qué regla lo evita? **Se relee antes de cada lote** |
+| 12 | [FORMATOS](12-FORMATOS.md) | ¿Qué diez maneras completas hay de estructurar, editar y desarrollar un vídeo? |
 
 ## Las siete ideas que sostienen el método
 
@@ -29,6 +31,8 @@
 3. **Una idea por plano, un plano cada 2-4 segundos.**
 4. **La cámara señala.** Lo que se nombra se acerca, se resalta o se rotula en ese momento.
 5. **Aire y letra contenida.** Márgenes siempre; el texto se lee, no grita.
-6. **Marca fija, forma variable.** Colores, tipografía y cierre no cambian; gancho,
-   estructura, movimiento y ritmo rotan (documento 05).
+6. **Marca fija, forma variable.** Colores, tipografía y cierre no cambian; el **formato**
+   cambia de un vídeo a otro (documento 12) y dentro de él rotan gancho y ritmo (documento 05).
 7. **Lotes pequeños con visto bueno.** Un defecto no aprobado se multiplica por todos.
+8. **Cada corrección se vuelve norma** (documento 11): lo que se arregla a mano una vez, la
+   siguiente lo comprueba una herramienta.

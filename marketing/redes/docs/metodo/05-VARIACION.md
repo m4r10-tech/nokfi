@@ -9,9 +9,14 @@ La solución: **unas cosas no se tocan nunca y otras rotan con método**.
 Tipografía y pesos · paleta y color por serie · producto enmarcado con aire · subtítulos
 (tamaño, sitio, palabra activa) · cierre · voz · criterio de calidad.
 
-## 2. Los seis mandos que rotan
+## 2. Primero el formato, luego los mandos
 
-Cada vídeo elige **una opción de cada mando**. La combinación se apunta en el registro.
+La variedad de verdad la da el **formato** (documento 12): diez recetas completas que
+cambian composición, estructura y desarrollo. Los mandos de abajo afinan **dentro** de un
+formato; por sí solos no bastan (lección I1: un vídeo con otra apertura y otra transición
+sobre la misma composición se ve igual).
+
+Cada vídeo elige un formato y **una opción de cada mando**. Todo se apunta en el registro.
 
 **A · Gancho** (documento 02): resultado primero · experto que explica · llevar la contraria ·
 cifra exacta · orden directa · bucle abierto · pregunta al espectador.

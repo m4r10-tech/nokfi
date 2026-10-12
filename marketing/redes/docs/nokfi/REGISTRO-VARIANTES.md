@@ -8,20 +8,41 @@
 |---|---|---|---|---|---|---|---|---|---|---|---|---|---|
 | x001 Todo Nokfi en 60 s | resultado + tiempo | recorrido | título + producto asomando | lateral con giro | medio | rótulos | 56 s | | | | | | |
 
-## Previstos (texto de voz escrito, sin montar)
+## Lotes 1 y 2 (voz cortada y revisada; pendientes de montar en su formato)
 
-| Vídeo | A | B | C (propuesta) | D (propuesta) | E | F |
-|---|---|---|---|---|---|---|
-| x002 Casi 6.000 el día 20 | cifra exacta | demostración directa | cifra gigante que cuenta | vertical | medio | contador |
-| x003 36 días sin cobrar | resultado primero | caso | producto ya en acción | lateral con giro | medio | rótulos con cifras |
-| x004 ¿Puedo contratar? | bucle abierto | pregunta → respuesta | pregunta en pantalla | empuje | sereno | gráfico |
-| x005 Cuota de autónomos | orden directa | comparación | título + producto | corte seco | vivo | dos columnas |
-| x006 210 € no son tuyos | llevar la contraria | mito roto | cifra gigante | lateral con giro | medio | antes/después |
-| x007 Tu precio por hora | experto que explica | lista de pasos | producto ya en acción | vertical | sereno | lista que se marca |
-| x008 NIF en una llamada | resultado primero | demostración directa | producto ya en acción | corte seco | vivo | terminal |
-| x009 n8n lee Gmail | resultado primero | problema → solución | mensaje o notificación | empuje | medio | flujo de nodos |
+Formatos de [`../metodo/12-FORMATOS.md`](../metodo/12-FORMATOS.md). Los ocho se montaron o se
+iban a montar como F1 con retoques; Mario vio x002 y pidió variedad real (lección I1).
 
-## Opciones construidas en el montador (`editor.mjs`)
+| Vídeo | Formato | Gancho | Velocidad | Voz |
+|---|---|---|---|---|
+| x002 Casi 6.000 el día 20 | **F2 La cifra** | cifra exacta | medio | OK · falta retoque de la frase 3 («Finanzas e Impuestos») |
+| x003 36 días sin cobrar | **F7 El caso** | resultado primero | medio | OK |
+| x004 ¿Puedo contratar? | **F6 Pregunta y respuesta** | bucle abierto | sereno | OK |
+| x005 Cuota de autónomos | **F8 Dos casos** | orden directa | medio-vivo | OK (el reconocedor oye «cincuenta» en «sin cuenta»: comprobar de oído) |
+| x006 210 € no son tuyos | **F3 El mito** | llevar la contraria | medio | OK |
+| x007 Tu precio por hora | **F4 Paso a paso** | experto que explica | sereno | OK |
+| x008 NIF en una llamada | **F10 Bajo el capó** | resultado primero | vivo | OK |
+| x009 n8n lee Gmail | **F5 Antes / ahora** | resultado primero | medio | OK |
+
+## Formatos construidos en el montador
+
+| Formato | Estado |
+|---|---|
+| F1 Recorrido | **construido y aprobado** (x001) |
+| F2 La cifra | pendiente (hay apertura de cifra y contador; falta la composición tipográfica con el producto en tarjeta) |
+| F3 El mito | pendiente |
+| F4 Paso a paso | pendiente |
+| F5 Antes / ahora | pendiente |
+| F6 Pregunta y respuesta | pendiente (hay la tarjeta de pregunta; falta cuenta atrás y plegado) |
+| F7 El caso | pendiente (hay un chat en `tarjetas.mjs`, de la etapa 1) |
+| F8 Dos casos | pendiente |
+| F9 Lista rápida | pendiente |
+| F10 Bajo el capó | pendiente (hay terminal y flujo en `tarjetas.mjs`, de la etapa 1) |
+
+Orden de construcción: F2 → F8 → F4 → F3 → F6 → F7 → F5 → F10 → F9. Cada formato se enseña
+primero en fotogramas fijos y luego en un vídeo, antes de usarlo en más.
+
+## Mandos construidos dentro de F1 (`editor.mjs`)
 
 | Mando | Construido (campo del guion) | Pendiente de construir |
 |---|---|---|

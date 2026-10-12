@@ -8,6 +8,8 @@ Tres puertas. Un vídeo que no pasa una no llega a la siguiente.
 - [ ] Ninguna frase con un silencio interno de más de 0,6 s.
 - [ ] Voz en torno a −15 LUFS; pico por debajo de −1 dB; sin saturación.
 - [ ] La música no tapa la voz y los efectos no caen sobre una sílaba.
+- [ ] Revisados los avisos del cortador: frases «sin pausa antes» y «pausas abiertas tras :».
+- [ ] Ganancia de voz fija en todo el vídeo.
 
 ## Puerta 2 · Fotogramas fijos (antes de montar entero)
 
@@ -35,7 +37,8 @@ Lo ve entero **una persona**, con sonido y sin él.
 - [ ] Los subtítulos van con la voz, palabra a palabra.
 - [ ] El cierre deja un segundo para leer la llamada a la acción.
 - [ ] Duración dentro de lo previsto por el guion.
-- [ ] El vídeo no se parece al anterior en gancho, estructura y apertura a la vez.
+- [ ] El formato es distinto al del vídeo anterior (documento 12).
+- [ ] Ninguna pausa o corte que suene a montaje entre dos frases.
 
 ## Defectos: qué se hace con ellos
 

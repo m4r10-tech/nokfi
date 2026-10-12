@@ -42,6 +42,11 @@ paso**; si se puede quitar sin que se note, sobra.
 - Una frase por línea; la línea es la unidad de corte y de escena.
 - Cifras **en letra y redondeadas** («casi seis mil euros»); la exacta va en pantalla.
 - Siglas y marcas como se dicen. El nombre del producto, al final de una frase corta.
+- **Se escribe como se habla**: una ruta de menú se dice con «e», «y» o «de» («Finanzas e
+  Impuestos»), no como una lista con comas.
+- Tras **dos puntos** va una pausa: usarlos solo donde se quiera una.
+- Cada línea acaba en **punto**: el locutor tiende a decir de corrido lo que no lo lleva.
+- Evitar expresiones que suenen como una cifra junto a cifras («sin registrarte», no «sin cuenta»).
 - Frases que se puedan decir de un tirón; una coma como mucho.
 - Tono de contárselo a alguien, en segunda persona o en primera («abro», «pongo», «me dice»).
 - Nada de «en este vídeo», «hoy vamos a ver», «no te lo vas a creer».
@@ -63,3 +68,5 @@ la misma llamada del cierre · 3-5 etiquetas (2 del público, 2 del tema, 1 de l
 - [ ] Todas las cifras están en esas grabaciones.
 - [ ] No promete nada que el producto no haga.
 - [ ] El gancho es de un tipo distinto al de los dos vídeos anteriores.
+- [ ] El formato (documento 12) es distinto al del vídeo anterior y encaja con el contenido.
+- [ ] Se han repasado las lecciones de voz (documento 11) sobre el texto.

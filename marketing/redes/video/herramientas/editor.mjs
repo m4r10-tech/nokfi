@@ -19,7 +19,7 @@
  */
 import fs from 'node:fs';
 import path from 'node:path';
-import { execFileSync } from 'node:child_process';
+import { execFileSync, spawnSync } from 'node:child_process';
 import { fileURLToPath } from 'node:url';
 import { createRequire } from 'node:module';
 
@@ -149,7 +149,11 @@ const FX = {
 for (const [n, [fuente, filtro]] of Object.entries(FX)) sh('ffmpeg', ['-v', 'error', '-y', '-f', 'lavfi', '-i', fuente, '-af', filtro, '-ar', '48000', '-ac', '2', path.join(tmp, `${n}.wav`)]);
 const musica = path.join(VIDEO, 'recursos/musica', g.musica || fs.readdirSync(path.join(VIDEO, 'recursos/musica')).sort()[0]);
 const ent = ['-i', voz, '-stream_loop', '-1', '-i', musica];
-const fil = [`[1:a]adelay=${OFFSET * 1000}:all=1,loudnorm=I=-15:TP=-1.5:LRA=9,aresample=48000[v]`,
+// Volumen de la voz: una sola ganancia fija para todo el vídeo (medida antes). El ajuste automático de ffmpeg sube y
+// baja el volumen a mitad de frase y se oye como un corte (lección del 2026-10-12).
+const medida = spawnSync('ffmpeg', ['-hide_banner', '-nostats', '-i', voz, '-af', 'loudnorm=print_format=json', '-f', 'null', '-'], { encoding: 'utf8' }).stderr.match(/"input_i"\s*:\s*"(-?[\d.]+)"/);
+const GANANCIA = medida ? Math.max(-6, Math.min(10, -15 - parseFloat(medida[1]))) : 0;
+const fil = [`[1:a]adelay=${OFFSET * 1000}:all=1,volume=${GANANCIA.toFixed(2)}dB,aresample=48000[v]`,
   `[2:a]atrim=0:${total.toFixed(2)},volume=0.085,afade=t=in:d=0.8,afade=t=out:st=${(total - 1.4).toFixed(2)}:d=1.4,aresample=48000[m]`];
 efectos.forEach(([t, tipo], i) => { ent.push('-i', path.join(tmp, `${tipo}.wav`)); fil.push(`[${i + 3}:a]adelay=${Math.max(0, Math.round((t - 0.06) * 1000))}:all=1[e${i}]`); });
 fil.push(`[v][m]${efectos.map((_, i) => `[e${i}]`).join('')}amix=inputs=${efectos.length + 2}:normalize=0:duration=longest,alimiter=limit=0.95[a]`);

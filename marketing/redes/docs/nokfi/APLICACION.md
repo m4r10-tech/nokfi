@@ -165,11 +165,15 @@ Música: las tres pistas de [`musica-licencias.md`](musica-licencias.md).
 - **Etapa 2 (desde el 12 oct.)**: voz de ElevenLabs por lotes, montador nuevo, entrega manual.
   `x001` es la base aprobada.
 
-## 11. Siguiente lote
+## 11. Dónde estamos
 
-1. Mario lee `lote-01/texto.txt` y `lote-02/texto.txt`, pide cambios o los locuta y deja el
-   audio en la misma carpeta.
-2. Claude construye en el montador las opciones de variación que piden esos 8 vídeos
-   (`REGISTRO-VARIANTES.md`) y las enseña en fotogramas fijos.
-3. Montaje, control de calidad y visto bueno, vídeo a vídeo.
-4. Regrabar lo flojo de §4 cuando haga falta para un guion.
+- **x001** aprobado (F1 Recorrido). Tiene dos mejoras preparadas sin remontar.
+- **x002** montado como F1 y visto por Mario: correcciones de voz hechas (lecciones V1-V5) y
+  pendiente de rehacer en **F2 La cifra**. Falta que Mario locute la frase nueva
+  (`salida/lotes-voz/retoque-x002-frase-3/`).
+- **Lotes 1 y 2** (x002-x009): voz cortada con el cortador nuevo y revisada. Cada vídeo tiene
+  formato asignado en `REGISTRO-VARIANTES.md`.
+- **Siguiente**: construir los formatos en el orden del registro, enseñando cada uno en
+  fotogramas fijos, y montar cada vídeo en el suyo.
+
+Sustituir una frase: `…/partir_audio.py --retoque <id> <nº de frase> <audio> ["texto nuevo"]`.
