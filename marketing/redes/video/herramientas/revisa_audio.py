@@ -1,11 +1,11 @@
-"""marketing/redes/video/revisa_audio.py — sesión 13: revisión automática de la locución antes de publicar.
+"""marketing/redes/video/herramientas/revisa_audio.py — sesión 13: revisión automática de la locución antes de publicar.
 
 Como nadie escucha cada vídeo, un reconocedor de voz local (Whisper, gratis) transcribe cada frase
 locutada y se compara con lo que debía decir. También se mide el ritmo y los silencios raros.
 
 Uso (venv .asr):  .asr/bin/python revisa_audio.py <id> [<id> …]
 Lee voz/<id>.wav y voz/<id>.tiempos.json; escribe voz/<id>.revision.json y, por stdout, una línea por vídeo:
-  <id> OK            |  <id> MAL 3,5   (números de frase, desde 1, que hay que repetir con voz.mjs --repetir)
+  <id> OK            |  <id> MAL 3,5   (números de frase, desde 1, que hay que volver a locutar)
 Una frase falla si lo oído se parece poco a lo escrito, si va muy lenta o muy rápida, o si tiene un hueco largo.
 """
 import difflib
@@ -19,7 +19,7 @@ import unicodedata
 import numpy as np
 from faster_whisper import WhisperModel
 
-HERE = os.path.dirname(os.path.abspath(__file__))
+HERE = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))   # marketing/redes/video
 UMBRAL, RITMO_MIN, RITMO_MAX, HUECO_MAX = 0.80, 10.5, 22.0, 0.60
 RITMO_MIN_EXTERNA = 7.0
 

@@ -1,11 +1,11 @@
-"""marketing/redes/video/partir_audio.py — sesión 13: parte un audio largo locutado FUERA (ElevenLabs) en la voz de cada vídeo.
+"""marketing/redes/video/herramientas/partir_audio.py — sesión 13: parte un audio largo locutado FUERA (ElevenLabs) en la voz de cada vídeo.
 
 El usuario pega marketing/redes/salida/lotes-voz/lote-NN.txt en ElevenLabs y guarda el audio. Este guion lo
 transcribe con Whisper (marcas de tiempo por palabra), lo alinea con el texto del lote y corta cada frase.
 
 Uso (venv .asr, desde la raíz del repo):
-  marketing/redes/video/.asr/bin/python marketing/redes/video/partir_audio.py lote-01 /ruta/al/audio.mp3 [--prueba]
-Salida por vídeo: voz/<id>.wav + voz/<id>.tiempos.json (igual que voz.mjs) + voz/<id>.externa.json (calidad de la
+  marketing/redes/video/.asr/bin/python marketing/redes/video/herramientas/partir_audio.py lote-01 /ruta/al/audio.mp3 [--prueba]
+Salida por vídeo: voz/<id>.wav + voz/<id>.tiempos.json + voz/<id>.externa.json (calidad de la
 alineación). Una frase con menos del 80 % de palabras reconocidas deja el vídeo marcado como DUDOSO.
 --prueba no escribe en voz/: solo informa.
 """
@@ -21,7 +21,7 @@ from faster_whisper import WhisperModel
 sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
 from revisa_audio import normal  # misma normalización que la revisión de audio
 
-HERE = os.path.dirname(os.path.abspath(__file__))
+HERE = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))   # marketing/redes/video
 LOTES = os.path.join(HERE, '../salida/lotes-voz/lotes.json')
 SR, PAUSA = 44100, 0.30
 TEMPO = 1.06  # un punto más ágil que el original, sin cambiar el tono

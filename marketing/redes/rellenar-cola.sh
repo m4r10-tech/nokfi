@@ -1,9 +1,0 @@
-#!/bin/bash
-# marketing/redes/rellenar-cola.sh — sesión 13: Buffer gratis solo admite 10 publicaciones programadas.
-# SIN CRON desde el 2026-10-12 (Buffer lo gestiona el usuario; ver video/PRODUCCION.md §8). Uso manual: mantiene en Buffer las 10 aprobadas más próximas (buffer.mjs rellenar) y sube sus vídeos.
-# Registro en salida/cola.log. Quitar el cron: crontab -e y borrar la línea de rellenar-cola.sh.
-cd "$(dirname "$0")/../.." || exit 1
-export PATH="$HOME/.nvm/versions/node/v24.20.0/bin:$PATH"
-[ -f marketing/redes/salida/COLA-EN-PAUSA ] && exit 0   # cola en pausa: borrar ese archivo para reanudar
-exec 9>/tmp/nokfi-cola.lock; flock -n 9 || exit 0
-echo "$(date '+%F %H:%M') $(node marketing/redes/buffer.mjs rellenar 2>&1 | tail -6 | tr '\n' ' ')" >> marketing/redes/salida/cola.log

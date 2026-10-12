@@ -64,7 +64,7 @@ Páginas útiles para enlazar: `/calculadora-cuota-autonomos`, `/calculadora-iva
   N blanca sobre cuadrado azul (`icon-512.png`).
 - Capturas: siempre las **reales** de la app con la cuenta de ejemplo
   («Taller García», datos ficticios), y se dice que son de ejemplo.
-- Plantillas: `marketing/redes/plantillas/` (ver su README). Producción de vídeos: `marketing/redes/video/PRODUCCION.md`.
+- Plantillas: `marketing/redes/plantillas/` (ver su README). Producción de vídeos: `marketing/redes/docs/PRODUCCION.md`.
 
 ---
 

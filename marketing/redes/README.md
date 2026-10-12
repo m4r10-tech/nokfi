@@ -3,21 +3,18 @@
 Solo **TikTok** (@nokfi4), con vídeos de la app real. **Nada se publica sin el ok de Mario**,
 que es quien programa en Buffer.
 
-| Qué | Dónde |
+| Carpeta | Qué hay |
 |---|---|
-| **Cómo se produce un vídeo** (norma de trabajo) | [`video/PRODUCCION.md`](video/PRODUCCION.md) |
-| **En qué paso está cada vídeo** | [`video/ESTADO.md`](video/ESTADO.md) (`python3 marketing/redes/video/estado.py`) |
-| Tono, bios, enlaces con UTM, lo que nunca decimos | `guia-estilo.md` |
-| Guiones y herramientas de vídeo | `video/` |
-| Vídeos terminados, audios de los lotes, hojas de contactos | `salida/` (no se versiona) |
-| Herramienta de Buffer (uso manual) | `buffer.mjs`, `rellenar-cola.sh` (sin cron) |
-| Registro de lo enviado a Buffer | `publicaciones/` |
-| Portadas | `plantillas/render.mjs` |
-| Página local para repasar publicaciones | `revision.py` |
-| Etapa de imágenes para X/Instagram (abandonada) | `archivo/imagenes-x-instagram/` |
+| `docs/` | [`PRODUCCION.md`](docs/PRODUCCION.md) (norma de trabajo), [`ESTADO.md`](docs/ESTADO.md) (en qué paso está cada vídeo), `guia-estilo.md`, `musica-licencias.md` |
+| `video/guiones/` | un JSON por vídeo |
+| `video/herramientas/` | montaje, tarjetas, corte y revisión de la voz, tablero |
+| `video/recursos/` | fuentes y música |
+| `video/voz/` | audio de cada vídeo (no se versiona) |
+| `plantillas/` | portadas |
+| `buffer/` | herramienta de Buffer (uso manual), claves (`.env`, no se versiona) y registro de lo enviado |
+| `salida/` | vídeos terminados, audios de los lotes y hojas de contactos (no se versiona) |
 
-Claves: `cp .env.example .env` y Mario escribe ahí la de Buffer. El `.env` no se versiona
-ni se pega en ningún chat.
+Tablero al día: `python3 marketing/redes/video/herramientas/estado.py`
 
 ## Medición
 

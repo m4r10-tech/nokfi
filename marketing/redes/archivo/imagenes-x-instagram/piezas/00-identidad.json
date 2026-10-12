@@ -1,5 +1,0 @@
-[
-  { "id": "00-perfil", "formato": "cuadrado", "laminas": [ { "plantilla": "perfil" } ] },
-  { "id": "00-cabecera-x", "formato": "cabecera", "laminas": [
-    { "plantilla": "cabecera", "titulo": "Tus números de autónomo, **claros**.", "texto": "Facturas, IVA, IRPF, cobros y caja · Para autónomos y pymes en España" } ] }
-]

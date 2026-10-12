@@ -1,10 +1,10 @@
 /**
- * marketing/redes/video/tarjetas.mjs — sesión 13: tarjetas animadas (terminal, flujo de
+ * marketing/redes/video/herramientas/tarjetas.mjs — sesión 13: tarjetas animadas (terminal, flujo de
  * nodos, chat con un agente, cifras) para los vídeos de API, MCP y n8n. Se dibujan con
  * HTML/CSS en Chromium, fotograma a fotograma, y quedan como un clip más del guion.
  *
- * Uso (desde la raíz del repo, DESPUÉS de voz.mjs: cada tarjeta dura lo que su frase):
- *   PLAYWRIGHT_CORE=… node marketing/redes/video/tarjetas.mjs marketing/redes/video/guiones/<id>.json
+ * Uso (desde la raíz del repo, DESPUÉS de cortar la voz con partir_audio.py: cada tarjeta dura lo que su frase):
+ *   PLAYWRIGHT_CORE=… node marketing/redes/video/herramientas/tarjetas.mjs marketing/redes/video/guiones/<id>.json
  * Salida: salida/video/<id>/clips/t<n>.mp4 + t<n>.json (n = posición de la escena), 1080×1920.
  *
  * En el guion, una escena con tarjeta lleva "tarjeta" en vez de "clip":
@@ -28,7 +28,7 @@ import { spawn } from 'node:child_process';
 import { fileURLToPath } from 'node:url';
 import { createRequire } from 'node:module';
 
-const HERE = path.dirname(fileURLToPath(import.meta.url));
+const HERE = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '..');   // marketing/redes/video
 const REDES = path.resolve(HERE, '..');
 const PUBLIC = path.resolve(REDES, '../../frontend/public');
 const W = 1080, H = 1920, FPS = 15;
@@ -252,7 +252,7 @@ function duraciones(g) {
 
 async function main() {
   const guionPath = process.argv[2];
-  if (!guionPath) throw new Error('Uso: node marketing/redes/video/tarjetas.mjs <guion.json>');
+  if (!guionPath) throw new Error('Uso: node marketing/redes/video/herramientas/tarjetas.mjs <guion.json>');
   const g = JSON.parse(fs.readFileSync(guionPath, 'utf8'));
   const dir = path.join(REDES, 'salida/video', g.id, 'clips');
   fs.mkdirSync(dir, { recursive: true });

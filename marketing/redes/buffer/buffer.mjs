@@ -1,22 +1,22 @@
 /**
- * marketing/redes/buffer.mjs — sesión 13: programar en Buffer lo aprobado.
+ * marketing/redes/buffer/buffer.mjs — sesión 13: programar en Buffer lo aprobado.
  *
  * Nada se publica sin el ok del usuario: solo se envían las publicaciones con
- * "aprobado": true en marketing/redes/publicaciones/<semana>.json, y cada una
+ * "aprobado": true en marketing/redes/buffer/publicaciones/<semana>.json, y cada una
  * guarda su "buffer_id" para no enviarla dos veces.
  *
- * Configuración en marketing/redes/.env (no se versiona):
+ * Configuración en marketing/redes/buffer/.env (no se versiona):
  *   BUFFER_API_KEY=…                      (publish.buffer.com → Settings → API)
  *   MEDIA_RSYNC_DEST=deploy@<vps>:~/nokfi/media-redes/
  *   MEDIA_BASE_URL=https://nokfi.app/api/redes-media     (opcional)
  *
  * Comandos (desde la raíz del repo):
- *   node marketing/redes/buffer.mjs canales                      → cuentas conectadas en Buffer
- *   node marketing/redes/buffer.mjs esquema                      → campos de createPost (comprobar la API)
- *   node marketing/redes/buffer.mjs revisar  <semana.json>       → qué se enviaría, sin enviar nada
- *   node marketing/redes/buffer.mjs subir    <semana.json>       → imágenes al VPS y comprobación de las URL
- *   node marketing/redes/buffer.mjs rellenar                     → mantiene en Buffer las 10 aprobadas más próximas de todos los archivos
- *   node marketing/redes/buffer.mjs programar <semana.json> [--borrador]
+ *   node marketing/redes/buffer/buffer.mjs canales                      → cuentas conectadas en Buffer
+ *   node marketing/redes/buffer/buffer.mjs esquema                      → campos de createPost (comprobar la API)
+ *   node marketing/redes/buffer/buffer.mjs revisar  <semana.json>       → qué se enviaría, sin enviar nada
+ *   node marketing/redes/buffer/buffer.mjs subir    <semana.json>       → imágenes al VPS y comprobación de las URL
+ *   node marketing/redes/buffer/buffer.mjs rellenar                     → mantiene en Buffer las 10 aprobadas más próximas de todos los archivos
+ *   node marketing/redes/buffer/buffer.mjs programar <semana.json> [--borrador]
  *        → crea en Buffer las aprobadas (con --borrador quedan como borrador en Buffer)
  *
  * Publicación: { "id", "red": "x|instagram|tiktok", "cuando": "2026-10-06T13:00" (hora de Madrid),
@@ -31,7 +31,7 @@ import { execFileSync } from 'node:child_process';
 import { fileURLToPath } from 'node:url';
 
 const HERE = path.dirname(fileURLToPath(import.meta.url));
-const SALIDA = path.join(HERE, 'salida');
+const SALIDA = path.resolve(HERE, '../salida');
 const API = 'https://api.buffer.com';
 const LIMITES = { x: 280, instagram: 2200, tiktok: 2200 };
 const SERVICIOS = { x: ['twitter', 'x'], instagram: ['instagram'], tiktok: ['tiktok'] };
@@ -48,7 +48,7 @@ cargarEnv();
 const MEDIA_BASE = (process.env.MEDIA_BASE_URL || 'https://nokfi.app/api/redes-media').replace(/\/+$/, '');
 
 async function gql(query, variables = {}) {
-  if (!process.env.BUFFER_API_KEY) throw new Error('Falta BUFFER_API_KEY en marketing/redes/.env');
+  if (!process.env.BUFFER_API_KEY) throw new Error('Falta BUFFER_API_KEY en marketing/redes/buffer/.env');
   const r = await fetch(API, {
     method: 'POST',
     headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${process.env.BUFFER_API_KEY}` },
@@ -72,7 +72,7 @@ function madridAUtc(local) {
 }
 
 function leerSemana(fich) {
-  if (!fich) throw new Error('Indica el archivo: marketing/redes/publicaciones/<semana>.json');
+  if (!fich) throw new Error('Indica el archivo: marketing/redes/buffer/publicaciones/<semana>.json');
   return { fich: path.resolve(fich), lista: JSON.parse(fs.readFileSync(path.resolve(fich), 'utf8')) };
 }
 
@@ -178,7 +178,7 @@ async function main() {
   }
 
   if (cmd === 'subir') {
-    if (!process.env.MEDIA_RSYNC_DEST) throw new Error('Falta MEDIA_RSYNC_DEST en marketing/redes/.env');
+    if (!process.env.MEDIA_RSYNC_DEST) throw new Error('Falta MEDIA_RSYNC_DEST en marketing/redes/buffer/.env');
     const piezas = [...new Set(lista.filter(p => p.pieza).map(p => p.pieza))];
     for (const pieza of piezas) {
       execFileSync('rsync', ['-az', '--chmod=D755,F644', `${path.join(SALIDA, pieza)}/`, `${process.env.MEDIA_RSYNC_DEST.replace(/\/?$/, '/')}${pieza}/`], { stdio: 'inherit' });
@@ -193,6 +193,7 @@ async function main() {
   }
 
   if (cmd === 'rellenar') {
+    if (fs.existsSync(path.join(SALIDA, '_control/COLA-EN-PAUSA'))) { console.log('Cola en pausa (salida/_control/COLA-EN-PAUSA): no se hace nada.'); return; }
     // Buffer gratis admite 10 programadas: aquí se mantienen en Buffer las 10 aprobadas más próximas de TODOS los
     // archivos de publicaciones/ (retira las más lejanas si hace falta) y se suben sus vídeos. Lo llama cron.
     const dir = path.join(HERE, 'publicaciones');

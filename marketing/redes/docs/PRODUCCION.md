@@ -4,7 +4,7 @@
 > está haciendo, se cambia lo que se está haciendo o se cambia este documento, pero no se
 > trabaja al margen. Última revisión: 2026-10-12.
 >
-> Estado de cada vídeo: [`ESTADO.md`](ESTADO.md) (lo genera `estado.py`).
+> Estado de cada vídeo: [`ESTADO.md`](ESTADO.md) (lo genera `video/herramientas/estado.py`).
 
 ## 1. Principios
 
@@ -34,31 +34,31 @@
 
 ## 3. Carpetas
 
+Ningún archivo suelto: cada cosa tiene su carpeta. Solo `README.md` vive en la raíz.
+
 ```
 marketing/redes/
-├── README.md              entrada: qué hay y dónde
-├── guia-estilo.md         tono, bios, enlaces, lo que nunca decimos
-├── buffer.mjs             herramienta de Buffer (uso manual, ver §8)
-├── publicaciones/         registro de lo enviado a Buffer (histórico)
-├── plantillas/            portadas (render.mjs)
-├── archivo/               etapa de imágenes para X/Instagram, abandonada
+├── README.md               entrada: qué hay y dónde
+├── docs/                   PRODUCCION.md (esto), ESTADO.md (tablero), guia-estilo.md, musica-licencias.md
 ├── video/
-│   ├── PRODUCCION.md      este documento
-│   ├── ESTADO.md          tablero (generado)
-│   ├── guiones/           un JSON por vídeo + _biblio.json (planos reutilizables)
-│   ├── voz/               audio por vídeo (no versionado)
-│   ├── musica/, fuentes/  recursos (licencias en musica-licencias.md)
-│   └── *.mjs, *.py        herramientas (ver §4)
-└── salida/                no versionado
-    ├── vNNN-…/            video.mp4, 01-portada.png, subtitulos.srt
-    ├── video/             grabaciones de la app (clips) y biblioteca de planos
-    ├── lotes-voz/         lote-NN.txt (texto) y lote-NN.mp3 (audio de Mario)
-    ├── _hojas/            hoja de contactos de cada vídeo (6 fotogramas)
-    ├── _registro/         registros antiguos
-    └── _archivo/          muestras de voz y piezas de imagen antiguas
+│   ├── guiones/            un JSON por vídeo + _biblio.json (planos reutilizables)
+│   ├── herramientas/       montar, tarjetas, serie, lotes_voz, partir_audio, revisa_audio, estado
+│   ├── recursos/           fuentes/ y musica/
+│   └── voz/                audio cortado por vídeo (no versionado)
+├── plantillas/             portadas (render.mjs)
+├── buffer/                 buffer.mjs, .env (claves) y publicaciones/ (registro de lo enviado)
+└── salida/                 no versionado
+    ├── vNNN-…/             video.mp4, 01-portada.png, subtitulos.srt
+    ├── video/              grabaciones de la app (clips) y biblioteca de planos
+    ├── lotes-voz/          lote-NN.txt (texto) y lote-NN.mp3 (audio de Mario)
+    ├── _hojas/             hoja de contactos de cada vídeo (6 fotogramas)
+    ├── _control/           COLA-EN-PAUSA, pendientes y dudosos
+    ├── _registro/          serie.log
+    └── _PAPELERA/          lo retirado en la limpieza; se puede borrar entero
 ```
 
 Nombres: `vNNN-tema-en-minusculas`. El número no se reutiliza aunque un vídeo se descarte.
+Un archivo nuevo va a su carpeta; si no encaja en ninguna, se crea la carpeta antes que el archivo.
 
 ## 4. El proceso, paso a paso
 
@@ -68,12 +68,12 @@ Cada paso tiene una condición de salida. Si no se cumple, no se pasa al siguien
 |---|---|---|---|
 | 1 | **Guion** | `guiones/<id>.json` | cumple §5 y todas las cifras están comprobadas en la app |
 | 2 | **Planos de la app** | `backend/scripts/redes-clips.js` | cada plano empieza en la pantalla útil, a tamaño real, sin datos reales |
-| 3 | **Texto del lote** | `lotes_voz.py` → `salida/lotes-voz/lote-NN.txt` | una frase por línea, cifras y siglas escritas como se dicen |
+| 3 | **Texto del lote** | `lotes_voz.py` → `salida/lotes-voz/lote-NN.txt` | una frase por línea; un lote ya repartido no se rehace |
 | 4 | **Locución** | Mario, en ElevenLabs → `lote-NN.mp3` | misma voz y mismos ajustes que el lote anterior |
 | 5 | **Corte** | `partir_audio.py lote-NN <audio>` | los 8 vídeos salen `OK` (ninguna frase por debajo del 80 %) |
 | 6 | **Revisión de audio** | `revisa_audio.py <id>…` | `OK`: lo que se oye es lo que dice el guion, sin huecos ni ritmo raro |
 | 7 | **Tarjetas** (si hay) | `tarjetas.mjs` | texto dentro de márgenes, datos reales |
-| 8 | **Montaje** | `montar.mjs` (o `serie.py --sin-cola <ids>`, que encadena 6-8 y vigila la temperatura) | `video.mp4` 1080×1920 con voz, música, subtítulos y portada |
+| 8 | **Montaje** | `serie.py <ids>` (encadena 6-8 y vigila la temperatura) | `video.mp4` 1080×1920 con voz, música, subtítulos y portada |
 | 9 | **Revisión visual** | hoja de `_hojas/` + lista de §7 | todos los puntos marcados |
 | 10 | **Visto bueno** | Mario ve los 8 vídeos | aprobado, o lista de cambios (se vuelve al paso que toque) |
 | 11 | **Publicación** | Mario, en Buffer | programado con la etiqueta de IA |
@@ -87,15 +87,15 @@ cd backend && PLAYWRIGHT_CORE=$(realpath ../../n8n-nodes-nokfi/node_modules/play
   node scripts/redes-clips.js ../marketing/redes/video/guiones/<id>.json
 
 # 3 · textos para locutar            5 · cortar el audio que deja Mario
-python3 marketing/redes/video/lotes_voz.py
-marketing/redes/video/.asr/bin/python marketing/redes/video/partir_audio.py lote-02 ~/Descargas/lote-02.mp3 --prueba
-marketing/redes/video/.asr/bin/python marketing/redes/video/partir_audio.py lote-02 ~/Descargas/lote-02.mp3
+python3 marketing/redes/video/herramientas/lotes_voz.py
+marketing/redes/video/.asr/bin/python marketing/redes/video/herramientas/partir_audio.py lote-02 ~/Descargas/lote-02.mp3 --prueba
+marketing/redes/video/.asr/bin/python marketing/redes/video/herramientas/partir_audio.py lote-02 ~/Descargas/lote-02.mp3
 
 # 6-8 · revisar, tarjetas y montar, despacio
-taskset -c 0,1 nice -n 19 ionice -c 3 python3 marketing/redes/video/serie.py --sin-cola <id> <id> …
+taskset -c 0,1 nice -n 19 ionice -c 3 python3 marketing/redes/video/herramientas/serie.py <id> <id> …
 
 # tablero                              ver los vídeos en el navegador
-python3 marketing/redes/video/estado.py
+python3 marketing/redes/video/herramientas/estado.py
 cd marketing/redes/salida && python3 -m http.server 8765 --bind 127.0.0.1
 ```
 
@@ -138,8 +138,7 @@ ficticios», una llamada a compartir y 3-5 etiquetas.
 ## 6. Norma de la voz
 
 - **Voz**: la de ElevenLabs que elige Mario, siempre la misma y con los mismos ajustes.
-  Castellano de España. La voz sintética antigua (Supertonic) queda solo como herramienta
-  de pruebas: no se publica nada nuevo con ella.
+  Castellano de España. Los motores de voz locales (Supertonic, Piper) se retiraron.
 - **Cómo se locuta**: un archivo por lote (`lote-NN.txt` entero, sin cambiar el orden ni
   saltarse líneas). Nombre del audio: `lote-NN.mp3`, en Descargas o en `salida/lotes-voz/`.
 - **Ritmo**: ágil sin correr. `partir_audio.py` acelera un 6 % sin cambiar el tono
@@ -179,18 +178,18 @@ pasa: se corrige el texto del lote y se vuelve a locutar esa parte.
 amarillo · plano estable, sin zoom continuo · toques visibles · cortes secos · barra de
 progreso opcional (`"barra": true`).
 
-**Música**: solo las pistas de `musica-licencias.md` (Pixabay, uso comercial, sin Content ID).
+**Música**: solo las pistas de `docs/musica-licencias.md` (Pixabay, uso comercial, sin Content ID).
 
 ## 8. Publicación
 
 - La lleva **Mario en Buffer**. No hay ningún proceso automático que programe, rellene o
-  retire publicaciones (el cron de `rellenar-cola.sh` está quitado desde el 2026-10-12).
+  retire publicaciones (no queda ningún cron desde el 2026-10-12).
 - Ritmo acordado: una publicación cada 4-5 horas (**09:00, 13:30, 18:00, 22:30**).
 - Buffer gratis admite **10 publicaciones programadas** y su API **250 peticiones al día**;
   por eso no se consulta en bucle.
-- `buffer.mjs` queda como herramienta manual, solo si Mario lo pide:
+- `buffer/buffer.mjs` queda como herramienta manual, solo si Mario lo pide:
   `revisar` (comprueba un archivo de publicaciones), `subir` (sube los vídeos al servidor) y
-  `programar`. `rellenar` no se usa mientras exista `salida/COLA-EN-PAUSA`.
+  `programar`. `rellenar` no hace nada mientras exista `salida/_control/COLA-EN-PAUSA`.
 - Para subir a mano: el vídeo está en `salida/<id>/video.mp4`, la portada en
   `01-portada.png` y el texto en el campo `texto` del guion.
 
@@ -202,8 +201,7 @@ Portátil de 4 núcleos, 8 GB y sin gráfica, que se apaga por calor.
 - Siempre `taskset -c 0,1 nice -n 19 ionice -c 3`.
 - `serie.py` detiene el trabajo a 70 °C y lo reanuda a 60 °C, y descansa entre vídeos.
 - Whisper a 2 hilos. Nada de modelos de voz grandes en local.
-- La producción en serie solo arranca sola si **no** existe `salida/SERIE-EN-PAUSA`
-  (`continuar-serie.sh`, cron cada 30 min). Hoy existe: todo se lanza a mano.
+- Nada arranca solo: no hay cron. Todo se lanza a mano y por lotes.
 
 ## 10. Aprendizajes
 

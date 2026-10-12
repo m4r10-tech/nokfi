@@ -1,17 +1,17 @@
 /**
- * marketing/redes/video/montar.mjs — sesión 13: edita un vídeo vertical para
+ * marketing/redes/video/herramientas/montar.mjs — sesión 13: edita un vídeo vertical para
  * TikTok/Reels a partir de un guion, los clips grabados de la app y, si están,
  * la voz (grabada por una persona) y la música.
  *
  * Uso (desde la raíz del repo, después de backend/scripts/redes-clips.js):
- *   PLAYWRIGHT_CORE=… node marketing/redes/video/montar.mjs marketing/redes/video/guiones/<id>.json
+ *   PLAYWRIGHT_CORE=… node marketing/redes/video/herramientas/montar.mjs marketing/redes/video/guiones/<id>.json
  *
  * Entrada:
  *   guion           escenas (clip + marca + frase de la voz), gancho y cierre
  *   salida/video/<id>/clips/*.mp4|json   grabaciones de la app (redes-clips.js)
  *   video/voz/<id>.(wav|m4a|mp3|ogg|opus)  voz leída del guion, con una pausa
  *                                         clara entre frases (opcional)
- *   video/musica/<archivo>                 "musica" del guion o la primera de la
+ *   video/recursos/musica/<archivo>                 "musica" del guion o la primera de la
  *                                         carpeta (opcional; con licencia de uso)
  * Salida (lista para buffer.mjs, pieza = <id>):
  *   salida/<id>/video.mp4       1080×1920, 30 fps, H.264 (~12 Mb/s) + AAC, −14 LUFS
@@ -31,10 +31,10 @@ import { fileURLToPath } from 'node:url';
 import { createRequire } from 'node:module';
 import os from 'node:os';
 
-const HERE = path.dirname(fileURLToPath(import.meta.url));
+const HERE = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '..');   // marketing/redes/video
 const REDES = path.resolve(HERE, '..');
 const SALIDA = path.join(REDES, 'salida');
-const FUENTES = path.join(HERE, 'fuentes');
+const FUENTES = path.join(HERE, 'recursos/fuentes');
 const W = 1080, H = 1920, FPS = 30;
 const PUBLIC = path.resolve(REDES, '../../frontend/public');
 // Franja de los subtítulos: por encima del texto de la publicación de TikTok y
@@ -161,7 +161,7 @@ async function dibujarTextos(estados, gancho, tmp) {
 
 async function main() {
   const guionPath = process.argv[2];
-  if (!guionPath) throw new Error('Uso: node marketing/redes/video/montar.mjs <guion.json>');
+  if (!guionPath) throw new Error('Uso: node marketing/redes/video/herramientas/montar.mjs <guion.json>');
   const g = JSON.parse(fs.readFileSync(guionPath, 'utf8'));
   const clipsDir = path.join(SALIDA, 'video', g.id, 'clips');
   const out = path.join(SALIDA, g.id);
@@ -171,7 +171,7 @@ async function main() {
 
   const frases = [...g.escenas.map(e => e.voz), g.cierre?.voz].filter(Boolean);
   const vozPath = ['wav', 'm4a', 'mp3', 'ogg', 'opus'].map(e => path.join(HERE, 'voz', `${g.id}.${e}`)).find(f => fs.existsSync(f));
-  const musDir = path.join(HERE, 'musica');
+  const musDir = path.join(HERE, 'recursos/musica');
   // MUSICA=<archivo> y SUFIJO=<texto> permiten probar varias pistas sin tocar el guion.
   const musPath = process.env.MUSICA ? path.join(musDir, process.env.MUSICA) : g.musica ? path.join(musDir, g.musica)
     : (fs.existsSync(musDir) ? fs.readdirSync(musDir).filter(n => /\.(mp3|m4a|wav|ogg)$/.test(n)).sort().map(n => path.join(musDir, n))[0] : null);
@@ -179,7 +179,7 @@ async function main() {
   // ── Tiempos de cada frase ──
   let tramos, vozTotal = 0;
   if (vozPath) {
-    // voz.mjs deja los tiempos exactos de cada frase; una voz grabada se corta por silencios.
+    // partir_audio.py deja los tiempos exactos de cada frase; una voz grabada se corta por silencios.
     const tj = vozPath.replace(/\.\w+$/, '.tiempos.json');
     const exactos = fs.existsSync(tj) ? JSON.parse(fs.readFileSync(tj, 'utf8')).tiempos : null;
     const r = exactos?.length === frases.length ? { tramos: exactos, total: dur(vozPath) } : tramosDeVoz(vozPath, frases.length);

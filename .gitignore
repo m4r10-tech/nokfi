@@ -22,9 +22,6 @@ docs/sesion*.md
 marketing/redes/salida/
 media-redes/
 marketing/redes/video/voz/
-marketing/redes/video/musica/*
-marketing/redes/video/.piper/
-marketing/redes/video/voces/
-marketing/redes/video/.supertonic/
+marketing/redes/video/recursos/musica/
 marketing/redes/video/.asr/
 __pycache__/

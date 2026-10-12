@@ -1,13 +1,13 @@
-"""marketing/redes/video/lotes_voz.py — sesión 13: textos para locutar FUERA (el usuario genera la voz en ElevenLabs).
+"""marketing/redes/video/herramientas/lotes_voz.py — sesión 13: textos para locutar FUERA (el usuario genera la voz en ElevenLabs).
 
-Uso (raíz del repo):  python3 marketing/redes/video/lotes_voz.py
+Uso (raíz del repo):  python3 marketing/redes/video/herramientas/lotes_voz.py
 Escribe marketing/redes/salida/lotes-voz/lote-NN.txt (≤ 2.400 caracteres cada uno: una frase por línea y una línea
 en blanco entre vídeos) y lotes.json (qué vídeos y frases lleva cada lote, para partir luego el audio con
 partir_audio.py). Orden: primero los vídeos que antes se publican.
 """
-import datetime, glob, json, os, re
+import datetime, glob, json, os, re, sys
 
-RAIZ = os.path.abspath(os.path.join(os.path.dirname(__file__), '../../..'))
+RAIZ = os.path.abspath(os.path.join(os.path.dirname(__file__), '../../../..'))
 G = os.path.join(RAIZ, 'marketing/redes/video/guiones')
 OUT = os.path.join(RAIZ, 'marketing/redes/salida/lotes-voz')
 MAX = 2400
@@ -23,9 +23,12 @@ def texto(frase):
 
 
 def main():
-    ahora = datetime.datetime.now().strftime('%Y-%m-%dT%H:%M')
+    # Los lotes ya repartidos no se tocan: el usuario locuta a partir de esos textos. Rehacerlos descuadraría sus audios.
+    if os.path.exists(os.path.join(OUT, 'lotes.json')) and '--rehacer' not in sys.argv:
+        return print('Ya hay lotes en salida/lotes-voz/. Para repartirlos de nuevo: --rehacer [--fecha AAAA-MM-DDTHH:MM]')
+    ahora = sys.argv[sys.argv.index('--fecha') + 1] if '--fecha' in sys.argv else datetime.datetime.now().strftime('%Y-%m-%dT%H:%M')
     orden, vistos = [], set()
-    pubs = [x for f in glob.glob(os.path.join(RAIZ, 'marketing/redes/publicaciones/*.json')) for x in json.load(open(f))]
+    pubs = [x for f in glob.glob(os.path.join(RAIZ, 'marketing/redes/buffer/publicaciones/*.json')) for x in json.load(open(f))]
     publicados = {x['pieza'] for x in pubs if x.get('aprobado') and x['cuando'] < ahora}
     for x in sorted([x for x in pubs if x.get('aprobado') and x['cuando'] >= ahora], key=lambda x: x['cuando']):
         if x['pieza'] not in vistos: orden.append(x['pieza']); vistos.add(x['pieza'])
