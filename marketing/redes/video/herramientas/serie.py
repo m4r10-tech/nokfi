@@ -2,7 +2,7 @@
 
 Uso (desde la raíz del repo):  python3 marketing/redes/video/herramientas/serie.py <id> [<id> …]
 Por cada guion con voz ya cortada (partir_audio.py): revisión automática del audio → tarjetas → montaje →
-hoja de contactos (salida/_hojas/<id>.png). No programa ni publica nada (ver docs/PRODUCCION.md).
+hoja de contactos (salida/_hojas/<id>.png). No programa ni publica nada (ver docs/nokfi/APLICACION.md).
 Un vídeo cuyo audio no pasa la revisión queda anotado como DUDOSO en salida/_control/serie-dudosos.txt.
 """
 import datetime, json, os, signal, subprocess, sys, time

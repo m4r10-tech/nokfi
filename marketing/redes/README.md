@@ -1,20 +1,19 @@
 # Redes sociales de Nokfi (sesión 13)
 
 Solo **TikTok** (@nokfi4), con vídeos de la app real. **Nada se publica sin el ok de Mario**,
-que es quien programa en Buffer.
+que es quien sube los vídeos.
 
 | Carpeta | Qué hay |
 |---|---|
-| `docs/` | [`PRODUCCION.md`](docs/PRODUCCION.md) (norma de trabajo), [`GANCHOS.md`](docs/GANCHOS.md) (métodos y ganchos con fuentes), [`PORTADAS.md`](docs/PORTADAS.md), `ESTADO.md`, `guia-estilo.md`, `musica-licencias.md` |
-| `video/guiones/` | un JSON por vídeo |
-| `video/herramientas/` | montaje, tarjetas, corte y revisión de la voz, tablero |
+| `docs/metodo/` | **El método**, válido para cualquier producto: [índice](docs/metodo/00-INDICE.md) · flujo · ganchos · guion · edición · variación · voz y sonido · portadas · publicación · control de calidad · aprendizaje |
+| `docs/nokfi/` | **Cómo lo aplicamos a Nokfi**: [`APLICACION.md`](docs/nokfi/APLICACION.md), banco de ganchos, registro de variantes, guía de estilo, música |
+| `video/guiones/` | un JSON por vídeo y el índice de grabaciones |
+| `video/herramientas/` | montador, corte y revisión de la voz |
 | `video/recursos/` | fuentes y música |
 | `video/voz/` | audio de cada vídeo (no se versiona) |
-| `plantillas/` | tarjeta de cierre |
+| `plantillas/` | tarjetas de imagen de la etapa 1 |
 | `buffer/` | `viaje.mjs` (modo viaje: Buffer automático solo cuando Mario lo pide), claves (`.env`, no se versiona) e historial |
 | `salida/` | `PARA-SUBIR/` (vídeos listos para arrastrar a TikTok), `SUBIDOS/`, grabaciones de la app y audios (no se versiona) |
-
-Tablero al día: `python3 marketing/redes/video/herramientas/estado.py`
 
 ## Medición
 

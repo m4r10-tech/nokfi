@@ -1,6 +1,6 @@
 """marketing/redes/video/herramientas/estado.py — sesión 13: tablero de la producción de vídeos.
 
-Recorre guiones/, voz/, salida/ y buffer/publicaciones/ y escribe marketing/redes/docs/ESTADO.md: en qué paso está cada
+Recorre guiones/, voz/, salida/ y buffer/publicaciones/ y escribe marketing/redes/docs/nokfi/ESTADO.md: en qué paso está cada
 vídeo y qué le falta. No toca nada más ni llama a Buffer.
 
 Uso (desde la raíz del repo):  python3 marketing/redes/video/herramientas/estado.py
@@ -48,7 +48,7 @@ for gp in sorted(glob.glob(os.path.join(V, 'guiones', 'v*.json'))):
     cuando = pub['cuando'].replace('T', ' ') if pub else ''
     filas.append(f"| {vid} | {g.get('metodo', '')[:38]} | {voz} | {audio} | {montado} | {cuando if publicado else ''} | {paso} |")
 
-with open(os.path.join(REDES, 'docs', 'ESTADO.md'), 'w') as f:
+with open(os.path.join(REDES, 'docs', 'nokfi', 'ESTADO.md'), 'w') as f:
     f.write(f"# Estado de la producción de vídeos\n\n> Generado por `estado.py` el {ahora.replace('T', ' ')}. No editar a mano: se sobrescribe.\n\n")
     f.write(f"**{len(filas)} guiones** · " + ' · '.join(f'{n} {k}' for k, n in sorted(cuenta.items(), key=lambda x: -x[1])) + '\n\n')
     f.write('«Publicado» sale de lo que se envió a Buffer con fecha ya pasada; lo que se publique a mano no aparece aquí.\n\n')
