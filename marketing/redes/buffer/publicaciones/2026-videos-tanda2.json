@@ -47,9 +47,7 @@
     "titulo": "¿Estás cobrando muy poco por hora?",
     "ia": true,
     "texto": "Calculadora de precio por hora para autónomos: gratis y sin registrarte, en nokfi.app 🧮 (cálculo orientativo)\n\nEnvíaselo a quien cobra demasiado barato 😬\n\n#autonomos #freelance #precioporhora #tarifas #emprendedores",
-    "aprobado": true,
-    "buffer_id": "6accc15e0b1f16abcb04e332",
-    "buffer_estado": "programada"
+    "aprobado": false
   },
   {
     "id": "v010-api-trimestre-tt",
@@ -60,8 +58,6 @@
     "titulo": "¿Y si tu agente de IA supiera cuánto IVA toca pagar?",
     "ia": true,
     "texto": "API de Nokfi: el resumen del trimestre (IVA, IRPF y total estimado) en una llamada, para n8n o tu agente de IA 🤖 (cuenta de ejemplo con datos ficticios)\n\nEnvíaselo a quien automatiza negocios 👇\n\n#n8n #automatizacion #api #agentesia #desarrolladores",
-    "aprobado": true,
-    "buffer_id": "6accc16032da9d8379eac4e6",
-    "buffer_estado": "programada"
+    "aprobado": false
   }
 ]
