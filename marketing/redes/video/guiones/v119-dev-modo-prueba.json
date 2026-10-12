@@ -1,0 +1,60 @@
+{
+ "id": "v119-dev-modo-prueba",
+ "titulo": "Probar una API: con miedo o con clave de prueba",
+ "metodo": "a mano contra la API: panel comparativo + Playground",
+ "barra": true,
+ "texto": "Claves de prueba en todos los planes: misma validación, datos de ejemplo y sin gastar cuota.\n\n#n8n #automatizacion #api #ia #desarrolladores",
+ "musica": "3-music-promotion.mp3",
+ "clips": [],
+ "escenas": [
+  {
+   "voz": "Probar una API de facturación con datos reales da miedo.",
+   "tarjeta": {
+    "tipo": "titulo",
+    "zona": "baja",
+    "lineas": [
+     "**A mano** o",
+     "con la API"
+    ],
+    "rotulo": "nokfi · API"
+   }
+  },
+  {
+   "voz": "Con la clave de prueba, misma validación y datos de ejemplo. Nada es real.",
+   "tarjeta": {
+    "tipo": "comparar",
+    "izq": {
+     "t": "A mano",
+     "items": [
+      "Gastar cuota en cada prueba",
+      "Datos reales en desarrollo",
+      "Facturas de mentira en el libro"
+     ]
+    },
+    "der": {
+     "t": "Con la API de Nokfi",
+     "items": [
+      "Clave nk_test_ en todos los planes",
+      "Datos de ejemplo realistas",
+      "Nada llega al libro"
+     ]
+    },
+    "rotulo": "nokfi · API",
+    "ritmo": 0.8
+   }
+  },
+  {
+   "clip": "claves",
+   "marca": "a",
+   "voz": "La creas en el panel, una por cliente o por flujo.",
+   "y": 0.35
+  }
+ ],
+ "cierre": {
+  "voz": "Envíaselo a quien prueba en producción.",
+  "titulo": "Envíaselo a quien prueba **en producción** 😅",
+  "texto": "nokfi.app · API con clave de prueba",
+  "boton": "Mira la documentación"
+ },
+ "gancho": "Probar una API: **con miedo** o con clave de prueba"
+}

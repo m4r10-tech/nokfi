@@ -1,0 +1,42 @@
+{
+ "id": "v088-cifra-90-dias",
+ "titulo": "90 días de caja, por adelantado",
+ "metodo": "cifra gigante + app",
+ "barra": true,
+ "texto": "Tu caja a 90 días, con cobros, gastos e impuestos. (cuenta de ejemplo con datos ficticios; cálculos orientativos)\n\n#autonomos #pymes #hacienda #emprendedores #negocio",
+ "musica": "2-bit-shift.mp3",
+ "clips": [],
+ "escenas": [
+  {
+   "voz": "Noventa días. Hasta ahí llega la previsión de caja.",
+   "tarjeta": {
+    "tipo": "datos",
+    "lineas": [
+     {
+      "n": "90",
+      "t": "días de caja, por adelantado"
+     }
+    ],
+    "rotulo": "nokfi · una cifra",
+    "ritmo": 0.5
+   }
+  },
+  {
+   "clip": "prev",
+   "marca": "a",
+   "voz": "Con lo que vas a cobrar, tus gastos fijos y los impuestos.",
+   "y": 0.35
+  },
+  {
+   "clip": "prev",
+   "marca": "rojo",
+   "voz": "Y pruebas un escenario antes de decidir.",
+   "y": 0.35
+  }
+ ],
+ "cierre": {
+  "voz": "Envíaselo a ese amigo que vive al día.",
+  "titulo": "Envíaselo a quien **vive al día** 👀",
+  "texto": "nokfi.app · 14 días gratis"
+ }
+}

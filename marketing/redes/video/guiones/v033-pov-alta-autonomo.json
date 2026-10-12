@@ -1,0 +1,40 @@
+{
+ "id": "v033-pov-alta-autonomo",
+ "titulo": "POV: te das de alta de autónomo y no sabes tu cuota",
+ "metodo": "POV narrado",
+ "barra": false,
+ "texto": "POV: te das de alta de autónomo y calculas tu cuota en 10 segundos. Gratis en nokfi.app 🧮 (cuenta de ejemplo con datos ficticios; cálculos orientativos)\n\n#autonomos #pymes #hacienda #emprendedores #negocio",
+ "musica": "1-chill-lofi-theme.mp3",
+ "clips": [],
+ "escenas": [
+  {
+   "clip": "cuota2000_500",
+   "marca": "r",
+   "voz": "Te das de alta y no sabes cuánto vas a pagar.",
+   "congelar": true
+  },
+  {
+   "clip": "cuota2000_500",
+   "marca": "calc",
+   "voz": "Pones ingresos y gastos."
+  },
+  {
+   "clip": "cuota2000_500",
+   "marca": "r",
+   "voz": "Tu tramo y tu cuota: **302 € al mes**.",
+   "locucion": "Tu tramo y tu cuota: trescientos dos euros al mes."
+  },
+  {
+   "clip": "cuota2000_500",
+   "marca": "plana",
+   "voz": "Primer año: **80 €** con tarifa plana.",
+   "locucion": "Primer año: ochenta euros con tarifa plana."
+  }
+ ],
+ "cierre": {
+  "voz": "Envíaselo a quien empieza de autónomo.",
+  "titulo": "Envíaselo a quien **empieza de autónomo** 🫡",
+  "texto": "nokfi.app · 14 días gratis"
+ },
+ "gancho": "POV: te das de alta de autónomo y **no sabes tu cuota**"
+}

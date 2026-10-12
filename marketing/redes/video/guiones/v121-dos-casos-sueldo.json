@@ -1,0 +1,43 @@
+{
+ "id": "v121-dos-casos-sueldo",
+ "titulo": "Dos sueldos y lo que cuestan de verdad",
+ "metodo": "dos casos comparados en la misma calculadora",
+ "barra": true,
+ "texto": "Lo que cuesta de verdad un empleado, con dos sueldos de ejemplo. Gratis y sin registro en nokfi.app 🧮 (cálculo orientativo)\n\n#autonomos #freelance #emprendedores #finanzas #negocio",
+ "musica": "2-bit-shift.mp3",
+ "clips": [],
+ "escenas": [
+  {
+   "clip": "emp18000",
+   "marca": "r",
+   "voz": "Un sueldo de 18.000 € al año.",
+   "locucion": "Un sueldo de dieciocho mil euros al año.",
+   "congelar": true
+  },
+  {
+   "clip": "emp18000",
+   "marca": "r",
+   "voz": "A la empresa le cuesta casi **24.000**.",
+   "locucion": "A la empresa le cuesta casi veinticuatro mil."
+  },
+  {
+   "clip": "emp30000",
+   "marca": "calc",
+   "voz": "Y uno de 30.000.",
+   "locucion": "Y uno de treinta mil."
+  },
+  {
+   "clip": "emp30000",
+   "marca": "r",
+   "voz": "Casi **40.000 €** al año.",
+   "locucion": "Casi cuarenta mil euros al año."
+  }
+ ],
+ "cierre": {
+  "voz": "Envíaselo a ese amigo que quiere contratar.",
+  "titulo": "Envíaselo a quien quiere **contratar** 👀",
+  "texto": "nokfi.app · calculadoras gratis",
+  "boton": "Haz tu cálculo gratis"
+ },
+ "gancho": "Dos sueldos y lo que **cuestan de verdad**"
+}

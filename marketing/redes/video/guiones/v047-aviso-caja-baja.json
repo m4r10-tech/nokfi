@@ -1,0 +1,44 @@
+{
+ "id": "v047-aviso-caja-baja",
+ "titulo": "El aviso que quieres recibir antes de quedarte sin caja",
+ "metodo": "notificación animada + app",
+ "barra": true,
+ "texto": "Previsión de caja a 90 días con aviso si vas a bajar de tu mínimo. (cuenta de ejemplo con datos ficticios; cálculos orientativos)\n\n#autonomos #pymes #hacienda #emprendedores #negocio",
+ "musica": "3-music-promotion.mp3",
+ "clips": [],
+ "escenas": [
+  {
+   "voz": "Mejor enterarte hoy que el día que no puedas pagar.",
+   "tarjeta": {
+    "tipo": "aviso",
+    "zona": "baja",
+    "avisos": [
+     {
+      "icono": "📉",
+      "t": "Tu caja va a bajar del mínimo",
+      "s": "Previsión a 90 días"
+     }
+    ],
+    "rotulo": "nokfi · avisos"
+   }
+  },
+  {
+   "clip": "prev",
+   "marca": "a",
+   "voz": "La previsión cuenta cobros, gastos fijos e impuestos.",
+   "y": 0.35
+  },
+  {
+   "clip": "prev",
+   "marca": "rojo",
+   "voz": "Y si la caja va a bajar de tu mínimo, lo ves con tiempo.",
+   "y": 0.35
+  }
+ ],
+ "cierre": {
+  "voz": "Envíaselo a ese amigo que vive al día.",
+  "titulo": "Envíaselo a quien **vive al día** 👀",
+  "texto": "nokfi.app · 14 días gratis"
+ },
+ "gancho": "El aviso que quieres recibir **antes** de quedarte sin caja"
+}

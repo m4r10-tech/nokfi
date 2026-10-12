@@ -1,0 +1,29 @@
+{
+ "id": "v069-pregunta-nota-negocio",
+ "titulo": "¿Qué nota le pones a tu negocio?",
+ "metodo": "pregunta al espectador: corto, pide comentario",
+ "barra": false,
+ "texto": "¿Qué nota le pones a tu negocio? 👇 (cuenta de ejemplo con datos ficticios; cálculos orientativos)\n\n#autonomos #pymes #hacienda #emprendedores #negocio",
+ "musica": "1-chill-lofi-theme.mp3",
+ "clips": [],
+ "escenas": [
+  {
+   "clip": "diag",
+   "marca": "nota",
+   "voz": "¿Qué nota le pondrías a cómo llevas tu negocio?",
+   "congelar": true
+  },
+  {
+   "clip": "diag",
+   "marca": "nota",
+   "voz": "A este le ha salido un **61 sobre 100**.",
+   "locucion": "A este le ha salido un sesenta y uno sobre cien."
+  }
+ ],
+ "cierre": {
+  "voz": "Te leo en comentarios.",
+  "titulo": "¿Y tú? **Te leo** en comentarios 👇",
+  "texto": "nokfi.app · 14 días gratis"
+ },
+ "gancho": "¿Qué nota le pones a **tu negocio**?"
+}

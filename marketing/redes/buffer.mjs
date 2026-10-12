@@ -15,6 +15,7 @@
  *   node marketing/redes/buffer.mjs esquema                      → campos de createPost (comprobar la API)
  *   node marketing/redes/buffer.mjs revisar  <semana.json>       → qué se enviaría, sin enviar nada
  *   node marketing/redes/buffer.mjs subir    <semana.json>       → imágenes al VPS y comprobación de las URL
+ *   node marketing/redes/buffer.mjs rellenar                     → mantiene en Buffer las 10 aprobadas más próximas de todos los archivos
  *   node marketing/redes/buffer.mjs programar <semana.json> [--borrador]
  *        → crea en Buffer las aprobadas (con --borrador quedan como borrador en Buffer)
  *
@@ -165,7 +166,7 @@ async function main() {
     return;
   }
 
-  const { fich: ruta, lista } = leerSemana(fich);
+  const { fich: ruta, lista } = cmd === 'rellenar' ? { fich: null, lista: [] } : leerSemana(fich);
 
   if (cmd === 'revisar') {
     for (const pub of lista) {
@@ -191,6 +192,41 @@ async function main() {
     return;
   }
 
+  if (cmd === 'rellenar') {
+    // Buffer gratis admite 10 programadas: aquí se mantienen en Buffer las 10 aprobadas más próximas de TODOS los
+    // archivos de publicaciones/ (retira las más lejanas si hace falta) y se suben sus vídeos. Lo llama cron.
+    const dir = path.join(HERE, 'publicaciones');
+    const archivos = fs.readdirSync(dir).filter(n => n.endsWith('.json')).map(n => ({ ruta: path.join(dir, n), lista: JSON.parse(fs.readFileSync(path.join(dir, n), 'utf8')) }));
+    const guardar = (a) => fs.writeFileSync(a.ruta, `${JSON.stringify(a.lista, null, 2)}\n`);
+    const futuras = archivos.flatMap(a => a.lista.map(pub => ({ a, pub })))
+      .filter(x => x.pub.aprobado && /^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}$/.test(x.pub.cuando || '') && new Date(madridAUtc(x.pub.cuando)) > Date.now() + 90000)
+      .sort((x, y) => x.pub.cuando.localeCompare(y.pub.cuando));
+    const primeras = futuras.slice(0, 10);
+    for (const x of futuras.slice(10)) {
+      if (!x.pub.buffer_id) continue;
+      try {
+        await gql(`mutation { deletePost(input: { id: ${JSON.stringify(x.pub.buffer_id)} }) { __typename } }`);
+        delete x.pub.buffer_id; delete x.pub.buffer_estado; guardar(x.a);
+        console.log(`↩ ${x.pub.id}: retirada de Buffer (vuelve cuando haya hueco)`);
+      } catch (e) { console.log(`– ${x.pub.id}: no se pudo retirar (${e.message.slice(0, 80)})`); }
+    }
+    const conectados = await canales();
+    let enviadas = 0;
+    for (const x of primeras) {
+      if (x.pub.buffer_id) continue;
+      const p = problemas(x.pub);
+      if (p.length) { console.log(`– ${x.pub.id}: no se envía (${p.join(' · ')})`); continue; }
+      try {
+        if (x.pub.pieza && process.env.MEDIA_RSYNC_DEST) execFileSync('rsync', ['-az', '--chmod=D755,F644', `${path.join(SALIDA, x.pub.pieza)}/`, `${process.env.MEDIA_RSYNC_DEST.replace(/\/?$/, '/')}${x.pub.pieza}/`], { stdio: 'ignore' });
+        const post = await crear(x.pub, await canalDe(x.pub.red, conectados), false);
+        x.pub.buffer_id = post.id; x.pub.buffer_estado = 'programada'; guardar(x.a);
+        console.log(`✓ ${x.pub.id} → ${x.pub.cuando}`);
+        enviadas++;
+      } catch (e) { console.log(`– ${x.pub.id}: ${e.message.slice(0, 140)}`); }
+    }
+    console.log(`${enviadas} enviadas · ${futuras.length} pendientes de publicarse en total.`);
+    return;
+  }
   if (cmd === 'programar') {
     const borrador = flags.includes('--borrador');
     const conectados = await canales();

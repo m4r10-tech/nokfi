@@ -1,0 +1,31 @@
+{
+ "id": "v066-pregunta-cuanto-tardan-en-pagarte",
+ "titulo": "¿Cuántos días tardan en pagarte?",
+ "metodo": "pregunta al espectador: corto, pide comentario",
+ "barra": false,
+ "texto": "¿Cuántos días tardan en pagarte? 👇 (cuenta de ejemplo con datos ficticios; cálculos orientativos)\n\n#autonomos #pymes #hacienda #emprendedores #negocio",
+ "musica": "1-chill-lofi-theme.mp3",
+ "clips": [],
+ "escenas": [
+  {
+   "clip": "cobros",
+   "marca": "a",
+   "voz": "¿Cuántos días tardan en pagarte tus clientes?",
+   "congelar": true,
+   "y": 0.35
+  },
+  {
+   "clip": "cobros",
+   "marca": "a",
+   "voz": "A este taller, **32 días** de media.",
+   "locucion": "A este taller, treinta y dos días de media.",
+   "y": 0.35
+  }
+ ],
+ "cierre": {
+  "voz": "Te leo en comentarios.",
+  "titulo": "¿Y tú? **Te leo** en comentarios 👇",
+  "texto": "nokfi.app · 14 días gratis"
+ },
+ "gancho": "¿Cuántos días tardan en **pagarte**?"
+}

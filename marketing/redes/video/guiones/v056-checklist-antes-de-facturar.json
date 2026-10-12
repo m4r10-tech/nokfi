@@ -1,0 +1,46 @@
+{
+ "id": "v056-checklist-antes-de-facturar",
+ "titulo": "Checklist antes de emitir una factura",
+ "metodo": "checklist animada + planos de la app",
+ "barra": true,
+ "texto": "Checklist antes de emitir una factura: NIF, IVA y retención. Herramientas gratis en nokfi.app ✅\n\n#autonomos #freelance #emprendedores #finanzas #negocio",
+ "musica": "3-music-promotion.mp3",
+ "clips": [],
+ "escenas": [
+  {
+   "voz": "Tres cosas que comprobar antes de emitir una factura.",
+   "tarjeta": {
+    "tipo": "lista",
+    "zona": "baja",
+    "items": [
+     "NIF comprobado",
+     "IVA correcto"
+    ],
+    "rotulo": "nokfi · checklist"
+   }
+  },
+  {
+   "clip": "nif",
+   "marca": "bien",
+   "voz": "Una: el NIF del cliente, validado.",
+   "desplaza": 1
+  },
+  {
+   "clip": "iva1000",
+   "marca": "r",
+   "voz": "Dos: el IVA, bien calculado.",
+   "locucion": "Dos: el iva, bien calculado."
+  },
+  {
+   "clip": "irpf1000",
+   "marca": "r",
+   "voz": "Y tres: la retención, si te toca."
+  }
+ ],
+ "cierre": {
+  "voz": "Guárdate este vídeo para cuando te haga falta.",
+  "titulo": "**Guárdalo** para tu próxima factura 📌",
+  "texto": "nokfi.app · 14 días gratis"
+ },
+ "gancho": "Checklist antes de **emitir una factura**"
+}

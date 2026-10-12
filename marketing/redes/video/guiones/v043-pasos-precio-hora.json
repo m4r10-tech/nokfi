@@ -1,0 +1,46 @@
+{
+ "id": "v043-pasos-precio-hora",
+ "titulo": "Tu precio por hora, en 3 pasos",
+ "metodo": "tutorial en 3 pasos: lista numerada + planos de la app",
+ "barra": true,
+ "texto": "Calcula tu precio por hora en tres pasos. Gratis y sin registro en nokfi.app 🧮 (cálculo orientativo)\n\n#autonomos #freelance #emprendedores #finanzas #negocio",
+ "musica": "2-bit-shift.mp3",
+ "clips": [],
+ "escenas": [
+  {
+   "voz": "Calcular tu precio por hora, bien, son tres pasos.",
+   "tarjeta": {
+    "tipo": "lista",
+    "zona": "baja",
+    "items": [
+     "Gastos y sueldo",
+     "Horas que facturas"
+    ],
+    "marca": "num",
+    "rotulo": "nokfi · en 3 pasos"
+   }
+  },
+  {
+   "clip": "hora44",
+   "marca": "calc",
+   "voz": "Uno: tus gastos fijos, tu sueldo y la cuota."
+  },
+  {
+   "clip": "hora44",
+   "marca": "horas",
+   "voz": "Dos: las horas que de verdad facturas al mes."
+  },
+  {
+   "clip": "hora44",
+   "marca": "r",
+   "voz": "Y tres: ahí tienes tu precio. En este ejemplo, **44 €**.",
+   "locucion": "Y tres: ahí tienes tu precio. En este ejemplo, cuarenta y cuatro euros."
+  }
+ ],
+ "cierre": {
+  "voz": "Envíaselo a ese amigo que cobra demasiado barato.",
+  "titulo": "Envíaselo a quien **cobra barato** 😬",
+  "texto": "nokfi.app · 14 días gratis"
+ },
+ "gancho": "Tu precio por hora, **en 3 pasos**"
+}

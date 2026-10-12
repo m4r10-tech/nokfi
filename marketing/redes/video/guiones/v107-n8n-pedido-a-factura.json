@@ -1,0 +1,72 @@
+{
+ "id": "v107-n8n-pedido-a-factura",
+ "titulo": "De un pedido a la factura, sin tocar nada",
+ "metodo": "flujo de nodos animado + app",
+ "barra": true,
+ "texto": "Nodo de n8n de Nokfi: emite facturas desde tus pedidos, con numeración correlativa y PDF. (flujo de ejemplo)\n\n#n8n #automatizacion #api #ia #desarrolladores",
+ "musica": "3-music-promotion.mp3",
+ "clips": [],
+ "escenas": [
+  {
+   "voz": "Entra un pedido y la factura sale sola, numerada y con su PDF.",
+   "tarjeta": {
+    "tipo": "flujo",
+    "zona": "baja",
+    "nodos": [
+     {
+      "icono": "🛒",
+      "t": "Pedido nuevo"
+     },
+     {
+      "icono": "N",
+      "t": "Nokfi",
+      "nokfi": true
+     },
+     {
+      "icono": "✉️",
+      "t": "Correo al cliente"
+     }
+    ],
+    "rotulo": "nokfi · n8n"
+   }
+  },
+  {
+   "voz": "El nodo de Nokfi la emite y la apunta en tu libro.",
+   "tarjeta": {
+    "tipo": "flujo",
+    "nodos": [
+     {
+      "icono": "🛒",
+      "t": "Pedido nuevo",
+      "s": "Tu tienda o tu formulario"
+     },
+     {
+      "icono": "N",
+      "t": "Nokfi · Emitir factura",
+      "s": "Numerada, con IVA y retención",
+      "nokfi": true
+     },
+     {
+      "icono": "✉️",
+      "t": "Correo al cliente",
+      "s": "Con el PDF adjunto"
+     }
+    ],
+    "rotulo": "nokfi · n8n"
+   }
+  },
+  {
+   "clip": "dev",
+   "marca": "a",
+   "voz": "Con el número de pedido como clave, nunca se emite dos veces.",
+   "y": 0.35
+  }
+ ],
+ "cierre": {
+  "voz": "Envíaselo a quien automatiza tiendas.",
+  "titulo": "Envíaselo a quien **automatiza** tiendas 🛒",
+  "texto": "nokfi.app · nodo y plantillas de n8n",
+  "boton": "Mira la documentación"
+ },
+ "gancho": "De un pedido a la factura, **sin tocar nada**"
+}

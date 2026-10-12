@@ -1,0 +1,51 @@
+{
+ "id": "v092-quiz-tarifa-plana",
+ "titulo": "¿Cuánto es la cuota con tarifa plana?",
+ "metodo": "quiz de tres opciones + comprobación en la calculadora",
+ "barra": true,
+ "texto": "Quiz: ¿cuánto es la cuota con tarifa plana? Calculadora gratis en nokfi.app 🧮\n\n#autonomos #freelance #emprendedores #finanzas #negocio",
+ "musica": "3-music-promotion.mp3",
+ "clips": [],
+ "escenas": [
+  {
+   "voz": "¿Cuánto paga de cuota un autónomo con tarifa plana?",
+   "tarjeta": {
+    "tipo": "pregunta",
+    "pregunta": "¿Cuánto es la cuota con tarifa plana?",
+    "opciones": [
+     "80 € al mes",
+     "200 € al mes",
+     "300 € al mes"
+    ],
+    "correcta": 0,
+    "revela": 2,
+    "rotulo": "nokfi · quiz"
+   }
+  },
+  {
+   "voz": "La respuesta es la a: ochenta euros al mes.",
+   "tarjeta": {
+    "tipo": "pregunta",
+    "pregunta": "¿Cuánto es la cuota con tarifa plana?",
+    "opciones": [
+     "80 € al mes",
+     "200 € al mes",
+     "300 € al mes"
+    ],
+    "correcta": 0,
+    "revela": 0.2,
+    "rotulo": "nokfi · quiz"
+   }
+  },
+  {
+   "clip": "cuota2000_500",
+   "marca": "plana",
+   "voz": "Durante los primeros doce meses."
+  }
+ ],
+ "cierre": {
+  "voz": "Envíaselo a ese amigo, a ver si acierta.",
+  "titulo": "Envíaselo, a ver si **acierta** 🤔",
+  "texto": "nokfi.app · 14 días gratis"
+ }
+}

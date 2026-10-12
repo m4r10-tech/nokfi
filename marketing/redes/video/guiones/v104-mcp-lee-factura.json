@@ -1,0 +1,67 @@
+{
+ "id": "v104-mcp-lee-factura",
+ "titulo": "Tu agente lee facturas y comprueba que cuadran",
+ "metodo": "chat con un agente (MCP) + cifras",
+ "barra": true,
+ "texto": "Servidor MCP de Nokfi: extrae facturas y valida totales, NIF, fecha y tipo de IVA. (conversación de ejemplo; la cifra es la que devuelve la herramienta)\n\n#n8n #automatizacion #api #ia #desarrolladores",
+ "musica": "3-music-promotion.mp3",
+ "clips": [],
+ "escenas": [
+  {
+   "voz": "Pásale una factura a tu agente y pídele que la revise.",
+   "tarjeta": {
+    "tipo": "chat",
+    "zona": "baja",
+    "mensajes": [
+     {
+      "de": "yo",
+      "texto": "Lee esta factura y dime si está bien"
+     }
+    ],
+    "rotulo": "nokfi · MCP"
+   }
+  },
+  {
+   "voz": "Nokfi extrae los datos, y comprueba el total y el NIF por su cuenta.",
+   "tarjeta": {
+    "tipo": "chat",
+    "mensajes": [
+     {
+      "de": "yo",
+      "texto": "Lee esta factura y dime si está bien"
+     },
+     {
+      "de": "tool",
+      "texto": "🔧 nokfi · extract_invoices"
+     },
+     {
+      "de": "ia",
+      "texto": "Recambios Norte, **1.018,94 €**. El total cuadra y el NIF es válido."
+     }
+    ],
+    "desde": 1,
+    "rotulo": "nokfi · MCP"
+   }
+  },
+  {
+   "voz": "Esa comprobación la hace Nokfi, no el modelo.",
+   "tarjeta": {
+    "tipo": "datos",
+    "lineas": [
+     {
+      "n": "5",
+      "t": "comprobaciones por factura"
+     }
+    ],
+    "rotulo": "nokfi · MCP"
+   }
+  }
+ ],
+ "cierre": {
+  "voz": "Envíaselo a quien automatiza contabilidad.",
+  "titulo": "Envíaselo a quien **automatiza** contabilidad 🤖",
+  "texto": "nokfi.app · servidor MCP",
+  "boton": "Mira la documentación"
+ },
+ "gancho": "Tu agente **lee facturas** y comprueba que cuadran"
+}

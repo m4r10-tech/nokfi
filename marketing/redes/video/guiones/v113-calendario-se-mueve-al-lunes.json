@@ -1,0 +1,43 @@
+{
+ "id": "v113-calendario-se-mueve-al-lunes",
+ "titulo": "¿El plazo cae en sábado? Pasa al lunes",
+ "metodo": "calendario animado + calendario real de la app",
+ "barra": true,
+ "texto": "Si el último día de un plazo cae en sábado o domingo, pasa al lunes: el calendario ya lo trae movido. (cuenta de ejemplo con datos ficticios; cálculos orientativos)\n\n#autonomos #iva #facturas #hacienda #emprendedores",
+ "musica": "3-music-promotion.mp3",
+ "clips": [],
+ "escenas": [
+  {
+   "voz": "¿El último día del plazo cae en sábado? Pasa al lunes.",
+   "tarjeta": {
+    "tipo": "calendario",
+    "mes": "Enero 2027",
+    "primer": 4,
+    "dias": 31,
+    "marcados": [
+     30
+    ],
+    "leyenda": "El **30** es sábado → pasa al lunes 1 de febrero",
+    "rotulo": "nokfi · calendario fiscal",
+    "ritmo": 0.7
+   }
+  },
+  {
+   "clip": "cal",
+   "marca": "plazos",
+   "voz": "En el calendario de Nokfi ya sale movido.",
+   "y": 0.35
+  },
+  {
+   "clip": "cal",
+   "marca": "a",
+   "voz": "Y ves cuántos días faltan para el siguiente.",
+   "y": 0.35
+  }
+ ],
+ "cierre": {
+  "voz": "Envíaselo a ese amigo que cuenta los días con los dedos.",
+  "titulo": "Envíaselo a quien **cuenta los días** 📅",
+  "texto": "nokfi.app · 14 días gratis"
+ }
+}

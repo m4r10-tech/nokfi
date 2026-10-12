@@ -1,0 +1,48 @@
+{
+ "id": "v058-checklist-fin-de-mes",
+ "titulo": "Checklist de fin de mes",
+ "metodo": "checklist animada + planos de la app",
+ "barra": true,
+ "texto": "Checklist de fin de mes: cobros, gastos fijos y caja. (cuenta de ejemplo con datos ficticios; cálculos orientativos)\n\n#autonomos #pymes #hacienda #emprendedores #negocio",
+ "musica": "2-bit-shift.mp3",
+ "clips": [],
+ "escenas": [
+  {
+   "voz": "Tres cosas que mirar cada fin de mes en tu negocio.",
+   "tarjeta": {
+    "tipo": "lista",
+    "zona": "baja",
+    "items": [
+     "Cobros pendientes",
+     "Gastos fijos"
+    ],
+    "rotulo": "nokfi · checklist"
+   }
+  },
+  {
+   "clip": "cobros",
+   "marca": "a",
+   "voz": "Una: lo que te deben.",
+   "y": 0.35
+  },
+  {
+   "clip": "fugas",
+   "marca": "a",
+   "voz": "Dos: tus gastos fijos.",
+   "congelar": true,
+   "y": 0.35
+  },
+  {
+   "clip": "prev",
+   "marca": "a",
+   "voz": "Y tres: cómo queda la caja.",
+   "y": 0.35
+  }
+ ],
+ "cierre": {
+  "voz": "Guárdate este vídeo para cuando te haga falta.",
+  "titulo": "**Guárdalo** para fin de mes 📌",
+  "texto": "nokfi.app · 14 días gratis"
+ },
+ "gancho": "Checklist de **fin de mes**"
+}

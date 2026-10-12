@@ -1,0 +1,40 @@
+{
+ "id": "v052-que-es-la-retencion",
+ "titulo": "¿Qué es la retención?",
+ "metodo": "glosario: título cinético + app",
+ "barra": true,
+ "texto": "La retención de IRPF en 15 segundos. Calculadora gratis en nokfi.app 🧮 (cálculo orientativo)\n\n#autonomos #iva #facturas #hacienda #emprendedores",
+ "musica": "2-bit-shift.mp3",
+ "clips": [],
+ "escenas": [
+  {
+   "voz": "¿Qué es la retención de una factura? Quince segundos.",
+   "tarjeta": {
+    "tipo": "titulo",
+    "lineas": [
+     "¿Qué es",
+     "la **retención**?"
+    ],
+    "rotulo": "nokfi · en 15 segundos",
+    "ritmo": 0.6
+   }
+  },
+  {
+   "clip": "irpf1000",
+   "marca": "calc",
+   "voz": "Es la parte de tu IRPF que tu cliente paga por ti.",
+   "locucion": "Es la parte de tu i erre pe efe que tu cliente paga por ti."
+  },
+  {
+   "clip": "irpf1000",
+   "marca": "r",
+   "voz": "De una factura de 1.000 €, se queda **150** y los ingresa en Hacienda.",
+   "locucion": "De una factura de mil euros, se queda ciento cincuenta y los ingresa en Hacienda."
+  }
+ ],
+ "cierre": {
+  "voz": "Envíaselo a ese amigo que no entiende sus facturas.",
+  "titulo": "Envíaselo a quien **no entiende sus facturas** 👀",
+  "texto": "nokfi.app · 14 días gratis"
+ }
+}

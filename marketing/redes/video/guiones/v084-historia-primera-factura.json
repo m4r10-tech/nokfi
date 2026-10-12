@@ -1,0 +1,34 @@
+{
+ "id": "v084-historia-primera-factura",
+ "titulo": "Mi primera factura estaba mal",
+ "metodo": "historia en tres actos, en primera persona",
+ "barra": true,
+ "texto": "Mi primera factura estaba mal: no llevaba retención. Calculadora gratis en nokfi.app 🧮\n\n#autonomos #iva #facturas #hacienda #emprendedores",
+ "musica": "1-chill-lofi-theme.mp3",
+ "clips": [],
+ "escenas": [
+  {
+   "clip": "irpf1000",
+   "marca": "r",
+   "voz": "Mi primera factura a una empresa estaba mal: no llevaba retención.",
+   "congelar": true
+  },
+  {
+   "clip": "irpf1000",
+   "marca": "calc",
+   "voz": "Nadie me había dicho que mi cliente tenía que retenerme una parte."
+  },
+  {
+   "clip": "irpf1000",
+   "marca": "r",
+   "voz": "Ahora la calculo antes: base, IVA, retención y lo que cobro.",
+   "locucion": "Ahora la calculo antes: base, iva, retención y lo que cobro."
+  }
+ ],
+ "cierre": {
+  "voz": "Envíaselo a ese amigo que acaba de empezar a facturar.",
+  "titulo": "Envíaselo a quien **empieza a facturar** 🫡",
+  "texto": "nokfi.app · 14 días gratis"
+ },
+ "gancho": "Mi primera factura **estaba mal**"
+}

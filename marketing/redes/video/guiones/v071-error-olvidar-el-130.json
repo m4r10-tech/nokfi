@@ -1,0 +1,41 @@
+{
+ "id": "v071-error-olvidar-el-130",
+ "titulo": "El error número 2 de los autónomos",
+ "metodo": "el error: título cinético + problema + solución",
+ "barra": true,
+ "texto": "El error número dos: olvidarse del modelo 130. (cuenta de ejemplo con datos ficticios; cálculos orientativos)\n\n#autonomos #iva #facturas #hacienda #emprendedores",
+ "musica": "3-music-promotion.mp3",
+ "clips": [],
+ "escenas": [
+  {
+   "voz": "El error número dos de los autónomos.",
+   "tarjeta": {
+    "tipo": "titulo",
+    "lineas": [
+     "El error",
+     "**nº 2**",
+     "de los autónomos"
+    ],
+    "rotulo": "nokfi · errores",
+    "ritmo": 0.55
+   }
+  },
+  {
+   "clip": "imp",
+   "marca": "m130",
+   "voz": "Acordarse del IVA y olvidarse del modelo 130.",
+   "locucion": "Acordarse del iva y olvidarse del modelo ciento treinta."
+  },
+  {
+   "clip": "imp",
+   "marca": "a",
+   "voz": "Aquí salen los dos sumados, para que no te pille.",
+   "y": 0.35
+  }
+ ],
+ "cierre": {
+  "voz": "Envíaselo a ese amigo que solo cuenta el IVA.",
+  "titulo": "Envíaselo a quien **solo cuenta el IVA** 🙃",
+  "texto": "nokfi.app · 14 días gratis"
+ }
+}

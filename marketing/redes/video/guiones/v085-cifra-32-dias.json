@@ -1,0 +1,42 @@
+{
+ "id": "v085-cifra-32-dias",
+ "titulo": "32 días tardan en pagarle",
+ "metodo": "cifra gigante + app",
+ "barra": true,
+ "texto": "Días medios de cobro: cuánto tardan en pagarte de verdad. (cuenta de ejemplo con datos ficticios; cálculos orientativos)\n\n#autonomos #pymes #hacienda #emprendedores #negocio",
+ "musica": "2-bit-shift.mp3",
+ "clips": [],
+ "escenas": [
+  {
+   "voz": "Treinta y dos días. Eso tardan, de media, en pagarle a este taller.",
+   "tarjeta": {
+    "tipo": "datos",
+    "lineas": [
+     {
+      "n": "32",
+      "t": "días tardan en pagarle"
+     }
+    ],
+    "rotulo": "nokfi · una cifra",
+    "ritmo": 0.5
+   }
+  },
+  {
+   "clip": "cobros",
+   "marca": "a",
+   "voz": "Sale solo de sus facturas cobradas.",
+   "y": 0.35
+  },
+  {
+   "clip": "cobros",
+   "marca": "lista",
+   "voz": "Y debajo, quién le debe hoy.",
+   "y": 0.35
+  }
+ ],
+ "cierre": {
+  "voz": "Envíaselo a ese amigo que no sabe cuánto tardan en pagarle.",
+  "titulo": "Envíaselo a quien **espera cobros** ⏳",
+  "texto": "nokfi.app · 14 días gratis"
+ }
+}

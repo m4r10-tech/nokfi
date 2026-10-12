@@ -1,0 +1,39 @@
+{
+ "id": "v032-pov-gestor-pide-facturas",
+ "titulo": "POV: tu gestor te pide las facturas del trimestre",
+ "metodo": "POV narrado",
+ "barra": false,
+ "texto": "POV: tu gestor te pide las facturas y las tienes en un toque 📒 (cuenta de ejemplo con datos ficticios; cálculos orientativos)\n\n#autonomos #pymes #hacienda #emprendedores #negocio",
+ "musica": "3-music-promotion.mp3",
+ "clips": [],
+ "escenas": [
+  {
+   "clip": "libro",
+   "marca": "a",
+   "voz": "Tu gestor te pide las facturas del trimestre.",
+   "congelar": true
+  },
+  {
+   "clip": "libro",
+   "marca": "lista",
+   "voz": "Están todas aquí, con su IVA."
+  },
+  {
+   "clip": "libro",
+   "marca": "arriba",
+   "voz": "Un toque: **PDF o Excel**."
+  },
+  {
+   "clip": "libro",
+   "marca": "arriba",
+   "voz": "Y sigues con lo tuyo.",
+   "congelar": true
+  }
+ ],
+ "cierre": {
+  "voz": "Envíaselo a quien vive en Excel.",
+  "titulo": "Envíaselo a quien **vive en Excel** 😅",
+  "texto": "nokfi.app · 14 días gratis"
+ },
+ "gancho": "POV: tu gestor te pide **las facturas del trimestre**"
+}

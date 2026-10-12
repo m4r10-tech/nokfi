@@ -1,0 +1,76 @@
+{
+ "id": "v105-n8n-drive-resumen-mensual",
+ "titulo": "El resumen de facturas del mes, sin abrir nada",
+ "metodo": "flujo de nodos animado + app",
+ "barra": true,
+ "texto": "Plantilla de n8n: de una carpeta de Drive a un resumen mensual por correo. (cuenta de ejemplo)\n\n#n8n #automatizacion #api #ia #desarrolladores",
+ "musica": "1-chill-lofi-theme.mp3",
+ "clips": [],
+ "escenas": [
+  {
+   "voz": "El día uno de cada mes, el resumen de tus facturas llega solo al correo.",
+   "tarjeta": {
+    "tipo": "flujo",
+    "zona": "baja",
+    "nodos": [
+     {
+      "icono": "🗓️",
+      "t": "Día 1 de cada mes"
+     },
+     {
+      "icono": "📁",
+      "t": "Google Drive"
+     },
+     {
+      "icono": "N",
+      "t": "Nokfi",
+      "nokfi": true
+     }
+    ],
+    "rotulo": "nokfi · n8n"
+   }
+  },
+  {
+   "voz": "Lee la carpeta de Drive, extrae cada factura y manda los totales.",
+   "tarjeta": {
+    "tipo": "flujo",
+    "nodos": [
+     {
+      "icono": "🗓️",
+      "t": "Día 1 de cada mes",
+      "s": "Disparador programado"
+     },
+     {
+      "icono": "📁",
+      "t": "Google Drive",
+      "s": "Carpeta de facturas del mes"
+     },
+     {
+      "icono": "N",
+      "t": "Nokfi · Extraer facturas",
+      "s": "Base, IVA y retenciones",
+      "nokfi": true
+     },
+     {
+      "icono": "✉️",
+      "t": "Correo",
+      "s": "Resumen para ti o tu gestoría"
+     }
+    ],
+    "rotulo": "nokfi · n8n"
+   }
+  },
+  {
+   "clip": "plant",
+   "marca": "b",
+   "voz": "Es una de las plantillas de n8n que vienen con Nokfi."
+  }
+ ],
+ "cierre": {
+  "voz": "Envíaselo a quien vive dentro de n8n.",
+  "titulo": "Envíaselo a quien **vive en n8n** 🤖",
+  "texto": "nokfi.app · nodo y plantillas de n8n",
+  "boton": "Mira la documentación"
+ },
+ "gancho": "El resumen de facturas del mes, **sin abrir nada**"
+}

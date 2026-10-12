@@ -1,0 +1,45 @@
+{
+ "id": "v048-aviso-cuota-80",
+ "titulo": "Que tu automatización no se pare sin avisar",
+ "metodo": "notificación animada + app",
+ "barra": true,
+ "texto": "Nokfi Trigger avisa a tu flujo de n8n al llegar al 80 % y al 100 % de la cuota. (cuenta de ejemplo)\n\n#n8n #automatizacion #api #ia #desarrolladores",
+ "musica": "1-chill-lofi-theme.mp3",
+ "clips": [],
+ "escenas": [
+  {
+   "voz": "Tu flujo se entera cuando la cuota del día llega al ochenta por ciento.",
+   "tarjeta": {
+    "tipo": "aviso",
+    "zona": "baja",
+    "avisos": [
+     {
+      "icono": "⚡",
+      "app": "Nokfi Trigger",
+      "t": "Cuota de hoy al 80 %",
+      "s": "Tu flujo de n8n lo recibe"
+     }
+    ],
+    "rotulo": "nokfi · n8n"
+   }
+  },
+  {
+   "clip": "webhooks",
+   "marca": "a",
+   "voz": "Es un evento más de los webhooks de Nokfi.",
+   "y": 0.35
+  },
+  {
+   "clip": "dev",
+   "marca": "a",
+   "voz": "Y en el panel ves las llamadas y la cuota de hoy.",
+   "y": 0.35
+  }
+ ],
+ "cierre": {
+  "voz": "Envíaselo a quien tiene flujos en producción.",
+  "titulo": "Envíaselo a quien tiene flujos **en producción** ⚡",
+  "texto": "nokfi.app · 14 días gratis"
+ },
+ "gancho": "Que tu automatización no se pare **sin avisar**"
+}

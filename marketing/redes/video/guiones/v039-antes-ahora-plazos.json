@@ -1,0 +1,54 @@
+{
+ "id": "v039-antes-ahora-plazos",
+ "titulo": "Los plazos de Hacienda: antes y ahora",
+ "metodo": "antes/ahora: panel comparativo + app",
+ "barra": true,
+ "texto": "Calendario fiscal con todos los plazos del año y aviso por correo antes de cada uno. (cuenta de ejemplo con datos ficticios; cálculos orientativos)\n\n#autonomos #pymes #hacienda #emprendedores #negocio",
+ "musica": "1-chill-lofi-theme.mp3",
+ "clips": [],
+ "escenas": [
+  {
+   "clip": "cal",
+   "marca": "a",
+   "voz": "Yo era de los que presentaban el último día.",
+   "congelar": true,
+   "y": 0.35
+  },
+  {
+   "voz": "Antes me enteraba por un compañero. Ahora me llega un aviso siete días antes, y otro la víspera.",
+   "tarjeta": {
+    "tipo": "comparar",
+    "izq": {
+     "t": "Antes",
+     "items": [
+      "Enterarme por un compañero",
+      "Presentar el último día",
+      "Algún recargo que otro"
+     ]
+    },
+    "der": {
+     "t": "Ahora",
+     "items": [
+      "Todos los plazos del año",
+      "Aviso 7 días antes",
+      "Y otro la víspera"
+     ]
+    },
+    "rotulo": "nokfi · antes y ahora",
+    "ritmo": 0.8
+   }
+  },
+  {
+   "clip": "cal",
+   "marca": "plazos",
+   "voz": "Y tengo todos los modelos del año, con su fecha.",
+   "y": 0.35
+  }
+ ],
+ "cierre": {
+  "voz": "Envíaselo a ese amigo que presenta el último día.",
+  "titulo": "Envíaselo a quien presenta **el último día** 🙃",
+  "texto": "nokfi.app · 14 días gratis"
+ },
+ "gancho": "Los plazos de Hacienda: **antes y ahora**"
+}

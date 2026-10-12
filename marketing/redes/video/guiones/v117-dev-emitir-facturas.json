@@ -1,0 +1,61 @@
+{
+ "id": "v117-dev-emitir-facturas",
+ "titulo": "Emitir facturas: programarlo tú o una llamada",
+ "metodo": "a mano contra la API: panel comparativo + Playground",
+ "barra": true,
+ "texto": "Emitir facturas por API: numeración, IVA, retención, PDF y factura electrónica. (claves reales en planes Pro y Max)\n\n#n8n #automatizacion #api #ia #desarrolladores",
+ "musica": "1-chill-lofi-theme.mp3",
+ "clips": [],
+ "escenas": [
+  {
+   "voz": "Emitir facturas bien es más que generar un PDF.",
+   "locucion": "Emitir facturas bien es más que generar un pe de efe.",
+   "tarjeta": {
+    "tipo": "titulo",
+    "zona": "baja",
+    "lineas": [
+     "**A mano** o",
+     "con la API"
+    ],
+    "rotulo": "nokfi · API"
+   }
+  },
+  {
+   "voz": "Numeración, impuestos y formatos. O una llamada, y Nokfi se encarga.",
+   "tarjeta": {
+    "tipo": "comparar",
+    "izq": {
+     "t": "A mano",
+     "items": [
+      "Numeración sin huecos",
+      "IVA, retención y recargo",
+      "PDF y factura electrónica"
+     ]
+    },
+    "der": {
+     "t": "Con la API de Nokfi",
+     "items": [
+      "Una llamada con el pedido",
+      "Numerada y en el libro",
+      "Con PDF y XML"
+     ]
+    },
+    "rotulo": "nokfi · API",
+    "ritmo": 0.8
+   }
+  },
+  {
+   "clip": "dev",
+   "marca": "a",
+   "voz": "Con clave de idempotencia, para no emitirla dos veces.",
+   "y": 0.35
+  }
+ ],
+ "cierre": {
+  "voz": "Envíaselo a quien está programando su facturación.",
+  "titulo": "Envíaselo a quien **programa** facturas 👨‍💻",
+  "texto": "nokfi.app · API con clave de prueba",
+  "boton": "Mira la documentación"
+ },
+ "gancho": "Emitir facturas: **programarlo tú** o una llamada"
+}

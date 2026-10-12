@@ -1,0 +1,39 @@
+{
+ "id": "v054-que-es-rendimiento-neto",
+ "titulo": "¿Qué es el rendimiento neto?",
+ "metodo": "glosario: título cinético + app",
+ "barra": true,
+ "texto": "El rendimiento neto en 15 segundos: de él depende tu cuota de autónomos. Calculadora gratis en nokfi.app 🧮 (cálculo orientativo)\n\n#autonomos #freelance #emprendedores #finanzas #negocio",
+ "musica": "1-chill-lofi-theme.mp3",
+ "clips": [],
+ "escenas": [
+  {
+   "voz": "¿Qué es el rendimiento neto de un autónomo? Quince segundos.",
+   "tarjeta": {
+    "tipo": "titulo",
+    "lineas": [
+     "¿Qué es el",
+     "**rendimiento neto**?"
+    ],
+    "rotulo": "nokfi · en 15 segundos",
+    "ritmo": 0.6
+   }
+  },
+  {
+   "clip": "cuota2000_500",
+   "marca": "calc",
+   "voz": "Lo que ingresas, menos tus gastos deducibles."
+  },
+  {
+   "clip": "cuota2000_500",
+   "marca": "r",
+   "voz": "De él depende tu cuota: aquí, **tramo 5** de quince.",
+   "locucion": "De él depende tu cuota: aquí, tramo cinco de quince."
+  }
+ ],
+ "cierre": {
+  "voz": "Envíaselo a ese amigo que no sabe por qué paga esa cuota.",
+  "titulo": "Envíaselo a quien **no entiende su cuota** 🤔",
+  "texto": "nokfi.app · 14 días gratis"
+ }
+}

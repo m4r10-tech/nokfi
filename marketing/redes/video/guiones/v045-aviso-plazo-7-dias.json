@@ -1,0 +1,43 @@
+{
+ "id": "v045-aviso-plazo-7-dias",
+ "titulo": "El aviso que te ahorra un recargo",
+ "metodo": "notificación animada + app",
+ "barra": true,
+ "texto": "Aviso por correo 7 días antes y la víspera de cada plazo fiscal. (cuenta de ejemplo con datos ficticios; cálculos orientativos)\n\n#autonomos #pymes #hacienda #emprendedores #negocio",
+ "musica": "1-chill-lofi-theme.mp3",
+ "clips": [],
+ "escenas": [
+  {
+   "voz": "Este aviso llega siete días antes de cada plazo de Hacienda.",
+   "tarjeta": {
+    "tipo": "aviso",
+    "zona": "baja",
+    "avisos": [
+     {
+      "icono": "📅",
+      "t": "Plazo fiscal en 7 días",
+      "s": "Modelos 303 y 130 · 20 de octubre"
+     }
+    ],
+    "rotulo": "nokfi · avisos"
+   }
+  },
+  {
+   "clip": "cal",
+   "marca": "aviso",
+   "voz": "Lo activas una vez, y te escribe también la víspera."
+  },
+  {
+   "clip": "cal",
+   "marca": "plazos",
+   "voz": "Con todos los modelos del año, cada uno con su fecha.",
+   "y": 0.35
+  }
+ ],
+ "cierre": {
+  "voz": "Envíaselo a ese amigo que presenta el último día.",
+  "titulo": "Envíaselo a quien presenta **el último día** 🙃",
+  "texto": "nokfi.app · 14 días gratis"
+ },
+ "gancho": "El aviso que te ahorra **un recargo**"
+}

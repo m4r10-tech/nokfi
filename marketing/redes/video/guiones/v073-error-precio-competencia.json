@@ -1,0 +1,40 @@
+{
+ "id": "v073-error-precio-competencia",
+ "titulo": "El error número 4 de los autónomos",
+ "metodo": "el error: título cinético + problema + solución",
+ "barra": true,
+ "texto": "El error número cuatro: poner el precio mirando a la competencia. Calculadora gratis en nokfi.app 🧮\n\n#autonomos #freelance #emprendedores #finanzas #negocio",
+ "musica": "2-bit-shift.mp3",
+ "clips": [],
+ "escenas": [
+  {
+   "voz": "El error número cuatro de los autónomos.",
+   "tarjeta": {
+    "tipo": "titulo",
+    "lineas": [
+     "El error",
+     "**nº 4**",
+     "de los autónomos"
+    ],
+    "rotulo": "nokfi · errores",
+    "ritmo": 0.55
+   }
+  },
+  {
+   "clip": "hora44",
+   "marca": "calc",
+   "voz": "Poner el precio mirando a la competencia."
+  },
+  {
+   "clip": "hora44",
+   "marca": "r",
+   "voz": "El precio sale de tus costes y de tus horas. Aquí, **44 €**.",
+   "locucion": "El precio sale de tus costes y de tus horas. Aquí, cuarenta y cuatro euros."
+  }
+ ],
+ "cierre": {
+  "voz": "Envíaselo a ese amigo que cobra demasiado barato.",
+  "titulo": "Envíaselo a quien **cobra barato** 😬",
+  "texto": "nokfi.app · 14 días gratis"
+ }
+}

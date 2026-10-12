@@ -1,0 +1,32 @@
+{
+ "id": "v067-pregunta-gastos-fijos",
+ "titulo": "¿Sabes cuánto pagas de gastos fijos al año?",
+ "metodo": "pregunta al espectador: corto, pide comentario",
+ "barra": false,
+ "texto": "¿Sabes cuánto pagas de gastos fijos al año? 👇 (cuenta de ejemplo con datos ficticios; cálculos orientativos)\n\n#autonomos #pymes #hacienda #emprendedores #negocio",
+ "musica": "2-bit-shift.mp3",
+ "clips": [],
+ "escenas": [
+  {
+   "clip": "fugas",
+   "marca": "a",
+   "voz": "¿Sabes cuánto pagas de gastos fijos al año?",
+   "congelar": true,
+   "y": 0.35
+  },
+  {
+   "clip": "fugas",
+   "marca": "a",
+   "voz": "Aquí, solo de alquiler, casi **14.000 €**.",
+   "locucion": "Aquí, solo de alquiler, casi catorce mil euros.",
+   "congelar": true,
+   "y": 0.35
+  }
+ ],
+ "cierre": {
+  "voz": "Te leo en comentarios.",
+  "titulo": "¿Y tú? **Te leo** en comentarios 👇",
+  "texto": "nokfi.app · 14 días gratis"
+ },
+ "gancho": "¿Sabes cuánto pagas de **gastos fijos** al año?"
+}

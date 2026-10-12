@@ -260,11 +260,13 @@ async function main() {
   g.escenas.forEach((e, i) => {
     // Escena con tarjeta animada (tarjetas.mjs): su clip es t<posición> y ya mide 1080×1920.
     const clip = e.tarjeta ? `t${i}` : e.clip;
-    const meta = JSON.parse(fs.readFileSync(path.join(clipsDir, `${clip}.json`), 'utf8'));
+    // Los planos de la app que no estén grabados para este guion se toman de la biblioteca común (guiones/_biblio.json).
+    const dirClip = fs.existsSync(path.join(clipsDir, `${clip}.json`)) ? clipsDir : path.join(SALIDA, 'video', '_biblio', 'clips');
+    const meta = JSON.parse(fs.readFileSync(path.join(dirClip, `${clip}.json`), 'utf8'));
     const desde = Math.max(0, (e.marca ? meta.marcas[e.marca] : meta.inicio) + (e.desplaza || 0));
     const d = durs[i];
     // congelar: el fotograma de la marca se queda fijo (solo el acercamiento lento).
-    args.push('-ss', desde.toFixed(3), '-t', (e.congelar ? 0.1 : d + 0.5).toFixed(3), '-i', path.join(clipsDir, `${clip}.mp4`));
+    args.push('-ss', desde.toFixed(3), '-t', (e.congelar ? 0.1 : d + 0.5).toFixed(3), '-i', path.join(dirClip, `${clip}.mp4`));
     const z = e.zoom ?? 0;               // plano estable; >0 solo si una escena lo pide
     const z0 = e.zoomInicial ?? 1;       // 1 = ancho completo del móvil
     const cy = e.y ?? 0;                 // 0 arriba … 1 abajo (de lo que sobra del alto)
@@ -318,10 +320,9 @@ async function main() {
 
   const video = path.join(out, process.env.SUFIJO ? `video-${process.env.SUFIJO}.mp4` : 'video.mp4');
   args.push('-filter_complex', filtros.join(';'), '-map', vmap, '-map', audio,
-    '-t', finTotal.toFixed(3), // Original «pesado» a propósito (prueba del 2026-10-11): con CRF la pantalla casi fija salía a ~0,6 Mb/s y
-    // TikTok solo servía 576×1024. Un fotograma clave cada medio segundo y bitrate alto dan un original de varios Mb/s.
-    '-c:v', 'libx264', '-profile:v', 'high', '-b:v', '12M', '-maxrate', '16M', '-bufsize', '24M', '-g', '15', '-keyint_min', '15', '-sc_threshold', '0',
-    '-preset', 'medium', '-pix_fmt', 'yuv420p', '-colorspace', 'bt709', '-color_primaries', 'bt709', '-color_trc', 'bt709',
+    '-t', finTotal.toFixed(3), // CRF: la prueba del 2026-10-11 con un original de ~5 Mb/s no cambió lo que sirve TikTok (576×1024), así que se
+    // vuelve a un archivo ligero y rápido de montar.
+    '-c:v', 'libx264', '-profile:v', 'high', '-crf', '17', '-preset', 'veryfast', '-tune', 'animation', '-pix_fmt', 'yuv420p', '-colorspace', 'bt709', '-color_primaries', 'bt709', '-color_trc', 'bt709',
     '-r', String(FPS), '-c:a', 'aac', '-b:a', '192k', '-ar', '48000', '-movflags', '+faststart', video);
   sh('ffmpeg', args);
 

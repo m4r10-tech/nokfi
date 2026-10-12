@@ -1,0 +1,45 @@
+{
+ "id": "v078-tour-impuestos",
+ "titulo": "El trimestre, de un vistazo",
+ "metodo": "recorrido rápido con voz: cortes cortos",
+ "barra": true,
+ "texto": "Lo que toca pagar, el 303, el 130 y la fecha: el trimestre de un vistazo. (cuenta de ejemplo con datos ficticios; cálculos orientativos)\n\n#autonomos #iva #facturas #hacienda #emprendedores",
+ "musica": "1-chill-lofi-theme.mp3",
+ "clips": [],
+ "escenas": [
+  {
+   "clip": "imp",
+   "marca": "a",
+   "voz": "Lo que **toca pagar**.",
+   "congelar": true,
+   "y": 0.35
+  },
+  {
+   "clip": "imp",
+   "marca": "m303",
+   "voz": "El **303**, desglosado.",
+   "congelar": true,
+   "locucion": "El trescientos tres, desglosado."
+  },
+  {
+   "clip": "imp",
+   "marca": "m130",
+   "voz": "El **130**, también.",
+   "congelar": true,
+   "locucion": "El ciento treinta, también."
+  },
+  {
+   "clip": "cal",
+   "marca": "a",
+   "voz": "Y **cuándo**.",
+   "congelar": true,
+   "y": 0.35
+  }
+ ],
+ "cierre": {
+  "voz": "Pruébalo gratis.",
+  "titulo": "Sin **sustos** el día 20.",
+  "texto": "nokfi.app · 14 días gratis"
+ },
+ "gancho": "El trimestre, **de un vistazo**"
+}

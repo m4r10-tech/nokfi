@@ -1,0 +1,53 @@
+{
+ "id": "v093-quiz-cuanto-cobras",
+ "titulo": "Factura de 1.000 € con IVA y retención: ¿cuánto cobras?",
+ "metodo": "quiz de tres opciones + comprobación en la calculadora",
+ "barra": true,
+ "texto": "Quiz: factura de 1.000 € con IVA y retención, ¿cuánto cobras? Calculadora gratis en nokfi.app 🧮\n\n#autonomos #iva #facturas #hacienda #emprendedores",
+ "musica": "1-chill-lofi-theme.mp3",
+ "clips": [],
+ "escenas": [
+  {
+   "voz": "Una factura de mil euros, con IVA y retención. ¿Cuánto cobras?",
+   "locucion": "Una factura de mil euros, con iva y retención. ¿Cuánto cobras?",
+   "tarjeta": {
+    "tipo": "pregunta",
+    "pregunta": "Factura de 1.000 € con IVA y retención: ¿cuánto cobras?",
+    "opciones": [
+     "1.210 €",
+     "1.060 €",
+     "850 €"
+    ],
+    "correcta": 1,
+    "revela": 2,
+    "rotulo": "nokfi · quiz"
+   }
+  },
+  {
+   "voz": "La respuesta es la be: mil sesenta.",
+   "tarjeta": {
+    "tipo": "pregunta",
+    "pregunta": "Factura de 1.000 € con IVA y retención: ¿cuánto cobras?",
+    "opciones": [
+     "1.210 €",
+     "1.060 €",
+     "850 €"
+    ],
+    "correcta": 1,
+    "revela": 0.2,
+    "rotulo": "nokfi · quiz"
+   }
+  },
+  {
+   "clip": "irpf1000",
+   "marca": "r",
+   "voz": "Sumas 210 de IVA y te retienen 150.",
+   "locucion": "Sumas doscientos diez de iva y te retienen ciento cincuenta."
+  }
+ ],
+ "cierre": {
+  "voz": "Envíaselo a ese amigo, a ver si acierta.",
+  "titulo": "Envíaselo, a ver si **acierta** 🤔",
+  "texto": "nokfi.app · 14 días gratis"
+ }
+}

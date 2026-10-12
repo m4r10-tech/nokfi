@@ -1,0 +1,63 @@
+{
+ "id": "v095-api-quitar-iva",
+ "titulo": "Saca la base de un precio con IVA, en una llamada",
+ "metodo": "terminal animada + Playground real",
+ "barra": true,
+ "texto": "API de Nokfi: base e IVA de cualquier importe, con recargo de equivalencia si hace falta. (respuesta real de la API en modo prueba; cálculo orientativo)\n\n#n8n #automatizacion #api #ia #desarrolladores",
+ "musica": "3-music-promotion.mp3",
+ "clips": [],
+ "escenas": [
+  {
+   "voz": "Te pasan un precio con IVA y necesitas la base.",
+   "locucion": "Te pasan un precio con iva y necesitas la base.",
+   "tarjeta": {
+    "tipo": "terminal",
+    "zona": "baja",
+    "comando": "POST /api/v1/tax/vat",
+    "tam": 38,
+    "rotulo": "nokfi · API"
+   }
+  },
+  {
+   "voz": "Le mandas el importe y le dices que lleva IVA.",
+   "locucion": "Le mandas el importe y le dices que lleva iva.",
+   "tarjeta": {
+    "tipo": "terminal",
+    "titulo": "POST /api/v1/tax/vat",
+    "json": true,
+    "respuesta": "{\n  \"amount\": 1210,\n  \"includes_vat\": true\n}",
+    "tam": 42,
+    "rotulo": "nokfi · API"
+   }
+  },
+  {
+   "voz": "Y te devuelve la base y la cuota: **1.000** y **210**.",
+   "locucion": "Y te devuelve la base y la cuota: mil y doscientos diez.",
+   "tarjeta": {
+    "tipo": "terminal",
+    "titulo": "Respuesta",
+    "json": true,
+    "respuesta": "{\n  \"base\": 1000,\n  \"vat_rate\": 21,\n  \"vat_amount\": 210,\n  \"total\": 1210\n}",
+    "resalta": [
+     "\"base\"",
+     "\"vat_amount\""
+    ],
+    "tam": 40,
+    "rotulo": "nokfi · API"
+   }
+  },
+  {
+   "clip": "pgvat",
+   "marca": "r",
+   "voz": "Sin inteligencia artificial y sin gastar cuota.",
+   "y": 0.35
+  }
+ ],
+ "cierre": {
+  "voz": "Envíaselo a quien programa tiendas en España.",
+  "titulo": "Envíaselo a quien **programa** tiendas 👨‍💻",
+  "texto": "nokfi.app · API con clave de prueba",
+  "boton": "Mira la documentación"
+ },
+ "gancho": "Saca la base de un precio con IVA, **en una llamada**"
+}

@@ -1,0 +1,60 @@
+{
+ "id": "v116-dev-leer-facturas",
+ "titulo": "Leer facturas: tu OCR o una llamada",
+ "metodo": "a mano contra la API: panel comparativo + Playground",
+ "barra": true,
+ "texto": "Extraer facturas con la API de Nokfi: el mismo JSON siempre, con totales y NIF comprobados.\n\n#n8n #automatizacion #api #ia #desarrolladores",
+ "musica": "3-music-promotion.mp3",
+ "clips": [],
+ "escenas": [
+  {
+   "voz": "Leer facturas con tu propio OCR es mantener una plantilla por proveedor.",
+   "tarjeta": {
+    "tipo": "titulo",
+    "zona": "baja",
+    "lineas": [
+     "**A mano** o",
+     "con la API"
+    ],
+    "rotulo": "nokfi · API"
+   }
+  },
+  {
+   "voz": "Con la API mandas el archivo y vuelve siempre el mismo JSON, ya comprobado.",
+   "locucion": "Con la API mandas el archivo y vuelve siempre el mismo yeison, ya comprobado.",
+   "tarjeta": {
+    "tipo": "comparar",
+    "izq": {
+     "t": "A mano",
+     "items": [
+      "OCR y plantillas por proveedor",
+      "Campos que bailan",
+      "Totales sin comprobar"
+     ]
+    },
+    "der": {
+     "t": "Con la API de Nokfi",
+     "items": [
+      "PDF, foto o texto",
+      "Siempre el mismo JSON",
+      "Total y NIF comprobados"
+     ]
+    },
+    "rotulo": "nokfi · API",
+    "ritmo": 0.8
+   }
+  },
+  {
+   "clip": "plant",
+   "marca": "a",
+   "voz": "Y hay plantillas de n8n para empezar en minutos."
+  }
+ ],
+ "cierre": {
+  "voz": "Envíaselo a quien pelea con un OCR.",
+  "titulo": "Envíaselo a quien **pelea con un OCR** 😅",
+  "texto": "nokfi.app · API con clave de prueba",
+  "boton": "Mira la documentación"
+ },
+ "gancho": "Leer facturas: **tu OCR** o una llamada"
+}

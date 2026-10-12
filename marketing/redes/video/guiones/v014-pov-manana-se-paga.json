@@ -1,8 +1,7 @@
 {
  "id": "v014-pov-manana-se-paga",
  "titulo": "POV: mañana se paga el IVA",
- "metodo": "POV sin voz (solo texto y música; no lleva etiqueta de IA)",
- "sinVoz": true,
+ "metodo": "POV con voz (solo texto y música; no lleva etiqueta de IA)",
  "texto": "POV: mañana se paga el IVA y no sabes cuánto 😅 (cuenta de ejemplo con datos ficticios)\n\nEnvíaselo a quien lo deja para el último día 🙃\n\n#autonomos #iva #hacienda #pov #emprendedores",
  "pilar": "dolor",
  "musica": "2-bit-shift.mp3",
@@ -65,7 +64,8 @@
    "clip": "impuestos",
    "marca": "impuestos",
    "voz": "**5.963 €**. Ya lo sabes.",
-   "y": 0.35
+   "y": 0.35,
+   "locucion": "Casi seis mil euros. Ya lo sabes."
   },
   {
    "clip": "impuestos",

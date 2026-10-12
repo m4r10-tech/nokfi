@@ -1,0 +1,36 @@
+{
+ "id": "v082-historia-casi-contrato",
+ "titulo": "Casi contrato sin mirar la caja",
+ "metodo": "historia en tres actos, en primera persona",
+ "barra": true,
+ "texto": "Casi contrato sin mirar la caja a 90 días. (cuenta de ejemplo con datos ficticios; cálculos orientativos)\n\n#autonomos #pymes #hacienda #emprendedores #negocio",
+ "musica": "2-bit-shift.mp3",
+ "clips": [],
+ "escenas": [
+  {
+   "clip": "prev",
+   "marca": "a",
+   "voz": "Estuve a punto de contratar a alguien solo porque había dinero en el banco.",
+   "congelar": true,
+   "y": 0.35
+  },
+  {
+   "clip": "prev",
+   "marca": "esc",
+   "voz": "Antes de firmar, puse su coste en la previsión.",
+   "y": 0.35
+  },
+  {
+   "clip": "prev",
+   "marca": "rojo",
+   "voz": "En diciembre me quedaba en números rojos. No firmé.",
+   "y": 0.35
+  }
+ ],
+ "cierre": {
+  "voz": "Envíaselo a ese amigo que está pensando en contratar.",
+  "titulo": "Envíaselo a quien quiere **contratar** 👀",
+  "texto": "nokfi.app · 14 días gratis"
+ },
+ "gancho": "Casi contrato **sin mirar la caja**"
+}

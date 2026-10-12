@@ -1,0 +1,67 @@
+[
+ {
+  "id": "v030-pov-cliente-no-paga-tt",
+  "red": "tiktok",
+  "cuando": "2026-10-12T01:30",
+  "pieza": "v030-pov-cliente-no-paga",
+  "video": "video.mp4",
+  "titulo": "POV: tu cliente lleva 36 días sin pagarte",
+  "ia": false,
+  "texto": "POV: tu cliente no paga y tú no quieres ser el pesado 😅 (cuenta de ejemplo con datos ficticios; cálculos orientativos)\n\n#autonomos #pymes #hacienda #emprendedores #negocio",
+  "aprobado": true,
+  "buffer_id": "6acc18acea568e911a44bf91",
+  "buffer_estado": "programada"
+ },
+ {
+  "id": "v035-antes-ahora-trimestre-tt",
+  "red": "tiktok",
+  "cuando": "2026-10-12T02:00",
+  "pieza": "v035-antes-ahora-trimestre",
+  "video": "video.mp4",
+  "titulo": "El trimestre: antes y ahora",
+  "ia": true,
+  "texto": "El trimestre sin hojas de cálculo: lo que toca pagar y cuánto falta apartar. (cuenta de ejemplo con datos ficticios; cálculos orientativos)\n\n#autonomos #pymes #hacienda #emprendedores #negocio",
+  "aprobado": true,
+  "buffer_id": "6acc195bfa026cfb811b6e65",
+  "buffer_estado": "programada"
+ },
+ {
+  "id": "v029-mito-130-impuesto-extra-tt",
+  "red": "tiktok",
+  "cuando": "2026-10-12T02:30",
+  "pieza": "v029-mito-130-impuesto-extra",
+  "video": "video.mp4",
+  "titulo": "¿Verdad o mito? El modelo 130 es un impuesto extra.",
+  "ia": true,
+  "texto": "El modelo 130 no es un impuesto extra: es un pago a cuenta de tu IRPF. (cuenta de ejemplo con datos ficticios; cálculos orientativos) (cálculos orientativos)\n\n#autonomos #iva #facturas #hacienda #emprendedores",
+  "aprobado": true,
+  "buffer_id": "6acc1a33a9411fbcc561443b",
+  "buffer_estado": "programada"
+ },
+ {
+  "id": "v120-dos-casos-cuota-tt",
+  "red": "tiktok",
+  "cuando": "2026-10-12T03:00",
+  "pieza": "v120-dos-casos-cuota",
+  "video": "video.mp4",
+  "titulo": "Dos autónomos, dos cuotas muy distintas",
+  "ia": true,
+  "texto": "La cuota de autónomos depende de lo que ganas: dos casos. Gratis y sin registro en nokfi.app 🧮 (cálculo orientativo)\n\n#autonomos #freelance #emprendedores #finanzas #negocio",
+  "aprobado": true,
+  "buffer_id": "6acc1a60a9411fbcc5614865",
+  "buffer_estado": "programada"
+ },
+ {
+  "id": "v031-pov-contratar-tt",
+  "red": "tiktok",
+  "cuando": "2026-10-12T03:30",
+  "pieza": "v031-pov-contratar",
+  "video": "video.mp4",
+  "titulo": "POV: quieres contratar y no sabes si te llega",
+  "ia": false,
+  "texto": "POV: quieres contratar y miras antes la caja de los próximos 90 días 📉 (cuenta de ejemplo con datos ficticios; cálculos orientativos)\n\n#autonomos #pymes #hacienda #emprendedores #negocio",
+  "aprobado": true,
+  "buffer_id": "6acc1a6863ff33d8c99c8654",
+  "buffer_estado": "programada"
+ }
+]

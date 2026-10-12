@@ -13,7 +13,10 @@
  *   tipos: terminal (comando que se teclea + respuesta; sin "comando" es un archivo que se va mostrando),
  *          flujo    ({ nodos: [{ icono, t, s, nokfi }] }, nodos encadenados de arriba abajo),
  *          chat     ({ mensajes: [{ de: "yo" | "ia" | "tool", texto }], desde: n ya visibles }),
- *          datos    ({ lineas: [{ n, t }] }, cifras grandes una a una).
+ *          datos    ({ lineas: [{ n, t }] }, cifras grandes una a una),
+ *          titulo ({ lineas }), comparar ({ izq: { t, items }, der }), pregunta ({ pregunta, opciones, correcta }),
+ *          lista ({ titulo, items, marca: 'num' }), aviso ({ avisos: [{ t, s, icono }] }), barras ({ titulo, barras: [{ t, v, txt, color }] }),
+ *          calendario ({ mes, primer (0 = lunes), dias, marcados: [20], leyenda }).
  *   zona: "alta" (por defecto; entre el gancho y los subtítulos) o "baja" (primera escena, bajo el gancho).
  *   pie: texto pequeño bajo la tarjeta. Los datos de las tarjetas deben ser reales (respuestas de la API).
  */
@@ -28,7 +31,7 @@ import { createRequire } from 'node:module';
 const HERE = path.dirname(fileURLToPath(import.meta.url));
 const REDES = path.resolve(HERE, '..');
 const PUBLIC = path.resolve(REDES, '../../frontend/public');
-const W = 1080, H = 1920, FPS = 20;
+const W = 1080, H = 1920, FPS = 15;
 const fuente = (f) => `data:font/woff2;base64,${fs.readFileSync(path.join(PUBLIC, 'fonts', f)).toString('base64')}`;
 
 const CSS = `
@@ -74,6 +77,30 @@ const CSS = `
   .dato { display: flex; align-items: baseline; gap: 26px; margin: 16px 0; }
   .dato b { flex: none; min-width: 170px; text-align: right; font-size: 120px; font-weight: 800; letter-spacing: -.04em; color: #7CB7FF; line-height: 1; }
   .dato span { font-size: 52px; font-weight: 700; line-height: 1.15; }
+  .tit { text-align: center; } .tit div { font-size: 118px; font-weight: 800; letter-spacing: -.04em; line-height: 1.06; margin: 8px 0; } .tit b { color: #FFD43B; }
+  .panel { border-radius: 34px; padding: 30px 36px; margin: 14px 0; border: 3px solid #3a2326; background: #1a1113; }
+  .panel.ok { border-color: #3B82F6; background: linear-gradient(180deg, #132644, #101826); }
+  .panel h3 { font-size: 44px; font-weight: 800; margin-bottom: 14px; color: #FF8A8A; } .panel.ok h3 { color: #8FC2FF; }
+  .panel p { font-size: 40px; font-weight: 600; line-height: 1.25; margin: 10px 0; display: flex; gap: 18px; } .panel p i { font-style: normal; flex: none; }
+  .preg h2 { font-size: 62px; font-weight: 800; letter-spacing: -.02em; line-height: 1.12; margin-bottom: 34px; text-align: center; }
+  .op { font-size: 46px; font-weight: 700; padding: 26px 34px; border-radius: 28px; border: 3px solid #2A3140; background: #12151C; margin: 16px 0; display: flex; gap: 22px; align-items: center; }
+  .op i { font-style: normal; flex: none; width: 66px; height: 66px; border-radius: 50%; background: #1C2230; display: flex; align-items: center; justify-content: center; font-weight: 800; }
+  .op.si { border-color: #28C840; background: #0F2416; } .op.si i { background: #28C840; color: #06210c; } .op.no { opacity: .35; }
+  .lst h2 { font-size: 58px; font-weight: 800; letter-spacing: -.02em; margin-bottom: 26px; }
+  .it { display: flex; align-items: center; gap: 26px; font-size: 46px; font-weight: 700; line-height: 1.2; padding: 20px 0; border-bottom: 2px solid #1E2430; }
+  .it i { font-style: normal; flex: none; width: 70px; height: 70px; border-radius: 20px; border: 4px solid #364055; display: flex; align-items: center; justify-content: center; font-size: 42px; font-weight: 800; color: transparent; }
+  .it.hecho i { background: #28C840; border-color: #28C840; color: #06210c; } .it.num i { background: #1456A2; border-color: #1456A2; color: #fff; border-radius: 50%; }
+  .avi { background: rgba(32, 36, 46, .96); border: 2px solid #343B4B; border-radius: 34px; padding: 26px 30px; margin: 14px 0; display: flex; gap: 24px; align-items: center; box-shadow: 0 20px 50px rgba(0,0,0,.5); }
+  .avi .ic { flex: none; width: 92px; height: 92px; border-radius: 24px; background: #1456A2; display: flex; align-items: center; justify-content: center; font-size: 50px; font-weight: 800; }
+  .avi b { display: block; font-size: 42px; font-weight: 800; } .avi span { display: block; font-size: 34px; color: #B4BECE; font-weight: 500; margin-top: 4px; line-height: 1.2; } .avi em { font-style: normal; font-size: 26px; color: #7F8EA3; font-weight: 600; text-transform: uppercase; letter-spacing: .06em; }
+  .bars h2 { font-size: 54px; font-weight: 800; margin-bottom: 30px; letter-spacing: -.02em; }
+  .bar { margin: 26px 0; } .bar label { display: flex; justify-content: space-between; font-size: 42px; font-weight: 700; margin-bottom: 12px; } .bar label b { font-weight: 800; }
+  .bar div { height: 54px; border-radius: 16px; background: #171C26; overflow: hidden; } .bar div u { display: block; height: 100%; border-radius: 16px; background: #3B82F6; }
+  .cal h2 { font-size: 58px; font-weight: 800; margin-bottom: 24px; text-align: center; }
+  .cal .g { display: grid; grid-template-columns: repeat(7, 1fr); gap: 12px; } .cal .g span { height: 104px; border-radius: 20px; background: #12151C; display: flex; align-items: center; justify-content: center; font-size: 40px; font-weight: 700; color: #C9D2E0; }
+  .cal .g span.h { background: transparent; color: #7F8EA3; font-size: 30px; height: 56px; } .cal .g span.v { background: transparent; }
+  .cal .g span.m { background: #1456A2; color: #fff; font-weight: 800; box-shadow: 0 0 0 6px rgba(59,130,246,.3); }
+  .cal .ley { margin-top: 26px; font-size: 40px; font-weight: 700; text-align: center; } .cal .ley b { color: #FFD43B; }
 `;
 
 /** Código de la página: pintar(p, t) dibuja la tarjeta en el instante p (0-1) de su duración. */
@@ -128,6 +155,42 @@ const JS = `(() => {
         if (el.classList.contains('ia')) { const full = el.dataset.t; el.innerHTML = full.slice(0, Math.round(full.length * clamp(q / 0.85))).replace(/\\*\\*(.+?)\\*\\*/g, '<b>$1</b>').replace(/\\*\\*/g, ''); }
       });
     },
+    titulo(p) {
+      const ds = [...zona.querySelectorAll('.tit div')], paso = 0.7 / ds.length;
+      ds.forEach((el, i) => { const a = ease((p - 0.02 - i * paso) / (paso * 0.7)); el.style.opacity = a; el.style.transform = 'translateY(' + (1 - a) * 60 + 'px) scale(' + (0.9 + 0.1 * a) + ')'; });
+    },
+    comparar(p) {
+      const ps = [...zona.querySelectorAll('.panel')], its = [...zona.querySelectorAll('.panel p')], paso = 0.8 / (its.length + 1);
+      ps.forEach((el, i) => { const a = ease((p - (i ? 0.42 : 0)) / 0.12); el.style.opacity = a; el.style.transform = 'translateX(' + (1 - a) * (i ? 60 : -60) + 'px)'; });
+      const n0 = ps[0].querySelectorAll('p').length;
+      its.forEach((el, i) => { const base = i < n0 ? 0.08 + i * (0.3 / n0) : 0.5 + (i - n0) * (0.32 / (its.length - n0)); el.style.opacity = ease((p - base) / 0.08); });
+    },
+    pregunta(p) {
+      const h = zona.querySelector('h2'), os = [...zona.querySelectorAll('.op')];
+      h.style.opacity = ease(p / 0.1);
+      os.forEach((el, i) => { const a = ease((p - 0.12 - i * 0.1) / 0.1); el.style.opacity = a; el.style.transform = 'translateY(' + (1 - a) * 30 + 'px)';
+        const rev = p > (T.revela ?? 0.72); el.classList.toggle('si', rev && i === T.correcta); el.classList.toggle('no', rev && i !== T.correcta); if (rev && i !== T.correcta) el.style.opacity = 0.35; });
+    },
+    lista(p) {
+      const its = [...zona.querySelectorAll('.it')], paso = 0.8 / its.length;
+      its.forEach((el, i) => { const a = ease((p - 0.04 - i * paso) / (paso * 0.5)); el.style.opacity = a; el.style.transform = 'translateX(' + (1 - a) * -50 + 'px)';
+        if (!el.classList.contains('num')) el.classList.toggle('hecho', p > 0.04 + i * paso + paso * 0.6); });
+    },
+    aviso(p) {
+      const as = [...zona.querySelectorAll('.avi')], paso = 0.75 / as.length;
+      as.forEach((el, i) => { const a = ease((p - 0.03 - i * paso) / (paso * 0.45)); el.style.opacity = a; el.style.transform = 'translateY(' + (1 - a) * -90 + 'px) scale(' + (0.94 + 0.06 * a) + ')'; });
+    },
+    barras(p) {
+      const bs = [...zona.querySelectorAll('.bar')], max = Math.max(...T.barras.map(b => Math.abs(b.v))), paso = 0.7 / bs.length;
+      bs.forEach((el, i) => { const a = ease((p - 0.05 - i * paso) / (paso * 0.9)); el.style.opacity = ease((p - i * paso) / 0.08);
+        el.querySelector('u').style.width = Math.max(2, Math.abs(T.barras[i].v) / max * 100 * a) + '%'; });
+    },
+    calendario(p) {
+      const ms = [...zona.querySelectorAll('.g span.dm')];
+      zona.querySelector('.cal').style.opacity = ease(p / 0.12);
+      ms.forEach((el, i) => { const on = p > 0.3 + i * 0.15; el.classList.toggle('m', on); el.style.transform = on ? 'scale(' + (1 + 0.08 * Math.sin(p * 18)) + ')' : ''; });
+      zona.querySelector('.ley').style.opacity = ease((p - 0.45) / 0.15);
+    },
     datos(p) {
       const ds = [...zona.querySelectorAll('.dato')], paso = 0.75 / ds.length;
       ds.forEach((el, i) => {
@@ -152,6 +215,17 @@ function cuerpo(t) {
   }
   if (t.tipo === 'chat') return `<div class="chat">${t.mensajes.map(m => `<div class="msg ${m.de}" data-t="${esc(m.texto)}">${negrita(m.texto)}</div>`).join('')}</div>`;
   if (t.tipo === 'datos') return t.lineas.map(l => `<div class="dato"><b data-n="${esc(l.n)}">${esc(l.n)}</b><span>${negrita(l.t)}</span></div>`).join('');
+  if (t.tipo === 'titulo') return `<div class="tit">${t.lineas.map(l => `<div>${negrita(l)}</div>`).join('')}</div>`;
+  if (t.tipo === 'comparar') return [['', t.izq, '✗'], [' ok', t.der, '✓']].map(([c, x, m]) => `<div class="panel${c}"><h3>${esc(x.t)}</h3>${x.items.map(i => `<p><i>${m}</i><span>${negrita(i)}</span></p>`).join('')}</div>`).join('');
+  if (t.tipo === 'pregunta') return `<div class="preg"><h2>${negrita(t.pregunta)}</h2>${t.opciones.map((o, i) => `<div class="op"><i>${'ABCD'[i]}</i><span>${negrita(o)}</span></div>`).join('')}</div>`;
+  if (t.tipo === 'lista') return `<div class="lst">${t.titulo ? `<h2>${negrita(t.titulo)}</h2>` : ''}${t.items.map((x, i) => `<div class="it${t.marca === 'num' ? ' num hecho' : ''}"><i>${t.marca === 'num' ? i + 1 : '✓'}</i><span>${negrita(x)}</span></div>`).join('')}</div>`;
+  if (t.tipo === 'aviso') return t.avisos.map(a => `<div class="avi"><div class="ic">${esc(a.icono || 'N')}</div><div><em>${esc(a.app || 'Nokfi')} · ahora</em><b>${esc(a.t)}</b><span>${esc(a.s || '')}</span></div></div>`).join('');
+  if (t.tipo === 'barras') return `<div class="bars">${t.titulo ? `<h2>${negrita(t.titulo)}</h2>` : ''}${t.barras.map(b => `<div class="bar"><label><span>${esc(b.t)}</span><b style="color:${b.color || '#fff'}">${esc(b.txt)}</b></label><div><u style="background:${b.color || '#3B82F6'}"></u></div></div>`).join('')}</div>`;
+  if (t.tipo === 'calendario') {
+    const celdas = ['L', 'M', 'X', 'J', 'V', 'S', 'D'].map(d => `<span class="h">${d}</span>`).concat(Array(t.primer).fill('<span class="v"></span>'),
+      Array.from({ length: t.dias }, (_, i) => `<span class="${(t.marcados || []).includes(i + 1) ? 'dm' : ''}">${i + 1}</span>`));
+    return `<div class="cal"><h2>${esc(t.mes)}</h2><div class="g">${celdas.join('')}</div><div class="ley">${negrita(t.leyenda || '')}</div></div>`;
+  }
   throw new Error(`Tipo de tarjeta desconocido: ${t.tipo}`);
 }
 
@@ -201,7 +275,7 @@ async function main() {
     for (let f = 0; f < n; f++) {
       // La animación se completa algo antes de que acabe la frase y se queda quieta.
       await page.evaluate((p) => window.pintar(p), Math.min(1, (f / FPS) / Math.max(0.5, durs[i] * (e.tarjeta.ritmo || 0.9))));
-      const png = await page.screenshot({ type: 'png' });
+      const png = await page.screenshot({ type: 'jpeg', quality: 93 });
       if (!ff.stdin.write(png)) await new Promise(r => ff.stdin.once('drain', r));
     }
     ff.stdin.end();

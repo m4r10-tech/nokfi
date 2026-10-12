@@ -1,0 +1,49 @@
+{
+ "id": "v042-pasos-puedo-contratar",
+ "titulo": "¿Puedes contratar? Compruébalo en 3 pasos",
+ "metodo": "tutorial en 3 pasos: lista numerada + planos de la app",
+ "barra": true,
+ "texto": "¿Puedes contratar? La previsión de caja te lo dice en tres pasos. (cuenta de ejemplo con datos ficticios; cálculos orientativos)\n\n#autonomos #pymes #hacienda #emprendedores #negocio",
+ "musica": "1-chill-lofi-theme.mp3",
+ "clips": [],
+ "escenas": [
+  {
+   "voz": "¿Puedes permitirte contratar? Compruébalo en tres pasos.",
+   "tarjeta": {
+    "tipo": "lista",
+    "zona": "baja",
+    "items": [
+     "Abre Previsión",
+     "Pon el coste al mes"
+    ],
+    "marca": "num",
+    "rotulo": "nokfi · en 3 pasos"
+   }
+  },
+  {
+   "clip": "prev",
+   "marca": "a",
+   "voz": "Uno: abres la previsión de caja.",
+   "y": 0.35
+  },
+  {
+   "clip": "prev",
+   "marca": "esc",
+   "voz": "Dos: pones lo que te costaría al mes.",
+   "y": 0.35
+  },
+  {
+   "clip": "prev",
+   "marca": "rojo",
+   "voz": "Y tres: miras si la caja aguanta **90 días**.",
+   "locucion": "Y tres: miras si la caja aguanta noventa días.",
+   "y": 0.35
+  }
+ ],
+ "cierre": {
+  "voz": "Envíaselo a ese amigo que está pensando en contratar.",
+  "titulo": "Envíaselo a quien quiere **contratar** 👀",
+  "texto": "nokfi.app · 14 días gratis"
+ },
+ "gancho": "¿Puedes contratar? Compruébalo **en 3 pasos**"
+}

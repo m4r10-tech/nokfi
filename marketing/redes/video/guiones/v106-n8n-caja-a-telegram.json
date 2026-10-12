@@ -1,0 +1,76 @@
+{
+ "id": "v106-n8n-caja-a-telegram",
+ "titulo": "Tu caja de la semana, cada lunes en Telegram",
+ "metodo": "flujo de nodos animado + app",
+ "barra": true,
+ "texto": "Plantilla de n8n: informe semanal de caja a Telegram. (cuenta de ejemplo)\n\n#n8n #automatizacion #api #ia #desarrolladores",
+ "musica": "2-bit-shift.mp3",
+ "clips": [],
+ "escenas": [
+  {
+   "voz": "Cada lunes, el resumen de tu caja te llega a Telegram.",
+   "tarjeta": {
+    "tipo": "flujo",
+    "zona": "baja",
+    "nodos": [
+     {
+      "icono": "🗓️",
+      "t": "Cada lunes"
+     },
+     {
+      "icono": "📊",
+      "t": "Hoja de caja"
+     },
+     {
+      "icono": "N",
+      "t": "Nokfi",
+      "nokfi": true
+     }
+    ],
+    "rotulo": "nokfi · n8n"
+   }
+  },
+  {
+   "voz": "Nokfi analiza la hoja de movimientos y saca las tres prioridades de la semana.",
+   "tarjeta": {
+    "tipo": "flujo",
+    "nodos": [
+     {
+      "icono": "🗓️",
+      "t": "Cada lunes",
+      "s": "Disparador programado"
+     },
+     {
+      "icono": "📊",
+      "t": "Hoja de caja",
+      "s": "Tus movimientos"
+     },
+     {
+      "icono": "N",
+      "t": "Nokfi · Analizar",
+      "s": "Resumen y prioridades",
+      "nokfi": true
+     },
+     {
+      "icono": "💬",
+      "t": "Telegram",
+      "s": "Las 3 prioridades de la semana"
+     }
+    ],
+    "rotulo": "nokfi · n8n"
+   }
+  },
+  {
+   "clip": "plant",
+   "marca": "c",
+   "voz": "La plantilla viene hecha. Para Slack, cambias el último nodo."
+  }
+ ],
+ "cierre": {
+  "voz": "Envíaselo a quien automatiza negocios.",
+  "titulo": "Envíaselo a quien **automatiza** negocios 🤖",
+  "texto": "nokfi.app · nodo y plantillas de n8n",
+  "boton": "Mira la documentación"
+ },
+ "gancho": "Tu caja de la semana, **cada lunes en Telegram**"
+}

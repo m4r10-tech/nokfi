@@ -1,0 +1,30 @@
+{
+ "id": "v065-pregunta-cuanto-apartas",
+ "titulo": "¿Tú cuánto apartas para Hacienda?",
+ "metodo": "pregunta al espectador: corto, pide comentario",
+ "barra": false,
+ "texto": "¿Cuánto apartas para Hacienda cada trimestre? 👇 (cuenta de ejemplo con datos ficticios; cálculos orientativos)\n\n#autonomos #pymes #hacienda #emprendedores #negocio",
+ "musica": "3-music-promotion.mp3",
+ "clips": [],
+ "escenas": [
+  {
+   "clip": "imp",
+   "marca": "a",
+   "voz": "¿Tú cuánto apartas para Hacienda cada trimestre?",
+   "congelar": true,
+   "y": 0.35
+  },
+  {
+   "clip": "imp",
+   "marca": "a",
+   "voz": "Yo, lo que me dice esta pantalla.",
+   "y": 0.35
+  }
+ ],
+ "cierre": {
+  "voz": "Te leo en comentarios.",
+  "titulo": "¿Y tú? **Te leo** en comentarios 👇",
+  "texto": "nokfi.app · 14 días gratis"
+ },
+ "gancho": "¿Tú cuánto **apartas** para Hacienda?"
+}

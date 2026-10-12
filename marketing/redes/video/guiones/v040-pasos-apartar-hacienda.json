@@ -1,0 +1,48 @@
+{
+ "id": "v040-pasos-apartar-hacienda",
+ "titulo": "Cuánto apartar para Hacienda, en 3 pasos",
+ "metodo": "tutorial en 3 pasos: lista numerada + planos de la app",
+ "barra": true,
+ "texto": "Cuánto apartar para Hacienda en tres pasos. (cuenta de ejemplo con datos ficticios; cálculos orientativos)\n\n#autonomos #pymes #hacienda #emprendedores #negocio",
+ "musica": "2-bit-shift.mp3",
+ "clips": [],
+ "escenas": [
+  {
+   "voz": "Saber cuánto apartar para Hacienda son tres pasos.",
+   "tarjeta": {
+    "tipo": "lista",
+    "zona": "baja",
+    "items": [
+     "Sube tus facturas",
+     "Abre Impuestos"
+    ],
+    "marca": "num",
+    "rotulo": "nokfi · en 3 pasos"
+   }
+  },
+  {
+   "clip": "libro",
+   "marca": "a",
+   "voz": "Uno: subes tus facturas y la IA las apunta.",
+   "locucion": "Uno: subes tus facturas y la inteligencia artificial las apunta."
+  },
+  {
+   "clip": "impnav",
+   "marca": "inicio",
+   "voz": "Dos: abres Finanzas, Impuestos.",
+   "desplaza": 0.6
+  },
+  {
+   "clip": "imp",
+   "marca": "a",
+   "voz": "Y tres: apuntas lo que ya tienes guardado, y te dice **cuánto falta**.",
+   "y": 0.35
+  }
+ ],
+ "cierre": {
+  "voz": "Envíaselo a ese amigo autónomo que va siempre justo.",
+  "titulo": "Envíaselo a quien **siempre va justo** 🙃",
+  "texto": "nokfi.app · 14 días gratis"
+ },
+ "gancho": "Cuánto apartar para Hacienda, **en 3 pasos**"
+}

@@ -1,0 +1,42 @@
+{
+ "id": "v114-calendario-cuatro-fechas",
+ "titulo": "Las cuatro fechas del autónomo",
+ "metodo": "lista numerada + calendario real",
+ "barra": true,
+ "texto": "Las cuatro fechas trimestrales del autónomo en el régimen general. (cuenta de ejemplo con datos ficticios; cálculos orientativos)\n\n#autonomos #iva #facturas #hacienda #emprendedores",
+ "musica": "1-chill-lofi-theme.mp3",
+ "clips": [],
+ "escenas": [
+  {
+   "voz": "Cuatro fechas que todo autónomo debería saberse.",
+   "tarjeta": {
+    "tipo": "lista",
+    "titulo": "IVA y pago a cuenta",
+    "marca": "num",
+    "items": [
+     "**20 de abril**",
+     "**20 de julio**",
+     "**20 de octubre**",
+     "**30 de enero**"
+    ],
+    "rotulo": "nokfi · calendario fiscal"
+   }
+  },
+  {
+   "clip": "cal",
+   "marca": "plazos",
+   "voz": "Si caen en fin de semana, pasan al lunes.",
+   "y": 0.35
+  },
+  {
+   "clip": "cal",
+   "marca": "aviso",
+   "voz": "Y con el aviso activado, no hace falta acordarse."
+  }
+ ],
+ "cierre": {
+  "voz": "Guárdate este vídeo.",
+  "titulo": "**Guárdalo**: las 4 fechas 📌",
+  "texto": "nokfi.app · 14 días gratis"
+ }
+}

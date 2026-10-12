@@ -1,0 +1,72 @@
+{
+ "id": "v108-n8n-validar-nif-formulario",
+ "titulo": "Que no entre un NIF falso en tu CRM",
+ "metodo": "flujo de nodos animado + app",
+ "barra": true,
+ "texto": "Nodo de n8n de Nokfi: valida NIF, NIE y CIF antes de guardar un cliente. (flujo de ejemplo)\n\n#n8n #automatizacion #api #ia #desarrolladores",
+ "musica": "1-chill-lofi-theme.mp3",
+ "clips": [],
+ "escenas": [
+  {
+   "voz": "Un NIF mal escrito en el alta, y luego la factura sale mal.",
+   "tarjeta": {
+    "tipo": "flujo",
+    "zona": "baja",
+    "nodos": [
+     {
+      "icono": "📝",
+      "t": "Formulario de alta"
+     },
+     {
+      "icono": "N",
+      "t": "Nokfi",
+      "nokfi": true
+     },
+     {
+      "icono": "🗂️",
+      "t": "Tu CRM"
+     }
+    ],
+    "rotulo": "nokfi · n8n"
+   }
+  },
+  {
+   "voz": "Un nodo de Nokfi en medio lo valida antes de guardarlo.",
+   "tarjeta": {
+    "tipo": "flujo",
+    "nodos": [
+     {
+      "icono": "📝",
+      "t": "Formulario de alta",
+      "s": "Tu cliente escribe su NIF"
+     },
+     {
+      "icono": "N",
+      "t": "Nokfi · Validar NIF",
+      "s": "Dígito de control y tipo",
+      "nokfi": true
+     },
+     {
+      "icono": "🗂️",
+      "t": "Tu CRM",
+      "s": "Solo entran los válidos"
+     }
+    ],
+    "rotulo": "nokfi · n8n"
+   }
+  },
+  {
+   "clip": "pgnif",
+   "marca": "r",
+   "voz": "Es un cálculo fijo: no gasta cuota.",
+   "y": 0.35
+  }
+ ],
+ "cierre": {
+  "voz": "Envíaselo a quien monta formularios y CRM.",
+  "titulo": "Envíaselo a quien monta **formularios** 📝",
+  "texto": "nokfi.app · nodo y plantillas de n8n",
+  "boton": "Mira la documentación"
+ },
+ "gancho": "Que no entre **un NIF falso** en tu CRM"
+}

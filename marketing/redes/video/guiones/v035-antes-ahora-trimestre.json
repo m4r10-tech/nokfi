@@ -1,0 +1,54 @@
+{
+ "id": "v035-antes-ahora-trimestre",
+ "titulo": "El trimestre: antes y ahora",
+ "metodo": "antes/ahora: panel comparativo + app",
+ "barra": true,
+ "texto": "El trimestre sin hojas de cálculo: lo que toca pagar y cuánto falta apartar. (cuenta de ejemplo con datos ficticios; cálculos orientativos)\n\n#autonomos #pymes #hacienda #emprendedores #negocio",
+ "musica": "3-music-promotion.mp3",
+ "clips": [],
+ "escenas": [
+  {
+   "clip": "imp",
+   "marca": "a",
+   "voz": "Así vivía yo cada trimestre.",
+   "congelar": true,
+   "y": 0.35
+  },
+  {
+   "voz": "Antes: correos, hojas de cálculo y nervios. Ahora subo las facturas y veo lo que toca pagar.",
+   "tarjeta": {
+    "tipo": "comparar",
+    "izq": {
+     "t": "Antes",
+     "items": [
+      "Buscar facturas en el correo",
+      "Sumar el IVA en una hoja",
+      "Rezar para que cuadre"
+     ]
+    },
+    "der": {
+     "t": "Ahora",
+     "items": [
+      "Subo las facturas",
+      "Veo lo que toca pagar",
+      "Y cuánto me falta apartar"
+     ]
+    },
+    "rotulo": "nokfi · antes y ahora",
+    "ritmo": 0.8
+   }
+  },
+  {
+   "clip": "imp",
+   "marca": "m303",
+   "voz": "Con el desglose del **303** y del **130**.",
+   "locucion": "Con el desglose del trescientos tres y del ciento treinta."
+  }
+ ],
+ "cierre": {
+  "voz": "Envíaselo a ese amigo que sufre cada trimestre.",
+  "titulo": "Envíaselo a quien **sufre cada trimestre** 🙃",
+  "texto": "nokfi.app · 14 días gratis"
+ },
+ "gancho": "El trimestre: **antes y ahora**"
+}

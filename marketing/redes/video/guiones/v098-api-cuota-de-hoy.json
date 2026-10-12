@@ -1,0 +1,49 @@
+{
+ "id": "v098-api-cuota-de-hoy",
+ "titulo": "¿Cuánta cuota te queda hoy? Una llamada",
+ "metodo": "terminal animada + Playground real",
+ "barra": true,
+ "texto": "API de Nokfi: consulta tu cuota antes de lanzar un lote. (respuesta real de la API en modo prueba; cálculo orientativo)\n\n#n8n #automatizacion #api #ia #desarrolladores",
+ "musica": "3-music-promotion.mp3",
+ "clips": [],
+ "escenas": [
+  {
+   "voz": "Antes de lanzar cien análisis, mira cuánta cuota te queda.",
+   "tarjeta": {
+    "tipo": "terminal",
+    "zona": "baja",
+    "comando": "GET /api/v1/usage",
+    "tam": 38,
+    "rotulo": "nokfi · API"
+   }
+  },
+  {
+   "voz": "Plan, cuota del día y lo que llevas gastado.",
+   "tarjeta": {
+    "tipo": "terminal",
+    "titulo": "Respuesta",
+    "json": true,
+    "respuesta": "{\n  \"plan\": \"pro\",\n  \"mode\": \"test\",\n  \"daily_quota\": 50,\n  \"used_today\": 0\n}",
+    "resalta": [
+     "\"daily_quota\"",
+     "\"used_today\""
+    ],
+    "tam": 40,
+    "rotulo": "nokfi · API"
+   }
+  },
+  {
+   "clip": "pguso",
+   "marca": "r",
+   "voz": "Con una clave de prueba puedes montarlo todo sin gastar nada.",
+   "y": 0.35
+  }
+ ],
+ "cierre": {
+  "voz": "Envíaselo a quien tiene flujos en producción.",
+  "titulo": "Envíaselo a quien tiene flujos **en producción** ⚡",
+  "texto": "nokfi.app · API con clave de prueba",
+  "boton": "Mira la documentación"
+ },
+ "gancho": "¿Cuánta cuota te queda hoy? **Una llamada**"
+}

@@ -1,0 +1,29 @@
+{
+ "id": "v068-pregunta-precio-hora",
+ "titulo": "¿A cuánto cobras la hora?",
+ "metodo": "pregunta al espectador: corto, pide comentario",
+ "barra": false,
+ "texto": "¿A cuánto cobras la hora? Calcula tu mínimo gratis en nokfi.app 👇 (cálculo orientativo)\n\n#autonomos #freelance #emprendedores #finanzas #negocio",
+ "musica": "3-music-promotion.mp3",
+ "clips": [],
+ "escenas": [
+  {
+   "clip": "hora44",
+   "marca": "r",
+   "voz": "¿A cuánto cobras la hora?",
+   "congelar": true
+  },
+  {
+   "clip": "hora44",
+   "marca": "r",
+   "voz": "Con estos números, menos de **40 €** es perder dinero.",
+   "locucion": "Con estos números, menos de cuarenta euros es perder dinero."
+  }
+ ],
+ "cierre": {
+  "voz": "Te leo en comentarios.",
+  "titulo": "¿Y tú? **Te leo** en comentarios 👇",
+  "texto": "nokfi.app · 14 días gratis"
+ },
+ "gancho": "¿A cuánto cobras **la hora**?"
+}

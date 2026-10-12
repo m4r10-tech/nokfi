@@ -1,0 +1,43 @@
+{
+ "id": "v120-dos-casos-cuota",
+ "titulo": "Dos autónomos, dos cuotas muy distintas",
+ "metodo": "dos casos comparados en la misma calculadora",
+ "barra": true,
+ "texto": "La cuota de autónomos depende de lo que ganas: dos casos. Gratis y sin registro en nokfi.app 🧮 (cálculo orientativo)\n\n#autonomos #freelance #emprendedores #finanzas #negocio",
+ "musica": "1-chill-lofi-theme.mp3",
+ "clips": [],
+ "escenas": [
+  {
+   "clip": "cuota900_100",
+   "marca": "r",
+   "voz": "El primero ingresa 900 € al mes.",
+   "locucion": "El primero ingresa novecientos euros al mes.",
+   "congelar": true
+  },
+  {
+   "clip": "cuota900_100",
+   "marca": "r",
+   "voz": "Paga unos **226 €** de cuota.",
+   "locucion": "Paga unos doscientos veintiséis euros de cuota."
+  },
+  {
+   "clip": "cuota4000_800",
+   "marca": "calc",
+   "voz": "El segundo ingresa 4.000.",
+   "locucion": "El segundo ingresa cuatro mil."
+  },
+  {
+   "clip": "cuota4000_800",
+   "marca": "r",
+   "voz": "Y paga **453 €**: el doble.",
+   "locucion": "Y paga cuatrocientos cincuenta y tres euros: el doble."
+  }
+ ],
+ "cierre": {
+  "voz": "Envíaselo a ese amigo que cree que todos pagan lo mismo.",
+  "titulo": "Envíaselo a quien cree que **todos pagan igual** 🤔",
+  "texto": "nokfi.app · calculadoras gratis",
+  "boton": "Haz tu cálculo gratis"
+ },
+ "gancho": "Dos autónomos, **dos cuotas** muy distintas"
+}

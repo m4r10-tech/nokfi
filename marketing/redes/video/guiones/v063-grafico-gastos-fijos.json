@@ -1,0 +1,51 @@
+{
+ "id": "v063-grafico-gastos-fijos",
+ "titulo": "A dónde van tus gastos fijos en un año",
+ "metodo": "gráfico de barras animado + app",
+ "barra": true,
+ "texto": "Tus gastos fijos al mes y al año, sacados de tus facturas. (cuenta de ejemplo con datos ficticios; cálculos orientativos)\n\n#autonomos #pymes #hacienda #emprendedores #negocio",
+ "musica": "1-chill-lofi-theme.mp3",
+ "clips": [],
+ "escenas": [
+  {
+   "voz": "Al mes parecen poco. Al año, solo el alquiler son casi catorce mil euros.",
+   "tarjeta": {
+    "tipo": "barras",
+    "titulo": "Gastos fijos, al año",
+    "barras": [
+     {
+      "t": "Alquiler",
+      "v": 13794,
+      "txt": "13.794 €",
+      "color": "#FF6B6B"
+     },
+     {
+      "t": "Luz",
+      "v": 3252,
+      "txt": "3.252 €",
+      "color": "#FFD43B"
+     },
+     {
+      "t": "Programas",
+      "v": 566,
+      "txt": "566 €",
+      "color": "#3B82F6"
+     }
+    ],
+    "rotulo": "nokfi · en cifras"
+   }
+  },
+  {
+   "clip": "fugas",
+   "marca": "a",
+   "voz": "Nokfi los saca de tus facturas, y tú decides qué sobra.",
+   "congelar": true,
+   "y": 0.35
+  }
+ ],
+ "cierre": {
+  "voz": "Envíaselo a ese amigo que paga cosas que no usa.",
+  "titulo": "Envíaselo a quien paga **lo que no usa** 👀",
+  "texto": "nokfi.app · 14 días gratis"
+ }
+}

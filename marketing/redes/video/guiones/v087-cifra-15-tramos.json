@@ -1,0 +1,41 @@
+{
+ "id": "v087-cifra-15-tramos",
+ "titulo": "15 tramos de cuota de autónomos",
+ "metodo": "cifra gigante + app",
+ "barra": true,
+ "texto": "La cuota de autónomos tiene 15 tramos: calcula el tuyo gratis en nokfi.app 🧮\n\n#autonomos #freelance #emprendedores #finanzas #negocio",
+ "musica": "1-chill-lofi-theme.mp3",
+ "clips": [],
+ "escenas": [
+  {
+   "voz": "Quince tramos. Tu cuota de autónomos depende de en cuál caes.",
+   "tarjeta": {
+    "tipo": "datos",
+    "lineas": [
+     {
+      "n": "15",
+      "t": "tramos de cuota de autónomos"
+     }
+    ],
+    "rotulo": "nokfi · una cifra",
+    "ritmo": 0.5
+   }
+  },
+  {
+   "clip": "cuota2000_500",
+   "marca": "calc",
+   "voz": "Pones lo que ingresas y lo que gastas."
+  },
+  {
+   "clip": "cuota2000_500",
+   "marca": "r",
+   "voz": "Y ves tu tramo y tu cuota. Aquí, el **tramo 5**.",
+   "locucion": "Y ves tu tramo y tu cuota. Aquí, el tramo cinco."
+  }
+ ],
+ "cierre": {
+  "voz": "Envíaselo a ese amigo que no sabe por qué paga esa cuota.",
+  "titulo": "Envíaselo a quien **no entiende su cuota** 🤔",
+  "texto": "nokfi.app · 14 días gratis"
+ }
+}

@@ -1,0 +1,51 @@
+{
+ "id": "v077-tour-desarrolladores",
+ "titulo": "El espacio de desarrolladores, en 12 segundos",
+ "metodo": "recorrido rápido con voz: cortes cortos",
+ "barra": true,
+ "texto": "Claves, Playground, webhooks y plantillas de n8n: el espacio de desarrolladores de Nokfi. (cuenta de ejemplo)\n\n#n8n #automatizacion #api #ia #desarrolladores",
+ "musica": "3-music-promotion.mp3",
+ "clips": [],
+ "escenas": [
+  {
+   "clip": "dev",
+   "marca": "a",
+   "voz": "Tu **panel**.",
+   "congelar": true,
+   "y": 0.35
+  },
+  {
+   "clip": "claves",
+   "marca": "a",
+   "voz": "Tus **claves**.",
+   "congelar": true,
+   "y": 0.35
+  },
+  {
+   "clip": "pgnif",
+   "marca": "r",
+   "voz": "El **Playground**.",
+   "congelar": true,
+   "y": 0.35
+  },
+  {
+   "clip": "webhooks",
+   "marca": "a",
+   "voz": "Los **webhooks**.",
+   "congelar": true,
+   "y": 0.35
+  },
+  {
+   "clip": "plant",
+   "marca": "a",
+   "voz": "Las plantillas de **n8n**.",
+   "congelar": true
+  }
+ ],
+ "cierre": {
+  "voz": "Pruébalo gratis.",
+  "titulo": "API, MCP y **n8n**.",
+  "texto": "nokfi.app · 14 días gratis"
+ },
+ "gancho": "El espacio de desarrolladores, en **12 segundos**"
+}

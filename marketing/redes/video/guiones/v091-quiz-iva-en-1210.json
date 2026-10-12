@@ -1,0 +1,53 @@
+{
+ "id": "v091-quiz-iva-en-1210",
+ "titulo": "¿Cuánto IVA hay dentro de 1.210 €?",
+ "metodo": "quiz de tres opciones + comprobación en la calculadora",
+ "barra": true,
+ "texto": "Quiz: ¿cuánto IVA hay en 1.210 €? Calculadora gratis en nokfi.app 🧮\n\n#autonomos #iva #facturas #hacienda #emprendedores",
+ "musica": "2-bit-shift.mp3",
+ "clips": [],
+ "escenas": [
+  {
+   "voz": "¿Cuánto IVA hay dentro de un precio de mil doscientos diez euros?",
+   "locucion": "¿Cuánto iva hay dentro de un precio de mil doscientos diez euros?",
+   "tarjeta": {
+    "tipo": "pregunta",
+    "pregunta": "¿Cuánto IVA hay dentro de 1.210 €?",
+    "opciones": [
+     "254 €",
+     "210 €",
+     "121 €"
+    ],
+    "correcta": 1,
+    "revela": 2,
+    "rotulo": "nokfi · quiz"
+   }
+  },
+  {
+   "voz": "La respuesta es la be: doscientos diez.",
+   "tarjeta": {
+    "tipo": "pregunta",
+    "pregunta": "¿Cuánto IVA hay dentro de 1.210 €?",
+    "opciones": [
+     "254 €",
+     "210 €",
+     "121 €"
+    ],
+    "correcta": 1,
+    "revela": 0.2,
+    "rotulo": "nokfi · quiz"
+   }
+  },
+  {
+   "clip": "iva1000",
+   "marca": "r",
+   "voz": "Porque el IVA se calcula sobre la base, no sobre el total.",
+   "locucion": "Porque el iva se calcula sobre la base, no sobre el total."
+  }
+ ],
+ "cierre": {
+  "voz": "Envíaselo a ese amigo, a ver si acierta.",
+  "titulo": "Envíaselo, a ver si **acierta** 🤔",
+  "texto": "nokfi.app · 14 días gratis"
+ }
+}

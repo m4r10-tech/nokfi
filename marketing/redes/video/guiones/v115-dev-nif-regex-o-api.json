@@ -1,0 +1,61 @@
+{
+ "id": "v115-dev-nif-regex-o-api",
+ "titulo": "Validar un NIF: tu regex o una llamada",
+ "metodo": "a mano contra la API: panel comparativo + Playground",
+ "barra": true,
+ "texto": "Validar NIF, NIE y CIF: una llamada a la API de Nokfi en vez de mantener tu propia regex. (respuesta real en modo prueba)\n\n#n8n #automatizacion #api #ia #desarrolladores",
+ "musica": "2-bit-shift.mp3",
+ "clips": [],
+ "escenas": [
+  {
+   "voz": "Validar un NIF parece fácil, hasta que llegan los casos raros.",
+   "tarjeta": {
+    "tipo": "titulo",
+    "zona": "baja",
+    "lineas": [
+     "**A mano** o",
+     "con la API"
+    ],
+    "rotulo": "nokfi · API"
+   }
+  },
+  {
+   "voz": "A mano: una regex, las letras de control y las excepciones. Con la API, una llamada.",
+   "tarjeta": {
+    "tipo": "comparar",
+    "izq": {
+     "t": "A mano",
+     "items": [
+      "Una regex que casi funciona",
+      "Letras de control por tipo",
+      "NIE, CIF y casos raros"
+     ]
+    },
+    "der": {
+     "t": "Con la API de Nokfi",
+     "items": [
+      "Una llamada",
+      "Válido, tipo y NIF-IVA",
+      "Sin gastar cuota"
+     ]
+    },
+    "rotulo": "nokfi · API",
+    "ritmo": 0.8
+   }
+  },
+  {
+   "clip": "pgnif",
+   "marca": "r",
+   "voz": "Y te devuelve el tipo y el NIF-IVA europeo.",
+   "locucion": "Y te devuelve el tipo y el NIF iva europeo.",
+   "y": 0.35
+  }
+ ],
+ "cierre": {
+  "voz": "Envíaselo a quien todavía mantiene esa regex.",
+  "titulo": "Envíaselo a quien mantiene **esa regex** 😅",
+  "texto": "nokfi.app · API con clave de prueba",
+  "boton": "Mira la documentación"
+ },
+ "gancho": "Validar un NIF: **tu regex** o una llamada"
+}

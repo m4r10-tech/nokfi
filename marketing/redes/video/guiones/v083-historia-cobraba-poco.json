@@ -1,0 +1,33 @@
+{
+ "id": "v083-historia-cobraba-poco",
+ "titulo": "Cobraba la hora por debajo de mi coste",
+ "metodo": "historia en tres actos, en primera persona",
+ "barra": true,
+ "texto": "Cobraba la hora por debajo de mi coste. Haz la cuenta gratis en nokfi.app 🧮 (cálculo orientativo)\n\n#autonomos #freelance #emprendedores #finanzas #negocio",
+ "musica": "3-music-promotion.mp3",
+ "clips": [],
+ "escenas": [
+  {
+   "clip": "hora44",
+   "marca": "r",
+   "voz": "Durante años cobré la hora por debajo de lo que me costaba trabajar.",
+   "congelar": true
+  },
+  {
+   "clip": "hora44",
+   "marca": "calc",
+   "voz": "Nunca había sumado gastos, sueldo y cuota."
+  },
+  {
+   "clip": "hora44",
+   "marca": "r",
+   "voz": "El día que hice la cuenta, subí precios."
+  }
+ ],
+ "cierre": {
+  "voz": "Envíaselo a ese amigo que cobra demasiado barato.",
+  "titulo": "Envíaselo a quien **cobra barato** 😬",
+  "texto": "nokfi.app · 14 días gratis"
+ },
+ "gancho": "Cobraba la hora **por debajo de mi coste**"
+}

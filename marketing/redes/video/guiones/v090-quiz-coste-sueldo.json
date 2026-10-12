@@ -1,0 +1,51 @@
+{
+ "id": "v090-quiz-coste-sueldo",
+ "titulo": "¿Cuánto cuesta al año un sueldo de 18.000 €?",
+ "metodo": "quiz de tres opciones + comprobación en la calculadora",
+ "barra": true,
+ "texto": "Quiz: ¿cuánto cuesta de verdad un sueldo de 18.000 €? Calculadora gratis en nokfi.app 🧮\n\n#autonomos #freelance #emprendedores #finanzas #negocio",
+ "musica": "1-chill-lofi-theme.mp3",
+ "clips": [],
+ "escenas": [
+  {
+   "voz": "¿Cuánto le cuesta a la empresa un sueldo de dieciocho mil euros al año?",
+   "tarjeta": {
+    "tipo": "pregunta",
+    "pregunta": "¿Cuánto cuesta al año un sueldo de 18.000 €?",
+    "opciones": [
+     "18.000 €",
+     "21.000 €",
+     "Casi 24.000 €"
+    ],
+    "correcta": 2,
+    "revela": 2,
+    "rotulo": "nokfi · quiz"
+   }
+  },
+  {
+   "voz": "La respuesta es la ce: casi veinticuatro mil.",
+   "tarjeta": {
+    "tipo": "pregunta",
+    "pregunta": "¿Cuánto cuesta al año un sueldo de 18.000 €?",
+    "opciones": [
+     "18.000 €",
+     "21.000 €",
+     "Casi 24.000 €"
+    ],
+    "correcta": 2,
+    "revela": 0.2,
+    "rotulo": "nokfi · quiz"
+   }
+  },
+  {
+   "clip": "emp18000",
+   "marca": "r",
+   "voz": "La diferencia es la Seguridad Social de la empresa."
+  }
+ ],
+ "cierre": {
+  "voz": "Envíaselo a ese amigo, a ver si acierta.",
+  "titulo": "Envíaselo, a ver si **acierta** 🤔",
+  "texto": "nokfi.app · 14 días gratis"
+ }
+}

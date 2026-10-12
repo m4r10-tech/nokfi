@@ -1,0 +1,44 @@
+{
+ "id": "v110-calendario-20-octubre",
+ "titulo": "El 20 de octubre: cuatro modelos el mismo día",
+ "metodo": "calendario animado + calendario real de la app",
+ "barra": true,
+ "texto": "El 20 de octubre: 303, 130, 111 y 115 del tercer trimestre. (cuenta de ejemplo con datos ficticios; cálculos orientativos)\n\n#autonomos #iva #facturas #hacienda #emprendedores",
+ "musica": "3-music-promotion.mp3",
+ "clips": [],
+ "escenas": [
+  {
+   "voz": "El veinte de octubre se juntan cuatro modelos el mismo día.",
+   "tarjeta": {
+    "tipo": "calendario",
+    "mes": "Octubre 2026",
+    "primer": 3,
+    "dias": 31,
+    "marcados": [
+     20
+    ],
+    "leyenda": "Día **20**: modelos 303, 130, 111 y 115",
+    "rotulo": "nokfi · calendario fiscal",
+    "ritmo": 0.7
+   }
+  },
+  {
+   "clip": "cal",
+   "marca": "a",
+   "voz": "IVA, pago a cuenta, y retenciones.",
+   "locucion": "iva, pago a cuenta, y retenciones.",
+   "y": 0.35
+  },
+  {
+   "clip": "imp",
+   "marca": "a",
+   "voz": "Aquí ves cuánto te toca antes de que llegue.",
+   "y": 0.35
+  }
+ ],
+ "cierre": {
+  "voz": "Envíaselo a ese amigo que lo deja para el último día.",
+  "titulo": "Envíaselo a quien lo deja **para el último día** 🙃",
+  "texto": "nokfi.app · 14 días gratis"
+ }
+}

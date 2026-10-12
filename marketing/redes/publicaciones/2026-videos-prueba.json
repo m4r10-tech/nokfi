@@ -54,14 +54,14 @@
   {
     "id": "v005-api-valida-nif-tt",
     "red": "tiktok",
-    "cuando": "2026-10-12T12:00",
+    "cuando": "2026-10-12T15:30",
     "pieza": "v005-api-valida-nif",
     "video": "video.mp4",
     "titulo": "Tu automatización no sabe si un NIF es válido",
     "ia": true,
     "texto": "API de Nokfi: valida NIF, NIE y CIF, calcula IVA y modelo 130 y emite facturas desde n8n o tu agente de IA 🤖 (cuenta de ejemplo con datos ficticios)\n\nEnvíaselo a quien monta automatizaciones 👇\n\n#n8n #automatizacion #api #ia #desarrolladores",
     "aprobado": true,
-    "buffer_id": "6acbfcdd7db619a2914a502d",
+    "buffer_id": "6acca645e2deefbfcdae2086",
     "buffer_estado": "programada"
   }
 ]

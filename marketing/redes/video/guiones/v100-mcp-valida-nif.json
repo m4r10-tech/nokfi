@@ -1,0 +1,71 @@
+{
+ "id": "v100-mcp-valida-nif",
+ "titulo": "Tu agente comprueba un NIF sin inventárselo",
+ "metodo": "chat con un agente (MCP) + cifras",
+ "barra": true,
+ "texto": "Servidor MCP de Nokfi: tu agente valida NIF, NIE y CIF con el dígito de control. (conversación de ejemplo; la cifra es la que devuelve la herramienta)\n\n#n8n #automatizacion #api #ia #desarrolladores",
+ "musica": "2-bit-shift.mp3",
+ "clips": [],
+ "escenas": [
+  {
+   "voz": "Pregúntale a un agente si un NIF es válido, y a veces se lo inventa.",
+   "tarjeta": {
+    "tipo": "chat",
+    "zona": "baja",
+    "mensajes": [
+     {
+      "de": "yo",
+      "texto": "¿Es válido el NIF B12345674?"
+     }
+    ],
+    "rotulo": "nokfi · MCP"
+   }
+  },
+  {
+   "voz": "Con la herramienta de Nokfi, comprueba el dígito de control de verdad.",
+   "tarjeta": {
+    "tipo": "chat",
+    "mensajes": [
+     {
+      "de": "yo",
+      "texto": "¿Es válido el NIF B12345674?"
+     },
+     {
+      "de": "tool",
+      "texto": "🔧 nokfi · validate_tax_id"
+     },
+     {
+      "de": "ia",
+      "texto": "Sí: es un **CIF válido**, de una sociedad limitada."
+     }
+    ],
+    "desde": 1,
+    "rotulo": "nokfi · MCP"
+   }
+  },
+  {
+   "voz": "Es un cálculo fijo: no gasta cuota.",
+   "tarjeta": {
+    "tipo": "datos",
+    "lineas": [
+     {
+      "n": "0",
+      "t": "cuota gastada"
+     },
+     {
+      "n": "15",
+      "t": "herramientas"
+     }
+    ],
+    "rotulo": "nokfi · MCP"
+   }
+  }
+ ],
+ "cierre": {
+  "voz": "Envíaselo a quien está montando agentes.",
+  "titulo": "Envíaselo a quien **monta agentes** 🤖",
+  "texto": "nokfi.app · servidor MCP",
+  "boton": "Mira la documentación"
+ },
+ "gancho": "Tu agente comprueba un NIF **sin inventárselo**"
+}

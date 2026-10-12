@@ -1,0 +1,47 @@
+{
+ "id": "v044-pasos-comprobar-nif",
+ "titulo": "Comprueba un NIF antes de facturar",
+ "metodo": "tutorial en 3 pasos: lista numerada + planos de la app",
+ "barra": true,
+ "texto": "Valida el NIF de tu cliente antes de emitir la factura. Gratis en nokfi.app ✅\n\n#autonomos #freelance #emprendedores #finanzas #negocio",
+ "musica": "3-music-promotion.mp3",
+ "clips": [],
+ "escenas": [
+  {
+   "voz": "Comprobar un NIF antes de facturar. Tres pasos y diez segundos.",
+   "tarjeta": {
+    "tipo": "lista",
+    "zona": "baja",
+    "items": [
+     "Escribe el NIF",
+     "Pulsa Comprobar"
+    ],
+    "marca": "num",
+    "rotulo": "nokfi · en 3 pasos"
+   }
+  },
+  {
+   "clip": "nif",
+   "marca": "ini",
+   "voz": "Uno: escribes el NIF de tu cliente."
+  },
+  {
+   "clip": "nif",
+   "marca": "mal",
+   "voz": "Dos: pulsas Comprobar. Este **no es válido**.",
+   "desplaza": 0.5
+  },
+  {
+   "clip": "nif",
+   "marca": "bien",
+   "voz": "Y tres: lo corriges antes de emitir la factura.",
+   "desplaza": 1
+  }
+ ],
+ "cierre": {
+  "voz": "Envíaselo a ese amigo que hace las facturas a mano.",
+  "titulo": "Envíaselo a quien factura **a mano** ✍️",
+  "texto": "nokfi.app · 14 días gratis"
+ },
+ "gancho": "Comprueba un NIF **antes de facturar**"
+}

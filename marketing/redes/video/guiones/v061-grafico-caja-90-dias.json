@@ -1,0 +1,56 @@
+{
+ "id": "v061-grafico-caja-90-dias",
+ "titulo": "De 6.200 € a 782 en 90 días",
+ "metodo": "gráfico de barras animado + app",
+ "barra": true,
+ "texto": "La caja de hoy engaña: mírala a 30, 60 y 90 días. (cuenta de ejemplo con datos ficticios; cálculos orientativos)\n\n#autonomos #pymes #hacienda #emprendedores #negocio",
+ "musica": "2-bit-shift.mp3",
+ "clips": [],
+ "escenas": [
+  {
+   "voz": "Hoy hay más de seis mil euros en caja. En noventa días, menos de ochocientos.",
+   "tarjeta": {
+    "tipo": "barras",
+    "titulo": "Tu caja, sin hacer nada",
+    "barras": [
+     {
+      "t": "Hoy",
+      "v": 6200,
+      "txt": "6.200 €",
+      "color": "#28C840"
+     },
+     {
+      "t": "En 30 días",
+      "v": 3718,
+      "txt": "3.718 €",
+      "color": "#3B82F6"
+     },
+     {
+      "t": "En 60 días",
+      "v": 2250,
+      "txt": "2.250 €",
+      "color": "#FFD43B"
+     },
+     {
+      "t": "En 90 días",
+      "v": 782,
+      "txt": "782 €",
+      "color": "#FF6B6B"
+     }
+    ],
+    "rotulo": "nokfi · en cifras"
+   }
+  },
+  {
+   "clip": "prev",
+   "marca": "a",
+   "voz": "Es la previsión de caja: cobros, gastos fijos e impuestos.",
+   "y": 0.35
+  }
+ ],
+ "cierre": {
+  "voz": "Envíaselo a ese amigo que solo mira el saldo de hoy.",
+  "titulo": "Envíaselo a quien solo mira **el saldo de hoy** 👀",
+  "texto": "nokfi.app · 14 días gratis"
+ }
+}

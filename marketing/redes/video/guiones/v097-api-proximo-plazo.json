@@ -1,0 +1,49 @@
+{
+ "id": "v097-api-proximo-plazo",
+ "titulo": "El próximo plazo de Hacienda, por API",
+ "metodo": "terminal animada + Playground real",
+ "barra": true,
+ "texto": "API de Nokfi: el calendario fiscal con fechas, modelos y días que quedan. (respuesta real de la API en modo prueba; cálculo orientativo)\n\n#n8n #automatizacion #api #ia #desarrolladores",
+ "musica": "2-bit-shift.mp3",
+ "clips": [],
+ "escenas": [
+  {
+   "voz": "¿Cuál es el próximo plazo de Hacienda? Pregúntaselo a la API.",
+   "tarjeta": {
+    "tipo": "terminal",
+    "zona": "baja",
+    "comando": "GET /api/v1/tax/calendar",
+    "tam": 38,
+    "rotulo": "nokfi · API"
+   }
+  },
+  {
+   "voz": "Fecha, modelos y días que quedan.",
+   "tarjeta": {
+    "tipo": "terminal",
+    "titulo": "Respuesta",
+    "json": true,
+    "respuesta": "{\n  \"date\": \"2026-10-20\",\n  \"models\": [\"303\", \"130\", \"111\", \"115\"],\n  \"period\": \"3T 2026\",\n  \"days_left\": 9\n}",
+    "resalta": [
+     "\"date\"",
+     "\"days_left\""
+    ],
+    "tam": 40,
+    "rotulo": "nokfi · API"
+   }
+  },
+  {
+   "clip": "pgcal",
+   "marca": "r",
+   "voz": "Para autónomos o sociedades, y sin gastar cuota.",
+   "y": 0.35
+  }
+ ],
+ "cierre": {
+  "voz": "Envíaselo a quien hace paneles para gestorías.",
+  "titulo": "Envíaselo a quien hace **paneles** 📊",
+  "texto": "nokfi.app · API con clave de prueba",
+  "boton": "Mira la documentación"
+ },
+ "gancho": "El próximo plazo de Hacienda, **por API**"
+}

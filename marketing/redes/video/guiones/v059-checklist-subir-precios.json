@@ -1,0 +1,44 @@
+{
+ "id": "v059-checklist-subir-precios",
+ "titulo": "Checklist antes de subir precios",
+ "metodo": "checklist animada + planos de la app",
+ "barra": true,
+ "texto": "Antes de subir precios: costes, horas reales y precio mínimo. Calculadora gratis en nokfi.app 🧮\n\n#autonomos #freelance #emprendedores #finanzas #negocio",
+ "musica": "3-music-promotion.mp3",
+ "clips": [],
+ "escenas": [
+  {
+   "voz": "Antes de subir precios, haz estas cuentas.",
+   "tarjeta": {
+    "tipo": "lista",
+    "zona": "baja",
+    "items": [
+     "Tus costes",
+     "Tus horas reales"
+    ],
+    "rotulo": "nokfi · checklist"
+   }
+  },
+  {
+   "clip": "hora44",
+   "marca": "calc",
+   "voz": "Una: lo que te cuesta abrir cada mes."
+  },
+  {
+   "clip": "hora44",
+   "marca": "horas",
+   "voz": "Dos: las horas que de verdad facturas."
+  },
+  {
+   "clip": "hora44",
+   "marca": "r",
+   "voz": "Y tres: el precio mínimo para no perder dinero."
+  }
+ ],
+ "cierre": {
+  "voz": "Guárdate este vídeo para cuando te haga falta.",
+  "titulo": "**Guárdalo** antes de subir precios 📌",
+  "texto": "nokfi.app · 14 días gratis"
+ },
+ "gancho": "Checklist antes de **subir precios**"
+}

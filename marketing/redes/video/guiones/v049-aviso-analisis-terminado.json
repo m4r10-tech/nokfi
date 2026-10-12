@@ -1,0 +1,44 @@
+{
+ "id": "v049-aviso-analisis-terminado",
+ "titulo": "Tu flujo sigue solo cuando termina el análisis",
+ "metodo": "notificación animada + app",
+ "barra": true,
+ "texto": "Nokfi Trigger: tu flujo de n8n continúa cuando termina un análisis. Webhooks firmados. (cuenta de ejemplo)\n\n#n8n #automatizacion #api #ia #desarrolladores",
+ "musica": "2-bit-shift.mp3",
+ "clips": [],
+ "escenas": [
+  {
+   "voz": "Nada de esperar mirando la pantalla: el Trigger avisa cuando el análisis termina.",
+   "tarjeta": {
+    "tipo": "aviso",
+    "zona": "baja",
+    "avisos": [
+     {
+      "icono": "✅",
+      "app": "Nokfi Trigger",
+      "t": "Análisis terminado",
+      "s": "Tu flujo de n8n continúa"
+     }
+    ],
+    "rotulo": "nokfi · n8n"
+   }
+  },
+  {
+   "clip": "plant",
+   "marca": "a",
+   "voz": "Las plantillas ya vienen hechas para importar."
+  },
+  {
+   "clip": "webhooks",
+   "marca": "a",
+   "voz": "Y los avisos van firmados, para que sepas que son de verdad.",
+   "y": 0.35
+  }
+ ],
+ "cierre": {
+  "voz": "Envíaselo a quien vive dentro de n8n.",
+  "titulo": "Envíaselo a quien **vive en n8n** 🤖",
+  "texto": "nokfi.app · 14 días gratis"
+ },
+ "gancho": "Tu flujo sigue solo cuando **termina el análisis**"
+}

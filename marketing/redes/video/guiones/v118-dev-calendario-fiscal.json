@@ -1,0 +1,60 @@
+{
+ "id": "v118-dev-calendario-fiscal",
+ "titulo": "El calendario fiscal: mantenerlo tú o pedirlo",
+ "metodo": "a mano contra la API: panel comparativo + Playground",
+ "barra": true,
+ "texto": "El calendario fiscal español por API, con fechas ajustadas y días restantes. (respuesta real en modo prueba)\n\n#n8n #automatizacion #api #ia #desarrolladores",
+ "musica": "2-bit-shift.mp3",
+ "clips": [],
+ "escenas": [
+  {
+   "voz": "Mantener a mano el calendario de Hacienda es un trabajo que nadie quiere.",
+   "tarjeta": {
+    "tipo": "titulo",
+    "zona": "baja",
+    "lineas": [
+     "**A mano** o",
+     "con la API"
+    ],
+    "rotulo": "nokfi · API"
+   }
+  },
+  {
+   "voz": "Con la API lo pides y viene con las fechas ya ajustadas.",
+   "tarjeta": {
+    "tipo": "comparar",
+    "izq": {
+     "t": "A mano",
+     "items": [
+      "Copiar fechas cada año",
+      "Fines de semana y festivos",
+      "Autónomo o sociedad"
+     ]
+    },
+    "der": {
+     "t": "Con la API de Nokfi",
+     "items": [
+      "Una llamada",
+      "Fechas ya movidas al lunes",
+      "Con los días que quedan"
+     ]
+    },
+    "rotulo": "nokfi · API",
+    "ritmo": 0.8
+   }
+  },
+  {
+   "clip": "pgcal",
+   "marca": "r",
+   "voz": "Modelos, periodo y días que quedan.",
+   "y": 0.35
+  }
+ ],
+ "cierre": {
+  "voz": "Envíaselo a quien hace software para gestorías.",
+  "titulo": "Envíaselo a quien hace software **para gestorías** 📅",
+  "texto": "nokfi.app · API con clave de prueba",
+  "boton": "Mira la documentación"
+ },
+ "gancho": "El calendario fiscal: **mantenerlo tú** o pedirlo"
+}

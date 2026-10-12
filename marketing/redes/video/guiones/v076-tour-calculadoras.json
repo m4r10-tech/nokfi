@@ -1,0 +1,47 @@
+{
+ "id": "v076-tour-calculadoras",
+ "titulo": "5 calculadoras gratis para autónomos",
+ "metodo": "recorrido rápido con voz: cortes cortos",
+ "barra": true,
+ "texto": "Cinco calculadoras gratis y sin registro en nokfi.app 🧮 (cálculos orientativos)\n\n#autonomos #freelance #emprendedores #finanzas #negocio",
+ "musica": "2-bit-shift.mp3",
+ "clips": [],
+ "escenas": [
+  {
+   "clip": "iva1000",
+   "marca": "r",
+   "voz": "El **IVA**.",
+   "congelar": true
+  },
+  {
+   "clip": "irpf1000",
+   "marca": "r",
+   "voz": "La **retención**.",
+   "congelar": true
+  },
+  {
+   "clip": "cuota2000_500",
+   "marca": "r",
+   "voz": "Tu **cuota**.",
+   "congelar": true
+  },
+  {
+   "clip": "emp18000",
+   "marca": "r",
+   "voz": "Un **empleado**.",
+   "congelar": true
+  },
+  {
+   "clip": "hora44",
+   "marca": "r",
+   "voz": "Tu precio por **hora**.",
+   "congelar": true
+  }
+ ],
+ "cierre": {
+  "voz": "Pruébalo gratis.",
+  "titulo": "Gratis y **sin registro**.",
+  "texto": "nokfi.app · 14 días gratis"
+ },
+ "gancho": "5 calculadoras **gratis** para autónomos"
+}

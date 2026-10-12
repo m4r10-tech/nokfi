@@ -1,0 +1,45 @@
+{
+ "id": "v046-aviso-recordatorio-cliente",
+ "titulo": "El correo que no tienes que escribir tú",
+ "metodo": "notificación animada + app",
+ "barra": true,
+ "texto": "Recordatorios automáticos a tus clientes cuando una factura vence. (cuenta de ejemplo con datos ficticios; cálculos orientativos)\n\n#autonomos #pymes #hacienda #emprendedores #negocio",
+ "musica": "2-bit-shift.mp3",
+ "clips": [],
+ "escenas": [
+  {
+   "voz": "Este correo le llega a tu cliente cuando se retrasa en pagarte.",
+   "tarjeta": {
+    "tipo": "aviso",
+    "zona": "baja",
+    "avisos": [
+     {
+      "icono": "✉️",
+      "app": "Correo a tu cliente",
+      "t": "Recordatorio de pago",
+      "s": "Factura vencida · tono amable"
+     }
+    ],
+    "rotulo": "nokfi · avisos"
+   }
+  },
+  {
+   "clip": "cobros",
+   "marca": "auto2",
+   "voz": "Sale solo a los siete días. Más firme a los treinta, y formal a los sesenta.",
+   "y": 0.35
+  },
+  {
+   "clip": "cobros",
+   "marca": "lista",
+   "voz": "Y tú ves quién te debe, sin perseguir a nadie.",
+   "y": 0.35
+  }
+ ],
+ "cierre": {
+  "voz": "Envíaselo a ese amigo que no se atreve a reclamar.",
+  "titulo": "Envíaselo a quien **no se atreve a reclamar** 😅",
+  "texto": "nokfi.app · 14 días gratis"
+ },
+ "gancho": "El correo que **no tienes que escribir** tú"
+}

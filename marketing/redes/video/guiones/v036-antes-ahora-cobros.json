@@ -1,0 +1,54 @@
+{
+ "id": "v036-antes-ahora-cobros",
+ "titulo": "Cobrar facturas: antes y ahora",
+ "metodo": "antes/ahora: panel comparativo + app",
+ "barra": true,
+ "texto": "Facturas vencidas: quién te debe, desde cuándo y un recordatorio que sale solo. (cuenta de ejemplo con datos ficticios; cálculos orientativos)\n\n#autonomos #pymes #hacienda #emprendedores #negocio",
+ "musica": "1-chill-lofi-theme.mp3",
+ "clips": [],
+ "escenas": [
+  {
+   "clip": "cobros",
+   "marca": "a",
+   "voz": "Perseguir a quien me debe era lo peor.",
+   "congelar": true,
+   "y": 0.35
+  },
+  {
+   "voz": "Antes lo apuntaba en un papel y se me olvidaba. Ahora el recordatorio sale solo.",
+   "tarjeta": {
+    "tipo": "comparar",
+    "izq": {
+     "t": "Antes",
+     "items": [
+      "Apuntar quién debe en un papel",
+      "Escribir correos incómodos",
+      "Olvidarme de reclamar"
+     ]
+    },
+    "der": {
+     "t": "Ahora",
+     "items": [
+      "Veo quién debe y desde cuándo",
+      "El recordatorio sale solo",
+      "A los 7, 30 y 60 días"
+     ]
+    },
+    "rotulo": "nokfi · antes y ahora",
+    "ritmo": 0.8
+   }
+  },
+  {
+   "clip": "cobros",
+   "marca": "lista",
+   "voz": "Y veo de un vistazo quién me debe y desde cuándo.",
+   "y": 0.35
+  }
+ ],
+ "cierre": {
+  "voz": "Envíaselo a ese amigo que no se atreve a reclamar.",
+  "titulo": "Envíaselo a quien **no se atreve a reclamar** 😅",
+  "texto": "nokfi.app · 14 días gratis"
+ },
+ "gancho": "Cobrar facturas: **antes y ahora**"
+}

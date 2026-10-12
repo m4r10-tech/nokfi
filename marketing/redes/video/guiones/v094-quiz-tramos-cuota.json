@@ -1,0 +1,51 @@
+{
+ "id": "v094-quiz-tramos-cuota",
+ "titulo": "¿Cuántos tramos tiene la cuota de autónomos?",
+ "metodo": "quiz de tres opciones + comprobación en la calculadora",
+ "barra": true,
+ "texto": "Quiz: ¿cuántos tramos tiene la cuota de autónomos? Calcula el tuyo gratis en nokfi.app 🧮\n\n#autonomos #freelance #emprendedores #finanzas #negocio",
+ "musica": "2-bit-shift.mp3",
+ "clips": [],
+ "escenas": [
+  {
+   "voz": "¿Cuántos tramos tiene la cuota de autónomos?",
+   "tarjeta": {
+    "tipo": "pregunta",
+    "pregunta": "¿Cuántos tramos tiene la cuota de autónomos?",
+    "opciones": [
+     "3 tramos",
+     "9 tramos",
+     "15 tramos"
+    ],
+    "correcta": 2,
+    "revela": 2,
+    "rotulo": "nokfi · quiz"
+   }
+  },
+  {
+   "voz": "La respuesta es la ce: quince tramos.",
+   "tarjeta": {
+    "tipo": "pregunta",
+    "pregunta": "¿Cuántos tramos tiene la cuota de autónomos?",
+    "opciones": [
+     "3 tramos",
+     "9 tramos",
+     "15 tramos"
+    ],
+    "correcta": 2,
+    "revela": 0.2,
+    "rotulo": "nokfi · quiz"
+   }
+  },
+  {
+   "clip": "cuota2000_500",
+   "marca": "r",
+   "voz": "Y pagas según lo que ganas de verdad."
+  }
+ ],
+ "cierre": {
+  "voz": "Envíaselo a ese amigo, a ver si acierta.",
+  "titulo": "Envíaselo, a ver si **acierta** 🤔",
+  "texto": "nokfi.app · 14 días gratis"
+ }
+}

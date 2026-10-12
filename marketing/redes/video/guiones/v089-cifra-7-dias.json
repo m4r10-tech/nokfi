@@ -1,0 +1,41 @@
+{
+ "id": "v089-cifra-7-dias",
+ "titulo": "7 días antes, te avisa",
+ "metodo": "cifra gigante + app",
+ "barra": true,
+ "texto": "Aviso 7 días antes y la víspera de cada plazo fiscal. (cuenta de ejemplo con datos ficticios; cálculos orientativos)\n\n#autonomos #pymes #hacienda #emprendedores #negocio",
+ "musica": "3-music-promotion.mp3",
+ "clips": [],
+ "escenas": [
+  {
+   "voz": "Siete días. Con ese margen te avisa antes de cada plazo de Hacienda.",
+   "tarjeta": {
+    "tipo": "datos",
+    "lineas": [
+     {
+      "n": "7",
+      "t": "días antes, te avisa"
+     }
+    ],
+    "rotulo": "nokfi · una cifra",
+    "ritmo": 0.5
+   }
+  },
+  {
+   "clip": "cal",
+   "marca": "aviso",
+   "voz": "Y otra vez la víspera, por si acaso."
+  },
+  {
+   "clip": "cal",
+   "marca": "plazos",
+   "voz": "Con todos los modelos del año.",
+   "y": 0.35
+  }
+ ],
+ "cierre": {
+  "voz": "Envíaselo a ese amigo que presenta el último día.",
+  "titulo": "Envíaselo a quien presenta **el último día** 🙃",
+  "texto": "nokfi.app · 14 días gratis"
+ }
+}

@@ -1,0 +1,76 @@
+{
+ "id": "v109-n8n-aviso-total-no-cuadra",
+ "titulo": "Un aviso cuando una factura no cuadra",
+ "metodo": "flujo de nodos animado + app",
+ "barra": true,
+ "texto": "Nodo de n8n de Nokfi: cada factura llega con sus comprobaciones (total, NIF, fecha, tipo de IVA). (flujo de ejemplo)\n\n#n8n #automatizacion #api #ia #desarrolladores",
+ "musica": "2-bit-shift.mp3",
+ "clips": [],
+ "escenas": [
+  {
+   "voz": "Facturas con el total mal sumado: mejor verlas antes de pagarlas.",
+   "tarjeta": {
+    "tipo": "flujo",
+    "zona": "baja",
+    "nodos": [
+     {
+      "icono": "✉️",
+      "t": "Factura recibida"
+     },
+     {
+      "icono": "N",
+      "t": "Nokfi",
+      "nokfi": true
+     },
+     {
+      "icono": "🔀",
+      "t": "Si no cuadra…"
+     }
+    ],
+    "rotulo": "nokfi · n8n"
+   }
+  },
+  {
+   "voz": "Nokfi comprueba cada factura, y tu flujo avisa si algo no cuadra.",
+   "tarjeta": {
+    "tipo": "flujo",
+    "nodos": [
+     {
+      "icono": "✉️",
+      "t": "Factura recibida",
+      "s": "Por correo o en una carpeta"
+     },
+     {
+      "icono": "N",
+      "t": "Nokfi · Extraer facturas",
+      "s": "Comprueba total y NIF",
+      "nokfi": true
+     },
+     {
+      "icono": "🔀",
+      "t": "Si no cuadra…",
+      "s": "checks.totals_ok = false"
+     },
+     {
+      "icono": "💬",
+      "t": "Aviso",
+      "s": "A ti o a contabilidad"
+     }
+    ],
+    "rotulo": "nokfi · n8n"
+   }
+  },
+  {
+   "clip": "plant",
+   "marca": "a",
+   "voz": "Puedes empezar por una plantilla y añadirle el aviso."
+  }
+ ],
+ "cierre": {
+  "voz": "Envíaselo a quien automatiza contabilidad.",
+  "titulo": "Envíaselo a quien **automatiza** contabilidad 🤖",
+  "texto": "nokfi.app · nodo y plantillas de n8n",
+  "boton": "Mira la documentación"
+ },
+ "gancho": "Un aviso cuando una factura **no cuadra**"
+}

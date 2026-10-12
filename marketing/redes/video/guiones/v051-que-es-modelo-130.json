@@ -1,0 +1,41 @@
+{
+ "id": "v051-que-es-modelo-130",
+ "titulo": "¿Qué es el modelo 130?",
+ "metodo": "glosario: título cinético + app",
+ "barra": true,
+ "texto": "El modelo 130 en 15 segundos: un pago a cuenta de tu IRPF. (cuenta de ejemplo con datos ficticios; cálculos orientativos)\n\n#autonomos #iva #facturas #hacienda #emprendedores",
+ "musica": "1-chill-lofi-theme.mp3",
+ "clips": [],
+ "escenas": [
+  {
+   "voz": "¿Qué es el modelo 130? Quince segundos.",
+   "locucion": "¿Qué es el modelo ciento treinta? Quince segundos.",
+   "tarjeta": {
+    "tipo": "titulo",
+    "lineas": [
+     "¿Qué es",
+     "el **modelo 130**?"
+    ],
+    "rotulo": "nokfi · en 15 segundos",
+    "ritmo": 0.6
+   }
+  },
+  {
+   "clip": "imp",
+   "marca": "m130",
+   "voz": "Es un adelanto de tu IRPF, cada trimestre.",
+   "locucion": "Es un adelanto de tu i erre pe efe, cada trimestre."
+  },
+  {
+   "clip": "imp",
+   "marca": "m130",
+   "voz": "El veinte por ciento de lo que llevas ganado en el año.",
+   "congelar": true
+  }
+ ],
+ "cierre": {
+  "voz": "Envíaselo a ese amigo autónomo que acaba de empezar.",
+  "titulo": "Envíaselo a quien **acaba de empezar** 🫡",
+  "texto": "nokfi.app · 14 días gratis"
+ }
+}

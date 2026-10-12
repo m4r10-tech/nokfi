@@ -1,0 +1,67 @@
+{
+ "id": "v103-mcp-estima-130",
+ "titulo": "El modelo 130, calculado por tu agente",
+ "metodo": "chat con un agente (MCP) + cifras",
+ "barra": true,
+ "texto": "Servidor MCP de Nokfi: tu agente estima el modelo 130 con una herramienta de cálculo fijo. (conversación de ejemplo; la cifra es la que devuelve la herramienta)\n\n#n8n #automatizacion #api #ia #desarrolladores",
+ "musica": "2-bit-shift.mp3",
+ "clips": [],
+ "escenas": [
+  {
+   "voz": "Dale a tu agente los números del trimestre y pídele el modelo ciento treinta.",
+   "tarjeta": {
+    "tipo": "chat",
+    "zona": "baja",
+    "mensajes": [
+     {
+      "de": "yo",
+      "texto": "Estima mi 130: ingresos 42.000, gastos 18.500, ya pagué 2.900 y me retuvieron 600"
+     }
+    ],
+    "rotulo": "nokfi · MCP"
+   }
+  },
+  {
+   "voz": "Llama a la herramienta de Nokfi y te devuelve el resultado: mil doscientos euros.",
+   "tarjeta": {
+    "tipo": "chat",
+    "mensajes": [
+     {
+      "de": "yo",
+      "texto": "Estima mi 130: ingresos 42.000, gastos 18.500, ya pagué 2.900 y me retuvieron 600"
+     },
+     {
+      "de": "tool",
+      "texto": "🔧 nokfi · estimate_model_130"
+     },
+     {
+      "de": "ia",
+      "texto": "Resultado: **1.200 €**, a pagar hasta el 20 de octubre."
+     }
+    ],
+    "desde": 1,
+    "rotulo": "nokfi · MCP"
+   }
+  },
+  {
+   "voz": "Con la fecha límite incluida.",
+   "tarjeta": {
+    "tipo": "datos",
+    "lineas": [
+     {
+      "n": "130",
+      "t": "estimado en segundos"
+     }
+    ],
+    "rotulo": "nokfi · MCP"
+   }
+  }
+ ],
+ "cierre": {
+  "voz": "Envíaselo a quien programa para autónomos.",
+  "titulo": "Envíaselo a quien **programa** para autónomos 👨‍💻",
+  "texto": "nokfi.app · servidor MCP",
+  "boton": "Mira la documentación"
+ },
+ "gancho": "El modelo 130, **calculado por tu agente**"
+}

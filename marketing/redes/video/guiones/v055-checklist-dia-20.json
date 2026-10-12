@@ -1,0 +1,46 @@
+{
+ "id": "v055-checklist-dia-20",
+ "titulo": "Checklist antes del día 20",
+ "metodo": "checklist animada + planos de la app",
+ "barra": true,
+ "texto": "Checklist del autónomo antes del día 20: facturas, IVA y dinero apartado. (cuenta de ejemplo con datos ficticios; cálculos orientativos)\n\n#autonomos #pymes #hacienda #emprendedores #negocio",
+ "musica": "2-bit-shift.mp3",
+ "clips": [],
+ "escenas": [
+  {
+   "voz": "Tres cosas que revisar antes del día veinte.",
+   "tarjeta": {
+    "tipo": "lista",
+    "zona": "baja",
+    "items": [
+     "Facturas subidas",
+     "IVA calculado"
+    ],
+    "rotulo": "nokfi · checklist"
+   }
+  },
+  {
+   "clip": "libro",
+   "marca": "a",
+   "voz": "Una: todas las facturas del trimestre, subidas."
+  },
+  {
+   "clip": "imp",
+   "marca": "m303",
+   "voz": "Dos: el IVA, calculado.",
+   "locucion": "Dos: el iva, calculado."
+  },
+  {
+   "clip": "imp",
+   "marca": "a",
+   "voz": "Y tres: el dinero, **apartado**.",
+   "y": 0.35
+  }
+ ],
+ "cierre": {
+  "voz": "Guárdate este vídeo para cuando te haga falta.",
+  "titulo": "**Guárdalo** para el día 20 📌",
+  "texto": "nokfi.app · 14 días gratis"
+ },
+ "gancho": "Checklist antes del **día 20**"
+}

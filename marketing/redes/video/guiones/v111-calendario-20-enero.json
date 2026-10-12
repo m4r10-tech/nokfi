@@ -1,0 +1,44 @@
+{
+ "id": "v111-calendario-20-enero",
+ "titulo": "El 20 de enero no es el día del IVA",
+ "metodo": "calendario animado + calendario real de la app",
+ "barra": true,
+ "texto": "En enero, las retenciones (111 y 115) van el día 20; el IVA del 4T, más tarde. (cuenta de ejemplo con datos ficticios; cálculos orientativos)\n\n#autonomos #iva #facturas #hacienda #emprendedores",
+ "musica": "1-chill-lofi-theme.mp3",
+ "clips": [],
+ "escenas": [
+  {
+   "voz": "Ojo: el veinte de enero no es el día del IVA.",
+   "locucion": "Ojo: el veinte de enero no es el día del iva.",
+   "tarjeta": {
+    "tipo": "calendario",
+    "mes": "Enero 2027",
+    "primer": 4,
+    "dias": 31,
+    "marcados": [
+     20
+    ],
+    "leyenda": "Día **20**: modelos 111 y 115 (retenciones)",
+    "rotulo": "nokfi · calendario fiscal",
+    "ritmo": 0.7
+   }
+  },
+  {
+   "clip": "cal",
+   "marca": "plazos",
+   "voz": "Ese día van las retenciones.",
+   "y": 0.35
+  },
+  {
+   "clip": "cal",
+   "marca": "aviso",
+   "voz": "El IVA del cuarto trimestre va más tarde, y te avisa de los dos.",
+   "locucion": "El iva del cuarto trimestre va más tarde, y te avisa de los dos."
+  }
+ ],
+ "cierre": {
+  "voz": "Envíaselo a ese amigo que se lía con las fechas.",
+  "titulo": "Envíaselo a quien **se lía con las fechas** 📅",
+  "texto": "nokfi.app · 14 días gratis"
+ }
+}

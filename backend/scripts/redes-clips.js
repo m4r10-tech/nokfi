@@ -18,6 +18,7 @@
  *   { "escribir": { "en": "input[name=x]", "texto": "1200", "limpiar": true } }   limpiar: borra antes lo que hubiera
  *   { "elegir": { "en": "select", "valor": "tax.vat" } }      opción de un desplegable
  *   { "bajar": 500 } / { "subir": 500 }           desplazamiento suave en px
+ *   { "leer": "main", "como": "resultado" }             guarda el texto de ese elemento en <clip>.json (leido)
  *   { "marca": "importe" }                        segundo del clip que usa el montaje (escena.marca)
  * SHOTS_DATE=AAAA-MM-DD fija el día (por defecto 2026-09-29, dentro del 3T de los datos).
  */
@@ -85,6 +86,7 @@ async function grabarClip(browser, demo, clip, dir) {
   const ahora = () => Date.now() / 1000;
   let inicio = null;
   const marcas = {};
+  const leido = {};
 
   for (const paso of clip.pasos) {
     if (paso.ir) {
@@ -118,6 +120,9 @@ async function grabarClip(browser, demo, clip, dir) {
       await wait(350);
       await loc.selectOption(paso.elegir.valor);
       await wait(700);
+    } else if (paso.leer) {
+      // Texto de la pantalla (p. ej. el resultado de una calculadora) para escribir el guion con la cifra real.
+      leido[paso.como || paso.leer] = (await page.locator(paso.leer).first().innerText()).replace(/\s+/g, ' ').slice(0, 900);
     } else if (paso.bajar) {
       await desplazar(page, paso.bajar);
     } else if (paso.subir) {
@@ -142,7 +147,8 @@ async function grabarClip(browser, demo, clip, dir) {
   const rel = (t) => Math.max(0, +(t - t0).toFixed(3));
   fs.writeFileSync(path.join(dir, `${clip.id}.json`), JSON.stringify({
     inicio: rel(inicio ?? t0), fin: rel(fin),
-    marcas: Object.fromEntries(Object.entries(marcas).map(([k, v]) => [k, rel(v)]))
+    marcas: Object.fromEntries(Object.entries(marcas).map(([k, v]) => [k, rel(v)])),
+    leido
   }, null, 2));
   return destino;
 }
@@ -158,8 +164,12 @@ async function main() {
   const browser = await chromium.launch({ executablePath: CHROME });
   for (const clip of guion.clips) {
     if (solo && clip.id !== solo) continue;
-    await grabarClip(browser, demo, clip, dir);
-    console.log('✓ clip', clip.id);
+    // Un clip que falla (p. ej. una pantalla que tarda) no tumba el resto: se reintenta una vez y se sigue.
+    let ok = false;
+    for (let intento = 0; intento < 2 && !ok; intento++) {
+      try { await grabarClip(browser, demo, clip, dir); ok = true; } catch (e) { console.log('✗ clip', clip.id, String(e.message || e).split('\n')[0]); }
+    }
+    if (ok) console.log('✓ clip', clip.id);
   }
   await browser.close();
   demo.close();

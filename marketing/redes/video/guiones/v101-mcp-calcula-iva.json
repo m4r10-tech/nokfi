@@ -1,0 +1,69 @@
+{
+ "id": "v101-mcp-calcula-iva",
+ "titulo": "Que tu agente no haga las cuentas de cabeza",
+ "metodo": "chat con un agente (MCP) + cifras",
+ "barra": true,
+ "texto": "Servidor MCP de Nokfi: el IVA lo calcula la herramienta, no el modelo. (conversación de ejemplo; la cifra es la que devuelve la herramienta)\n\n#n8n #automatizacion #api #ia #desarrolladores",
+ "musica": "3-music-promotion.mp3",
+ "clips": [],
+ "escenas": [
+  {
+   "voz": "Los agentes se equivocan con los números. No les dejes calcular el IVA.",
+   "locucion": "Los agentes se equivocan con los números. No les dejes calcular el iva.",
+   "tarjeta": {
+    "tipo": "chat",
+    "zona": "baja",
+    "mensajes": [
+     {
+      "de": "yo",
+      "texto": "¿Cuánto IVA lleva una factura de 1.210 €?"
+     }
+    ],
+    "rotulo": "nokfi · MCP"
+   }
+  },
+  {
+   "voz": "Que llame a la herramienta de Nokfi: base mil, IVA doscientos diez.",
+   "locucion": "Que llame a la herramienta de Nokfi: base mil, iva doscientos diez.",
+   "tarjeta": {
+    "tipo": "chat",
+    "mensajes": [
+     {
+      "de": "yo",
+      "texto": "¿Cuánto IVA lleva una factura de 1.210 €?"
+     },
+     {
+      "de": "tool",
+      "texto": "🔧 nokfi · calculate_vat"
+     },
+     {
+      "de": "ia",
+      "texto": "Base **1.000 €** e IVA **210 €**, al 21 %."
+     }
+    ],
+    "desde": 1,
+    "rotulo": "nokfi · MCP"
+   }
+  },
+  {
+   "voz": "Cálculo exacto, y sin gastar cuota.",
+   "tarjeta": {
+    "tipo": "datos",
+    "lineas": [
+     {
+      "n": "21",
+      "t": "% · también 10, 4 y recargo"
+     }
+    ],
+    "rotulo": "nokfi · MCP"
+   }
+  }
+ ],
+ "cierre": {
+  "voz": "Envíaselo a quien está montando agentes.",
+  "titulo": "Envíaselo a quien **monta agentes** 🤖",
+  "texto": "nokfi.app · servidor MCP",
+  "boton": "Mira la documentación"
+ },
+ "gancho": "Que tu agente **no haga las cuentas de cabeza**"
+}

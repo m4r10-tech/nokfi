@@ -1,0 +1,44 @@
+{
+ "id": "v031-pov-contratar",
+ "titulo": "POV: quieres contratar y no sabes si te llega",
+ "metodo": "POV narrado",
+ "barra": false,
+ "texto": "POV: quieres contratar y miras antes la caja de los próximos 90 días 📉 (cuenta de ejemplo con datos ficticios; cálculos orientativos)\n\n#autonomos #pymes #hacienda #emprendedores #negocio",
+ "musica": "2-bit-shift.mp3",
+ "clips": [],
+ "escenas": [
+  {
+   "clip": "prev",
+   "marca": "a",
+   "voz": "Quieres contratar y no sabes si te llega.",
+   "congelar": true,
+   "y": 0.35
+  },
+  {
+   "clip": "prev",
+   "marca": "esc",
+   "voz": "Pones el coste: **1.800 €** al mes.",
+   "y": 0.35,
+   "locucion": "Pones el coste: mil ochocientos euros al mes."
+  },
+  {
+   "clip": "prev",
+   "marca": "rojo",
+   "voz": "En diciembre, **números rojos**.",
+   "y": 0.35
+  },
+  {
+   "clip": "prev",
+   "marca": "rojo",
+   "voz": "Mejor saberlo hoy.",
+   "congelar": true,
+   "y": 0.35
+  }
+ ],
+ "cierre": {
+  "voz": "Envíaselo a quien quiere contratar.",
+  "titulo": "Envíaselo a quien quiere **contratar** 👀",
+  "texto": "nokfi.app · 14 días gratis"
+ },
+ "gancho": "POV: quieres contratar y **no sabes si te llega**"
+}

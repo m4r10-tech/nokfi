@@ -1,0 +1,46 @@
+{
+ "id": "v034-pov-en-que-se-va",
+ "titulo": "POV: abres el banco y no sabes en qué se va el dinero",
+ "metodo": "POV narrado",
+ "barra": false,
+ "texto": "POV: miras tus gastos fijos y descubres cuánto suman al mes 💸 (cuenta de ejemplo con datos ficticios; cálculos orientativos)\n\n#autonomos #pymes #hacienda #emprendedores #negocio",
+ "musica": "2-bit-shift.mp3",
+ "clips": [],
+ "escenas": [
+  {
+   "clip": "fugas",
+   "marca": "a",
+   "voz": "Abres el banco y no sabes en qué se va.",
+   "congelar": true,
+   "y": 0.35
+  },
+  {
+   "clip": "fugas",
+   "marca": "a",
+   "voz": "Tus gastos fijos, sacados de tus facturas.",
+   "congelar": true,
+   "y": 0.35
+  },
+  {
+   "clip": "fugas",
+   "marca": "a",
+   "voz": "Casi **1.500 €** al mes.",
+   "congelar": true,
+   "y": 0.35,
+   "locucion": "Casi mil quinientos euros al mes."
+  },
+  {
+   "clip": "fugas",
+   "marca": "a",
+   "voz": "¿Sigues usando todo lo que pagas?",
+   "congelar": true,
+   "y": 0.35
+  }
+ ],
+ "cierre": {
+  "voz": "Envíaselo a quien paga lo que no usa.",
+  "titulo": "Envíaselo a quien paga **lo que no usa** 👀",
+  "texto": "nokfi.app · 14 días gratis"
+ },
+ "gancho": "POV: abres el banco y **no sabes en qué se va** el dinero"
+}

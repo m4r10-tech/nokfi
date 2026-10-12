@@ -1,0 +1,41 @@
+{
+ "id": "v086-cifra-61-sobre-100",
+ "titulo": "61 sobre 100: la nota del negocio",
+ "metodo": "cifra gigante + app",
+ "barra": true,
+ "texto": "Un diagnóstico de 30 preguntas que le pone nota a tu negocio. (cuenta de ejemplo con datos ficticios; cálculos orientativos)\n\n#autonomos #pymes #hacienda #emprendedores #negocio",
+ "musica": "3-music-promotion.mp3",
+ "clips": [],
+ "escenas": [
+  {
+   "voz": "Sesenta y uno sobre cien. Es la nota de cómo se lleva este negocio.",
+   "tarjeta": {
+    "tipo": "datos",
+    "lineas": [
+     {
+      "n": "61",
+      "t": "sobre 100: la nota del negocio"
+     }
+    ],
+    "rotulo": "nokfi · una cifra",
+    "ritmo": 0.5
+   }
+  },
+  {
+   "clip": "diag",
+   "marca": "nota",
+   "voz": "Sale de treinta preguntas, con reglas fijas."
+  },
+  {
+   "clip": "cuest",
+   "marca": "a",
+   "voz": "Y te dice por dónde empezar a mejorar.",
+   "y": 0.35
+  }
+ ],
+ "cierre": {
+  "voz": "Envíaselo a ese amigo que lleva el negocio a ojo.",
+  "titulo": "Envíaselo a quien lo lleva **a ojo** 👀",
+  "texto": "nokfi.app · 14 días gratis"
+ }
+}

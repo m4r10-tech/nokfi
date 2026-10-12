@@ -1,0 +1,53 @@
+{
+ "id": "v038-antes-ahora-libro",
+ "titulo": "Llevar las facturas: antes y ahora",
+ "metodo": "antes/ahora: panel comparativo + app",
+ "barra": true,
+ "texto": "Tu libro de facturas al día: la IA las lee y el IVA sale separado. (cuenta de ejemplo con datos ficticios; cálculos orientativos)\n\n#autonomos #pymes #hacienda #emprendedores #negocio",
+ "musica": "3-music-promotion.mp3",
+ "clips": [],
+ "escenas": [
+  {
+   "clip": "libro",
+   "marca": "a",
+   "voz": "Mis facturas vivían en una caja de zapatos.",
+   "congelar": true
+  },
+  {
+   "voz": "Antes las copiaba a mano, una a una. Ahora las lee la inteligencia artificial y el IVA sale separado.",
+   "locucion": "Antes las copiaba a mano, una a una. Ahora las lee la inteligencia artificial y el iva sale separado.",
+   "tarjeta": {
+    "tipo": "comparar",
+    "izq": {
+     "t": "Antes",
+     "items": [
+      "Tickets en una caja",
+      "Copiar cada factura a mano",
+      "Enviar fotos al gestor"
+     ]
+    },
+    "der": {
+     "t": "Ahora",
+     "items": [
+      "La IA lee cada factura",
+      "El IVA sale ya separado",
+      "PDF o Excel con un toque"
+     ]
+    },
+    "rotulo": "nokfi · antes y ahora",
+    "ritmo": 0.8
+   }
+  },
+  {
+   "clip": "libro",
+   "marca": "lista",
+   "voz": "Cada factura, en su sitio y con su IVA."
+  }
+ ],
+ "cierre": {
+  "voz": "Envíaselo a ese amigo que guarda los tickets en una caja.",
+  "titulo": "Envíaselo a quien guarda **tickets en una caja** 📦",
+  "texto": "nokfi.app · 14 días gratis"
+ },
+ "gancho": "Llevar las facturas: **antes y ahora**"
+}

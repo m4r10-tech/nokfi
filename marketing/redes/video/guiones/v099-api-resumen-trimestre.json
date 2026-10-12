@@ -1,0 +1,49 @@
+{
+ "id": "v099-api-resumen-trimestre",
+ "titulo": "El trimestre de un negocio, en un JSON",
+ "metodo": "terminal animada + Playground real",
+ "barra": true,
+ "texto": "API de Nokfi: IVA, modelo 130 y total estimado del trimestre, calculados desde el libro. (respuesta real de la API en modo prueba; cálculo orientativo)\n\n#n8n #automatizacion #api #ia #desarrolladores",
+ "musica": "1-chill-lofi-theme.mp3",
+ "clips": [],
+ "escenas": [
+  {
+   "voz": "Todo el trimestre de un negocio, en una sola respuesta.",
+   "tarjeta": {
+    "tipo": "terminal",
+    "zona": "baja",
+    "comando": "GET /api/v1/tax/quarter",
+    "tam": 38,
+    "rotulo": "nokfi · API"
+   }
+  },
+  {
+   "voz": "IVA, modelo 130 y el **total estimado**, desde el libro de facturas.",
+   "locucion": "iva, modelo ciento treinta y el total estimado, desde el libro de facturas.",
+   "tarjeta": {
+    "tipo": "terminal",
+    "titulo": "Respuesta",
+    "json": true,
+    "respuesta": "{\n  \"due_date\": \"2026-10-20\",\n  \"vat\": { \"result\": 3093.93 },\n  \"irpf130\": { \"result\": 2869.6 },\n  \"total_estimated\": 5963.53\n}",
+    "resalta": [
+     "\"total_estimated\""
+    ],
+    "tam": 40,
+    "rotulo": "nokfi · API"
+   }
+  },
+  {
+   "clip": "pgtri",
+   "marca": "r",
+   "voz": "Listo para un panel, un informe o tu agente.",
+   "y": 0
+  }
+ ],
+ "cierre": {
+  "voz": "Envíaselo a quien hace paneles para negocios.",
+  "titulo": "Envíaselo a quien hace **paneles** 📊",
+  "texto": "nokfi.app · API con clave de prueba",
+  "boton": "Mira la documentación"
+ },
+ "gancho": "El trimestre de un negocio, **en un JSON**"
+}

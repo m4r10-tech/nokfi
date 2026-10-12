@@ -1,0 +1,39 @@
+{
+ "id": "v053-que-es-base-imponible",
+ "titulo": "¿Qué es la base imponible?",
+ "metodo": "glosario: título cinético + app",
+ "barra": true,
+ "texto": "La base imponible en 15 segundos. Calculadora de IVA gratis en nokfi.app 🧮 (cálculo orientativo)\n\n#autonomos #iva #facturas #hacienda #emprendedores",
+ "musica": "3-music-promotion.mp3",
+ "clips": [],
+ "escenas": [
+  {
+   "voz": "¿Qué es la base imponible? Quince segundos.",
+   "tarjeta": {
+    "tipo": "titulo",
+    "lineas": [
+     "¿Qué es la",
+     "**base imponible**?"
+    ],
+    "rotulo": "nokfi · en 15 segundos",
+    "ritmo": 0.6
+   }
+  },
+  {
+   "clip": "iva1000",
+   "marca": "calc",
+   "voz": "Es el precio de lo que vendes, antes de impuestos."
+  },
+  {
+   "clip": "iva1000",
+   "marca": "r",
+   "voz": "Sobre esos **1.000 €** se calcula el IVA: 210.",
+   "locucion": "Sobre esos mil euros se calcula el iva: doscientos diez."
+  }
+ ],
+ "cierre": {
+  "voz": "Envíaselo a ese amigo que hace su primera factura.",
+  "titulo": "Envíaselo a quien hace **su primera factura** ✍️",
+  "texto": "nokfi.app · 14 días gratis"
+ }
+}

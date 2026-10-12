@@ -1,0 +1,51 @@
+{
+ "id": "v064-grafico-factura-1000",
+ "titulo": "Qué pasa con una factura de 1.000 €",
+ "metodo": "gráfico de barras animado + app",
+ "barra": true,
+ "texto": "Una factura de 1.000 € paso a paso: IVA, retención y lo que cobras. Calculadora gratis en nokfi.app 🧮 (cálculo orientativo)\n\n#autonomos #iva #facturas #hacienda #emprendedores",
+ "musica": "2-bit-shift.mp3",
+ "clips": [],
+ "escenas": [
+  {
+   "voz": "Una factura de mil euros: sumas el IVA y te restan la retención.",
+   "locucion": "Una factura de mil euros: sumas el iva y te restan la retención.",
+   "tarjeta": {
+    "tipo": "barras",
+    "titulo": "Una factura de 1.000 €",
+    "barras": [
+     {
+      "t": "Base",
+      "v": 1000,
+      "txt": "1.000 €",
+      "color": "#3B82F6"
+     },
+     {
+      "t": "IVA (21 %)",
+      "v": 210,
+      "txt": "+210 €",
+      "color": "#FFD43B"
+     },
+     {
+      "t": "Retención (15 %)",
+      "v": 150,
+      "txt": "−150 €",
+      "color": "#FF6B6B"
+     }
+    ],
+    "rotulo": "nokfi · en cifras"
+   }
+  },
+  {
+   "clip": "irpf1000",
+   "marca": "r",
+   "voz": "Cobras **1.060**. Y de eso, 210 son de Hacienda.",
+   "locucion": "Cobras mil sesenta. Y de eso, doscientos diez son de Hacienda."
+  }
+ ],
+ "cierre": {
+  "voz": "Envíaselo a ese amigo que hace su primera factura.",
+  "titulo": "Envíaselo a quien hace **su primera factura** ✍️",
+  "texto": "nokfi.app · 14 días gratis"
+ }
+}

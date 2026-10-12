@@ -1,0 +1,48 @@
+{
+ "id": "v041-pasos-reclamar-factura",
+ "titulo": "Reclama una factura sin escribir un correo",
+ "metodo": "tutorial en 3 pasos: lista numerada + planos de la app",
+ "barra": true,
+ "texto": "Reclamar facturas vencidas en tres pasos, con recordatorio automático. (cuenta de ejemplo con datos ficticios; cálculos orientativos)\n\n#autonomos #pymes #hacienda #emprendedores #negocio",
+ "musica": "3-music-promotion.mp3",
+ "clips": [],
+ "escenas": [
+  {
+   "voz": "Reclamar una factura sin escribir tú el correo. Tres pasos.",
+   "tarjeta": {
+    "tipo": "lista",
+    "zona": "baja",
+    "items": [
+     "Abre Cobros",
+     "Mira quién te debe"
+    ],
+    "marca": "num",
+    "rotulo": "nokfi · en 3 pasos"
+   }
+  },
+  {
+   "clip": "cobros",
+   "marca": "a",
+   "voz": "Uno: abres Cobros y ves lo vencido.",
+   "y": 0.35
+  },
+  {
+   "clip": "cobros",
+   "marca": "lista",
+   "voz": "Dos: miras quién te debe y desde cuándo.",
+   "y": 0.35
+  },
+  {
+   "clip": "cobros",
+   "marca": "auto",
+   "voz": "Y tres: activas el recordatorio automático, y **sale solo**.",
+   "y": 0.35
+  }
+ ],
+ "cierre": {
+  "voz": "Envíaselo a ese amigo que no se atreve a reclamar.",
+  "titulo": "Envíaselo a quien **no se atreve a reclamar** 😅",
+  "texto": "nokfi.app · 14 días gratis"
+ },
+ "gancho": "Reclama una factura **sin escribir un correo**"
+}

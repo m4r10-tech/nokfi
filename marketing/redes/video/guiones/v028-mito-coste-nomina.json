@@ -1,0 +1,50 @@
+{
+ "id": "v028-mito-coste-nomina",
+ "titulo": "¿Verdad o mito? Un empleado te cuesta lo que pone en su nómina.",
+ "metodo": "verdad o mito: pregunta animada + prueba en la app",
+ "barra": true,
+ "texto": "Lo que cuesta de verdad un empleado, con la Seguridad Social de la empresa. Calculadora gratis en nokfi.app 🧮 (cálculos orientativos)\n\n#autonomos #freelance #emprendedores #finanzas #negocio",
+ "musica": "2-bit-shift.mp3",
+ "clips": [],
+ "escenas": [
+  {
+   "voz": "¿Verdad o mito? Un empleado te cuesta lo que pone en su nómina.",
+   "tarjeta": {
+    "tipo": "pregunta",
+    "pregunta": "Un empleado te cuesta lo que pone en su nómina.",
+    "opciones": [
+     "Verdad",
+     "Mito"
+    ],
+    "correcta": 1,
+    "revela": 2,
+    "rotulo": "nokfi · ¿verdad o mito?"
+   }
+  },
+  {
+   "voz": "Es un **mito**: la empresa paga aparte la Seguridad Social.",
+   "tarjeta": {
+    "tipo": "pregunta",
+    "pregunta": "Un empleado te cuesta lo que pone en su nómina.",
+    "opciones": [
+     "Verdad",
+     "Mito"
+    ],
+    "correcta": 1,
+    "revela": 0.12,
+    "rotulo": "nokfi · ¿verdad o mito?"
+   }
+  },
+  {
+   "clip": "emp18000",
+   "marca": "r",
+   "voz": "Un sueldo de 18.000 € al año te cuesta casi **24.000**.",
+   "locucion": "Un sueldo de dieciocho mil euros al año te cuesta casi veinticuatro mil."
+  }
+ ],
+ "cierre": {
+  "voz": "Envíaselo a ese amigo que quiere contratar.",
+  "titulo": "Envíaselo a quien quiere **contratar** 👀",
+  "texto": "nokfi.app · 14 días gratis"
+ }
+}

@@ -1,0 +1,36 @@
+{
+ "id": "v080-historia-casi-no-pago-el-iva",
+ "titulo": "El trimestre que casi no pago el IVA",
+ "metodo": "historia en tres actos, en primera persona",
+ "barra": true,
+ "texto": "El trimestre que casi no pago el IVA, y lo que miro ahora cada semana. (cuenta de ejemplo con datos ficticios; cálculos orientativos)\n\n#autonomos #iva #facturas #hacienda #emprendedores",
+ "musica": "3-music-promotion.mp3",
+ "clips": [],
+ "escenas": [
+  {
+   "clip": "imp",
+   "marca": "a",
+   "voz": "Un trimestre llegué al día veinte sin el dinero del IVA.",
+   "locucion": "Un trimestre llegué al día veinte sin el dinero del iva.",
+   "congelar": true,
+   "y": 0.35
+  },
+  {
+   "clip": "libro",
+   "marca": "a",
+   "voz": "Lo había cobrado, pero me lo había gastado sin darme cuenta."
+  },
+  {
+   "clip": "imp",
+   "marca": "a",
+   "voz": "Desde entonces miro esto cada semana: lo que toca, y lo que me falta.",
+   "y": 0.35
+  }
+ ],
+ "cierre": {
+  "voz": "Envíaselo a ese amigo autónomo que va siempre justo.",
+  "titulo": "Envíaselo a quien **siempre va justo** 🙃",
+  "texto": "nokfi.app · 14 días gratis"
+ },
+ "gancho": "El trimestre que **casi no pago** el IVA"
+}

@@ -1,0 +1,50 @@
+{
+ "id": "v060-grafico-trimestre-taller",
+ "titulo": "Un trimestre de un taller, en cifras",
+ "metodo": "gráfico de barras animado + app",
+ "barra": true,
+ "texto": "Ingresos, gastos e IVA del trimestre, calculados desde tus facturas. (cuenta de ejemplo con datos ficticios; cálculos orientativos)\n\n#autonomos #pymes #hacienda #emprendedores #negocio",
+ "musica": "1-chill-lofi-theme.mp3",
+ "clips": [],
+ "escenas": [
+  {
+   "voz": "Así queda un trimestre de un taller: ingresos, gastos, y el IVA que hay que pagar.",
+   "locucion": "Así queda un trimestre de un taller: ingresos, gastos, y el iva que hay que pagar.",
+   "tarjeta": {
+    "tipo": "barras",
+    "titulo": "Un trimestre, en cifras",
+    "barras": [
+     {
+      "t": "Ingresos",
+      "v": 21620,
+      "txt": "21.620 €",
+      "color": "#28C840"
+     },
+     {
+      "t": "Gastos",
+      "v": 7272,
+      "txt": "7.272 €",
+      "color": "#FF6B6B"
+     },
+     {
+      "t": "IVA a pagar",
+      "v": 3094,
+      "txt": "3.094 €",
+      "color": "#FFD43B"
+     }
+    ],
+    "rotulo": "nokfi · en cifras"
+   }
+  },
+  {
+   "clip": "libro",
+   "marca": "a",
+   "voz": "Sale solo de las facturas que se suben a Nokfi."
+  }
+ ],
+ "cierre": {
+  "voz": "Envíaselo a ese amigo que no sabe cuánto gana.",
+  "titulo": "Envíaselo a quien **no sabe cuánto gana** 👀",
+  "texto": "nokfi.app · 14 días gratis"
+ }
+}

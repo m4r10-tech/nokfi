@@ -1,0 +1,61 @@
+{
+ "id": "v096-api-retencion",
+ "titulo": "La retención de una factura, calculada por la API",
+ "metodo": "terminal animada + Playground real",
+ "barra": true,
+ "texto": "API de Nokfi: retención de IRPF, IVA y total de la factura en una llamada. (respuesta real de la API en modo prueba; cálculo orientativo)\n\n#n8n #automatizacion #api #ia #desarrolladores",
+ "musica": "1-chill-lofi-theme.mp3",
+ "clips": [],
+ "escenas": [
+  {
+   "voz": "¿Cuánto hay que retener en esta factura?",
+   "tarjeta": {
+    "tipo": "terminal",
+    "zona": "baja",
+    "comando": "POST /api/v1/tax/withholding",
+    "tam": 38,
+    "rotulo": "nokfi · API"
+   }
+  },
+  {
+   "voz": "Le mandas la base y el tipo de actividad.",
+   "tarjeta": {
+    "tipo": "terminal",
+    "titulo": "POST /api/v1/tax/withholding",
+    "json": true,
+    "respuesta": "{\n  \"base\": 1000,\n  \"type\": \"professional\"\n}",
+    "tam": 42,
+    "rotulo": "nokfi · API"
+   }
+  },
+  {
+   "voz": "Devuelve la retención, el IVA y el total: **1.060 €**.",
+   "locucion": "Devuelve la retención, el iva y el total: mil sesenta euros.",
+   "tarjeta": {
+    "tipo": "terminal",
+    "titulo": "Respuesta",
+    "json": true,
+    "respuesta": "{\n  \"withholding_rate\": 15,\n  \"withholding_amount\": 150,\n  \"vat_amount\": 210,\n  \"total_invoice\": 1060\n}",
+    "resalta": [
+     "\"withholding_amount\"",
+     "\"total_invoice\""
+    ],
+    "tam": 40,
+    "rotulo": "nokfi · API"
+   }
+  },
+  {
+   "clip": "pgret",
+   "marca": "r",
+   "voz": "Pruébalo en el Playground, con el código listo para copiar.",
+   "y": 0.35
+  }
+ ],
+ "cierre": {
+  "voz": "Envíaselo a quien programa facturación.",
+  "titulo": "Envíaselo a quien **programa** facturas 👨‍💻",
+  "texto": "nokfi.app · API con clave de prueba",
+  "boton": "Mira la documentación"
+ },
+ "gancho": "La retención de una factura, **calculada por la API**"
+}

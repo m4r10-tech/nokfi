@@ -1,0 +1,41 @@
+{
+ "id": "v072-error-no-reclamar",
+ "titulo": "El error número 3 de los autónomos",
+ "metodo": "el error: título cinético + problema + solución",
+ "barra": true,
+ "texto": "El error número tres: no reclamar las facturas vencidas. (cuenta de ejemplo con datos ficticios; cálculos orientativos)\n\n#autonomos #pymes #hacienda #emprendedores #negocio",
+ "musica": "1-chill-lofi-theme.mp3",
+ "clips": [],
+ "escenas": [
+  {
+   "voz": "El error número tres de los autónomos.",
+   "tarjeta": {
+    "tipo": "titulo",
+    "lineas": [
+     "El error",
+     "**nº 3**",
+     "de los autónomos"
+    ],
+    "rotulo": "nokfi · errores",
+    "ritmo": 0.55
+   }
+  },
+  {
+   "clip": "cobros",
+   "marca": "lista",
+   "voz": "Dejar pasar las facturas vencidas por no molestar.",
+   "y": 0.35
+  },
+  {
+   "clip": "cobros",
+   "marca": "auto",
+   "voz": "Se evita con un recordatorio que sale solo.",
+   "y": 0.35
+  }
+ ],
+ "cierre": {
+  "voz": "Envíaselo a ese amigo que no se atreve a reclamar.",
+  "titulo": "Envíaselo a quien **no se atreve a reclamar** 😅",
+  "texto": "nokfi.app · 14 días gratis"
+ }
+}

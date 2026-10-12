@@ -1,0 +1,43 @@
+{
+ "id": "v030-pov-cliente-no-paga",
+ "titulo": "POV: tu cliente lleva 36 días sin pagarte",
+ "metodo": "POV narrado",
+ "barra": false,
+ "texto": "POV: tu cliente no paga y tú no quieres ser el pesado 😅 (cuenta de ejemplo con datos ficticios; cálculos orientativos)\n\n#autonomos #pymes #hacienda #emprendedores #negocio",
+ "musica": "1-chill-lofi-theme.mp3",
+ "clips": [],
+ "escenas": [
+  {
+   "clip": "cobros",
+   "marca": "a",
+   "voz": "Tu cliente lleva 36 días sin pagarte.",
+   "congelar": true,
+   "y": 0.35,
+   "locucion": "Tu cliente lleva treinta y seis días sin pagarte."
+  },
+  {
+   "clip": "cobros",
+   "marca": "lista",
+   "voz": "Y tú, sin atreverte a escribirle.",
+   "y": 0.35
+  },
+  {
+   "clip": "cobros",
+   "marca": "auto",
+   "voz": "Activas el **recordatorio automático**.",
+   "y": 0.35
+  },
+  {
+   "clip": "cobros",
+   "marca": "auto2",
+   "voz": "Y que lo persiga otro.",
+   "y": 0.35
+  }
+ ],
+ "cierre": {
+  "voz": "Envíaselo a quien persigue facturas.",
+  "titulo": "Envíaselo a quien **persigue facturas** 😅",
+  "texto": "nokfi.app · 14 días gratis"
+ },
+ "gancho": "POV: tu cliente lleva **36 días** sin pagarte"
+}

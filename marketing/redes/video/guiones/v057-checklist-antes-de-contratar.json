@@ -1,0 +1,41 @@
+{
+ "id": "v057-checklist-antes-de-contratar",
+ "titulo": "Checklist antes de contratar",
+ "metodo": "checklist animada + planos de la app",
+ "barra": true,
+ "texto": "Antes de contratar: el coste real y tu caja a 90 días. (cuenta de ejemplo con datos ficticios; cálculos orientativos)\n\n#autonomos #pymes #hacienda #emprendedores #negocio",
+ "musica": "1-chill-lofi-theme.mp3",
+ "clips": [],
+ "escenas": [
+  {
+   "voz": "Dos números que mirar antes de contratar a alguien.",
+   "tarjeta": {
+    "tipo": "lista",
+    "zona": "baja",
+    "items": [
+     "Coste real",
+     "Caja a 90 días"
+    ],
+    "rotulo": "nokfi · checklist"
+   }
+  },
+  {
+   "clip": "emp18000",
+   "marca": "r",
+   "voz": "Uno: lo que cuesta de verdad, con la Seguridad Social."
+  },
+  {
+   "clip": "prev",
+   "marca": "rojo",
+   "voz": "Y dos: si tu caja lo aguanta **90 días**.",
+   "locucion": "Y dos: si tu caja lo aguanta noventa días.",
+   "y": 0.35
+  }
+ ],
+ "cierre": {
+  "voz": "Guárdate este vídeo para cuando te haga falta.",
+  "titulo": "**Guárdalo** antes de contratar 📌",
+  "texto": "nokfi.app · 14 días gratis"
+ },
+ "gancho": "Checklist antes de **contratar**"
+}

@@ -1,80 +1,80 @@
 [
-  {
-    "id": "2026-10-12-modelo-130-ig",
-    "red": "instagram",
-    "tipo": "post",
-    "cuando": "2026-10-12T13:00",
-    "pieza": "2026-10-12-modelo-130",
-    "texto": "El modelo 130 no es un impuesto extra: es un adelanto de tu IRPF.\n\nSe calcula con el 20 % de tu beneficio desde el 1 de enero, menos lo que ya pagaste en trimestres anteriores y las retenciones.\n\nSi el año pasado al menos el 70 % de tus ingresos llevaron retención, no tienes que presentarlo.\n\nDesliza para ver el ejemplo 👉 Guía completa: enlace en la bio.\n\n#autonomos #modelo130 #irpf #autonomosespaña",
-    "aprobado": false
-  },
-  {
-    "id": "2026-10-12-modelo-130-tt",
-    "red": "tiktok",
-    "cuando": "2026-10-12T20:00",
-    "pieza": "2026-10-12-modelo-130",
-    "texto": "El modelo 130 no es un impuesto extra: es un adelanto de tu IRPF 👉 Desliza para ver cómo se calcula. Guía gratis: enlace en la bio. #autonomos #modelo130 #irpf",
-    "aprobado": false
-  },
-  {
-    "id": "2026-10-12-modelo-130-x",
-    "red": "x",
-    "cuando": "2026-10-12T08:30",
-    "pieza": "2026-10-12-modelo-130-x",
-    "texto": "Modelo 130 en una línea: 20 % de (ingresos − gastos) desde enero − lo ya pagado − retenciones.\nEjemplo: 14.000 € de rendimiento → 2.800 − 1.200 − 300 = 1.300 €.\nnokfi.app/guias/modelo-130-pago-fraccionado-irpf?utm_source=x&utm_medium=social&utm_campaign=2026-10-12-modelo-130",
-    "aprobado": false
-  },
-  {
-    "id": "2026-10-14-domiciliar-15oct-ig",
-    "red": "instagram",
-    "tipo": "story",
-    "cuando": "2026-10-14T11:00",
-    "pieza": "2026-10-14-domiciliar-15oct",
-    "texto": "Mañana, 15 de octubre, último día para domiciliar el 303 y el 130.",
-    "aprobado": false
-  },
-  {
-    "id": "2026-10-14-domiciliar-15oct-x",
-    "red": "x",
-    "cuando": "2026-10-14T08:30",
-    "texto": "Mañana, 15 de octubre, último día para presentar con domiciliación el 303 y el 130 del 3T.\nDespués, hasta el 20, pagas tú con NRC o tarjeta.",
-    "aprobado": false
-  },
-  {
-    "id": "2026-10-15-video-errores-303-tt",
-    "red": "tiktok",
-    "tipo": "video",
-    "cuando": "2026-10-15T20:00",
-    "pieza": "2026-10-15-video-errores-303",
-    "video": "video.mp4",
-    "texto": "3 errores del IVA trimestral que vemos una y otra vez (el tercero duele) 😬 Guía del 303: enlace en la bio. #autonomos #iva #modelo303",
-    "aprobado": false
-  },
-  {
-    "id": "2026-10-15-video-errores-303-ig",
-    "red": "instagram",
-    "tipo": "reel",
-    "cuando": "2026-10-15T13:00",
-    "pieza": "2026-10-15-video-errores-303",
-    "video": "video.mp4",
-    "texto": "3 errores del IVA trimestral que vemos una y otra vez (el tercero duele) 😬\n\nGuía del 303: enlace en la bio.\n\n#autonomos #iva #modelo303 #errores",
-    "aprobado": false
-  },
-  {
-    "id": "2026-10-17-funcion-libro-ig",
-    "red": "instagram",
-    "tipo": "post",
-    "cuando": "2026-10-17T13:00",
-    "pieza": "2026-10-17-funcion-libro",
-    "texto": "Haces una foto a la factura y la IA la apunta en tu libro de ingresos y gastos: fecha, proveedor, base, IVA y total. Tú lo revisas y lo exportas para tu gestoría.\n\nCaptura real con una cuenta de ejemplo. Prueba 14 días gratis: enlace en la bio.\n\n#autonomos #facturas #ia #pymes",
-    "aprobado": false
-  },
-  {
-    "id": "2026-10-17-funcion-libro-x",
-    "red": "x",
-    "cuando": "2026-10-17T10:00",
-    "pieza": "2026-10-17-funcion-libro-x",
-    "texto": "Foto de la factura → la IA la apunta en tu libro → la revisas → la exportas a tu gestoría en Excel o CSV.\n14 días gratis: nokfi.app/?utm_source=x&utm_medium=social&utm_campaign=2026-10-17-funcion-libro",
-    "aprobado": false
-  }
+ {
+  "id": "2026-10-12-modelo-130-ig",
+  "red": "instagram",
+  "tipo": "post",
+  "cuando": "2026-10-12T13:00",
+  "pieza": "2026-10-12-modelo-130",
+  "texto": "El modelo 130 no es un impuesto extra: es un adelanto de tu IRPF.\n\nSe calcula con el 20 % de tu beneficio desde el 1 de enero, menos lo que ya pagaste en trimestres anteriores y las retenciones.\n\nSi el año pasado al menos el 70 % de tus ingresos llevaron retención, no tienes que presentarlo.\n\nDesliza para ver el ejemplo 👉 Guía completa: enlace en la bio.\n\n#autonomos #modelo130 #irpf #autonomosespaña",
+  "aprobado": false
+ },
+ {
+  "id": "2026-10-12-modelo-130-tt",
+  "red": "tiktok",
+  "cuando": "2026-10-12T20:00",
+  "pieza": "2026-10-12-modelo-130",
+  "texto": "El modelo 130 no es un impuesto extra: es un adelanto de tu IRPF 👉 Desliza para ver cómo se calcula. Guía gratis: enlace en la bio. #autonomos #modelo130 #irpf",
+  "aprobado": false
+ },
+ {
+  "id": "2026-10-12-modelo-130-x",
+  "red": "x",
+  "cuando": "2026-10-12T08:30",
+  "pieza": "2026-10-12-modelo-130-x",
+  "texto": "Modelo 130 en una línea: 20 % de (ingresos − gastos) desde enero − lo ya pagado − retenciones.\nEjemplo: 14.000 € de rendimiento → 2.800 − 1.200 − 300 = 1.300 €.\nnokfi.app/guias/modelo-130-pago-fraccionado-irpf?utm_source=x&utm_medium=social&utm_campaign=2026-10-12-modelo-130",
+  "aprobado": false
+ },
+ {
+  "id": "2026-10-14-domiciliar-15oct-ig",
+  "red": "instagram",
+  "tipo": "story",
+  "cuando": "2026-10-14T11:00",
+  "pieza": "2026-10-14-domiciliar-15oct",
+  "texto": "Mañana, 15 de octubre, último día para domiciliar el 303 y el 130.",
+  "aprobado": false
+ },
+ {
+  "id": "2026-10-14-domiciliar-15oct-x",
+  "red": "x",
+  "cuando": "2026-10-14T08:30",
+  "texto": "Mañana, 15 de octubre, último día para presentar con domiciliación el 303 y el 130 del 3T.\nDespués, hasta el 20, pagas tú con NRC o tarjeta.",
+  "aprobado": false
+ },
+ {
+  "id": "2026-10-15-video-errores-303-tt",
+  "red": "tiktok",
+  "tipo": "video",
+  "cuando": "2026-10-15T20:00",
+  "pieza": "2026-10-15-video-errores-303",
+  "video": "video.mp4",
+  "texto": "3 errores del IVA trimestral que vemos una y otra vez (el tercero duele) 😬 Guía del 303: enlace en la bio. #autonomos #iva #modelo303",
+  "aprobado": false
+ },
+ {
+  "id": "2026-10-15-video-errores-303-ig",
+  "red": "instagram",
+  "tipo": "reel",
+  "cuando": "2026-10-15T13:00",
+  "pieza": "2026-10-15-video-errores-303",
+  "video": "video.mp4",
+  "texto": "3 errores del IVA trimestral que vemos una y otra vez (el tercero duele) 😬\n\nGuía del 303: enlace en la bio.\n\n#autonomos #iva #modelo303 #errores",
+  "aprobado": false
+ },
+ {
+  "id": "2026-10-17-funcion-libro-ig",
+  "red": "instagram",
+  "tipo": "post",
+  "cuando": "2026-10-17T13:00",
+  "pieza": "2026-10-17-funcion-libro",
+  "texto": "Haces una foto a la factura y la IA la apunta en tu libro de ingresos y gastos: fecha, proveedor, base, IVA y total. Tú lo revisas y lo exportas para tu gestoría.\n\nCaptura real con una cuenta de ejemplo. Prueba 14 días gratis: enlace en la bio.\n\n#autonomos #facturas #ia #pymes",
+  "aprobado": false
+ },
+ {
+  "id": "2026-10-17-funcion-libro-x",
+  "red": "x",
+  "cuando": "2026-10-17T10:00",
+  "pieza": "2026-10-17-funcion-libro-x",
+  "texto": "Foto de la factura → la IA la apunta en tu libro → la revisas → la exportas a tu gestoría en Excel o CSV.\n14 días gratis: nokfi.app/?utm_source=x&utm_medium=social&utm_campaign=2026-10-17-funcion-libro",
+  "aprobado": false
+ }
 ]

@@ -1,0 +1,41 @@
+{
+ "id": "v123-dos-casos-iva",
+ "titulo": "El mismo precio, dos IVA distintos",
+ "metodo": "dos casos comparados en la misma calculadora",
+ "barra": true,
+ "texto": "El mismo precio con IVA general y reducido. Gratis y sin registro en nokfi.app 🧮 (cálculo orientativo)\n\n#autonomos #iva #facturas #hacienda #emprendedores",
+ "musica": "1-chill-lofi-theme.mp3",
+ "clips": [],
+ "escenas": [
+  {
+   "clip": "iva1000",
+   "marca": "r",
+   "voz": "Mil euros al tipo general.",
+   "congelar": true
+  },
+  {
+   "clip": "iva1000",
+   "marca": "r",
+   "voz": "Con el 21 %, el total es **1.210**.",
+   "locucion": "Con el veintiuno por ciento, el total es mil doscientos diez."
+  },
+  {
+   "clip": "iva10",
+   "marca": "calc",
+   "voz": "Los mismos mil euros, al tipo reducido."
+  },
+  {
+   "clip": "iva10",
+   "marca": "r",
+   "voz": "Con el 10 %, **1.100**. Hostelería, por ejemplo.",
+   "locucion": "Con el diez por ciento, mil cien. Hostelería, por ejemplo."
+  }
+ ],
+ "cierre": {
+  "voz": "Envíaselo a ese amigo que siempre pone el veintiuno.",
+  "titulo": "Envíaselo a quien **siempre pone el 21** 🙃",
+  "texto": "nokfi.app · calculadoras gratis",
+  "boton": "Haz tu cálculo gratis"
+ },
+ "gancho": "El mismo precio, **dos IVA** distintos"
+}

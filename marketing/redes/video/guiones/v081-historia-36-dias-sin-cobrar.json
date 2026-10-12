@@ -1,0 +1,36 @@
+{
+ "id": "v081-historia-36-dias-sin-cobrar",
+ "titulo": "El cliente que tardó 36 días en pagarme",
+ "metodo": "historia en tres actos, en primera persona",
+ "barra": true,
+ "texto": "El cliente que tardó 36 días en pagar, y cómo dejé de perseguir facturas. (cuenta de ejemplo con datos ficticios; cálculos orientativos)\n\n#autonomos #pymes #hacienda #emprendedores #negocio",
+ "musica": "1-chill-lofi-theme.mp3",
+ "clips": [],
+ "escenas": [
+  {
+   "clip": "cobros",
+   "marca": "lista",
+   "voz": "Un cliente tardó treinta y seis días en pagarme una factura.",
+   "congelar": true,
+   "y": 0.35
+  },
+  {
+   "clip": "cobros",
+   "marca": "a",
+   "voz": "Y yo sin reclamar, por no parecer pesado.",
+   "y": 0.35
+  },
+  {
+   "clip": "cobros",
+   "marca": "auto",
+   "voz": "Ahora el recordatorio sale solo, y yo no persigo a nadie.",
+   "y": 0.35
+  }
+ ],
+ "cierre": {
+  "voz": "Envíaselo a ese amigo que no se atreve a reclamar.",
+  "titulo": "Envíaselo a quien **no se atreve a reclamar** 😅",
+  "texto": "nokfi.app · 14 días gratis"
+ },
+ "gancho": "El cliente que tardó **36 días** en pagarme"
+}

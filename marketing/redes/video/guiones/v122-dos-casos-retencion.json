@@ -1,0 +1,43 @@
+{
+ "id": "v122-dos-casos-retencion",
+ "titulo": "Dos facturas: lo que pones y lo que cobras",
+ "metodo": "dos casos comparados en la misma calculadora",
+ "barra": true,
+ "texto": "Lo que pones en la factura y lo que cobras: dos ejemplos con IVA y retención. Gratis y sin registro en nokfi.app 🧮 (cálculo orientativo)\n\n#autonomos #iva #facturas #hacienda #emprendedores",
+ "musica": "3-music-promotion.mp3",
+ "clips": [],
+ "escenas": [
+  {
+   "clip": "irpf1000",
+   "marca": "r",
+   "voz": "Una factura de 1.000 €.",
+   "locucion": "Una factura de mil euros.",
+   "congelar": true
+  },
+  {
+   "clip": "irpf1000",
+   "marca": "r",
+   "voz": "Con IVA y retención, cobras **1.060**.",
+   "locucion": "Con iva y retención, cobras mil sesenta."
+  },
+  {
+   "clip": "irpf2500",
+   "marca": "calc",
+   "voz": "Y una de 2.500.",
+   "locucion": "Y una de dos mil quinientos."
+  },
+  {
+   "clip": "irpf2500",
+   "marca": "r",
+   "voz": "Cobras **2.650**, y 525 son de Hacienda.",
+   "locucion": "Cobras dos mil seiscientos cincuenta, y quinientos veinticinco son de Hacienda."
+  }
+ ],
+ "cierre": {
+  "voz": "Envíaselo a ese amigo que acaba de empezar a facturar.",
+  "titulo": "Envíaselo a quien **empieza a facturar** 🫡",
+  "texto": "nokfi.app · calculadoras gratis",
+  "boton": "Haz tu cálculo gratis"
+ },
+ "gancho": "Dos facturas: lo que pones y **lo que cobras**"
+}

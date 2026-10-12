@@ -1,0 +1,44 @@
+{
+ "id": "v062-grafico-coste-empleado",
+ "titulo": "Lo que cuesta de verdad un sueldo de 18.000 €",
+ "metodo": "gráfico de barras animado + app",
+ "barra": true,
+ "texto": "El coste real de un empleado, con la Seguridad Social de la empresa. Calculadora gratis en nokfi.app 🧮 (cálculo orientativo)\n\n#autonomos #freelance #emprendedores #finanzas #negocio",
+ "musica": "3-music-promotion.mp3",
+ "clips": [],
+ "escenas": [
+  {
+   "voz": "Un sueldo de dieciocho mil euros lleva casi seis mil más de Seguridad Social.",
+   "tarjeta": {
+    "tipo": "barras",
+    "titulo": "Un sueldo de 18.000 € al año",
+    "barras": [
+     {
+      "t": "Salario bruto",
+      "v": 18000,
+      "txt": "18.000 €",
+      "color": "#3B82F6"
+     },
+     {
+      "t": "Seguridad Social de la empresa",
+      "v": 5787,
+      "txt": "+5.787 €",
+      "color": "#FF6B6B"
+     }
+    ],
+    "rotulo": "nokfi · en cifras"
+   }
+  },
+  {
+   "clip": "emp18000",
+   "marca": "r",
+   "voz": "En total, casi **24.000 €** al año.",
+   "locucion": "En total, casi veinticuatro mil euros al año."
+  }
+ ],
+ "cierre": {
+  "voz": "Envíaselo a ese amigo que quiere contratar.",
+  "titulo": "Envíaselo a quien quiere **contratar** 👀",
+  "texto": "nokfi.app · 14 días gratis"
+ }
+}

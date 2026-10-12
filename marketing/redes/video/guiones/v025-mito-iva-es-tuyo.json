@@ -1,0 +1,50 @@
+{
+ "id": "v025-mito-iva-es-tuyo",
+ "titulo": "¿Verdad o mito? El IVA que cobras es dinero tuyo.",
+ "metodo": "verdad o mito: pregunta animada + prueba en la app",
+ "barra": true,
+ "texto": "El IVA que cobras no es tuyo: lo guardas para Hacienda. Calculadora de IVA gratis en nokfi.app 🧮 (cálculos orientativos)\n\n#autonomos #iva #facturas #hacienda #emprendedores",
+ "musica": "2-bit-shift.mp3",
+ "clips": [],
+ "escenas": [
+  {
+   "voz": "¿Verdad o mito? El IVA que cobras es dinero tuyo.",
+   "tarjeta": {
+    "tipo": "pregunta",
+    "pregunta": "El IVA que cobras es dinero tuyo.",
+    "opciones": [
+     "Verdad",
+     "Mito"
+    ],
+    "correcta": 1,
+    "revela": 2,
+    "rotulo": "nokfi · ¿verdad o mito?"
+   }
+  },
+  {
+   "voz": "Es un **mito**: solo lo guardas para Hacienda.",
+   "tarjeta": {
+    "tipo": "pregunta",
+    "pregunta": "El IVA que cobras es dinero tuyo.",
+    "opciones": [
+     "Verdad",
+     "Mito"
+    ],
+    "correcta": 1,
+    "revela": 0.12,
+    "rotulo": "nokfi · ¿verdad o mito?"
+   }
+  },
+  {
+   "clip": "iva1000",
+   "marca": "r",
+   "voz": "De **1.210 €** que cobras, **210** no son tuyos.",
+   "locucion": "De mil doscientos diez euros que cobras, doscientos diez no son tuyos."
+  }
+ ],
+ "cierre": {
+  "voz": "Envíaselo a ese amigo que todavía se lo cree.",
+  "titulo": "Envíaselo a quien **se gasta el IVA** 😬",
+  "texto": "nokfi.app · 14 días gratis"
+ }
+}

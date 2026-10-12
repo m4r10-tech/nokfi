@@ -1,0 +1,42 @@
+{
+ "id": "v079-tour-de-factura-a-impuesto",
+ "titulo": "De la factura al impuesto",
+ "metodo": "recorrido rápido con voz: cortes cortos",
+ "barra": true,
+ "texto": "De la factura al impuesto sin hojas de cálculo. (cuenta de ejemplo con datos ficticios; cálculos orientativos)\n\n#autonomos #iva #facturas #hacienda #emprendedores",
+ "musica": "2-bit-shift.mp3",
+ "clips": [],
+ "escenas": [
+  {
+   "clip": "libro",
+   "marca": "lista",
+   "voz": "Subes las **facturas**.",
+   "congelar": true
+  },
+  {
+   "clip": "libro",
+   "marca": "a",
+   "voz": "Se suman **solas**.",
+   "congelar": true
+  },
+  {
+   "clip": "imp",
+   "marca": "m303",
+   "voz": "Sale el **IVA**.",
+   "congelar": true
+  },
+  {
+   "clip": "imp",
+   "marca": "a",
+   "voz": "Y lo que hay que **apartar**.",
+   "congelar": true,
+   "y": 0.35
+  }
+ ],
+ "cierre": {
+  "voz": "Pruébalo gratis.",
+  "titulo": "Tus números, **claros**.",
+  "texto": "nokfi.app · 14 días gratis"
+ },
+ "gancho": "De la factura **al impuesto**"
+}

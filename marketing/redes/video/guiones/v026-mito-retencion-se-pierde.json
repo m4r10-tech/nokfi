@@ -1,0 +1,51 @@
+{
+ "id": "v026-mito-retencion-se-pierde",
+ "titulo": "¿Verdad o mito? Lo que te retiene un cliente lo pierdes.",
+ "metodo": "verdad o mito: pregunta animada + prueba en la app",
+ "barra": true,
+ "texto": "La retención de IRPF no se pierde: es un adelanto que tu cliente ingresa a tu nombre. Calculadora gratis en nokfi.app 🧮 (cálculos orientativos)\n\n#autonomos #iva #facturas #hacienda #emprendedores",
+ "musica": "3-music-promotion.mp3",
+ "clips": [],
+ "escenas": [
+  {
+   "voz": "¿Verdad o mito? Lo que te retiene un cliente lo pierdes.",
+   "tarjeta": {
+    "tipo": "pregunta",
+    "pregunta": "Lo que te retiene un cliente lo pierdes.",
+    "opciones": [
+     "Verdad",
+     "Mito"
+    ],
+    "correcta": 1,
+    "revela": 2,
+    "rotulo": "nokfi · ¿verdad o mito?"
+   }
+  },
+  {
+   "voz": "Es un **mito**: es un adelanto de tu IRPF.",
+   "locucion": "Es un mito: es un adelanto de tu i erre pe efe.",
+   "tarjeta": {
+    "tipo": "pregunta",
+    "pregunta": "Lo que te retiene un cliente lo pierdes.",
+    "opciones": [
+     "Verdad",
+     "Mito"
+    ],
+    "correcta": 1,
+    "revela": 0.12,
+    "rotulo": "nokfi · ¿verdad o mito?"
+   }
+  },
+  {
+   "clip": "irpf1000",
+   "marca": "r",
+   "voz": "Tu cliente ingresa esos **150 €** en Hacienda a tu nombre.",
+   "locucion": "Tu cliente ingresa esos ciento cincuenta euros en Hacienda a tu nombre."
+  }
+ ],
+ "cierre": {
+  "voz": "Envíaselo a ese amigo que acaba de empezar a facturar.",
+  "titulo": "Envíaselo a quien **empieza a facturar** 🫡",
+  "texto": "nokfi.app · 14 días gratis"
+ }
+}

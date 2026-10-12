@@ -1,0 +1,67 @@
+{
+ "id": "v102-mcp-proximo-plazo",
+ "titulo": "Tu agente sabe cuándo toca Hacienda",
+ "metodo": "chat con un agente (MCP) + cifras",
+ "barra": true,
+ "texto": "Servidor MCP de Nokfi: el calendario fiscal español para tu agente. (conversación de ejemplo; la cifra es la que devuelve la herramienta)\n\n#n8n #automatizacion #api #ia #desarrolladores",
+ "musica": "1-chill-lofi-theme.mp3",
+ "clips": [],
+ "escenas": [
+  {
+   "voz": "Pregúntale a tu agente cuándo es el próximo plazo de Hacienda.",
+   "tarjeta": {
+    "tipo": "chat",
+    "zona": "baja",
+    "mensajes": [
+     {
+      "de": "yo",
+      "texto": "¿Cuándo es el próximo plazo de Hacienda?"
+     }
+    ],
+    "rotulo": "nokfi · MCP"
+   }
+  },
+  {
+   "voz": "Consulta el calendario fiscal de Nokfi y te da la fecha y los modelos.",
+   "tarjeta": {
+    "tipo": "chat",
+    "mensajes": [
+     {
+      "de": "yo",
+      "texto": "¿Cuándo es el próximo plazo de Hacienda?"
+     },
+     {
+      "de": "tool",
+      "texto": "🔧 nokfi · fiscal_calendar"
+     },
+     {
+      "de": "ia",
+      "texto": "El **20 de octubre**: modelos 303, 130, 111 y 115."
+     }
+    ],
+    "desde": 1,
+    "rotulo": "nokfi · MCP"
+   }
+  },
+  {
+   "voz": "Para autónomos y para sociedades.",
+   "tarjeta": {
+    "tipo": "datos",
+    "lineas": [
+     {
+      "n": "2",
+      "t": "calendarios: autónomo y sociedad"
+     }
+    ],
+    "rotulo": "nokfi · MCP"
+   }
+  }
+ ],
+ "cierre": {
+  "voz": "Envíaselo a quien automatiza para gestorías.",
+  "titulo": "Envíaselo a quien **automatiza** gestorías 📅",
+  "texto": "nokfi.app · servidor MCP",
+  "boton": "Mira la documentación"
+ },
+ "gancho": "Tu agente sabe **cuándo toca Hacienda**"
+}

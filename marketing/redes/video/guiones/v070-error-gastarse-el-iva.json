@@ -1,0 +1,41 @@
+{
+ "id": "v070-error-gastarse-el-iva",
+ "titulo": "El error número 1 de los autónomos",
+ "metodo": "el error: título cinético + problema + solución",
+ "barra": true,
+ "texto": "El error número uno: gastarse el IVA. (cuenta de ejemplo con datos ficticios; cálculos orientativos)\n\n#autonomos #iva #facturas #hacienda #emprendedores",
+ "musica": "2-bit-shift.mp3",
+ "clips": [],
+ "escenas": [
+  {
+   "voz": "El error número uno de los autónomos.",
+   "tarjeta": {
+    "tipo": "titulo",
+    "lineas": [
+     "El error",
+     "**nº 1**",
+     "de los autónomos"
+    ],
+    "rotulo": "nokfi · errores",
+    "ritmo": 0.55
+   }
+  },
+  {
+   "clip": "iva1000",
+   "marca": "r",
+   "voz": "Gastarse el IVA como si fuera suyo.",
+   "locucion": "Gastarse el iva como si fuera suyo."
+  },
+  {
+   "clip": "imp",
+   "marca": "a",
+   "voz": "Se evita sabiendo cada día cuánto hay que apartar.",
+   "y": 0.35
+  }
+ ],
+ "cierre": {
+  "voz": "Envíaselo a ese amigo que se gasta el IVA.",
+  "titulo": "Envíaselo a quien **se gasta el IVA** 😬",
+  "texto": "nokfi.app · 14 días gratis"
+ }
+}

@@ -1,0 +1,43 @@
+{
+ "id": "v112-calendario-1-febrero",
+ "titulo": "El 1 de febrero: 303, 130 y 390",
+ "metodo": "calendario animado + calendario real de la app",
+ "barra": true,
+ "texto": "El IVA del cuarto trimestre, el 130 y el resumen anual (390): hasta el 1 de febrero de 2027. (cuenta de ejemplo con datos ficticios; cálculos orientativos)\n\n#autonomos #iva #facturas #hacienda #emprendedores",
+ "musica": "2-bit-shift.mp3",
+ "clips": [],
+ "escenas": [
+  {
+   "voz": "El uno de febrero de dos mil veintisiete: IVA, pago a cuenta y resumen anual.",
+   "locucion": "El uno de febrero de dos mil veintisiete: iva, pago a cuenta y resumen anual.",
+   "tarjeta": {
+    "tipo": "calendario",
+    "mes": "Febrero 2027",
+    "primer": 0,
+    "dias": 28,
+    "marcados": [
+     1
+    ],
+    "leyenda": "Día **1**: modelos 303, 130 y 390",
+    "rotulo": "nokfi · calendario fiscal",
+    "ritmo": 0.7
+   }
+  },
+  {
+   "clip": "cal",
+   "marca": "plazos",
+   "voz": "El plazo acaba en sábado y pasa al lunes.",
+   "y": 0.35
+  },
+  {
+   "clip": "cal",
+   "marca": "aviso",
+   "voz": "No hace falta que te lo sepas: te llega el aviso."
+  }
+ ],
+ "cierre": {
+  "voz": "Envíaselo a ese amigo que no sabe qué es el 390.",
+  "titulo": "Envíaselo a quien **no conoce el 390** 🤔",
+  "texto": "nokfi.app · 14 días gratis"
+ }
+}

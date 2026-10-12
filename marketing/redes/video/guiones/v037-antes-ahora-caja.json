@@ -1,0 +1,54 @@
+{
+ "id": "v037-antes-ahora-caja",
+ "titulo": "Saber si llegas a fin de mes: antes y ahora",
+ "metodo": "antes/ahora: panel comparativo + app",
+ "barra": true,
+ "texto": "Previsión de caja a 30, 60 y 90 días con cobros, gastos fijos e impuestos. (cuenta de ejemplo con datos ficticios; cálculos orientativos)\n\n#autonomos #pymes #hacienda #emprendedores #negocio",
+ "musica": "2-bit-shift.mp3",
+ "clips": [],
+ "escenas": [
+  {
+   "clip": "prev",
+   "marca": "a",
+   "voz": "Antes miraba el banco y cruzaba los dedos.",
+   "congelar": true,
+   "y": 0.35
+  },
+  {
+   "voz": "Antes solo veía el saldo de hoy. Ahora veo la caja a noventa días, con los impuestos dentro.",
+   "tarjeta": {
+    "tipo": "comparar",
+    "izq": {
+     "t": "Antes",
+     "items": [
+      "Mirar el saldo de hoy",
+      "Olvidar los impuestos",
+      "Sorpresa a final de mes"
+     ]
+    },
+    "der": {
+     "t": "Ahora",
+     "items": [
+      "Caja a 30, 60 y 90 días",
+      "Con cobros, gastos e impuestos",
+      "Y aviso si baja de mi mínimo"
+     ]
+    },
+    "rotulo": "nokfi · antes y ahora",
+    "ritmo": 0.8
+   }
+  },
+  {
+   "clip": "prev",
+   "marca": "a",
+   "voz": "Cobros previstos, gastos fijos e impuestos, todo junto.",
+   "y": 0.35
+  }
+ ],
+ "cierre": {
+  "voz": "Envíaselo a ese amigo que vive al día.",
+  "titulo": "Envíaselo a quien **vive al día** 👀",
+  "texto": "nokfi.app · 14 días gratis"
+ },
+ "gancho": "Saber si llegas a fin de mes: **antes y ahora**"
+}

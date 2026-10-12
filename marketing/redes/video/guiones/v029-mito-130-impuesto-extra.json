@@ -1,0 +1,52 @@
+{
+ "id": "v029-mito-130-impuesto-extra",
+ "titulo": "¿Verdad o mito? El modelo 130 es un impuesto extra.",
+ "metodo": "verdad o mito: pregunta animada + prueba en la app",
+ "barra": true,
+ "texto": "El modelo 130 no es un impuesto extra: es un pago a cuenta de tu IRPF. (cuenta de ejemplo con datos ficticios; cálculos orientativos) (cálculos orientativos)\n\n#autonomos #iva #facturas #hacienda #emprendedores",
+ "musica": "3-music-promotion.mp3",
+ "clips": [],
+ "escenas": [
+  {
+   "voz": "¿Verdad o mito? El modelo 130 es un impuesto extra.",
+   "tarjeta": {
+    "tipo": "pregunta",
+    "pregunta": "El modelo 130 es un impuesto extra.",
+    "opciones": [
+     "Verdad",
+     "Mito"
+    ],
+    "correcta": 1,
+    "revela": 2,
+    "rotulo": "nokfi · ¿verdad o mito?"
+   },
+   "locucion": "¿Verdad o mito? El modelo ciento treinta es un impuesto extra."
+  },
+  {
+   "voz": "Es un **mito**: es un adelanto de tu IRPF.",
+   "locucion": "Es un mito: es un adelanto de tu i erre pe efe.",
+   "tarjeta": {
+    "tipo": "pregunta",
+    "pregunta": "El modelo 130 es un impuesto extra.",
+    "opciones": [
+     "Verdad",
+     "Mito"
+    ],
+    "correcta": 1,
+    "revela": 0.12,
+    "rotulo": "nokfi · ¿verdad o mito?"
+   }
+  },
+  {
+   "clip": "imp",
+   "marca": "m130",
+   "voz": "El 20 % de tu beneficio, a cuenta de la renta.",
+   "locucion": "El veinte por ciento de tu beneficio, a cuenta de la renta."
+  }
+ ],
+ "cierre": {
+  "voz": "Envíaselo a ese amigo autónomo que se lía con los modelos.",
+  "titulo": "Envíaselo a quien **se lía con los modelos** 🙃",
+  "texto": "nokfi.app · 14 días gratis"
+ }
+}

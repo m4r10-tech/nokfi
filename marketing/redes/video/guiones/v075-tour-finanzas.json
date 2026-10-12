@@ -1,0 +1,59 @@
+{
+ "id": "v075-tour-finanzas",
+ "titulo": "Tus finanzas, en 12 segundos",
+ "metodo": "recorrido rápido con voz: cortes cortos",
+ "barra": true,
+ "texto": "Facturas, impuestos, cobros, caja, gastos fijos y plazos en una app. (cuenta de ejemplo con datos ficticios; cálculos orientativos)\n\n#autonomos #pymes #hacienda #emprendedores #negocio",
+ "musica": "1-chill-lofi-theme.mp3",
+ "clips": [],
+ "escenas": [
+  {
+   "clip": "libro",
+   "marca": "a",
+   "voz": "Tus **facturas**.",
+   "congelar": true
+  },
+  {
+   "clip": "imp",
+   "marca": "a",
+   "voz": "Tus **impuestos**.",
+   "congelar": true,
+   "y": 0.35
+  },
+  {
+   "clip": "cobros",
+   "marca": "a",
+   "voz": "Quién te **debe**.",
+   "congelar": true,
+   "y": 0.35
+  },
+  {
+   "clip": "prev",
+   "marca": "a",
+   "voz": "Tu **caja** a 90 días.",
+   "congelar": true,
+   "y": 0.35,
+   "locucion": "Tu caja a noventa días."
+  },
+  {
+   "clip": "fugas",
+   "marca": "a",
+   "voz": "Tus gastos **fijos**.",
+   "congelar": true,
+   "y": 0.35
+  },
+  {
+   "clip": "cal",
+   "marca": "a",
+   "voz": "Tus **plazos**.",
+   "congelar": true,
+   "y": 0.35
+  }
+ ],
+ "cierre": {
+  "voz": "Pruébalo gratis.",
+  "titulo": "Tus números, **claros**.",
+  "texto": "nokfi.app · 14 días gratis"
+ },
+ "gancho": "Tus finanzas, en **12 segundos**"
+}

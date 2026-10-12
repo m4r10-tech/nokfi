@@ -1,0 +1,42 @@
+{
+ "id": "v050-que-es-modelo-303",
+ "titulo": "¿Qué es el modelo 303?",
+ "metodo": "glosario: título cinético + app",
+ "barra": true,
+ "texto": "El modelo 303 en 15 segundos: el IVA que cobraste menos el de tus gastos. (cuenta de ejemplo con datos ficticios; cálculos orientativos)\n\n#autonomos #iva #facturas #hacienda #emprendedores",
+ "musica": "3-music-promotion.mp3",
+ "clips": [],
+ "escenas": [
+  {
+   "voz": "¿Qué es el modelo 303? Te lo explico en quince segundos.",
+   "locucion": "¿Qué es el modelo trescientos tres? Te lo explico en quince segundos.",
+   "tarjeta": {
+    "tipo": "titulo",
+    "lineas": [
+     "¿Qué es",
+     "el **modelo 303**?"
+    ],
+    "rotulo": "nokfi · en 15 segundos",
+    "ritmo": 0.6
+   }
+  },
+  {
+   "clip": "imp",
+   "marca": "m303",
+   "voz": "Es la declaración del IVA de cada trimestre.",
+   "locucion": "Es la declaración del iva de cada trimestre."
+  },
+  {
+   "clip": "imp",
+   "marca": "m303",
+   "voz": "El IVA que cobraste, menos el IVA de tus gastos.",
+   "locucion": "El iva que cobraste, menos el iva de tus gastos.",
+   "congelar": true
+  }
+ ],
+ "cierre": {
+  "voz": "Envíaselo a ese amigo que se lía con los modelos.",
+  "titulo": "Envíaselo a quien **se lía con los modelos** 🙃",
+  "texto": "nokfi.app · 14 días gratis"
+ }
+}

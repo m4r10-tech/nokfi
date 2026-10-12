@@ -1,0 +1,50 @@
+{
+ "id": "v027-mito-misma-cuota",
+ "titulo": "¿Verdad o mito? Todos los autónomos pagan la misma cuota.",
+ "metodo": "verdad o mito: pregunta animada + prueba en la app",
+ "barra": true,
+ "texto": "Desde 2023 la cuota de autónomos depende de tus rendimientos netos. Calcula la tuya gratis en nokfi.app 🧮 (cálculos orientativos)\n\n#autonomos #freelance #emprendedores #finanzas #negocio",
+ "musica": "1-chill-lofi-theme.mp3",
+ "clips": [],
+ "escenas": [
+  {
+   "voz": "¿Verdad o mito? Todos los autónomos pagan la misma cuota.",
+   "tarjeta": {
+    "tipo": "pregunta",
+    "pregunta": "Todos los autónomos pagan la misma cuota.",
+    "opciones": [
+     "Verdad",
+     "Mito"
+    ],
+    "correcta": 1,
+    "revela": 2,
+    "rotulo": "nokfi · ¿verdad o mito?"
+   }
+  },
+  {
+   "voz": "Es un **mito**: depende de lo que ganas, en quince tramos.",
+   "tarjeta": {
+    "tipo": "pregunta",
+    "pregunta": "Todos los autónomos pagan la misma cuota.",
+    "opciones": [
+     "Verdad",
+     "Mito"
+    ],
+    "correcta": 1,
+    "revela": 0.12,
+    "rotulo": "nokfi · ¿verdad o mito?"
+   }
+  },
+  {
+   "clip": "cuota2000_500",
+   "marca": "r",
+   "voz": "Con 2.000 € de ingresos y 500 de gastos: **tramo 5**, unos **300 € al mes**.",
+   "locucion": "Con dos mil euros de ingresos y quinientos de gastos: tramo cinco, unos trescientos euros al mes."
+  }
+ ],
+ "cierre": {
+  "voz": "Envíaselo a ese amigo que se acaba de hacer autónomo.",
+  "titulo": "Envíaselo a quien **empieza de autónomo** 🫡",
+  "texto": "nokfi.app · 14 días gratis"
+ }
+}

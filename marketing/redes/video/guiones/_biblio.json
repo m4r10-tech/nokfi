@@ -1,0 +1,1707 @@
+{
+ "id": "_biblio",
+ "nota": "Biblioteca común de planos de la app para los vídeos en serie (montar.mjs los usa cuando el guion no trae el clip).",
+ "clips": [
+  {
+   "id": "imp",
+   "pasos": [
+    {
+     "ir": "/app/finanzas/impuestos"
+    },
+    {
+     "marca": "a"
+    },
+    {
+     "esperar": 7000
+    },
+    {
+     "bajar": 560
+    },
+    {
+     "marca": "m303"
+    },
+    {
+     "esperar": 6000
+    },
+    {
+     "bajar": 520
+    },
+    {
+     "marca": "m130"
+    },
+    {
+     "esperar": 6000
+    }
+   ]
+  },
+  {
+   "id": "impnav",
+   "pasos": [
+    {
+     "ir": "/app/home"
+    },
+    {
+     "marca": "inicio"
+    },
+    {
+     "esperar": 700
+    },
+    {
+     "tocar": "nav a:has-text('Finanzas')"
+    },
+    {
+     "esperar": 600
+    },
+    {
+     "tocar": "a:has-text('Impuestos')"
+    },
+    {
+     "marca": "imp"
+    },
+    {
+     "esperar": 6000
+    }
+   ]
+  },
+  {
+   "id": "cobros",
+   "pasos": [
+    {
+     "ir": "/app/finanzas/cobros"
+    },
+    {
+     "marca": "a"
+    },
+    {
+     "esperar": 5000
+    },
+    {
+     "bajar": 430
+    },
+    {
+     "marca": "lista"
+    },
+    {
+     "esperar": 7000
+    },
+    {
+     "subir": 240
+    },
+    {
+     "marca": "auto"
+    },
+    {
+     "esperar": 900
+    },
+    {
+     "tocar": "input[type=checkbox]"
+    },
+    {
+     "esperar": 1200
+    },
+    {
+     "marca": "auto2"
+    },
+    {
+     "esperar": 6000
+    }
+   ]
+  },
+  {
+   "id": "prev",
+   "pasos": [
+    {
+     "ir": "/app/finanzas/prevision"
+    },
+    {
+     "marca": "a"
+    },
+    {
+     "esperar": 7000
+    },
+    {
+     "bajar": 640
+    },
+    {
+     "marca": "esc"
+    },
+    {
+     "esperar": 700
+    },
+    {
+     "escribir": {
+      "en": "input[placeholder=\"0\"] >> nth=0",
+      "texto": "1800"
+     }
+    },
+    {
+     "esperar": 600
+    },
+    {
+     "tocar": "button:has-text('Aplicar')"
+    },
+    {
+     "esperar": 700
+    },
+    {
+     "subir": 640
+    },
+    {
+     "marca": "rojo"
+    },
+    {
+     "esperar": 8000
+    }
+   ]
+  },
+  {
+   "id": "libro",
+   "pasos": [
+    {
+     "ir": "/app/finanzas/libro"
+    },
+    {
+     "esperar": 400
+    },
+    {
+     "bajar": 200
+    },
+    {
+     "marca": "a"
+    },
+    {
+     "esperar": 6000
+    },
+    {
+     "bajar": 420
+    },
+    {
+     "marca": "lista"
+    },
+    {
+     "esperar": 2500
+    },
+    {
+     "bajar": 300
+    },
+    {
+     "marca": "lista2"
+    },
+    {
+     "esperar": 4500
+    },
+    {
+     "subir": 720
+    },
+    {
+     "marca": "arriba"
+    },
+    {
+     "esperar": 7000
+    }
+   ]
+  },
+  {
+   "id": "cal",
+   "pasos": [
+    {
+     "ir": "/app/finanzas/calendario"
+    },
+    {
+     "marca": "a"
+    },
+    {
+     "esperar": 6000
+    },
+    {
+     "bajar": 560
+    },
+    {
+     "marca": "plazos"
+    },
+    {
+     "esperar": 2800
+    },
+    {
+     "bajar": 380
+    },
+    {
+     "marca": "plazos2"
+    },
+    {
+     "esperar": 2800
+    },
+    {
+     "bajar": 380
+    },
+    {
+     "marca": "plazos3"
+    },
+    {
+     "esperar": 3500
+    },
+    {
+     "subir": 1070
+    },
+    {
+     "marca": "aviso"
+    },
+    {
+     "esperar": 7000
+    }
+   ]
+  },
+  {
+   "id": "fugas",
+   "pasos": [
+    {
+     "ir": "/app/finanzas/fugas"
+    },
+    {
+     "marca": "a"
+    },
+    {
+     "esperar": 9000
+    }
+   ]
+  },
+  {
+   "id": "diag",
+   "pasos": [
+    {
+     "ir": "/app/historial"
+    },
+    {
+     "esperar": 500
+    },
+    {
+     "tocar": "a:has-text('Diagnóstico de negocio')"
+    },
+    {
+     "esperar": 900
+    },
+    {
+     "bajar": 430
+    },
+    {
+     "marca": "nota"
+    },
+    {
+     "esperar": 9000
+    }
+   ]
+  },
+  {
+   "id": "excel",
+   "pasos": [
+    {
+     "ir": "/app/excel"
+    },
+    {
+     "marca": "a"
+    },
+    {
+     "esperar": 7000
+    }
+   ]
+  },
+  {
+   "id": "cuest",
+   "pasos": [
+    {
+     "ir": "/app/cuestionario"
+    },
+    {
+     "marca": "a"
+    },
+    {
+     "esperar": 7000
+    }
+   ]
+  },
+  {
+   "id": "calcs",
+   "pasos": [
+    {
+     "ir": "/app/calculadoras"
+    },
+    {
+     "marca": "a"
+    },
+    {
+     "esperar": 6000
+    }
+   ]
+  },
+  {
+   "id": "factura",
+   "pasos": [
+    {
+     "ir": "/app/finanzas/facturas/nueva"
+    },
+    {
+     "esperar": 400
+    },
+    {
+     "bajar": 340
+    },
+    {
+     "marca": "a"
+    },
+    {
+     "esperar": 7000
+    }
+   ]
+  },
+  {
+   "id": "dev",
+   "pasos": [
+    {
+     "ir": "/app/dev"
+    },
+    {
+     "marca": "a"
+    },
+    {
+     "esperar": 7000
+    }
+   ]
+  },
+  {
+   "id": "claves",
+   "pasos": [
+    {
+     "ir": "/app/dev/claves"
+    },
+    {
+     "marca": "a"
+    },
+    {
+     "esperar": 7000
+    }
+   ]
+  },
+  {
+   "id": "webhooks",
+   "pasos": [
+    {
+     "ir": "/app/dev/webhooks"
+    },
+    {
+     "marca": "a"
+    },
+    {
+     "esperar": 7000
+    }
+   ]
+  },
+  {
+   "id": "plant",
+   "pasos": [
+    {
+     "ir": "/app/dev/plantillas"
+    },
+    {
+     "esperar": 500
+    },
+    {
+     "bajar": 150
+    },
+    {
+     "marca": "a"
+    },
+    {
+     "esperar": 8000
+    },
+    {
+     "bajar": 440
+    },
+    {
+     "marca": "b"
+    },
+    {
+     "esperar": 6000
+    },
+    {
+     "bajar": 440
+    },
+    {
+     "marca": "c"
+    },
+    {
+     "esperar": 6000
+    }
+   ]
+  },
+  {
+   "id": "pgnif",
+   "pasos": [
+    {
+     "ir": "/app/dev/playground"
+    },
+    {
+     "esperar": 600
+    },
+    {
+     "marca": "ini"
+    },
+    {
+     "esperar": 2500
+    },
+    {
+     "tocar": "button:has-text('Ejecutar')"
+    },
+    {
+     "esperar": 600
+    },
+    {
+     "bajar": 430
+    },
+    {
+     "marca": "r"
+    },
+    {
+     "leer": "pre >> nth=0",
+     "como": "r"
+    },
+    {
+     "esperar": 9000
+    }
+   ]
+  },
+  {
+   "id": "pg130",
+   "pasos": [
+    {
+     "ir": "/app/dev/playground"
+    },
+    {
+     "esperar": 600
+    },
+    {
+     "elegir": {
+      "en": "select",
+      "valor": "tax.model-130"
+     }
+    },
+    {
+     "esperar": 800
+    },
+    {
+     "marca": "ini"
+    },
+    {
+     "esperar": 2500
+    },
+    {
+     "tocar": "button:has-text('Ejecutar')"
+    },
+    {
+     "esperar": 600
+    },
+    {
+     "bajar": 500
+    },
+    {
+     "marca": "r"
+    },
+    {
+     "leer": "pre >> nth=0",
+     "como": "r"
+    },
+    {
+     "esperar": 9000
+    }
+   ]
+  },
+  {
+   "id": "pgvat",
+   "pasos": [
+    {
+     "ir": "/app/dev/playground"
+    },
+    {
+     "esperar": 600
+    },
+    {
+     "elegir": {
+      "en": "select",
+      "valor": "tax.vat"
+     }
+    },
+    {
+     "esperar": 800
+    },
+    {
+     "marca": "ini"
+    },
+    {
+     "esperar": 2500
+    },
+    {
+     "tocar": "button:has-text('Ejecutar')"
+    },
+    {
+     "esperar": 600
+    },
+    {
+     "bajar": 430
+    },
+    {
+     "marca": "r"
+    },
+    {
+     "leer": "pre >> nth=0",
+     "como": "r"
+    },
+    {
+     "esperar": 9000
+    }
+   ]
+  },
+  {
+   "id": "pgret",
+   "pasos": [
+    {
+     "ir": "/app/dev/playground"
+    },
+    {
+     "esperar": 600
+    },
+    {
+     "elegir": {
+      "en": "select",
+      "valor": "tax.withholding"
+     }
+    },
+    {
+     "esperar": 800
+    },
+    {
+     "marca": "ini"
+    },
+    {
+     "esperar": 2500
+    },
+    {
+     "tocar": "button:has-text('Ejecutar')"
+    },
+    {
+     "esperar": 600
+    },
+    {
+     "bajar": 430
+    },
+    {
+     "marca": "r"
+    },
+    {
+     "leer": "pre >> nth=0",
+     "como": "r"
+    },
+    {
+     "esperar": 9000
+    }
+   ]
+  },
+  {
+   "id": "pgcal",
+   "pasos": [
+    {
+     "ir": "/app/dev/playground"
+    },
+    {
+     "esperar": 600
+    },
+    {
+     "elegir": {
+      "en": "select",
+      "valor": "tax.calendar"
+     }
+    },
+    {
+     "esperar": 800
+    },
+    {
+     "marca": "ini"
+    },
+    {
+     "esperar": 2500
+    },
+    {
+     "tocar": "button:has-text('Ejecutar')"
+    },
+    {
+     "esperar": 600
+    },
+    {
+     "bajar": 430
+    },
+    {
+     "marca": "r"
+    },
+    {
+     "leer": "pre >> nth=0",
+     "como": "r"
+    },
+    {
+     "esperar": 9000
+    }
+   ]
+  },
+  {
+   "id": "pgtri",
+   "pasos": [
+    {
+     "ir": "/app/dev/playground"
+    },
+    {
+     "esperar": 600
+    },
+    {
+     "elegir": {
+      "en": "select",
+      "valor": "tax.quarter"
+     }
+    },
+    {
+     "esperar": 800
+    },
+    {
+     "marca": "ini"
+    },
+    {
+     "esperar": 2500
+    },
+    {
+     "tocar": "button:has-text('Ejecutar')"
+    },
+    {
+     "esperar": 600
+    },
+    {
+     "bajar": 640
+    },
+    {
+     "marca": "r"
+    },
+    {
+     "leer": "pre >> nth=0",
+     "como": "r"
+    },
+    {
+     "esperar": 9000
+    }
+   ]
+  },
+  {
+   "id": "pguso",
+   "pasos": [
+    {
+     "ir": "/app/dev/playground"
+    },
+    {
+     "esperar": 600
+    },
+    {
+     "elegir": {
+      "en": "select",
+      "valor": "usage"
+     }
+    },
+    {
+     "esperar": 800
+    },
+    {
+     "marca": "ini"
+    },
+    {
+     "esperar": 2500
+    },
+    {
+     "tocar": "button:has-text('Ejecutar')"
+    },
+    {
+     "esperar": 600
+    },
+    {
+     "bajar": 330
+    },
+    {
+     "marca": "r"
+    },
+    {
+     "leer": "pre >> nth=0",
+     "como": "r"
+    },
+    {
+     "esperar": 9000
+    }
+   ]
+  },
+  {
+   "id": "iva1000",
+   "pasos": [
+    {
+     "ir": "/calculadora-iva"
+    },
+    {
+     "esperar": 500
+    },
+    {
+     "bajar": 330
+    },
+    {
+     "marca": "calc"
+    },
+    {
+     "esperar": 500
+    },
+    {
+     "escribir": {
+      "en": "main input >> nth=0",
+      "texto": "1000",
+      "limpiar": true
+     }
+    },
+    {
+     "esperar": 500
+    },
+    {
+     "marca": "r"
+    },
+    {
+     "leer": "main",
+     "como": "r"
+    },
+    {
+     "esperar": 8000
+    }
+   ]
+  },
+  {
+   "id": "iva10",
+   "pasos": [
+    {
+     "ir": "/calculadora-iva"
+    },
+    {
+     "esperar": 500
+    },
+    {
+     "bajar": 330
+    },
+    {
+     "marca": "calc"
+    },
+    {
+     "esperar": 500
+    },
+    {
+     "escribir": {
+      "en": "main input >> nth=0",
+      "texto": "1000",
+      "limpiar": true
+     }
+    },
+    {
+     "tocar": "main button:has-text('10 %')"
+    },
+    {
+     "esperar": 500
+    },
+    {
+     "marca": "r"
+    },
+    {
+     "leer": "main",
+     "como": "r"
+    },
+    {
+     "esperar": 8000
+    }
+   ]
+  },
+  {
+   "id": "ivaquitar",
+   "pasos": [
+    {
+     "ir": "/calculadora-iva"
+    },
+    {
+     "esperar": 500
+    },
+    {
+     "bajar": 330
+    },
+    {
+     "marca": "calc"
+    },
+    {
+     "esperar": 400
+    },
+    {
+     "tocar": "main button:has-text('Quitar IVA')"
+    },
+    {
+     "escribir": {
+      "en": "main input >> nth=0",
+      "texto": "121",
+      "limpiar": true
+     }
+    },
+    {
+     "esperar": 500
+    },
+    {
+     "marca": "r"
+    },
+    {
+     "leer": "main",
+     "como": "r"
+    },
+    {
+     "esperar": 8000
+    }
+   ]
+  },
+  {
+   "id": "irpf1000",
+   "pasos": [
+    {
+     "ir": "/calculadora-retencion-irpf"
+    },
+    {
+     "esperar": 500
+    },
+    {
+     "bajar": 380
+    },
+    {
+     "marca": "calc"
+    },
+    {
+     "esperar": 500
+    },
+    {
+     "escribir": {
+      "en": "main input >> nth=0",
+      "texto": "1000",
+      "limpiar": true
+     }
+    },
+    {
+     "esperar": 500
+    },
+    {
+     "marca": "r"
+    },
+    {
+     "leer": "main",
+     "como": "r"
+    },
+    {
+     "esperar": 8000
+    }
+   ]
+  },
+  {
+   "id": "irpf2500",
+   "pasos": [
+    {
+     "ir": "/calculadora-retencion-irpf"
+    },
+    {
+     "esperar": 500
+    },
+    {
+     "bajar": 380
+    },
+    {
+     "marca": "calc"
+    },
+    {
+     "esperar": 500
+    },
+    {
+     "escribir": {
+      "en": "main input >> nth=0",
+      "texto": "2500",
+      "limpiar": true
+     }
+    },
+    {
+     "esperar": 500
+    },
+    {
+     "marca": "r"
+    },
+    {
+     "leer": "main",
+     "como": "r"
+    },
+    {
+     "esperar": 8000
+    }
+   ]
+  },
+  {
+   "id": "cuota2000_500",
+   "pasos": [
+    {
+     "ir": "/calculadora-cuota-autonomos"
+    },
+    {
+     "esperar": 600
+    },
+    {
+     "bajar": 410
+    },
+    {
+     "marca": "calc"
+    },
+    {
+     "esperar": 500
+    },
+    {
+     "escribir": {
+      "en": "main input >> nth=0",
+      "texto": "2000",
+      "limpiar": true
+     }
+    },
+    {
+     "escribir": {
+      "en": "main input >> nth=1",
+      "texto": "500",
+      "limpiar": true
+     }
+    },
+    {
+     "esperar": 500
+    },
+    {
+     "marca": "r"
+    },
+    {
+     "leer": "main",
+     "como": "r"
+    },
+    {
+     "esperar": 7000
+    },
+    {
+     "tocar": "main input[type=checkbox]"
+    },
+    {
+     "esperar": 600
+    },
+    {
+     "marca": "plana"
+    },
+    {
+     "leer": "main",
+     "como": "plana"
+    },
+    {
+     "esperar": 6000
+    }
+   ]
+  },
+  {
+   "id": "cuota1200_200",
+   "pasos": [
+    {
+     "ir": "/calculadora-cuota-autonomos"
+    },
+    {
+     "esperar": 600
+    },
+    {
+     "bajar": 410
+    },
+    {
+     "marca": "calc"
+    },
+    {
+     "esperar": 500
+    },
+    {
+     "escribir": {
+      "en": "main input >> nth=0",
+      "texto": "1200",
+      "limpiar": true
+     }
+    },
+    {
+     "escribir": {
+      "en": "main input >> nth=1",
+      "texto": "200",
+      "limpiar": true
+     }
+    },
+    {
+     "esperar": 500
+    },
+    {
+     "marca": "r"
+    },
+    {
+     "leer": "main",
+     "como": "r"
+    },
+    {
+     "esperar": 7000
+    },
+    {
+     "tocar": "main input[type=checkbox]"
+    },
+    {
+     "esperar": 600
+    },
+    {
+     "marca": "plana"
+    },
+    {
+     "leer": "main",
+     "como": "plana"
+    },
+    {
+     "esperar": 6000
+    }
+   ]
+  },
+  {
+   "id": "cuota4000_800",
+   "pasos": [
+    {
+     "ir": "/calculadora-cuota-autonomos"
+    },
+    {
+     "esperar": 600
+    },
+    {
+     "bajar": 410
+    },
+    {
+     "marca": "calc"
+    },
+    {
+     "esperar": 500
+    },
+    {
+     "escribir": {
+      "en": "main input >> nth=0",
+      "texto": "4000",
+      "limpiar": true
+     }
+    },
+    {
+     "escribir": {
+      "en": "main input >> nth=1",
+      "texto": "800",
+      "limpiar": true
+     }
+    },
+    {
+     "esperar": 500
+    },
+    {
+     "marca": "r"
+    },
+    {
+     "leer": "main",
+     "como": "r"
+    },
+    {
+     "esperar": 7000
+    },
+    {
+     "tocar": "main input[type=checkbox]"
+    },
+    {
+     "esperar": 600
+    },
+    {
+     "marca": "plana"
+    },
+    {
+     "leer": "main",
+     "como": "plana"
+    },
+    {
+     "esperar": 6000
+    }
+   ]
+  },
+  {
+   "id": "cuota900_100",
+   "pasos": [
+    {
+     "ir": "/calculadora-cuota-autonomos"
+    },
+    {
+     "esperar": 600
+    },
+    {
+     "bajar": 410
+    },
+    {
+     "marca": "calc"
+    },
+    {
+     "esperar": 500
+    },
+    {
+     "escribir": {
+      "en": "main input >> nth=0",
+      "texto": "900",
+      "limpiar": true
+     }
+    },
+    {
+     "escribir": {
+      "en": "main input >> nth=1",
+      "texto": "100",
+      "limpiar": true
+     }
+    },
+    {
+     "esperar": 500
+    },
+    {
+     "marca": "r"
+    },
+    {
+     "leer": "main",
+     "como": "r"
+    },
+    {
+     "esperar": 7000
+    },
+    {
+     "tocar": "main input[type=checkbox]"
+    },
+    {
+     "esperar": 600
+    },
+    {
+     "marca": "plana"
+    },
+    {
+     "leer": "main",
+     "como": "plana"
+    },
+    {
+     "esperar": 6000
+    }
+   ]
+  },
+  {
+   "id": "cuota3000_600",
+   "pasos": [
+    {
+     "ir": "/calculadora-cuota-autonomos"
+    },
+    {
+     "esperar": 600
+    },
+    {
+     "bajar": 410
+    },
+    {
+     "marca": "calc"
+    },
+    {
+     "esperar": 500
+    },
+    {
+     "escribir": {
+      "en": "main input >> nth=0",
+      "texto": "3000",
+      "limpiar": true
+     }
+    },
+    {
+     "escribir": {
+      "en": "main input >> nth=1",
+      "texto": "600",
+      "limpiar": true
+     }
+    },
+    {
+     "esperar": 500
+    },
+    {
+     "marca": "r"
+    },
+    {
+     "leer": "main",
+     "como": "r"
+    },
+    {
+     "esperar": 7000
+    },
+    {
+     "tocar": "main input[type=checkbox]"
+    },
+    {
+     "esperar": 600
+    },
+    {
+     "marca": "plana"
+    },
+    {
+     "leer": "main",
+     "como": "plana"
+    },
+    {
+     "esperar": 6000
+    }
+   ]
+  },
+  {
+   "id": "emp18000",
+   "pasos": [
+    {
+     "ir": "/calculadora-coste-empleado"
+    },
+    {
+     "esperar": 500
+    },
+    {
+     "bajar": 330
+    },
+    {
+     "marca": "calc"
+    },
+    {
+     "esperar": 500
+    },
+    {
+     "escribir": {
+      "en": "main input >> nth=0",
+      "texto": "18000",
+      "limpiar": true
+     }
+    },
+    {
+     "esperar": 500
+    },
+    {
+     "bajar": 270
+    },
+    {
+     "marca": "r"
+    },
+    {
+     "leer": "main",
+     "como": "r"
+    },
+    {
+     "esperar": 9000
+    }
+   ]
+  },
+  {
+   "id": "emp24000",
+   "pasos": [
+    {
+     "ir": "/calculadora-coste-empleado"
+    },
+    {
+     "esperar": 500
+    },
+    {
+     "bajar": 330
+    },
+    {
+     "marca": "calc"
+    },
+    {
+     "esperar": 500
+    },
+    {
+     "escribir": {
+      "en": "main input >> nth=0",
+      "texto": "24000",
+      "limpiar": true
+     }
+    },
+    {
+     "esperar": 500
+    },
+    {
+     "bajar": 270
+    },
+    {
+     "marca": "r"
+    },
+    {
+     "leer": "main",
+     "como": "r"
+    },
+    {
+     "esperar": 9000
+    }
+   ]
+  },
+  {
+   "id": "emp30000",
+   "pasos": [
+    {
+     "ir": "/calculadora-coste-empleado"
+    },
+    {
+     "esperar": 500
+    },
+    {
+     "bajar": 330
+    },
+    {
+     "marca": "calc"
+    },
+    {
+     "esperar": 500
+    },
+    {
+     "escribir": {
+      "en": "main input >> nth=0",
+      "texto": "30000",
+      "limpiar": true
+     }
+    },
+    {
+     "esperar": 500
+    },
+    {
+     "bajar": 270
+    },
+    {
+     "marca": "r"
+    },
+    {
+     "leer": "main",
+     "como": "r"
+    },
+    {
+     "esperar": 9000
+    }
+   ]
+  },
+  {
+   "id": "emp16576",
+   "pasos": [
+    {
+     "ir": "/calculadora-coste-empleado"
+    },
+    {
+     "esperar": 500
+    },
+    {
+     "bajar": 330
+    },
+    {
+     "marca": "calc"
+    },
+    {
+     "esperar": 500
+    },
+    {
+     "escribir": {
+      "en": "main input >> nth=0",
+      "texto": "16576",
+      "limpiar": true
+     }
+    },
+    {
+     "esperar": 500
+    },
+    {
+     "bajar": 270
+    },
+    {
+     "marca": "r"
+    },
+    {
+     "leer": "main",
+     "como": "r"
+    },
+    {
+     "esperar": 9000
+    }
+   ]
+  },
+  {
+   "id": "hora44",
+   "pasos": [
+    {
+     "ir": "/calculadora-precio-hora"
+    },
+    {
+     "esperar": 500
+    },
+    {
+     "bajar": 300
+    },
+    {
+     "marca": "calc"
+    },
+    {
+     "esperar": 400
+    },
+    {
+     "escribir": {
+      "en": "main input >> nth=0",
+      "texto": "1200",
+      "limpiar": true
+     }
+    },
+    {
+     "escribir": {
+      "en": "main input >> nth=1",
+      "texto": "2500",
+      "limpiar": true
+     }
+    },
+    {
+     "escribir": {
+      "en": "main input >> nth=2",
+      "texto": "300",
+      "limpiar": true
+     }
+    },
+    {
+     "esperar": 400
+    },
+    {
+     "bajar": 360
+    },
+    {
+     "marca": "horas"
+    },
+    {
+     "esperar": 500
+    },
+    {
+     "escribir": {
+      "en": "main input >> nth=4",
+      "texto": "100",
+      "limpiar": true
+     }
+    },
+    {
+     "esperar": 500
+    },
+    {
+     "marca": "r"
+    },
+    {
+     "leer": "main",
+     "como": "r"
+    },
+    {
+     "esperar": 9000
+    }
+   ]
+  },
+  {
+   "id": "hora80",
+   "pasos": [
+    {
+     "ir": "/calculadora-precio-hora"
+    },
+    {
+     "esperar": 500
+    },
+    {
+     "bajar": 300
+    },
+    {
+     "marca": "calc"
+    },
+    {
+     "esperar": 400
+    },
+    {
+     "escribir": {
+      "en": "main input >> nth=0",
+      "texto": "600",
+      "limpiar": true
+     }
+    },
+    {
+     "escribir": {
+      "en": "main input >> nth=1",
+      "texto": "2000",
+      "limpiar": true
+     }
+    },
+    {
+     "escribir": {
+      "en": "main input >> nth=2",
+      "texto": "300",
+      "limpiar": true
+     }
+    },
+    {
+     "esperar": 400
+    },
+    {
+     "bajar": 360
+    },
+    {
+     "marca": "horas"
+    },
+    {
+     "esperar": 500
+    },
+    {
+     "escribir": {
+      "en": "main input >> nth=4",
+      "texto": "80",
+      "limpiar": true
+     }
+    },
+    {
+     "esperar": 500
+    },
+    {
+     "marca": "r"
+    },
+    {
+     "leer": "main",
+     "como": "r"
+    },
+    {
+     "esperar": 9000
+    }
+   ]
+  },
+  {
+   "id": "nif",
+   "pasos": [
+    {
+     "ir": "/validar-nif"
+    },
+    {
+     "esperar": 500
+    },
+    {
+     "bajar": 230
+    },
+    {
+     "marca": "ini"
+    },
+    {
+     "esperar": 600
+    },
+    {
+     "escribir": {
+      "en": "main input >> nth=0",
+      "texto": "B12345675",
+      "limpiar": true
+     }
+    },
+    {
+     "tocar": "button:has-text('Comprobar')"
+    },
+    {
+     "marca": "mal"
+    },
+    {
+     "esperar": 6000
+    },
+    {
+     "escribir": {
+      "en": "main input >> nth=0",
+      "texto": "B12345674",
+      "limpiar": true
+     }
+    },
+    {
+     "tocar": "button:has-text('Comprobar')"
+    },
+    {
+     "marca": "bien"
+    },
+    {
+     "esperar": 7000
+    }
+   ]
+  },
+  {
+   "id": "dni",
+   "pasos": [
+    {
+     "ir": "/validar-nif"
+    },
+    {
+     "esperar": 500
+    },
+    {
+     "bajar": 230
+    },
+    {
+     "marca": "ini"
+    },
+    {
+     "esperar": 600
+    },
+    {
+     "escribir": {
+      "en": "main input >> nth=0",
+      "texto": "12345678Z",
+      "limpiar": true
+     }
+    },
+    {
+     "tocar": "button:has-text('Comprobar')"
+    },
+    {
+     "marca": "bien"
+    },
+    {
+     "leer": "main",
+     "como": "r"
+    },
+    {
+     "esperar": 7000
+    }
+   ]
+  },
+  {
+   "id": "calpub",
+   "pasos": [
+    {
+     "ir": "/calendario-fiscal-2026"
+    },
+    {
+     "marca": "a"
+    },
+    {
+     "esperar": 5000
+    },
+    {
+     "bajar": 500
+    },
+    {
+     "marca": "b"
+    },
+    {
+     "esperar": 5000
+    },
+    {
+     "bajar": 500
+    },
+    {
+     "marca": "c"
+    },
+    {
+     "esperar": 5000
+    }
+   ]
+  }
+ ],
+ "escenas": []
+}
