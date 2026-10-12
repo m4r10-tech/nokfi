@@ -31,7 +31,7 @@ iban a montar como F1 con retoques; Mario vio x002 y pidió variedad real (lecci
 | F1 Recorrido | **construido y aprobado** (x001) |
 | F2 La cifra | **construido** (escenas `dato` con `tarjeta`, `fichas` y `barra`); usado en x002, **pendiente del visto bueno de Mario** |
 | F3 El mito | pendiente |
-| F4 Paso a paso | pendiente |
+| F4 Paso a paso | **construido** (escenas `paso` con `pasos` en el guion y `tarjeta`); usado en x007, **pendiente del visto bueno de Mario** |
 | F5 Antes / ahora | pendiente |
 | F6 Pregunta y respuesta | pendiente (hay la tarjeta de pregunta; falta cuenta atrás y plegado) |
 | F7 El caso | pendiente (hay un chat en `tarjetas.mjs`, de la etapa 1) |

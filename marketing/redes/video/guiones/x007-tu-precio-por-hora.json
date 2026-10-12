@@ -3,253 +3,269 @@
  "carpeta": "007-tu-precio-por-hora",
  "titulo": "Tu precio por hora no se inventa: se calcula",
  "ritmo": "sereno",
- "transicion": "vertical",
+ "transicion": "corte",
  "musica": "1-chill-lofi-theme.mp3",
- "variantes": "A experto que explica · B lista de pasos · C producto ya en acción · D vertical · E sereno · F contador",
+ "variantes": "F4 Paso a paso · gancho: experto que explica · velocidad serena",
  "texto": "Cuánto cobrar por hora para no perder dinero: gastos fijos, lo que quieres ganar, tu cuota y las horas que facturas de verdad. Calculadora gratis en nokfi.app\n\nCálculo orientativo.\n\nGuárdalo para tu próximo presupuesto 📌\n\n#autonomos #freelance #precios #presupuesto #emprendedores",
  "subtitulos": {
   "7": "La calculadora es gratis en nokfi.app"
  },
  "escenas": [
   {
-   "tipo": "app",
+   "tipo": "paso",
    "frases": [
     0,
     0
    ],
    "tag": "CALCULADORA",
    "titulo": "El número que **decide**",
+   "paso": -1,
+   "tarjeta": {
+    "x": 400,
+    "top": 540,
+    "escala": 0.8,
+    "giro": 0,
+    "alto": 1060
+   },
+   "subsY": 1436,
    "planos": [
     {
      "clip": "hora44",
-     "foco": [
-      0.4,
-      0.42
-     ],
-     "zoom": 1.22,
-     "peso": 1,
      "desde": {
       "marca": "r",
-      "mas": 0.3
+      "mas": 0.4
      },
-     "quieta": true
-    }
-   ],
-   "rotulos": [
-    {
-     "texto": "44,00 € la hora",
-     "en": 0.3,
-     "y": 620,
-     "lado": "der"
+     "foco": [
+      0.3,
+      0.44
+     ],
+     "zoom": 1.35
     }
    ]
   },
   {
-   "tipo": "app",
+   "tipo": "paso",
    "frases": [
     1,
     1
    ],
    "tag": "CALCULADORA",
    "titulo": "No se inventa: **se calcula**",
+   "paso": -1,
+   "tarjeta": {
+    "x": 400,
+    "top": 540,
+    "escala": 0.8,
+    "giro": 0,
+    "alto": 1060
+   },
+   "subsY": 1436,
    "planos": [
     {
      "clip": "hora44",
-     "foco": [
-      0.5,
-      0.2
-     ],
-     "zoom": 1.12,
-     "peso": 1,
      "desde": {
       "marca": "calc",
-      "mas": 0.0
-     }
+      "mas": -1.0
+     },
+     "foco": [
+      0.5,
+      0.12
+     ],
+     "zoom": 1.06
     }
-   ],
-   "rotulos": []
+   ]
   },
   {
-   "tipo": "app",
+   "tipo": "paso",
    "frases": [
     2,
     2
    ],
    "tag": "CALCULADORA",
    "titulo": "Gastos, sueldo y **cuota**",
+   "paso": 0,
+   "tarjeta": {
+    "x": 400,
+    "top": 540,
+    "escala": 0.8,
+    "giro": 0,
+    "alto": 1060
+   },
+   "subsY": 1436,
    "planos": [
     {
      "clip": "hora44",
-     "foco": [
-      0.5,
-      0.3
-     ],
-     "zoom": 1.2,
-     "peso": 1,
      "desde": {
       "marca": "calc",
-      "mas": 1.0
-     }
-    }
-   ],
-   "rotulos": [
-    {
-     "texto": "1.200 € de gastos fijos",
-     "en": 0.3,
-     "y": 1170,
-     "lado": "izq"
+      "mas": 0.2
+     },
+     "foco": [
+      0.5,
+      0.14
+     ],
+     "zoom": 1.06
     }
    ]
   },
   {
-   "tipo": "app",
+   "tipo": "paso",
    "frases": [
     3,
     3
    ],
    "tag": "CALCULADORA",
    "titulo": "Margen y **horas reales**",
+   "paso": 1,
+   "tarjeta": {
+    "x": 400,
+    "top": 540,
+    "escala": 0.8,
+    "giro": 0,
+    "alto": 1060
+   },
+   "subsY": 1436,
    "planos": [
     {
      "clip": "hora44",
-     "foco": [
-      0.5,
-      0.3
-     ],
-     "zoom": 1.2,
-     "peso": 1,
      "desde": {
       "marca": "horas",
-      "mas": -1.5
-     }
-    }
-   ],
-   "rotulos": [
-    {
-     "texto": "100 horas al mes",
-     "en": 0.5,
-     "y": 620,
-     "lado": "der"
+      "mas": -2.6
+     },
+     "foco": [
+      0.5,
+      0.22
+     ],
+     "zoom": 1.06
     }
    ]
   },
   {
-   "tipo": "app",
+   "tipo": "paso",
    "frases": [
     4,
     4
    ],
    "tag": "CALCULADORA",
-   "titulo": "Las que **cobras**",
+   "titulo": "Las horas que **cobras**",
+   "paso": 1,
+   "tarjeta": {
+    "x": 400,
+    "top": 540,
+    "escala": 0.8,
+    "giro": 0,
+    "alto": 1060
+   },
+   "subsY": 1436,
    "planos": [
     {
      "clip": "hora44",
-     "foco": [
-      0.5,
-      0.32
-     ],
-     "zoom": 1.22,
-     "peso": 1,
      "desde": {
       "marca": "horas",
-      "mas": 0.3
-     }
+      "mas": 0.4
+     },
+     "foco": [
+      0.5,
+      0.3
+     ],
+     "zoom": 1.06
     }
-   ],
-   "rotulos": []
+   ]
   },
   {
-   "tipo": "app",
+   "tipo": "paso",
    "frases": [
     5,
     5
    ],
    "tag": "CALCULADORA",
    "titulo": "Resultado: **44 € la hora**",
+   "paso": 2,
+   "tarjeta": {
+    "x": 400,
+    "top": 540,
+    "escala": 0.8,
+    "giro": 0,
+    "alto": 1060
+   },
+   "subsY": 1436,
    "planos": [
     {
      "clip": "hora44",
-     "foco": [
-      0.4,
-      0.42
-     ],
-     "zoom": 1.25,
-     "peso": 1,
      "desde": {
       "marca": "r",
       "mas": 0.2
-     }
-    }
-   ],
-   "rotulos": [
-    {
-     "texto": "# € la hora",
-     "en": 0.2,
-     "y": 1170,
-     "lado": "izq",
-     "cuenta": {
-      "hasta": 44,
-      "dec": 2
-     }
+     },
+     "foco": [
+      0.3,
+      0.44
+     ],
+     "zoom": 1.35
     }
    ]
   },
   {
-   "tipo": "app",
+   "tipo": "paso",
    "frases": [
     6,
     6
    ],
    "tag": "CALCULADORA",
-   "titulo": "Por debajo, **pierdes**",
+   "titulo": "Por debajo, **pierdes dinero**",
+   "paso": 2,
+   "tarjeta": {
+    "x": 400,
+    "top": 540,
+    "escala": 0.8,
+    "giro": 0,
+    "alto": 1060
+   },
+   "subsY": 1436,
    "planos": [
     {
      "clip": "hora44",
-     "foco": [
-      0.5,
-      0.47
-     ],
-     "zoom": 1.2,
-     "peso": 1,
      "desde": {
       "marca": "r",
-      "mas": 2.0
-     }
-    }
-   ],
-   "rotulos": [
-    {
-     "texto": "Coste por hora: 40 €",
-     "en": 0.3,
-     "y": 620,
-     "lado": "der"
+      "mas": 2.5
+     },
+     "foco": [
+      0.5,
+      0.46
+     ],
+     "zoom": 1.06
     }
    ]
   },
   {
-   "tipo": "app",
+   "tipo": "paso",
    "frases": [
     7,
     7
    ],
    "tag": "CALCULADORA",
-   "titulo": "Gratis y **sin cuenta**",
+   "titulo": "Gratis en **nokfi.app**",
+   "paso": 3,
+   "tarjeta": {
+    "x": 400,
+    "top": 540,
+    "escala": 0.8,
+    "giro": 0,
+    "alto": 1060
+   },
+   "subsY": 1436,
    "planos": [
     {
-     "clip": "calcs",
+     "clip": "hora44",
+     "desde": {
+      "marca": "r",
+      "mas": 4.5
+     },
      "foco": [
       0.5,
-      0.25
+      0.42
      ],
-     "zoom": 1.12,
-     "peso": 1,
-     "desde": {
-      "marca": "a",
-      "mas": 0.3
-     }
+     "zoom": 1.06
     }
-   ],
-   "rotulos": []
+   ]
   },
   {
    "tipo": "cierre",
@@ -261,5 +277,11 @@
    "linea1": "Guárdalo para tu próximo **presupuesto**",
    "pie": "Cálculo orientativo"
   }
+ ],
+ "formato": "F4 Paso a paso",
+ "pasos": [
+  "Gastos, sueldo y cuota",
+  "Margen y horas reales",
+  "Tu precio por hora"
  ]
 }

@@ -12,7 +12,7 @@
  * Salida: salida/PARA-SUBIR/<carpeta>/ video.mp4 · portada.png · texto.txt · titulo.txt
  *
  * Guion: { id, carpeta, titulo, texto, musica, ritmo: "sereno|medio|vivo", transicion: "lateral|vertical|empuje|corte",
- *   escenas: [ { tipo: "titulo|cifra|pregunta|seccion|app|dato|duo|cierre", frases: [desde, hasta],
+ *   escenas: [ { tipo: "titulo|cifra|pregunta|seccion|app|dato|duo|paso|cierre", frases: [desde, hasta],
  *   tag, titulo, planos: [ { clip, desde: s | { marca, mas }, peso, foco: [x, y] (0-1 en la pantalla de la app), zoom, suelta } ],
  *   rotulos: [ { texto, en: 0-1 (momento dentro de la escena), y, lado, plano (se va con ese plano) } ], … } ] }
  * Se para solo si el equipo pasa de 72 °C y sigue al bajar de 62 °C.
@@ -115,7 +115,7 @@ T.frases.forEach((dicha, i) => {
   cerrar();
 });
 
-fs.writeFileSync(path.join(tmp, 'data.js'), `window.DATA = ${JSON.stringify({ fps: FPS, total, escenas, subs, ritmo: RITMO, transicion: g.transicion || 'lateral' })};`);
+fs.writeFileSync(path.join(tmp, 'data.js'), `window.DATA = ${JSON.stringify({ fps: FPS, total, escenas, subs, ritmo: RITMO, transicion: g.transicion || 'lateral', pasos: g.pasos || [] })};`);
 fs.writeFileSync(path.join(tmp, 'index.html'), fs.readFileSync(path.join(AQUI, 'editor-pagina.html'), 'utf8').replaceAll('FUENTES', `file://${path.join(VIDEO, 'recursos/fuentes')}`));
 
 // ── Dibujo fotograma a fotograma ──
