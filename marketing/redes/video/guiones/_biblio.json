@@ -2539,6 +2539,89 @@
      "esperar": 5000
     }
    ]
+  },
+  {
+   "id": "facturarellena",
+   "pasos": [
+    {
+     "ir": "/app/finanzas/facturas/nueva"
+    },
+    {
+     "esperar": 500
+    },
+    {
+     "bajar": 330
+    },
+    {
+     "marca": "a"
+    },
+    {
+     "esperar": 900
+    },
+    {
+     "escribir": {
+      "en": "xpath=//main//*[normalize-space(text())='Nombre o razón social']/following::input[1]",
+      "texto": "Transportes López SL"
+     }
+    },
+    {
+     "marca": "nombre"
+    },
+    {
+     "escribir": {
+      "en": "xpath=//main//*[normalize-space(text())='NIF']/following::input[1]",
+      "texto": "B12345674"
+     }
+    },
+    {
+     "marca": "nif"
+    },
+    {
+     "escribir": {
+      "en": "xpath=//main//*[normalize-space(text())='Dirección']/following::input[1]",
+      "texto": "Calle Mayor 12"
+     }
+    },
+    {
+     "escribir": {
+      "en": "xpath=//main//*[normalize-space(text())='Código postal']/following::input[1]",
+      "texto": "28001"
+     }
+    },
+    {
+     "marca": "relleno"
+    },
+    {
+     "esperar": 2500
+    },
+    {
+     "bajar": 520
+    },
+    {
+     "marca": "b1"
+    },
+    {
+     "esperar": 4000
+    },
+    {
+     "bajar": 520
+    },
+    {
+     "marca": "b2"
+    },
+    {
+     "esperar": 4000
+    },
+    {
+     "bajar": 520
+    },
+    {
+     "marca": "b3"
+    },
+    {
+     "esperar": 4000
+    }
+   ]
   }
  ],
  "escenas": []

@@ -13,7 +13,7 @@
  *
  * Guion: { id, carpeta, titulo, texto, musica, escenas: [ { tipo: "titulo|seccion|app|cierre", frases: [desde, hasta],
  *   tag, titulo, planos: [ { clip, desde: s | { marca, mas }, peso, foco: [x, y] (0-1 en la pantalla de la app), zoom, suelta } ],
- *   rotulos: [ { texto, en: 0-1 (momento dentro de la escena), y, lado } ], … } ] }
+ *   rotulos: [ { texto, en: 0-1 (momento dentro de la escena), y, lado, plano (se va con ese plano) } ], … } ] }
  * Se para solo si el equipo pasa de 72 °C y sigue al bajar de 62 °C.
  */
 import fs from 'node:fs';
@@ -70,6 +70,7 @@ for (const [k, e] of escenas.entries()) {
     if (!p.n) throw new Error(`${p.clip}: sin fotogramas desde ${desde}`);
     p.dir = `file://${p.dir}`;
   }
+  for (const r of e.rotulos || []) if (r.plano != null) r.hasta = e.planos[r.plano].fin;
 }
 
 // ── Subtítulos: trozos de hasta 3 palabras, con el tiempo de cada palabra ──

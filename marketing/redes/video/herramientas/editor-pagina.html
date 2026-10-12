@@ -142,7 +142,8 @@ window.pinta = async (t) => {
   // ── Rótulos ──
   $('rot').innerHTML = (e.rotulos || []).map((r, i) => {
     const x = muelle((t - r.t) / 0.55); if (t < r.t) return '';
-    const sale = 1 - ease((u - (dur - 0.25)) / 0.22);
+    // Un rótulo con «hasta» (lo pone editor.mjs si lleva «plano») se va al acabar su plano; si no, al acabar la escena.
+    const sale = (1 - ease((u - (dur - 0.25)) / 0.22)) * (r.hasta != null ? 1 - ease((t - (r.hasta - 0.3)) / 0.25) : 1);
     const izq = (r.lado || (i % 2 ? 'der' : 'izq')) === 'izq';
     const pos = izq ? `left:56px` : `right:${r.y > 880 ? 150 : 56}px`;
     const fl = Math.sin(t * 1.6 + i) * 5;
