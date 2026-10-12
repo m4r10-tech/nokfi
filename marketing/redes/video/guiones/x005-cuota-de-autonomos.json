@@ -2,222 +2,383 @@
  "id": "x005-cuota-de-autonomos",
  "carpeta": "005-cuota-de-autonomos",
  "titulo": "¿Cuánto vas a pagar de cuota de autónomos?",
- "ritmo": "vivo",
+ "ritmo": "medio",
  "transicion": "corte",
  "musica": "2-bit-shift.mp3",
- "variantes": "A orden directa · B comparación · C título + producto · D corte seco · E vivo · F contador",
+ "variantes": "F8 Dos casos · gancho: pregunta/orden directa · velocidad media",
  "texto": "Calculadora de cuota de autónomos 2026, gratis y sin cuenta, con tarifa plana incluida: nokfi.app\n\nCálculo orientativo; no sustituye a tu gestoría.\n\nEnvíaselo a quien está pensando en darse de alta 👇\n\n#autonomos #cuotadeautonomos #tarifaplana #emprender #freelance",
  "subtitulos": {
   "1": "Lo calculo gratis, sin cuenta, en nokfi.app"
  },
  "escenas": [
   {
-   "tipo": "titulo",
+   "tipo": "duo",
    "frases": [
     0,
     0
    ],
    "tag": "CALCULADORA",
    "titulo": "¿Cuánto pagas de **cuota de autónomos**?",
-   "fonoTop": 1040,
-   "fonoEscala": 0.94,
-   "planos": [
+   "casos": [
     {
+     "etq": "Ganas 2.000 €",
      "clip": "cuota2000_500",
+     "desde": {
+      "marca": "calc",
+      "mas": 0.0
+     },
+     "foco": [
+      0.5,
+      0.25
+     ],
+     "color": "#22B07D",
+     "quieto": true
+    },
+    {
+     "etq": "Primer año",
+     "clip": "cuota2000_500",
+     "desde": {
+      "marca": "plana",
+      "mas": 1.0
+     },
      "foco": [
       0.5,
       0.3
      ],
-     "zoom": 1.0,
-     "peso": 1,
-     "desde": {
-      "marca": "r",
-      "mas": 0.5
-     },
-     "quieta": true
+     "color": "#F2A93B",
+     "quieto": true,
+     "oculto": true
     }
-   ]
+   ],
+   "activo": null,
+   "top": 600,
+   "subsY": 1436
   },
   {
-   "tipo": "app",
+   "tipo": "duo",
    "frases": [
     1,
     1
    ],
    "tag": "CALCULADORA",
-   "titulo": "Gratis y **sin cuenta**",
-   "planos": [
+   "titulo": "Gratis y **sin registrarte**",
+   "casos": [
     {
-     "clip": "calcs",
+     "etq": "Ganas 2.000 €",
+     "clip": "cuota2000_500",
+     "desde": {
+      "marca": "calc",
+      "mas": 0.0
+     },
      "foco": [
       0.5,
       0.25
      ],
-     "zoom": 1.12,
-     "peso": 1,
+     "color": "#22B07D",
+     "quieto": true
+    },
+    {
+     "etq": "Primer año",
+     "clip": "cuota2000_500",
      "desde": {
-      "marca": "a",
-      "mas": 0.3
-     }
+      "marca": "plana",
+      "mas": 1.0
+     },
+     "foco": [
+      0.5,
+      0.3
+     ],
+     "color": "#F2A93B",
+     "quieto": true,
+     "oculto": true
     }
    ],
-   "rotulos": []
+   "activo": null,
+   "diferencia": {
+    "texto": "nokfi.app",
+    "en": 0.25
+   },
+   "top": 600,
+   "subsY": 1436
   },
   {
-   "tipo": "app",
+   "tipo": "duo",
    "frases": [
     2,
     2
    ],
    "tag": "CALCULADORA",
    "titulo": "Ingresos y **gastos**",
-   "planos": [
+   "casos": [
     {
+     "etq": "Ganas 2.000 €",
      "clip": "cuota2000_500",
+     "desde": {
+      "marca": "calc",
+      "mas": 0.2
+     },
      "foco": [
       0.5,
       0.2
      ],
-     "zoom": 1.2,
-     "peso": 1,
-     "desde": {
-      "marca": "calc",
-      "mas": 0.2
-     }
-    }
-   ],
-   "rotulos": [
-    {
-     "texto": "2.000 € de ingresos",
-     "en": 0.2,
-     "y": 1150,
-     "lado": "izq"
+     "color": "#22B07D"
     },
     {
-     "texto": "500 € de gastos",
-     "en": 0.6,
-     "y": 620,
-     "lado": "der"
+     "etq": "Primer año",
+     "clip": "cuota2000_500",
+     "desde": {
+      "marca": "plana",
+      "mas": 1.0
+     },
+     "foco": [
+      0.5,
+      0.3
+     ],
+     "color": "#F2A93B",
+     "quieto": true,
+     "oculto": true
     }
-   ]
+   ],
+   "activo": 0,
+   "top": 600,
+   "subsY": 1436
   },
   {
-   "tipo": "app",
+   "tipo": "duo",
    "frases": [
     3,
     3
    ],
    "tag": "CALCULADORA",
-   "titulo": "Tu cuota: **unos 300 €**",
-   "planos": [
+   "titulo": "Resultado: **unos 300 €**",
+   "casos": [
     {
+     "etq": "Ganas 2.000 €",
      "clip": "cuota2000_500",
-     "foco": [
-      0.4,
-      0.4
-     ],
-     "zoom": 1.25,
-     "peso": 1,
      "desde": {
       "marca": "r",
       "mas": 0.4
-     }
+     },
+     "foco": [
+      0.3,
+      0.33
+     ],
+     "color": "#22B07D",
+     "quieto": true,
+     "zoom": 1.45
+    },
+    {
+     "etq": "Primer año",
+     "clip": "cuota2000_500",
+     "desde": {
+      "marca": "plana",
+      "mas": 1.0
+     },
+     "foco": [
+      0.5,
+      0.3
+     ],
+     "color": "#F2A93B",
+     "quieto": true,
+     "oculto": true
     }
    ],
-   "rotulos": [
+   "activo": 0,
+   "barras": [
     {
-     "texto": "# € al mes",
-     "en": 0.2,
-     "y": 1160,
-     "lado": "izq",
-     "cuenta": {
-      "hasta": 302.65,
-      "dec": 2
-     }
+     "etq": "Cuota normal",
+     "valor": 302.65,
+     "dec": 2,
+     "max": 320,
+     "color": "#22B07D",
+     "en": 0.2
     }
-   ]
+   ],
+   "top": 600,
+   "subsY": 1436
   },
   {
-   "tipo": "app",
+   "tipo": "duo",
    "frases": [
     4,
     4
    ],
    "tag": "CALCULADORA",
    "titulo": "Tramo y **rendimiento**",
-   "planos": [
+   "casos": [
     {
+     "etq": "Ganas 2.000 €",
      "clip": "cuota2000_500",
-     "foco": [
-      0.5,
-      0.48
-     ],
-     "zoom": 1.2,
-     "peso": 1,
      "desde": {
       "marca": "r",
-      "mas": 2.5
-     }
+      "mas": 2.0
+     },
+     "foco": [
+      0.5,
+      0.42
+     ],
+     "color": "#22B07D",
+     "quieto": true,
+     "zoom": 1.2
+    },
+    {
+     "etq": "Primer año",
+     "clip": "cuota2000_500",
+     "desde": {
+      "marca": "plana",
+      "mas": 1.0
+     },
+     "foco": [
+      0.5,
+      0.3
+     ],
+     "color": "#F2A93B",
+     "quieto": true,
+     "oculto": true
     }
    ],
-   "rotulos": []
+   "activo": 0,
+   "barras": [
+    {
+     "etq": "Cuota normal",
+     "valor": 302.65,
+     "dec": 2,
+     "max": 320,
+     "color": "#22B07D",
+     "en": 0.2
+    }
+   ],
+   "top": 600,
+   "subsY": 1436
   },
   {
-   "tipo": "app",
+   "tipo": "duo",
    "frases": [
     5,
     5
    ],
    "tag": "CALCULADORA",
    "titulo": "Tarifa plana: **80 €**",
-   "planos": [
+   "casos": [
     {
+     "etq": "Ganas 2.000 €",
      "clip": "cuota2000_500",
+     "desde": {
+      "marca": "r",
+      "mas": 2.0
+     },
      "foco": [
-      0.4,
-      0.4
+      0.5,
+      0.42
      ],
-     "zoom": 1.25,
-     "peso": 1,
+     "color": "#22B07D",
+     "quieto": true,
+     "zoom": 1.2
+    },
+    {
+     "etq": "Primer año",
+     "clip": "cuota2000_500",
      "desde": {
       "marca": "plana",
-      "mas": 0.3
-     }
+      "mas": 1.0
+     },
+     "foco": [
+      0.3,
+      0.33
+     ],
+     "color": "#F2A93B",
+     "quieto": true,
+     "zoom": 1.45
     }
    ],
-   "rotulos": [
+   "activo": 1,
+   "barras": [
     {
-     "texto": "Primer año",
-     "en": 0.25,
-     "y": 620,
-     "lado": "der"
+     "etq": "Cuota normal",
+     "valor": 302.65,
+     "dec": 2,
+     "max": 320,
+     "color": "#22B07D",
+     "en": 0.2
+    },
+    {
+     "etq": "Tarifa plana",
+     "valor": 80,
+     "dec": 2,
+     "max": 320,
+     "color": "#F2A93B",
+     "en": 0.35
     }
-   ]
+   ],
+   "top": 600,
+   "subsY": 1436
   },
   {
-   "tipo": "app",
+   "tipo": "duo",
    "frases": [
     6,
     6
    ],
    "tag": "CALCULADORA",
    "titulo": "Cálculo **orientativo**",
-   "planos": [
+   "casos": [
     {
+     "etq": "Ganas 2.000 €",
      "clip": "cuota2000_500",
+     "desde": {
+      "marca": "r",
+      "mas": 2.0
+     },
      "foco": [
       0.5,
-      0.62
+      0.42
      ],
-     "zoom": 1.1,
-     "peso": 1,
+     "color": "#22B07D",
+     "quieto": true,
+     "zoom": 1.2
+    },
+    {
+     "etq": "Primer año",
+     "clip": "cuota2000_500",
      "desde": {
       "marca": "plana",
-      "mas": 2.5
-     }
+      "mas": 1.0
+     },
+     "foco": [
+      0.5,
+      0.4
+     ],
+     "color": "#F2A93B",
+     "quieto": true,
+     "zoom": 1.2
     }
    ],
-   "rotulos": []
+   "activo": null,
+   "barras": [
+    {
+     "etq": "Cuota normal",
+     "valor": 302.65,
+     "dec": 2,
+     "max": 320,
+     "color": "#22B07D",
+     "en": 0.2
+    },
+    {
+     "etq": "Tarifa plana",
+     "valor": 80,
+     "dec": 2,
+     "max": 320,
+     "color": "#F2A93B",
+     "en": 0.35
+    }
+   ],
+   "diferencia": {
+    "texto": "222,65 € de diferencia",
+    "en": 0.2,
+    "y": 1085
+   },
+   "top": 600,
+   "subsY": 1436
   },
   {
    "tipo": "cierre",
@@ -227,7 +388,8 @@
    ],
    "tag": "NOKFI",
    "linea1": "Envíaselo a quien va a **darse de alta**",
-   "pie": "Cuenta de ejemplo · cálculos orientativos"
+   "pie": "Cálculo orientativo · no sustituye a tu gestoría"
   }
- ]
+ ],
+ "formato": "F8 Dos casos"
 }

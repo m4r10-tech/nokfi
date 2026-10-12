@@ -12,7 +12,7 @@
  * Salida: salida/PARA-SUBIR/<carpeta>/ video.mp4 · portada.png · texto.txt · titulo.txt
  *
  * Guion: { id, carpeta, titulo, texto, musica, ritmo: "sereno|medio|vivo", transicion: "lateral|vertical|empuje|corte",
- *   escenas: [ { tipo: "titulo|cifra|pregunta|seccion|app|cierre", frases: [desde, hasta],
+ *   escenas: [ { tipo: "titulo|cifra|pregunta|seccion|app|dato|duo|cierre", frases: [desde, hasta],
  *   tag, titulo, planos: [ { clip, desde: s | { marca, mas }, peso, foco: [x, y] (0-1 en la pantalla de la app), zoom, suelta } ],
  *   rotulos: [ { texto, en: 0-1 (momento dentro de la escena), y, lado, plano (se va con ese plano) } ], … } ] }
  * Se para solo si el equipo pasa de 72 °C y sigue al bajar de 62 °C.
@@ -59,6 +59,16 @@ for (const [k, e] of escenas.entries()) {
   if (e.cambio != null) { e.cambio = tiempos[e.cambio][0] - 0.1; efectos.push([e.cambio, 'paso']); }
   for (const r of e.rotulos || []) { r.t = +(e.ini + r.en * (e.fin - e.ini)).toFixed(3); efectos.push([r.t, 'pop']); }
   if (e.tipo === 'cierre') efectos.push([e.ini + 0.1, 'campana']);
+  // «Dos casos»: cada caso es un plano que dura toda la escena.
+  for (const [i, c] of (e.casos || []).entries()) {
+    c.ini = e.ini; c.fin = e.fin;
+    const meta = JSON.parse(fs.readFileSync(path.join(BIBLIO, `${c.clip}.json`), 'utf8'));
+    const desde = typeof c.desde === 'object' ? meta.marcas[c.desde.marca] + (c.desde.mas || 0) : (c.desde ?? meta.inicio);
+    const dirC = path.join(tmp, `c${k}-${i}`); fs.mkdirSync(dirC);
+    sh('ffmpeg', ['-v', 'error', '-y', '-ss', desde.toFixed(3), '-t', (c.quieto ? 0.05 : e.fin - e.ini + 0.1).toFixed(3), '-i', path.join(BIBLIO, `${c.clip}.mp4`), '-vf', `fps=${FPS},scale=1080:-2:flags=lanczos`, '-q:v', '2', path.join(dirC, '%05d.jpg')]);
+    c.n = fs.readdirSync(dirC).length; c.dir = `file://${dirC}`;
+    if (!c.n) throw new Error(`${c.clip}: sin fotogramas desde ${desde}`);
+  }
   // Planos: se reparten la escena según su peso y se extraen sus fotogramas.
   const pesos = (e.planos || []).map(p => p.peso || 1), suma = pesos.reduce((a, b) => a + b, 0);
   let t = e.ini;

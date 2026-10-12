@@ -35,7 +35,7 @@ iban a montar como F1 con retoques; Mario vio x002 y pidió variedad real (lecci
 | F5 Antes / ahora | pendiente |
 | F6 Pregunta y respuesta | pendiente (hay la tarjeta de pregunta; falta cuenta atrás y plegado) |
 | F7 El caso | pendiente (hay un chat en `tarjetas.mjs`, de la etapa 1) |
-| F8 Dos casos | pendiente |
+| F8 Dos casos | **construido** (escenas `duo` con `casos`, `barras` y `diferencia`); usado en x005, **pendiente del visto bueno de Mario** |
 | F9 Lista rápida | pendiente |
 | F10 Bajo el capó | pendiente (hay terminal y flujo en `tarjetas.mjs`, de la etapa 1) |
 

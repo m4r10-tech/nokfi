@@ -149,6 +149,28 @@ window.pinta = async (t) => {
     }
   }
 
+  // ── Formato F8 «Dos casos»: dos ventanas del producto lado a lado; habla una y la otra se atenúa ──
+  if (e.tipo === 'duo') {
+    const antDuo = D.escenas[k - 1]?.tipo === 'duo', sigDuo = D.escenas[k + 1]?.tipo === 'duo';
+    const H = e.alto || 1000, s0 = 0.56, top = e.top || 560;
+    for (const [i, c] of e.casos.entries()) {
+      const el = i ? f1 : f0, img = el.firstElementChild;
+      await foto(img, c, t);
+      const antes = antDuo ? D.escenas[k - 1] : null;
+      const act = (x) => x == null ? 0.85 : x === i ? 1 : 0.38;                         // encendido de cada caso
+      const a0 = antes ? act(antes.activo) : act(e.activo), a1 = act(e.activo), a = a0 + (a1 - a0) * ease(u / 0.35);
+      const entra = antDuo ? 1 : muelle((u - i * 0.12) / 0.6), sale = sigDuo ? 0 : ease((u - (dur - 0.3)) / 0.26);
+      const [fx, fy] = c.foco || [0.5, 0.3], oy = fy * 1647, iy = Math.max(H - 1647, Math.min(0, H / 2 - oy));
+      const eraOculto = antes?.casos?.[i]?.oculto, bl = c.oculto ? 16 : eraOculto ? 16 * (1 - ease(u / 0.4)) : 0;
+      el.style.display = 'block'; el.style.height = H + 'px'; img.style.height = '1647px';
+      img.style.transformOrigin = `${fx * 760}px ${oy}px`; img.style.transform = `translate(0px, ${iy}px) scale(${(c.zoom || 1) * (1 + 0.03 * ease(u / 1.2))})`;
+      img.style.filter = bl ? `blur(${bl}px) brightness(.6)` : 'none';
+      el.style.transformOrigin = '380px 500px';
+      el.style.transform = `translate(${(i ? 578 : 76) - 160 - 380 * (1 - s0)}px, ${top - 430 - 500 * (1 - s0) + (1 - entra) * 900 + sale * 200 + Math.sin(t * 0.9 + i) * 4}px) scale(${s0 * (0.94 + 0.08 * (a - 0.38) / 0.62)})`;
+      el.style.opacity = (0.45 + 0.55 * (a - 0.38) / 0.62) * (1 - sale); el.style.filter = 'none';
+    }
+  } else { for (const im of [$('i0'), $('i1')]) im.style.filter = 'none'; }
+
   // ── Cabecera (etiqueta de serie + título de la escena) ──
   const cab = $('cab');
   if (e.tipo === 'app' && e.titulo) {
@@ -196,6 +218,22 @@ window.pinta = async (t) => {
     h += `<div style="left:96px;top:520px;font-weight:800;font-size:330px;line-height:1;letter-spacing:-10px;color:transparent;-webkit-text-stroke:5px rgba(255,255,255,.5);opacity:${clamp(x * 2) * (1 - sale)};transform:translateX(${(1 - x) * -160}px)">${e.numero}</div>`;
     h += `<div style="left:96px;top:880px;width:860px;font-weight:800;font-size:96px;line-height:1.05;letter-spacing:-2px;opacity:${clamp(y * 2) * (1 - sale)};transform:translateY(${(1 - y) * 70}px)">${e.titulo}</div>`;
     h += `<div style="left:96px;top:${880 + (e.lineas || 2) * 104 + 40}px;height:10px;border-radius:5px;background:#fff;width:${out((u - 0.4) / 0.5) * 260}px;opacity:${1 - sale}"></div>`;
+    full.style.opacity = 1;
+  } else if (e.tipo === 'duo') {
+    const antDuo = D.escenas[k - 1]?.tipo === 'duo', sigDuo = D.escenas[k + 1]?.tipo === 'duo', antes = antDuo ? D.escenas[k - 1] : null;
+    const fin = sigDuo ? 1 : 1 - ease((u - (dur - 0.25)) / 0.22), top = e.top || 560, yEt = top - 78, yB = top + (e.alto || 1000) * 0.56 + 44;
+    const fmt = (x, dec) => x.toLocaleString('es-ES', { useGrouping: 'always', minimumFractionDigits: dec || 0, maximumFractionDigits: dec || 0 });
+    h += `<div style="left:96px;top:250px;font-weight:800;font-size:26px;letter-spacing:3px;padding:9px 20px;border-radius:999px;background:${acento}22;color:${acento};border:2px solid ${acento}66;opacity:${fin}">${e.tag}</div>`;
+    h += `<div style="left:96px;top:318px;width:888px;font-weight:800;font-size:58px;line-height:1.1;letter-spacing:-1px;opacity:${fin}">${palabras(e.titulo).map((w, i) => { const x = antes?.titulo === e.titulo ? 1 : muelle((u - 0.06 - i * 0.055) / 0.5); return `<span style="display:inline-block;white-space:pre;opacity:${clamp(x * 2)};transform:translateY(${(1 - x) * 40}px)">${w.replace('ACENTO', acento)} </span>`; }).join('')}</div>`;
+    e.casos.forEach((c, i) => {
+      const on = e.activo == null || e.activo === i, x = antDuo ? 1 : muelle((u - 0.2 - i * 0.12) / 0.5);
+      h += `<div style="left:${i ? 578 : 76}px;top:${yEt}px;width:426px;text-align:center;opacity:${clamp(x * 2) * fin}"><span style="display:inline-block;font-weight:800;font-size:32px;padding:10px 22px;border-radius:16px;background:${on ? c.color || acento : 'rgba(255,255,255,.1)'};color:${on ? '#fff' : 'rgba(255,255,255,.55)'}">${c.oculto ? '¿?' : c.etq}</span></div>`;
+    });
+    (e.barras || []).forEach((b, i) => {
+      const vieja = (antes?.barras || []).some(g => g.etq === b.etq), p = vieja ? 1 : out((u - (b.en || 0.2) * dur) / 0.8), x = vieja ? 1 : muelle((u - (b.en || 0.2) * dur + 0.1) / 0.5);
+      h += `<div style="left:96px;top:${yB + i * 100}px;width:888px;opacity:${clamp(x * 2) * fin}"><div style="display:flex;justify-content:space-between;font-weight:800;font-size:34px"><span style="color:#C9D6E8;font-weight:600">${b.etq}</span><span>${fmt(b.valor * p, b.dec)} ${b.sufijo || '€'}</span></div><div style="margin-top:8px;height:22px;border-radius:12px;background:rgba(255,255,255,.1);overflow:hidden"><div style="height:100%;width:${b.valor / b.max * 100 * p}%;background:${b.color || acento};border-radius:12px"></div></div></div>`;
+    });
+    if (e.diferencia) { const x = muelle((u - (e.diferencia.en || 0.3) * dur) / 0.55); h += `<div style="left:0;width:1080px;top:${e.diferencia.y || top + 190}px;display:flex;justify-content:center;opacity:${clamp(x * 2) * fin}"><div style="font-weight:800;font-size:54px;padding:22px 38px;border-radius:26px;background:#fff;color:#0B1526;box-shadow:0 24px 60px rgba(0,0,0,.6);transform:scale(${0.6 + 0.4 * x}) rotate(-3deg)">${e.diferencia.texto}</div></div>`; }
     full.style.opacity = 1;
   } else if (e.tipo === 'dato') {
     // Formato F2 «La cifra»: el número manda arriba y se transforma de escena en escena; debajo, la barra de
@@ -257,7 +295,7 @@ window.pinta = async (t) => {
 
   // ── Subtítulos: trozo actual, con la palabra que suena resaltada ──
   const c = D.subs.find(x => t >= x.ini - 0.04 && t < x.fin + 0.08);
-  $('subs').style.top = (e.tipo === 'app' ? 1368 : e.tipo === 'dato' ? (e.subsY || 1400) : e.tipo === 'pregunta' ? 1420 : e.tipo === 'titulo' ? 1380 : 1390) + 'px';
+  $('subs').style.top = (e.tipo === 'app' ? 1368 : e.tipo === 'dato' ? (e.subsY || 1400) : e.tipo === 'duo' ? (e.subsY || 1440) : e.tipo === 'pregunta' ? 1420 : e.tipo === 'titulo' ? 1380 : 1390) + 'px';
   $('subs').innerHTML = c ? `<p style="transform:scale(${0.92 + 0.08 * out((t - c.ini + 0.04) / 0.14)})">${c.pal.map(w => {
     const dicha = t >= w.ini, activa = t >= w.ini && t < w.fin;
     return `<span style="color:${dicha ? '#fff' : 'rgba(255,255,255,.45)'};background:${activa ? '#1456A2' : 'transparent'}">${w.txt}</span>`;
