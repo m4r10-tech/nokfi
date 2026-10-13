@@ -1,0 +1,288 @@
+{
+ "id": "x016-excel-hasta-el-trimestre",
+ "carpeta": "016-excel-hasta-el-trimestre",
+ "titulo": "Excel está bien. Hasta que llega el trimestre",
+ "ritmo": "medio",
+ "transicion": "lateral",
+ "musica": "1-chill-lofi-theme.mp3",
+ "formato": "F5 Antes / ahora",
+ "variantes": "F5 Antes / ahora · gancho: llevar la contraria · velocidad media",
+ "texto": "El trimestre ya calculado: el IVA de tus ventas menos el de tus gastos y el pago a cuenta del IRPF, con las cuentas a la vista. Y el libro, exportado a PDF o a Excel. Pruébalo gratis 14 días en nokfi.app\n\nCuenta de ejemplo con datos ficticios. Cálculos orientativos.\n\nEnvíaselo a quien pasa el día 20 sumando celdas 👇\n\n#autonomos #excel #iva #irpf #impuestos",
+ "subtitulos": {},
+ "escenas": [
+  {
+   "tipo": "partida",
+   "frases": [
+    0,
+    0
+   ],
+   "tag": "AUTÓNOMOS",
+   "corte": 0.42,
+   "antes": [
+    "Buscar las facturas",
+    "Sumar el IVA",
+    "Restar los gastos",
+    "Cruzar los dedos"
+   ],
+   "antesEtq": "CON EXCEL",
+   "ahoraEtq": "CON NOKFI",
+   "titulo": "Excel está bien. **Hasta el trimestre**",
+   "tarjeta": {
+    "x": 198,
+    "top": 937,
+    "escala": 0.9,
+    "giro": 0,
+    "alto": 514
+   },
+   "planos": [
+    {
+     "clip": "imp",
+     "desde": 0.4,
+     "foco": [
+      0.5,
+      0.5
+     ],
+     "zoom": 1.0
+    }
+   ]
+  },
+  {
+   "tipo": "partida",
+   "frases": [
+    1,
+    1
+   ],
+   "tag": "AUTÓNOMOS",
+   "corte": 0.42,
+   "antes": [
+    "Buscar las facturas",
+    "Sumar el IVA",
+    "Restar los gastos",
+    "Cruzar los dedos"
+   ],
+   "antesEtq": "CON EXCEL",
+   "ahoraEtq": "CON NOKFI",
+   "titulo": "Antes: todo **a mano**",
+   "tarjeta": {
+    "x": 198,
+    "top": 937,
+    "escala": 0.9,
+    "giro": 0,
+    "alto": 514
+   },
+   "planos": [
+    {
+     "clip": "imp",
+     "desde": 1.5,
+     "foco": [
+      0.5,
+      0.5
+     ],
+     "zoom": 1.0
+    }
+   ]
+  },
+  {
+   "tipo": "partida",
+   "frases": [
+    2,
+    2
+   ],
+   "tag": "AUTÓNOMOS",
+   "corte": 0.12,
+   "antes": [
+    "Buscar las facturas",
+    "Sumar el IVA",
+    "Restar los gastos",
+    "Cruzar los dedos"
+   ],
+   "antesEtq": "CON EXCEL",
+   "ahoraEtq": "CON NOKFI",
+   "titulo": "El trimestre, **ya calculado**",
+   "tarjeta": {
+    "x": 198,
+    "top": 589,
+    "escala": 0.9,
+    "giro": 0,
+    "alto": 900
+   },
+   "planos": [
+    {
+     "clip": "imp",
+     "desde": 0.6,
+     "foco": [
+      0.5,
+      0.5
+     ],
+     "zoom": 1.0
+    }
+   ]
+  },
+  {
+   "tipo": "partida",
+   "frases": [
+    3,
+    3
+   ],
+   "tag": "AUTÓNOMOS",
+   "corte": 0.12,
+   "antes": [
+    "Buscar las facturas",
+    "Sumar el IVA",
+    "Restar los gastos",
+    "Cruzar los dedos"
+   ],
+   "antesEtq": "CON EXCEL",
+   "ahoraEtq": "CON NOKFI",
+   "titulo": "IVA: ventas **menos gastos**",
+   "tarjeta": {
+    "x": 198,
+    "top": 589,
+    "escala": 0.9,
+    "giro": 0,
+    "alto": 900
+   },
+   "planos": [
+    {
+     "clip": "imp",
+     "desde": {
+      "marca": "m303",
+      "mas": 0.4
+     },
+     "foco": [
+      0.5,
+      0.4
+     ],
+     "zoom": 1.0
+    }
+   ]
+  },
+  {
+   "tipo": "partida",
+   "frases": [
+    4,
+    4
+   ],
+   "tag": "AUTÓNOMOS",
+   "corte": 0.12,
+   "antes": [
+    "Buscar las facturas",
+    "Sumar el IVA",
+    "Restar los gastos",
+    "Cruzar los dedos"
+   ],
+   "antesEtq": "CON EXCEL",
+   "ahoraEtq": "CON NOKFI",
+   "titulo": "IRPF, con las **cuentas a la vista**",
+   "tarjeta": {
+    "x": 198,
+    "top": 589,
+    "escala": 0.9,
+    "giro": 0,
+    "alto": 900
+   },
+   "planos": [
+    {
+     "clip": "imp",
+     "desde": {
+      "marca": "m130",
+      "mas": 0.4
+     },
+     "foco": [
+      0.5,
+      0.45
+     ],
+     "zoom": 1.0
+    }
+   ]
+  },
+  {
+   "tipo": "partida",
+   "frases": [
+    5,
+    5
+   ],
+   "tag": "AUTÓNOMOS",
+   "corte": 0.12,
+   "antes": [
+    "Buscar las facturas",
+    "Sumar el IVA",
+    "Restar los gastos",
+    "Cruzar los dedos"
+   ],
+   "antesEtq": "CON EXCEL",
+   "ahoraEtq": "CON NOKFI",
+   "titulo": "El libro, a **PDF o Excel**",
+   "tarjeta": {
+    "x": 198,
+    "top": 589,
+    "escala": 0.9,
+    "giro": 0,
+    "alto": 900
+   },
+   "planos": [
+    {
+     "clip": "libro",
+     "desde": {
+      "marca": "arriba",
+      "mas": 0.4
+     },
+     "foco": [
+      0.5,
+      0.3
+     ],
+     "zoom": 1.0
+    }
+   ]
+  },
+  {
+   "tipo": "partida",
+   "frases": [
+    6,
+    6
+   ],
+   "tag": "AUTÓNOMOS",
+   "corte": 0.12,
+   "antes": [
+    "Buscar las facturas",
+    "Sumar el IVA",
+    "Restar los gastos",
+    "Cruzar los dedos"
+   ],
+   "antesEtq": "CON EXCEL",
+   "ahoraEtq": "CON NOKFI",
+   "titulo": "Sí, a Excel. **Pero ya hecho**",
+   "tarjeta": {
+    "x": 198,
+    "top": 589,
+    "escala": 0.9,
+    "giro": 0,
+    "alto": 900
+   },
+   "planos": [
+    {
+     "clip": "libro",
+     "desde": {
+      "marca": "arriba",
+      "mas": 3.5
+     },
+     "foco": [
+      0.5,
+      0.3
+     ],
+     "zoom": 1.0
+    }
+   ]
+  },
+  {
+   "tipo": "cierre",
+   "frases": [
+    7,
+    7
+   ],
+   "tag": "NOKFI",
+   "linea1": "Envíaselo a quien pasa el día 20 **sumando celdas**",
+   "pie": "Cuenta de ejemplo · cálculos orientativos"
+  }
+ ]
+}

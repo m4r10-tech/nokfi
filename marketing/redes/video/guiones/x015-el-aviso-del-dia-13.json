@@ -1,0 +1,282 @@
+{
+ "id": "x015-el-aviso-del-dia-13",
+ "carpeta": "015-el-aviso-del-dia-13",
+ "titulo": "El correo que te llega el día 13",
+ "ritmo": "medio",
+ "transicion": "vertical",
+ "musica": "2-bit-shift.mp3",
+ "formato": "F7 El caso",
+ "variantes": "F7 El caso · gancho: resultado primero · velocidad media",
+ "texto": "El calendario fiscal de Nokfi te avisa por correo siete días antes de cada plazo y otra vez la víspera. Con los plazos de todo el año, para autónomos y sociedades. Pruébalo gratis 14 días en nokfi.app\n\nCuenta de ejemplo con datos ficticios.\n\nGuárdalo y actívalo hoy 📌\n\n#autonomos #pymes #hacienda #impuestos #calendariofiscal",
+ "subtitulos": {},
+ "escenas": [
+  {
+   "tipo": "caso",
+   "frases": [
+    0,
+    0
+   ],
+   "tag": "AUTÓNOMOS",
+   "dia": "13 OCT",
+   "tarjeta": {
+    "x": 130,
+    "top": 560,
+    "escala": 1.08,
+    "giro": 0,
+    "alto": 740
+   },
+   "avisos": [
+    {
+     "titulo": "Nokfi · calendario fiscal",
+     "detalle": "Quedan 7 días para tu próximo plazo",
+     "color": "#2F7FE0",
+     "icono": "✉",
+     "en": 0.45
+    }
+   ],
+   "planos": [
+    {
+     "clip": "cal",
+     "desde": {
+      "marca": "a",
+      "mas": 0.4
+     },
+     "foco": [
+      0.5,
+      0.3
+     ],
+     "zoom": 1.0
+    }
+   ],
+   "desenfoque": true,
+   "avisosY": 600
+  },
+  {
+   "tipo": "caso",
+   "frases": [
+    1,
+    1
+   ],
+   "tag": "AUTÓNOMOS",
+   "dia": "13 OCT",
+   "tarjeta": {
+    "x": 130,
+    "top": 560,
+    "escala": 1.08,
+    "giro": 0,
+    "alto": 740
+   },
+   "avisos": [
+    {
+     "titulo": "Nokfi · calendario fiscal",
+     "detalle": "Quedan 7 días para tu próximo plazo",
+     "color": "#2F7FE0",
+     "icono": "✉",
+     "en": 0.05
+    },
+    {
+     "titulo": "Plazo del 20 de octubre",
+     "detalle": "Faltan 7 días",
+     "color": "#F2A93B",
+     "icono": "!",
+     "en": 0.3
+    }
+   ],
+   "planos": [
+    {
+     "clip": "cal",
+     "desde": {
+      "marca": "a",
+      "mas": 2.5
+     },
+     "foco": [
+      0.5,
+      0.3
+     ],
+     "zoom": 1.0
+    }
+   ],
+   "desenfoque": true,
+   "avisosY": 600
+  },
+  {
+   "tipo": "caso",
+   "frases": [
+    2,
+    2
+   ],
+   "tag": "AUTÓNOMOS",
+   "dia": "13 OCT",
+   "tarjeta": {
+    "x": 130,
+    "top": 560,
+    "escala": 1.08,
+    "giro": 0,
+    "alto": 740
+   },
+   "avisos": [],
+   "planos": [
+    {
+     "clip": "cal",
+     "desde": {
+      "marca": "a",
+      "mas": 0.5
+     },
+     "foco": [
+      0.5,
+      0.3
+     ],
+     "zoom": 1.0
+    }
+   ],
+   "titulo": "El **calendario fiscal**"
+  },
+  {
+   "tipo": "caso",
+   "frases": [
+    3,
+    3
+   ],
+   "tag": "AUTÓNOMOS",
+   "dia": "TODO EL AÑO",
+   "tarjeta": {
+    "x": 130,
+    "top": 560,
+    "escala": 1.08,
+    "giro": 0,
+    "alto": 740
+   },
+   "avisos": [],
+   "planos": [
+    {
+     "clip": "cal",
+     "desde": {
+      "marca": "plazos",
+      "mas": 0.2
+     },
+     "foco": [
+      0.5,
+      0.45
+     ],
+     "zoom": 1.0
+    }
+   ],
+   "titulo": "Todos los **plazos del año**"
+  },
+  {
+   "tipo": "caso",
+   "frases": [
+    4,
+    4
+   ],
+   "tag": "AUTÓNOMOS",
+   "dia": "TODO EL AÑO",
+   "tarjeta": {
+    "x": 130,
+    "top": 560,
+    "escala": 1.08,
+    "giro": 0,
+    "alto": 740
+   },
+   "avisos": [],
+   "planos": [
+    {
+     "clip": "cal",
+     "desde": {
+      "marca": "plazos2",
+      "mas": 0.8
+     },
+     "foco": [
+      0.5,
+      0.5
+     ],
+     "zoom": 1.0
+    }
+   ],
+   "titulo": "Fin de semana: pasa al **lunes**"
+  },
+  {
+   "tipo": "caso",
+   "frases": [
+    5,
+    5
+   ],
+   "tag": "AUTÓNOMOS",
+   "dia": "19 OCT",
+   "tarjeta": {
+    "x": 130,
+    "top": 560,
+    "escala": 1.08,
+    "giro": 0,
+    "alto": 740
+   },
+   "avisos": [
+    {
+     "titulo": "Mañana vence el plazo",
+     "detalle": "Segundo aviso, la víspera",
+     "color": "#FF5A5F",
+     "icono": "!",
+     "en": 0.3
+    }
+   ],
+   "planos": [
+    {
+     "clip": "cal",
+     "desde": {
+      "marca": "plazos3",
+      "mas": 0.4
+     },
+     "foco": [
+      0.5,
+      0.5
+     ],
+     "zoom": 1.0
+    }
+   ],
+   "desenfoque": true,
+   "avisosY": 600
+  },
+  {
+   "tipo": "caso",
+   "frases": [
+    6,
+    6
+   ],
+   "tag": "AUTÓNOMOS",
+   "dia": "HOY",
+   "tarjeta": {
+    "x": 130,
+    "top": 560,
+    "escala": 1.08,
+    "giro": 0,
+    "alto": 740
+   },
+   "avisos": [],
+   "planos": [
+    {
+     "clip": "cal",
+     "desde": {
+      "marca": "aviso",
+      "mas": 0.4
+     },
+     "foco": [
+      0.5,
+      0.3
+     ],
+     "zoom": 1.0
+    }
+   ],
+   "titulo": "Se activa con **una casilla**"
+  },
+  {
+   "tipo": "cierre",
+   "frases": [
+    7,
+    7
+   ],
+   "tag": "NOKFI",
+   "linea1": "Guárdalo y **actívalo hoy**",
+   "pie": "Cuenta de ejemplo con datos ficticios"
+  }
+ ]
+}

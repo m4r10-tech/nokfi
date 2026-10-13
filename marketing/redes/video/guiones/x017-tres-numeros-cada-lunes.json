@@ -1,0 +1,193 @@
+{
+ "id": "x017-tres-numeros-cada-lunes",
+ "carpeta": "017-tres-numeros-cada-lunes",
+ "titulo": "3 números que miro cada lunes",
+ "ritmo": "vivo",
+ "transicion": "corte",
+ "musica": "3-music-promotion.mp3",
+ "formato": "F9 Lista rápida",
+ "variantes": "F9 Lista rápida · gancho: experto que explica · velocidad viva",
+ "texto": "Lo que hay que apartar para Hacienda, quién te debe dinero y cómo va a estar tu caja a 90 días: los tres en la pantalla de inicio. Pruébalo gratis 14 días en nokfi.app\n\nCuenta de ejemplo con datos ficticios. Cálculos orientativos.\n\nGuárdalo y míralo el lunes 📌\n\n#autonomos #pymes #tesoreria #impuestos #emprendedores",
+ "subtitulos": {},
+ "escenas": [
+  {
+   "tipo": "lista",
+   "frases": [
+    0,
+    0
+   ],
+   "tag": "AUTÓNOMOS",
+   "n": 0,
+   "total": 3,
+   "titulo": "**3 números** que miro cada lunes",
+   "intro": true
+  },
+  {
+   "tipo": "lista",
+   "frases": [
+    1,
+    1
+   ],
+   "tag": "AUTÓNOMOS",
+   "n": 1,
+   "total": 3,
+   "titulo": "Lo que aparto para **Hacienda**",
+   "tarjeta": {
+    "x": 96,
+    "top": 520,
+    "escala": 1.17,
+    "giro": -3,
+    "alto": 640
+   },
+   "planos": [
+    {
+     "clip": "imp",
+     "desde": 0.6,
+     "foco": [
+      0.5,
+      0.5
+     ],
+     "zoom": 1.15
+    }
+   ]
+  },
+  {
+   "tipo": "lista",
+   "frases": [
+    2,
+    2
+   ],
+   "tag": "AUTÓNOMOS",
+   "n": 2,
+   "total": 3,
+   "titulo": "Quién me **debe** dinero",
+   "tarjeta": {
+    "x": 96,
+    "top": 520,
+    "escala": 1.17,
+    "giro": -3,
+    "alto": 640
+   },
+   "planos": [
+    {
+     "clip": "cobros",
+     "desde": {
+      "marca": "a",
+      "mas": 0.6
+     },
+     "foco": [
+      0.5,
+      0.36
+     ],
+     "zoom": 1.0
+    }
+   ]
+  },
+  {
+   "tipo": "lista",
+   "frases": [
+    3,
+    3
+   ],
+   "tag": "AUTÓNOMOS",
+   "n": 3,
+   "total": 3,
+   "titulo": "Mi caja a **90 días**",
+   "tarjeta": {
+    "x": 96,
+    "top": 520,
+    "escala": 1.17,
+    "giro": -3,
+    "alto": 640
+   },
+   "planos": [
+    {
+     "clip": "prev",
+     "desde": {
+      "marca": "a",
+      "mas": 0.5
+     },
+     "foco": [
+      0.5,
+      0.7
+     ],
+     "zoom": 1.0
+    }
+   ]
+  },
+  {
+   "tipo": "lista",
+   "frases": [
+    4,
+    4
+   ],
+   "tag": "AUTÓNOMOS",
+   "n": 3,
+   "total": 3,
+   "titulo": "Los tres, en **Inicio**",
+   "tarjeta": {
+    "x": 96,
+    "top": 520,
+    "escala": 1.17,
+    "giro": -3,
+    "alto": 640
+   },
+   "planos": [
+    {
+     "clip": "inicio",
+     "desde": {
+      "marca": "a",
+      "mas": 0.6
+     },
+     "foco": [
+      0.5,
+      0.62
+     ],
+     "zoom": 1.0
+    }
+   ]
+  },
+  {
+   "tipo": "lista",
+   "frases": [
+    5,
+    5
+   ],
+   "tag": "AUTÓNOMOS",
+   "n": 3,
+   "total": 3,
+   "titulo": "El tercero **avisa antes**",
+   "tarjeta": {
+    "x": 96,
+    "top": 520,
+    "escala": 1.17,
+    "giro": -3,
+    "alto": 640
+   },
+   "planos": [
+    {
+     "clip": "prev",
+     "desde": {
+      "marca": "a",
+      "mas": 3.0
+     },
+     "foco": [
+      0.5,
+      0.78
+     ],
+     "zoom": 1.15
+    }
+   ]
+  },
+  {
+   "tipo": "cierre",
+   "frases": [
+    6,
+    6
+   ],
+   "tag": "NOKFI",
+   "linea1": "Guárdalo y míralo el **lunes**",
+   "pie": "Cuenta de ejemplo con datos ficticios"
+  }
+ ]
+}

@@ -15,7 +15,7 @@ iban a montar como F1 con retoques; Mario vio x002 y pidió variedad real (lecci
 
 | Vídeo | Formato | Gancho | Velocidad | Voz |
 |---|---|---|---|---|
-| x002 Casi 6.000 el día 20 | **F2 La cifra** | cifra exacta | medio | OK · falta retoque de la frase 3 («Finanzas e Impuestos») |
+| x002 Casi 6.000 el día 20 | **F2 La cifra** | cifra exacta | medio | OK · frase 3 sustituida el 2026-10-13 («En Nokfi abre Finanzas e Impuestos.») y vídeo remontado |
 | x003 36 días sin cobrar | **F7 El caso** | resultado primero | medio | OK |
 | x004 ¿Puedo contratar? | **F6 Pregunta y respuesta** | bucle abierto | sereno | OK |
 | x005 Cuota de autónomos | **F8 Dos casos** | orden directa | medio-vivo | OK (el reconocedor oye «cincuenta» en «sin cuenta»: comprobar de oído) |
@@ -34,15 +34,15 @@ iban a montar como F1 con retoques; Mario vio x002 y pidió variedad real (lecci
 | x013 Comprueba el NIF | **F4 Paso a paso** | orden directa | medio | lateral · 3 | OK |
 | x014 Mismo precio, dos facturas | **F8 Dos casos** | cifra exacta | medio | empuje · 1 | OK |
 
-## Lote 4 (texto escrito; pendiente de que Mario lo lea y lo locute)
+## Lote 4 (voz recibida el 2026-10-13, cortada y revisada; montados, pendientes del visto bueno de Mario)
 
-| Vídeo | Formato | Gancho |
-|---|---|---|
-| x015-el-aviso-del-dia-13 | **F7 El caso** | resultado primero |
-| x016-excel-hasta-el-trimestre | **F5 Antes / ahora** | llevar la contraria |
-| x017-tres-numeros-cada-lunes | **F9 Lista rápida** | experto que explica |
+| Vídeo | Formato | Gancho | Velocidad | Transición · música | Voz |
+|---|---|---|---|---|---|
+| x015 El aviso del día 13 | **F7 El caso** | resultado primero | medio | vertical · 2 | OK |
+| x016 Excel hasta el trimestre | **F5 Antes / ahora** | llevar la contraria | medio | lateral · 1 | OK (el reconocedor oye «abre Snokfi» en «abres Nokfi»: comprobar de oído) |
+| x017 Tres números cada lunes | **F9 Lista rápida** | experto que explica | vivo | corte · 3 | OK |
 
-x017 usará F9, que está construido pero aún no se ha visto en ningún vídeo.
+x017 es el primer vídeo en F9: revisarlo con más cuidado.
 
 ## Formatos construidos en el montador
 
@@ -56,7 +56,7 @@ x017 usará F9, que está construido pero aún no se ha visto en ningún vídeo.
 | F6 Pregunta y respuesta | **construido** (escena `pregunta` con `cuenta` + escenas `prueba` con `pregunta` y `chip`); usado en x004, **pendiente del visto bueno de Mario** |
 | F7 El caso | **construido** (escenas `caso` con `dia`, `avisos` y `desenfoque`); usado en x003, **pendiente del visto bueno de Mario** |
 | F8 Dos casos | **construido** (escenas `duo` con `casos`, `barras` y `diferencia`); usado en x005, **pendiente del visto bueno de Mario** |
-| F9 Lista rápida | **construido** (escenas `lista` con `n`, `total`, `intro` y recorte en `tarjeta`); probado solo en fotogramas con una voz prestada, **sin ningún vídeo todavía** |
+| F9 Lista rápida | **construido** (escenas `lista` con `n`, `total`, `intro` y recorte en `tarjeta`); usado en x017, **pendiente del visto bueno de Mario** |
 | F10 Bajo el capó | **construido** (escenas `codigo` con panel que se escribe, `nota` y `chips`); usado en x008, **pendiente del visto bueno de Mario** |
 
 Orden de construcción: F2 → F8 → F4 → F3 → F6 → F7 → F5 → F10 → F9. Cada formato se enseña

@@ -80,8 +80,8 @@ Avisos sobre planos concretos: `facturanueva` enseña un aviso amarillo de datos
 en `ayuda` sale el nombre de Mario.
 
 **Voz** (`salida/lotes-voz/`, una carpeta por lote con `texto.txt` y el audio dentro): locutados
-y montados, `explicativo-60s/`, `lote-01/` (x002-x006), `lote-02/` (x007-x009) y `lote-03/`
-(x010-x014). Escrito y pendiente de leer y locutar: `lote-04/` (x015-x017). El audio se guarda **dentro de la carpeta de su lote**, con
+y montados, `explicativo-60s/`, `lote-01/` (x002-x006), `lote-02/` (x007-x009) `lote-03/`
+(x010-x014) y `lote-04/` (x015-x017). No hay textos pendientes de locutar. El audio se guarda **dentro de la carpeta de su lote**, con
 cualquier nombre. `_indice/lotes.json` dice qué vídeos y frases lleva cada lote.
 
 ## 5. Órdenes
@@ -120,6 +120,8 @@ de lo que se dice («nokfi punto app» → «nokfi.app»).
 - Una pasada completa de 56 s tarda **unos 30 minutos** en este portátil: primero `--foto`,
   y los cambios, todos juntos.
 - Qué opciones de variación están construidas: tabla al final de `REGISTRO-VARIANTES.md`.
+- `--rehacer-cierre` redibuja solo la última escena; `--rehacer-sonido` vuelve a mezclar el
+  sonido sin dibujar nada (segundos).
 - `montar.mjs`, `tarjetas.mjs` y `serie.py` son de la etapa 1 (pantalla completa, letra
   grande). Se conservan porque `tarjetas.mjs` tiene recursos aprovechables (terminal, chat,
   gráfico, calendario) que hay que pasar al montador nuevo.
@@ -169,11 +171,11 @@ Música: las tres pistas de [`musica-licencias.md`](musica-licencias.md).
 
 - **x001** aprobado (F1 Recorrido). Tiene dos mejoras preparadas sin remontar.
 - **x002-x009** (lotes 1 y 2): montados, cada uno en un formato distinto; pendientes del visto
-  bueno de Mario. A x002 le falta el retoque de la frase 3
-  (`salida/lotes-voz/retoque-x002-frase-3/`).
+  bueno de Mario. x002 ya lleva la frase 3 nueva («Finanzas e Impuestos»).
 - **x010-x014** (lote 3): voz recibida el 13 de octubre, cortada y revisada; montados en F3, F2,
   F6, F4 y F8. Pendientes del visto bueno de Mario.
-- **Lote 4** (x015-x017): texto escrito, sin locutar.
+- **x015-x017** (lote 4): voz recibida el 13 de octubre; montados en F7, F5 y F9. Pendientes
+  del visto bueno de Mario. No queda ningún texto de voz en reserva: toca escribir el lote 5.
 - Estado por vídeo: `REGISTRO-VARIANTES.md`.
 
 Sustituir una frase: `…/partir_audio.py --retoque <id> <nº de frase> <audio> ["texto nuevo"]`.
