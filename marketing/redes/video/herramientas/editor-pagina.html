@@ -221,6 +221,21 @@ window.pinta = async (t) => {
     h += `<div style="left:96px;top:880px;width:860px;font-weight:800;font-size:96px;line-height:1.05;letter-spacing:-2px;opacity:${clamp(y * 2) * (1 - sale)};transform:translateY(${(1 - y) * 70}px)">${e.titulo}</div>`;
     h += `<div style="left:96px;top:${880 + (e.lineas || 2) * 104 + 40}px;height:10px;border-radius:5px;background:#fff;width:${out((u - 0.4) / 0.5) * 260}px;opacity:${1 - sale}"></div>`;
     full.style.opacity = 1;
+  } else if (e.tipo === 'lista') {
+    // Formato F9 «Lista rápida»: barra de N tramos arriba; cada punto es un número enorme a pantalla completa y, después,
+    // un recorte muy cerrado del producto (ventana inclinada, la dibuja el bloque de teléfonos con e.tarjeta).
+    const antL = D.escenas[k - 1]?.tipo === 'lista', sigL = D.escenas[k + 1]?.tipo === 'lista';
+    const fin = sigL ? 1 : 1 - ease((u - (dur - 0.2)) / 0.18), N = e.total || 3, x = muelle(u / 0.4), w = (888 - (N - 1) * 14) / N;
+    for (let i = 0; i < N; i++) { const lleno = i + 1 < e.n ? 1 : i + 1 === e.n ? clamp(u / dur) : 0; h += `<div style="left:${96 + i * (w + 14)}px;top:244px;width:${w}px;height:12px;border-radius:6px;background:rgba(255,255,255,.14);overflow:hidden;opacity:${fin}"><div style="width:${lleno * 100}%;height:100%;background:${acento}"></div></div>`; }
+    if (e.intro) {
+      h += `<div style="left:96px;top:520px;width:888px;font-weight:800;font-size:112px;line-height:1.03;letter-spacing:-3px;opacity:${fin};transform:scale(${0.92 + 0.08 * x});transform-origin:left center">${e.titulo.replace(/\*\*(.+?)\*\*/g, `<b style="color:${acento}">$1</b>`)}</div>`;
+    } else if (!(e.planos || []).length) {
+      h += `<div style="left:80px;top:330px;font-weight:800;font-size:560px;line-height:1;letter-spacing:-20px;color:${acento};text-shadow:0 30px 120px ${acento}77;opacity:${clamp(x * 3) * fin};transform:scale(${1.6 - 0.6 * Math.min(1, x)}) rotate(${(1 - Math.min(1, x)) * -8}deg);transform-origin:left center">${e.n}</div>`;
+      h += `<div style="left:96px;top:930px;width:888px;font-weight:800;font-size:92px;line-height:1.05;letter-spacing:-2px;opacity:${clamp(muelle((u - 0.12) / 0.4) * 2) * fin}">${e.titulo.replace(/\*\*(.+?)\*\*/g, `<b style="color:${acento}">$1</b>`)}</div>`;
+    } else {
+      h += `<div style="left:96px;top:290px;display:flex;align-items:center;gap:26px;opacity:${fin}"><span style="font-weight:800;font-size:150px;line-height:1;color:${acento}">${e.n}</span><span style="font-weight:800;font-size:60px;line-height:1.08;letter-spacing:-1px;width:720px">${e.titulo.replace(/\*\*(.+?)\*\*/g, `<b style="color:${acento}">$1</b>`)}</span></div>`;
+    }
+    full.style.opacity = 1;
   } else if (e.tipo === 'codigo') {
     // Formato F10 «Bajo el capó»: panel de código que se escribe solo (arriba) y el producto o la respuesta en ventana (abajo).
     const antK = D.escenas[k - 1]?.tipo === 'codigo', sigK = D.escenas[k + 1]?.tipo === 'codigo', antes = antK ? D.escenas[k - 1] : null;
@@ -389,7 +404,7 @@ window.pinta = async (t) => {
 
   // ── Subtítulos: trozo actual, con la palabra que suena resaltada ──
   const c = D.subs.find(x => t >= x.ini - 0.04 && t < x.fin + 0.08);
-  $('subs').style.top = (e.tipo === 'app' ? 1368 : e.tipo === 'dato' ? (e.subsY || 1400) : e.tipo === 'duo' ? (e.subsY || 1440) : e.tipo === 'paso' ? (e.subsY || 1436) : e.tipo === 'prueba' ? (e.subsY || 1440) : e.tipo === 'mito' ? 1420 : e.tipo === 'caso' ? (e.subsY || 1440) : (e.tipo === 'codigo' || e.tipo === 'partida') ? (e.subsY || 1440) : e.tipo === 'pregunta' ? 1420 : e.tipo === 'titulo' ? 1380 : 1390) + 'px';
+  $('subs').style.top = (e.tipo === 'app' ? 1368 : e.tipo === 'dato' ? (e.subsY || 1400) : e.tipo === 'duo' ? (e.subsY || 1440) : e.tipo === 'paso' ? (e.subsY || 1436) : e.tipo === 'prueba' ? (e.subsY || 1440) : e.tipo === 'mito' ? 1420 : e.tipo === 'caso' ? (e.subsY || 1440) : (e.tipo === 'codigo' || e.tipo === 'partida' || e.tipo === 'lista') ? (e.subsY || 1440) : e.tipo === 'pregunta' ? 1420 : e.tipo === 'titulo' ? 1380 : 1390) + 'px';
   $('subs').innerHTML = c ? `<p style="transform:scale(${0.92 + 0.08 * out((t - c.ini + 0.04) / 0.14)})">${c.pal.map(w => {
     const dicha = t >= w.ini, activa = t >= w.ini && t < w.fin;
     return `<span style="color:${dicha ? '#fff' : 'rgba(255,255,255,.45)'};background:${activa ? '#1456A2' : 'transparent'}">${w.txt}</span>`;

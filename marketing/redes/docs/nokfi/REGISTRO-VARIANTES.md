@@ -37,7 +37,7 @@ iban a montar como F1 con retoques; Mario vio x002 y pidió variedad real (lecci
 | x016-excel-hasta-el-trimestre | **F5 Antes / ahora** | llevar la contraria |
 | x017-tres-numeros-cada-lunes | **F9 Lista rápida** | experto que explica |
 
-x017 necesita F9, que aún no está construido.
+x017 usará F9, que está construido pero aún no se ha visto en ningún vídeo.
 
 ## Formatos construidos en el montador
 
@@ -51,7 +51,7 @@ x017 necesita F9, que aún no está construido.
 | F6 Pregunta y respuesta | **construido** (escena `pregunta` con `cuenta` + escenas `prueba` con `pregunta` y `chip`); usado en x004, **pendiente del visto bueno de Mario** |
 | F7 El caso | **construido** (escenas `caso` con `dia`, `avisos` y `desenfoque`); usado en x003, **pendiente del visto bueno de Mario** |
 | F8 Dos casos | **construido** (escenas `duo` con `casos`, `barras` y `diferencia`); usado en x005, **pendiente del visto bueno de Mario** |
-| F9 Lista rápida | pendiente |
+| F9 Lista rápida | **construido** (escenas `lista` con `n`, `total`, `intro` y recorte en `tarjeta`); probado solo en fotogramas con una voz prestada, **sin ningún vídeo todavía** |
 | F10 Bajo el capó | **construido** (escenas `codigo` con panel que se escribe, `nota` y `chips`); usado en x008, **pendiente del visto bueno de Mario** |
 
 Orden de construcción: F2 → F8 → F4 → F3 → F6 → F7 → F5 → F10 → F9. Cada formato se enseña
