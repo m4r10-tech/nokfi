@@ -169,7 +169,7 @@ const GANANCIA = medida ? Math.max(-6, Math.min(10, -15 - parseFloat(medida[1]))
 const fil = [`[1:a]adelay=${OFFSET * 1000}:all=1,volume=${GANANCIA.toFixed(2)}dB,aresample=48000[v]`,
   `[2:a]atrim=0:${total.toFixed(2)},volume=0.085,afade=t=in:d=0.8,afade=t=out:st=${(total - 1.4).toFixed(2)}:d=1.4,aresample=48000[m]`];
 efectos.forEach(([t, tipo], i) => { ent.push('-i', path.join(tmp, `${tipo}.wav`)); fil.push(`[${i + 3}:a]adelay=${Math.max(0, Math.round((t - 0.06) * 1000))}:all=1[e${i}]`); });
-fil.push(`[v][m]${efectos.map((_, i) => `[e${i}]`).join('')}amix=inputs=${efectos.length + 2}:normalize=0:duration=longest,alimiter=limit=0.95[a]`);
+fil.push(`[v][m]${efectos.map((_, i) => `[e${i}]`).join('')}amix=inputs=${efectos.length + 2}:normalize=0:duration=longest,alimiter=limit=0.84[a]`);
 
 const carpeta = path.join(SALIDA, 'PARA-SUBIR', g.carpeta || g.id);
 fs.mkdirSync(carpeta, { recursive: true });
