@@ -1,0 +1,439 @@
+{
+ "id": "x014-mismo-precio-dos-facturas",
+ "carpeta": "014-mismo-precio-dos-facturas",
+ "titulo": "El mismo precio, dos facturas distintas",
+ "ritmo": "medio",
+ "transicion": "empuje",
+ "musica": "1-chill-lofi-theme.mp3",
+ "formato": "F8 Dos casos",
+ "variantes": "F8 Dos casos · gancho: cifra exacta · velocidad media",
+ "texto": "1.000 € con IVA al 21 % son 1.210 €; con el reducido al 10 %, 1.100 €. Calculadora de IVA gratis en nokfi.app\n\nQué tipo te toca depende de tu actividad. Cálculo orientativo.\n\nEnvíaselo a quien siempre duda con el IVA 👇\n\n#autonomos #iva #facturas #hosteleria #reformas",
+ "subtitulos": {},
+ "escenas": [
+  {
+   "tipo": "duo",
+   "frases": [
+    0,
+    0
+   ],
+   "tag": "CALCULADORA",
+   "titulo": "Mismo precio, **dos facturas**",
+   "casos": [
+    {
+     "etq": "IVA al 21 %",
+     "clip": "iva1000",
+     "desde": {
+      "marca": "calc",
+      "mas": 0.0
+     },
+     "foco": [
+      0.5,
+      0.25
+     ],
+     "color": "#2F7FE0",
+     "quieto": true
+    },
+    {
+     "etq": "IVA al 10 %",
+     "clip": "iva10",
+     "desde": {
+      "marca": "calc",
+      "mas": 0.0
+     },
+     "foco": [
+      0.5,
+      0.25
+     ],
+     "color": "#F2A93B",
+     "quieto": true
+    }
+   ],
+   "activo": null,
+   "top": 600,
+   "subsY": 1436
+  },
+  {
+   "tipo": "duo",
+   "frases": [
+    1,
+    1
+   ],
+   "tag": "CALCULADORA",
+   "titulo": "IVA general: **1.210 €**",
+   "casos": [
+    {
+     "etq": "IVA al 21 %",
+     "clip": "iva1000",
+     "desde": {
+      "marca": "r",
+      "mas": 0.6
+     },
+     "foco": [
+      0.5,
+      0.42
+     ],
+     "color": "#2F7FE0",
+     "quieto": true,
+     "zoom": 1.2
+    },
+    {
+     "etq": "IVA al 10 %",
+     "clip": "iva10",
+     "desde": {
+      "marca": "calc",
+      "mas": 0.0
+     },
+     "foco": [
+      0.5,
+      0.25
+     ],
+     "color": "#F2A93B",
+     "quieto": true
+    }
+   ],
+   "activo": 0,
+   "top": 600,
+   "subsY": 1436,
+   "barras": [
+    {
+     "etq": "Al 21 %",
+     "valor": 1210,
+     "dec": 0,
+     "max": 1300,
+     "color": "#2F7FE0",
+     "en": 0.45
+    }
+   ]
+  },
+  {
+   "tipo": "duo",
+   "frases": [
+    2,
+    2
+   ],
+   "tag": "CALCULADORA",
+   "titulo": "IVA reducido: **1.100 €**",
+   "casos": [
+    {
+     "etq": "IVA al 21 %",
+     "clip": "iva1000",
+     "desde": {
+      "marca": "r",
+      "mas": 0.6
+     },
+     "foco": [
+      0.5,
+      0.42
+     ],
+     "color": "#2F7FE0",
+     "quieto": true,
+     "zoom": 1.2
+    },
+    {
+     "etq": "IVA al 10 %",
+     "clip": "iva10",
+     "desde": {
+      "marca": "r",
+      "mas": 0.6
+     },
+     "foco": [
+      0.5,
+      0.42
+     ],
+     "color": "#F2A93B",
+     "quieto": true,
+     "zoom": 1.2
+    }
+   ],
+   "activo": 1,
+   "top": 600,
+   "subsY": 1436,
+   "barras": [
+    {
+     "etq": "Al 21 %",
+     "valor": 1210,
+     "dec": 0,
+     "max": 1300,
+     "color": "#2F7FE0",
+     "en": 0.05
+    },
+    {
+     "etq": "Al 10 %",
+     "valor": 1100,
+     "dec": 0,
+     "max": 1300,
+     "color": "#F2A93B",
+     "en": 0.45
+    }
+   ]
+  },
+  {
+   "tipo": "duo",
+   "frases": [
+    3,
+    3
+   ],
+   "tag": "CALCULADORA",
+   "titulo": "**110 €** de diferencia",
+   "casos": [
+    {
+     "etq": "IVA al 21 %",
+     "clip": "iva1000",
+     "desde": {
+      "marca": "r",
+      "mas": 0.6
+     },
+     "foco": [
+      0.5,
+      0.42
+     ],
+     "color": "#2F7FE0",
+     "quieto": true,
+     "zoom": 1.2
+    },
+    {
+     "etq": "IVA al 10 %",
+     "clip": "iva10",
+     "desde": {
+      "marca": "r",
+      "mas": 0.6
+     },
+     "foco": [
+      0.5,
+      0.42
+     ],
+     "color": "#F2A93B",
+     "quieto": true,
+     "zoom": 1.2
+    }
+   ],
+   "activo": null,
+   "top": 600,
+   "subsY": 1436,
+   "barras": [
+    {
+     "etq": "Al 21 %",
+     "valor": 1210,
+     "dec": 0,
+     "max": 1300,
+     "color": "#2F7FE0",
+     "en": 0.05
+    },
+    {
+     "etq": "Al 10 %",
+     "valor": 1100,
+     "dec": 0,
+     "max": 1300,
+     "color": "#F2A93B",
+     "en": 0.05
+    }
+   ],
+   "diferencia": {
+    "texto": "110 € de diferencia",
+    "en": 0.15,
+    "y": 1085
+   }
+  },
+  {
+   "tipo": "duo",
+   "frases": [
+    4,
+    4
+   ],
+   "tag": "CALCULADORA",
+   "titulo": "Hostelería, **obras en vivienda**…",
+   "casos": [
+    {
+     "etq": "IVA al 21 %",
+     "clip": "iva1000",
+     "desde": {
+      "marca": "r",
+      "mas": 2.0
+     },
+     "foco": [
+      0.5,
+      0.42
+     ],
+     "color": "#2F7FE0",
+     "quieto": true,
+     "zoom": 1.2
+    },
+    {
+     "etq": "IVA al 10 %",
+     "clip": "iva10",
+     "desde": {
+      "marca": "r",
+      "mas": 2.0
+     },
+     "foco": [
+      0.5,
+      0.56
+     ],
+     "color": "#F2A93B",
+     "quieto": true,
+     "zoom": 1.2
+    }
+   ],
+   "activo": 1,
+   "top": 600,
+   "subsY": 1436,
+   "barras": [
+    {
+     "etq": "Al 21 %",
+     "valor": 1210,
+     "dec": 0,
+     "max": 1300,
+     "color": "#2F7FE0",
+     "en": 0.05
+    },
+    {
+     "etq": "Al 10 %",
+     "valor": 1100,
+     "dec": 0,
+     "max": 1300,
+     "color": "#F2A93B",
+     "en": 0.05
+    }
+   ]
+  },
+  {
+   "tipo": "duo",
+   "frases": [
+    5,
+    5
+   ],
+   "tag": "CALCULADORA",
+   "titulo": "Base, cuota y **total**",
+   "casos": [
+    {
+     "etq": "IVA al 21 %",
+     "clip": "iva1000",
+     "desde": {
+      "marca": "r",
+      "mas": 2.0
+     },
+     "foco": [
+      0.5,
+      0.42
+     ],
+     "color": "#2F7FE0",
+     "quieto": true,
+     "zoom": 1.2
+    },
+    {
+     "etq": "IVA al 10 %",
+     "clip": "iva10",
+     "desde": {
+      "marca": "r",
+      "mas": 2.0
+     },
+     "foco": [
+      0.5,
+      0.42
+     ],
+     "color": "#F2A93B",
+     "quieto": true,
+     "zoom": 1.2
+    }
+   ],
+   "activo": 0,
+   "top": 600,
+   "subsY": 1436,
+   "barras": [
+    {
+     "etq": "Al 21 %",
+     "valor": 1210,
+     "dec": 0,
+     "max": 1300,
+     "color": "#2F7FE0",
+     "en": 0.05
+    },
+    {
+     "etq": "Al 10 %",
+     "valor": 1100,
+     "dec": 0,
+     "max": 1300,
+     "color": "#F2A93B",
+     "en": 0.05
+    }
+   ]
+  },
+  {
+   "tipo": "duo",
+   "frases": [
+    6,
+    6
+   ],
+   "tag": "CALCULADORA",
+   "titulo": "Depende de tu **actividad**",
+   "casos": [
+    {
+     "etq": "IVA al 21 %",
+     "clip": "iva1000",
+     "desde": {
+      "marca": "r",
+      "mas": 2.0
+     },
+     "foco": [
+      0.5,
+      0.42
+     ],
+     "color": "#2F7FE0",
+     "quieto": true,
+     "zoom": 1.2
+    },
+    {
+     "etq": "IVA al 10 %",
+     "clip": "iva10",
+     "desde": {
+      "marca": "r",
+      "mas": 2.0
+     },
+     "foco": [
+      0.5,
+      0.42
+     ],
+     "color": "#F2A93B",
+     "quieto": true,
+     "zoom": 1.2
+    }
+   ],
+   "activo": null,
+   "top": 600,
+   "subsY": 1436,
+   "barras": [
+    {
+     "etq": "Al 21 %",
+     "valor": 1210,
+     "dec": 0,
+     "max": 1300,
+     "color": "#2F7FE0",
+     "en": 0.05
+    },
+    {
+     "etq": "Al 10 %",
+     "valor": 1100,
+     "dec": 0,
+     "max": 1300,
+     "color": "#F2A93B",
+     "en": 0.05
+    }
+   ],
+   "diferencia": {
+    "texto": "Cálculo orientativo",
+    "en": 0.2,
+    "y": 1085
+   }
+  },
+  {
+   "tipo": "cierre",
+   "frases": [
+    7,
+    7
+   ],
+   "tag": "NOKFI",
+   "linea1": "Envíaselo a quien **duda con el IVA**",
+   "pie": "Cálculo orientativo"
+  }
+ ]
+}

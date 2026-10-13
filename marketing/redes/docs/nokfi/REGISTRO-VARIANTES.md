@@ -24,15 +24,20 @@ iban a montar como F1 con retoques; Mario vio x002 y pidió variedad real (lecci
 | x008 NIF en una llamada | **F10 Bajo el capó** | resultado primero | vivo | OK |
 | x009 n8n lee Gmail | **F5 Antes / ahora** | resultado primero | medio | OK |
 
-## Lotes 3 y 4 (textos escritos; pendientes de que Mario los lea y los locute)
+## Lote 3 (voz recibida el 2026-10-13, cortada y revisada; montados, pendientes del visto bueno de Mario)
+
+| Vídeo | Formato | Gancho | Velocidad | Transición · música | Voz |
+|---|---|---|---|---|---|
+| x010 Un sueldo no cuesta 1.500 | **F3 El mito** | llevar la contraria | medio | lateral · 2 | OK |
+| x011 32 días en cobrar | **F2 La cifra** | cifra exacta | medio | empuje · 3 | OK (la última frase necesitó la segunda escucha, lección V8) |
+| x012 ¿Cuánto te llega al banco? | **F6 Pregunta y respuesta** | pregunta al espectador | medio | vertical · 1 | OK («Son mil sesenta» va enlazada y algo lenta: comprobar de oído) |
+| x013 Comprueba el NIF | **F4 Paso a paso** | orden directa | medio | lateral · 3 | OK |
+| x014 Mismo precio, dos facturas | **F8 Dos casos** | cifra exacta | medio | empuje · 1 | OK |
+
+## Lote 4 (texto escrito; pendiente de que Mario lo lea y lo locute)
 
 | Vídeo | Formato | Gancho |
 |---|---|---|
-| x010-un-sueldo-no-cuesta-1500 | **F3 El mito** | llevar la contraria |
-| x011-32-dias-en-cobrar | **F2 La cifra** | cifra exacta |
-| x012-cuanto-te-llega-al-banco | **F6 Pregunta y respuesta** | pregunta al espectador |
-| x013-comprueba-el-nif | **F4 Paso a paso** | orden directa |
-| x014-mismo-precio-dos-facturas | **F8 Dos casos** | cifra exacta |
 | x015-el-aviso-del-dia-13 | **F7 El caso** | resultado primero |
 | x016-excel-hasta-el-trimestre | **F5 Antes / ahora** | llevar la contraria |
 | x017-tres-numeros-cada-lunes | **F9 Lista rápida** | experto que explica |

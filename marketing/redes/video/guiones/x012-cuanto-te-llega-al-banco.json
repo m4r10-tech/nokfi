@@ -1,0 +1,215 @@
+{
+ "id": "x012-cuanto-te-llega-al-banco",
+ "carpeta": "012-cuanto-te-llega-al-banco",
+ "titulo": "Facturas 1.000 €: ¿cuánto te llega al banco?",
+ "ritmo": "medio",
+ "transicion": "vertical",
+ "musica": "1-chill-lofi-theme.mp3",
+ "formato": "F6 Pregunta y respuesta",
+ "variantes": "F6 Pregunta y respuesta · gancho: pregunta al espectador · velocidad media",
+ "texto": "De una factura de 1.000 € a una empresa: sumas el IVA y restas la retención de IRPF. Calculadora de retención gratis en nokfi.app\n\nCálculo orientativo para el régimen general.\n\nEnvíaselo a quien acaba de hacer su primera factura 👇\n\n#autonomos #irpf #iva #facturas #freelance",
+ "subtitulos": {
+  "7": "Lo calculas gratis en nokfi.app"
+ },
+ "escenas": [
+  {
+   "tipo": "pregunta",
+   "frases": [
+    0,
+    2
+   ],
+   "tag": "CALCULADORA",
+   "titulo": "Facturas 1.000 €. ¿Cuánto te **llega al banco**?",
+   "lineas": 3,
+   "opciones": [
+    "1.210 €",
+    "1.000 €",
+    "1.060 €"
+   ],
+   "correcta": 2,
+   "revela": 0.76,
+   "cuenta": true
+  },
+  {
+   "tipo": "prueba",
+   "frases": [
+    3,
+    3
+   ],
+   "tag": "CALCULADORA",
+   "pregunta": "¿Cuánto te llega al banco?",
+   "chip": "1.060 €",
+   "color": "#22B07D",
+   "titulo": "Sumas el IVA: **+210 €**",
+   "tarjeta": {
+    "x": 130,
+    "top": 520,
+    "escala": 1.08,
+    "giro": 0,
+    "alto": 770
+   },
+   "planos": [
+    {
+     "clip": "irpf1000",
+     "foco": [
+      0.5,
+      0.4
+     ],
+     "zoom": 1.0,
+     "desde": {
+      "marca": "r",
+      "mas": 0.3
+     }
+    }
+   ]
+  },
+  {
+   "tipo": "prueba",
+   "frases": [
+    4,
+    4
+   ],
+   "tag": "CALCULADORA",
+   "pregunta": "¿Cuánto te llega al banco?",
+   "chip": "1.060 €",
+   "color": "#22B07D",
+   "titulo": "Restas la retención: **−150 €**",
+   "tarjeta": {
+    "x": 130,
+    "top": 520,
+    "escala": 1.08,
+    "giro": 0,
+    "alto": 770
+   },
+   "planos": [
+    {
+     "clip": "irpf1000",
+     "foco": [
+      0.5,
+      0.44
+     ],
+     "zoom": 1.0,
+     "desde": {
+      "marca": "r",
+      "mas": 2.5
+     }
+    }
+   ],
+   "veredicto": {
+    "texto": "1.000 + 210 − 150 = 1.060 €",
+    "en": 0.45,
+    "y": 1270,
+    "icono": ""
+   }
+  },
+  {
+   "tipo": "prueba",
+   "frases": [
+    5,
+    5
+   ],
+   "tag": "CALCULADORA",
+   "pregunta": "¿Cuánto te llega al banco?",
+   "chip": "1.060 €",
+   "color": "#22B07D",
+   "titulo": "No la pierdes: es un **adelanto**",
+   "tarjeta": {
+    "x": 130,
+    "top": 520,
+    "escala": 1.08,
+    "giro": 0,
+    "alto": 770
+   },
+   "planos": [
+    {
+     "clip": "irpf1000",
+     "foco": [
+      0.5,
+      0.6
+     ],
+     "zoom": 1.0,
+     "desde": {
+      "marca": "r",
+      "mas": 4.5
+     }
+    }
+   ]
+  },
+  {
+   "tipo": "prueba",
+   "frases": [
+    6,
+    6
+   ],
+   "tag": "CALCULADORA",
+   "pregunta": "¿Cuánto te llega al banco?",
+   "chip": "1.060 €",
+   "color": "#22B07D",
+   "titulo": "Nuevos autónomos: **7 %**",
+   "tarjeta": {
+    "x": 130,
+    "top": 520,
+    "escala": 1.08,
+    "giro": 0,
+    "alto": 770
+   },
+   "planos": [
+    {
+     "clip": "irpf1000",
+     "foco": [
+      0.5,
+      0.3
+     ],
+     "zoom": 1.0,
+     "desde": {
+      "marca": "calc",
+      "mas": 0.2
+     }
+    }
+   ]
+  },
+  {
+   "tipo": "prueba",
+   "frases": [
+    7,
+    7
+   ],
+   "tag": "CALCULADORA",
+   "pregunta": "¿Cuánto te llega al banco?",
+   "chip": "1.060 €",
+   "color": "#22B07D",
+   "titulo": "Gratis en **nokfi.app**",
+   "tarjeta": {
+    "x": 130,
+    "top": 520,
+    "escala": 1.08,
+    "giro": 0,
+    "alto": 770
+   },
+   "planos": [
+    {
+     "clip": "calcs",
+     "foco": [
+      0.5,
+      0.25
+     ],
+     "zoom": 1.0,
+     "desde": {
+      "marca": "a",
+      "mas": 0.3
+     }
+    }
+   ]
+  },
+  {
+   "tipo": "cierre",
+   "frases": [
+    8,
+    8
+   ],
+   "tag": "NOKFI",
+   "linea1": "Envíaselo a quien hace su **primera factura**",
+   "pie": "Cálculo orientativo"
+  }
+ ]
+}

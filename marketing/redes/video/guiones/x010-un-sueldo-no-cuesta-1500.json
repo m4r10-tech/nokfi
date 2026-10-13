@@ -1,0 +1,271 @@
+{
+ "id": "x010-un-sueldo-no-cuesta-1500",
+ "carpeta": "010-un-sueldo-no-cuesta-1500",
+ "titulo": "Un sueldo de 1.500 € no te cuesta 1.500 €",
+ "ritmo": "medio",
+ "transicion": "lateral",
+ "musica": "2-bit-shift.mp3",
+ "formato": "F3 El mito",
+ "variantes": "F3 El mito · gancho: llevar la contraria · velocidad media",
+ "texto": "Lo que cuesta de verdad un empleado: el sueldo bruto más la Seguridad Social que paga la empresa. Calculadora de coste de un empleado, gratis en nokfi.app\n\nCálculo orientativo con los tipos de 2026 del régimen general; no incluye bonificaciones ni convenio.\n\nEnvíaselo a quien está pensando en contratar 👇\n\n#autonomos #pymes #contratar #seguridadsocial #emprendedores",
+ "subtitulos": {
+  "7": "La calculadora es gratis en nokfi.app"
+ },
+ "escenas": [
+  {
+   "tipo": "mito",
+   "frases": [
+    0,
+    0
+   ],
+   "tag": "CALCULADORA",
+   "frase": "Un sueldo de 1.500 €\nme cuesta 1.500 €.",
+   "tacha": 0.4,
+   "sello": "NO",
+   "verdad": "Te cuesta **casi 2.000 €**",
+   "cuerpo": 92
+  },
+  {
+   "tipo": "prueba",
+   "frases": [
+    1,
+    1
+   ],
+   "tag": "CALCULADORA",
+   "mito": "«Un sueldo de 1.500 € me cuesta 1.500 €.»",
+   "titulo": "Calculadora de **coste de un empleado**",
+   "tarjeta": {
+    "x": 130,
+    "top": 520,
+    "escala": 1.08,
+    "giro": 0,
+    "alto": 770
+   },
+   "planos": [
+    {
+     "clip": "emp18000",
+     "foco": [
+      0.5,
+      0.2
+     ],
+     "zoom": 1.0,
+     "desde": {
+      "marca": "calc",
+      "mas": -1.0
+     }
+    }
+   ]
+  },
+  {
+   "tipo": "prueba",
+   "frases": [
+    2,
+    2
+   ],
+   "tag": "CALCULADORA",
+   "mito": "«Un sueldo de 1.500 € me cuesta 1.500 €.»",
+   "titulo": "**18.000 €** brutos al año",
+   "tarjeta": {
+    "x": 130,
+    "top": 520,
+    "escala": 1.08,
+    "giro": 0,
+    "alto": 770
+   },
+   "planos": [
+    {
+     "clip": "emp18000",
+     "foco": [
+      0.5,
+      0.3
+     ],
+     "zoom": 1.0,
+     "desde": {
+      "marca": "calc",
+      "mas": 0.3
+     }
+    }
+   ]
+  },
+  {
+   "tipo": "prueba",
+   "frases": [
+    3,
+    3
+   ],
+   "tag": "CALCULADORA",
+   "mito": "«Un sueldo de 1.500 € me cuesta 1.500 €.»",
+   "titulo": "Coste real: **23.787 €**",
+   "tarjeta": {
+    "x": 130,
+    "top": 520,
+    "escala": 1.08,
+    "giro": 0,
+    "alto": 770
+   },
+   "planos": [
+    {
+     "clip": "emp18000",
+     "foco": [
+      0.5,
+      0.3
+     ],
+     "zoom": 1.0,
+     "desde": {
+      "marca": "r",
+      "mas": 0.3
+     }
+    }
+   ],
+   "veredicto": {
+    "texto": "Casi 24.000 € al año",
+    "en": 0.35,
+    "y": 1270
+   }
+  },
+  {
+   "tipo": "prueba",
+   "frases": [
+    4,
+    4
+   ],
+   "tag": "CALCULADORA",
+   "mito": "«Un sueldo de 1.500 € me cuesta 1.500 €.»",
+   "titulo": "Casi **2.000 € al mes**",
+   "tarjeta": {
+    "x": 130,
+    "top": 520,
+    "escala": 1.08,
+    "giro": 0,
+    "alto": 770
+   },
+   "planos": [
+    {
+     "clip": "emp18000",
+     "foco": [
+      0.5,
+      0.34
+     ],
+     "zoom": 1.0,
+     "desde": {
+      "marca": "r",
+      "mas": 2.5
+     }
+    }
+   ],
+   "veredicto": {
+    "texto": "1.982,25 € al mes",
+    "en": 0.3,
+    "y": 1270
+   }
+  },
+  {
+   "tipo": "prueba",
+   "frases": [
+    5,
+    5
+   ],
+   "tag": "CALCULADORA",
+   "mito": "«Un sueldo de 1.500 € me cuesta 1.500 €.»",
+   "titulo": "Seguridad Social: **un 32 % más**",
+   "tarjeta": {
+    "x": 130,
+    "top": 520,
+    "escala": 1.08,
+    "giro": 0,
+    "alto": 770
+   },
+   "planos": [
+    {
+     "clip": "emp18000",
+     "foco": [
+      0.5,
+      0.62
+     ],
+     "zoom": 1.0,
+     "desde": {
+      "marca": "r",
+      "mas": 4.5
+     }
+    }
+   ],
+   "veredicto": {
+    "texto": "5.787 € de Seguridad Social",
+    "en": 0.4,
+    "y": 1270
+   }
+  },
+  {
+   "tipo": "prueba",
+   "frases": [
+    6,
+    6
+   ],
+   "tag": "CALCULADORA",
+   "mito": "«Un sueldo de 1.500 € me cuesta 1.500 €.»",
+   "titulo": "Antes de **publicar la oferta**",
+   "tarjeta": {
+    "x": 130,
+    "top": 520,
+    "escala": 1.08,
+    "giro": 0,
+    "alto": 770
+   },
+   "planos": [
+    {
+     "clip": "emp18000",
+     "foco": [
+      0.5,
+      0.4
+     ],
+     "zoom": 1.0,
+     "desde": {
+      "marca": "r",
+      "mas": 7.0
+     }
+    }
+   ]
+  },
+  {
+   "tipo": "prueba",
+   "frases": [
+    7,
+    7
+   ],
+   "tag": "CALCULADORA",
+   "mito": "«Un sueldo de 1.500 € me cuesta 1.500 €.»",
+   "titulo": "Gratis en **nokfi.app**",
+   "tarjeta": {
+    "x": 130,
+    "top": 520,
+    "escala": 1.08,
+    "giro": 0,
+    "alto": 770
+   },
+   "planos": [
+    {
+     "clip": "calcs",
+     "foco": [
+      0.5,
+      0.25
+     ],
+     "zoom": 1.0,
+     "desde": {
+      "marca": "a",
+      "mas": 0.3
+     }
+    }
+   ]
+  },
+  {
+   "tipo": "cierre",
+   "frases": [
+    8,
+    8
+   ],
+   "tag": "NOKFI",
+   "linea1": "Envíaselo a quien piensa en **contratar**",
+   "pie": "Cálculo orientativo · tipos de 2026"
+  }
+ ]
+}

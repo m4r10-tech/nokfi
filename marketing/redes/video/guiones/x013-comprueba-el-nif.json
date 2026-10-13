@@ -1,0 +1,255 @@
+{
+ "id": "x013-comprueba-el-nif",
+ "carpeta": "013-comprueba-el-nif",
+ "titulo": "Antes de enviar una factura, comprueba el NIF",
+ "ritmo": "medio",
+ "transicion": "lateral",
+ "musica": "3-music-promotion.mp3",
+ "formato": "F4 Paso a paso",
+ "pasos": [
+  "Abre el validador",
+  "Escribe el NIF",
+  "Pulsa Comprobar"
+ ],
+ "variantes": "F4 Paso a paso · gancho: orden directa · velocidad media",
+ "texto": "Un NIF mal escrito puede dejar una factura sin valor para deducir el IVA. Validador de NIF, NIE y CIF, gratis en nokfi.app\n\nComprueba el formato y el dígito de control; no consulta el censo de Hacienda.\n\nGuárdalo para tu próxima factura 📌\n\n#autonomos #facturas #nif #iva #pymes",
+ "subtitulos": {
+  "2": "Paso uno: abre el validador de nokfi.app. Es gratis."
+ },
+ "escenas": [
+  {
+   "tipo": "paso",
+   "frases": [
+    0,
+    0
+   ],
+   "tag": "CALCULADORA",
+   "titulo": "Antes de enviar, **comprueba el NIF**",
+   "paso": -1,
+   "tarjeta": {
+    "x": 400,
+    "top": 540,
+    "escala": 0.8,
+    "giro": 0,
+    "alto": 1060
+   },
+   "subsY": 1436,
+   "planos": [
+    {
+     "clip": "nif",
+     "desde": {
+      "marca": "ini",
+      "mas": 0.0
+     },
+     "foco": [
+      0.5,
+      0.2
+     ],
+     "zoom": 1.06
+    }
+   ]
+  },
+  {
+   "tipo": "paso",
+   "frases": [
+    1,
+    1
+   ],
+   "tag": "CALCULADORA",
+   "titulo": "Un NIF mal escrito **sale caro**",
+   "paso": -1,
+   "tarjeta": {
+    "x": 400,
+    "top": 540,
+    "escala": 0.8,
+    "giro": 0,
+    "alto": 1060
+   },
+   "subsY": 1436,
+   "planos": [
+    {
+     "clip": "nif",
+     "desde": {
+      "marca": "mal",
+      "mas": 0.6
+     },
+     "foco": [
+      0.5,
+      0.3
+     ],
+     "zoom": 1.06
+    }
+   ]
+  },
+  {
+   "tipo": "paso",
+   "frases": [
+    2,
+    2
+   ],
+   "tag": "CALCULADORA",
+   "titulo": "Validador **gratis**",
+   "paso": 0,
+   "tarjeta": {
+    "x": 400,
+    "top": 540,
+    "escala": 0.8,
+    "giro": 0,
+    "alto": 1060
+   },
+   "subsY": 1436,
+   "planos": [
+    {
+     "clip": "dni",
+     "desde": {
+      "marca": "ini",
+      "mas": -1.0
+     },
+     "foco": [
+      0.5,
+      0.14
+     ],
+     "zoom": 1.06
+    }
+   ]
+  },
+  {
+   "tipo": "paso",
+   "frases": [
+    3,
+    3
+   ],
+   "tag": "CALCULADORA",
+   "titulo": "NIF, NIE o **CIF**",
+   "paso": 1,
+   "tarjeta": {
+    "x": 400,
+    "top": 540,
+    "escala": 0.8,
+    "giro": 0,
+    "alto": 1060
+   },
+   "subsY": 1436,
+   "planos": [
+    {
+     "clip": "dni",
+     "desde": {
+      "marca": "ini",
+      "mas": 0.5
+     },
+     "foco": [
+      0.5,
+      0.24
+     ],
+     "zoom": 1.06
+    }
+   ]
+  },
+  {
+   "tipo": "paso",
+   "frases": [
+    4,
+    4
+   ],
+   "tag": "CALCULADORA",
+   "titulo": "Pulsa **Comprobar**",
+   "paso": 2,
+   "tarjeta": {
+    "x": 400,
+    "top": 540,
+    "escala": 0.8,
+    "giro": 0,
+    "alto": 1060
+   },
+   "subsY": 1436,
+   "planos": [
+    {
+     "clip": "dni",
+     "desde": {
+      "marca": "bien",
+      "mas": -0.4
+     },
+     "foco": [
+      0.5,
+      0.28
+     ],
+     "zoom": 1.06
+    }
+   ]
+  },
+  {
+   "tipo": "paso",
+   "frases": [
+    5,
+    5
+   ],
+   "tag": "CALCULADORA",
+   "titulo": "Válido, tipo y **NIF-IVA**",
+   "paso": 3,
+   "tarjeta": {
+    "x": 400,
+    "top": 540,
+    "escala": 0.8,
+    "giro": 0,
+    "alto": 1060
+   },
+   "subsY": 1436,
+   "planos": [
+    {
+     "clip": "dni",
+     "desde": {
+      "marca": "bien",
+      "mas": 0.8
+     },
+     "foco": [
+      0.5,
+      0.4
+     ],
+     "zoom": 1.06
+    }
+   ]
+  },
+  {
+   "tipo": "paso",
+   "frases": [
+    6,
+    6
+   ],
+   "tag": "CALCULADORA",
+   "titulo": "Formato y **dígito de control**",
+   "paso": 3,
+   "tarjeta": {
+    "x": 400,
+    "top": 540,
+    "escala": 0.8,
+    "giro": 0,
+    "alto": 1060
+   },
+   "subsY": 1436,
+   "planos": [
+    {
+     "clip": "dni",
+     "desde": {
+      "marca": "bien",
+      "mas": 3.5
+     },
+     "foco": [
+      0.5,
+      0.5
+     ],
+     "zoom": 1.06
+    }
+   ]
+  },
+  {
+   "tipo": "cierre",
+   "frases": [
+    7,
+    7
+   ],
+   "tag": "NOKFI",
+   "linea1": "Guárdalo para tu próxima **factura**",
+   "pie": "No consulta el censo de Hacienda"
+  }
+ ]
+}

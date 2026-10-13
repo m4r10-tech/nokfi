@@ -162,7 +162,8 @@ def retoque():
     texto = sys.argv[i + 4] if len(sys.argv) > i + 4 and not sys.argv[i + 4].startswith('--') else F['frases'][n - 1]['texto']
     tempo = float(sys.argv[sys.argv.index('--tempo') + 1]) if '--tempo' in sys.argv else F.get('tempo', TEMPO)
     pcm = cargar(audio); e = energia(pcm); total = len(pcm) / 16000
-    crudas = transcribir(WhisperModel('small', device='cpu', compute_type='int8', cpu_threads=2), pcm)
+    modelo = WhisperModel('small', device='cpu', compute_type='int8', cpu_threads=2)
+    crudas = transcribir(modelo, pcm)
     esperado, tiempo, dos = alinear([texto], crudas)
     ts = [x for x in tiempo if x]
     ok = len(ts) / max(1, len(esperado))
@@ -185,19 +186,44 @@ def main():
     tempo = float(sys.argv[sys.argv.index('--tempo') + 1]) if '--tempo' in sys.argv else TEMPO
     videos = json.load(open(LOTES))[lote]
     pcm = cargar(audio); e = energia(pcm); total = len(pcm) / 16000
-    crudas = transcribir(WhisperModel('small', device='cpu', compute_type='int8', cpu_threads=2), pcm)
+    modelo = WhisperModel('small', device='cpu', compute_type='int8', cpu_threads=2)
+    crudas = transcribir(modelo, pcm)
     todas = [f for v in videos for f in v['frases']]
     esperado, tiempo, dos = alinear(todas, crudas)
     # Límites de habla de cada frase por sus palabras reconocidas.
     L, i = [], 0
     for f in todas:
         n = len(normal(f)); ts = [x for x in tiempo[i:i + n] if x]
-        L.append({'ini': ts[0][0] if ts else None, 'fin': ts[-1][1] if ts else None, 'ok': len(ts) / max(1, n)})
+        L.append({'ini': ts[0][0] if ts else None, 'fin': ts[-1][1] if ts else None, 'ok': len(ts) / max(1, n),
+                  'sin_cabeza': bool(ts) and not tiempo[i], 'sin_cola': bool(ts) and not tiempo[i + n - 1]})
         i += n
     for k, fr in enumerate(L):   # frases sin ninguna palabra reconocida: el hueco entre sus vecinas
         if fr['ini'] is None:
             fr['ini'] = next((L[j]['fin'] for j in range(k - 1, -1, -1) if L[j]['fin'] is not None), 0)
             fr['fin'] = next((L[j]['ini'] for j in range(k + 1, len(L)) if L[j]['ini'] is not None), total)
+    # Whisper a veces se salta una frase entera (o su principio o su final) en la pasada larga. Cada tramo
+    # con frases flojas se vuelve a escuchar él solo, entre la frase buena de antes y la de después, y se
+    # realinea; se queda la lectura nueva si reconoce más palabras.
+    flojas = [fr['ok'] < 0.8 or fr['sin_cabeza'] or fr['sin_cola'] for fr in L]
+    k = 0
+    while k < len(L):
+        if not flojas[k]: k += 1; continue
+        j = k
+        while j + 1 < len(L) and flojas[j + 1]: j += 1
+        t0 = L[k - 1]['fin'] if k else 0.0
+        t1 = L[j + 1]['ini'] if j + 1 < len(L) else total
+        if t1 - t0 > 0.3:
+            locales = [(a + t0, b + t0, w) for a, b, w in transcribir(modelo, pcm[int(t0 * 16000):int(t1 * 16000)])]
+            _, t2, _ = alinear(todas[k:j + 1], locales)
+            n_viejo = sum(len(normal(f)) * L[q]['ok'] for q, f in zip(range(k, j + 1), todas[k:j + 1]))
+            if sum(1 for x in t2 if x) > n_viejo + 0.5:
+                i0 = sum(len(normal(f)) for f in todas[:k]); i2 = 0
+                for q in range(k, j + 1):
+                    n = len(normal(todas[q])); ts = [x for x in t2[i2:i2 + n] if x]
+                    if ts: L[q].update(ini=ts[0][0], fin=ts[-1][1], ok=len(ts) / max(1, n))
+                    tiempo[i0 + i2:i0 + i2 + n] = t2[i2:i2 + n]; i2 += n
+                crudas = sorted([c for c in crudas if not (t0 <= (c[0] + c[1]) / 2 < t1)] + locales)
+        k = j + 1
     medio = [0.0] + [mas_silencioso(e, min(L[k]['fin'], L[k + 1]['ini']), max(L[k]['fin'], L[k + 1]['ini'])) for k in range(len(L) - 1)] + [total]
     # ¿Hay silencio de verdad entre cada frase y la siguiente? (al menos 100 ms seguidos por debajo del umbral)
     def silencio(k):

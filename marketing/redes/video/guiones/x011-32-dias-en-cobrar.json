@@ -1,0 +1,397 @@
+{
+ "id": "x011-32-dias-en-cobrar",
+ "carpeta": "011-32-dias-en-cobrar",
+ "titulo": "32 días: lo que tardan en pagarte",
+ "ritmo": "medio",
+ "transicion": "empuje",
+ "musica": "3-music-promotion.mp3",
+ "formato": "F2 La cifra",
+ "variantes": "F2 La cifra · gancho: cifra exacta · velocidad media",
+ "texto": "Cuánto tardan en pagarte, cuánto te deben y cuánto ha vencido ya, sin hacer ninguna cuenta. Pruébalo gratis 14 días en nokfi.app\n\nCuenta de ejemplo con datos ficticios.\n\nGuárdalo si este mes también vas justo de caja 📌\n\n#autonomos #pymes #cobros #facturas #morosidad",
+ "subtitulos": {},
+ "escenas": [
+  {
+   "tipo": "dato",
+   "frases": [
+    0,
+    0
+   ],
+   "tag": "AUTÓNOMOS",
+   "antetitulo": "Lo que tardan en pagarle",
+   "valor": 32,
+   "decimales": 0,
+   "sufijo": "días",
+   "cuerpo": 168,
+   "tarjeta": {
+    "x": 490,
+    "top": 730,
+    "escala": 0.68,
+    "giro": -2,
+    "alto": 980
+   },
+   "planos": [
+    {
+     "clip": "cobros",
+     "foco": [
+      0.5,
+      0.3
+     ],
+     "zoom": 1.06,
+     "desde": {
+      "marca": "a",
+      "mas": 0.4
+     },
+     "quieta": true
+    }
+   ],
+   "fichas": [],
+   "fichasAncho": 360,
+   "subsY": 1440
+  },
+  {
+   "tipo": "dato",
+   "frases": [
+    1,
+    1
+   ],
+   "tag": "AUTÓNOMOS",
+   "antetitulo": "Lo que tardan en pagarle",
+   "valor": 32,
+   "decimales": 0,
+   "sufijo": "días",
+   "cuerpo": 168,
+   "tarjeta": {
+    "x": 490,
+    "top": 730,
+    "escala": 0.68,
+    "giro": -2,
+    "alto": 980
+   },
+   "planos": [
+    {
+     "clip": "cobros",
+     "foco": [
+      0.5,
+      0.3
+     ],
+     "zoom": 1.06,
+     "desde": {
+      "marca": "a",
+      "mas": 0.6
+     }
+    }
+   ],
+   "fichas": [
+    {
+     "texto": "Cuenta de ejemplo",
+     "detalle": "Taller García",
+     "en": 0.35
+    }
+   ],
+   "fichasAncho": 360,
+   "subsY": 1440
+  },
+  {
+   "tipo": "dato",
+   "frases": [
+    2,
+    2
+   ],
+   "tag": "AUTÓNOMOS",
+   "antetitulo": "Lo que tardan en pagarle",
+   "valor": 32,
+   "decimales": 0,
+   "sufijo": "días",
+   "cuerpo": 168,
+   "tarjeta": {
+    "x": 490,
+    "top": 730,
+    "escala": 0.68,
+    "giro": -2,
+    "alto": 980
+   },
+   "planos": [
+    {
+     "clip": "cobros",
+     "foco": [
+      0.5,
+      0.2
+     ],
+     "zoom": 1.06,
+     "desde": {
+      "marca": "a",
+      "mas": 0.8
+     }
+    }
+   ],
+   "fichas": [
+    {
+     "texto": "Cuenta de ejemplo",
+     "detalle": "Taller García",
+     "en": 0.35
+    },
+    {
+     "texto": "Se mira en",
+     "detalle": "Cobros",
+     "en": 0.35
+    }
+   ],
+   "fichasAncho": 360,
+   "subsY": 1440
+  },
+  {
+   "tipo": "dato",
+   "frases": [
+    3,
+    3
+   ],
+   "tag": "AUTÓNOMOS",
+   "antetitulo": "Plazo medio de cobro",
+   "valor": 32,
+   "decimales": 0,
+   "sufijo": "días",
+   "cuerpo": 168,
+   "tarjeta": {
+    "x": 490,
+    "top": 730,
+    "escala": 0.68,
+    "giro": -2,
+    "alto": 980
+   },
+   "planos": [
+    {
+     "clip": "cobros",
+     "foco": [
+      0.5,
+      0.36
+     ],
+     "zoom": 1.06,
+     "desde": {
+      "marca": "a",
+      "mas": 1.2
+     }
+    }
+   ],
+   "fichas": [
+    {
+     "texto": "Pendiente de cobro",
+     "valor": 4948.9,
+     "decimales": 2,
+     "sufijo": "€",
+     "color": "#2F7FE0",
+     "en": 0.3
+    }
+   ],
+   "fichasAncho": 360,
+   "subsY": 1440
+  },
+  {
+   "tipo": "dato",
+   "frases": [
+    4,
+    4
+   ],
+   "tag": "AUTÓNOMOS",
+   "antetitulo": "Plazo medio de cobro",
+   "valor": 32,
+   "decimales": 0,
+   "sufijo": "días",
+   "cuerpo": 168,
+   "tarjeta": {
+    "x": 490,
+    "top": 730,
+    "escala": 0.68,
+    "giro": -2,
+    "alto": 980
+   },
+   "planos": [
+    {
+     "clip": "cobros",
+     "foco": [
+      0.5,
+      0.42
+     ],
+     "zoom": 1.06,
+     "desde": {
+      "marca": "a",
+      "mas": 2.0
+     }
+    }
+   ],
+   "fichas": [
+    {
+     "texto": "Pendiente de cobro",
+     "valor": 4948.9,
+     "decimales": 2,
+     "sufijo": "€",
+     "color": "#2F7FE0",
+     "en": 0.3
+    },
+    {
+     "texto": "Ya vencido",
+     "valor": 3448.5,
+     "decimales": 2,
+     "sufijo": "€",
+     "color": "#FF6B6B",
+     "en": 0.3
+    }
+   ],
+   "fichasAncho": 360,
+   "subsY": 1440,
+   "barra": [
+    {
+     "pct": 69.7,
+     "color": "#FF6B6B",
+     "en": 0.3
+    },
+    {
+     "pct": 30.3,
+     "color": "#2F7FE0",
+     "en": 0.1
+    }
+   ]
+  },
+  {
+   "tipo": "dato",
+   "frases": [
+    5,
+    5
+   ],
+   "tag": "AUTÓNOMOS",
+   "antetitulo": "Plazo medio de cobro",
+   "valor": 32,
+   "decimales": 0,
+   "sufijo": "días",
+   "cuerpo": 168,
+   "tarjeta": {
+    "x": 490,
+    "top": 730,
+    "escala": 0.68,
+    "giro": -2,
+    "alto": 980
+   },
+   "planos": [
+    {
+     "clip": "cobros",
+     "foco": [
+      0.5,
+      0.45
+     ],
+     "zoom": 1.06,
+     "desde": {
+      "marca": "lista",
+      "mas": 0.4
+     }
+    }
+   ],
+   "fichas": [
+    {
+     "texto": "Pendiente de cobro",
+     "valor": 4948.9,
+     "decimales": 2,
+     "sufijo": "€",
+     "color": "#2F7FE0",
+     "en": 0.3
+    },
+    {
+     "texto": "Ya vencido",
+     "valor": 3448.5,
+     "decimales": 2,
+     "sufijo": "€",
+     "color": "#FF6B6B",
+     "en": 0.3
+    }
+   ],
+   "fichasAncho": 360,
+   "subsY": 1440,
+   "barra": [
+    {
+     "pct": 69.7,
+     "color": "#FF6B6B",
+     "en": 0.3
+    },
+    {
+     "pct": 30.3,
+     "color": "#2F7FE0",
+     "en": 0.1
+    }
+   ]
+  },
+  {
+   "tipo": "dato",
+   "frases": [
+    6,
+    6
+   ],
+   "tag": "AUTÓNOMOS",
+   "antetitulo": "Plazo medio de cobro",
+   "valor": 32,
+   "decimales": 0,
+   "sufijo": "días",
+   "cuerpo": 168,
+   "tarjeta": {
+    "x": 490,
+    "top": 730,
+    "escala": 0.68,
+    "giro": -2,
+    "alto": 980
+   },
+   "planos": [
+    {
+     "clip": "cobros",
+     "foco": [
+      0.5,
+      0.55
+     ],
+     "zoom": 1.06,
+     "desde": {
+      "marca": "lista",
+      "mas": 4.0
+     }
+    }
+   ],
+   "fichas": [
+    {
+     "texto": "Pendiente de cobro",
+     "valor": 4948.9,
+     "decimales": 2,
+     "sufijo": "€",
+     "color": "#2F7FE0",
+     "en": 0.3
+    },
+    {
+     "texto": "Ya vencido",
+     "valor": 3448.5,
+     "decimales": 2,
+     "sufijo": "€",
+     "color": "#FF6B6B",
+     "en": 0.3
+    }
+   ],
+   "fichasAncho": 360,
+   "subsY": 1440,
+   "barra": [
+    {
+     "pct": 69.7,
+     "color": "#FF6B6B",
+     "en": 0.3
+    },
+    {
+     "pct": 30.3,
+     "color": "#2F7FE0",
+     "en": 0.1
+    }
+   ]
+  },
+  {
+   "tipo": "cierre",
+   "frases": [
+    7,
+    7
+   ],
+   "tag": "NOKFI",
+   "linea1": "Guárdalo si vas **justo de caja**",
+   "pie": "Cuenta de ejemplo con datos ficticios"
+  }
+ ]
+}

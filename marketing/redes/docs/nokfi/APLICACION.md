@@ -79,9 +79,9 @@ Avisos sobre planos concretos: `facturanueva` enseña un aviso amarillo de datos
 (usar `factura` o `facturarellena`); el texto del `informe` dice «0 €» (usar solo la nota);
 en `ayuda` sale el nombre de Mario.
 
-**Voz** (`salida/lotes-voz/`, una carpeta por lote con `texto.txt` y el audio dentro): locutado
-y montado, `explicativo-60s/`. Escritos y pendientes de leer y locutar: `lote-01/` (x002-x006)
-y `lote-02/` (x007-x009). El audio se guarda **dentro de la carpeta de su lote**, con
+**Voz** (`salida/lotes-voz/`, una carpeta por lote con `texto.txt` y el audio dentro): locutados
+y montados, `explicativo-60s/`, `lote-01/` (x002-x006), `lote-02/` (x007-x009) y `lote-03/`
+(x010-x014). Escrito y pendiente de leer y locutar: `lote-04/` (x015-x017). El audio se guarda **dentro de la carpeta de su lote**, con
 cualquier nombre. `_indice/lotes.json` dice qué vídeos y frases lleva cada lote.
 
 ## 5. Órdenes
@@ -168,12 +168,12 @@ Música: las tres pistas de [`musica-licencias.md`](musica-licencias.md).
 ## 11. Dónde estamos
 
 - **x001** aprobado (F1 Recorrido). Tiene dos mejoras preparadas sin remontar.
-- **x002** montado como F1 y visto por Mario: correcciones de voz hechas (lecciones V1-V5) y
-  pendiente de rehacer en **F2 La cifra**. Falta que Mario locute la frase nueva
+- **x002-x009** (lotes 1 y 2): montados, cada uno en un formato distinto; pendientes del visto
+  bueno de Mario. A x002 le falta el retoque de la frase 3
   (`salida/lotes-voz/retoque-x002-frase-3/`).
-- **Lotes 1 y 2** (x002-x009): voz cortada con el cortador nuevo y revisada. Cada vídeo tiene
-  formato asignado en `REGISTRO-VARIANTES.md`.
-- **Siguiente**: construir los formatos en el orden del registro, enseñando cada uno en
-  fotogramas fijos, y montar cada vídeo en el suyo.
+- **x010-x014** (lote 3): voz recibida el 13 de octubre, cortada y revisada; montados en F3, F2,
+  F6, F4 y F8. Pendientes del visto bueno de Mario.
+- **Lote 4** (x015-x017): texto escrito, sin locutar.
+- Estado por vídeo: `REGISTRO-VARIANTES.md`.
 
 Sustituir una frase: `…/partir_audio.py --retoque <id> <nº de frase> <audio> ["texto nuevo"]`.

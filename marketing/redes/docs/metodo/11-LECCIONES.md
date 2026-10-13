@@ -25,6 +25,8 @@
 | V5 | «Finanzas, Impuestos» debía ser «Finanzas e Impuestos» | El texto imitaba la ruta del menú en vez de decirlo como se habla | **Se escribe como se dice**: las rutas de menú se leen con «e», «y» o «de» («Finanzas e Impuestos», «el Playground de la API»). Nunca una enumeración con comas que no sea una lista | documento 03 |
 | V6 | Una frase mal hay que repetirla sin rehacer todo | — | Cada frase se guarda suelta; una frase nueva se sustituye con `partir_audio.py --retoque` | `partir_audio.py` |
 | V7 | El reconocedor confunde «sin cuenta» con «cincuenta» | Suenan igual | Evitar en el texto expresiones que suenen como una cifra si hay cifras cerca («sin registrarte» en vez de «sin cuenta») | documento 03 |
+| V8 | Una frase entera desaparece o sale cortada aunque el locutor la dijo | En una pasada larga el reconocedor a veces se salta una frase y coloca mal las vecinas | El cortador vuelve a escuchar, él solo, cada tramo con frases flojas y se queda con la lectura que reconoce más palabras; ninguna frase dudosa pasa a montaje sin esa segunda escucha | `partir_audio.py` |
+| V9 | En un plano con cifras, el zoom corta los números del borde | Encuadre demasiado cerrado en ventanas estrechas (dos casos) | En ventanas de media anchura, zoom máximo 1,2 y foco centrado: ninguna cifra a medias | documento 04 · guiones |
 
 ## Imagen y montaje
 
