@@ -19,7 +19,10 @@ sobre la misma composición se ve igual).
 Cada vídeo elige un formato y **una opción de cada mando**. Todo se apunta en el registro.
 
 **A · Gancho** (documento 02): resultado primero · experto que explica · llevar la contraria ·
-cifra exacta · orden directa · bucle abierto · pregunta al espectador.
+cifra exacta · orden directa · bucle abierto · pregunta al espectador · lo que te está
+costando · cuenta atrás · llamada por situación · error común · lo que casi nadie mira · cómo
+funciona por dentro · escena reconocible · regla o lista · empezar por la mitad · la prueba
+(17 tipos; en un lote de 8, al menos 5 distintos y 2 de los diez últimos).
 
 **B · Estructura** (documento 03): demostración directa · problema → solución · mito roto ·
 lista de N · antes / ahora · pregunta → respuesta · recorrido · caso · comparación.

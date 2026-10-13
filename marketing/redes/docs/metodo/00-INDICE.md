@@ -11,7 +11,7 @@
 | # | Documento | Responde a |
 |---|---|---|
 | 01 | [FLUJO](01-FLUJO.md) | ¿En qué orden se hace todo y cuándo se puede pasar al paso siguiente? |
-| 02 | [GANCHOS](02-GANCHOS.md) | ¿Cómo se consigue que no pasen de largo en los 2 primeros segundos? |
+| 02 | [GANCHOS](02-GANCHOS.md) | ¿Cómo se consigue que no pasen de largo en los 2 primeros segundos? 17 tipos, ganchos reales con cifras y prueba de los seis síes |
 | 03 | [GUION](03-GUION.md) | ¿Qué se dice, en qué orden y con cuántas palabras? |
 | 04 | [EDICIÓN](04-EDICION.md) | ¿Cómo se ve: composición, cámara, texto, movimiento? |
 | 05 | [VARIACIÓN](05-VARIACION.md) | ¿Cómo se cambia de gancho, movimiento y velocidad sin perder la marca? |
