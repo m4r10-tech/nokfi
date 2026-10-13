@@ -24,6 +24,21 @@ iban a montar como F1 con retoques; Mario vio x002 y pidió variedad real (lecci
 | x008 NIF en una llamada | **F10 Bajo el capó** | resultado primero | vivo | OK |
 | x009 n8n lee Gmail | **F5 Antes / ahora** | resultado primero | medio | OK |
 
+## Lotes 3 y 4 (textos escritos; pendientes de que Mario los lea y los locute)
+
+| Vídeo | Formato | Gancho |
+|---|---|---|
+| x010-un-sueldo-no-cuesta-1500 | **F3 El mito** | llevar la contraria |
+| x011-32-dias-en-cobrar | **F2 La cifra** | cifra exacta |
+| x012-cuanto-te-llega-al-banco | **F6 Pregunta y respuesta** | pregunta al espectador |
+| x013-comprueba-el-nif | **F4 Paso a paso** | orden directa |
+| x014-mismo-precio-dos-facturas | **F8 Dos casos** | cifra exacta |
+| x015-el-aviso-del-dia-13 | **F7 El caso** | resultado primero |
+| x016-excel-hasta-el-trimestre | **F5 Antes / ahora** | llevar la contraria |
+| x017-tres-numeros-cada-lunes | **F9 Lista rápida** | experto que explica |
+
+x017 necesita F9, que aún no está construido.
+
 ## Formatos construidos en el montador
 
 | Formato | Estado |
