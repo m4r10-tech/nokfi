@@ -81,7 +81,7 @@ en `ayuda` sale el nombre de Mario.
 
 **Voz** (`salida/lotes-voz/`, una carpeta por lote con `texto.txt` y el audio dentro): locutados
 y montados, `explicativo-60s/`, `lote-01/` (x002-x006), `lote-02/` (x007-x009) `lote-03/`
-(x010-x014) y `lote-04/` (x015-x017). No hay textos pendientes de locutar. El audio se guarda **dentro de la carpeta de su lote**, con
+(x010-x014) y `lote-04/` (x015-x017). Escrito y pendiente de leer y locutar: `lote-05/` (x018-x022). El audio se guarda **dentro de la carpeta de su lote**, con
 cualquier nombre. `_indice/lotes.json` dice qué vídeos y frases lleva cada lote.
 
 ## 5. Órdenes
@@ -175,7 +175,8 @@ Música: las tres pistas de [`musica-licencias.md`](musica-licencias.md).
 - **x010-x014** (lote 3): voz recibida el 13 de octubre, cortada y revisada; montados en F3, F2,
   F6, F4 y F8. Pendientes del visto bueno de Mario.
 - **x015-x017** (lote 4): voz recibida el 13 de octubre; montados en F7, F5 y F9. Pendientes
-  del visto bueno de Mario. No queda ningún texto de voz en reserva: toca escribir el lote 5.
+  del visto bueno de Mario. 
+- **Lote 5** (x018-x022): texto escrito en `salida/lotes-voz/lote-05/`, sin locutar.
 - Estado por vídeo: `REGISTRO-VARIANTES.md`.
 
 Sustituir una frase: `…/partir_audio.py --retoque <id> <nº de frase> <audio> ["texto nuevo"]`.

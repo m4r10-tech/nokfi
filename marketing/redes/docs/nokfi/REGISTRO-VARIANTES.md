@@ -44,6 +44,16 @@ iban a montar como F1 con retoques; Mario vio x002 y pidió variedad real (lecci
 
 x017 es el primer vídeo en F9: revisarlo con más cuidado.
 
+## Lote 5 (texto escrito el 2026-10-13; pendiente de que Mario lo lea y lo locute)
+
+| Vídeo | Formato | Gancho | Pantalla |
+|---|---|---|---|
+| x018-el-trimestre-en-una-llamada | **F10 Bajo el capó** | resultado primero | Playground (trimestre) |
+| x019-el-130-no-es-un-impuesto-de-mas | **F3 El mito** | llevar la contraria | Impuestos (modelo 130) |
+| x020-61-sobre-100 | **F2 La cifra** | cifra exacta | Diagnóstico |
+| x021-cuanto-pagas-de-cuota-con-4000 | **F6 Pregunta y respuesta** | pregunta al espectador | Calc. cuota (4.000 / 800) |
+| x022-quitar-el-iva-a-un-precio | **F4 Paso a paso** | orden directa | Calc. IVA (quitar) |
+
 ## Formatos construidos en el montador
 
 | Formato | Estado |
