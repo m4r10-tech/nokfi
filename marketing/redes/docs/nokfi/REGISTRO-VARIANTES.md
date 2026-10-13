@@ -32,12 +32,12 @@ iban a montar como F1 con retoques; Mario vio x002 y pidió variedad real (lecci
 | F2 La cifra | **construido** (escenas `dato` con `tarjeta`, `fichas` y `barra`); usado en x002, **pendiente del visto bueno de Mario** |
 | F3 El mito | **construido** (escenas `mito` y `prueba`); usado en x006, **pendiente del visto bueno de Mario** |
 | F4 Paso a paso | **construido** (escenas `paso` con `pasos` en el guion y `tarjeta`); usado en x007, **pendiente del visto bueno de Mario** |
-| F5 Antes / ahora | pendiente |
+| F5 Antes / ahora | **construido** (escenas `partida` con `corte` y `antes`); usado en x009, **pendiente del visto bueno de Mario** |
 | F6 Pregunta y respuesta | **construido** (escena `pregunta` con `cuenta` + escenas `prueba` con `pregunta` y `chip`); usado en x004, **pendiente del visto bueno de Mario** |
 | F7 El caso | **construido** (escenas `caso` con `dia`, `avisos` y `desenfoque`); usado en x003, **pendiente del visto bueno de Mario** |
 | F8 Dos casos | **construido** (escenas `duo` con `casos`, `barras` y `diferencia`); usado en x005, **pendiente del visto bueno de Mario** |
 | F9 Lista rápida | pendiente |
-| F10 Bajo el capó | pendiente (hay terminal y flujo en `tarjetas.mjs`, de la etapa 1) |
+| F10 Bajo el capó | **construido** (escenas `codigo` con panel que se escribe, `nota` y `chips`); usado en x008, **pendiente del visto bueno de Mario** |
 
 Orden de construcción: F2 → F8 → F4 → F3 → F6 → F7 → F5 → F10 → F9. Cada formato se enseña
 primero en fotogramas fijos y luego en un vídeo, antes de usarlo en más.

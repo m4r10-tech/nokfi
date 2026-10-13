@@ -5,233 +5,410 @@
  "ritmo": "vivo",
  "transicion": "corte",
  "musica": "2-bit-shift.mp3",
- "variantes": "A resultado primero · B demostración directa · C producto ya en acción · D corte seco · E vivo · F rótulos",
+ "variantes": "F10 Bajo el capó · gancho: resultado primero · velocidad viva",
  "texto": "Validar NIF, NIE y CIF con una llamada a la API de Nokfi: formato, dígito de control, tipo y NIF-IVA. En modo prueba no gasta cuota. nokfi.app\n\nNo consulta el censo de la AEAT ni VIES.\n\nEnvíaselo a quien valida NIF con una expresión regular 👇\n\n#api #desarrolladores #n8n #automatizacion #nif",
  "subtitulos": {},
  "escenas": [
   {
-   "tipo": "app",
+   "tipo": "codigo",
    "frases": [
     0,
     0
    ],
    "tag": "API",
    "titulo": "Un NIF, **una llamada**",
+   "archivo": "respuesta.json",
+   "codigo": [
+    {
+     "t": "{",
+     "resalta": false
+    },
+    {
+     "t": "  \"value\": \"B12345674\",",
+     "resalta": false
+    },
+    {
+     "t": "  \"valid\": true,",
+     "resalta": true
+    },
+    {
+     "t": "  \"type\": \"cif\",",
+     "resalta": false
+    },
+    {
+     "t": "  \"vat_number\": \"ESB12345674\"",
+     "resalta": false
+    },
+    {
+     "t": "}",
+     "resalta": false
+    }
+   ],
+   "tarjeta": {
+    "x": 230,
+    "top": 970,
+    "escala": 0.82,
+    "giro": 0,
+    "alto": 520
+   },
+   "letra": 30,
    "planos": [
     {
      "clip": "pgnif",
-     "foco": [
-      0.5,
-      0.55
-     ],
-     "zoom": 1.2,
-     "peso": 1,
      "desde": {
       "marca": "r",
       "mas": 0.3
      },
-     "quieta": true
+     "foco": [
+      0.5,
+      0.52
+     ],
+     "zoom": 1.0
     }
    ],
-   "rotulos": [
-    {
-     "texto": "\"valid\": true",
-     "en": 0.3,
-     "y": 620,
-     "lado": "der"
-    }
-   ]
+   "escrito": true
   },
   {
-   "tipo": "app",
+   "tipo": "codigo",
    "frases": [
     1,
     1
    ],
    "tag": "API",
    "titulo": "El **Playground** de la API",
+   "archivo": "peticion",
+   "codigo": [
+    {
+     "t": "GET /api/v1/tax/nif",
+     "resalta": false
+    }
+   ],
+   "tarjeta": {
+    "x": 230,
+    "top": 970,
+    "escala": 0.82,
+    "giro": 0,
+    "alto": 520
+   },
+   "letra": 30,
    "planos": [
     {
      "clip": "pgnif",
-     "foco": [
-      0.5,
-      0.25
-     ],
-     "zoom": 1.12,
-     "peso": 1,
      "desde": {
       "marca": "ini",
       "mas": 0.0
-     }
+     },
+     "foco": [
+      0.5,
+      0.3
+     ],
+     "zoom": 1.0
     }
    ],
-   "rotulos": []
+   "escribe": 0.5
   },
   {
-   "tipo": "app",
+   "tipo": "codigo",
    "frases": [
     2,
     2
    ],
    "tag": "API",
    "titulo": "Elegir, pegar y **Ejecutar**",
+   "archivo": "peticion",
+   "codigo": [
+    {
+     "t": "GET /api/v1/tax/nif",
+     "resalta": false
+    },
+    {
+     "t": "{ \"value\": \"B12345674\" }",
+     "resalta": false
+    }
+   ],
+   "tarjeta": {
+    "x": 230,
+    "top": 970,
+    "escala": 0.82,
+    "giro": 0,
+    "alto": 520
+   },
+   "letra": 30,
    "planos": [
     {
      "clip": "pgnif",
-     "foco": [
-      0.4,
-      0.75
-     ],
-     "zoom": 1.22,
-     "peso": 1,
      "desde": {
       "marca": "ini",
       "mas": 1.5
-     }
+     },
+     "foco": [
+      0.5,
+      0.72
+     ],
+     "zoom": 1.0
     }
    ],
-   "rotulos": []
+   "escribe": 0.5
   },
   {
-   "tipo": "app",
+   "tipo": "codigo",
    "frases": [
     3,
     3
    ],
    "tag": "API",
    "titulo": "Válido: es un **CIF**",
+   "archivo": "respuesta.json",
+   "codigo": [
+    {
+     "t": "{",
+     "resalta": false
+    },
+    {
+     "t": "  \"valid\": true,",
+     "resalta": true
+    },
+    {
+     "t": "  \"type\": \"cif\",",
+     "resalta": true
+    },
+    {
+     "t": "  \"entity\": \"Sociedad de",
+     "resalta": true
+    },
+    {
+     "t": "     responsabilidad limitada\",",
+     "resalta": true
+    },
+    {
+     "t": "  \"vat_number\": \"ESB12345674\"",
+     "resalta": false
+    },
+    {
+     "t": "}",
+     "resalta": false
+    }
+   ],
+   "tarjeta": {
+    "x": 230,
+    "top": 970,
+    "escala": 0.82,
+    "giro": 0,
+    "alto": 520
+   },
+   "letra": 30,
    "planos": [
     {
      "clip": "pgnif",
-     "foco": [
-      0.5,
-      0.52
-     ],
-     "zoom": 1.25,
-     "peso": 1,
      "desde": {
       "marca": "r",
       "mas": 0.2
-     }
+     },
+     "foco": [
+      0.5,
+      0.55
+     ],
+     "zoom": 1.0
     }
    ],
-   "rotulos": [
-    {
-     "texto": "Sociedad limitada",
-     "en": 0.3,
-     "y": 1170,
-     "lado": "izq"
-    }
-   ]
+   "escribe": 0.4
   },
   {
-   "tipo": "app",
+   "tipo": "codigo",
    "frases": [
     4,
     4
    ],
    "tag": "API",
    "titulo": "Su **NIF-IVA** europeo",
+   "archivo": "respuesta.json",
+   "codigo": [
+    {
+     "t": "{",
+     "resalta": false
+    },
+    {
+     "t": "  \"valid\": true,",
+     "resalta": false
+    },
+    {
+     "t": "  \"type\": \"cif\",",
+     "resalta": false
+    },
+    {
+     "t": "  \"entity\": \"Sociedad de",
+     "resalta": false
+    },
+    {
+     "t": "     responsabilidad limitada\",",
+     "resalta": false
+    },
+    {
+     "t": "  \"vat_number\": \"ESB12345674\"",
+     "resalta": true
+    },
+    {
+     "t": "}",
+     "resalta": false
+    }
+   ],
+   "tarjeta": {
+    "x": 230,
+    "top": 970,
+    "escala": 0.82,
+    "giro": 0,
+    "alto": 520
+   },
+   "letra": 30,
    "planos": [
     {
      "clip": "pgnif",
+     "desde": {
+      "marca": "r",
+      "mas": 1.8
+     },
      "foco": [
       0.5,
       0.6
      ],
-     "zoom": 1.25,
-     "peso": 1,
-     "desde": {
-      "marca": "r",
-      "mas": 1.8
-     }
-    }
-   ],
-   "rotulos": [
-    {
-     "texto": "ESB12345674",
-     "en": 0.2,
-     "y": 620,
-     "lado": "der"
+     "zoom": 1.0
     }
    ]
   },
   {
-   "tipo": "app",
+   "tipo": "codigo",
    "frases": [
     5,
     5
    ],
    "tag": "API",
    "titulo": "Formato y **dígito de control**",
+   "archivo": "respuesta.json",
+   "codigo": [
+    {
+     "t": "{",
+     "resalta": false
+    },
+    {
+     "t": "  \"valid\": true,",
+     "resalta": true
+    },
+    {
+     "t": "  \"type\": \"cif\",",
+     "resalta": false
+    },
+    {
+     "t": "  \"entity\": \"Sociedad de",
+     "resalta": false
+    },
+    {
+     "t": "     responsabilidad limitada\",",
+     "resalta": false
+    },
+    {
+     "t": "  \"vat_number\": \"ESB12345674\"",
+     "resalta": false
+    },
+    {
+     "t": "}",
+     "resalta": false
+    }
+   ],
+   "tarjeta": {
+    "x": 230,
+    "top": 970,
+    "escala": 0.82,
+    "giro": 0,
+    "alto": 520
+   },
+   "letra": 30,
    "planos": [
     {
      "clip": "pgnif",
-     "foco": [
-      0.5,
-      0.68
-     ],
-     "zoom": 1.22,
-     "peso": 1,
      "desde": {
       "marca": "r",
       "mas": 3.0
-     }
+     },
+     "foco": [
+      0.5,
+      0.66
+     ],
+     "zoom": 1.0
     }
    ],
-   "rotulos": [
-    {
-     "texto": "No consulta el censo",
-     "en": 0.3,
-     "y": 1180,
-     "lado": "izq"
-    }
-   ]
+   "nota": {
+    "texto": "No consulta AEAT ni VIES",
+    "en": 0.35
+   }
   },
   {
-   "tipo": "app",
+   "tipo": "codigo",
    "frases": [
     6,
     6
    ],
    "tag": "API",
    "titulo": "Modo prueba: **no gasta cuota**",
-   "planos": [
+   "archivo": "respuesta.json",
+   "codigo": [
     {
-     "clip": "claves",
-     "foco": [
-      0.5,
-      0.72
-     ],
-     "zoom": 1.18,
-     "peso": 1,
-     "desde": {
-      "marca": "a",
-      "mas": 0.3
-     }
+     "t": "{",
+     "resalta": false
     },
     {
+     "t": "  \"valid\": true,",
+     "resalta": false
+    },
+    {
+     "t": "  \"type\": \"cif\",",
+     "resalta": false
+    },
+    {
+     "t": "  \"entity\": \"Sociedad de",
+     "resalta": false
+    },
+    {
+     "t": "     responsabilidad limitada\",",
+     "resalta": false
+    },
+    {
+     "t": "  \"vat_number\": \"ESB12345674\"",
+     "resalta": false
+    },
+    {
+     "t": "}",
+     "resalta": false
+    }
+   ],
+   "tarjeta": {
+    "x": 230,
+    "top": 970,
+    "escala": 0.82,
+    "giro": 0,
+    "alto": 520
+   },
+   "letra": 30,
+   "planos": [
+    {
      "clip": "pgnif",
-     "foco": [
-      0.5,
-      0.88
-     ],
-     "zoom": 1.15,
-     "peso": 1,
      "desde": {
       "marca": "r",
       "mas": 4.5
-     }
+     },
+     "foco": [
+      0.5,
+      0.86
+     ],
+     "zoom": 1.0
     }
    ],
-   "rotulos": [
-    {
-     "texto": "curl · JavaScript · Python",
-     "en": 0.6,
-     "y": 620,
-     "lado": "der"
-    }
-   ]
+   "chips": [
+    "curl",
+    "JavaScript",
+    "Python"
+   ],
+   "chipAncho": 250,
+   "chipsY": 850
   },
   {
    "tipo": "cierre",
@@ -243,5 +420,6 @@
    "linea1": "Envíaselo a quien usa una **expresión regular**",
    "pie": "Modo prueba · no gasta cuota"
   }
- ]
+ ],
+ "formato": "F10 Bajo el capó"
 }

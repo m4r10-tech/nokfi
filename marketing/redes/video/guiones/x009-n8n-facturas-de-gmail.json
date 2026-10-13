@@ -5,252 +5,321 @@
  "ritmo": "medio",
  "transicion": "empuje",
  "musica": "3-music-promotion.mp3",
- "variantes": "A resultado primero · B problema → solución · C producto ya en acción · D empuje · E medio · F rótulos",
+ "variantes": "F5 Antes / ahora · gancho: resultado primero · velocidad media",
  "texto": "Plantillas de n8n listas para importar: facturas de Gmail a Google Sheets, carpeta de Drive a resumen mensual e informe semanal de caja a Telegram. nokfi.app\n\nEnvíaselo a quien todavía copia facturas a mano 👇\n\n#n8n #automatizacion #facturas #gmail #googlesheets",
  "subtitulos": {},
  "escenas": [
   {
-   "tipo": "app",
+   "tipo": "partida",
    "frases": [
     0,
     0
    ],
    "tag": "API",
+   "corte": 0.42,
+   "antes": [
+    "Abrir el correo",
+    "Descargar el PDF",
+    "Copiar los datos",
+    "Comprobar el total"
+   ],
+   "antesEtq": "A MANO",
+   "ahoraEtq": "CON UN FLUJO",
    "titulo": "De **Gmail** a una hoja, solo",
+   "tarjeta": {
+    "x": 198,
+    "top": 937,
+    "escala": 0.9,
+    "giro": 0,
+    "alto": 514
+   },
    "planos": [
     {
      "clip": "plant",
-     "foco": [
-      0.5,
-      0.35
-     ],
-     "zoom": 1.18,
-     "peso": 1,
      "desde": {
       "marca": "a",
       "mas": 0.3
      },
-     "quieta": true
-    }
-   ],
-   "rotulos": [
-    {
-     "texto": "Plantilla de n8n",
-     "en": 0.3,
-     "y": 620,
-     "lado": "der"
+     "foco": [
+      0.5,
+      0.32
+     ],
+     "zoom": 1.0
     }
    ]
   },
   {
-   "tipo": "app",
+   "tipo": "partida",
    "frases": [
     1,
     1
    ],
    "tag": "API",
-   "titulo": "Lista para **importar**",
+   "corte": 0.42,
+   "antes": [
+    "Abrir el correo",
+    "Descargar el PDF",
+    "Copiar los datos",
+    "Comprobar el total"
+   ],
+   "antesEtq": "A MANO",
+   "ahoraEtq": "CON UN FLUJO",
+   "titulo": "Plantilla lista para **importar**",
+   "tarjeta": {
+    "x": 198,
+    "top": 937,
+    "escala": 0.9,
+    "giro": 0,
+    "alto": 514
+   },
    "planos": [
     {
      "clip": "plant",
-     "foco": [
-      0.35,
-      0.5
-     ],
-     "zoom": 1.22,
-     "peso": 1,
      "desde": {
       "marca": "a",
       "mas": 2.0
-     }
-    }
-   ],
-   "rotulos": [
-    {
-     "texto": "Descargar JSON",
-     "en": 0.3,
-     "y": 1170,
-     "lado": "izq"
+     },
+     "foco": [
+      0.5,
+      0.36
+     ],
+     "zoom": 1.0
     }
    ]
   },
   {
-   "tipo": "app",
+   "tipo": "partida",
    "frases": [
     2,
     2
    ],
    "tag": "API",
+   "corte": 0.12,
+   "antes": [
+    "Abrir el correo",
+    "Descargar el PDF",
+    "Copiar los datos",
+    "Comprobar el total"
+   ],
+   "antesEtq": "A MANO",
+   "ahoraEtq": "CON UN FLUJO",
    "titulo": "Cada hora mira tu **correo**",
+   "tarjeta": {
+    "x": 198,
+    "top": 589,
+    "escala": 0.9,
+    "giro": 0,
+    "alto": 900
+   },
    "planos": [
     {
      "clip": "plant",
-     "foco": [
-      0.5,
-      0.58
-     ],
-     "zoom": 1.22,
-     "peso": 1,
      "desde": {
       "marca": "a",
       "mas": 3.5
-     }
-    }
-   ],
-   "rotulos": [
-    {
-     "texto": "PDF o foto",
-     "en": 0.3,
-     "y": 620,
-     "lado": "der"
+     },
+     "foco": [
+      0.5,
+      0.42
+     ],
+     "zoom": 1.0
     }
    ]
   },
   {
-   "tipo": "app",
+   "tipo": "partida",
    "frases": [
     3,
     3
    ],
    "tag": "API",
+   "corte": 0.12,
+   "antes": [
+    "Abrir el correo",
+    "Descargar el PDF",
+    "Copiar los datos",
+    "Comprobar el total"
+   ],
+   "antesEtq": "A MANO",
+   "ahoraEtq": "CON UN FLUJO",
    "titulo": "Una fila **por factura**",
+   "tarjeta": {
+    "x": 198,
+    "top": 589,
+    "escala": 0.9,
+    "giro": 0,
+    "alto": 900
+   },
    "planos": [
     {
      "clip": "plant",
-     "foco": [
-      0.5,
-      0.66
-     ],
-     "zoom": 1.22,
-     "peso": 1,
      "desde": {
       "marca": "a",
       "mas": 5.0
-     }
-    }
-   ],
-   "rotulos": [
-    {
-     "texto": "Google Sheets",
-     "en": 0.3,
-     "y": 1180,
-     "lado": "izq"
+     },
+     "foco": [
+      0.5,
+      0.46
+     ],
+     "zoom": 1.0
     }
    ]
   },
   {
-   "tipo": "app",
+   "tipo": "partida",
    "frases": [
     4,
     4
    ],
    "tag": "API",
+   "corte": 0.12,
+   "antes": [
+    "Abrir el correo",
+    "Descargar el PDF",
+    "Copiar los datos",
+    "Comprobar el total"
+   ],
+   "antesEtq": "A MANO",
+   "ahoraEtq": "CON UN FLUJO",
    "titulo": "Total y NIF, **comprobados**",
+   "tarjeta": {
+    "x": 198,
+    "top": 589,
+    "escala": 0.9,
+    "giro": 0,
+    "alto": 900
+   },
    "planos": [
     {
      "clip": "plant",
-     "foco": [
-      0.5,
-      0.4
-     ],
-     "zoom": 1.2,
-     "peso": 1,
      "desde": {
       "marca": "a",
       "mas": 6.2
-     }
+     },
+     "foco": [
+      0.5,
+      0.42
+     ],
+     "zoom": 1.0
     }
-   ],
-   "rotulos": []
+   ]
   },
   {
-   "tipo": "app",
+   "tipo": "partida",
    "frases": [
     5,
     5
    ],
    "tag": "API",
+   "corte": 0.12,
+   "antes": [
+    "Abrir el correo",
+    "Descargar el PDF",
+    "Copiar los datos",
+    "Comprobar el total"
+   ],
+   "antesEtq": "A MANO",
+   "ahoraEtq": "CON UN FLUJO",
    "titulo": "De **Drive** a un resumen",
+   "tarjeta": {
+    "x": 198,
+    "top": 589,
+    "escala": 0.9,
+    "giro": 0,
+    "alto": 900
+   },
    "planos": [
     {
      "clip": "plant",
-     "foco": [
-      0.5,
-      0.35
-     ],
-     "zoom": 1.2,
-     "peso": 1,
      "desde": {
       "marca": "b",
       "mas": 0.3
-     }
-    }
-   ],
-   "rotulos": [
-    {
-     "texto": "Resumen mensual por email",
-     "en": 0.3,
-     "y": 1180,
-     "lado": "izq"
+     },
+     "foco": [
+      0.5,
+      0.36
+     ],
+     "zoom": 1.0
     }
    ]
   },
   {
-   "tipo": "app",
+   "tipo": "partida",
    "frases": [
     6,
     6
    ],
    "tag": "API",
+   "corte": 0.12,
+   "antes": [
+    "Abrir el correo",
+    "Descargar el PDF",
+    "Copiar los datos",
+    "Comprobar el total"
+   ],
+   "antesEtq": "A MANO",
+   "ahoraEtq": "CON UN FLUJO",
    "titulo": "Caja semanal en **Telegram**",
+   "tarjeta": {
+    "x": 198,
+    "top": 589,
+    "escala": 0.9,
+    "giro": 0,
+    "alto": 900
+   },
    "planos": [
     {
      "clip": "plant",
-     "foco": [
-      0.5,
-      0.35
-     ],
-     "zoom": 1.2,
-     "peso": 1,
      "desde": {
       "marca": "c",
       "mas": 0.3
-     }
-    }
-   ],
-   "rotulos": [
-    {
-     "texto": "Cada lunes",
-     "en": 0.3,
-     "y": 620,
-     "lado": "der"
+     },
+     "foco": [
+      0.5,
+      0.36
+     ],
+     "zoom": 1.0
     }
    ]
   },
   {
-   "tipo": "app",
+   "tipo": "partida",
    "frases": [
     7,
     7
    ],
    "tag": "API",
+   "corte": 0.12,
+   "antes": [
+    "Abrir el correo",
+    "Descargar el PDF",
+    "Copiar los datos",
+    "Comprobar el total"
+   ],
+   "antesEtq": "A MANO",
+   "ahoraEtq": "CON UN FLUJO",
    "titulo": "Descargar, importar y **tu clave**",
+   "tarjeta": {
+    "x": 198,
+    "top": 589,
+    "escala": 0.9,
+    "giro": 0,
+    "alto": 900
+   },
    "planos": [
     {
      "clip": "claves",
-     "foco": [
-      0.5,
-      0.75
-     ],
-     "zoom": 1.2,
-     "peso": 1,
      "desde": {
       "marca": "a",
       "mas": 0.3
-     }
+     },
+     "foco": [
+      0.5,
+      0.72
+     ],
+     "zoom": 1.0
     }
-   ],
-   "rotulos": []
+   ]
   },
   {
    "tipo": "cierre",
@@ -262,5 +331,6 @@
    "linea1": "Envíaselo a quien copia facturas **a mano**",
    "pie": "Plantillas en Desarrolladores → Plantillas"
   }
- ]
+ ],
+ "formato": "F5 Antes / ahora"
 }
