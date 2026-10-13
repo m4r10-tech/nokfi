@@ -37,6 +37,7 @@
 | I5 | Pantallas con avisos, vacías o a medio cargar | Se usó el plano sin mirarlo | Todo plano se mira en fotograma fijo antes de montar; los planos flojos se anotan en el inventario | documento 09, puerta 2 |
 | I6 | Cifras a medio teclear en pantalla (12,10 € en vez de 1.210 €) | El plano empezaba durante la escritura | Un plano de «resultado» empieza cuando la cifra ya está completa | guion visual |
 | I7 | El reloj de «60 s» salía en una portada que no iba de tiempo | Estaba fijo en la plantilla de título | Los adornos de portada son opcionales y los pide el guion | `editor.mjs` |
+| I8 | En el cierre, el botón pisaba la frase cuando esta ocupaba tres líneas | El botón tenía una posición fija | Frase, botón y pie van en columna y se recolocan solos; todo texto variable se prueba con su versión más larga | `editor.mjs` y documento 09 |
 
 ## Publicación
 

@@ -20,6 +20,7 @@ y el último.
 - [ ] Nada importante en las zonas prohibidas (220 arriba, 400 abajo, 140 a la derecha abajo).
 - [ ] Aire a los lados en todos los planos; el producto nunca toca el borde.
 - [ ] Ningún texto pisa a otro; el título no queda tapado por el producto.
+- [ ] El **último fotograma** (cierre) se mira siempre: frase, botón y pie sin pisarse.
 - [ ] Los rótulos no tapan lo que señalan y hay dos como mucho a la vez.
 - [ ] Los subtítulos no tapan la cifra de la que se habla.
 - [ ] Lo que se ve en cada frase es lo que la frase dice.

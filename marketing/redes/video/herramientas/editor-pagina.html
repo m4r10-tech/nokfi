@@ -377,12 +377,12 @@ window.pinta = async (t) => {
   } else if (e.tipo === 'cierre') {
     const a = muelle(u / 0.6), seg = e.cambio != null && t >= e.cambio, v = seg ? t - e.cambio : 0;
     h += `<div class="marca" style="left:0;width:1080px;top:470px;justify-content:center;font-size:120px;letter-spacing:-3px;opacity:${clamp(a * 2)};transform:scale(${0.6 + 0.4 * a})"><div style="width:150px;height:150px;border-radius:38px;background:#1456A2;display:flex;align-items:center;justify-content:center;box-shadow:0 20px 60px rgba(20,86,162,.6)">${LOGO(112)}</div>nokfi</div>`;
-    const b = muelle((u - 0.25) / 0.6);
-    h += `<div style="left:96px;width:888px;top:720px;text-align:center;font-weight:800;font-size:112px;line-height:1.05;letter-spacing:-3px;opacity:${clamp(b * 2) * (seg ? 1 - ease(v / 0.2) : 1)};transform:translateY(${(1 - b) * 60}px)">${e.linea1.replace(/\*\*(.+?)\*\*/g, `<b style="color:${acento}">$1</b>`)}</div>`;
-    if (seg) { const c = muelle((v - 0.12) / 0.6); h += `<div style="left:96px;width:888px;top:720px;text-align:center;font-weight:800;font-size:92px;line-height:1.08;letter-spacing:-2px;opacity:${clamp(c * 2)};transform:translateY(${(1 - c) * 60}px)">${e.linea2.replace(/\*\*(.+?)\*\*/g, `<b style="color:${acento}">$1</b>`)}</div>`; }
-    const d = muelle((u - 0.5) / 0.6), late = 1 + Math.sin(t * 5) * 0.02;
-    h += `<div style="left:0;width:1080px;top:1070px;display:flex;justify-content:center;opacity:${clamp(d * 2)}"><div style="font-weight:800;font-size:66px;padding:26px 60px;border-radius:999px;background:#fff;color:#0B1526;box-shadow:0 24px 60px rgba(0,0,0,.5);transform:scale(${(0.7 + 0.3 * d) * late})">nokfi.app</div></div>`;
-    h += `<div style="left:0;width:1080px;top:1230px;text-align:center;font-weight:600;font-size:34px;color:#9FB3CC;opacity:${clamp(d * 2)}">${e.pie || ''}</div>`;
+    // Frase, botón y pie van en columna: el botón baja solo si la frase ocupa tres líneas (antes se pisaban).
+    const b = muelle((u - 0.25) / 0.6), d = muelle((u - 0.5) / 0.6), late = 1 + Math.sin(t * 5) * 0.02;
+    const c = seg ? muelle((v - 0.12) / 0.6) : 0, col = (x) => x.replace(/\*\*(.+?)\*\*/g, `<b style="color:${acento}">$1</b>`);
+    const frase = seg ? `<div style="font-weight:800;font-size:92px;line-height:1.08;letter-spacing:-2px;opacity:${clamp(c * 2)};transform:translateY(${(1 - c) * 60}px)">${col(e.linea2)}</div>`
+      : `<div style="font-weight:800;font-size:${e.linea1.replace(/\*/g, '').length > 24 ? 92 : 112}px;line-height:1.06;letter-spacing:-2.5px;opacity:${clamp(b * 2) * (e.cambio != null ? 1 - ease((t - (e.cambio - 0.2)) / 0.2) : 1)};transform:translateY(${(1 - b) * 60}px)">${col(e.linea1)}</div>`;
+    h += `<div style="left:96px;width:888px;top:710px;display:flex;flex-direction:column;align-items:center;text-align:center;gap:44px">${frase}<div style="font-weight:800;font-size:66px;padding:26px 60px;border-radius:999px;background:#fff;color:#0B1526;box-shadow:0 24px 60px rgba(0,0,0,.5);opacity:${clamp(d * 2)};transform:scale(${(0.7 + 0.3 * d) * late})">nokfi.app</div><div style="font-weight:600;font-size:34px;color:#9FB3CC;opacity:${clamp(d * 2)};margin-top:-10px">${e.pie || ''}</div></div>`;
     full.style.opacity = 1;
   }
   full.innerHTML = h;

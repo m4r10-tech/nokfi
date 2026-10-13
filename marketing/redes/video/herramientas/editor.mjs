@@ -8,6 +8,7 @@
  *
  * Uso (desde la raíz del repo, con la voz ya cortada por partir_audio.py):
  *   PLAYWRIGHT_CORE=… node marketing/redes/video/herramientas/editor.mjs marketing/redes/video/guiones/<id>.json [--foto 12.5] [--desde s --hasta s]
+ *   --rehacer-cierre  solo redibuja la última escena y la empalma con el vídeo existente
  *   --foto t        solo guarda el fotograma del segundo t en salida/_registro/<id>-<t>.png (para revisar el diseño)
  * Salida: salida/PARA-SUBIR/<carpeta>/ video.mp4 · portada.png · texto.txt · titulo.txt
  *
@@ -142,9 +143,11 @@ if (foto != null) {
 
 const cuadros = path.join(tmp, 'cuadros'); fs.mkdirSync(cuadros);
 const nTotal = Math.round(total * FPS), t0 = Date.now();
-for (let n = 0; n < nTotal; n++) {
+// --rehacer-cierre: solo se vuelve a dibujar la última escena y se empalma con el vídeo que ya existe (ahorra casi toda la pasada).
+const soloCierre = args.includes('--rehacer-cierre'), nIni = soloCierre ? Math.round(escenas.at(-1).ini * FPS) : 0;
+for (let n = nIni; n < nTotal; n++) {
   await page.evaluate((x) => window.pinta(x), n / FPS);
-  await page.screenshot({ path: path.join(cuadros, `${String(n + 1).padStart(5, '0')}.jpg`), type: 'jpeg', quality: 96 });
+  await page.screenshot({ path: path.join(cuadros, `${String(n - nIni + 1).padStart(5, '0')}.jpg`), type: 'jpeg', quality: 96 });
   if (n % 30 === 0) { await enfriar(); if (n % 150 === 0) console.log(`  ${(n / FPS).toFixed(0)} / ${total.toFixed(0)} s · ${temperatura().toFixed(0)} °C · ${((Date.now() - t0) / 60000).toFixed(1)} min`); }
 }
 await browser.close();
@@ -172,6 +175,16 @@ const carpeta = path.join(SALIDA, 'PARA-SUBIR', g.carpeta || g.id);
 fs.mkdirSync(carpeta, { recursive: true });
 const video = path.join(carpeta, 'video.mp4');
 await enfriar();
+if (soloCierre) {
+  const nuevo = path.join(tmp, 'nuevo.mp4'), corte = (nIni / FPS).toFixed(4);
+  sh('ffmpeg', ['-v', 'error', '-y', '-i', video, '-framerate', String(FPS), '-i', path.join(cuadros, '%05d.jpg'), '-filter_complex',
+    `[0:v]trim=0:${corte},setpts=PTS-STARTPTS[a];[1:v]setpts=PTS-STARTPTS[b];[a][b]concat=n=2:v=1:a=0[v]`, '-map', '[v]', '-map', '0:a', '-c:a', 'copy',
+    '-c:v', 'libx264', '-preset', 'medium', '-crf', '17', '-pix_fmt', 'yuv420p', '-r', String(FPS), '-threads', '2', '-movflags', '+faststart', nuevo]);
+  fs.copyFileSync(nuevo, video);
+  fs.rmSync(tmp, { recursive: true, force: true });
+  console.log(`✓ cierre rehecho · ${path.relative(process.cwd(), video)} · ${dur(video).toFixed(1)} s`);
+  process.exit(0);
+}
 sh('ffmpeg', ['-v', 'error', '-y', '-framerate', String(FPS), '-i', path.join(cuadros, '%05d.jpg'), ...ent, '-filter_complex', fil.join(';'),
   '-map', '0:v', '-map', '[a]', '-t', total.toFixed(2), '-c:v', 'libx264', '-preset', 'medium', '-crf', '17', '-pix_fmt', 'yuv420p', '-threads', '2',
   '-c:a', 'aac', '-b:a', '192k', '-movflags', '+faststart', video]);
