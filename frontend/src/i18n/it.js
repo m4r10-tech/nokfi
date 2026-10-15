@@ -714,7 +714,7 @@ export default {
   },
   privacy: {
     title: 'Informativa sulla privacy',
-    updated: 'Ultimo aggiornamento: 2 ottobre 2026',
+    updated: 'Ultimo aggiornamento: 15 ottobre 2026',
     intro: 'Questa informativa descrive, senza clausole nascoste, quali dati tratta Nokfi (nokfi.app), per quale scopo e quali servizi di terze parti intervengono. Riflette esattamente il funzionamento dell’applicazione.',
     sections: [
       { h: 'Titolare e contatti', ps: ['Il titolare del trattamento dei dati del tuo account è {OWNER}. Per qualsiasi questione di privacy o per esercitare i tuoi diritti, scrivi a info@nokfi.app. Per problemi con l’account o i pagamenti, a soporte@nokfi.app.'] },
@@ -740,14 +740,14 @@ export default {
         'Groq: genera le analisi, legge le fatture e risponde nell’assistente; se non è disponibile, si usa Cloudflare Workers AI. Il suo contratto gli vieta di usare i tuoi dati per addestrare o perfezionare modelli, e abbiamo attivato la conservazione zero (le richieste non vengono salvate). Tratta i dati negli Stati Uniti, con clausole contrattuali tipo.',
         'Cerebras: fornitore di IA di riserva, usato solo se Groq e Cloudflare non sono disponibili (stesse attività). Il suo contratto gli consente di usare i tuoi dati solo per fornire il servizio (non per addestrare modelli) e di conservarli lo stretto necessario. Tratta i dati negli Stati Uniti, con clausole contrattuali tipo.',
         'Resend: invia le email (la tua chiave di licenza, il recupero della password e, se attivati, gli avvisi del calendario fiscale, il riepilogo mensile e i solleciti di pagamento ai tuoi clienti).',
-        'Cloudflare: rete di distribuzione e sicurezza che protegge l’accesso al sito. Usiamo il paese della tua connessione (indicato da Cloudflare) solo per scegliere la lingua iniziale del sito; non lo conserviamo.',
+        'Cloudflare: rete di distribuzione e sicurezza che protegge l’accesso al sito. Usiamo il paese della tua connessione (indicato da Cloudflare) solo per scegliere la lingua iniziale del sito; non lo conserviamo. Conserva anche il backup giornaliero del database, cifrato e nell’UE (Cloudflare R2); senza la nostra chiave non può leggerlo, e ogni backup viene cancellato dopo 30 giorni.',
         "Agenzia delle entrate spagnola (AEAT): se per il tuo account viene attivato l'invio dei registri VERI*FACTU, i registri delle tue fatture le vengono trasmessi per obbligo di legge. Per ora è disattivato."
       ] },
       { h: 'Dati dei tuoi clienti e fornitori', ps: ['Per i dati di terzi che inserisci in Nokfi (clienti e fornitori delle tue fatture), tu sei il titolare e Nokfi agisce come responsabile del trattamento: li usiamo solo per fornirti il servizio. Le condizioni sono nell’accordo sul trattamento dei dati (nokfi.app/encargo-tratamiento). Se attivi i solleciti automatici, partono con il nome della tua azienda e le risposte arrivano direttamente alla tua email.'] },
       { h: 'Cookie e analisi', ps: ['Nokfi non usa cookie di tracciamento. Per sapere quante persone visitano il sito pubblico usiamo Cloudflare Web Analytics, che non usa cookie, non conserva il tuo indirizzo IP e non ti identifica. Contiamo inoltre, senza alcun dato personale, quante volte si clicca su «Prova gratis», si avvia un pagamento o si usa uno strumento pubblico (solo il totale per giorno e per pagina). Sessione, lingua e tema sono conservati nella memoria locale del tuo browser.'] },
       { h: 'Conservazione ed eliminazione', ps: ['Conserviamo i tuoi dati finché la licenza esiste. Da Impostazioni → I miei dati puoi scaricare tutti i tuoi dati in un file o eliminare l’account: insieme a esso vengono eliminati profilo, cronologia, registro delle fatture, attività, chiavi API e sessioni. I report tecnici di errore vengono eliminati dopo 30 giorni. Eliminando l\'account si eliminano anche le fatture emesse e i loro registri; conservarle per il periodo previsto dalla legge è un tuo obbligo, quindi scaricale prima.'] },
       { h: 'I tuoi diritti', ps: ['Puoi esercitare i diritti di accesso, rettifica, cancellazione, portabilità e opposizione dalle Impostazioni o scrivendo a info@nokfi.app. Puoi anche presentare reclamo all’Agenzia spagnola per la protezione dei dati (aepd.es).'] },
-      { h: 'Sicurezza', ps: ['Applichiamo HTTPS su tutto il servizio, password con hash scrypt, token di sessione, di recupero e chiavi API conservati come hash e backup periodici del database sul server.'] }
+      { h: 'Sicurezza', ps: ['Applichiamo HTTPS su tutto il servizio, password con hash scrypt, token di sessione, di recupero e chiavi API conservati come hash e backup giornalieri del database sul server e, cifrati (AES-256), su Cloudflare R2 nell’UE, dove vengono cancellati dopo 30 giorni.'] }
     ]
   },
   report: {

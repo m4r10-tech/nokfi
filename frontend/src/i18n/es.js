@@ -718,7 +718,7 @@ export default {
   },
   privacy: {
     title: 'Política de privacidad',
-    updated: 'Última actualización: 2 de octubre de 2026',
+    updated: 'Última actualización: 15 de octubre de 2026',
     intro: 'Esta política describe, sin letra pequeña, qué datos trata Nokfi (nokfi.app), para qué y qué servicios de terceros intervienen. Refleja exactamente cómo funciona la aplicación.',
     sections: [
       { h: 'Responsable y contacto', ps: ['El responsable del tratamiento de los datos de tu cuenta es {OWNER}. Para cualquier cuestión de privacidad o para ejercer tus derechos, escribe a info@nokfi.app. Para problemas con tu cuenta o tus pagos, a soporte@nokfi.app.'] },
@@ -744,14 +744,14 @@ export default {
         'Groq: genera los análisis, lee las facturas y responde en el asistente; si no está disponible, se usa Cloudflare Workers AI. Su contrato le prohíbe usar tus datos para entrenar o ajustar modelos, y tenemos activada la retención cero (no guarda las peticiones). Procesa los datos en EE. UU., con cláusulas contractuales tipo.',
         'Cerebras: proveedor de IA de respaldo, solo si Groq y Cloudflare no están disponibles (mismas tareas). Su contrato solo le permite usar tus datos para prestar el servicio (no para entrenar modelos) y conservarlos lo imprescindible. Procesa los datos en EE. UU., con cláusulas contractuales tipo.',
         'Resend: envía los emails (tu clave de licencia, recuperación de contraseña y, si los tienes activados, los avisos del calendario fiscal, el resumen mensual y los recordatorios de cobro a tus clientes).',
-        'Cloudflare: red de distribución y seguridad que protege el acceso a la web. Usamos el país de tu conexión (que Cloudflare nos indica) solo para elegir el idioma inicial de la web; no lo guardamos.',
+        'Cloudflare: red de distribución y seguridad que protege el acceso a la web. Usamos el país de tu conexión (que Cloudflare nos indica) solo para elegir el idioma inicial de la web; no lo guardamos. También guarda, cifrada y en la UE (Cloudflare R2), la copia de seguridad diaria de la base de datos; sin nuestra clave no puede leerla, y cada copia se borra a los 30 días.',
         "Agencia Tributaria (AEAT): si se activa para tu cuenta el envío de registros VERI*FACTU, los registros de tus facturas se le remiten por obligación legal. Por ahora está desactivado."
       ] },
       { h: 'Datos de tus clientes y proveedores', ps: ['Para los datos de terceros que introduces en Nokfi (clientes y proveedores de tus facturas), tú eres el responsable y Nokfi actúa como encargado del tratamiento: solo los usamos para prestarte el servicio. Las condiciones están en el contrato de encargo de tratamiento (nokfi.app/encargo-tratamiento). Si activas la reclamación automática, los recordatorios salen con el nombre de tu empresa y las respuestas llegan directamente a tu email.'] },
       { h: 'Cookies y analítica', ps: ['Nokfi no utiliza cookies de seguimiento. Para saber cuántas personas visitan la web pública usamos Cloudflare Web Analytics, que no usa cookies, no guarda tu IP y no te identifica. Además contamos, sin ningún dato personal, cuántas veces se pulsa «Probar gratis», se empieza un pago o se usa una herramienta pública (solo el total por día y por página). Tu sesión, tu idioma y tu tema se guardan en el almacenamiento local de tu navegador.'] },
       { h: 'Conservación y eliminación', ps: ['Conservamos tus datos mientras tu licencia exista. Desde Configuración → Mis datos puedes descargar todos tus datos en un archivo o borrar tu cuenta: se eliminan con ella tu perfil, tu historial, tu libro de facturas, tus tareas, tus claves de API y tus sesiones. Los informes técnicos de errores se borran a los 30 días. Al borrar la cuenta se borran también las facturas que hayas emitido y sus registros; la obligación de conservarlas durante el plazo legal es tuya, así que descárgalas antes.'] },
       { h: 'Tus derechos', ps: ['Puedes ejercer tus derechos de acceso, rectificación, supresión, portabilidad y oposición desde Configuración o escribiendo a info@nokfi.app. También puedes reclamar ante la Agencia Española de Protección de Datos (aepd.es).'] },
-      { h: 'Seguridad', ps: ['Aplicamos HTTPS en todo el servicio, contraseñas hasheadas con scrypt, tokens de sesión, de recuperación y claves de API almacenados como hash, y copias de seguridad periódicas de la base de datos en el servidor.'] }
+      { h: 'Seguridad', ps: ['Aplicamos HTTPS en todo el servicio, contraseñas hasheadas con scrypt, tokens de sesión, de recuperación y claves de API almacenados como hash, y copias de seguridad diarias de la base de datos en el servidor y, cifradas (AES-256), en Cloudflare R2 dentro de la UE, donde se borran a los 30 días.'] }
     ]
   },
   report: {

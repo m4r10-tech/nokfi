@@ -714,7 +714,7 @@ export default {
   },
   privacy: {
     title: 'Datenschutzerklärung',
-    updated: 'Zuletzt aktualisiert: 2. Oktober 2026',
+    updated: 'Zuletzt aktualisiert: 15. Oktober 2026',
     intro: 'Diese Erklärung beschreibt ohne Kleingedrucktes, welche Daten Nokfi (nokfi.app) verarbeitet, wofür und welche Drittanbieter beteiligt sind. Sie entspricht genau der Funktionsweise der Anwendung.',
     sections: [
       { h: 'Verantwortlicher und Kontakt', ps: ['Verantwortlicher für die Daten deines Kontos ist {OWNER}. Für Datenschutzfragen oder zur Ausübung deiner Rechte schreibe an info@nokfi.app. Bei Problemen mit Konto oder Zahlungen an soporte@nokfi.app.'] },
@@ -740,14 +740,14 @@ export default {
         'Groq: erstellt die Analysen, liest Rechnungen und antwortet im Assistenten; ist er nicht verfügbar, wird Cloudflare Workers AI genutzt. Sein Vertrag verbietet, deine Daten zum Training oder Feinabstimmen von Modellen zu nutzen, und wir haben die Null-Speicherung aktiviert (Anfragen werden nicht gespeichert). Er verarbeitet die Daten in den USA, auf Grundlage von Standardvertragsklauseln.',
         'Cerebras: KI-Ersatzanbieter, nur genutzt, wenn Groq und Cloudflare nicht verfügbar sind (gleiche Aufgaben). Sein Vertrag erlaubt ihm, deine Daten nur zur Erbringung des Dienstes zu nutzen (nicht zum Training von Modellen) und sie nur so lange wie nötig aufzubewahren. Er verarbeitet die Daten in den USA, auf Grundlage von Standardvertragsklauseln.',
         'Resend: versendet die E-Mails (deinen Lizenzschlüssel, die Passwort-Wiederherstellung und, falls aktiviert, Steuerfristen-Erinnerungen, die monatliche Zusammenfassung und Zahlungserinnerungen an deine Kunden).',
-        'Cloudflare: Auslieferungs- und Sicherheitsnetz, das den Zugriff auf die Website schützt. Das Land deiner Verbindung (von Cloudflare übermittelt) nutzen wir nur, um die Anfangssprache der Website zu wählen; wir speichern es nicht.',
+        'Cloudflare: Auslieferungs- und Sicherheitsnetz, das den Zugriff auf die Website schützt. Das Land deiner Verbindung (von Cloudflare übermittelt) nutzen wir nur, um die Anfangssprache der Website zu wählen; wir speichern es nicht. Außerdem speichert Cloudflare das tägliche Datenbank-Backup verschlüsselt in der EU (Cloudflare R2); ohne unseren Schlüssel kann es nicht gelesen werden, und jedes Backup wird nach 30 Tagen gelöscht.',
         "Spanische Steuerbehörde (AEAT): Wird für dein Konto die Übermittlung der VERI*FACTU-Datensätze eingeschaltet, werden die Datensätze deiner Rechnungen aufgrund einer gesetzlichen Pflicht an sie gesendet. Derzeit ist sie ausgeschaltet."
       ] },
       { h: 'Daten deiner Kunden und Lieferanten', ps: ['Für Daten Dritter, die du in Nokfi eingibst (Kunden und Lieferanten deiner Rechnungen), bist du der Verantwortliche und Nokfi handelt als Auftragsverarbeiter: Wir nutzen sie nur, um dir den Dienst zu erbringen. Die Bedingungen stehen im Auftragsverarbeitungsvertrag (nokfi.app/encargo-tratamiento). Wenn du automatische Erinnerungen aktivierst, werden sie im Namen deiner Firma versendet und Antworten gehen direkt an deine E-Mail.'] },
       { h: 'Cookies und Analyse', ps: ['Nokfi verwendet keine Tracking-Cookies. Um zu wissen, wie viele Menschen die öffentliche Website besuchen, nutzen wir Cloudflare Web Analytics: ohne Cookies, ohne Speicherung deiner IP-Adresse und ohne dich zu identifizieren. Außerdem zählen wir ohne personenbezogene Daten, wie oft „Kostenlos testen“ geklickt, eine Zahlung begonnen oder ein öffentliches Tool genutzt wird (nur die Summe pro Tag und Seite). Sitzung, Sprache und Design werden im lokalen Speicher deines Browsers gehalten.'] },
       { h: 'Speicherdauer und Löschung', ps: ['Wir speichern deine Daten, solange deine Lizenz besteht. Unter Einstellungen → Meine Daten kannst du alle Daten als Datei herunterladen oder dein Konto löschen: Profil, Verlauf, Rechnungsjournal, Aufgaben, API-Schlüssel und Sitzungen werden dabei gelöscht. Technische Fehlerberichte werden nach 30 Tagen gelöscht. Beim Löschen des Kontos werden auch deine ausgestellten Rechnungen und ihre Datensätze gelöscht; sie für die gesetzliche Frist aufzubewahren ist deine Pflicht, lade sie also vorher herunter.'] },
       { h: 'Deine Rechte', ps: ['Deine Rechte auf Auskunft, Berichtigung, Löschung, Datenübertragbarkeit und Widerspruch kannst du in den Einstellungen oder per E-Mail an info@nokfi.app ausüben. Du kannst dich auch bei der spanischen Datenschutzbehörde (aepd.es) beschweren.'] },
-      { h: 'Sicherheit', ps: ['Wir nutzen durchgehend HTTPS, mit scrypt gehashte Passwörter, als Hash gespeicherte Sitzungs- und Wiederherstellungstoken sowie API-Schlüssel und regelmäßige Datenbank-Backups auf dem Server.'] }
+      { h: 'Sicherheit', ps: ['Wir nutzen durchgehend HTTPS, mit scrypt gehashte Passwörter, als Hash gespeicherte Sitzungs- und Wiederherstellungstoken sowie API-Schlüssel und tägliche Datenbank-Backups auf dem Server sowie verschlüsselt (AES-256) in Cloudflare R2 innerhalb der EU, wo sie nach 30 Tagen gelöscht werden.'] }
     ]
   },
   report: {

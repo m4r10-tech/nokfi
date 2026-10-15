@@ -717,7 +717,7 @@ export default {
   },
   privacy: {
     title: 'Polityka prywatności',
-    updated: 'Ostatnia aktualizacja: 2 października 2026',
+    updated: 'Ostatnia aktualizacja: 15 października 2026',
     intro: 'Ta polityka opisuje bez drobnego druku, jakie dane przetwarza Nokfi (nokfi.app), w jakim celu i jakie usługi zewnętrzne w tym uczestniczą. Odzwierciedla dokładnie działanie aplikacji.',
     sections: [
       { h: 'Administrator i kontakt', ps: ['Administratorem danych twojego konta jest {OWNER}. W sprawach prywatności lub aby skorzystać ze swoich praw, napisz na info@nokfi.app. W sprawach konta lub płatności — na soporte@nokfi.app.'] },
@@ -743,14 +743,14 @@ export default {
         'Groq: generuje analizy, czyta faktury i odpowiada w asystencie; gdy jest niedostępny, używany jest Cloudflare Workers AI. Umowa zabrania mu używania twoich danych do trenowania lub dostrajania modeli, a my mamy włączone zerowe przechowywanie (zapytania nie są zapisywane). Przetwarza dane w USA, na podstawie standardowych klauzul umownych.',
         'Cerebras: zapasowy dostawca AI, używany tylko, gdy Groq i Cloudflare są niedostępne (te same zadania). Umowa pozwala mu używać twoich danych wyłącznie do świadczenia usługi (nie do trenowania modeli) i przechowywać je tylko tak długo, jak to konieczne. Przetwarza dane w USA, na podstawie standardowych klauzul umownych.',
         'Resend: wysyła e-maile (twój klucz licencyjny, odzyskiwanie hasła oraz — jeśli je włączysz — przypomnienia kalendarza podatkowego, miesięczne podsumowanie i przypomnienia o płatności do twoich klientów).',
-        'Cloudflare: sieć dostarczania i bezpieczeństwa chroniąca dostęp do strony. Kraju twojego połączenia (podawanego przez Cloudflare) używamy tylko do wyboru początkowego języka strony; nie przechowujemy go.',
+        'Cloudflare: sieć dostarczania i bezpieczeństwa chroniąca dostęp do strony. Kraju twojego połączenia (podawanego przez Cloudflare) używamy tylko do wyboru początkowego języka strony; nie przechowujemy go. Przechowuje też codzienną kopię zapasową bazy danych, zaszyfrowaną i w UE (Cloudflare R2); bez naszego klucza nie może jej odczytać, a każda kopia jest usuwana po 30 dniach.',
         "Hiszpański urząd skarbowy (AEAT): jeśli dla Twojego konta zostanie włączona wysyłka rekordów VERI*FACTU, rekordy Twoich faktur będą mu przekazywane z mocy prawa. Na razie jest wyłączona."
       ] },
       { h: 'Dane twoich klientów i dostawców', ps: ['W przypadku danych osób trzecich, które wprowadzasz do Nokfi (klienci i dostawcy z faktur), ty jesteś administratorem, a Nokfi podmiotem przetwarzającym: używamy ich wyłącznie do świadczenia usługi. Warunki opisuje umowa powierzenia przetwarzania danych (nokfi.app/encargo-tratamiento). Jeśli włączysz automatyczne przypomnienia, wychodzą one w imieniu twojej firmy, a odpowiedzi trafiają bezpośrednio na twój e-mail.'] },
       { h: 'Pliki cookie i analityka', ps: ['Nokfi nie używa śledzących plików cookie. Aby wiedzieć, ile osób odwiedza publiczną stronę, korzystamy z Cloudflare Web Analytics, które nie używa plików cookie, nie zapisuje Twojego adresu IP i nie identyfikuje Cię. Liczymy też, bez żadnych danych osobowych, ile razy kliknięto „Wypróbuj za darmo”, rozpoczęto płatność lub użyto publicznego narzędzia (tylko suma na dzień i stronę). Sesja, język i motyw są przechowywane w pamięci lokalnej przeglądarki.'] },
       { h: 'Przechowywanie i usuwanie', ps: ['Przechowujemy dane, dopóki istnieje twoja licencja. W Ustawienia → Moje dane możesz pobrać wszystkie dane w pliku lub usunąć konto: razem z nim usuwamy profil, historię, rejestr faktur, zadania, klucze API i sesje. Techniczne raporty błędów usuwamy po 30 dniach. Usunięcie konta usuwa też wystawione faktury i ich rekordy; obowiązek ich przechowywania przez okres ustawowy spoczywa na Tobie, więc najpierw je pobierz.'] },
       { h: 'Twoje prawa', ps: ['Możesz skorzystać z prawa dostępu, sprostowania, usunięcia, przenoszenia i sprzeciwu w Ustawieniach lub pisząc na info@nokfi.app. Możesz też złożyć skargę do hiszpańskiego organu ochrony danych (aepd.es).'] },
-      { h: 'Bezpieczeństwo', ps: ['Stosujemy HTTPS w całej usłudze, hasła haszowane algorytmem scrypt, tokeny sesji i odzyskiwania oraz klucze API przechowywane jako skróty, a także regularne kopie zapasowe bazy danych na serwerze.'] }
+      { h: 'Bezpieczeństwo', ps: ['Stosujemy HTTPS w całej usłudze, hasła haszowane algorytmem scrypt, tokeny sesji i odzyskiwania oraz klucze API przechowywane jako skróty, a także codzienne kopie zapasowe bazy danych na serwerze oraz, zaszyfrowane (AES-256), w Cloudflare R2 na terenie UE, gdzie są usuwane po 30 dniach.'] }
     ]
   },
   report: {

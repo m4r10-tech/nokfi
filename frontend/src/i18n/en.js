@@ -715,7 +715,7 @@ export default {
   },
   privacy: {
     title: 'Privacy policy',
-    updated: 'Last updated: 2 October 2026',
+    updated: 'Last updated: 15 October 2026',
     intro: 'This policy describes, in plain terms, which data Nokfi (nokfi.app) processes, why, and which third-party services are involved. It reflects exactly how the application works.',
     sections: [
       { h: 'Controller & contact', ps: ['The controller for your account data is {OWNER}. For any privacy question or to exercise your rights, write to info@nokfi.app. For account or payment issues, to soporte@nokfi.app.'] },
@@ -741,14 +741,14 @@ export default {
         'Groq: generates the analyses, reads invoices and answers in the assistant; if it is unavailable, Cloudflare Workers AI is used. Its contract forbids using your data to train or fine-tune models, and we have zero data retention enabled (requests are not stored). It processes data in the US, under standard contractual clauses.',
         'Cerebras: backup AI provider, used only if Groq and Cloudflare are unavailable (same tasks). Its contract only allows it to use your data to provide the service (not to train models) and to keep it only as long as necessary. It processes data in the US, under standard contractual clauses.',
         'Resend: sends emails (your licence key, password recovery and, if enabled, tax calendar reminders, the monthly summary and payment reminders to your clients).',
-        'Cloudflare: delivery and security network protecting access to the website. We use your connection\'s country (provided by Cloudflare) only to choose the website\'s initial language; we do not store it.',
+        'Cloudflare: delivery and security network protecting access to the website. We use your connection\'s country (provided by Cloudflare) only to choose the website\'s initial language; we do not store it. It also stores the daily database backup, encrypted and in the EU (Cloudflare R2); it cannot read it without our key, and each backup is deleted after 30 days.',
         "Spanish Tax Agency (AEAT): if sending VERI*FACTU records is turned on for your account, your invoice records are sent to it under a legal obligation. It is turned off for now."
       ] },
       { h: 'Your clients’ and suppliers’ data', ps: ['For third-party data you enter in Nokfi (clients and suppliers on your invoices), you are the controller and Nokfi acts as processor: we use it only to provide the service. The terms are in the data processing agreement (nokfi.app/encargo-tratamiento). If you enable automatic reminders, they are sent in your company’s name and replies go straight to your email.'] },
       { h: 'Cookies & analytics', ps: ['Nokfi does not use tracking cookies. To know how many people visit the public website we use Cloudflare Web Analytics, which uses no cookies, does not store your IP address and does not identify you. We also count, without any personal data, how many times “Try for free” is clicked, a payment is started or a public tool is used (only the total per day and page). Your session, language and theme are kept in your browser’s local storage.'] },
       { h: 'Retention & deletion', ps: ['We keep your data while your license exists. From Settings → My data you can download all your data as a file or delete your account: your profile, history, invoice ledger, tasks, API keys and sessions are deleted with it. Technical error reports are deleted after 30 days. Deleting your account also deletes the invoices you issued and their records; keeping them for the legal period is your obligation, so download them first.'] },
       { h: 'Your rights', ps: ['You can exercise your rights of access, rectification, erasure, portability and objection from Settings or by writing to info@nokfi.app. You can also lodge a complaint with the Spanish Data Protection Agency (aepd.es).'] },
-      { h: 'Security', ps: ['We enforce HTTPS across the service, passwords hashed with scrypt, session tokens, recovery tokens and API keys stored as hashes, and regular database backups on the server.'] }
+      { h: 'Security', ps: ['We enforce HTTPS across the service, passwords hashed with scrypt, session tokens, recovery tokens and API keys stored as hashes, and daily database backups on the server and, encrypted (AES-256), in Cloudflare R2 within the EU, where they are deleted after 30 days.'] }
     ]
   },
   report: {

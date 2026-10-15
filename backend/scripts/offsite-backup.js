@@ -12,7 +12,9 @@
  * La retención (p. ej. 30 días) se configura con una regla de ciclo de vida en el bucket.
  *
  * Uso:    node scripts/offsite-backup.js db/backups/nokfi-XXXX.db
- * Restaurar: node scripts/offsite-backup.js --decrypt copia.db.gz.enc salida.db
+ * Listar:    node scripts/offsite-backup.js --list
+ * Restaurar: node scripts/offsite-backup.js --restore latest salida.db   (o --restore db/nokfi-XXXX.db.gz.enc salida.db)
+ *            node scripts/offsite-backup.js --decrypt copia.db.gz.enc salida.db   (archivo ya descargado)
  * Formato del archivo: "NKB1" | iv(12) | tag(16) | datos cifrados (gzip de la BD).
  */
 
@@ -47,35 +49,47 @@ function decrypt(buf) {
   return zlib.gunzipSync(Buffer.concat([d.update(buf.subarray(32)), d.final()]));
 }
 
-/* ── PUT firmado (AWS Signature V4, API S3 de R2) sin dependencias ── */
+/* ── Peticiones firmadas (AWS Signature V4, API S3 de R2) sin dependencias ── */
 const sha256 = (d) => crypto.createHash('sha256').update(d).digest('hex');
 const hmac = (k, d) => crypto.createHmac('sha256', k).update(d).digest();
+const enc = (v) => encodeURIComponent(v).replace(/[!'()*]/g, c => '%' + c.charCodeAt(0).toString(16).toUpperCase());
 
-async function putObject(objectKey, body) {
+async function r2Request(method, objectKey, { body = Buffer.alloc(0), query = {} } = {}) {
   const { R2_ACCOUNT_ID, R2_ACCESS_KEY_ID, R2_SECRET_ACCESS_KEY, R2_BUCKET } = process.env;
   if (!R2_ACCOUNT_ID || !R2_ACCESS_KEY_ID || !R2_SECRET_ACCESS_KEY || !R2_BUCKET) throw new Error('Faltan variables R2_* en .env');
   const host = `${R2_ACCOUNT_ID}${process.env.R2_JURISDICTION === 'eu' ? '.eu' : ''}.r2.cloudflarestorage.com`;
-  const uri = `/${R2_BUCKET}/${objectKey.split('/').map(encodeURIComponent).join('/')}`;
-  const now = new Date();
-  const amzDate = now.toISOString().replace(/[-:]/g, '').replace(/\.\d{3}/, '');
+  const uri = `/${R2_BUCKET}${objectKey ? '/' + objectKey.split('/').map(encodeURIComponent).join('/') : ''}`;
+  const qs = Object.keys(query).sort().map(k => `${enc(k)}=${enc(query[k])}`).join('&');
+  const amzDate = new Date().toISOString().replace(/[-:]/g, '').replace(/\.\d{3}/, '');
   const day = amzDate.slice(0, 8);
   const payloadHash = sha256(body);
   const headers = { host, 'x-amz-content-sha256': payloadHash, 'x-amz-date': amzDate };
   const signed = Object.keys(headers).sort().join(';');
-  const canonical = ['PUT', uri, '', Object.keys(headers).sort().map(h => `${h}:${headers[h]}\n`).join(''), signed, payloadHash].join('\n');
+  const canonical = [method, uri, qs, Object.keys(headers).sort().map(h => `${h}:${headers[h]}\n`).join(''), signed, payloadHash].join('\n');
   const scope = `${day}/auto/s3/aws4_request`;
   const toSign = ['AWS4-HMAC-SHA256', amzDate, scope, sha256(canonical)].join('\n');
   const kSig = ['auto', 's3', 'aws4_request'].reduce((k, part) => hmac(k, part), hmac(`AWS4${R2_SECRET_ACCESS_KEY}`, day));
   const signature = crypto.createHmac('sha256', kSig).update(toSign).digest('hex');
-  const res = await fetch(`https://${host}${uri}`, {
-    method: 'PUT',
+  const res = await fetch(`https://${host}${uri}${qs ? '?' + qs : ''}`, {
+    method,
     headers: {
-      'x-amz-content-sha256': payloadHash, 'x-amz-date': amzDate, 'content-type': 'application/octet-stream',
+      'x-amz-content-sha256': payloadHash, 'x-amz-date': amzDate,
+      ...(method === 'PUT' ? { 'content-type': 'application/octet-stream' } : {}),
       Authorization: `AWS4-HMAC-SHA256 Credential=${R2_ACCESS_KEY_ID}/${scope}, SignedHeaders=${signed}, Signature=${signature}`
     },
-    body
+    ...(method === 'PUT' ? { body } : {})
   });
   if (!res.ok) throw new Error(`R2 respondió ${res.status}: ${(await res.text()).slice(0, 300)}`);
+  return res;
+}
+
+const putObject = (objectKey, body) => r2Request('PUT', objectKey, { body });
+const getObject = async (objectKey) => Buffer.from(await (await r2Request('GET', objectKey)).arrayBuffer());
+
+// Lista las copias subidas (más reciente al final). Basta para unos cientos de objetos (retención 30 días).
+async function listObjects() {
+  const xml = await (await r2Request('GET', '', { query: { 'list-type': '2', prefix: 'db/' } })).text();
+  return [...xml.matchAll(/<Key>([^<]+)<\/Key>[\s\S]*?<Size>(\d+)<\/Size>/g)].map(m => ({ key: m[1], size: Number(m[2]) })).sort((a, b) => a.key.localeCompare(b.key));
 }
 
 async function main() {
@@ -83,6 +97,25 @@ async function main() {
   if (args[0] === '--decrypt') {
     fs.writeFileSync(args[2], decrypt(fs.readFileSync(args[1])));
     console.log(`[offsite] Descifrada → ${args[2]}`);
+    return;
+  }
+  if (args[0] === '--list') {
+    for (const o of await listObjects()) console.log(`${o.key}\t${Math.round(o.size / 1024)} KB`);
+    return;
+  }
+  if (args[0] === '--restore') {
+    // Descarga una copia de R2 (o la más reciente con «latest») y la descifra en un archivo nuevo.
+    let objectKey = args[1];
+    const out = args[2];
+    if (!objectKey || !out) throw new Error('Uso: offsite-backup.js --restore <db/archivo.db.gz.enc|latest> <salida.db>');
+    if (fs.existsSync(out)) throw new Error(`${out} ya existe; no se sobrescribe`);
+    if (objectKey === 'latest') {
+      const all = await listObjects();
+      if (!all.length) throw new Error('No hay copias en R2');
+      objectKey = all[all.length - 1].key;
+    }
+    fs.writeFileSync(out, decrypt(await getObject(objectKey)), { mode: 0o600 });
+    console.log(`[offsite] Restaurada r2://${process.env.R2_BUCKET}/${objectKey} → ${out}`);
     return;
   }
   const file = args[0];

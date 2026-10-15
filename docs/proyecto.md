@@ -173,7 +173,17 @@ ruta y recuento; sin datos personales). Las de la sesión 4 en adelante se crean
 con `CREATE TABLE IF NOT EXISTS` al arrancar (`db/schema4.js` y módulos).
 
 Variables de entorno: ver `backend/.env.example` (IA, Stripe, Resend, R2,
-VERI*FACTU…). Detalle de las tablas originales:
+VERI*FACTU…).
+
+Copias de seguridad (activo en prod desde la S14, 2026-10-15): cron 03:30 →
+`scripts/backup-db.sh` (copia local verificada, 14 días) → `scripts/offsite-backup.js`
+la sube comprimida y cifrada (AES-256-GCM, `BACKUP_ENCRYPTION_KEY`, guardada
+también en el KeePassXC del usuario) al bucket R2 `nokfi-backups` (jurisdicción UE,
+borrado a los 30 días; token solo de ese bucket y solo desde la IP del VPS). El
+informe diario avisa si la última subida tiene más de 26 h. Restaurar (desde el VPS):
+`node scripts/offsite-backup.js --list` y `--restore latest /ruta/salida.db`.
+
+Detalle de las tablas originales:
 
 SQLite (`better-sqlite3`), db relativa a `backend/` (`DB_PATH=./db/nokfi.db`).
 Tablas:
