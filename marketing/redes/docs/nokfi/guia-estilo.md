@@ -25,8 +25,8 @@ Nombre de usuario recomendado: **@nokfiapp** en las tres (si está cogido,
 > Para autónomos y pymes en España
 > Consejos cada semana · Prueba 14 días gratis 👇
 
-**TikTok (≤80):**
-> Tus números de autónomo, claros. Consejos cada semana 👇
+**TikTok (≤80)** — cuenta **@nokfiapp** desde el 2026-10-18 (@nokfi4 quedó marcada como bot):
+> App para autónomos: IVA, IRPF y quién te debe, sin Excel. 14 días gratis 👇
 
 Categoría (Instagram, cuenta profesional): *Software* / *Aplicación*.
 Correo de contacto visible: `info@nokfi.app`.
