@@ -9,12 +9,24 @@
 
 ---
 
+> **2026-10-22/23 — VPS nuevo.** El VPS anterior (`191.44.112.86`) se perdió por
+> no renovarlo. Recuperado en **FreakHosting BVPS-5** (Frankfurt, Ubuntu 24.04,
+> 5 vCPU, 8 GB RAM, 200 GB, 8,99 €/mes, renovación automática por PayPal):
+> **`207.244.199.227`**. BD restaurada desde R2 (copia del 16-10 03:30, íntegra,
+> sin pérdida de datos). Node 24 + PM2 7 + Nginx 1.24, ufw (SSH/80/443),
+> fail2ban, 2 GB de swap, SSH solo por clave (`nokfi-deploy`, root y deploy).
+> Sitio en `/etc/nginx/sites-available/nokfi` y real-IP en
+> `/etc/nginx/conf.d/cloudflare-realip.conf`. Certificado LE nuevo (emitido con
+> la nube gris unos minutos; renovación por `certbot.timer`). Token R2 limitado a
+> la IP nueva. Cerebras quitado de `AI_PROVIDERS` (caducaba el 29-10).
+> **Al renovar el VPS: fecha de vencimiento en el panel de FreakHosting.**
+
 ## 0. TL;DR (estado actual)
 
 - **Producción HTTPS viva**: `https://nokfi.app/` (Nginx + Let's Encrypt, cert
   hasta **2026-11-01** autorenova via `certbot.timer`).
 - **Cloudflare (edge) EN PROD — Full strict (2026-08-08/10), completo y
-  verificado**: CF es el edge de `nokfi.app` (origen `191.44.112.86` oculto tras
+  verificado**: CF es el edge de `nokfi.app` (origen `207.244.199.227` oculto tras
   anycast `104.21.6.208`/`172.67.135.69`). real-IP chain, Bot Fight OFF, WAF skip
   webhook, 3 Cache Rules, Redirect www→nokfi 301, renewal HTTP-01 a través de CF.
   Detalle en §3.
@@ -35,15 +47,15 @@ vía Namecheap (gratis; CF no proxya MX/TXT).
 
 ---
 
-## 1. Topología y convenciones (VPS `191.44.112.86`)
+## 1. Topología y convenciones (VPS `207.244.199.227`, desde 2026-10-22)
 
 Cadena de tráfico: **Cliente → TLS → Cloudflare (edge, valida LE) → TLS → Nginx
 (real-IP) → Express `:3001`**.
 
 - **Paths**: app en `/home/deploy/nokfi/`. Backend (PM2 fork, cwd
   `.../backend`, `:3001`), frontend build en `.../frontend/dist` (servido por
-  Nginx). `/etc/nginx/sites-available/nokfi.app` (sitio) +
-  `/etc/nginx/conf.d/cloudflare.conf` (real-IP). DB en `.../backend/db/nokfi.db`.
+  Nginx). `/etc/nginx/sites-available/nokfi` (sitio) +
+  `/etc/nginx/conf.d/cloudflare-realip.conf` (real-IP). DB en `.../backend/db/nokfi.db`.
 - **Resurrect**: systemd `pm2-deploy.service` arranca PM2 al boot (no hay
   arranque manual tras reboot).
 - **`DB_PATH` y `dotenv` son RELATIVOS al cwd** — PM2 arranca con cwd
@@ -74,7 +86,7 @@ Rule).
 
 ### Dashboard CF `nokfi.app` (Free): config esencial
 - **SSL/TLS → Full (strict)** (no Flexible). Always-HTTPS ON.
-- **DNS**: A `@`+`www` → `191.44.112.86` **Proxied 🟠**. MX/TXT de Resend quedan
+- **DNS**: A `@`+`www` → `207.244.199.227` **Proxied 🟠**. MX/TXT de Resend quedan
   **DNS-only 🔘** (mailer no se toca). Nameservers → Custom DNS =
   `terry.ns.cloudflare.com` + `tina.ns.cloudflare.com`.
 - **🔴 Bot Fight Mode OFF** — el UA `Stripe/1.0` del webhook DEBE pasar
