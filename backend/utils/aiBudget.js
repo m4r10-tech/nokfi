@@ -10,24 +10,21 @@
  *   AI_BUDGET_<PROV>_DAILY_TOKENS   tokens (entrada + salida) al día
  *   AI_BUDGET_<PROV>_MONTHLY_USD    coste estimado al mes
  *   AI_PRICE_<PROV>_IN / _OUT       USD por millón de tokens (para estimar)
- * Hoy solo Cerebras lo trae por defecto (DEFAULTS), porque tiene tarjeta
- * asociada. Poner un tope a 0 lo desactiva del todo.
+ * Ningún proveedor lo trae por defecto (DEFAULTS vacío): los de hoy son
+ * gratuitos o locales. Poner un tope a 0 lo desactiva del todo.
  *
  * Caducidad: AI_EXPIRES_<PROV>=YYYY-MM-DD → desde ese día el proveedor deja
- * de usarse solo (p. ej. la prueba de Cerebras, que acaba el 29-oct-2026), y
- * el informe diario avisa desde 7 días antes.
+ * de usarse solo (p. ej. una prueba gratuita con fecha de fin), y el informe
+ * diario avisa desde 7 días antes.
  */
 
 'use strict';
 
 const { getDB } = require('../db/database');
 
-// Cerebras: prueba de 5 $ que caduca a los 30 días (sin cargos automáticos).
-// Topes muy por debajo: ~4 $ al mes como máximo y 300.000 tokens al día.
-// Precios de gpt-oss-120b redondeados al alza para estimar de más, no de menos.
-const DEFAULTS = {
-  cerebras: { dailyTokens: 300000, monthlyUsd: 4, priceIn: 0.4, priceOut: 0.8 }
-};
+// Topes por defecto por proveedor: { dailyTokens, monthlyUsd, priceIn, priceOut }.
+// Vacío desde que salió Cerebras (2026-10-22); se usan las variables de entorno.
+const DEFAULTS = {};
 
 function num(v) { const n = Number(v); return v !== undefined && v !== '' && Number.isFinite(n) ? n : undefined; }
 

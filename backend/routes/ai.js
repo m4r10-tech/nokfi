@@ -16,12 +16,14 @@
 const express = require('express');
 const { requireLicense } = require('../middleware/requireLicense');
 const { runAnalysis } = require('../services/ai/analyze');
+const { deferrable } = require('../services/deferred');
 const { listActions, setActionDone, actionStats } = require('../db/actions');
 
 const aiRouter = express.Router();
 const actionsRouter = express.Router();
 
-aiRouter.post('/analyze', requireLicense, async (req, res) => {
+// Si la IA tarda (IA local), responde 202 { pending } y se consulta en /api/pending/:id.
+aiRouter.post('/analyze', requireLicense, deferrable(async (req, res) => {
   const b = req.body || {};
   const out = await runAnalysis({
     license: req.license,
@@ -34,7 +36,7 @@ aiRouter.post('/analyze', requireLicense, async (req, res) => {
     source: 'web'
   });
   res.status(out.status).json(out.body);
-});
+}));
 
 actionsRouter.get('/', requireLicense, (req, res) => {
   res.json({ actions: listActions(req.license.id), stats: actionStats(req.license.id) });

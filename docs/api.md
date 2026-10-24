@@ -7,8 +7,8 @@
 > Estado actual (**2026-10-02, sesión 12**): suscripción mensual con **Stripe**
 > (3 Products: Mini / Pro / Max; trial de 14 días en Mini; precios desde el
 > `.env`, catálogo en `GET /api/payments/plans`). Auth por **email + clave +
-> contraseña**. IA con **Groq → Cloudflare Workers AI → Cerebras** (Cerebras
-> caduca el 2026-10-29; topes en `utils/aiBudget.js`). Emisión de facturas con
+> contraseña**. IA con **Groq → Cloudflare Workers AI → IA local** (llama.cpp en
+> el propio VPS, último respaldo desde 2026-10; topes opcionales en `utils/aiBudget.js`). Emisión de facturas con
 > **VERI*FACTU** (envío a la AEAT apagado: `VERIFACTU_ENV=off`), API pública
 > **v1**, servidor **MCP 1.2.0** y nodo **n8n 0.3.0**. e2e: **520**.
 >
@@ -203,9 +203,20 @@ Cambia la contraseña SOLO de la licencia indicada (del email verificado) y
 
 **`POST /api/ai/analyze`** — `{ task, input, lang?, title?, job? }`; `task` = `cuestionario`, `excel`, `compare`, `folder` (informes), `folder_map` (notas de una carpeta) o `invoices` (leer facturas con IA).
 El backend arma el prompt (`services/ai/prompts.js`), llama a los proveedores en
-orden (`AI_PROVIDERS`, hoy `groq,cloudflare,cerebras`; si uno falla pasa al
+orden (`AI_PROVIDERS`, hoy `groq,cloudflare,local`; si uno falla pasa al
 siguiente) y guarda el informe estructurado en `analyses` con su plan de acción
 (`action_items`, `GET/PATCH /api/actions`).
+
+**Respuestas aplazadas (2026-10, IA local):** `POST /api/ai/analyze`, `POST /api/chat`
+y `POST /api/finance/collection-email` responden como siempre si la IA contesta en
+menos de 25 s (`DEFER_AFTER_MS`). Si tarda más (la IA local del VPS puede tardar
+minutos), responden `202 { pending: "pend_…" }` y el trabajo sigue en segundo plano;
+`GET /api/pending/:id` (con sesión, solo la licencia que lo lanzó) da `202 { pending }`
+mientras trabaja y, al acabar, el estado HTTP y el cuerpo originales (una sola vez;
+caduca a los 30 min; `404 pending_not_found` si se reinició el servidor). Máximo 5
+en curso por licencia (`429 too_many_pending`). El navegador lo hace solo
+(`frontend/src/middleware/api.js`) y muestra un aviso mientras espera. La API v1 no
+cambia: para trabajos largos tiene su modo asíncrono (`?async=true`).
 
 **Cuota diaria por licencia (atómica):** `reserveAiSlot` reserva un hueco en
 `ai_usage` (PK `license_id+day+slot`) **antes** de llamar a la IA; si el análisis

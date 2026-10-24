@@ -587,6 +587,9 @@ export default {
     api_plan_required: 'API-Schlüssel sind in den Plänen Pro und Max verfügbar.',
     subscription_active: 'Kündige zuerst dein Abonnement unter „Abonnement verwalten“. Danach kannst du das Konto löschen.',
     payload_too_large: 'Die Dateien sind für einen einzigen Upload zu groß. Versuche es mit weniger Dateien.',
+    pending_not_found: 'Die Aufgabe wurde unterbrochen. Starte sie erneut.',
+    too_many_pending: 'Du hast mehrere KI-Aufgaben in Bearbeitung. Warte, bis sie fertig sind, bevor du eine neue startest.',
+    ai_timeout: 'Die KI ist nicht rechtzeitig fertig geworden. Versuche es in ein paar Minuten erneut.',
     offlineTitle: 'Nokfi ist nicht erreichbar',
     offlineDesc: 'Das kann an deiner Verbindung oder einem Serverneustart liegen. Versuche es in ein paar Sekunden erneut.',
     genericTitle: 'Laden nicht möglich'
@@ -596,7 +599,8 @@ export default {
     offline: 'Keine Internetverbindung',
     online: 'Verbindung wiederhergestellt',
     sessionExpired: 'Deine Sitzung ist abgelaufen. Melde dich erneut an.',
-    licenseInactive: 'Deine Lizenz ist nicht mehr aktiv. Du wurdest abgemeldet.'
+    licenseInactive: 'Deine Lizenz ist nicht mehr aktiv. Du wurdest abgemeldet.',
+    aiSlow: 'Die KI braucht länger als sonst. Wir arbeiten weiter – lass diesen Tab geöffnet.'
   },
   footer: { rights: 'Alle Rechte vorbehalten' },
   landing: {
@@ -714,7 +718,7 @@ export default {
   },
   privacy: {
     title: 'Datenschutzerklärung',
-    updated: 'Zuletzt aktualisiert: 15. Oktober 2026',
+    updated: 'Zuletzt aktualisiert: 24. Oktober 2026',
     intro: 'Diese Erklärung beschreibt ohne Kleingedrucktes, welche Daten Nokfi (nokfi.app) verarbeitet, wofür und welche Drittanbieter beteiligt sind. Sie entspricht genau der Funktionsweise der Anwendung.',
     sections: [
       { h: 'Verantwortlicher und Kontakt', ps: ['Verantwortlicher für die Daten deines Kontos ist {OWNER}. Für Datenschutzfragen oder zur Ausübung deiner Rechte schreibe an info@nokfi.app. Bei Problemen mit Konto oder Zahlungen an soporte@nokfi.app.'] },
@@ -732,13 +736,12 @@ export default {
       ] },
       { h: 'Deine Dateien werden nicht auf unseren Servern gespeichert', ps: [
         'Die Excel-Dateien, PDFs und Ordner, die du analysierst, werden lokal in deinem Browser gelesen. Sie werden nicht auf unseren Servern gespeichert.',
-        'Für eine Analyse werden der extrahierte Text oder die Zeilen über unseren Server an den KI-Dienst gesendet. Beim Lesen gescannter oder fotografierter Rechnungen wird zusätzlich eine verkleinerte Kopie des Bildes oder PDFs gesendet – nur zum Lesen; auch sie wird nicht gespeichert.'
+        'Für eine Analyse werden der extrahierte Text oder die Zeilen über unseren Server an den KI-Dienst gesendet. Beim Lesen gescannter oder fotografierter Rechnungen wird zusätzlich eine verkleinerte Kopie des Bildes oder PDFs gesendet – nur zum Lesen; auch sie wird nicht gespeichert. Sind diese Dienste nicht verfügbar, übernimmt ein eigenes KI-Modell auf unserem Server in der EU die Analyse, ohne die Daten an Dritte zu senden.'
       ] },
       { h: 'Beteiligte Drittanbieter', list: [
         'Stripe: wickelt Zahlungen ab und verwaltet Abonnements.',
         'Cloudflare Workers AI: erstellt die Analysen, liest gescannte oder fotografierte Rechnungen und antwortet im Assistenten. Seine Bedingungen verbieten, deine Daten zum Training von Modellen zu nutzen, und es speichert sie nicht (außer vorübergehenden technischen Protokollen zur Missbrauchsaufklärung). Deine Gespräche mit dem Assistenten speichern wir nicht.',
         'Groq: erstellt die Analysen, liest Rechnungen und antwortet im Assistenten; ist er nicht verfügbar, wird Cloudflare Workers AI genutzt. Sein Vertrag verbietet, deine Daten zum Training oder Feinabstimmen von Modellen zu nutzen, und wir haben die Null-Speicherung aktiviert (Anfragen werden nicht gespeichert). Er verarbeitet die Daten in den USA, auf Grundlage von Standardvertragsklauseln.',
-        'Cerebras: KI-Ersatzanbieter, nur genutzt, wenn Groq und Cloudflare nicht verfügbar sind (gleiche Aufgaben). Sein Vertrag erlaubt ihm, deine Daten nur zur Erbringung des Dienstes zu nutzen (nicht zum Training von Modellen) und sie nur so lange wie nötig aufzubewahren. Er verarbeitet die Daten in den USA, auf Grundlage von Standardvertragsklauseln.',
         'Resend: versendet die E-Mails (deinen Lizenzschlüssel, die Passwort-Wiederherstellung und, falls aktiviert, Steuerfristen-Erinnerungen, die monatliche Zusammenfassung und Zahlungserinnerungen an deine Kunden).',
         'Cloudflare: Auslieferungs- und Sicherheitsnetz, das den Zugriff auf die Website schützt. Das Land deiner Verbindung (von Cloudflare übermittelt) nutzen wir nur, um die Anfangssprache der Website zu wählen; wir speichern es nicht. Außerdem speichert Cloudflare das tägliche Datenbank-Backup verschlüsselt in der EU (Cloudflare R2); ohne unseren Schlüssel kann es nicht gelesen werden, und jedes Backup wird nach 30 Tagen gelöscht.',
         "Spanische Steuerbehörde (AEAT): Wird für dein Konto die Übermittlung der VERI*FACTU-Datensätze eingeschaltet, werden die Datensätze deiner Rechnungen aufgrund einer gesetzlichen Pflicht an sie gesendet. Derzeit ist sie ausgeschaltet."
@@ -751,6 +754,7 @@ export default {
     ]
   },
   report: {
+    backupAi: 'Mit der Ersatz-KI von Nokfi erstellt (die üblichen Dienste haben nicht geantwortet). Sie ist einfacher: Prüfe die Zahlen in deinen Nokfi-Ansichten.',
     summary: 'Zusammenfassung', keyFigures: 'Kennzahlen', strengths: 'Stärken', priorities: 'Prioritäten',
     actionPlan: 'Maßnahmenplan', glossary: 'Glossar', progress: '{n} von {total} erledigt',
     goTo: 'Zu {name}',

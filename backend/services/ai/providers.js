@@ -6,12 +6,11 @@
  * entrenen con ellos. El free tier de Gemini SÍ entrena → fuera por defecto.
  * Proveedores que contractualmente NO entrenan con los datos:
  *   cloudflare  Cloudflare Workers AI (OpenAI-compatible). Principal.
- *   cerebras    Cerebras (sesión 7). Respaldo, con tope de seguridad de gasto
- *               (utils/aiBudget.js): gpt-oss-120b para texto, qwen-3.8-27b con imágenes.
  *   groq        Groq Cloud (OpenAI-compatible, gratis sin tarjeta). gpt-oss-120b (texto) y qwen3.8-27b (imágenes).
  *   gemini      Solo si se añade a AI_PROVIDERS (p.ej. cuando haya plan de PAGO).
+ *   local       IA en el propio VPS (llama-server, LOCAL_AI_URL). Último respaldo (2026-10).
  *
- * Orden: AI_PROVIDERS (por defecto "cloudflare,cerebras"); solo se usan los que
+ * Orden: AI_PROVIDERS (por defecto "groq,cloudflare,local"); solo se usan los que
  * tengan credenciales. Si uno falla (cuota, saturación, petición demasiado
  * grande, formato no soportado…) se prueba el siguiente.
  *
@@ -21,11 +20,13 @@
 
 'use strict';
 
-const { fetchWithTimeout } = require('../../utils/http');
+const { fetchWithTimeout, requestLong } = require('../../utils/http');
 const { audit } = require('../../db/database');
 const budget = require('../../utils/aiBudget');
 const gemini = require('./gemini');
+const localAi = require('./localQueue');
 const { AiError, parseJsonLoose } = gemini;
+const { langDirective } = require('./prompts');
 
 const IMAGE_MIMES = ['image/jpeg', 'image/png', 'image/webp'];
 
@@ -38,6 +39,7 @@ function toJsonSchema(s) {
   if (s.description) out.description = s.description;
   if (s.properties) out.properties = Object.fromEntries(Object.entries(s.properties).map(([k, v]) => [k, toJsonSchema(v)]));
   if (s.items) out.items = toJsonSchema(s.items);
+  if (s.maxItems) out.maxItems = s.maxItems;
   if (s.required) out.required = s.required;
   return out;
 }
@@ -71,8 +73,10 @@ function providerError(name, status, body) {
   return err;
 }
 
-async function openAiCompatible({ name, url, key, model, system, parts, schema, maxTokens, jsonMode, extra = {}, timeoutMs = 90000 }) {
-  const sys = schema ? `${system}\n\n${jsonInstruction(schema)}` : system;
+async function openAiCompatible({ name, url, key, model, system, parts, schema, maxTokens, jsonMode, jsonSchema = false, extra = {}, timeoutMs = 90000, long = false }) {
+  // Con json_schema (IA local) la gramática ya impone la estructura: el esquema en
+  // texto solo alarga la lectura (~500 tokens) y en las pruebas empeoraba el informe.
+  const sys = schema && !jsonSchema ? `${system}\n\n${jsonInstruction(schema)}` : system;
   const content = toOpenAiContent(parts);
   // Tope de seguridad (utils/aiBudget.js): si la llamada puede pasarse, se salta este proveedor.
   const chars = sys.length + parts.reduce((n, p) => n + (p.text ? p.text.length : p.inlineData ? 4000 : 0), 0);
@@ -89,12 +93,13 @@ async function openAiCompatible({ name, url, key, model, system, parts, schema, 
     temperature: 0.3,
     ...extra
   };
-  if (schema && jsonMode) body.response_format = { type: 'json_object' };
+  if (schema && jsonSchema) body.response_format = { type: 'json_schema', json_schema: { name: 'nokfi', schema: toJsonSchema(schema) } };
+  else if (schema && jsonMode) body.response_format = { type: 'json_object' };
   let res;
   try {
-    res = await fetchWithTimeout(url, {
+    res = await (long ? requestLong : fetchWithTimeout)(url, {
       method: 'POST',
-      headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${key}` },
+      headers: { 'Content-Type': 'application/json', ...(key ? { Authorization: `Bearer ${key}` } : {}) },
       body: JSON.stringify(body)
     }, timeoutMs);
   } catch (e) {
@@ -135,19 +140,6 @@ const PROVIDERS = {
       });
     }
   },
-  // Sesión 7: respaldo de Cloudflare. Texto con gpt-oss-120b; si hay imágenes
-  // (facturas en foto), qwen-3.8-27b, que admite visión. Con tope de seguridad.
-  cerebras: {
-    configured: () => !!process.env.CEREBRAS_API_KEY,
-    generate: (o) => {
-      const vision = o.parts.some(p => p.inlineData);
-      return openAiCompatible({
-        ...o, name: 'cerebras', url: 'https://api.cerebras.ai/v1/chat/completions', key: process.env.CEREBRAS_API_KEY,
-        model: vision ? (process.env.CEREBRAS_VISION_MODEL || 'qwen-3.8-27b') : (process.env.CEREBRAS_MODEL || 'gpt-oss-120b'),
-        jsonMode: true, extra: vision ? {} : { reasoning_effort: 'low' }
-      });
-    }
-  },
   cloudflare: {
     configured: () => !!(process.env.CF_ACCOUNT_ID && process.env.CF_AI_TOKEN),
     generate: (o) => openAiCompatible({
@@ -158,12 +150,38 @@ const PROVIDERS = {
   gemini: {
     configured: () => !!process.env.GEMINI_API_KEY,
     generate: (o) => gemini.generate(o)
+  },
+  // IA local (2026-10): llama-server en el propio VPS (solo 127.0.0.1). Último
+  // respaldo: lento en CPU, pero los datos no salen del servidor. El JSON va
+  // forzado por gramática (json_schema), así un modelo pequeño no puede romperlo.
+  local: {
+    configured: () => !!process.env.LOCAL_AI_URL,
+    generate: async (o) => {
+      // En CPU lee ~18 tokens/s: una petición enorme no acabaría a tiempo. Mejor
+      // fallar en el acto que hacer esperar minutos para nada.
+      const chars = (o.system || '').length + o.parts.reduce((n, p) => n + (p.text ? p.text.length : 0), 0);
+      if (chars > (Number(process.env.LOCAL_AI_MAX_PROMPT_CHARS) || 28000)) {
+        const err = new AiError('prompt_too_long', 'local: petición demasiado grande');
+        err.retryable = true;
+        throw err;
+      }
+      return localAi.run(() => openAiCompatible({
+        ...o,
+        // Los modelos pequeños olvidan el idioma pedido en el system: se repite al final.
+        parts: o.lang ? [...o.parts, { text: langDirective(o.lang) }] : o.parts,
+        name: 'local', url: `${process.env.LOCAL_AI_URL}/v1/chat/completions`, key: '',
+        model: process.env.LOCAL_AI_MODEL || 'local',
+        maxTokens: Math.min(o.maxTokens || 3000, Number(process.env.LOCAL_AI_MAX_TOKENS) || 3000),
+        jsonSchema: true, extra: { chat_template_kwargs: { enable_thinking: false } }, long: true,
+        timeoutMs: Number(process.env.LOCAL_AI_TIMEOUT_MS) || 12 * 60000
+      }));
+    }
   }
 };
 
 function providerOrder() {
   // Un proveedor con fecha de caducidad (AI_EXPIRES_<PROV>) deja de usarse solo ese día.
-  return (process.env.AI_PROVIDERS || 'groq,cloudflare,cerebras').split(',').map(s => s.trim())
+  return (process.env.AI_PROVIDERS || 'groq,cloudflare,local').split(',').map(s => s.trim())
     .filter(p => PROVIDERS[p]?.configured() && !budget.expired(p));
 }
 

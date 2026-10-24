@@ -35,11 +35,14 @@ module.exports = async function session4Tests({ post, put, get, call, check, che
     try { await providers.generate({ system: 's', parts: [{ inlineData: { mimeType: 'application/pdf', data: 'AAA' } }], schema: { type: 'OBJECT' } }); } catch (e) { pdfErr = e; }
     check('IA: PDF inline no se manda a modelos que no lo leen (error controlado)', () => !!pdfErr && pdfErr.code === 'ai_provider_error');
     const chat = require('../services/ai/chat');
-    check('Chat: orden por defecto sin Gemini ni OpenRouter', () => {
-      const prev = process.env.CHAT_PROVIDERS; delete process.env.CHAT_PROVIDERS; process.env.CEREBRAS_API_KEY = 'c';
-      const o = chat.providerOrder(); if (prev !== undefined) process.env.CHAT_PROVIDERS = prev; delete process.env.CEREBRAS_API_KEY;
+    check('Chat: orden por defecto groq → cloudflare → local, sin Gemini ni OpenRouter', () => {
+      const prev = process.env.CHAT_PROVIDERS; const prevL = process.env.LOCAL_AI_URL;
+      delete process.env.CHAT_PROVIDERS; process.env.LOCAL_AI_URL = 'http://127.0.0.1:8081';
+      const o = chat.providerOrder();
+      if (prev !== undefined) process.env.CHAT_PROVIDERS = prev;
+      if (prevL === undefined) delete process.env.LOCAL_AI_URL; else process.env.LOCAL_AI_URL = prevL;
       const base = o.filter(x => x !== 'groq');
-      return base[0] === 'cloudflare' && base[1] === 'cerebras' && (!o.includes('groq') || o[0] === 'groq') && !o.includes('gemini') && !o.includes('openrouter');
+      return base[0] === 'cloudflare' && base[1] === 'local' && (!o.includes('groq') || o[0] === 'groq') && !o.includes('gemini') && !o.includes('openrouter');
     });
     global.fetch = saved.fetch;
     for (const [k, v] of [['AI_PROVIDERS', saved.AI], ['GROQ_API_KEY', saved.G], ['CF_ACCOUNT_ID', saved.A], ['CF_AI_TOKEN', saved.T], ['GEMINI_API_KEY', saved.GM]]) { if (v === undefined) delete process.env[k]; else process.env[k] = v; }
@@ -405,56 +408,153 @@ module.exports = async function session4Tests({ post, put, get, call, check, che
     global.fetch = savedFetch;
     if (savedKey === undefined) delete process.env.GEMINI_API_KEY; else process.env.GEMINI_API_KEY = savedKey;
   }
-  // ── Sesión 7: Cerebras como respaldo con tope de seguridad de gasto ──
+  // ── IA local (2026-10): último respaldo en el VPS + topes y caducidad genéricos ──
   {
     const providers = require('../services/ai/providers');
     const budget = require('../utils/aiBudget');
-    const saved = { fetch: global.fetch, AI: process.env.AI_PROVIDERS, K: process.env.CEREBRAS_API_KEY, A: process.env.CF_ACCOUNT_ID, T: process.env.CF_AI_TOKEN, D: process.env.AI_BUDGET_CEREBRAS_DAILY_TOKENS };
-    process.env.AI_PROVIDERS = 'cloudflare,cerebras'; process.env.CEREBRAS_API_KEY = 'csk_test'; process.env.CF_ACCOUNT_ID = 'acc'; process.env.CF_AI_TOKEN = 'tok';
+    const P4 = require('../services/ai/prompts');
+    const keys = ['AI_PROVIDERS', 'LOCAL_AI_URL', 'CF_ACCOUNT_ID', 'CF_AI_TOKEN', 'GROQ_API_KEY', 'AI_BUDGET_GROQ_DAILY_TOKENS', 'AI_BUDGET_GROQ_MONTHLY_USD', 'AI_PRICE_GROQ_IN', 'AI_PRICE_GROQ_OUT'];
+    const saved = { fetch: global.fetch, env: Object.fromEntries(keys.map(k => [k, process.env[k]])) };
+    // Un llama-server de mentira en un puerto local (la IA local va por node:http, no por fetch).
     const seen = [];
-    global.fetch = async (url, o) => {
-      const body = JSON.parse(o.body); seen.push({ url, model: body.model, reasoning: body.reasoning_effort });
-      if (url.includes('cloudflare')) return { ok: false, status: 429, text: async () => 'neurons exhausted' };
-      return { ok: true, status: 200, text: async () => '', json: async () => ({ choices: [{ message: { content: '{"summary":"desde cerebras"}' }, finish_reason: 'stop' }], usage: { prompt_tokens: 1000, completion_tokens: 500 } }) };
-    };
-    getDB().prepare("DELETE FROM ai_provider_usage WHERE provider = 'cerebras'").run();
-    const r1 = await providers.generate({ system: 's', parts: [{ text: 'hola' }], schema: { type: 'OBJECT', properties: { summary: { type: 'STRING' } } }, maxTokens: 200 });
-    check('S7 IA: si Cloudflare se agota, responde Cerebras (gpt-oss-120b, reasoning low) y se anota su consumo', () =>
-      r1.json.summary === 'desde cerebras' && seen.some(x => x.url.includes('cerebras') && x.model === 'gpt-oss-120b' && x.reasoning === 'low')
-      && budget.usage('cerebras').tokens === 1500 && budget.usage('cerebras').cost_usd > 0);
-    seen.length = 0;
-    await providers.generate({ system: 's', parts: [{ text: 'factura' }, { inlineData: { mimeType: 'image/png', data: 'AAAA' } }], schema: { type: 'OBJECT', properties: { summary: { type: 'STRING' } } }, maxTokens: 200 });
-    check('S7 IA: con imágenes, Cerebras usa el modelo con visión (qwen-3.8-27b)', () => seen.some(x => x.url.includes('cerebras') && x.model === 'qwen-3.8-27b'));
-    process.env.AI_BUDGET_CEREBRAS_DAILY_TOKENS = '2000';
-    seen.length = 0;
-    let err = null;
-    try { await providers.generate({ system: 's', parts: [{ text: 'hola' }], schema: { type: 'OBJECT', properties: { summary: { type: 'STRING' } } }, maxTokens: 1000 }); } catch (e) { err = e; }
-    check('S7 IA: con el tope diario alcanzado NO se llama a Cerebras (0 peticiones) y el error es controlado', () =>
-      err && err.code === 'ai_quota_exceeded' && !seen.some(x => x.url.includes('cerebras')));
-    process.env.AI_BUDGET_CEREBRAS_DAILY_TOKENS = '0';
-    check('S7 IA: tope a 0 desactiva el proveedor', () => budget.allow('cerebras', 1).ok === false);
-    delete process.env.AI_BUDGET_CEREBRAS_DAILY_TOKENS;
-    getDB().prepare("INSERT OR REPLACE INTO ai_provider_usage (provider, day, calls, tokens_in, tokens_out, cost_usd) VALUES ('cerebras', ?, 1, 0, 0, 3.99)").run(new Date().toISOString().slice(0, 7) + '-01');
-    check('S7 IA: tope mensual en USD (4 $ por defecto) bloquea antes de pasarse', () => budget.allow('cerebras', 100000).ok === false && budget.allow('cerebras', 100).ok === true);
-    check('S7 IA: los proveedores sin tope (Cloudflare) no se bloquean', () => budget.allow('cloudflare', 1e9).ok === true);
-    const buildOpsReport_ = () => require('../services/opsReport').buildOpsReport(new Date());
-    process.env.AI_EXPIRES_CEREBRAS = new Date().toISOString().slice(0, 10);
-    check('S7 IA: el día de caducidad (AI_EXPIRES_CEREBRAS) Cerebras sale solo de la cadena de análisis y de chat', () =>
-      !providers.providerOrder().includes('cerebras') && !require('../services/ai/chat').providerOrder().includes('cerebras'));
-    process.env.AI_EXPIRES_CEREBRAS = new Date(Date.now() + 5 * 86400000).toISOString().slice(0, 10);
-    check('S7 IA: antes de la fecha sigue activo y el informe avisa a 5 días', () =>
-      providers.providerOrder().includes('cerebras') && buildOpsReport_().alerts.some(a => a.includes('cerebras caduca') && a.includes('en 5 días')));
-    delete process.env.AI_EXPIRES_CEREBRAS;
-    const { buildOpsReport } = require('../services/opsReport');
-    check('S7 ops: el informe diario incluye el consumo por proveedor y avisa al 80 % del tope mensual', () => {
-      const rep = buildOpsReport(new Date(Date.now() + 86400000));
-      return Array.isArray(rep.ai.usage) && rep.alerts.some(a => a.includes('cerebras') && a.includes('tope'));
+    let localReply = { content: '{"summary":"desde local","priorities":[],"action_plan":[]}' };
+    const fakeLlama = require('http').createServer((rq, rs) => {
+      let raw = ''; rq.on('data', c => { raw += c; });
+      rq.on('end', () => {
+        seen.push({ url: rq.url, body: JSON.parse(raw), auth: rq.headers.authorization });
+        rs.writeHead(200, { 'Content-Type': 'application/json' });
+        rs.end(JSON.stringify({ choices: [{ message: { content: localReply.content }, finish_reason: 'stop' }], usage: { prompt_tokens: 1000, completion_tokens: 500 } }));
+      });
     });
+    await new Promise(r => fakeLlama.listen(0, '127.0.0.1', r));
+    process.env.AI_PROVIDERS = 'cloudflare,local'; process.env.LOCAL_AI_URL = `http://127.0.0.1:${fakeLlama.address().port}`;
+    process.env.CF_ACCOUNT_ID = 'acc'; process.env.CF_AI_TOKEN = 'tok';
+    const cfCalls = [];
+    global.fetch = async (url) => { cfCalls.push(url); return { ok: false, status: 429, text: async () => 'neurons exhausted' }; };
+    getDB().prepare("DELETE FROM ai_provider_usage WHERE provider = 'local'").run();
+    const r1 = await providers.generate({ system: 's', parts: [{ text: 'hola' }], schema: P4.REPORT_SCHEMA, maxTokens: 8000 });
+    const loc = seen[0];
+    check('IA local: si Cloudflare se agota responde la IA local y se anota su consumo', () =>
+      cfCalls.length === 1 && r1.json.summary === 'desde local' && r1.model.startsWith('local:') && budget.usage('local').tokens === 1500);
+    check('IA local: JSON forzado por esquema (con límites de elementos), sin "pensar", sin clave y salida acotada', () =>
+      loc && loc.url === '/v1/chat/completions' && loc.body.response_format?.type === 'json_schema'
+      && loc.body.response_format.json_schema.schema.properties.priorities.maxItems === 6
+      && loc.body.chat_template_kwargs?.enable_thinking === false && !loc.auth && loc.body.max_tokens === 3000);
+    seen.length = 0;
+    await providers.generate({ system: 's', parts: [{ text: 'hola' }], schema: P4.REPORT_SCHEMA, maxTokens: 500, lang: 'en' });
+    check('IA local: se le repite el idioma pedido al final del mensaje', () => {
+      const c = seen[0]?.body.messages[1].content;
+      return typeof c === 'string' && c.trim().endsWith(P4.langDirective('en'));
+    });
+    seen.length = 0;
+    localReply = { content: '{"invoices":[]}' };
+    await providers.generate({ system: 's', parts: [{ text: 'factura' }, { inlineData: { mimeType: 'image/png', data: 'AAAA' } }], schema: P4.INVOICE_SCHEMA, maxTokens: 200 });
+    check('IA local: las facturas en foto le llegan como imagen', () =>
+      seen.length === 1 && Array.isArray(seen[0].body.messages[1].content) && seen[0].body.messages[1].content.some(c => c.type === 'image_url'));
+    seen.length = 0;
+    let bigErr = null;
+    try { await providers.generate({ system: 's', parts: [{ text: 'x'.repeat(30000) }], schema: P4.REPORT_SCHEMA }); } catch (e) { bigErr = e; }
+    check('IA local: una petición demasiado grande no se le manda (error prompt_too_long al momento)', () =>
+      bigErr && bigErr.code === 'prompt_too_long' && seen.length === 0);
+    const nv = P4.normalizeInvoices({ invoices: [
+      { file_name: 'a', invoice_date: '28/09/2026', due_date: '2026-10-10', base: 150, vat_amount: 31.5, irpf_rate: -15, irpf_amount: -22.5, total: 159 },
+      { file_name: 'b', invoice_date: '1.3.2026', base: 1, vat_amount: 0, total: 1 },
+      { file_name: 'c', invoice_date: '45/13/2026', base: 1, vat_amount: 0, total: 1 }
+    ] }, [{ name: 'a' }, { name: 'b' }, { name: 'c' }]);
+    const gsrc = 'Por cobrar 4.963,79 €; vencido 4.779,50 €. Ingresos 87.300,00 €. Transportes López: 2.904,00 €.';
+    const gf = P4.guardFigures({ summary: 'Hay 4.779,50 € vencidos. Cobró 1.842,29 € ayer.', key_figures: [{ label: 'Ingresos', value: '€87,300.00' }, { label: 'Raro', value: '135.900 €' }],
+      priorities: [{ title: 'Reclamar', detail: 'Debe 2.904 €. Y 17,880.00 € más.', severity: 'high' }, { title: 'Inventada 9.999 €', detail: '', severity: 'low' }],
+      action_plan: [{ title: 'Llamar en 7 días', detail: 'Pedir 2.904,00 €.' }], strengths: [], glossary: [] }, gsrc);
+    check('IA local: el filtro quita frases y cifras que no están en los datos y respeta las que sí (en cualquier formato)', () =>
+      gf.report.summary === 'Hay 4.779,50 € vencidos.' && gf.report.key_figures.length === 1 && gf.report.key_figures[0].label === 'Ingresos'
+      && gf.report.priorities.length === 1 && gf.report.priorities[0].detail === 'Debe 2.904 €.' && gf.report.action_plan.length === 1 && gf.removed === 4);
+    const notInv = P4.normalizeInvoices({ invoices: [{ file_name: 'f', is_invoice: false, issuer_name: 'Suministros Levante S.L.', base: 500, vat_amount: 105, total: 605 },
+      { file_name: 'g', is_invoice: false, issuer_name: '', total: 0 }] }, [{ name: 'f' }, { name: 'g' }]);
+    check('Facturas IA: con emisor e importe cuenta como factura aunque el modelo diga que no; sin datos, no', () =>
+      notInv[0].is_invoice === true && notInv[1].is_invoice === false);
+    check('Facturas IA: fechas DD/MM/AAAA se convierten, las imposibles se vacían y la retención va en positivo', () =>
+      nv[0].invoice_date === '2026-09-28' && nv[0].irpf_amount === 22.5 && nv[0].irpf_rate === 15 && nv[0].check_ok === true
+      && nv[1].invoice_date === '2026-03-01' && nv[2].invoice_date === '');
+    const chatMod = require('../services/ai/chat');
+    const savedChat = process.env.CHAT_PROVIDERS; process.env.CHAT_PROVIDERS = 'cloudflare,local';
+    seen.length = 0;
+    localReply = { content: 'Respuesta local' };
+    const cr = await chatMod.freeText({ system: 's', prompt: 'p' });
+    check('IA local: el chat y los emails también caen a la IA local', () => cr.provider === 'local' && cr.text === 'Respuesta local'
+      && seen.length === 1 && seen[0].body.chat_template_kwargs?.enable_thinking === false);
+    if (savedChat === undefined) delete process.env.CHAT_PROVIDERS; else process.env.CHAT_PROVIDERS = savedChat;
+    const q = require('../services/ai/localQueue');
+    let active = 0, maxActive = 0;
+    const job = () => q.run(async () => { active++; maxActive = Math.max(maxActive, active); await new Promise(r => setTimeout(r, 15)); active--; return 1; });
+    const qr = await Promise.allSettled([job(), job(), job(), job(), job(), job()]);
+    check('IA local: un solo trabajo a la vez y, con la cola llena, error reintentable en el acto', () =>
+      maxActive === 1 && qr.filter(x => x.status === 'fulfilled').length === 4
+      && qr.filter(x => x.status === 'rejected').every(x => x.reason.code === 'ai_provider_error' && x.reason.retryable) && q.stats().running === 0);
+    getDB().prepare("DELETE FROM ai_provider_usage WHERE provider = 'local'").run();
+
+    // Topes de gasto genéricos (utils/aiBudget.js), probados con un proveedor cualquiera.
+    process.env.AI_PROVIDERS = 'groq,local'; process.env.GROQ_API_KEY = 'gsk_test';
+    process.env.AI_PRICE_GROQ_IN = '0.4'; process.env.AI_PRICE_GROQ_OUT = '0.8';
+    process.env.AI_BUDGET_GROQ_DAILY_TOKENS = '500';
+    seen.length = 0; cfCalls.length = 0;
+    localReply = { content: '{"summary":"x"}' };
+    global.fetch = async (url) => { cfCalls.push(url); return { ok: true, status: 200, json: async () => ({ choices: [{ message: { content: '{"summary":"x"}' } }] }), text: async () => '' }; };
+    await providers.generate({ system: 's', parts: [{ text: 'hola' }], schema: { type: 'OBJECT', properties: { summary: { type: 'STRING' } } }, maxTokens: 1000 });
+    check('Topes IA: con el tope diario alcanzado NO se llama a ese proveedor y pasa al siguiente', () =>
+      !cfCalls.some(u => u.includes('groq')) && seen.length === 1);
+    process.env.AI_BUDGET_GROQ_DAILY_TOKENS = '0';
+    check('Topes IA: tope a 0 desactiva el proveedor', () => budget.allow('groq', 1).ok === false);
+    delete process.env.AI_BUDGET_GROQ_DAILY_TOKENS;
+    process.env.AI_BUDGET_GROQ_MONTHLY_USD = '4';
+    getDB().prepare("INSERT OR REPLACE INTO ai_provider_usage (provider, day, calls, tokens_in, tokens_out, cost_usd) VALUES ('groq', ?, 1, 0, 0, 3.99)").run(new Date().toISOString().slice(0, 7) + '-01');
+    check('Topes IA: tope mensual en USD bloquea antes de pasarse', () => budget.allow('groq', 100000).ok === false && budget.allow('groq', 100).ok === true);
+    check('Topes IA: los proveedores sin tope no se bloquean', () => budget.allow('cloudflare', 1e9).ok === true && budget.allow('local', 1e9).ok === true);
+    const { buildOpsReport } = require('../services/opsReport');
+    check('Ops: el informe diario incluye el consumo por proveedor y avisa al 80 % del tope mensual', () => {
+      const rep = buildOpsReport(new Date(Date.now() + 86400000));
+      return Array.isArray(rep.ai.usage) && rep.alerts.some(a => a.includes('groq') && a.includes('tope'));
+    });
+    process.env.AI_EXPIRES_GROQ = new Date().toISOString().slice(0, 10);
+    check('Caducidad IA: el día indicado (AI_EXPIRES_<PROV>) el proveedor sale solo de análisis y chat', () =>
+      !providers.providerOrder().includes('groq') && !require('../services/ai/chat').providerOrder().includes('groq'));
+    process.env.AI_EXPIRES_GROQ = new Date(Date.now() + 5 * 86400000).toISOString().slice(0, 10);
+    check('Caducidad IA: antes de la fecha sigue activo y el informe avisa a 5 días', () =>
+      providers.providerOrder().includes('groq') && buildOpsReport(new Date()).alerts.some(a => a.includes('groq caduca') && a.includes('en 5 días')));
+    delete process.env.AI_EXPIRES_GROQ;
     getDB().prepare("DELETE FROM ai_provider_usage").run();
+    await new Promise(r => fakeLlama.close(r));
     global.fetch = saved.fetch;
-    for (const [k, env] of [['AI', 'AI_PROVIDERS'], ['K', 'CEREBRAS_API_KEY'], ['A', 'CF_ACCOUNT_ID'], ['T', 'CF_AI_TOKEN'], ['D', 'AI_BUDGET_CEREBRAS_DAILY_TOKENS']]) {
-      if (saved[k] === undefined) delete process.env[env]; else process.env[env] = saved[k];
-    }
+    for (const k of keys) { if (saved.env[k] === undefined) delete process.env[k]; else process.env[k] = saved.env[k]; }
+  }
+
+  // ── IA local (2026-10): respuestas aplazadas (services/deferred.js) ──
+  {
+    const { deferrable, pendingHandler, _store } = require('../services/deferred');
+    const fakeRes = () => { const r = { code: 0, body: null, status(c) { r.code = c; return r; }, json(b) { r.body = b; return r; } }; return r; };
+    const req = { license: { id: 991 }, params: {} };
+    const fast = fakeRes();
+    await deferrable(async (_q, res) => res.status(201).json({ ok: 1 }), { waitMs: 200 })(req, fast);
+    check('Aplazadas: si responde a tiempo, la respuesta es la de siempre', () => fast.code === 201 && fast.body.ok === 1 && _store.size === 0);
+    let release;
+    const slowDone = new Promise(r => { release = r; });
+    const slow = fakeRes();
+    await deferrable(async (_q, res) => { await slowDone; res.json({ report: 'listo' }); }, { waitMs: 20 })(req, slow);
+    const id = slow.body?.pending;
+    check('Aplazadas: si tarda, 202 { pending }', () => slow.code === 202 && /^pend_[0-9a-f]{24}$/.test(id));
+    const p1 = fakeRes(); pendingHandler({ license: { id: 991 }, params: { id } }, p1);
+    const other = fakeRes(); pendingHandler({ license: { id: 992 }, params: { id } }, other);
+    check('Aplazadas: mientras trabaja, la consulta da 202; otra licencia no la ve (404)', () => p1.code === 202 && other.code === 404);
+    release(); await new Promise(r => setTimeout(r, 10));
+    const p2 = fakeRes(); pendingHandler({ license: { id: 991 }, params: { id } }, p2);
+    const p3 = fakeRes(); pendingHandler({ license: { id: 991 }, params: { id } }, p3);
+    check('Aplazadas: al terminar devuelve el resultado con su estado y se borra', () => p2.code === 200 && p2.body.report === 'listo' && p3.code === 404);
+    const boom = fakeRes();
+    await deferrable(async () => { throw new Error('x'); }, { waitMs: 200 })(req, boom);
+    check('Aplazadas: una excepción se convierte en 500 internal_error', () => boom.code === 500 && boom.body.error === 'internal_error');
+    const waits = [];
+    for (let i = 0; i < 6; i++) { const r = fakeRes(); await deferrable(() => new Promise(() => {}), { waitMs: 1 })(req, r); waits.push(r.code); }
+    check('Aplazadas: como mucho 5 en curso por licencia (la 6.ª, 429)', () => waits.slice(0, 5).every(c => c === 202) && waits[5] === 429);
+    _store.clear();
   }
 
   // ── Sesión 7: servidor MCP (/api/mcp) ──

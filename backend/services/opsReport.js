@@ -66,7 +66,7 @@ function providerUsage(now) {
     .map(({ provider }) => ({ provider, day, ...usage(provider, day), budget: budgetFor(provider) }));
 }
 
-function buildOpsReport(now = new Date()) {
+function buildOpsReport(now = new Date(), { localAiUp = null } = {}) {
   const db = getDB();
   const since = "datetime('now', '-1 day')";
   const count = (sql, ...a) => db.prepare(sql).get(...a).c;
@@ -88,7 +88,7 @@ function buildOpsReport(now = new Date()) {
     backup, disk,
     errors, errorsTotal: errors.reduce((s, e) => s + e.c, 0),
     web: { day: yesterday, ...web },
-    ai: { ok: ev('AI_ANALYSIS_GENERATED'), failed: ev('AI_ANALYSIS_FAILED'), providerFails: aiFails, usage: providerUsage(now) },
+    ai: { ok: ev('AI_ANALYSIS_GENERATED'), failed: ev('AI_ANALYSIS_FAILED'), providerFails: aiFails, usage: providerUsage(now), localUp: localAiUp },
     mail: { failed: mailFails },
     activity: {
       active_licenses: count("SELECT COUNT(*) c FROM licenses WHERE status = 'active'"),
@@ -104,6 +104,7 @@ function buildOpsReport(now = new Date()) {
     !backup.ok && backup.text,
     !disk.ok && disk.text,
     report.ai.failed > 0 && `${report.ai.failed} análisis de IA fallidos`,
+    localAiUp === false && 'La IA local (último respaldo) no responde: revisa el servicio nokfi-ia (journalctl -u nokfi-ia)',
     ...report.ai.usage.filter(u => u.budget?.monthlyUsd && u.month_usd >= u.budget.monthlyUsd * 0.8)
       .map(u => `${u.provider}: gasto estimado del mes ${u.month_usd.toFixed(2)} $ (tope ${u.budget.monthlyUsd} $)`),
     ...require('../utils/aiBudget').expiringSoon(now).map(x => x.days > 0
@@ -125,7 +126,8 @@ async function runOpsReport(now = new Date(), { force = false } = {}) {
   const db = getDB();
   if (db.prepare('INSERT OR IGNORE INTO ops_runs (key) VALUES (?)').run(key).changes === 0) return false;
   try {
-    await sendOpsReportEmail({ to: process.env.OPS_EMAIL || 'admin@nokfi.app', report: buildOpsReport(now) });
+    const localAiUp = await require('./ai/localQueue').health();
+    await sendOpsReportEmail({ to: process.env.OPS_EMAIL || 'admin@nokfi.app', report: buildOpsReport(now, { localAiUp }) });
     return true;
   } catch (e) {
     db.prepare('DELETE FROM ops_runs WHERE key = ?').run(key);

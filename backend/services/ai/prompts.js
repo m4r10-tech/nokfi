@@ -73,6 +73,7 @@ const REPORT_SCHEMA = {
     key_figures: {
       type: 'ARRAY',
       description: 'Cifras clave (máx. 6). Solo cifras presentes o calculables con los datos.',
+      maxItems: 6,
       items: {
         type: 'OBJECT',
         properties: {
@@ -83,10 +84,11 @@ const REPORT_SCHEMA = {
         required: ['label', 'value']
       }
     },
-    strengths: { type: 'ARRAY', description: 'Puntos fuertes (máx. 4).', items: { type: 'STRING' } },
+    strengths: { type: 'ARRAY', description: 'Puntos fuertes (máx. 4).', maxItems: 4, items: { type: 'STRING' } },
     priorities: {
       type: 'ARRAY',
       description: 'Problemas o riesgos ordenados de más a menos grave (3-6).',
+      maxItems: 6,
       items: {
         type: 'OBJECT',
         properties: {
@@ -101,6 +103,7 @@ const REPORT_SCHEMA = {
     action_plan: {
       type: 'ARRAY',
       description: 'Pasos concretos y marcables para los próximos 30 días (3-7).',
+      maxItems: 7,
       items: {
         type: 'OBJECT',
         properties: {
@@ -116,6 +119,7 @@ const REPORT_SCHEMA = {
     glossary: {
       type: 'ARRAY',
       description: 'Términos financieros usados en el informe explicados en lenguaje llano (máx. 6).',
+      maxItems: 6,
       items: {
         type: 'OBJECT',
         properties: { term: { type: 'STRING' }, definition: { type: 'STRING' } },
@@ -173,6 +177,43 @@ function normalizeReport(raw, { dropHealth = false } = {}) {
   // Plan ordenado por plazo (los pasos sin plazo, al final y en su orden).
   report.action_plan.sort((a, b) => (a.due_in_days ?? 999) - (b.due_in_days ?? 999));
   return report;
+}
+
+/* ── Filtro de cifras para la IA de respaldo (2026-10) ──
+ * Los modelos pequeños de la IA local a veces escriben importes que no están en
+ * los datos. Se comparan las cifras del informe (3 dígitos o más) con las de la
+ * petición, sin importar el formato (87.300,00 € = 87,300.00 = 87300): las
+ * frases con una cifra desconocida se quitan, igual que las cifras clave. Lo
+ * pequeño (días, plazos, porcentajes de 1-2 dígitos) no se comprueba. */
+function numberKeys(text) {
+  const out = [];
+  for (const m of String(text || '').matchAll(/\d[\d.,]*\d|\d/g)) {
+    let v = m[0];
+    v = v.replace(/[.,]0{1,2}$/, '');                     // 87.300,00 → 87.300
+    const digits = v.replace(/[.,]/g, '').replace(/^0+(?=\d)/, '');
+    if (digits.length >= 3) out.push(digits);
+  }
+  return out;
+}
+
+function guardFigures(report, sourceText) {
+  const known = new Set(numberKeys(sourceText));
+  const ok = (text) => numberKeys(text).every(n => known.has(n));
+  const keepSentences = (text) => String(text || '').split(/(?<=[.!?])\s+/).filter(ok).join(' ').trim();
+  let removed = 0;
+  const count = (before, after) => { if (before !== after) removed++; return after; };
+  const out = {
+    ...report,
+    summary: count(report.summary, keepSentences(report.summary)),
+    key_figures: report.key_figures.filter(k => ok(k.value) || (removed++, false)),
+    priorities: report.priorities
+      .map(p => ({ ...p, title: ok(p.title) ? p.title : '', detail: count(p.detail, keepSentences(p.detail)) }))
+      .filter(p => p.title || (removed++, false)),
+    action_plan: report.action_plan
+      .map(a => ({ ...a, title: ok(a.title) ? a.title : '', detail: count(a.detail, keepSentences(a.detail)) }))
+      .filter(a => a.title || (removed++, false))
+  };
+  return { report: out, removed };
 }
 
 /** Texto plano del informe (para contar/mostrar y como contexto del chat). */
@@ -425,7 +466,16 @@ function buildInvoices({ files }) {
 }
 
 const round2 = (n) => Math.round((Number(n) || 0) * 100) / 100;
-const isoDate = (s) => (/^\d{4}-\d{2}-\d{2}$/.test(String(s || '').trim()) ? String(s).trim() : '');
+// Fecha a AAAA-MM-DD. Algunos modelos (sobre todo los pequeños) devuelven el
+// formato español DD/MM/AAAA aunque se les pida otro: se acepta y se convierte.
+const isoDate = (s) => {
+  const v = String(s || '').trim();
+  if (/^\d{4}-\d{2}-\d{2}$/.test(v)) return v;
+  const m = v.match(/^(\d{1,2})[/.-](\d{1,2})[/.-](\d{4})$/);
+  if (!m) return '';
+  const [d, mo, y] = [Number(m[1]), Number(m[2]), m[3]];
+  return d >= 1 && d <= 31 && mo >= 1 && mo <= 12 ? `${y}-${String(mo).padStart(2, '0')}-${String(d).padStart(2, '0')}` : '';
+};
 
 function normalizeInvoices(raw, files) {
   const list = arr(raw?.invoices);
@@ -433,7 +483,9 @@ function normalizeInvoices(raw, files) {
     const inv = list.find(x => x?.file_name === f.name) || list[i] || {};
     const out = {
       file_name: f.name,
-      is_invoice: inv.is_invoice !== false,
+      // Los modelos pequeños a veces marcan como "no factura" un documento del
+      // que sí han sacado emisor e importe: si los hay, se trata como factura.
+      is_invoice: inv.is_invoice !== false || (Number(inv.total) > 0 && !!clean(inv.issuer_name, 160)),
       issuer_name: clean(inv.issuer_name, 160),
       issuer_nif: clean(inv.issuer_nif, 20).toUpperCase().replace(/[\s-]/g, ''),
       recipient_name: clean(inv.recipient_name, 160),
@@ -446,8 +498,9 @@ function normalizeInvoices(raw, files) {
       base: round2(inv.base),
       vat_rate: round2(inv.vat_rate),
       vat_amount: round2(inv.vat_amount),
-      irpf_rate: round2(inv.irpf_rate),
-      irpf_amount: round2(inv.irpf_amount),
+      // La retención se guarda en positivo (hay modelos que la devuelven con signo menos).
+      irpf_rate: Math.abs(round2(inv.irpf_rate)),
+      irpf_amount: Math.abs(round2(inv.irpf_amount)),
       total: round2(inv.total)
     };
     // Validación V1: base + IVA − retención = total (tolerancia de redondeo).
@@ -465,6 +518,7 @@ module.exports = {
   REPORT_SCHEMA,
   INVOICE_SCHEMA,
   normalizeReport,
+  guardFigures,
   reportToText,
   QUESTIONNAIRE_ITEMS,
   EXCEL_MODULES,

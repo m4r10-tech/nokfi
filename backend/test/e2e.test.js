@@ -972,11 +972,12 @@ async function main() {
       ] }) }] } }] }),
       text: async () => ''
     });
-    await checkAsync('V1: invoices → datos normalizados (NIF, fecha ISO) y check_ok por factura',
+    // Desde 2026-10 la fecha DD/MM/AAAA se convierte a ISO (antes se dejaba vacía).
+    await checkAsync('V1: invoices → datos normalizados (NIF, fecha ISO también desde DD/MM/AAAA) y check_ok por factura',
       post('/api/ai/analyze', { task: 'invoices', input: { files: [{ name: 'a.pdf', text: 'Factura luz' }, { name: 'b.pdf', text: 'Factura mía' }] } }, tokenA),
       r => r.status === 200 && r.data.invoices.length === 2
         && r.data.invoices[0].issuer_nif === 'B12345678' && r.data.invoices[0].check_ok === true
-        && r.data.invoices[1].invoice_date === '' && r.data.invoices[1].check_ok === false
+        && r.data.invoices[1].invoice_date === '2026-07-03' && r.data.invoices[1].check_ok === false
     );
     await checkAsync('V1: invoices con mime no soportado → 400',
       post('/api/ai/analyze', { task: 'invoices', input: { files: [{ name: 'x.exe', mime: 'application/x-msdownload', data: 'AAAA' }] } }, tokenA),

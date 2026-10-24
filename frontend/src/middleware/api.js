@@ -14,7 +14,36 @@ export function setSessionExpiredHandler(fn) { onSessionExpired = fn; }
 export function setSessionToken(token) { sessionToken = token; }
 export function getSessionToken() { return sessionToken; }
 
-async function request(path, { method = 'GET', body, auth = false, isFormData = false } = {}) {
+// Respuestas aplazadas (backend services/deferred.js): si la IA tarda (p. ej. la
+// IA local del servidor), la petición devuelve 202 { pending } y aquí se consulta
+// /pending/:id hasta tener el resultado, que llega como si fuera la respuesta
+// original. Mientras, se avisa con el evento `nokfi:ai-wait` (lo pinta ToastContext).
+const PENDING_MAX_MS = 20 * 60 * 1000;
+const sleep = (ms) => new Promise(r => setTimeout(r, ms));
+let waiting = 0;
+function setWaiting(delta) {
+  waiting = Math.max(0, waiting + delta);
+  try { window.dispatchEvent(new CustomEvent('nokfi:ai-wait', { detail: { waiting } })); } catch { /* sin window (tests) */ }
+}
+
+async function waitPending(id, auth) {
+  setWaiting(1);
+  try {
+    const t0 = Date.now();
+    for (let i = 0; Date.now() - t0 < PENDING_MAX_MS; i++) {
+      await sleep(i < 5 ? 3000 : 5000);
+      const r = await request(`/pending/${encodeURIComponent(id)}`, { auth, noDefer: true });
+      if (r.status === 202 && r.data?.pending) continue;
+      if (r.status === 0) continue; // un corte de red puntual no pierde el trabajo
+      return r;
+    }
+    return { ok: false, status: 504, data: { error: 'ai_timeout' } };
+  } finally {
+    setWaiting(-1);
+  }
+}
+
+async function request(path, { method = 'GET', body, auth = false, isFormData = false, noDefer = false } = {}) {
   const headers = {};
   if (!isFormData) headers['Content-Type'] = 'application/json';
   if (auth && sessionToken) headers['Authorization'] = `Bearer ${sessionToken}`;
@@ -58,6 +87,7 @@ async function request(path, { method = 'GET', body, auth = false, isFormData = 
     if (onSessionExpired) onSessionExpired(data.error);
   }
 
+  if (!noDefer && res.status === 202 && typeof data.pending === 'string') return waitPending(data.pending, auth);
   return { ok: res.ok, status: res.status, data };
 }
 

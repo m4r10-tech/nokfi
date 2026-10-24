@@ -10,7 +10,7 @@
 export const DPA = {
   es: {
     title: 'Contrato de encargo de tratamiento',
-    updated: 'Última actualización: 15 de octubre de 2026',
+    updated: 'Última actualización: 24 de octubre de 2026',
     intro: 'Cuando usas Nokfi tratas datos personales de terceros (por ejemplo, el nombre, NIF y email de tus clientes y proveedores). Para esos datos tú eres el responsable del tratamiento y Nokfi actúa como encargado, conforme al artículo 28 del Reglamento General de Protección de Datos (RGPD) y a la Ley Orgánica 3/2018. Este contrato forma parte de los términos de uso y se acepta al activar la licencia.',
     sections: [
       { h: '1. Partes', list: [
@@ -42,7 +42,8 @@ export const DPA = {
         'Los archivos que analizas se leen en tu navegador y no se guardan en nuestros servidores.',
         'API: el registro de llamadas no guarda el contenido (90 días); los resultados de los trabajos asíncronos y el contenido de los webhooks se borran a las 24 h. Los webhooks solo envían datos a las URL que tú configuras, firmados con HMAC y solo a direcciones públicas por https.',
         'Las facturas emitidas, sus líneas y sus registros de facturación no se pueden modificar ni borrar (bloqueo en la base de datos y huella encadenada, Real Decreto 1007/2023).',
-        'Copias de seguridad diarias de la base de datos, verificadas; la copia que sale del servidor va comprimida y cifrada (AES-256-GCM) con una clave que solo tiene Nokfi, y se borra a los 30 días. Registro de eventos de seguridad.'
+        'Copias de seguridad diarias de la base de datos, verificadas; la copia que sale del servidor va comprimida y cifrada (AES-256-GCM) con una clave que solo tiene Nokfi, y se borra a los 30 días. Registro de eventos de seguridad.',
+        'Si los proveedores de IA externos no están disponibles, los análisis los hace un modelo de IA propio en el servidor de Nokfi (UE), sin intervención de terceros.'
       ] },
       { h: '6. Subencargados', ps: [
         'Autorizas a Nokfi a usar los siguientes subencargados, que han asumido obligaciones de protección de datos equivalentes a las de este contrato:'
@@ -50,7 +51,6 @@ export const DPA = {
         '{HOSTING}',
         'Cloudflare, Inc.: red de distribución y seguridad, generación de análisis con IA (Workers AI) y almacenamiento de la copia de seguridad cifrada en la UE (R2). Transferencias internacionales amparadas por el Marco de Privacidad de Datos UE-EE. UU. y cláusulas contractuales tipo.',
         'Groq, Inc.: generación de análisis con IA, junto con Cloudflare; sin entrenamiento con los datos y con retención cero. EE. UU., con cláusulas contractuales tipo.',
-        'Cerebras Systems, Inc.: generación de análisis con IA como respaldo, solo si Groq y Cloudflare no están disponibles; sin entrenamiento con los datos. EE. UU., con cláusulas contractuales tipo.',
         'Resend (Plus Five Five, Inc.): envío de emails, incluidos los recordatorios de cobro a tus clientes. EE. UU., con cláusulas contractuales tipo.'
       ], after: [
         'Si incorporamos o sustituimos un subencargado (por ejemplo, otro proveedor de IA que no entrene con los datos), lo publicaremos en esta página y te avisaremos con al menos 15 días de antelación; podrás oponerte cancelando tu licencia.',
@@ -70,7 +70,7 @@ export const DPA = {
   },
   en: {
     title: 'Data processing agreement',
-    updated: 'Last updated: 15 October 2026',
+    updated: 'Last updated: 24 October 2026',
     intro: 'When you use Nokfi you process personal data of third parties (for example, the name, tax ID and email of your clients and suppliers). For that data you are the controller and Nokfi acts as processor, under Article 28 of the General Data Protection Regulation (GDPR). This agreement is part of the terms of use and is accepted when you activate your licence. The Spanish version prevails in case of discrepancy.',
     sections: [
       { h: '1. Parties', list: [
@@ -102,13 +102,13 @@ export const DPA = {
         'Files you analyse are read in your browser and not stored on our servers.',
         'API: the call log never stores content (90 days); async job results and webhook contents are deleted after 24 h. Webhooks only send data to the URLs you configure, HMAC-signed and only to public https addresses.',
         'Issued invoices, their lines and their billing records cannot be changed or deleted (database lock and chained fingerprint, Royal Decree 1007/2023).',
-        'Daily, verified database backups; the copy that leaves the server is compressed and encrypted (AES-256-GCM) with a key held only by Nokfi, and is deleted after 30 days. Security event logging.'
+        'Daily, verified database backups; the copy that leaves the server is compressed and encrypted (AES-256-GCM) with a key held only by Nokfi, and is deleted after 30 days. Security event logging.',
+        'If the external AI providers are unavailable, analyses are produced by Nokfi’s own AI model on Nokfi’s server (EU), with no third party involved.'
       ] },
       { h: '6. Sub-processors', ps: ['You authorise Nokfi to use the following sub-processors, bound by data protection obligations equivalent to this agreement:'], list: [
         '{HOSTING}',
         'Cloudflare, Inc.: content delivery and security network, AI analyses (Workers AI) and storage of the encrypted backup in the EU (R2). International transfers covered by the EU-US Data Privacy Framework and standard contractual clauses.',
         'Groq, Inc.: AI analyses, together with Cloudflare; no training on the data and zero data retention. US, under standard contractual clauses.',
-        'Cerebras Systems, Inc.: backup AI analyses, used only if Groq and Cloudflare are unavailable; no training on the data. US, under standard contractual clauses.',
         'Resend (Plus Five Five, Inc.): email delivery, including payment reminders to your clients. USA, with standard contractual clauses.'
       ], after: [
         'If we add or replace a sub-processor (for example another AI provider that does not train on data), we will publish it here and notify you at least 15 days in advance; you may object by cancelling your licence.',

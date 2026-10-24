@@ -177,6 +177,9 @@ app.use(express.json({ limit: '2mb' }));
 const generalLimiter = rateLimit({
   windowMs: 15 * 60 * 1000,
   max: isProduction ? 200 : 2000,
+  // Consultas de respuestas aplazadas (services/deferred.js): baratas, con sesión,
+  // y un análisis lento hace decenas mientras espera.
+  skip: (req) => req.path.startsWith('/pending/'),
   standardHeaders: true,
   legacyHeaders: false,
   message: { error: 'rate_limited', message: 'Demasiadas peticiones. Inténtalo en unos minutos.' }
@@ -269,6 +272,7 @@ app.use('/api/proxy', proxyRoutes);
 app.use('/api/ai', aiRouter);               // análisis con plantillas de backend (sesión 4, F1/F2)
 app.use('/api/actions', actionsRouter);     // plan de acción marcable (C2)
 app.use('/api/chat', chatRoutes);           // asistente con modelos gratuitos (C5)
+app.get('/api/pending/:id', require('./middleware/requireLicense').requireLicense, require('./services/deferred').pendingHandler); // respuestas de IA que tardan (IA local)
 app.use('/api/ledger', financeRoutes.ledger);       // libro de facturas (V1)
 app.use('/api/finance', financeRoutes.finance);     // impuestos, cobros, fugas, previsión, calendario (V2-V5, C4)
 app.use('/api/dashboard', financeRoutes.dashboard); // resumen del panel de inicio

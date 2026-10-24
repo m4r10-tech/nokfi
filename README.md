@@ -57,7 +57,7 @@ Stripe).
 | Capa | Tecnología |
 |------|------------|
 | Backend | Node.js 22 + Express + SQLite (`better-sqlite3`) |
-| IA | Groq → Cloudflare Workers AI → Cerebras (en cadena; proveedores que no entrenan con los datos) |
+| IA | Groq → Cloudflare Workers AI → IA local en el VPS (llama.cpp; en cadena; nada entrena con los datos) |
 | Frontend | React + Vite + Tailwind CSS + PWA, i18n (es, en, fr, it, de, pl) |
 | Gráficas | Recharts |
 | Archivos | `xlsx` (SheetJS), `jspdf`, `pdfjs-dist`, `docx`, `pptxgenjs` |

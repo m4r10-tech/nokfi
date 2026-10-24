@@ -25,6 +25,7 @@
 
 const express = require('express');
 const { requireLicense } = require('../middleware/requireLicense');
+const { deferrable } = require('../services/deferred');
 const { getCompanyProfile, getLatestAnalysisOfKind, audit, countAiAnalysesToday } = require('../db/database');
 const F = require('../db/finance');
 const { sentStages } = require('../services/collections');
@@ -129,7 +130,7 @@ const TONES = {
   formal: 'aviso formal: menciona que, de no recibir el pago en 7 días, se valorarán otras medidas (sin amenazas concretas ni lenguaje legal inventado)'
 };
 
-finance.post('/collection-email', requireLicense, async (req, res) => {
+finance.post('/collection-email', requireLicense, deferrable(async (req, res) => {
   const entry = F.getEntry(req.license.id, Number(req.body?.entry_id));
   if (!entry || entry.type !== 'income') return res.status(404).json({ error: 'not_found' });
   if (!allowMessage(req.license.id)) return res.status(429).json({ error: 'chat_rate_limited' });
@@ -156,7 +157,7 @@ Concepto: ${entry.concept || '—'}.`;
     if (e.code === 'chat_unavailable') return res.status(503).json({ error: 'chat_unavailable' });
     res.status(500).json({ error: 'internal_error' });
   }
-});
+}));
 
 /* ── V5: fugas ── */
 finance.get('/leaks', requireLicense, (req, res) => {

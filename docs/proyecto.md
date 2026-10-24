@@ -18,9 +18,10 @@
   análisis de Excel con IA, asistente, calculadoras y enlaces para la gestoría.
 - **Espacios**: Negocio y Desarrolladores (claves `nk_live_`/`nk_test_`,
   webhooks, Playground, registro, clientes).
-- **IA**: Groq → Cloudflare Workers AI → Cerebras (Cerebras se quita el
-  2026-10-29); topes de gasto en `utils/aiBudget.js`. Gemini ya no se usa por
-  defecto (queda como proveedor opcional en el código).
+- **IA**: Groq → Cloudflare Workers AI → **IA local** (llama.cpp en el VPS,
+  último respaldo desde 2026-10; ver `docs/deploy.md` «IA local»). Cerebras
+  salió el 2026-10-22. Topes de gasto opcionales en `utils/aiBudget.js`. Gemini
+  ya no se usa por defecto (queda como proveedor opcional en el código).
 - **Integraciones**: API pública v1, servidor MCP 1.2.0, nodo n8n 0.3.0 (npm).
 - **Web pública (sesión 12)**: landing, precios, 5 calculadoras, calendario
   fiscal, validador de NIF y 8 guías, en castellano (raíz) e inglés (`/en/…`),
@@ -120,7 +121,7 @@ cobro en Stripe. Esto impide la farmación de claves sin pagar.
 | Capa | Tecnología |
 |------|------------|
 | Backend | Node.js 22 + Express + SQLite (`better-sqlite3` 13) |
-| IA | Groq, Cloudflare Workers AI y Cerebras (orden en `AI_PROVIDERS` / `CHAT_PROVIDERS`) |
+| IA | Groq, Cloudflare Workers AI e IA local con llama.cpp (orden en `AI_PROVIDERS` / `CHAT_PROVIDERS`) |
 | Frontend | React 18 + Vite 5 + Tailwind CSS + PWA; páginas públicas prerenderizadas (SSR en el build) |
 | Gráficas | Recharts |
 | Excel/PDF | `xlsx` (SheetJS), `jspdf`, `pdfjs-dist`, `docx`, `pptxgenjs` |

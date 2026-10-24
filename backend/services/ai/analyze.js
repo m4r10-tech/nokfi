@@ -61,7 +61,9 @@ const AI_ERROR_RESPONSES = {
   ai_quota_exceeded: [503, 'El servicio de análisis ha alcanzado su límite diario global. Inténtalo de nuevo en unas horas.'],
   ai_provider_error: [502, 'Ha fallado la conexión con el servicio de análisis. Inténtalo de nuevo en unos minutos.'],
   ai_empty_response: [502, 'El análisis no pudo generarse ahora mismo (la IA devolvió una respuesta vacía). Inténtalo de nuevo.'],
-  ai_bad_output: [502, 'La IA devolvió una respuesta incompleta. Inténtalo de nuevo: no se ha descontado de tu cuota.']
+  ai_bad_output: [502, 'La IA devolvió una respuesta incompleta. Inténtalo de nuevo: no se ha descontado de tu cuota.'],
+  // Solo quedaba la IA local y la petición era demasiado grande para ella.
+  prompt_too_long: [503, 'Hay demasiados datos para un solo análisis ahora mismo. Prueba con menos archivos o con uno más pequeño.']
 };
 
 /** Valida la entrada y prepara la llamada. Devuelve { error } o { plan }. */
@@ -182,7 +184,8 @@ async function runAnalysis({ license, task, input, lang, title, jobId, ip, sourc
       system: P.systemPrompt({ profile, lang }),
       parts: plan.parts,
       schema: plan.schema,
-      maxTokens: plan.maxTokens || 8000
+      maxTokens: plan.maxTokens || 8000,
+      lang
     });
   } catch (e) {
     permit.onFailure();
@@ -208,7 +211,15 @@ async function runAnalysis({ license, task, input, lang, title, jobId, ip, sourc
     return { status: 200, body: { invoices: P.normalizeInvoices(result.json, plan.files), ...jobOut } };
   }
 
-  const report = P.normalizeReport(result.json, { dropHealth: task === 'cuestionario' });
+  let report = P.normalizeReport(result.json, { dropHealth: task === 'cuestionario' });
+  // IA de respaldo (local, 2026-10): fuera las cifras que no estén en los datos y
+  // marca para que la pantalla avise de que conviene contrastarlo.
+  if (String(result.model || '').startsWith('local:')) {
+    const source = [P.systemPrompt({ profile, lang }), ...plan.parts.map(p => p.text || '')].join('\n');
+    const guarded = P.guardFigures(report, source);
+    if (guarded.removed) console.warn(`[AI] IA local: ${guarded.removed} elementos quitados por cifras no presentes en los datos`);
+    report = { ...guarded.report, ai_backup: true };
+  }
   if (!report.summary && !report.priorities.length) {
     return { status: 502, body: { error: 'ai_bad_output', message: AI_ERROR_RESPONSES.ai_bad_output[1] } };
   }

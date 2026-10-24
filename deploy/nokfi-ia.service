@@ -1,0 +1,61 @@
+# ==========================================================================
+# Nokfi — IA local (llama-server) como servicio systemd. Desde 2026-10.
+# --------------------------------------------------------------------------
+# Último respaldo de la IA (AI_PROVIDERS=groq,cloudflare,local): si Groq y
+# Cloudflare fallan, el backend le pide el análisis aquí. Solo escucha en
+# 127.0.0.1 (no se ve desde fuera; además ufw solo abre 22/80/443).
+#
+# Instalación (root):
+#   cp deploy/nokfi-ia.service /etc/systemd/system/
+#   systemctl daemon-reload && systemctl enable --now nokfi-ia
+# Comprobar:  curl -s 127.0.0.1:8081/health   → {"status":"ok"}
+# Logs:       journalctl -u nokfi-ia -n 50
+#
+# Modelo (elegido el 2026-10-24 midiendo con backend/scripts/ia-local-prueba.js):
+# Gemma 4 E2B instruct, cuantización QAT q4_0 oficial de Google
+# (huggingface.co/google/gemma-4-E2B-it-qat-q4_0-gguf), Apache 2.0, con visión
+# (mmproj) para las facturas en foto. Descartados: Qwen3.5-4B (demasiado lento
+# en esta CPU), Qwen3.5-2B (más rápido pero inventa cifras e ignora el idioma)
+# y Gemma 4 E4B (no cabe con margen en 8 GB).
+# Archivos: binarios en /opt/llama.cpp/current (release oficial de
+# ggml-org/llama.cpp, enlace a la versión), modelo en /opt/nokfi-ia/models.
+# Para cambiar de modelo: dejar el .gguf nuevo y su mmproj en esa carpeta,
+# cambiar las rutas de abajo, LOCAL_AI_MODEL en el .env, daemon-reload,
+# restart, y probar con backend/scripts/ia-local-prueba.js.
+#
+# Límites para que NUNCA ahogue a la app: prioridad baja de CPU (Nice +
+# CPUWeight) y tope de RAM (si se pasa, systemd lo mata y lo reinicia; el
+# backend sigue con Groq/Cloudflare y la petición en curso falla limpia).
+# ==========================================================================
+
+[Unit]
+Description=Nokfi IA local (llama-server, solo 127.0.0.1)
+After=network.target
+
+[Service]
+Type=simple
+User=llm
+Group=llm
+ExecStart=/opt/llama.cpp/current/llama-server \
+  -m /opt/nokfi-ia/models/gemma-4-E2B-it-q4_0.gguf \
+  --mmproj /opt/nokfi-ia/models/gemma-4-E2B-it-mmproj.gguf \
+  --host 127.0.0.1 --port 8081 \
+  -t 5 -c 16384 -np 1 --jinja --no-webui
+Restart=on-failure
+RestartSec=10
+Nice=15
+CPUWeight=20
+MemoryMax=6G
+MemorySwapMax=0
+# Endurecido: sin acceso a /home (ni al .env ni a la BD), sistema de solo lectura.
+ProtectHome=true
+ProtectSystem=strict
+PrivateTmp=true
+NoNewPrivileges=true
+ProtectKernelTunables=true
+ProtectKernelModules=true
+ProtectControlGroups=true
+RestrictAddressFamilies=AF_INET AF_INET6 AF_UNIX
+
+[Install]
+WantedBy=multi-user.target

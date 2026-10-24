@@ -39,6 +39,14 @@ function StructuredReport({ report, actions, health, onActionsChange }) {
   const { t, lang } = useLang();
   return (
     <div className="flex flex-col gap-4 anim-fade">
+      {report.ai_backup && (
+        // IA local de respaldo (2026-10): más sencilla, se avisa para contrastar.
+        <p role="note" className="flex items-start gap-2 rounded-xl px-3.5 py-2.5 text-sm"
+          style={{ background: 'var(--surface-2)', color: 'var(--text-secondary)' }}>
+          <Info size={16} className="shrink-0 mt-0.5" style={{ color: 'var(--accent-text)' }} />
+          <span>{t('report.backupAi')}</span>
+        </p>
+      )}
       <Block>
         <p className="text-[15px] leading-relaxed" style={{ color: 'var(--text-primary)' }}>{report.summary}</p>
       </Block>

@@ -1,5 +1,5 @@
 import { createContext, useContext, useState, useCallback, useRef, useEffect, useMemo } from 'react';
-import { CheckCircle2, AlertCircle, Info, X, WifiOff } from 'lucide-react';
+import { CheckCircle2, AlertCircle, Info, X, WifiOff, Hourglass } from 'lucide-react';
 import { useLang } from './LangContext';
 
 /**
@@ -61,6 +61,19 @@ export function ToastProvider({ children }) {
     window.addEventListener('online', on);
     return () => { window.removeEventListener('offline', off); window.removeEventListener('online', on); };
   }, [push, t]);
+
+  // IA lenta (respuestas aplazadas, middleware/api.js): aviso fijo mientras
+  // haya alguna en curso; se quita solo al terminar.
+  const aiWaitToast = useRef(null);
+  useEffect(() => {
+    const onWait = (e) => {
+      const n = e.detail?.waiting || 0;
+      if (n > 0 && !aiWaitToast.current) aiWaitToast.current = push('info', t('toast.aiSlow'), { key: 'ai-wait', duration: 0, icon: Hourglass });
+      if (n === 0 && aiWaitToast.current) { dismiss(aiWaitToast.current); aiWaitToast.current = null; }
+    };
+    window.addEventListener('nokfi:ai-wait', onWait);
+    return () => window.removeEventListener('nokfi:ai-wait', onWait);
+  }, [push, dismiss, t]);
 
   useEffect(() => () => timers.current.forEach(clearTimeout), []);
 

@@ -587,6 +587,9 @@ export default {
     api_plan_required: 'Les clés d’API sont disponibles avec les offres Pro et Max.',
     subscription_active: 'Résiliez d’abord votre abonnement depuis « Gérer l’abonnement ». Vous pourrez ensuite supprimer le compte.',
     payload_too_large: 'Les fichiers sont trop lourds pour un seul envoi. Essayez avec moins de fichiers.',
+    pending_not_found: 'La tâche a été interrompue. Relancez-la.',
+    too_many_pending: 'Plusieurs tâches d’IA sont en cours. Attendez qu’elles se terminent avant d’en lancer une autre.',
+    ai_timeout: 'L’IA n’a pas terminé à temps. Réessayez dans quelques minutes.',
     offlineTitle: 'Impossible de joindre Nokfi',
     offlineDesc: 'Il peut s’agir de votre connexion ou d’un redémarrage du serveur. Réessayez dans quelques secondes.',
     genericTitle: 'Chargement impossible'
@@ -596,7 +599,8 @@ export default {
     offline: 'Pas de connexion internet',
     online: 'Connexion rétablie',
     sessionExpired: 'Votre session a expiré. Reconnectez-vous.',
-    licenseInactive: 'Votre licence n’est plus active. Vous avez été déconnecté.'
+    licenseInactive: 'Votre licence n’est plus active. Vous avez été déconnecté.',
+    aiSlow: 'L’IA met plus de temps que d’habitude. Nous continuons : ne fermez pas cet onglet.'
   },
   footer: { rights: 'Tous droits réservés' },
   landing: {
@@ -714,7 +718,7 @@ export default {
   },
   privacy: {
     title: 'Politique de confidentialité',
-    updated: 'Dernière mise à jour : 15 octobre 2026',
+    updated: 'Dernière mise à jour : 24 octobre 2026',
     intro: 'Cette politique décrit, sans petits caractères, quelles données Nokfi (nokfi.app) traite, dans quel but et quels services tiers interviennent. Elle reflète exactement le fonctionnement de l’application.',
     sections: [
       { h: 'Responsable et contact', ps: ['Le responsable du traitement des données de votre compte est {OWNER}. Pour toute question de confidentialité ou pour exercer vos droits, écrivez à info@nokfi.app. Pour un problème de compte ou de paiement, à soporte@nokfi.app.'] },
@@ -732,13 +736,12 @@ export default {
       ] },
       { h: 'Vos fichiers ne sont pas conservés sur nos serveurs', ps: [
         'Les fichiers Excel, PDF et les dossiers que vous analysez sont lus localement, dans votre propre navigateur. Ils ne sont pas conservés sur nos serveurs.',
-        'Pour générer une analyse, le texte ou les lignes extraits sont envoyés, via notre serveur, au service d’intelligence artificielle. Pour lire des factures numérisées ou photographiées, une copie réduite de l’image ou du PDF est aussi envoyée, uniquement pour la lire ; elle n’est pas conservée non plus.'
+        'Pour générer une analyse, le texte ou les lignes extraits sont envoyés, via notre serveur, au service d’intelligence artificielle. Pour lire des factures numérisées ou photographiées, une copie réduite de l’image ou du PDF est aussi envoyée, uniquement pour la lire ; elle n’est pas conservée non plus. Si ces services sont indisponibles, l’analyse est réalisée par notre propre modèle d’IA, qui fonctionne sur notre serveur dans l’UE, sans envoyer les données à aucun tiers.'
       ] },
       { h: 'Services tiers qui interviennent', list: [
         'Stripe : traite les paiements et gère les abonnements.',
         'Cloudflare Workers AI : génère les analyses, lit les factures scannées ou photographiées et répond dans l’assistant. Ses conditions interdisent d’utiliser vos données pour entraîner des modèles et il ne les conserve pas (sauf journaux techniques temporaires pour enquêter sur les abus). Nous ne conservons pas vos conversations avec l’assistant.',
         'Groq : génère les analyses, lit les factures et répond dans l’assistant ; s’il est indisponible, Cloudflare Workers AI prend le relais. Son contrat lui interdit d’utiliser vos données pour entraîner ou ajuster des modèles, et la conservation zéro est activée (les requêtes ne sont pas conservées). Il traite les données aux États-Unis, sous clauses contractuelles types.',
-        'Cerebras : fournisseur d’IA de secours, utilisé seulement si Groq et Cloudflare sont indisponibles (mêmes tâches). Son contrat ne l’autorise à utiliser vos données que pour fournir le service (pas pour entraîner des modèles) et à les conserver le strict nécessaire. Il traite les données aux États-Unis, sous clauses contractuelles types.',
         'Resend : envoie les e-mails (votre clé de licence, la récupération du mot de passe et, si vous les activez, les rappels du calendrier fiscal, le résumé mensuel et les relances de paiement à vos clients).',
         'Cloudflare : réseau de distribution et de sécurité qui protège l’accès au site. Nous utilisons le pays de votre connexion (indiqué par Cloudflare) uniquement pour choisir la langue initiale du site ; nous ne le conservons pas. Il stocke aussi la sauvegarde quotidienne de la base de données, chiffrée et dans l’UE (Cloudflare R2) ; il ne peut pas la lire sans notre clé, et chaque sauvegarde est supprimée au bout de 30 jours.',
         "Agence fiscale espagnole (AEAT) : si l'envoi des enregistrements VERI*FACTU est activé pour votre compte, les enregistrements de vos factures lui sont transmis en vertu d'une obligation légale. Il est désactivé pour l'instant."
@@ -751,6 +754,7 @@ export default {
     ]
   },
   report: {
+    backupAi: 'Réalisé avec l’IA de secours de Nokfi (les services habituels ne répondaient pas). Elle est plus simple : vérifiez les chiffres dans vos écrans Nokfi.',
     summary: 'Résumé', keyFigures: 'Chiffres clés', strengths: 'Points forts', priorities: 'Priorités',
     actionPlan: 'Plan d’action', glossary: 'Glossaire', progress: '{n} sur {total} faites',
     goTo: 'Aller à {name}',

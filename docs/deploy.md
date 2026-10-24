@@ -252,3 +252,42 @@ con alerta por email. No se puede crear desde Claude Code (necesita cuenta).
   (sudo, usuario).
 - `robots.txt` y `og-image.png` se sirven desde `frontend/dist` (los copia el
   build de Vite desde `public/`); sin config extra de Nginx.
+
+## 13. IA local (último respaldo, desde 2026-10-24)
+
+Cadena de IA: **Groq → Cloudflare Workers AI → IA local** (`AI_PROVIDERS` y
+`CHAT_PROVIDERS` = `groq,cloudflare,local`). Si los dos servicios externos fallan,
+el análisis, el chat y los emails de reclamación los hace un modelo en el propio
+VPS: los datos no salen del servidor. Es lento (CPU) y más sencillo, así que es
+un salvavidas, no el motor principal.
+
+- **Servicio**: `nokfi-ia` (systemd, `deploy/nokfi-ia.service`), usuario `llm`,
+  solo `127.0.0.1:8081`, prioridad baja (Nice 15, CPUWeight 20), tope de RAM 6 GB,
+  sin acceso a `/home`. `systemctl status nokfi-ia`, `journalctl -u nokfi-ia -n 50`,
+  `curl -s 127.0.0.1:8081/health`.
+- **Motor**: llama.cpp, binario oficial de su release de GitHub en
+  `/opt/llama.cpp/<build>` con el enlace `/opt/llama.cpp/current` (instalado
+  `b11852`). Necesita `libgomp1`. Para actualizar: descomprimir otra release al
+  lado, mover el enlace, `systemctl restart nokfi-ia` y probar.
+- **Modelo**: Gemma 4 E2B instruct, QAT q4_0 oficial de Google (Apache 2.0) +
+  `mmproj` para leer facturas en foto, en `/opt/nokfi-ia/models`. Elegido midiendo
+  con `backend/scripts/ia-local-prueba.js` los prompts reales de Nokfi (ver la
+  cabecera de `deploy/nokfi-ia.service`). En esta CPU (EPYC 7551P, 5 núcleos, AVX2)
+  lee ~18 tokens/s y escribe ~6: diagnóstico ≈ 4 min, Excel ≈ 6 min, factura ≈ 1 min,
+  chat ≈ 1-2 min.
+- **Backend** (`.env`): `LOCAL_AI_URL=http://127.0.0.1:8081`,
+  `LOCAL_AI_MODEL=gemma-4-e2b`; opcionales `LOCAL_AI_MAX_QUEUE` (3),
+  `LOCAL_AI_TIMEOUT_MS` (12 min), `LOCAL_AI_CHAT_TIMEOUT_MS` (5 min),
+  `LOCAL_AI_MAX_PROMPT_CHARS` (28000: más grande, no se le manda).
+- **Cómo se protege la calidad**: JSON forzado por gramática (`json_schema`), el
+  idioma se repite al final del mensaje, las cifras que no estén en los datos se
+  quitan del informe (`guardFigures`) y el informe lleva `ai_backup: true`, que la
+  pantalla muestra como aviso para contrastar las cifras.
+- **Sin cortes en la web**: las respuestas que tardan > 25 s se aplazan
+  (`202 { pending }` + `GET /api/pending/:id`, ver `docs/api.md`), porque
+  Cloudflare corta a los 100 s y Nginx a los 60 s.
+- **Vigilancia**: `/api/admin/ai-status` (incluye `local` y su cola) y el informe
+  diario (línea «IA local» y aviso si no responde).
+- **Probar a mano** (en el VPS, `backend/`):
+  `node scripts/ia-local-prueba.js --app --url http://127.0.0.1:8081 --label prueba --only facturas-texto`
+  (deja las salidas en `~/backups/ia-prueba`).

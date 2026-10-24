@@ -10,6 +10,7 @@
 'use strict';
 
 const express = require('express');
+const { deferrable } = require('../services/deferred');
 const router = express.Router();
 const { requireLicense } = require('../middleware/requireLicense');
 const { getAnalysis, getCompanyProfile } = require('../db/database');
@@ -19,7 +20,7 @@ const { financeContext } = require('../services/ai/financeContext');
 
 const MAX_FINANCE_CHARS = 2500;
 
-router.post('/', requireLicense, async (req, res) => {
+router.post('/', requireLicense, deferrable(async (req, res) => {
   const messages = sanitizeMessages(req.body?.messages);
   if (!messages.length || messages[messages.length - 1].role !== 'user') {
     return res.status(400).json({ error: 'invalid_input', message: 'Escribe una pregunta.' });
@@ -62,6 +63,6 @@ router.post('/', requireLicense, async (req, res) => {
     console.error('[CHAT] Excepción:', e.message);
     res.status(500).json({ error: 'internal_error' });
   }
-});
+}));
 
 module.exports = router;

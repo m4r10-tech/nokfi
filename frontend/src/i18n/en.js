@@ -588,6 +588,9 @@ export default {
     api_plan_required: 'API keys are available on the Pro and Max plans.',
     subscription_active: 'First cancel your subscription from “Manage subscription”. Then you can delete the account.',
     payload_too_large: 'The files are too large for a single upload. Try with fewer files.',
+    pending_not_found: 'The task was interrupted. Please run it again.',
+    too_many_pending: 'You have several AI tasks running. Wait for them to finish before starting another one.',
+    ai_timeout: 'The AI didn’t finish in time. Please try again in a few minutes.',
     offlineTitle: 'We can’t reach Nokfi',
     offlineDesc: 'It may be your connection or the server restarting. Try again in a few seconds.',
     genericTitle: 'Couldn’t load'
@@ -597,7 +600,8 @@ export default {
     offline: 'You are offline',
     online: 'Back online',
     sessionExpired: 'Your session has expired. Please sign in again.',
-    licenseInactive: 'Your license is no longer active. You have been signed out.'
+    licenseInactive: 'Your license is no longer active. You have been signed out.',
+    aiSlow: 'The AI is taking longer than usual. We’re still working on it: keep this tab open.'
   },
   footer: { rights: 'All rights reserved' },
   landing: {
@@ -715,7 +719,7 @@ export default {
   },
   privacy: {
     title: 'Privacy policy',
-    updated: 'Last updated: 15 October 2026',
+    updated: 'Last updated: 24 October 2026',
     intro: 'This policy describes, in plain terms, which data Nokfi (nokfi.app) processes, why, and which third-party services are involved. It reflects exactly how the application works.',
     sections: [
       { h: 'Controller & contact', ps: ['The controller for your account data is {OWNER}. For any privacy question or to exercise your rights, write to info@nokfi.app. For account or payment issues, to soporte@nokfi.app.'] },
@@ -733,13 +737,12 @@ export default {
       ] },
       { h: 'Your files are not stored on our servers', ps: [
         'The Excel files, PDFs and folders you analyse are read locally, in your own browser. They are not stored on our servers.',
-        'To generate an analysis, the extracted text or rows are sent through our server to the AI service. When reading scanned or photographed invoices, a reduced copy of the image or PDF is also sent, only to read it; it is not stored either.'
+        'To generate an analysis, the extracted text or rows are sent through our server to the AI service. When reading scanned or photographed invoices, a reduced copy of the image or PDF is also sent, only to read it; it is not stored either. If those services are unavailable, the analysis is done by our own AI model running on our server in the EU, without sending the data to any third party.'
       ] },
       { h: 'Third-party services involved', list: [
         'Stripe: processes payments and manages subscriptions.',
         'Cloudflare Workers AI: generates the analyses, reads scanned or photographed invoices and answers in the assistant. Its terms forbid using your data to train models and it does not retain it (except temporary technical logs to investigate abuse). We do not store your assistant conversations.',
         'Groq: generates the analyses, reads invoices and answers in the assistant; if it is unavailable, Cloudflare Workers AI is used. Its contract forbids using your data to train or fine-tune models, and we have zero data retention enabled (requests are not stored). It processes data in the US, under standard contractual clauses.',
-        'Cerebras: backup AI provider, used only if Groq and Cloudflare are unavailable (same tasks). Its contract only allows it to use your data to provide the service (not to train models) and to keep it only as long as necessary. It processes data in the US, under standard contractual clauses.',
         'Resend: sends emails (your licence key, password recovery and, if enabled, tax calendar reminders, the monthly summary and payment reminders to your clients).',
         'Cloudflare: delivery and security network protecting access to the website. We use your connection\'s country (provided by Cloudflare) only to choose the website\'s initial language; we do not store it. It also stores the daily database backup, encrypted and in the EU (Cloudflare R2); it cannot read it without our key, and each backup is deleted after 30 days.',
         "Spanish Tax Agency (AEAT): if sending VERI*FACTU records is turned on for your account, your invoice records are sent to it under a legal obligation. It is turned off for now."
@@ -752,6 +755,7 @@ export default {
     ]
   },
   report: {
+    backupAi: 'Made with Nokfi’s backup AI (the usual services weren’t responding). It’s simpler: check the figures against your Nokfi screens.',
     summary: 'Summary', keyFigures: 'Key figures', strengths: 'Strengths', priorities: 'Priorities',
     actionPlan: 'Action plan', glossary: 'Glossary', progress: '{n} of {total} done',
     goTo: 'Go to {name}',
