@@ -242,6 +242,13 @@ con alerta por email. No se puede crear desde Claude Code (necesita cuenta).
 
 ## 12. Notas post-auditoría before-deploy (2026-09-19)
 
+- **Dependencias del backend en el VPS (2026-10-24):** solo si cambia
+  `package-lock.json`, y siempre con
+  `npm ci --omit=dev --ignore-scripts`. El VPS no tiene compilador y
+  `better-sqlite3` ya trae el binario de Linux en `prebuilds/`. Sin
+  `--ignore-scripts`, npm intenta compilarlo con `node-gyp`, falla y deja
+  `node_modules` vacío, así que el backend no arranca. Ningún otro paquete tiene script de instalación.
+
 - Tras el próximo `git pull` en el VPS, ejecutar `npm audit fix` en
   `backend/` (el `package-lock.json` actualizado ya va en el repo; el fix
   asegura node_modules alineado). Frontend: **no** aplicar `npm audit fix
