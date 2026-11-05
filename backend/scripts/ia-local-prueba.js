@@ -120,17 +120,10 @@ async function callLocal(c) {
 async function callRef(c, name) {
   const t0 = Date.now();
   if (c.kind === 'chat') {
-    const url = name === 'groq' ? 'https://api.groq.com/openai/v1/chat/completions'
-      : `https://api.cloudflare.com/client/v4/accounts/${process.env.CF_ACCOUNT_ID}/ai/v1/chat/completions`;
-    const key = name === 'groq' ? process.env.GROQ_API_KEY : process.env.CF_AI_TOKEN;
-    const model = name === 'groq' ? (process.env.GROQ_CHAT_MODEL || 'openai/gpt-oss-120b') : (process.env.CF_AI_CHAT_MODEL || '@cf/meta/llama-3.3-70b-instruct-fp8-fast');
-    const res = await fetch(url, {
-      method: 'POST', headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${key}` },
-      body: JSON.stringify({ model, max_tokens: 700, temperature: 0.4, messages: [{ role: 'system', content: c.system }, ...c.messages] })
-    });
-    const data = await res.json();
-    if (!res.ok) throw new Error(`HTTP ${res.status}`);
-    return { text: data.choices?.[0]?.message?.content || '', ms: Date.now() - t0 };
+    // Mismo proveedor de chat que la app (gpt-oss razona: con un max_tokens corto a pelo salía vacío).
+    process.env.CHAT_PROVIDERS = name;
+    const r = await require('../services/ai/chat').freeText({ system: c.system, prompt: c.messages[0].content });
+    return { text: r.text, ms: Date.now() - t0 };
   }
   const schema = c.kind === 'report' ? P.REPORT_SCHEMA : P.INVOICE_SCHEMA;
   const r = await PROVIDERS[name].generate({ system: P.systemPrompt({ profile, lang: c.lang }), parts: c.parts, schema, maxTokens: 8000 });

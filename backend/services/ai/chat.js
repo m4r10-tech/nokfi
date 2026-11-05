@@ -76,8 +76,14 @@ async function openAiCompatible(url, key, model, system, messages, extraHeaders 
 const PROVIDERS = {
   groq: {
     configured: () => !!process.env.GROQ_API_KEY,
-    call: (system, messages) => openAiCompatible('https://api.groq.com/openai/v1/chat/completions',
-      process.env.GROQ_API_KEY, process.env.GROQ_CHAT_MODEL || 'openai/gpt-oss-120b', system, messages, {}, 'groq')
+    // gpt-oss razona antes de contestar y ese razonamiento cuenta en max_tokens: con 700 a
+    // veces no quedaba sitio para la respuesta ("empty"). Razonamiento corto y más margen.
+    call: (system, messages) => {
+      const model = process.env.GROQ_CHAT_MODEL || 'openai/gpt-oss-120b';
+      return openAiCompatible('https://api.groq.com/openai/v1/chat/completions',
+        process.env.GROQ_API_KEY, model, system, messages, {}, 'groq',
+        { extraBody: model.includes('gpt-oss') ? { reasoning_effort: 'low', max_tokens: 2000 } : {} });
+    }
   },
   openrouter: {
     configured: () => !!process.env.OPENROUTER_API_KEY,
