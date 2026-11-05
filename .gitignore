@@ -19,6 +19,8 @@ claude-photos/
 md/
 # Notas de trabajo por sesión (planes/handoffs locales): no se versionan
 docs/sesion*.md
+docs/sesiones/
+CLAUDE.md
 marketing/redes/salida/
 media-redes/
 marketing/redes/video/voz/

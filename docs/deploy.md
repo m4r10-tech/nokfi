@@ -9,10 +9,10 @@
 
 ---
 
-> **2026-10-22/23 — VPS nuevo.** El VPS anterior (`191.44.112.86`) se perdió por
+> **2026-10-22/23 — VPS nuevo.** El VPS anterior se perdió por
 > no renovarlo. Recuperado en **FreakHosting BVPS-5** (Frankfurt, Ubuntu 24.04,
 > 5 vCPU, 8 GB RAM, 200 GB, 8,99 €/mes, renovación automática por PayPal):
-> **`207.244.199.227`**. BD restaurada desde R2 (copia del 16-10 03:30, íntegra,
+> **`<IP_DEL_VPS>`**. BD restaurada desde R2 (copia del 16-10 03:30, íntegra,
 > sin pérdida de datos). Node 24 + PM2 7 + Nginx 1.24, ufw (SSH/80/443),
 > fail2ban, 2 GB de swap, SSH solo por clave (`nokfi-deploy`, root y deploy).
 > Sitio en `/etc/nginx/sites-available/nokfi` y real-IP en
@@ -26,7 +26,7 @@
 - **Producción HTTPS viva**: `https://nokfi.app/` (Nginx + Let's Encrypt, cert
   hasta **2026-11-01** autorenova via `certbot.timer`).
 - **Cloudflare (edge) EN PROD — Full strict (2026-08-08/10), completo y
-  verificado**: CF es el edge de `nokfi.app` (origen `207.244.199.227` oculto tras
+  verificado**: CF es el edge de `nokfi.app` (origen `<IP_DEL_VPS>` oculto tras
   anycast `104.21.6.208`/`172.67.135.69`). real-IP chain, Bot Fight OFF, WAF skip
   webhook, 3 Cache Rules, Redirect www→nokfi 301, renewal HTTP-01 a través de CF.
   Detalle en §3.
@@ -47,7 +47,10 @@ vía Namecheap (gratis; CF no proxya MX/TXT).
 
 ---
 
-## 1. Topología y convenciones (VPS `207.244.199.227`, desde 2026-10-22)
+## 1. Topología y convenciones (VPS `<IP_DEL_VPS>`, desde 2026-10-22)
+
+> La IP real del VPS no se publica (el origen va oculto tras Cloudflare): en este
+> documento aparece como `<IP_DEL_VPS>`. Está en el panel del proveedor y en las notas locales.
 
 Cadena de tráfico: **Cliente → TLS → Cloudflare (edge, valida LE) → TLS → Nginx
 (real-IP) → Express `:3001`**.
@@ -86,7 +89,7 @@ Rule).
 
 ### Dashboard CF `nokfi.app` (Free): config esencial
 - **SSL/TLS → Full (strict)** (no Flexible). Always-HTTPS ON.
-- **DNS**: A `@`+`www` → `207.244.199.227` **Proxied 🟠**. MX/TXT de Resend quedan
+- **DNS**: A `@`+`www` → `<IP_DEL_VPS>` **Proxied 🟠**. MX/TXT de Resend quedan
   **DNS-only 🔘** (mailer no se toca). Nameservers → Custom DNS =
   `terry.ns.cloudflare.com` + `tina.ns.cloudflare.com`.
 - **🔴 Bot Fight Mode OFF** — el UA `Stripe/1.0` del webhook DEBE pasar
