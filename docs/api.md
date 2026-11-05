@@ -10,7 +10,7 @@
 > contraseña**. IA con **Groq → Cloudflare Workers AI → IA local** (llama.cpp en
 > el propio VPS, último respaldo desde 2026-10; topes opcionales en `utils/aiBudget.js`). Emisión de facturas con
 > **VERI*FACTU** (envío a la AEAT apagado: `VERIFACTU_ENV=off`), API pública
-> **v1**, servidor **MCP 1.2.0** y nodo **n8n 0.3.0**. e2e: **520**.
+> **v1**, servidor **MCP 1.2.0** y nodo **n8n 0.3.0**. e2e: **541**.
 >
 > §1-§6 son el contrato de la web; §8-§14 (al final) recogen lo añadido de la
 > sesión 4 a la 12. El detalle de la API pública está en
@@ -205,7 +205,9 @@ Cambia la contraseña SOLO de la licencia indicada (del email verificado) y
 El backend arma el prompt (`services/ai/prompts.js`), llama a los proveedores en
 orden (`AI_PROVIDERS`, hoy `groq,cloudflare,local`; si uno falla pasa al
 siguiente) y guarda el informe estructurado en `analyses` con su plan de acción
-(`action_items`, `GET/PATCH /api/actions`).
+(`action_items`, `GET/PATCH /api/actions`). Si respondió la IA local, el informe lleva
+`ai_backup: true` y las cifras que no estén en los datos se quitan (`guardFigures`).
+El chat usa Groq `gpt-oss` con `reasoning_effort: low`.
 
 **Respuestas aplazadas (2026-10, IA local):** `POST /api/ai/analyze`, `POST /api/chat`
 y `POST /api/finance/collection-email` responden como siempre si la IA contesta en

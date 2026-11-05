@@ -27,7 +27,7 @@
   fiscal, validador de NIF y 8 guías, en castellano (raíz) e inglés (`/en/…`),
   prerenderizadas en el build y con `sitemap.xml`. Ver §24.
 - **Idiomas de la app**: es, en, fr, it, de, pl.
-- **Tests**: `cd backend && node test/e2e.test.js` → **520**. Frontend:
+- **Tests**: `cd backend && node test/e2e.test.js` → **541**. Frontend:
   `npm run check:i18n`, `npm run check:seo`, `npm run test:einvoice`.
 
 ---
@@ -143,7 +143,7 @@ nokfi/
 │   ├── services/       # ai/, invoicing/ (PDF, XML), verifactu/, einvoice, taxTools,
 │   │                   # webhooks, jobs, reminders, monthlySummary, opsReport, webEvents
 │   ├── utils/          # password (scrypt), mailer (Resend), aiBudget, fiscalCalendar, finance
-│   └── test/           # e2e.test.js + session*.tests.js (520)
+│   └── test/           # e2e.test.js + session*.tests.js (541)
 ├── frontend/           # PWA — React + Vite + Tailwind
 │   ├── scripts/        # prerender.mjs (SEO), check-i18n, check-seo, test-einvoice
 │   └── src/

@@ -69,7 +69,7 @@ Stripe).
 
 ```
 nokfi/
-├── backend/            # API — Express + SQLite; test/ (e2e 362/362)
+├── backend/            # API — Express + SQLite; test/ (e2e 541/541)
 ├── frontend/           # PWA — React + Vite + Tailwind (build same-origin /api)
 ├── integrations/n8n/   # nodo de n8n (publicado en npm)
 ├── deploy/             # nginx-nokfi.conf + nginx-cloudflare-realip.conf
@@ -95,7 +95,7 @@ cp .env.example .env   # ADMIN_SECRET (≥32), claves de IA, Stripe, Resend, PLA
 npm install --omit=optional
 npm run dev            # → http://localhost:3001
 ```
-Tests: `cd backend && node test/e2e.test.js` (**362/362**, sin red: la IA se simula).
+Tests: `cd backend && node test/e2e.test.js` (**541/541**, sin red: la IA se simula).
 
 ### Frontend
 ```bash
@@ -113,7 +113,7 @@ npm run dev            # → http://localhost:5173
 - ✅ En producción con pagos reales, emails y copia diaria de la base de datos
 - ✅ Sesiones 6-10 completadas: libro, impuestos, cobros, previsión, diagnóstico,
   asistente con datos, API v1 + webhooks + MCP + nodo n8n, pulido de la interfaz
-- ✅ e2e **362/362**
+- ✅ e2e **541/541**
 - 🔜 Factura electrónica B2B y VERI\*FACTU (app y API), posicionamiento, y
   apps para Play Store y App Store
 
