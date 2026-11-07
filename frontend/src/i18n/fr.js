@@ -188,6 +188,7 @@ export default {
     spaceBusiness: 'Entreprise',
     spaceDev: 'Développeurs',
     devSummary: 'Vue d’ensemble',
+    devSummaryShort: 'Aperçu',
     devKeys: 'Clés',
     devDocs: 'Documentation',
     devTemplates: 'Modèles',
@@ -312,8 +313,8 @@ export default {
   onboarding: {
     companyPlaceholder: 'Le nom de votre entreprise', sectorSelect: 'Choisissez un secteur',
     sectors: { taller: 'Garage automobile', automocion: 'Automobile (vente de véhicules)', transporte: 'Transport', industria: 'Industrie', mayorista: 'Commerce de gros', alojamiento: 'Hébergement', inmobiliaria: 'Immobilier', estetica: 'Coiffure et esthétique', deporte: 'Sport et loisirs', asesoria: 'Expertise comptable et conseil', arquitectura: 'Architecture et ingénierie', marketing: 'Marketing et publicité', limpieza: 'Nettoyage', agricultura: 'Agriculture', comercio: 'Commerce de détail', hosteleria: 'Hôtellerie-restauration', salud: 'Santé', legal: 'Juridique', construccion: 'Construction', tecnologia: 'Technologie', consultoria: 'Conseil', diseno: 'Design', educacion: 'Éducation', otro: 'Autre' },
-    sizes: { solo: 'Seul (indépendant)', s2: '2–5 personnes', s6: '6–20 personnes', s20: 'Plus de 20 personnes' },
     sectorAliases: { taller: 'garage mécanicien voiture pneus carrosserie peinture', automocion: 'concessionnaire voitures motos occasion', transporte: 'camion messagerie livraison déménagement logistique taxi', industria: 'usine fabrication métal menuiserie', comercio: 'magasin boutique détaillant boulangerie primeur', mayorista: 'distribution entrepôt grossiste', hosteleria: 'bar restaurant café brasserie', alojamiento: 'hôtel auberge gîte location saisonnière', construccion: 'chantier rénovation maçon plombier électricien', inmobiliaria: 'appartements location agence immobilière', salud: 'clinique médecin dentiste kiné psychologue', estetica: 'coiffeur barbier ongles spa esthéticienne', deporte: 'salle de sport fitness école de danse', educacion: 'école formation cours soutien scolaire', legal: 'avocat cabinet', asesoria: 'expert-comptable comptabilité conseiller fiscal', consultoria: 'consultant conseil', arquitectura: 'architecte ingénieur bureau d’études', tecnologia: 'logiciel informatique développement web', marketing: 'agence réseaux sociaux publicité', diseno: 'graphiste photographie', limpieza: 'nettoyage entretien maintenance', agricultura: 'ferme agriculteur élevage champ' },
+    sizes: { solo: 'Seul (indépendant)', s2: '2–5 personnes', s6: '6–20 personnes', s20: 'Plus de 20 personnes' },
     expenses: { alquiler: 'Loyer', personal: 'Personnel', proveedores: 'Fournisseurs', marketing: 'Marketing', suministros: 'Énergie et fournitures', tecnologia: 'Technologie', transporte: 'Transport', otro: 'Autre' },
     welcome: 'Bienvenue sur Nokfi', subtitle: 'Parlez-nous un peu de votre activité pour personnaliser vos analyses',
     companyName: 'Nom de l’entreprise', sector: 'Secteur', size: 'Taille',

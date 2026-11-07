@@ -163,12 +163,12 @@ export function Faq({ items, vars }) {
       <h2 id="faq-title" className="text-lg font-semibold" style={{ color: 'var(--text-primary)' }}>{ui.faqTitle}</h2>
       <div className="mt-3 flex flex-col gap-2">
         {items.map(({ q, a }) => (
-          <details key={q} className="group card px-4 py-3">
-            <summary className="flex items-center justify-between gap-3 cursor-pointer list-none text-[15px] font-medium" style={{ color: 'var(--text-primary)' }}>
+          <details key={q} className="group card px-4 py-1">
+            <summary className="flex items-center justify-between gap-3 min-h-10 cursor-pointer list-none text-[15px] font-medium" style={{ color: 'var(--text-primary)' }}>
               {fill(q, vars)}
               <ChevronDown size={16} className="shrink-0 transition-transform group-open:rotate-180" style={{ color: 'var(--text-muted)' }} aria-hidden="true" />
             </summary>
-            <p className="mt-2 text-[15px] leading-relaxed" style={{ color: 'var(--text-secondary)' }}>{fill(a, vars)}</p>
+            <p className="mt-1 mb-2 text-[15px] leading-relaxed" style={{ color: 'var(--text-secondary)' }}>{fill(a, vars)}</p>
           </details>
         ))}
       </div>

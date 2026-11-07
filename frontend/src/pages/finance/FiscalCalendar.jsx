@@ -51,7 +51,7 @@ export default function FiscalCalendar() {
               </div>
               <div className="min-w-0">
                 <p className="text-sm font-semibold" style={{ color: 'var(--text-primary)' }}>{t('finance.calendar.models').replace('{m}', next.models.join(', '))} · {next.period}</p>
-                <p className="text-xs mt-0.5" style={{ color: 'var(--text-secondary)' }}>{t(`finance.calendar.kind_${next.kind}`)}</p>
+                <p className="text-xs mt-0.5 break-words" style={{ color: 'var(--text-secondary)' }}>{t(`finance.calendar.kind_${next.kind}`)}</p>
                 <p className="text-xs mt-1" style={{ color: 'var(--text-muted)' }}>{isoDate(next.date, lang, { weekday: 'long', day: 'numeric', month: 'long' })}</p>
               </div>
             </div>
@@ -65,7 +65,7 @@ export default function FiscalCalendar() {
                 { value: 'autonomo', label: t('config.legalAutonomo') }, { value: 'sociedad', label: t('config.legalSociedad') }, { value: '', label: t('finance.calendar.all') }
               ]} />
             </div>
-            <label className="flex items-start gap-2.5 text-sm cursor-pointer" style={{ color: 'var(--text-primary)' }}>
+            <label className="flex items-start gap-2.5 py-1 text-sm cursor-pointer" style={{ color: 'var(--text-primary)' }}>
               <input type="checkbox" checked={!!profile.fiscalReminders} onChange={(e) => updateProfile({ fiscalReminders: e.target.checked })} className="w-4 h-4 mt-0.5" />
               <span><span className="font-medium flex items-center gap-1.5"><BellRing size={14} /> {t('finance.calendar.remind')}</span>
                 <span className="block text-xs mt-0.5" style={{ color: 'var(--text-muted)' }}>{t('finance.calendar.remindHint')}</span></span>
@@ -91,7 +91,7 @@ export default function FiscalCalendar() {
                       <CalendarDays size={15} className="shrink-0" style={{ color: 'var(--accent-text)' }} />
                       <span className="text-sm tabular w-16 shrink-0" style={{ color: 'var(--text-primary)' }}>{isoDate(d.date, lang, { day: 'numeric', month: 'short' })}</span>
                       <span className="flex-1 min-w-0">
-                        <span className="block text-sm font-medium" style={{ color: 'var(--text-primary)' }}>{t('finance.calendar.models').replace('{m}', d.models.join(', '))} · {d.period}</span>
+                        <span className="block text-sm font-medium break-words" style={{ color: 'var(--text-primary)' }}>{t('finance.calendar.models').replace('{m}', d.models.join(', '))} · {d.period}</span>
                         <span className="block text-xs truncate" style={{ color: 'var(--text-secondary)' }}>{t(`finance.calendar.kind_${d.kind}`)}</span>
                       </span>
                       {d.conditional && <Badge tone="muted">{t('finance.calendar.ifApplies')}</Badge>}

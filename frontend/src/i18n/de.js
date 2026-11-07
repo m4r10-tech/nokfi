@@ -188,6 +188,7 @@ export default {
     spaceBusiness: 'Unternehmen',
     spaceDev: 'Entwickler',
     devSummary: 'Übersicht',
+    devSummaryShort: 'Übersicht',
     devKeys: 'Schlüssel',
     devDocs: 'Dokumentation',
     devTemplates: 'Vorlagen',
@@ -312,8 +313,8 @@ export default {
   onboarding: {
     companyPlaceholder: 'Name deines Unternehmens', sectorSelect: 'Branche wählen',
     sectors: { taller: 'Kfz-Werkstatt', automocion: 'Kfz-Handel', transporte: 'Transport', industria: 'Industrie', mayorista: 'Großhandel', alojamiento: 'Beherbergung', inmobiliaria: 'Immobilien', estetica: 'Friseur und Kosmetik', deporte: 'Sport und Freizeit', asesoria: 'Steuerberatung und Buchhaltung', arquitectura: 'Architektur und Ingenieurwesen', marketing: 'Marketing und Werbung', limpieza: 'Reinigung', agricultura: 'Landwirtschaft', comercio: 'Einzelhandel', hosteleria: 'Gastgewerbe', salud: 'Gesundheit', legal: 'Recht', construccion: 'Bau', tecnologia: 'Technologie', consultoria: 'Beratung', diseno: 'Design', educacion: 'Bildung', otro: 'Sonstiges' },
-    sizes: { solo: 'Nur ich (selbstständig)', s2: '2–5 Personen', s6: '6–20 Personen', s20: 'Über 20 Personen' },
     sectorAliases: { taller: 'Autowerkstatt Mechaniker Reifen Karosserie Lackiererei', automocion: 'Autohaus Autos Motorräder Gebrauchtwagen', transporte: 'Lkw Spedition Kurier Lieferdienst Umzüge Logistik Taxi', industria: 'Fabrik Fertigung Metall Schreinerei', comercio: 'Laden Geschäft Einzelhändler Boutique Bäckerei Obst', mayorista: 'Vertrieb Lager', hosteleria: 'Bar Restaurant Café Kneipe Gastronomie', alojamiento: 'Hotel Pension Ferienwohnungen Landhaus', construccion: 'Baustelle Renovierung Maurer Klempner Elektriker', inmobiliaria: 'Wohnungen Vermietung Makler', salud: 'Klinik Arzt Zahnarzt Physiotherapie Psychologie', estetica: 'Friseur Barbier Nägel Spa Kosmetik', deporte: 'Fitnessstudio Tanzschule', educacion: 'Akademie Weiterbildung Nachhilfe Unterricht', legal: 'Anwalt Kanzlei', asesoria: 'Steuerberater Buchhaltung Lohnbuchhaltung', consultoria: 'Berater', arquitectura: 'Architekt Ingenieur Büro', tecnologia: 'Software IT Programmierung Web', marketing: 'Agentur soziale Medien Werbung', diseno: 'Grafikdesigner Fotografie', limpieza: 'Reinigung Gebäudereinigung Hausmeister Wartung', agricultura: 'Bauernhof Landwirt Viehzucht Feld' },
+    sizes: { solo: 'Nur ich (selbstständig)', s2: '2–5 Personen', s6: '6–20 Personen', s20: 'Über 20 Personen' },
     expenses: { alquiler: 'Miete', personal: 'Personal', proveedores: 'Lieferanten', marketing: 'Marketing', suministros: 'Energie & Nebenkosten', tecnologia: 'Technologie', transporte: 'Transport', otro: 'Sonstiges' },
     welcome: 'Willkommen bei Nokfi', subtitle: 'Erzähl uns kurz von deinem Unternehmen, damit wir deine Analysen personalisieren können',
     companyName: 'Name des Unternehmens', sector: 'Branche', size: 'Größe',

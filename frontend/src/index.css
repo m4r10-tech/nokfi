@@ -178,7 +178,9 @@ body {
   @media (min-width: 768px) { .btn { min-height: 40px; } }
   .btn:active:not(:disabled) { transform: scale(0.98); }
   .btn:disabled { opacity: 0.5; cursor: not-allowed; }
-  .btn-sm { min-height: 34px; padding: 0 12px; font-size: 13px; border-radius: 8px; }
+  /* S15b V6: en el móvil, objetivos táctiles de al menos 40 px (también los botones de solo icono). */
+  .btn-sm { min-height: 40px; padding: 0 12px; font-size: 13px; border-radius: 8px; }
+  @media (max-width: 767px) { .btn-sm[class*="!px-"] { min-width: 40px; } .tap-target { display: inline-flex; align-items: center; justify-content: center; min-height: 40px; min-width: 40px; } }
   @media (min-width: 768px) { .btn-sm { min-height: 32px; } }
   .btn-primary { background: var(--accent); color: var(--on-accent); }
   .btn-primary:hover:not(:disabled) { background: var(--accent-hover); }
@@ -315,6 +317,9 @@ details[open] .details-chevron { transform: rotate(180deg); }
 }
 .bottom-nav-item:active { transform: scale(0.94); }
 .bottom-nav-item.active { color: var(--accent-text); }
+/* S15b V5: una etiqueta larga (fr/de/pl) nunca se sale de su hueco: se corta con «…». */
+.bottom-nav-item { min-width: 0; padding: 0 2px; }
+.bottom-nav-item > span { max-width: 100%; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
 
 /* Landing (Tanda H): barras de la vista previa que crecen al entrar en pantalla. */
 .grow-bar {
@@ -329,11 +334,6 @@ html { scroll-padding-top: 80px; }
 /* C5 — botón del asistente: encima de la barra inferior en móvil. */
 .chat-launcher { bottom: calc(var(--bottom-nav-h) + 16px + env(safe-area-inset-bottom)); }
 @media (min-width: 768px) { .chat-launcher { bottom: 24px; } }
-
-/* §2.1 — aviso de nueva versión: encima de la barra inferior en móvil. */
-.update-prompt { bottom: 16px; }
-:root:has(.bottom-nav) .update-prompt { bottom: calc(var(--bottom-nav-h) + 12px + env(safe-area-inset-bottom)); }
-@media (min-width: 768px) { :root:has(.bottom-nav) .update-prompt { bottom: 24px; } }
 /* S15b V8: en el móvil se aparta al desplazar hacia abajo (tapaba los importes) y vuelve al subir. */
 .chat-launcher { transition: transform var(--dur-base) var(--ease-out), opacity var(--dur-base) var(--ease-out); }
 @media (max-width: 767px) {
@@ -341,6 +341,11 @@ html { scroll-padding-top: 80px; }
   .chat-launcher.is-away:focus-visible { transform: none; opacity: 1; pointer-events: auto; }
 }
 @media (prefers-reduced-motion: reduce) { .chat-launcher { transition: none; } }
+
+/* §2.1 — aviso de nueva versión: encima de la barra inferior en móvil. */
+.update-prompt { bottom: 16px; }
+:root:has(.bottom-nav) .update-prompt { bottom: calc(var(--bottom-nav-h) + 12px + env(safe-area-inset-bottom)); }
+@media (min-width: 768px) { :root:has(.bottom-nav) .update-prompt { bottom: 24px; } }
 
 /* Sesión 10: capturas de la landing en el tema que se está viendo. */
 html.theme-light .shot-dark,
