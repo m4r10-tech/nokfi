@@ -1097,12 +1097,12 @@ async function main() {
     check('Deuda H: 10 análisis mini (cuota 10) → los 10 fueron 200', () => tenOk);
     check('Deuda H: countAiAnalysesToday(id) == 10 tras los 10 usos', () => countAiAnalysesToday(quotaId) === 10);
 
-    await checkAsync('Deuda H: 11.ª petición (cuota 10) → 429 + mensaje "Has agotado tu cuota diaria"',
+    await checkAsync('Deuda H: 11.ª petición (cuota 10) → 429 + mensaje "Has gastado los 10 créditos de hoy" (S15b: «créditos»)',
       post('/api/ai/analyze', quotaPrompt, quotaToken),
       r => r.status === 429
         && r.data.error === 'license_daily_limit_reached'
         && typeof r.data.message === 'string'
-        && r.data.message.includes('Has agotado tu cuota diaria')
+        && r.data.message.includes('Has gastado los 10 créditos de hoy')
         && r.data.message.includes('10') // menciona la cuota concreta
     );
     check('Deuda H: tras el 429, countAiAnalysesToday sigue == 10 (no se infló)', () => countAiAnalysesToday(quotaId) === 10);

@@ -7,7 +7,7 @@ This is an n8n community node for [Nokfi](https://nokfi.app): the AI for small-b
 - **Run financial analyses** (sales, cash, stock, purchases, profit, two-period comparison, document folders) and get a structured report: summary, key figures, priorities and an action plan.
 - **Spanish tax tools without AI** (no quota): validate NIF/NIE/CIF, VAT with the equivalence surcharge, IRPF withholding, Modelo 130 and the tax calendar.
 - **Nokfi Trigger**: start a workflow when an analysis or a background job finishes, when your quota reaches 80 % or 100 %, or 7 days and 1 day before each tax deadline. Signed webhooks, registered automatically.
-- **Check your usage** (plan, daily quota, analyses used today).
+- **Check your usage** (plan, daily credits, credits used today and credit pack balance; 1 credit = 1 AI analysis or invoice reading).
 
 Data is processed by AI providers that do not train on it. Invoices sent through the API are not stored.
 

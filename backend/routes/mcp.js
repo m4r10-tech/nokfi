@@ -26,13 +26,13 @@ const SERVER_INFO = { name: 'nokfi', title: 'Nokfi', version: '1.3.0' };
 const PROTOCOL_VERSIONS = ['2025-11-25', '2025-06-18', '2025-03-26'];
 const LANGS = ['es', 'en', 'fr', 'it', 'de', 'pl'];
 
-const INSTRUCTIONS = 'Nokfi is an AI for small-business documents and finance (Spain). Use extract_invoices to turn invoices (PDF/image as base64, or text) into validated JSON: the checks object is computed by Nokfi, not by the AI. Structured e-invoices (Facturae, UBL, CII, Factur-X/ZUGFeRD PDF) are read exactly, without AI and without quota. Use analyze for financial reports. Every analysis and every extract_invoices call that needs the AI uses 1 analysis of the user\'s daily quota; check get_usage first when running many. The tax tools (validate_tax_id, calculate_vat, calculate_withholding, estimate_model_130, fiscal_calendar) are deterministic Spanish tax calculations and do NOT use quota: prefer them over doing the math yourself. With a test key (nk_test_) AI tools return realistic sample data. Invoicing: issue_invoice issues a real, legally binding invoice in the user\'s name (numbered, added to their books and, when enabled, reported to the Spanish tax agency under VERI*FACTU): confirm the details with the user before calling it, and always pass an idempotency_key so a retry never issues it twice. Issued invoices are never edited: fix them with a corrective invoice (issue_invoice with rectifies_id) or cancel_invoice. With a test key, invoices are test documents (TEST- numbering) that never reach the books or the tax agency, and the real data of the account (analyses, customers, books) is not visible.';
+const INSTRUCTIONS = 'Nokfi is an AI for small-business documents and finance (Spain). Use extract_invoices to turn invoices (PDF/image as base64, or text) into validated JSON: the checks object is computed by Nokfi, not by the AI. Structured e-invoices (Facturae, UBL, CII, Factur-X/ZUGFeRD PDF) are read exactly, without AI and without quota. Use analyze for financial reports. Every analysis and every extract_invoices call that needs the AI uses 1 credit of the user (first the daily plan credits, then credit packs; the same balance as the web app); check get_usage first when running many. The tax tools (validate_tax_id, calculate_vat, calculate_withholding, estimate_model_130, fiscal_calendar) are deterministic Spanish tax calculations and do NOT use quota: prefer them over doing the math yourself. With a test key (nk_test_) AI tools return realistic sample data. Invoicing: issue_invoice issues a real, legally binding invoice in the user\'s name (numbered, added to their books and, when enabled, reported to the Spanish tax agency under VERI*FACTU): confirm the details with the user before calling it, and always pass an idempotency_key so a retry never issues it twice. Issued invoices are never edited: fix them with a corrective invoice (issue_invoice with rectifies_id) or cancel_invoice. With a test key, invoices are test documents (TEST- numbering) that never reach the books or the tax agency, and the real data of the account (analyses, customers, books) is not visible.';
 
 const TOOLS = [
   {
     name: 'extract_invoices',
     title: 'Extract invoices',
-    description: 'Extract structured data from up to 5 invoices (PDF, JPG, PNG, WebP as base64, plain text, or e-invoice XML). Returns issuer, NIF, number, dates, base, VAT, withholding and total, plus deterministic checks (totals, Spanish NIF/CIF/NIE check digit, date, VAT rate) and warnings. Nothing is stored. E-invoices (Facturae 3.2.x, UBL 2.x, CII, Factur-X/ZUGFeRD embedded in a PDF) are read exactly without AI and do not use quota (ai_used: false, source_format set); otherwise uses 1 analysis of the daily quota.',
+    description: 'Extract structured data from up to 5 invoices (PDF, JPG, PNG, WebP as base64, plain text, or e-invoice XML). Returns issuer, NIF, number, dates, base, VAT, withholding and total, plus deterministic checks (totals, Spanish NIF/CIF/NIE check digit, date, VAT rate) and warnings. Nothing is stored. E-invoices (Facturae 3.2.x, UBL 2.x, CII, Factur-X/ZUGFeRD embedded in a PDF) are read exactly without AI and do not use quota (ai_used: false, source_format set); otherwise uses 1 credit (daily credits first, then credit packs).',
     inputSchema: {
       type: 'object',
       properties: {
@@ -57,7 +57,7 @@ const TOOLS = [
   {
     name: 'analyze',
     title: 'Run a financial analysis',
-    description: 'Run a Nokfi analysis and get a structured report (summary, key figures, strengths, priorities, action plan). type: excel (data: { module: stock|ventas|servicios|entradas|caja|total, files: [{ name, rows: [ {column: value} ] }] }), compare (data: { module, periodA: { label, files }, periodB: { label, files } }), folder (data: { instruction, files: [{ name, text }] }) or cuestionario (data: { answers: { id: true|false|"partial"|"na" } }). Figures are computed by Nokfi from all rows; the AI only explains them. Saved in the user\'s history. Uses 1 analysis of the daily quota.',
+    description: 'Run a Nokfi analysis and get a structured report (summary, key figures, strengths, priorities, action plan). type: excel (data: { module: stock|ventas|servicios|entradas|caja|total, files: [{ name, rows: [ {column: value} ] }] }), compare (data: { module, periodA: { label, files }, periodB: { label, files } }), folder (data: { instruction, files: [{ name, text }] }) or cuestionario (data: { answers: { id: true|false|"partial"|"na" } }). Figures are computed by Nokfi from all rows; the AI only explains them. Saved in the user\'s history. Uses 1 credit (daily credits first, then credit packs).',
     inputSchema: {
       type: 'object',
       properties: {
@@ -136,7 +136,7 @@ const TOOLS = [
   {
     name: 'get_usage',
     title: 'Get usage',
-    description: 'Plan, daily analysis quota and analyses used today.',
+    description: 'Plan, daily credits, credits used today and credit pack balance (daily_quota/used_today kept for compatibility; pack_credits, credits_available).',
     inputSchema: { type: 'object', properties: {} },
     annotations: { readOnlyHint: true }
   },

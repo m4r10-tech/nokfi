@@ -1,5 +1,9 @@
 # Changelog
 
+## Unreleased (API, no node change)
+
+- AI analyses are now called **credits** (1 credit = 1 AI analysis or invoice reading). Usage › Get also returns `daily_credits`, `daily_credits_used`, `daily_credits_left`, `pack_credits` and `credits_available`; `daily_quota` and `used_today` are kept. Credit packs (one-off, never expire) are used once the daily credits run out and share the balance with the web app.
+
 ## 0.4.0
 
 - New **Customer** resource: Get Many (list or search your address book) and Create.

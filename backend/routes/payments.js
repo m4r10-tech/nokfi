@@ -43,7 +43,9 @@
  *   POST /api/payments/stripe/cancel                  → cancelar al final del periodo pagado, auth Bearer
  *   POST /api/payments/stripe/resume-checkout         → cuenta bloqueada por impago: pagar un plan y reanudar
  *   GET  /api/payments/stripe/reveal                  → muestra la clave recién comprada en /reveal (una vez)
- *   GET  /api/payments/plans                          → catálogo público de planes (anti-drift, sin auth)
+ *   GET  /api/payments/plans                          → catálogo público de planes y paquetes (anti-drift, sin auth)
+ *   GET  /api/payments/credits                        → saldo de créditos de paquetes y compras, auth Bearer (S15b, U1)
+ *   POST /api/payments/stripe/credit-checkout         → Checkout de pago único de un paquete de créditos (S15b, U1)
  */
 
 'use strict';
@@ -60,7 +62,8 @@ const rateLimit = require('express-rate-limit');
 // Fuente única de planes: precios (céntimos + EUR + nombre), planes válidos,
 // saneamiento, y configuración del trial. Sustituye a los literales locales
 // PLAN_PRICES / VALID_PLANS / coercePlan que vivían aquí antes (drift-prone).
-const { PLANS, coercePlan, planHasTrial, TRIAL_DAYS, VALID_PLANS } = require('../config/plans');
+const { PLANS, coercePlan, planHasTrial, TRIAL_DAYS, VALID_PLANS, CREDIT_PACKS, packPriceEnv } = require('../config/plans');
+const { creditBalance, listPurchases } = require('../db/credits');
 // Misma versión de API que routes/webhooks.js (un sólo declarador).
 const STRIPE_API_VERSION = require('../config/stripe-version');
 const { fetchWithTimeout } = require('../utils/http');
@@ -91,8 +94,12 @@ const checkoutLimiter = rateLimit({
    así SIEMPRE muestra el precio que Stripe va a cobrar (anti-drift: nada de
    hardcodear precios en el frontend). No requiere auth ni claves de Stripe.
 
-   Devuelve: { plans: [{ id, name, price_eur, quota, trial }, ...] }
+   Devuelve: { plans: [{ id, name, price_eur, quota, trial }, ...],
+               credit_packs: [{ id, credits, price_eur }, ...] }   (S15b, U1)
+   `quota` = créditos al día del plan (antes «análisis de IA al día»).
 ────────────────────────────────────────────────────────── */
+const packList = () => Object.keys(CREDIT_PACKS).map(id => ({ id, credits: CREDIT_PACKS[id].credits, price_eur: CREDIT_PACKS[id].eur }));
+
 router.get('/plans', (req, res) => {
   const plans = Object.keys(PLANS).map(id => ({
     id,
@@ -101,7 +108,83 @@ router.get('/plans', (req, res) => {
     quota: PLANS[id].quota,
     trial: planHasTrial(id)
   }));
-  res.json({ plans });
+  res.json({ plans, credit_packs: packList() });
+});
+
+/* ──────────────────────────────────────────────────────────
+   S15b (U1) — Paquetes de créditos (pago único, no caducan)
+
+   Solo con un plan activo (Q1: el paquete amplía el plan, no lo sustituye).
+   Se gastan cuando se acaban los créditos del día (Q2) y el saldo es el mismo
+   en la web y en /api/v1 (Q3). El cobro es un Checkout mode=payment con el
+   Price de STRIPE_PRICE_PACK_<créditos>; los créditos los suma el webhook
+   checkout.session.completed (idempotente por sesión), nunca este endpoint.
+────────────────────────────────────────────────────────── */
+const PERIOD_GRACE_MS = 3 * 86400000; // la renovación (invoice.paid) puede llegar algo después del fin del periodo
+function hasActivePlan(license) {
+  if (license.status !== 'active' || license.blocked_reason || !VALID_PLANS.includes(license.plan)) return false;
+  if (license.current_period_ends_at && Date.parse(license.current_period_ends_at) + PERIOD_GRACE_MS <= Date.now()) return false;
+  return true;
+}
+
+// Límite propio (mismo criterio que checkoutLimiter, contador aparte).
+const packCheckoutLimiter = rateLimit({
+  windowMs: 60 * 1000, max: 10, standardHeaders: true, legacyHeaders: false,
+  message: { error: 'rate_limited', message: 'Demasiados intentos de pago. Espera un momento.' }
+});
+
+/* GET /api/payments/credits   (auth: Bearer) → { balance, can_buy, packs, purchases } */
+router.get('/credits', requireLicense, (req, res) => {
+  res.json({
+    balance: creditBalance(req.license.id),
+    can_buy: hasActivePlan(req.license),
+    packs: packList(),
+    purchases: listPurchases(req.license.id, 20)
+  });
+});
+
+/* POST /api/payments/stripe/credit-checkout  { pack, locale }   (auth: Bearer) → { checkout_url } */
+router.post('/stripe/credit-checkout', packCheckoutLimiter, requireLicense, async (req, res) => {
+  const license = req.license;
+  const pack = String(req.body?.pack || '');
+  if (!CREDIT_PACKS[pack]) return res.status(400).json({ error: 'invalid_pack' });
+  if (!hasActivePlan(license)) {
+    return res.status(403).json({ error: 'plan_required', message: 'Los paquetes de créditos solo se pueden comprar con un plan activo.' });
+  }
+  if (!process.env.STRIPE_SECRET_KEY) return res.status(500).json({ error: 'stripe_not_configured' });
+  const priceId = process.env[packPriceEnv(pack)];
+  if (!priceId) return res.status(500).json({ error: 'stripe_price_not_configured' });
+
+  const back = `${process.env.APP_PUBLIC_URL}/app/configuracion?s=plan`;
+  const params = {
+    'mode': 'payment',
+    'success_url': `${back}&credits=ok`,
+    'cancel_url': `${back}&credits=cancelled`,
+    'line_items[0][price]': priceId,
+    'line_items[0][quantity]': '1',
+    'metadata[kind]': 'credit_pack',
+    'metadata[pack]': pack,
+    'metadata[license_id]': String(license.id),
+    'payment_intent_data[metadata][kind]': 'credit_pack',
+    'payment_intent_data[metadata][pack]': pack,
+    'payment_intent_data[metadata][license_id]': String(license.id)
+  };
+  if (license.stripe_customer_id) params.customer = license.stripe_customer_id;
+  else params.customer_email = license.email;
+  if (CHECKOUT_LOCALES.includes(req.body?.locale)) params.locale = req.body.locale;
+
+  try {
+    const r = await stripeApi('POST', 'checkout/sessions', params);
+    if (!r.ok) {
+      console.error('[STRIPE PACK] Error creando checkout:', r.status, r.data?.error?.message);
+      return res.status(502).json({ error: 'stripe_error' });
+    }
+    audit('CREDIT_PACK_CHECKOUT', { license_id: license.id, ip: req.ip, detail: `pack=${pack}` });
+    res.json({ checkout_url: r.data.url });
+  } catch (e) {
+    console.error('[STRIPE PACK] Excepción:', e.message);
+    res.status(500).json({ error: 'internal_error' });
+  }
 });
 
 /* ──────────────────────────────────────────────────────────

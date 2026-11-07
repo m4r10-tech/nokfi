@@ -13,6 +13,10 @@
  *   - Si NINGUNA llamada del trabajo ha salido bien, un fallo libera el slot
  *     (el análisis fallido no cuenta, igual que antes).
  *
+ * S15b (U1): 1 análisis = 1 crédito. Cuando se acaban los créditos del día del
+ * plan, se gasta 1 crédito de los paquetes comprados (db/credits.js); si la IA
+ * falla, se devuelve igual que el slot del día.
+ *
  * Los jobs viven en memoria: el backend es un único proceso PM2 (fork). Un
  * reinicio solo invalida trabajos a medias (el frontend reintenta sin job).
  */
@@ -21,6 +25,7 @@
 
 const crypto = require('crypto');
 const { reserveAiSlot, releaseAiSlot, aiQuotaForPlan, countAiAnalysesToday, audit } = require('../../db/database');
+const { takeCredit, refundCredit } = require('../../db/credits');
 
 const JOB_TTL_MS = 15 * 60 * 1000;
 const jobs = new Map();
@@ -84,8 +89,10 @@ function reserveOrThrow(license, ip) {
   const limit = aiQuotaForPlan(license.plan);
   const r = reserveAiSlot(license.id, limit);
   if (!r) {
+    // S15b (U1, Q2): acabados los créditos del día, se gasta uno de los paquetes.
+    if (takeCredit(license.id)) return { pack: true };
     const used = countAiAnalysesToday(license.id);
-    audit('AI_LICENSE_DAILY_LIMIT_REACHED', { license_id: license.id, ip, detail: `used=${used}/${limit} plan=${license.plan}` });
+    audit('AI_LICENSE_DAILY_LIMIT_REACHED', { license_id: license.id, ip, detail: `used=${used}/${limit} plan=${license.plan} pack=0` });
     throw new QuotaError(limit);
   }
   // Sesión 9: aviso por webhook al pasar el 80 % y el 100 % de la cuota del día.
@@ -99,7 +106,10 @@ function bind(license, job, ephemeral = false) {
     onSuccess() { job.succeeded = true; },
     onFailure() {
       if (!job.succeeded && job.reservation) {
-        try { releaseAiSlot(license.id, job.reservation.day, job.reservation.slot); } catch (_) { /* no enmascarar */ }
+        try {
+          if (job.reservation.pack) refundCredit(license.id);
+          else releaseAiSlot(license.id, job.reservation.day, job.reservation.slot);
+        } catch (_) { /* no enmascarar */ }
         job.reservation = null;
       }
     }
@@ -107,7 +117,7 @@ function bind(license, job, ephemeral = false) {
 }
 
 function quotaMessage(limit) {
-  return `Has agotado tu cuota diaria de ${limit} análisis. Inténtalo de nuevo mañana o mejora tu plan para disponer de más análisis diarios.`;
+  return `Has gastado los ${limit} créditos de hoy y no te quedan créditos de paquetes. Mañana se renuevan; si necesitas más, compra un paquete de créditos o mejora tu plan.`;
 }
 
 module.exports = { acquire, QuotaError, quotaMessage, _jobs: jobs };

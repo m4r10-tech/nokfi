@@ -20,6 +20,9 @@
  *   invoice.payment_failed             → renovación rechazada → se para la suscripción
  *                                        y la cuenta queda bloqueada (S15b, U4)
  *   charge.dispute.created             → chargeback → revocación
+ *   checkout.session.completed (mode=payment, metadata.kind=credit_pack)
+ *   checkout.session.async_payment_succeeded → paquete de créditos pagado:
+ *                                        suma los créditos UNA vez por sesión (S15b, U1)
  *
  * S15b: un evento que llega antes que la licencia (orden no garantizado) se
  * guarda processed=0 y se responde 503 para que Stripe lo reintente (antes 200:
@@ -68,7 +71,8 @@ const PENDING = { pending: true };
 
 // Fuente única de planes válidos (config/plans.js). Antes era un literal local
 // ['mini','pro','max'] duplicado en payments.js/admin.js/database.js → drift.
-const { VALID_PLANS } = require('../config/plans');
+const { VALID_PLANS, CREDIT_PACKS } = require('../config/plans');
+const { grantPack, purchaseByPaymentIntent } = require('../db/credits');
 
 /** Coerce un plan entrante a un id conocido, con 'mini' como conservador. */
 function coerceStripePlan(plan) { return VALID_PLANS.includes(plan) ? plan : 'mini'; }
@@ -168,6 +172,11 @@ router.post('/stripe', async (req, res) => {
       case 'checkout.session.completed':
         await handleStripeCheckoutCompleted(event, req.ip);
         break;
+      case 'checkout.session.async_payment_succeeded':
+        // S15b (U1): un paquete pagado con un método asíncrono se acredita aquí.
+        if (event.data.object?.metadata?.kind === 'credit_pack') await handleCreditPackPaid(event, event.data.object, req.ip);
+        else recordPaymentEvent({ provider: 'stripe', event_id: event.id, event_type: event.type, processed: true });
+        break;
       case 'invoice.paid':
         result = await handleStripeInvoicePaid(event, req.ip);
         break;
@@ -217,6 +226,9 @@ router.post('/stripe', async (req, res) => {
 /** checkout.session.completed — alta inicial de la suscripción → crea la licencia. */
 async function handleStripeCheckoutCompleted(event, ip) {
   const session = event.data.object;
+  if (session.mode === 'payment' && session.metadata?.kind === 'credit_pack') {
+    return handleCreditPackPaid(event, session, ip);
+  }
   if (session.mode !== 'subscription') {
     // El lifetime de pago único se eliminó; un checkout no-suscripción no
     // debería llegar. Se ignora (no genera licencia obsolena).
@@ -524,6 +536,48 @@ async function handleStripeInvoicePaymentFailed(event, ip) {
   recordPaymentEvent({ provider: 'stripe', event_id: event.id, event_type: event.type, license_id: license.id, processed: true });
 }
 
+/**
+ * S15b (U1): paquete de créditos pagado (Checkout mode=payment). Acredita los
+ * créditos del paquete UNA sola vez por Checkout Session (credit_purchases con
+ * stripe_session_id UNIQUE): aunque Stripe repita el evento, o lleguen
+ * checkout.session.completed y async_payment_succeeded de la misma sesión, el
+ * saldo solo sube una vez. Si el pago aún no está cobrado (método asíncrono),
+ * no se acredita: lo hará checkout.session.async_payment_succeeded.
+ */
+async function handleCreditPackPaid(event, session, ip) {
+  const md = session.metadata || {};
+  const pack = CREDIT_PACKS[md.pack];
+  const license = getLicenseById(Number(md.license_id));
+  if (session.payment_status !== 'paid') {
+    audit('CREDIT_PACK_UNPAID', { license_id: license?.id || null, ip, detail: `session=${session.id} status=${session.payment_status}` });
+    recordPaymentEvent({ provider: 'stripe', event_id: event.id, event_type: event.type, license_id: license?.id || null, processed: true });
+    return;
+  }
+  if (!pack || !license) {
+    // Pagado pero sin paquete o cuenta reconocibles (cuenta borrada entre el pago y el
+    // evento): no hay a quién acreditar; queda en el registro para devolverlo a mano.
+    console.error('[WEBHOOK STRIPE] paquete de créditos sin cuenta o paquete válido: session=%s pack=%s license=%s', session.id, md.pack, md.license_id);
+    audit('CREDIT_PACK_ORPHAN', { ip, detail: `session=${session.id} pack=${md.pack} license=${md.license_id} amount=${session.amount_total}` });
+    recordPaymentEvent({ provider: 'stripe', event_id: event.id, event_type: event.type, processed: true });
+    return;
+  }
+  if (session.amount_total != null && Number(session.amount_total) !== pack.cents) {
+    console.warn('[WEBHOOK STRIPE] paquete %s cobrado por %s céntimos (catálogo: %s): revisar el Price de Stripe', md.pack, session.amount_total, pack.cents);
+  }
+  const r = grantPack({
+    license_id: license.id, pack: md.pack, credits: pack.credits,
+    amount_cents: session.amount_total ?? null, currency: session.currency || null,
+    session_id: session.id, payment_intent: idOf(session.payment_intent), livemode: !!session.livemode
+  });
+  audit(r.credited ? 'CREDIT_PACK_PURCHASED' : 'CREDIT_PACK_DUPLICATE', {
+    license_id: license.id, ip, detail: `pack=${md.pack} credits=${pack.credits} session=${session.id} balance=${r.balance}`
+  });
+  recordPaymentEvent({
+    provider: 'stripe', event_id: event.id, event_type: event.type, license_id: license.id,
+    amount_eur: session.amount_total != null ? Number(session.amount_total) / 100 : null, processed: true
+  });
+}
+
 /** S15b (U4): checkout.session.completed de resume-checkout → reactiva la misma licencia. */
 async function resumeBlockedLicense(event, session, ip) {
   const license = getLicenseById(Number(session.metadata.resume_license_id));
@@ -655,6 +709,12 @@ async function handleChargebackByPaymentRef(provider, dispute, ip) {
   let license = getLicenseByPaymentIntent(provider, pi)
     || getLicenseByPaymentRef(provider, pi)
     || getLicenseByPaymentRef(provider, dispute.id);
+
+  // S15b (U1): contracargo de un paquete de créditos → misma política que el resto.
+  if (!license) {
+    const purchase = purchaseByPaymentIntent(pi);
+    if (purchase) license = getLicenseById(purchase.license_id);
+  }
 
   if (!license) {
     license = await resolveLicenseForDisputeViaStripe(dispute);

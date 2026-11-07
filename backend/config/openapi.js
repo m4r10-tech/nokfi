@@ -205,7 +205,7 @@ const spec = {
   security: [{ bearer: [] }],
   paths: {
     '/usage': {
-      get: { summary: 'Cuota de hoy', responses: { 200: { description: 'OK', content: { 'application/json': { schema: { type: 'object', properties: { plan: { type: 'string' }, mode: { type: 'string', enum: ['live', 'test'], description: 'Modo de la clave usada' }, daily_quota: { type: 'integer' }, used_today: { type: 'integer' } } } } } } } }
+      get: { summary: 'Créditos de hoy y de paquetes', responses: { 200: { description: 'OK', content: { 'application/json': { schema: { type: 'object', properties: { plan: { type: 'string' }, mode: { type: 'string', enum: ['live', 'test'], description: 'Modo de la clave usada' }, daily_quota: { type: 'integer', description: 'Igual que daily_credits (se mantiene por compatibilidad)' }, used_today: { type: 'integer', description: 'Igual que daily_credits_used (se mantiene por compatibilidad)' }, daily_credits: { type: 'integer', description: 'Créditos al día del plan' }, daily_credits_used: { type: 'integer', description: 'Créditos del día gastados hoy (se renuevan a las 00:00 UTC)' }, daily_credits_left: { type: 'integer' }, pack_credits: { type: 'integer', description: 'Saldo de paquetes de créditos (no caducan; el mismo en la web y en la API). Se gastan cuando se acaban los del día' }, credits_available: { type: 'integer', description: 'daily_credits_left + pack_credits' } } } } } } } }
     },
     '/analyze': {
       post: {

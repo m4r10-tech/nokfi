@@ -27,6 +27,7 @@ const express = require('express');
 const { requireLicense } = require('../middleware/requireLicense');
 const { deferrable } = require('../services/deferred');
 const { getCompanyProfile, getLatestAnalysisOfKind, audit, countAiAnalysesToday } = require('../db/database');
+const { creditBalance } = require('../db/credits');
 const F = require('../db/finance');
 const { sentStages } = require('../services/collections');
 const { taxSummary, receivables, leaks, forecast, quarterOf, formatEur } = require('../utils/finance');
@@ -230,6 +231,7 @@ dashboard.get('/', requireLicense, (req, res) => {
     ledger_count: entries.length,
     // Cuota REAL gastada hoy (incluye lecturas de facturas y llamadas por API, que no van al historial).
     ai_used_today: countAiAnalysesToday(id),
+    ai_pack_credits: creditBalance(id), // S15b (U1): saldo de paquetes de créditos
     next_deadline: upcoming(profile.legal_form || undefined, iso(new Date()), 1)[0] || null
   };
   if (entries.length) {
