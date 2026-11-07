@@ -67,6 +67,7 @@ Primer acceso (licencia sin contraseña todavía).
 | 200 | `{ success: true, token, expires_at, license }` | Login correcto |
 | 409 | `{ error: "not_activated" }` | No tiene contraseña → flujo `/activate` |
 | 401 | `{ error: "invalid_credentials" }` | Credenciales incorrectas (mensaje SIEMPRE genérico) |
+| 403 | `{ error: "account_blocked", reason: "payment_failed", resume_token, email, plan }` | Cuenta bloqueada por una renovación rechazada **y contraseña correcta**. `resume_token` solo sirve para `POST /api/payments/stripe/resume-checkout` (con contraseña mala → 401 genérico) |
 | 400 | `{ error: "invalid_input" }` | Formato inválido |
 
 ### `POST /api/auth/verify`
@@ -329,12 +330,17 @@ Crea una Checkout Session en modo **suscripción** mensual.
 | 429 | `{ error: "rate_limited" }` | **Rate-limit propio** (10 req/min por IP) — defensa en profundidad sobre el limiter general (**auditoría 2026-09**) |
 
 El plan **mini** lleva `subscription_data[trial_period_days]=14` (tarjeta
-obligatoria, no cobra al instante; cobra el día 14). pro/max sin trial. El
+obligatoria, no cobra al instante; cobra el día 14). pro/max sin trial. Una
+tarjeta que ya tuvo trial (misma `card.fingerprint`, aunque cambie el email) no
+repite: el webhook acaba la prueba en el acto y se cobra el primer mes. Si se
+abandona el pago, Stripe vuelve a `/pricing?plan=<id>&cancelled=true`
+(`/en/pricing` en inglés). El
 `line_items[0][price]` referencia el **price_id estable** de Stripe
 (`STRIPE_PRICE_*`) — no `price_data` efímero.
 
 ### `POST /api/payments/stripe/create-portal-session`  *(auth: Bearer, requireLicense)*
-Sesión del **Stripe Customer Portal** (cancelar, cambiar de plan, método de pago).
+Sesión del **Stripe Customer Portal**: tarjeta, facturas y cancelar a fin de
+periodo. **El cambio de plan NO está en el Portal** (se hace con `change-plan`).
 
 | Status | Body | Cuándo |
 |--------|------|--------|
@@ -343,11 +349,55 @@ Sesión del **Stripe Customer Portal** (cancelar, cambiar de plan, método de pa
 | 500 | `{ error: "stripe_not_configured" }` | Falta la key |
 | 502 | `{ error: "stripe_error" }` | Error de Stripe |
 
-> **Comportamiento del Portal (config desde Stripe dashboard, no código):** los
-> cambios de plan aplican **proration = None** → elegir otro plan es **€0 hoy** y
-> se aplica al **fin del periodo actual** (anclado a la propia fecha de pago).
-> Downgrade sin abono. Un usuario en trial de mini puede subir a pro/max (aplica
-> al fin del trial, cobrando €20/€50).
+> **Configuración del Portal (en Stripe, no en código):** `subscription_update`
+> **desactivado**; `payment_method_update`, `invoice_history` y
+> `subscription_cancel` (`at_period_end`) activados.
+
+### Modelo de cobro (S15b)
+Cualquier cambio de plan (subida o bajada) cobra **hoy el precio completo** del
+plan nuevo y empieza un **periodo nuevo de un mes** desde hoy; sin prorrateos ni
+devoluciones. Si el cobro falla, el plan no cambia. Cambiar durante el trial acaba
+el trial y cobra hoy. Cancelar mantiene el acceso hasta el fin del periodo pagado.
+Si se rechaza el cobro de una renovación, la suscripción se para y la cuenta queda
+bloqueada hasta pagar un plan nuevo (`resume-checkout`).
+
+### `GET /api/payments/stripe/change-plan/preview?plan=<id>`  *(auth: Bearer, requireLicense)*
+Aviso previo, sin tocar Stripe.
+
+| Status | Body | Cuándo |
+|--------|------|--------|
+| 200 | `{ plan, current_plan, amount_eur, ends_at, ends_trial, cancel_at_period_end }` | `ends_at` = misma fecha del mes siguiente |
+| 400 | `{ error: "invalid_plan" \| "not_stripe_customer" }` | Plan desconocido / licencia sin suscripción |
+| 409 | `{ error: "same_plan" }` | Ya tiene ese plan |
+
+### `POST /api/payments/stripe/change-plan`  *(auth: Bearer, requireLicense)*
+**Body:** `{ plan }`. Actualiza la suscripción con el precio nuevo y
+`billing_cycle_anchor=now`, `proration_behavior=none`,
+`payment_behavior=error_if_incomplete` (+ `trial_end=now` si está en trial).
+
+| Status | Body | Cuándo |
+|--------|------|--------|
+| 200 | `{ success: true, plan, amount_eur, current_period_ends_at }` | Cobrado y cambiado |
+| 402 | `{ error: "payment_failed" }` | Tarjeta rechazada: **el plan no cambia** |
+| 409 | `{ error: "same_plan" \| "subscription_not_active" }` | Mismo plan / suscripción no activa |
+| 400 / 500 / 502 | `invalid_plan`, `not_stripe_customer` / `stripe_not_configured`, `stripe_price_not_configured` / `stripe_error` | |
+
+### `POST /api/payments/stripe/cancel`  *(auth: Bearer, requireLicense)*
+`cancel_at_period_end=true` en Stripe → `200 { success, cancel_at_period_end: true, current_period_ends_at }`.
+`400 not_stripe_customer` · `500 stripe_not_configured` · `502 stripe_error`.
+
+### `POST /api/payments/stripe/resume-checkout`  *(auth: Bearer = `resume_token` del login)*
+**Body:** `{ plan, locale? }`. Solo para cuentas bloqueadas por impago. Checkout
+del plan elegido (sin trial, se cobra hoy) para el **mismo cliente**; al pagarse,
+`checkout.session.completed` (con `metadata.resume_license_id`) reactiva la misma
+licencia. Stripe vuelve a `/login?resumed=1` (o `?resume_cancelled=1`).
+
+| Status | Body | Cuándo |
+|--------|------|--------|
+| 200 | `{ checkout_url }` | Redirigir |
+| 401 | `{ error: "session_invalid" }` | Token caducado o inexistente |
+| 409 | `{ error: "not_blocked" }` | La cuenta no está bloqueada por impago |
+| 400 / 429 / 500 / 502 | `invalid_plan` / `rate_limited` / `stripe_*` | |
 
 ### `GET /api/payments/stripe/reveal?session_id=...`  *(público, sin auth)*
 Página `/reveal` al volver de Checkout (el `session_id` es URL-secreta que Stripe
@@ -355,9 +405,10 @@ solo entrega al navegador del comprador).
 
 | Status | Body | Cuándo |
 |--------|------|--------|
-| 200 | `{ key, email, plan }` | El webhook ya creó la licencia (`active`) |
+| 200 | `{ key, email, plan, trial, trial_ends_at }` | El webhook ya creó la licencia (`active`). `trial=true` → hoy no se ha cobrado |
 | 400 | `{ error: "missing_session_id" }` | Falta el parámetro |
 | 404 | `{ error: "not_found" }` | Webhook aún no llegó, o id inexistente |
+| 410 | `{ error: "already_revealed", email }` | La clave ya se mostró (se tolera repetir 2 min tras la primera vez) |
 
 ### Rutas retiradas (PayPal / Coinbase / Revolut)
 `/api/payments/{paypal,coinbase,revolut}/*` **ya no existen** → `404 not_found`.
@@ -371,7 +422,8 @@ El frontend **no debe** tener botones de PayPal/Coinbase/Revolut.
 RAW para verificar la firma **HMAC-SHA256** (`verifyStripeSignature`, replay
 ±5 min). Procesa estos eventos (el endpoint LIVE tiene los 6 registrados):
 
-- `checkout.session.completed` → alta de suscripción, crea la licencia
+- `checkout.session.completed` → alta de suscripción, crea la licencia (con
+  `metadata.resume_license_id`: reactiva la cuenta bloqueada, sin licencia nueva)
 - `invoice.paid` → renovación (o primer cobro real tras el trial); limpia
   `trial_ends_at` solo si `amount_paid > 0`. El 1er `invoice.paid` del trial
   (`billing_reason='subscription_create'`, 0€, sin `invoice.subscription`) se
@@ -379,16 +431,20 @@ RAW para verificar la firma **HMAC-SHA256** (`verifyStripeSignature`, replay
   — nunca crea/finiquita una licencia por error (Deuda K)
 - `customer.subscription.updated` → cambio de plan / cancelación / `trialing→active`
 - `customer.subscription.deleted` → suscripción finiquitada → `expired`, sesiones cerradas
-- `invoice.payment_failed` → cobro fallido tras reintentos → `suspended`
+- `invoice.payment_failed` → renovación (o primer cobro tras el trial) rechazada →
+  cuenta bloqueada (`blocked_reason='payment_failed'`, `suspended`), sesiones
+  cerradas, la suscripción se cancela ya en Stripe y la factura se anula. Solo se
+  reactiva pagando un plan nuevo (`resume-checkout`)
 - `charge.dispute.created` → chargeback → revocación
 
 Los webhooks `paypal`/`coinbase`/`revolut` se retiraron → `404`.
 
 > **Idempotencia:** `recordPaymentEvent` guarda (provider, event_id) con
-> `processed`. Un evento con `processed=1` ya fue tratado (`duplicate`); los que
-> quedan `processed=0` (pendientes/sin licencia) se **reintentan** por Stripe —
-> por diseño. Que un test con sub_id inexistente quede `processed:false` y se
-> reintente es correcto.
+> `processed`. Un evento con `processed=1` ya fue tratado (`duplicate`). Un
+> `invoice.paid` o `customer.subscription.updated` que llega antes que la licencia
+> queda `processed=0` y se responde **`503 { error: "event_pending" }`** para que
+> Stripe lo reintente (solo durante 6 h desde que Stripe creó el evento; una
+> suscripción ya `canceled` no se reintenta).
 
 ---
 
@@ -541,7 +597,7 @@ el 2026-10-02.
 - [ ] `/reveal` es el `success_url` de Stripe (muestra la clave tras checkout, polling `GET .../reveal?session_id=` hasta 200)
 - [ ] `Pricing.jsx` fetchea `GET /api/payments/plans` al montar — no hardcodea precios; si el catálogo no carga, deshabilita los botones
 - [ ] El badge de trial (14 días) usa `trial===true` del catálogo (hoy solo `mini`), no hardcoded a un id
-- [ ] Configuración — Suscripción: si `license.has_subscription` → botón a `create-portal-session`; si `trial_ends_at` futuro → Row "Período de prueba — quedan X días"
+- [ ] Configuración — Suscripción: si `license.has_subscription` → «Cambiar de plan» (`change-plan/preview` + `change-plan`), «Cancelar plan» (`cancel`) y «Tarjeta y facturas» (`create-portal-session`); si `trial_ends_at` futuro → Row "Período de prueba — quedan X días"
 - [ ] `aiApi.analyze(prompt, max_tokens, { kind, title })` — Excel pasa `{kind:'excel', title}`, Cuestionario `{kind:'cuestionario', title:'Diagnóstico de negocio'}`
 - [ ] `Historial`/`Informes` comparten `HistoryBrowser`: listan `GET /api/analyses`, abren `GET /api/analyses/:id`; `result_html` SIEMPRE vía `sanitizeAiHtml`
 - [ ] El frontend no envía `license_id` en `/api/analyses` ni `/api/profile` — el backend scopea por la sesión

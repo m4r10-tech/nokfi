@@ -38,7 +38,8 @@ Stripe).
 
 ## Modelo de negocio
 
-**Suscripción mensual** vía Stripe (sin permanencia, cambios a fin de periodo):
+**Suscripción mensual** vía Stripe (sin permanencia; cambiar de plan cobra hoy el
+plan nuevo completo y empieza un mes nuevo; cancelar dura hasta fin de periodo):
 
 | Plan | Precio/mes | Análisis IA/día | Extra |
 |------|-----------|-----------------|-------|
@@ -46,8 +47,8 @@ Stripe).
 | **Pro** | 20 € | 50 | API para automatizaciones |
 | **Max** | 50 € | 130 | API + soporte prioritario (< 4 h laborables) |
 
-- Stripe: **3 Products** (Mini/Pro/Max), un Price mensual EUR cada uno; Customer
-  Portal con cambios a fin de periodo. El catálogo público
+- Stripe: **3 Products** (Mini/Pro/Max), un Price mensual EUR cada uno; cambio de
+  plan y cancelación desde Ajustes, Customer Portal para tarjeta y facturas. El catálogo público
   `GET /api/payments/plans` evita que la web y Stripe muestren precios distintos.
 - **Acceso**: email + clave de licencia (`XXXX-XXXX-XXXX-XXXX`) + contraseña
   (scrypt). Tokens hasheados en reposo.

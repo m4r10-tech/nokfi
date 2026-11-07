@@ -127,8 +127,22 @@ all simulated renewals succeeded`).
 ## 4. Stripe LIVE
 
 - **Modelo**: 3 Products separados (Nokfi Mini/Pro/Max) con 1 Price recurrente
-  mensual EUR cada uno. Portal con proration `None` (cambios a fin de periodo,
-  €0 hoy, downgrade sin abono; trial mini puede subir → aplica al fin del trial).
+  mensual EUR cada uno.
+- **Modelo de cobro (S15b)**: cualquier cambio de plan cobra hoy el precio
+  completo del plan nuevo y empieza un mes nuevo (`POST /api/payments/stripe/change-plan`:
+  `billing_cycle_anchor=now`, `proration_behavior=none`,
+  `payment_behavior=error_if_incomplete`); cancelar = hasta fin del periodo
+  pagado; una renovación rechazada para la suscripción y bloquea la cuenta hasta
+  pagar un plan nuevo (`resume-checkout`); una tarjeta que ya tuvo trial no repite.
+- **Customer Portal LIVE** (Dashboard › Configuración › Billing › Portal de
+  clientes, o `POST /v1/billing_portal/configurations/<bpc_…>`): **desactivar
+  «Cambiar de plan» (`features[subscription_update][enabled]=false`)**; dejar
+  activos método de pago, historial de facturas y cancelar al final del periodo.
+  Con el cambio de plan activo y proration `None` se podía usar Max pagando Mini.
+  El Portal de PRUEBA ya está así (2026-11-07).
+- **Reintentos de Stripe** (Billing › Revenue recovery): da igual cuántos haya,
+  al primer `invoice.payment_failed` de una renovación el backend cancela la
+  suscripción y anula la factura.
 - **Wireup**: `STRIPE_SECRET_KEY` (`sk_live_`) + `STRIPE_WEBHOOK_SECRET`
   (`whsec_`) + `STRIPE_PRICE_{MINI,PRO,MAX}` en el `.env` del VPS. Precios que se
   cobran = `STRIPE_PRICE_*`; precios que se muestran = `PLAN_PRICE_*_EUR`
@@ -137,6 +151,8 @@ all simulated renewals succeeded`).
   eventos**: `checkout.session.completed`, `invoice.paid`,
   `customer.subscription.updated`, `customer.subscription.deleted`,
   `invoice.payment_failed`, `charge.dispute.created`. Entrega OK a través de CF.
+  Un evento que llega antes que su licencia recibe `503` (Stripe lo reintenta);
+  en el panel de webhooks pueden verse algunos `503` sueltos en las altas: es normal.
 - **Verificado end-to-end**: pago real mini (trial 14d → 0€) creó la licencia
   `id=2` (`trial_ends_at = día+14`), reveal 200, login, Portal. API version fija
   `2024-04-10` (`config/stripe-version.js`) **solo en las llamadas salientes**.
@@ -147,7 +163,9 @@ all simulated renewals succeeded`).
   renovaciones y los cobros fallidos se ignoraban). Si se cambia la versión del
   endpoint, añadir un e2e con el formato nuevo.
 - Tarjeta de test Stripe: `4242 4242 4242 4242` (OK), `4000 0000 0000 0341`
-  (fallo de cobro al día 14).
+  (se guarda pero falla al cobrar: renovación o cambio de plan rechazados).
+- **Al borrar una cuenta** el backend cancela la suscripción y borra el cliente
+  de Stripe (si Stripe falla, la cuenta no se borra y se puede reintentar).
 
 ## 5. Mailer (Resend, provider único)
 
@@ -191,7 +209,7 @@ Todo lo crítico está resuelto. Restos **no bloqueantes / opcionales**:
 | # | Deuda | Bloquea | Estado / acción |
 |---|-------|---------|-----------------|
 | A | Stripe LIVE — webhook + cobros reales | — | ✅ **RESUELTO** (pago real verificado end-to-end, 6 eventos, entrega por CF). |
-| B | `STRIPE_PRICE_{MINI,PRO,MAX}` + 3 Products + Portal proration=None | — | ✅ **RESUELTO / DESPLEGADO** (Deuda B). |
+| B | `STRIPE_PRICE_{MINI,PRO,MAX}` + 3 Products + Portal proration=None | — | ✅ **RESUELTO / DESPLEGADO** (Deuda B). S15b: el cambio de plan sale del Portal (ver §4). |
 | C | Dominio + Nginx + SSL | — | ✅ **RESUELTO** (HTTPS vivo, cert LE, Cloudflare Full strict). |
 | H | Cuota diaria de IA vulnerable a overshoot por concurrencia (**TOCTOU**) | — | ✅ **RESUELTO (2026-08-17)** — cuota atómica vía tabla `ai_usage` (PK `license_id+day+slot`). `reserveAiSlot` inserta el slot ANTES del `await` a Gemini (INSERT atómico de mejor-sqlite3 → sin ventana TOCTOU); si la IA falla, `releaseAiSlot` lo libera y el fallo NO consume cuota. El `429` responde con mensaje específico. Detalle en `api.md` §2. |
 | I | `create-checkout` validaba plan tarde (coerción a mini) | — | ✅ **RESUELTO** (`400 invalid_plan` antes de tocar Stripe). |

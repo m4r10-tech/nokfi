@@ -48,6 +48,8 @@ con cifras, gráficas y recomendaciones concretas exportables a PDF/Excel.
 ## 2. Modelo de negocio (Fase 3 — suscripción mensual Stripe)
 
 **Suscripción mensual** vía Stripe, sin permanencia, cancelable a fin de periodo.
+Cambiar de plan (subir o bajar) cobra hoy el precio completo del plan nuevo y
+empieza un mes nuevo (S15b).
 Tres tiers:
 
 | Plan | Precio/mes | Análisis IA/día | Trial |
@@ -69,14 +71,20 @@ cambio de plan.
   `GET /api/payments/plans`). Dos orígenes que deben mantenerse **sincronizados a
   mano** (drift caveat): si cambias el precio en Stripe sin tocar `.env` (o al
   revés) la web muestra 5€ y Stripe cobra 7€.
-- **Proración del Portal = `None`** ("Sin cargos ni créditos"): elegir otro plan
-  → **€0 hoy** → se aplica al **fin del periodo de facturación actual** (anclado a
-  su propia fecha de pago, no al fin de mes calendario). Downgrade no genera
-  abono/reembolso. "Un mes" = desde que pagó (Stripe ancla cada sub a su fecha).
-- **Trial de mini = Opción 1**: el usuario en trial **puede** abrir el Portal y
-  subir a pro/max. Con proration `None` no cobra hoy — el cambio aterriza al
-  **fin del trial (día 14)** cobrando €20/€50 (no €5). Si vuelve a mini antes,
-  cobra €5. Maximiza captura de revenue caliente.
+- **Modelo de cobro (S15b, 2026-11-07; sustituye a «Portal proration None»)**:
+  cualquier cambio de plan (subida o bajada) cobra **hoy el precio completo** del
+  plan nuevo y empieza un **periodo nuevo de un mes** desde ese día; sin
+  prorrateos ni devoluciones. Si el cobro falla, el plan no cambia. Cambiar en el
+  trial acaba el trial y cobra ese día. Se hace desde Ajustes › Plan
+  (`change-plan`, con aviso previo de importe y fecha de fin); el Portal ya no
+  permite cambiar de plan (solo tarjeta, facturas y cancelar). Cancelar = sigue
+  hasta el fin del mes pagado.
+- **Renovación rechazada**: la suscripción se para y la cuenta queda bloqueada
+  («hasta que no renueves la suscripción no puedes usar la cuenta»); al entrar se
+  ve la pantalla de bloqueo con opción de pagar un plan nuevo, que reactiva la
+  misma cuenta con sus datos.
+- **Un trial por tarjeta**: si la huella de la tarjeta (`card.fingerprint`) ya tuvo
+  trial, la prueba se acaba en el alta y se cobra el primer mes.
 - **Anti-drift de precios**: el frontend SIEMPRE pasa por `GET /api/payments/plans`,
   nunca hardcodea. Lo que muestra la web == lo que cobra Stripe.
 - **Trial**: `subscription_data[trial_period_days]=14` (tarjeta obligatoria, no
@@ -106,8 +114,10 @@ compartida se agota entre sus usuarios).
 5. El usuario aterriza en `/reveal?session_id=` → polling a
    `GET /api/payments/stripe/reveal` hasta 200 → ve su clave.
 6. `/activate` (elige contraseña) → login → dashboard.
-7. La gestión de la subscripción (cancelar, cambiar de plan, método de pago) se
-   hace en el **Stripe Customer Portal** nativo vía `create-portal-session`.
+7. Cambiar de plan y cancelar se hace en Ajustes › Plan (`change-plan`, `cancel`);
+   tarjeta y facturas, en el **Stripe Customer Portal** vía `create-portal-session`.
+   `/reveal` muestra la clave una sola vez (margen de 2 min) y lleva al login con
+   el email y la clave rellenados.
 
 ## 4. Principio clave
 
@@ -195,7 +205,9 @@ La licencia = la cuenta de pago. Columnas (a Fase 3):
 (`active|suspended|revoked|expired`), `billing_model` (`subscription|legacy`),
 `password_hash` (scrypt), `stripe_customer_id`, `stripe_subscription_id`,
 `current_period_ends_at`, `cancel_at_period_end`, `trial_ends_at`,
-`device_name` (etiqueta legible, no participa en auth), `notes`, `created_at`.
+`blocked_reason` (`payment_failed` = bloqueada por renovación rechazada, S15b),
+`key_revealed_at` (/reveal una vez), `device_name` (etiqueta legible, no participa en auth),
+`notes`, `created_at`. Tabla `trial_fingerprints` (huellas de tarjeta que ya tuvieron trial).
 
 ### `sessions`
 Tokens de sesión Bearer.
@@ -260,7 +272,7 @@ Detalle de cada endpoint y sus códigos de error: ver [`api.md`](api.md).
 | API v1 / MCP | `/api/v1/*`, `/api/mcp` | clave `nk_live_` / `nk_test_` |
 | Historial | `/api/analyses`, `/api/analyses/:id` | Bearer (scoped por licencia) |
 | Perfil | `GET/PUT /api/profile` | Bearer (scoped por licencia) |
-| Pagos | `GET /api/payments/plans`, `POST .../stripe/create-checkout`, `POST .../create-portal-session`, `GET .../stripe/reveal` | según ruta |
+| Pagos | `GET /api/payments/plans`, `POST .../stripe/create-checkout`, `POST .../create-portal-session`, `GET/POST .../stripe/change-plan[/preview]`, `POST .../stripe/cancel`, `POST .../stripe/resume-checkout`, `GET .../stripe/reveal` | según ruta |
 | Webhooks | `POST /api/webhooks/stripe` | firma HMAC (solo Stripe) |
 | Admin | `/api/admin/*` | `ADMIN_SECRET` |
 
@@ -303,12 +315,14 @@ Para una suscripción Stripe (Fase 3), los estados se ligan al ciclo de vida de 
 sub:
 
 1. **Trial (mini)**: `status='active'` + `trial_ends_at` futuro. Al día 14 Stripe
-   cobra; si falla, `past_due → suspended → expired`.
+   cobra; si falla, igual que el punto 3.
 2. **Cobro recurrente OK**: `invoice.paid` renueva (limpia `trial_ends_at` si
    `amount_paid>0`).
-3. **Cobro fallido persistente**: `invoice.payment_failed` → `status='suspended'`.
-   Stripe reintenta; si sigue fallando y el usuario no actúa → `expired`.
-4. **Cancelación (Portal)**: `cancel_at_period_end=true` → sigue activo hasta el
+3. **Cobro fallido (S15b)**: `invoice.payment_failed` → `status='suspended'` +
+   `blocked_reason='payment_failed'`, la suscripción se cancela ya en Stripe (→
+   `expired`) y la cuenta queda bloqueada hasta pagar un plan nuevo
+   (`resume-checkout`, misma licencia).
+4. **Cancelación (Ajustes o Portal)**: `cancel_at_period_end=true` → sigue activo hasta el
    fin del periodo; al expirar `customer.subscription.deleted` → `expired` y
    sesiones cerradas.
 
