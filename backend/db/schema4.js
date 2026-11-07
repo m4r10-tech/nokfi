@@ -75,7 +75,7 @@ function runSession4Schema(db) {
       total          REAL    NOT NULL DEFAULT 0,
       paid           INTEGER NOT NULL DEFAULT 0,
       paid_at        TEXT    DEFAULT NULL,
-      source         TEXT    NOT NULL DEFAULT 'manual' CHECK(source IN ('manual','ai')),
+      source         TEXT    NOT NULL DEFAULT 'manual' CHECK(source IN ('manual','ai','einvoice')),
       file_name      TEXT    NOT NULL DEFAULT '',
       needs_review   INTEGER NOT NULL DEFAULT 0,
       created_at     TEXT    NOT NULL DEFAULT (datetime('now')),
@@ -273,6 +273,41 @@ function runSession4Schema(db) {
   ensureColumn(db, 'company_profiles', 'cash_alert_threshold', 'REAL NOT NULL DEFAULT 0');
   // Sesión 8: cada tarea del plan enlaza a la herramienta de Nokfi que la resuelve.
   ensureColumn(db, 'action_items', 'link', "TEXT NOT NULL DEFAULT ''");
+  allowEinvoiceSource(db);
 }
 
-module.exports = { runSession4Schema, ensureColumn, hasColumn };
+/**
+ * S15b L4: los apuntes leídos de una factura electrónica (XML / Factur-X) se
+ * guardan con source 'einvoice' (antes 'ai', aunque no usan IA). SQLite no deja
+ * cambiar un CHECK con ALTER: se reconstruye la tabla con el MISMO SQL que tiene
+ * guardado (con las columnas añadidas después) y el CHECK ampliado: tabla nueva
+ * con nombre temporal, copiar, DROP de la vieja y RENAME (como el rebuild de
+ * licenses). Idempotente: si el CHECK ya admite 'einvoice', no hace nada.
+ * Ninguna tabla tiene FK hacia ledger_entries (invoices.ledger_entry_id es un
+ * entero suelto).
+ */
+function allowEinvoiceSource(db) {
+  const row = db.prepare("SELECT sql FROM sqlite_master WHERE type = 'table' AND name = 'ledger_entries'").get();
+  const OLD = /CHECK\s*\(\s*source\s+IN\s*\(\s*'manual'\s*,\s*'ai'\s*\)\s*\)/i;
+  if (!row?.sql || !OLD.test(row.sql)) return;
+  const sql = row.sql
+    .replace(OLD, "CHECK(source IN ('manual','ai','einvoice'))")
+    .replace(/^CREATE TABLE\s+(IF NOT EXISTS\s+)?["`]?ledger_entries["`]?/i, 'CREATE TABLE ledger_entries_s15b');
+  const indexes = db.prepare("SELECT sql FROM sqlite_master WHERE type = 'index' AND tbl_name = 'ledger_entries' AND sql IS NOT NULL").all().map(r => r.sql);
+  db.pragma('foreign_keys = OFF');
+  try {
+    db.transaction(() => {
+      db.exec(sql);
+      db.exec('INSERT INTO ledger_entries_s15b SELECT * FROM ledger_entries');
+      db.exec('DROP TABLE ledger_entries');
+      db.exec('ALTER TABLE ledger_entries_s15b RENAME TO ledger_entries');
+      for (const ix of indexes) db.exec(ix);
+      const fk = db.prepare('PRAGMA foreign_key_check').all();
+      if (fk.length) throw new Error('foreign_key_check falló tras reconstruir ledger_entries: ' + JSON.stringify(fk));
+    })();
+  } finally {
+    db.pragma('foreign_keys = ON');
+  }
+}
+
+module.exports = { runSession4Schema, ensureColumn, hasColumn, allowEinvoiceSource };

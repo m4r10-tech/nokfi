@@ -17,6 +17,20 @@ const FIELDS = ['type', 'party_name', 'party_nif', 'party_email', 'invoice_numbe
   'base', 'vat_rate', 'vat_amount', 'irpf_rate', 'irpf_amount', 'total', 'paid', 'paid_at', 'source', 'file_name'];
 
 const ISO = /^\d{4}-\d{2}-\d{2}$/;
+// S15b F8: además del formato, la fecha tiene que existir (2026-02-30 no).
+const isRealDate = (v) => {
+  const s = String(v || '');
+  if (!ISO.test(s)) return false;
+  const [y, m, d] = s.split('-').map(Number);
+  const dt = new Date(Date.UTC(y, m - 1, d));
+  return dt.getUTCFullYear() === y && dt.getUTCMonth() === m - 1 && dt.getUTCDate() === d;
+};
+const todayIso = () => new Date().toISOString().slice(0, 10);
+// Margen de un día para la zona horaria (en España ya es «mañana» antes que en UTC).
+const tomorrowIso = () => new Date(Date.now() + 86400000).toISOString().slice(0, 10);
+// S15b L1: la retención resta del total, así que va con el signo de la base
+// (positiva en un apunte normal; negativa solo en uno en negativo, como un abono).
+const signedIrpf = (irpf, base) => { const a = Math.abs(num(irpf)); return num(base) < 0 ? -a : a; };
 const EMAIL = /^[^\s@<>"',;]+@[^\s@<>"',;]+\.[a-z]{2,}$/;
 const num = (v) => { const n = Number(v); return Number.isFinite(n) ? Math.round(n * 100) / 100 : 0; };
 const txt = (v, max) => sanitizeFreeText(v ?? '').slice(0, max);
@@ -30,10 +44,13 @@ function normalizeEntry(raw, { partial = false } = {}) {
     e.type = raw.type;
   }
   if (!partial || has('invoice_date')) {
-    if (!ISO.test(String(raw.invoice_date || ''))) return { error: 'invoice_date' };
+    if (!isRealDate(raw.invoice_date)) return { error: 'invoice_date' };
     e.invoice_date = raw.invoice_date;
   }
-  if (has('due_date')) e.due_date = ISO.test(String(raw.due_date || '')) ? raw.due_date : null;
+  if (has('due_date')) {
+    if (raw.due_date && ISO.test(String(raw.due_date)) && !isRealDate(raw.due_date)) return { error: 'due_date' };
+    e.due_date = isRealDate(raw.due_date) ? raw.due_date : null;
+  }
   if (has('party_name') || !partial) e.party_name = txt(raw.party_name, 160);
   if (has('party_nif') || !partial) e.party_nif = txt(raw.party_nif, 20).toUpperCase().replace(/[\s-]/g, '');
   if (has('party_email') || !partial) {
@@ -46,15 +63,24 @@ function normalizeEntry(raw, { partial = false } = {}) {
   for (const k of ['base', 'vat_rate', 'vat_amount', 'irpf_rate', 'irpf_amount', 'total']) {
     if (has(k) || !partial) e[k] = num(raw[k]);
   }
+  if (e.irpf_rate !== undefined) e.irpf_rate = Math.abs(e.irpf_rate);
+  if (e.irpf_amount !== undefined && (e.base !== undefined || !partial)) e.irpf_amount = signedIrpf(e.irpf_amount, e.base);
   if (has('paid') || !partial) {
     // Por defecto: los gastos se dan por pagados; los ingresos quedan pendientes de cobro (V4).
     e.paid = has('paid') ? (raw.paid ? 1 : 0) : (e.type === 'expense' ? 1 : 0);
   }
-  if (has('paid_at')) e.paid_at = ISO.test(String(raw.paid_at || '').slice(0, 10)) ? String(raw.paid_at).slice(0, 10) : null;
+  if (has('paid_at')) {
+    // S15b F5: la fecha de cobro/pago la elige el usuario; tiene que existir y no ser futura.
+    const p = raw.paid_at ? String(raw.paid_at).slice(0, 10) : '';
+    if (p && (!isRealDate(p) || p > tomorrowIso())) return { error: 'paid_at' };
+    e.paid_at = p || null;
+  }
   if (!partial) {
-    e.source = raw.source === 'ai' ? 'ai' : 'manual';
+    // S15b L4: 'einvoice' = leída de una factura electrónica (XML/Factur-X), sin IA.
+    e.source = ['ai', 'einvoice'].includes(raw.source) ? raw.source : 'manual';
     e.file_name = txt(raw.file_name, 160);
   }
+  if (!partial && e.paid_at && e.paid_at < e.invoice_date) return { error: 'paid_at' };
   if (e.total !== undefined || e.base !== undefined) {
     const base = e.base ?? num(raw.base), vat = e.vat_amount ?? num(raw.vat_amount), irpf = e.irpf_amount ?? num(raw.irpf_amount), total = e.total ?? num(raw.total);
     e.needs_review = Math.abs(base + vat - irpf - total) > 0.05 ? 1 : 0;
@@ -80,7 +106,7 @@ function insertEntries(license_id, entries) {
   const ids = [];
   db.transaction(() => {
     for (const e of entries) {
-      if (e.paid && !e.paid_at) e.paid_at = e.type === 'expense' ? e.invoice_date : new Date().toISOString().slice(0, 10);
+      if (e.paid && !e.paid_at) e.paid_at = e.type === 'expense' ? e.invoice_date : todayIso();
       const info = stmt.run(license_id, ...cols.map(c => (e[c] === undefined ? null : e[c])));
       ids.push(Number(info.lastInsertRowid));
     }
@@ -125,10 +151,12 @@ function updateEntry(license_id, id, partial) {
   if (current.invoice_id && Object.keys(partial).some(k => !INVOICE_EDITABLE.includes(k) && partial[k] !== current[k])) return { error: 'invoice_locked' };
   const { entry, error } = normalizeEntry({ ...partial }, { partial: true });
   if (error) return { error };
-  if (entry.paid === 1 && !current.paid && partial.paid_at === undefined) entry.paid_at = new Date().toISOString().slice(0, 10);
+  if (entry.paid === 1 && !current.paid && !entry.paid_at) entry.paid_at = todayIso();
   if (entry.paid === 0) entry.paid_at = null;
   // Recalcular needs_review con los valores finales.
   const merged = { ...current, ...entry };
+  if (merged.paid_at && merged.paid_at < merged.invoice_date) return { error: 'paid_at' };
+  if (entry.irpf_amount !== undefined || entry.base !== undefined) entry.irpf_amount = merged.irpf_amount = signedIrpf(merged.irpf_amount, merged.base);
   entry.needs_review = Math.abs(merged.base + merged.vat_amount - merged.irpf_amount - merged.total) > 0.05 ? 1 : 0;
   const keys = Object.keys(entry);
   if (!keys.length) return current;

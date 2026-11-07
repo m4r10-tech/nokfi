@@ -34,7 +34,8 @@ function quarterRange(year, q) {
 const inRange = (e, from, to) => e.invoice_date >= from && e.invoice_date <= to;
 
 /* ── V2: 303 + 130 ── */
-function vatForQuarter(entries, year, q) {
+// IVA del trimestre solo (repercutido − soportado), sin compensaciones.
+function vatOwnQuarter(entries, year, q) {
   const { from, to } = quarterRange(year, q);
   let output = 0, input = 0;
   for (const e of entries) {
@@ -43,6 +44,28 @@ function vatForQuarter(entries, year, q) {
     else input += e.vat_amount;
   }
   return { output: r2(output), input: r2(input), result: r2(output - input) };
+}
+
+/**
+ * Modelo 303 del trimestre (S15b F1): el resultado del propio trimestre menos
+ * las cuotas a compensar de trimestres ANTERIORES del mismo año (un 303
+ * negativo del 1T-3T no se paga ni se devuelve: se descuenta después). Si
+ * después de compensar sigue negativo, queda a compensar (o a devolver en el
+ * 4T). No se arrastra el 4T del año anterior: se supone que se pidió la
+ * devolución (lo habitual, y lo que dice la pantalla de Impuestos).
+ *
+ *   quarter_result         repercutido − soportado del trimestre
+ *   previous_compensation  saldo a compensar que viene de trimestres anteriores
+ *   result                 quarter_result − previous_compensation (lo del 303)
+ */
+function vatForQuarter(entries, year, q) {
+  let carry = 0;
+  for (let k = 1; k < q; k++) {
+    const r = vatOwnQuarter(entries, year, k).result - carry;
+    carry = r < 0 ? -r : 0;
+  }
+  const own = vatOwnQuarter(entries, year, q);
+  return { ...own, quarter_result: own.result, previous_compensation: r2(carry), result: r2(own.result - carry) };
 }
 
 /**
@@ -142,6 +165,13 @@ const median = (xs) => { const s = [...xs].sort((a, b) => a - b); const m = s.le
 const STABLE = 0.05;
 const isStable = (xs) => { if (xs.length < 2) return false; const m = median(xs); return m > 0 && xs.every(x => Math.abs(x - m) <= m * STABLE); };
 
+// Meses entre cargos: mediana de la separación entre meses distintos (YYYY-MM ordenados).
+function periodMonths(months) {
+  const idx = months.map(m => Number(m.slice(0, 4)) * 12 + Number(m.slice(5, 7)));
+  const gaps = idx.slice(1).map((v, i) => v - idx[i]);
+  return gaps.length ? Math.min(12, Math.max(1, Math.round(median(gaps)))) : 1;
+}
+
 /**
  * Fugas sobre los gastos del libro, agrupados por proveedor (NIF o nombre).
  *
@@ -152,6 +182,10 @@ const isStable = (xs) => { if (xs.length < 2) return false; const m = median(xs)
  *   meses anteriores y el último mes sube > 5 %. Se comparan BASES (sin IVA).
  *   Un proveedor sin categoría de suscripción tiene que ser estable en TODOS
  *   los meses para ser recurrente, así que nunca da "subida".
+ * - Periodicidad (S15b F4): la mediana de la separación en meses entre cargos
+ *   (1 = mensual, 3 = trimestral…). `amount` es el importe de cada cargo y
+ *   `monthly`/`yearly` lo reparten según la periodicidad (363 € trimestrales
+ *   = 121 €/mes, 1.452 €/año).
  * - Duplicados: mismo nº de factura, o mismo importe en ≤ 7 días.
  * - `dismissed`: claves de proveedor que el usuario ha marcado como "No es una
  *   fuga"; se excluyen de todo (también de la previsión).
@@ -184,17 +218,18 @@ function leaks(entries, refDate = today(), { dismissed = new Set() } = {}) {
       const lastBase = bases[bases.length - 1];
       const subscription = list.some(e => isSubscriptionCategory(e.category));
       if (isStable(bases) || subscription) {
-        // Importe mensual = el ÚLTIMO (tras una subida, la mediana se quedaría corta).
+        const period = periodMonths(months);
+        // Importe de cada cargo = el ÚLTIMO (tras una subida, la mediana se quedaría corta).
         recurring.push({
-          party_key: key, party_name: name, party_nif: last.party_nif, months: months.length, monthly: r2(last.total),
-          yearly: r2(last.total * 12), last_date: last.invoice_date, category: last.category, day: Number(last.invoice_date.slice(8, 10))
+          party_key: key, party_name: name, party_nif: last.party_nif, months: months.length, period_months: period, amount: r2(last.total),
+          monthly: r2(last.total / period), yearly: r2(last.total * 12 / period), last_date: last.invoice_date, category: last.category, day: Number(last.invoice_date.slice(8, 10))
         });
         const before = median(prevBases);
         if (isStable(prevBases) && before > 0 && lastBase > before * (1 + STABLE)) {
           increases.push({
             party_key: key, party_name: name, from: r2(before), to: r2(lastBase), pct: r2(((lastBase - before) / before) * 100),
             since: list[0].invoice_date, last_date: last.invoice_date,
-            monthly_extra: r2(lastBase - before), this_month: monthOf(last.invoice_date) === currentMonth,
+            period_months: period, monthly_extra: r2((lastBase - before) / period), charge_extra: r2(lastBase - before), this_month: monthOf(last.invoice_date) === currentMonth,
             delta_vs_previous: r2(lastBase - prevBases[prevBases.length - 1])
           });
         }
@@ -216,7 +251,7 @@ function leaks(entries, refDate = today(), { dismissed = new Set() } = {}) {
   // IDENTIFICADOS (cargos duplicados + sobrecoste de subidas este mes), no
   // ahorros supuestos.
   const detected = duplicates.filter(d => d.this_month).reduce((s, d) => s + d.total, 0)
-    + increases.filter(i => i.this_month).reduce((s, i) => s + i.monthly_extra, 0);
+    + increases.filter(i => i.this_month).reduce((s, i) => s + i.charge_extra, 0);
   return {
     recurring: recurring.sort((a, b) => b.yearly - a.yearly),
     increases: increases.sort((a, b) => b.pct - a.pct),
@@ -263,15 +298,18 @@ function forecast({ entries, balance, days = 90, threshold = 0, legalForm, scena
     if (date < refDate) date = refDate;
     flows.push({ date, amount: -e.total, kind: 'payable', label: e.party_name });
   }
-  // Gastos recurrentes (V5), proyectados cada mes el mismo día.
+  // Gastos recurrentes (V5), proyectados el mismo día cada `period_months`
+  // meses desde el último cargo (S15b F4: un trimestral no se cobra cada mes).
   const lk = leaks(entries, refDate, { dismissed });
   for (const r of lk.recurring) {
-    let d = new Date(refDate + 'T00:00:00Z');
-    for (let m = 0; m < 7; m++) {
-      const y = d.getUTCFullYear(), mo = d.getUTCMonth() + m;
+    const period = r.period_months || 1;
+    const y = Number(r.last_date.slice(0, 4)), m0 = Number(r.last_date.slice(5, 7)) - 1;
+    for (let k = 1; k < 400; k++) {
+      const mo = m0 + k * period;
       const lastDay = new Date(Date.UTC(y, mo + 1, 0)).getUTCDate();
       const date = iso(new Date(Date.UTC(y, mo, Math.min(r.day || 1, lastDay))));
-      if (date > refDate && date <= end && date > r.last_date) flows.push({ date, amount: -r.monthly, kind: 'recurring', label: r.party_name });
+      if (date > end) break;
+      if (date > refDate) flows.push({ date, amount: -(r.amount ?? r.monthly), kind: 'recurring', label: r.party_name });
     }
   }
   // Impuestos previstos (V2): trimestre anterior (si aún no ha vencido) y actual.
@@ -280,7 +318,7 @@ function forecast({ entries, balance, days = 90, threshold = 0, legalForm, scena
   for (const q of quarters) {
     const ts = taxSummary(entries, { ...q, legalForm });
     if (ts.due_date >= refDate && ts.due_date <= end && ts.total_estimated > 0) {
-      flows.push({ date: ts.due_date, amount: -ts.total_estimated, kind: 'tax', label: `${q.quarter}T ${q.year}` });
+      flows.push({ date: ts.due_date, amount: -ts.total_estimated, kind: 'tax', label: `${q.quarter}T ${q.year}`, quarter: q.quarter, year: q.year });
     }
   }
   // Escenarios.
@@ -319,4 +357,12 @@ function forecast({ entries, balance, days = 90, threshold = 0, legalForm, scena
   };
 }
 
-module.exports = { isSubscriptionCategory, quarterOf, quarterRange, vatForQuarter, irpf130ForQuarter, taxSummary, receivables, leaks, forecast, addDays, r2 };
+/* ── Importes con el formato del idioma (S15b F7): «8.470,00 €», no «8470.00 €» ── */
+const LOCALES = { es: 'es-ES', en: 'en-GB', fr: 'fr-FR', it: 'it-IT', de: 'de-DE', pl: 'pl-PL' };
+function formatEur(n, lang = 'es') {
+  const loc = LOCALES[String(lang || '').slice(0, 2)] || 'es-ES';
+  const s = new Intl.NumberFormat(loc, { style: 'currency', currency: 'EUR', useGrouping: 'always', minimumFractionDigits: 2, maximumFractionDigits: 2 }).format(Number(n) || 0);
+  return s.replace(/[\u00a0\u202f]/g, ' ');
+}
+
+module.exports = { formatEur, isSubscriptionCategory, quarterOf, quarterRange, vatForQuarter, irpf130ForQuarter, taxSummary, receivables, leaks, forecast, addDays, r2 };

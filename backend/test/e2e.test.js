@@ -1487,6 +1487,8 @@ async function main() {
   await require('./session12.tests')({ post, put, get, call, check, checkAsync, getDB });
   await require('./session13.tests')({ post, check });
   await require('./session13.tests').media({ get, check });
+  // Sesión 15b, lote 4 — cifras e impuestos.
+  await require('./session15b-cifras.tests')({ post, put, get, call, check, checkAsync, getDB });
 
   } catch (e) {
     console.error('TEST CRASH:', e.message);
