@@ -334,6 +334,13 @@ html { scroll-padding-top: 80px; }
 .update-prompt { bottom: 16px; }
 :root:has(.bottom-nav) .update-prompt { bottom: calc(var(--bottom-nav-h) + 12px + env(safe-area-inset-bottom)); }
 @media (min-width: 768px) { :root:has(.bottom-nav) .update-prompt { bottom: 24px; } }
+/* S15b V8: en el móvil se aparta al desplazar hacia abajo (tapaba los importes) y vuelve al subir. */
+.chat-launcher { transition: transform var(--dur-base) var(--ease-out), opacity var(--dur-base) var(--ease-out); }
+@media (max-width: 767px) {
+  .chat-launcher.is-away { animation: none; transform: translateY(calc(100% + 24px)); opacity: 0; pointer-events: none; }
+  .chat-launcher.is-away:focus-visible { transform: none; opacity: 1; pointer-events: auto; }
+}
+@media (prefers-reduced-motion: reduce) { .chat-launcher { transition: none; } }
 
 /* Sesión 10: capturas de la landing en el tema que se está viendo. */
 html.theme-light .shot-dark,
