@@ -87,11 +87,14 @@ export default function FiscalCalendar() {
                 {list.map(d => {
                   const past = d.date < new Date().toISOString().slice(0, 10);
                   return (
-                    <li key={d.key} className="flex items-center gap-3 rounded-xl px-3 py-2.5" style={{ background: 'var(--surface-2)', opacity: past ? 0.55 : 1 }}>
-                      <CalendarDays size={15} className="shrink-0" style={{ color: 'var(--accent-text)' }} />
-                      <span className="text-sm tabular w-16 shrink-0" style={{ color: 'var(--text-primary)' }}>{isoDate(d.date, lang, { day: 'numeric', month: 'short' })}</span>
+                    // S15b (A3): los plazos pasados se atenúan sin opacidad (con 0,55 el texto bajaba a 3-3,8:1):
+                    // sin fondo, con borde, icono apagado y texto secundario, que sigue cumpliendo AA.
+                    <li key={d.key} className="flex items-center gap-3 rounded-xl px-3 py-2.5"
+                      style={past ? { background: 'transparent', border: '1px solid var(--border)' } : { background: 'var(--surface-2)', border: '1px solid transparent' }}>
+                      <CalendarDays size={15} className="shrink-0" style={{ color: past ? 'var(--text-muted)' : 'var(--accent-text)' }} />
+                      <span className="text-sm tabular w-16 shrink-0" style={{ color: past ? 'var(--text-secondary)' : 'var(--text-primary)' }}>{isoDate(d.date, lang, { day: 'numeric', month: 'short' })}</span>
                       <span className="flex-1 min-w-0">
-                        <span className="block text-sm font-medium" style={{ color: 'var(--text-primary)' }}>{t('finance.calendar.models').replace('{m}', d.models.join(', '))} · {d.period}</span>
+                        <span className="block text-sm font-medium" style={{ color: past ? 'var(--text-secondary)' : 'var(--text-primary)' }}>{t('finance.calendar.models').replace('{m}', d.models.join(', '))} · {d.period}</span>
                         <span className="block text-xs truncate" style={{ color: 'var(--text-secondary)' }}>{t(`finance.calendar.kind_${d.kind}`)}</span>
                       </span>
                       {d.conditional && <Badge tone="muted">{t('finance.calendar.ifApplies')}</Badge>}
