@@ -457,7 +457,7 @@ P['/webhooks/{id}'].get.responses[404] = notFound;
 P['/webhooks/{id}'].patch.requestBody = { required: true, content: { 'application/json': { schema: { type: 'object', properties: {
   url: { type: 'string' }, events: { oneOf: [{ type: 'string', example: '*' }, { type: 'array', items: { type: 'string' } }] }, description: { type: 'string' },
   enabled: { type: 'boolean', description: 'true reactiva uno desactivado (pone a cero la racha de fallos)' } } } } } };
-Object.assign(P['/webhooks/{id}'].patch.responses, { 400: { description: 'invalid_url o invalid_events', content: errorContent }, 404: notFound });
+Object.assign(P['/webhooks/{id}'].patch.responses, { 400: { description: 'invalid_url, invalid_events o invalid_enabled (enabled no es booleano)', content: errorContent }, 404: notFound });
 P['/webhooks/{id}'].delete.responses[404] = notFound;
 P['/webhooks/{id}/test'].post.responses[404] = notFound;
 P['/invoices/{id}/status'].post.responses = { ...P['/invoices/{id}/status'].post.responses,

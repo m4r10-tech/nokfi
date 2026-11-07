@@ -272,7 +272,11 @@ function updateWebhook(license, id, body, livemode) {
     if (!patch.events) return { status: 400, body: { error: 'invalid_events', message: `events debe ser "*" o una lista de: ${W.EVENT_TYPES.join(', ')}.` } };
   }
   if (body?.description !== undefined) patch.description = String(body.description);
-  if (body?.enabled !== undefined) patch.enabled = !!body.enabled;
+  if (body?.enabled !== undefined) {
+    // S15b (sub5 #8): booleano estricto; antes !!"false" lo dejaba activado.
+    if (typeof body.enabled !== 'boolean') return { status: 400, body: { error: 'invalid_enabled', message: 'enabled debe ser true o false (booleano, sin comillas).' } };
+    patch.enabled = body.enabled;
+  }
   const ep = W.updateEndpoint(license.id, id, patch);
   return ep ? { status: 200, body: ep } : { status: 404, body: { error: 'not_found' } };
 }

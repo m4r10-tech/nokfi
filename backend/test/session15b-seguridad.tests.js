@@ -5,6 +5,7 @@
  *   S6  Origin ajeno → 403 sin fila en client_errors; client_errors con límite
  *   S7  X-Frame-Options de Express igual que Nginx (DENY)
  *   S8  el log de peticiones no lleva el token de un enlace de gestoría
+ *   S10 PATCH de un webhook con enabled no booleano → 400
  */
 
 'use strict';
@@ -121,5 +122,18 @@ module.exports = async function session15bSeguridadTests({ post, get, call, chec
     const log = out.join('');
     check('S8 el log de /api/shared/:token no contiene el token (sale como ***)',
       c.status === 201 && !!shareToken && r.status === 200 && log.includes('/api/shared/***') && !log.includes(shareToken));
+  }
+
+  // ── S10: enabled estrictamente booleano ──
+  {
+    const W = require('../db/webhooks');
+    const l = mkLicense('pro');
+    const tok = createSession(l.id, '127.0.0.1').token;
+    const id = W.createEndpoint(l.id, { url: 'https://example.com/hook', events: ['analysis.completed'] }).endpoint.id;
+    const bad = await call('PATCH', `/api/dev/webhooks/${id}`, { body: { enabled: 'false' }, auth: tok });
+    const still = W.getEndpoint(l.id, id);
+    check('S10 enabled:"false" (cadena) → 400 invalid_enabled y el webhook no cambia', bad.status === 400 && bad.data?.error === 'invalid_enabled' && still.enabled === true);
+    const off = await call('PATCH', `/api/dev/webhooks/${id}`, { body: { enabled: false }, auth: tok });
+    check('S10 enabled:false (booleano) lo desactiva', off.status === 200 && off.data?.enabled === false);
   }
 };

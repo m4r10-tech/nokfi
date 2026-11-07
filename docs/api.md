@@ -610,6 +610,9 @@ y direcciones públicas: se rechazan `localhost` (también `localhost.`), `*.loc
 `*.internal` y las redes privadas, de loopback, link-local, IPv4 compatibles
 (`::/96`), multicast (`ff00::/8`) y 6to4 (`2002::/16`), al registrar y al conectar.
 
+`PATCH /webhooks/:id` (y `PATCH /api/dev/webhooks/:id`) exige que `enabled` sea booleano
+(`true`/`false`); cualquier otro valor, como la cadena `"false"`, da `400 invalid_enabled`.
+
 (No confundir con `POST /api/webhooks/stripe`, el webhook **entrante** de Stripe de §4.)
 
 ## 13. Servidor MCP (`/api/mcp`, versión 1.3.0)
