@@ -80,7 +80,10 @@ export function ToastProvider({ children }) {
   return (
     <ToastContext.Provider value={api}>
       {children}
-      <div className="toaster fixed z-[60] flex flex-col gap-2 pointer-events-none
+      {/* S15b (A5): región viva siempre presente (vacía al cargar); los avisos se añaden dentro
+          y así los lectores de pantalla los leen. Los de error van además con role="alert". */}
+      <div aria-live="polite" aria-relevant="additions text"
+        className="toaster fixed z-[60] flex flex-col gap-2 pointer-events-none
                       left-4 right-4 bottom-4 items-center
                       md:left-auto md:right-6 md:bottom-6 md:items-end">
         {toasts.map(x => <ToastItem key={x.id} toast={x} onClose={() => dismiss(x.id)} closeLabel={t('common.close')} />)}
@@ -99,7 +102,7 @@ function ToastItem({ toast, onClose, closeLabel }) {
   const v = VARIANTS[toast.variant] || VARIANTS.info;
   const Icon = toast.icon || v.icon;
   return (
-    <div role={toast.variant === 'error' ? 'alert' : 'status'}
+    <div role={toast.variant === 'error' ? 'alert' : undefined}
       className="pointer-events-auto w-full max-w-sm flex items-start gap-3 rounded-xl pl-3.5 pr-2 py-3 text-sm"
       style={{
         background: 'var(--surface-1)', border: '1px solid var(--border-strong)', boxShadow: 'var(--shadow-lg)',

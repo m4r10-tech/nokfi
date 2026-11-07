@@ -177,7 +177,7 @@ export default {
     save: 'Speichern', cancel: 'Abbrechen', continue: 'Weiter', back: 'Zurück',
     loading: 'Wird geladen…', error: 'Es ist ein Fehler aufgetreten', retry: 'Erneut versuchen',
     open: 'Öffnen', yes: 'Ja', no: 'Nein', close: 'Schließen', copy: 'Kopieren', copied: 'Kopiert',
-    download: 'Herunterladen', export: 'Exportieren', analyze: 'Mit KI analysieren'
+    download: 'Herunterladen', export: 'Exportieren', analyze: 'Mit KI analysieren', skipToContent: 'Zum Inhalt springen'
   },
   nav: {
     home: 'Start', questionnaire: 'Fragebogen', questionnaireShort: 'Diagnose', excel: 'Excel-Analyse', excelShort: 'Excel',
@@ -333,6 +333,7 @@ export default {
     goodMorning: 'Guten Morgen', goodAfternoon: 'Guten Tag', goodEvening: 'Guten Abend',
     trialBanner: 'Du bist in der Testphase: noch {n} Tage.', trialBanner_one: 'Du bist in der Testphase: noch {n} Tag.', trialManage: 'Abo ansehen',
     newsTitle: "Neu: Du kannst jetzt Rechnungen ausstellen.",
+    newsClose: "Neuigkeiten-Hinweis schließen",
     newsText: "Nummeriert, mit PDF und E-Rechnung, und bereit für VERI*FACTU. Wir haben die Nutzungsbedingungen, den Auftragsverarbeitungsvertrag und die Datenschutzerklärung entsprechend aktualisiert.",
     newsCta: "Rechnung ausstellen",
     newsTerms: "Bedingungen",
@@ -608,7 +609,7 @@ export default {
     licenseInactive: 'Deine Lizenz ist nicht mehr aktiv. Du wurdest abgemeldet.',
     aiSlow: 'Die KI braucht länger als sonst. Wir arbeiten weiter – lass diesen Tab geöffnet.'
   },
-  footer: { rights: 'Alle Rechte vorbehalten' },
+  footer: { rights: 'Alle Rechte vorbehalten', linksNav: 'Weitere Links' },
   landing: {
     screensEyebrow: 'Von innen', screensHeading: 'So sieht Nokfi aus', screensSubtitle: 'Echte Screenshots der App mit einem Beispielkonto: eine Autowerkstatt mit ihren Rechnungen des Quartals.',
     screensTabs: ['Start', 'Steuern', 'Forderungen', 'Diagnose'], screensNote: 'Beispielkonto mit fiktiven Daten.',

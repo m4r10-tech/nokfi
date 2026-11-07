@@ -140,7 +140,7 @@ export default function Forecast() {
           {data.flows.length === 0 ? (
             <p className="text-sm" style={{ color: 'var(--text-secondary)' }}>{t('finance.forecast.noMovements')}</p>
           ) : (
-            <ul className="flex flex-col max-h-72 overflow-y-auto -mx-1">
+            <ul tabIndex={0} aria-label={t('finance.forecast.movements')} className="flex flex-col max-h-72 overflow-y-auto -mx-1">
               {data.flows.slice(0, 40).map((f, i) => (
                 <li key={i} className="flex items-center justify-between gap-3 px-1 py-1.5 text-sm" style={{ borderTop: i ? '1px solid var(--border)' : 'none' }}>
                   <span className="min-w-0">

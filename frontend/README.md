@@ -28,7 +28,18 @@ VITE_API_URL=/api npx vite build && node test/s15b-cifras.e2e.cjs   # Impuestos,
 VITE_API_URL=/api npx vite build && node test/s15b-seguridad.e2e.cjs   # exportar informes sin innerHTML y un solo enlace de gestoría por envío (Playwright)
 node test/s15b-ia.test.mjs       # botones del asistente a partir de «[enlace: clave]» (sin navegador)
 VITE_API_URL=/api npx vite build && node test/s15b-ia.e2e.cjs   # Cuestionario, Reclamar, asistente e Historial con la IA simulada (Playwright)
+npm i --prefix /tmp/a11y-tools axe-core@4.10.2   # una vez, FUERA del proyecto (no es dependencia)
+VITE_API_URL=/api npm run build && AXE_PATH=/tmp/a11y-tools/node_modules/axe-core/axe.min.js node test/s15b-a11y.e2e.cjs
+                                 # accesibilidad (Playwright): axe sin fallos serious/critical en 25 pantallas en claro y
+                                 # oscuro, foco retenido y devuelto en modales, hoja «Más» y asistente, «Saltar al contenido»,
+                                 # región viva de toasts y la landing pidiendo solo la captura visible en WebP (ONLY=axe|kbd|landing|misc)
 ```
+
+Capturas de la landing (`public/screens/`): `<pantalla>-<tema>.jpg` (1920×1200, las genera
+`backend/scripts/landing-screens.js`) y sus versiones WebP `<pantalla>-<tema>-{640,960,1280,1920}.webp`,
+que son las que pide la landing (`<picture>` con `srcset`; el JPG queda de respaldo). Si se
+regeneran los JPG, hay que regenerar los WebP, p. ej. con ImageMagick:
+`convert inicio-dark.jpg -resize 960x -quality 78 -define webp:method=6 inicio-dark-960.webp`.
 
 `npm run build` hace tres pasos (sesión 12, SEO): `vite build` (la SPA),
 `vite build --ssr src/entry-server.jsx` y `scripts/prerender.mjs`, que renderiza

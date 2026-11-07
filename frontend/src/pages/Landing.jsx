@@ -5,6 +5,7 @@ import {
   ScanLine, Landmark, Mail, LifeBuoy
 } from 'lucide-react';
 import { useLang } from '../context/LangContext';
+import { useTheme } from '../context/ThemeContext';
 import { useToast } from '../context/ToastContext';
 import PlanCards from '../components/PlanCards';
 import { PublicHeader, PublicFooter, usePublicPath } from '../components/PublicChrome';
@@ -239,11 +240,29 @@ export default function Landing() {
  * cada 6 s hasta que el visitante elige una; con movimiento reducido no rotan.
  */
 const SCREENS = ['inicio', 'impuestos', 'cobros', 'informe'];
+// S15b (A4): WebP en varios anchos (public/screens/<pantalla>-<tema>-<ancho>.webp); el JPG queda de respaldo.
+const SHOT_WIDTHS = [640, 960, 1280, 1920];
+const SHOT_SIZES = '(min-width: 1152px) 1120px, calc(100vw - 32px)';
 
 function Screens({ t }) {
-  const [ref] = useReveal({ threshold: 0.15 });
+  const [ref, visible] = useReveal({ threshold: 0.15 });
+  const { theme } = useTheme();
   const [active, setActive] = useState(0);
   const [auto, setAuto] = useState(true);
+  // S15b (A4): solo se pide la captura que se ve (y la siguiente cuando la sección ya está a la
+  // vista, para que el fundido no llegue a una imagen sin cargar). Las ya vistas se quedan
+  // montadas para que el fundido entre pestañas siga igual. Hasta montar no hay imágenes:
+  // el HTML prerenderizado es del tema oscuro y así no se pide la del tema que no toca.
+  const [mounted, setMounted] = useState(false);
+  const [seen, setSeen] = useState(() => new Set([0]));
+  useEffect(() => { setMounted(true); }, []);
+  useEffect(() => {
+    setSeen(prev => {
+      const rotates = auto && !window.matchMedia?.('(prefers-reduced-motion: reduce)').matches;
+      const want = [active, ...(visible && rotates ? [(active + 1) % SCREENS.length] : [])];
+      return want.every(i => prev.has(i)) ? prev : new Set([...prev, ...want]);
+    });
+  }, [active, visible, auto]);
   const tabs = t('landing.screensTabs');
   useEffect(() => {
     if (!auto || window.matchMedia?.('(prefers-reduced-motion: reduce)').matches) return;
@@ -251,6 +270,7 @@ function Screens({ t }) {
     return () => clearInterval(id);
   }, [auto]);
   const pick = (i) => { setActive(i); setAuto(false); };
+  const shotTheme = theme === 'light' ? 'light' : 'dark';
 
   return (
     <Section id="por-dentro" eyebrow={t('landing.screensEyebrow')} title={t('landing.screensHeading')} subtitle={t('landing.screensSubtitle')}>
@@ -277,8 +297,13 @@ function Screens({ t }) {
             {SCREENS.map((s, i) => (
               <div key={s} className="absolute inset-0" aria-hidden={active !== i}
                 style={{ opacity: active === i ? 1 : 0, transform: active === i ? 'none' : 'scale(0.985)', transition: 'opacity 500ms var(--ease-out), transform 600ms var(--ease-out)' }}>
-                <img src={`/screens/${s}-dark.jpg`} alt={Array.isArray(tabs) ? tabs[i] : s} loading="lazy" decoding="async" className="shot-dark w-full h-full object-cover object-top" />
-                <img src={`/screens/${s}-light.jpg`} alt={Array.isArray(tabs) ? tabs[i] : s} loading="lazy" decoding="async" className="shot-light w-full h-full object-cover object-top" />
+                {mounted && seen.has(i) && (
+                  <picture>
+                    <source type="image/webp" sizes={SHOT_SIZES}
+                      srcSet={SHOT_WIDTHS.map(w => `/screens/${s}-${shotTheme}-${w}.webp ${w}w`).join(', ')} />
+                    <img src={`/screens/${s}-${shotTheme}.jpg`} alt={Array.isArray(tabs) ? tabs[i] : s} width="1920" height="1200" loading="lazy" decoding="async" className="w-full h-full object-cover object-top" />
+                  </picture>
+                )}
               </div>
             ))}
           </div>

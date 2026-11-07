@@ -4,6 +4,7 @@ import { Link } from 'react-router-dom';
 import { X, AlertTriangle, ArrowRight } from 'lucide-react';
 import { useLang } from '../context/LangContext';
 import { toolLabelKey } from '../utils/nokfiLinks';
+import { useFocusTrap } from '../hooks/useFocusTrap';
 
 /**
  * Piezas de UI compartidas por las pantallas de la sesión 4 (finanzas,
@@ -66,18 +67,37 @@ export function Segmented({ value, onChange, options, size = 'md', label }) {
   );
 }
 
+/** S15b (A5): «Saltar al contenido» — primer Tab de la página; lleva el foco al <main>. */
+export function SkipLink() {
+  const { t } = useLang();
+  // Las páginas públicas tienen su propio <main> sin id: se le pone para que el enlace tenga destino.
+  useEffect(() => {
+    if (document.getElementById('contenido')) return;
+    const main = document.querySelector('main');
+    if (main) { main.id = 'contenido'; if (!main.hasAttribute('tabindex')) main.setAttribute('tabindex', '-1'); }
+  });
+  const go = (e) => {
+    const main = document.getElementById('contenido') || document.querySelector('main');
+    if (!main) return;
+    e.preventDefault();
+    if (!main.hasAttribute('tabindex')) main.setAttribute('tabindex', '-1');
+    main.focus();
+  };
+  return <a href="#contenido" onClick={go} className="skip-link">{t('common.skipToContent')}</a>;
+}
+
 export function Modal({ title, onClose, children, footer, wide }) {
   const { t } = useLang();
   const ref = useRef(null);
+  // S15b (A1): Tab no sale del modal, Escape lo cierra y al cerrar el foco vuelve al botón que lo abrió.
+  useFocusTrap(ref, { onEscape: onClose });
   useEffect(() => {
-    const onKey = (e) => { if (e.key === 'Escape') onClose(); };
-    document.addEventListener('keydown', onKey);
     const prev = document.body.style.overflow;
     document.body.style.overflow = 'hidden';
     // Si un campo del contenido ya tiene autoFocus, no le quitamos el foco.
     if (!ref.current?.contains(document.activeElement)) ref.current?.focus();
-    return () => { document.removeEventListener('keydown', onKey); document.body.style.overflow = prev; };
-  }, [onClose]);
+    return () => { document.body.style.overflow = prev; };
+  }, []);
   // Portal a <body>: si el modal se pinta dentro de un contenedor animado
   // (transform), `fixed` se posicionaría respecto a él y no cubriría el menú.
   return createPortal(

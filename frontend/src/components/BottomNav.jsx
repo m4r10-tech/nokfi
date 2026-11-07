@@ -6,6 +6,7 @@ import SpaceSwitcher from './SpaceSwitcher';
 import { useAuth } from '../context/AuthContext';
 import { useLang } from '../context/LangContext';
 import { useTheme } from '../context/ThemeContext';
+import { useFocusTrap } from '../hooks/useFocusTrap';
 
 /**
  * Navegación móvil (Tanda M, sesión 3) — barra inferior tipo app (<768px).
@@ -59,14 +60,14 @@ function MoreSheet({ items, companyName, onClose }) {
   const panelRef = useRef(null);
 
   // Escape cierra, scroll del fondo bloqueado y foco dentro de la hoja.
+  // S15b (A1): Tab no sale de la hoja y al cerrar el foco vuelve a «Más».
+  useFocusTrap(panelRef, { onEscape: onClose });
   useEffect(() => {
-    const onKey = (e) => { if (e.key === 'Escape') onClose(); };
-    document.addEventListener('keydown', onKey);
     const prevOverflow = document.body.style.overflow;
     document.body.style.overflow = 'hidden';
     panelRef.current?.focus();
-    return () => { document.removeEventListener('keydown', onKey); document.body.style.overflow = prevOverflow; };
-  }, [onClose]);
+    return () => { document.body.style.overflow = prevOverflow; };
+  }, []);
 
   return (
     <div className="md:hidden fixed inset-0 z-50" role="dialog" aria-modal="true" aria-label={t('nav.more')}>

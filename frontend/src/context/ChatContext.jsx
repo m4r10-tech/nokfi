@@ -7,6 +7,7 @@ import { useLang } from './LangContext';
 import { ToolLink } from '../components/ui';
 import { extractToolLinks } from '../utils/nokfiLinks';
 import { eur, isoDate } from '../utils/money';
+import { useFocusTrap } from '../hooks/useFocusTrap';
 
 /**
  * C5 — Asistente integrado (sesión 4). Botón flotante en toda la app privada y
@@ -112,14 +113,15 @@ function ChatPanel({ analysis, messages, setMessages, onClose, onClearContext })
   const [error, setError] = useState(null);
   const listRef = useRef(null);
   const inputRef = useRef(null);
+  const panelRef = useRef(null);
+  // S15b (A1): en móvil el panel ocupa toda la pantalla → es modal y el foco no sale de él.
+  // En escritorio sigue siendo un panel lateral. Escape cierra y el foco vuelve a quien lo abrió
+  // (o al botón flotante, que se vuelve a pintar al cerrar).
+  const [isModal] = useState(() => !!window.matchMedia?.('(max-width: 767px)').matches);
+  useFocusTrap(panelRef, { onEscape: onClose, trap: isModal, fallback: () => document.querySelector('.chat-launcher') });
 
   useEffect(() => { inputRef.current?.focus(); }, []);
   useEffect(() => { listRef.current?.scrollTo({ top: listRef.current.scrollHeight, behavior: 'smooth' }); }, [messages, sending]);
-  useEffect(() => {
-    const onKey = (e) => { if (e.key === 'Escape') onClose(); };
-    document.addEventListener('keydown', onKey);
-    return () => document.removeEventListener('keydown', onKey);
-  }, [onClose]);
 
   const send = async (e) => {
     e?.preventDefault();
@@ -140,8 +142,8 @@ function ChatPanel({ analysis, messages, setMessages, onClose, onClearContext })
   const suggestions = analysis ? t('chat.suggestionsReport') : (dataSuggestions || t('chat.suggestions'));
 
   return (
-    <div className="fixed z-50 inset-0 md:inset-auto md:right-6 md:bottom-6 md:w-[400px] md:h-[600px] md:max-h-[calc(100dvh-48px)] flex flex-col md:rounded-2xl overflow-hidden anim-scale"
-      role="dialog" aria-modal="false" aria-label={t('chat.title')}
+    <div ref={panelRef} className="fixed z-50 inset-0 md:inset-auto md:right-6 md:bottom-6 md:w-[400px] md:h-[600px] md:max-h-[calc(100dvh-48px)] flex flex-col md:rounded-2xl overflow-hidden anim-scale"
+      role="dialog" aria-modal={isModal ? 'true' : 'false'} aria-label={t('chat.title')}
       style={{ background: 'var(--surface-1)', border: '1px solid var(--border-strong)', boxShadow: 'var(--shadow-lg)' }}>
       <header className="flex items-center gap-3 px-4 h-14 shrink-0" style={{ borderBottom: '1px solid var(--border)', paddingTop: 'env(safe-area-inset-top)', boxSizing: 'content-box' }}>
         <div className="flex-1 min-w-0">

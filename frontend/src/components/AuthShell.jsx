@@ -10,7 +10,7 @@ import { usePublicPath } from './PublicChrome';
 export default function AuthShell({ children, footer }) {
   const pub = usePublicPath();
   return (
-    <div className="min-h-[100dvh] flex flex-col items-center justify-center px-4 py-10" style={{ background: 'var(--bg-base)' }}>
+    <main className="min-h-[100dvh] flex flex-col items-center justify-center px-4 py-10" style={{ background: 'var(--bg-base)' }}>
       <div className="w-full max-w-sm anim-enter">
         <div className="flex justify-center mb-8">
           <Link to={pub('home')} aria-label="Nokfi" className="rounded-lg"><Logo size="lg" /></Link>
@@ -20,7 +20,7 @@ export default function AuthShell({ children, footer }) {
         </div>
         {footer && <div className="mt-5 flex flex-col items-center gap-2 text-sm">{footer}</div>}
       </div>
-    </div>
+    </main>
   );
 }
 

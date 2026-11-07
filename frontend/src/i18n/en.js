@@ -177,7 +177,7 @@ export default {
     save: 'Save', cancel: 'Cancel', continue: 'Continue', back: 'Back',
     loading: 'Loading...', error: 'An error occurred', retry: 'Retry',
     open: 'Open', yes: 'Yes', no: 'No', close: 'Close', copy: 'Copy', copied: 'Copied',
-    download: 'Download', export: 'Export', analyze: 'Analyze with AI'
+    download: 'Download', export: 'Export', analyze: 'Analyze with AI', skipToContent: 'Skip to content'
   },
   nav: {
     home: 'Home', questionnaire: 'Questionnaire', questionnaireShort: 'Diagnosis', excel: 'Excel Analysis', excelShort: 'Excel',
@@ -334,6 +334,7 @@ export default {
     goodMorning: 'Good morning', goodAfternoon: 'Good afternoon', goodEvening: 'Good evening',
     trialBanner: 'You are on your free trial: {n} days left.', trialBanner_one: 'You are on your free trial: {n} day left.', trialManage: 'View subscription',
     newsTitle: "New: you can now issue invoices.",
+    newsClose: "Close the news notice",
     newsText: "Numbered, with PDF and e-invoice, and ready for VERI*FACTU. We have updated the terms, the data processing agreement and the privacy policy to explain it.",
     newsCta: "Issue an invoice",
     newsTerms: "Terms",
@@ -609,7 +610,7 @@ export default {
     licenseInactive: 'Your license is no longer active. You have been signed out.',
     aiSlow: 'The AI is taking longer than usual. We’re still working on it: keep this tab open.'
   },
-  footer: { rights: 'All rights reserved' },
+  footer: { rights: 'All rights reserved', linksNav: 'More links' },
   landing: {
     screensEyebrow: 'Inside', screensHeading: 'This is what Nokfi looks like', screensSubtitle: 'Real screenshots of the app with a sample account: a car repair shop with its invoices for the quarter.',
     screensTabs: ['Home', 'Taxes', 'Receivables', 'Diagnosis'], screensNote: 'Sample account with fictitious data.',
