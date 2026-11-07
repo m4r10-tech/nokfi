@@ -115,4 +115,66 @@ module.exports = async function session15bIaTests({ post, put, get, check, check
     check('S15b D6: Excel › Caja: media de entradas 1.050 (no 350) y de salidas 312,50; la suma no cambia', () =>
       st.totales.Entradas.media === 1050 && st.totales.Entradas.suma === 2100 && st.totales.Salidas.media === 312.5 && st.totales.Salidas.suma === 1250);
   }
+
+  // ── D8: renombrar y borrar (web + API) ──
+  {
+    const { createAnalysis } = require('../db/database');
+    const { createActionsForAnalysis } = require('../db/actions');
+    const a = await account('ia-d8@nokfi.local');
+    const b = await account('ia-d8-otro@nokfi.local');
+    const mk = (lid, title) => {
+      const id = createAnalysis({ license_id: lid, kind: 'cuestionario', title, result_json: { summary: 's', priorities: [], action_plan: [] } });
+      createActionsForAnalysis(lid, id, [{ title: 'Tarea 1' }, { title: 'Tarea 2' }]);
+      return id;
+    };
+    const id1 = mk(a.lid, 'Diagnóstico de negocio');
+    const id2 = mk(a.lid, 'Caja · oct 2026');
+    const other = mk(b.lid, 'Ajeno');
+    getDB().prepare('INSERT OR IGNORE INTO ai_usage (license_id, day, slot) VALUES (?, ?, 0)').run(a.lid, new Date().toISOString().slice(0, 10));
+
+    await checkAsync('S15b D8: PATCH /api/analyses/:id renombra (espacios juntados) y se ve en la lista',
+      patch(`/api/analyses/${id1}`, { title: '  Diagnóstico   noviembre  ' }, a.tok).then(async r => ({ r, list: (await get('/api/analyses', a.tok)).data })),
+      ({ r, list }) => r.status === 200 && r.data.title === 'Diagnóstico noviembre'
+        && list.analyses.find(x => x.id === id1)?.title === 'Diagnóstico noviembre');
+    await checkAsync('S15b D8: título vacío o de más de 120 caracteres → 400 invalid_title',
+      Promise.all([patch(`/api/analyses/${id1}`, { title: '   ' }, a.tok), patch(`/api/analyses/${id1}`, { title: 'x'.repeat(121) }, a.tok)]),
+      rs => rs.every(r => r.status === 400 && r.data.error === 'invalid_title'));
+    await checkAsync('S15b D8: no se puede renombrar ni borrar un análisis de otra cuenta (404, sin tocarlo)',
+      Promise.all([patch(`/api/analyses/${other}`, { title: 'x' }, a.tok), del(`/api/analyses/${other}`, a.tok)]),
+      rs => rs.every(r => r.status === 404) && getDB().prepare('SELECT title FROM analyses WHERE id = ?').get(other)?.title === 'Ajeno');
+    const tasksBefore = getDB().prepare('SELECT COUNT(*) c FROM action_items WHERE analysis_id = ?').get(id2).c;
+    const quotaBefore = getDB().prepare('SELECT COUNT(*) c FROM ai_usage WHERE license_id = ?').get(a.lid).c;
+    await checkAsync('S15b D8: DELETE /api/analyses/:id lo borra con sus tareas; ya no se abre (404)',
+      del(`/api/analyses/${id2}`, a.tok).then(async r => ({ r, after: await get(`/api/analyses/${id2}`, a.tok) })),
+      ({ r, after }) => r.status === 200 && r.data.success === true && tasksBefore === 2
+        && !getDB().prepare('SELECT 1 FROM analyses WHERE id = ?').get(id2)
+        && getDB().prepare('SELECT COUNT(*) c FROM action_items WHERE analysis_id = ?').get(id2).c === 0
+        && after.status === 404);
+    check('S15b D8: borrar un análisis no devuelve cuota (ai_usage intacto)', () =>
+      getDB().prepare('SELECT COUNT(*) c FROM ai_usage WHERE license_id = ?').get(a.lid).c === quotaBefore);
+    await checkAsync('S15b D8: borrar dos veces → 404; id no numérico → 400',
+      Promise.all([del(`/api/analyses/${id2}`, a.tok), del('/api/analyses/abc', a.tok)]),
+      ([r1, r2]) => r1.status === 404 && r2.status === 400 && r2.data.error === 'invalid_id');
+
+    // API /api/v1: clave real y clave de prueba.
+    const live = (await post('/api/keys', { name: 'd8-live' }, a.tok)).data.key;
+    const test = (await post('/api/keys', { name: 'd8-test', mode: 'test' }, a.tok)).data.key;
+    const id3 = mk(a.lid, 'Para la API');
+    await checkAsync('S15b D8 API: una clave nk_test_ no renombra ni borra un análisis real (404 y queda igual)',
+      Promise.all([patch(`/api/v1/analyses/${id3}`, { title: 'Cambiado' }, test), del(`/api/v1/analyses/${id3}`, test)]),
+      rs => String(test).startsWith('nk_test_') && rs.every(r => r.status === 404 && r.data.error === 'not_found')
+        && getDB().prepare('SELECT title FROM analyses WHERE id = ?').get(id3)?.title === 'Para la API');
+    await checkAsync('S15b D8 API: PATCH /api/v1/analyses/:id con clave real renombra; título inválido → 400',
+      Promise.all([patch(`/api/v1/analyses/${id3}`, { title: 'Informe API' }, live), patch(`/api/v1/analyses/${id3}`, { title: '' }, live)]),
+      ([ok, bad]) => ok.status === 200 && ok.data.title === 'Informe API' && bad.status === 400 && bad.data.error === 'invalid_title'
+        && getDB().prepare('SELECT title FROM analyses WHERE id = ?').get(id3)?.title === 'Informe API');
+    await checkAsync('S15b D8 API: la clave real no toca análisis de otra cuenta (404)',
+      del(`/api/v1/analyses/${other}`, live), r => r.status === 404 && !!getDB().prepare('SELECT 1 FROM analyses WHERE id = ?').get(other));
+    await checkAsync('S15b D8 API: DELETE /api/v1/analyses/:id con clave real lo borra; después GET → 404',
+      del(`/api/v1/analyses/${id3}`, live).then(async r => ({ r, after: await get(`/api/v1/analyses/${id3}`, live) })),
+      ({ r, after }) => r.status === 200 && r.data.deleted === true && after.status === 404);
+    const spec = (await get('/api/v1/openapi.json')).data;
+    check('S15b D8 API: la especificación OpenAPI declara PATCH y DELETE de /analyses/{id}', () =>
+      !!spec.paths['/analyses/{id}'].patch?.requestBody && !!spec.paths['/analyses/{id}'].delete?.responses[404]);
+  }
 };

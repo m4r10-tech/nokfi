@@ -8,6 +8,8 @@
  *   POST /api/v1/analyze            { type, data, lang?, title? } → informe JSON
  *   GET  /api/v1/analyses           lista
  *   GET  /api/v1/analyses/:id       informe completo (JSON estructurado)
+ *   PATCH  /api/v1/analyses/:id     { title } renombrar (S15b D8)
+ *   DELETE /api/v1/analyses/:id     borrar con su plan de acción (S15b D8)
  *   POST /api/v1/invoices/extract   { files: [{ name, mime, data } | { name, text }] }
  *                                   → facturas con checks y warnings (sesión 7)
  *                                   XML/Factur-X: lectura exacta sin IA ni cuota (sesión 11)
@@ -48,7 +50,7 @@ const { requireApiKey } = require('../middleware/requireApiKey');
 const { idempotency, idempotencyFor, isAsync, INVOICE_TTL_HOURS } = require('../middleware/idempotency');
 const { runAnalysis, checkInput } = require('../services/ai/analyze');
 const { quotaMessage } = require('../services/ai/quota');
-const { listAnalyses, getAnalysis, aiQuotaForPlan, countAiAnalysesToday, audit } = require('../db/database');
+const { listAnalyses, getAnalysis, renameAnalysis, deleteAnalysis, aiQuotaForPlan, countAiAnalysesToday, audit } = require('../db/database');
 const { listActionsForAnalysis } = require('../db/actions');
 const openapi = require('../config/openapi');
 const { pdfText } = require('../utils/pdfText');
@@ -61,6 +63,7 @@ const T = require('../services/taxTools');
 const { sampleAnalysis, sampleInvoices } = require('../services/testMode');
 
 const { absoluteLinks } = require('../services/ai/financeContext');
+const { validTitle, MAX_TITLE } = require('./analyses');
 
 const TYPES = ['cuestionario', 'excel', 'compare', 'folder'];
 
@@ -117,6 +120,24 @@ router.get('/analyses/:id', requireApiKey, (req, res) => {
   const a = getApiAnalysis(req.license, req.params.id, req.livemode);
   if (!a) return res.status(404).json({ error: 'not_found' });
   res.json(a);
+});
+
+/* S15b D8: renombrar y borrar. Los análisis de prueba no se guardan, así que una
+   clave nk_test_ no puede tocar ninguno (404, como al leerlos): nunca toca el historial real. */
+router.patch('/analyses/:id', requireApiKey, (req, res) => {
+  const id = Number(req.params.id);
+  if (!req.livemode || !Number.isInteger(id)) return res.status(404).json({ error: 'not_found' });
+  const title = validTitle(req.body?.title);
+  if (!title) return res.status(400).json({ error: 'invalid_title', message: `title: texto de 1 a ${MAX_TITLE} caracteres.` });
+  if (!renameAnalysis(req.license.id, id, title)) return res.status(404).json({ error: 'not_found' });
+  res.json({ id, title });
+});
+
+router.delete('/analyses/:id', requireApiKey, (req, res) => {
+  const id = Number(req.params.id);
+  if (!req.livemode || !Number.isInteger(id)) return res.status(404).json({ error: 'not_found' });
+  if (!deleteAnalysis(req.license.id, id)) return res.status(404).json({ error: 'not_found' });
+  res.json({ deleted: true, id });
 });
 
 /* ── Sesión 7: extracción de facturas (Bloque 1.2) ──

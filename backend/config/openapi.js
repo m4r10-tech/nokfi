@@ -448,6 +448,12 @@ delete P['/tax/nif'].post.parameters;
 
 P['/analyses'].get.description = 'Con una clave de prueba la lista está vacía: los análisis de prueba no se guardan y el historial real no se ve.';
 P['/analyses/{id}'].get.responses[404] = notFound;
+// S15b D8: renombrar y borrar (con una clave de prueba, 404: los análisis de prueba no se guardan).
+P['/analyses/{id}'].patch = { summary: 'Renombrar un análisis', parameters: P['/analyses/{id}'].get.parameters,
+  requestBody: { required: true, content: { 'application/json': { schema: { type: 'object', required: ['title'], properties: { title: { type: 'string', minLength: 1, maxLength: 120 } } } } } },
+  responses: { 200: { description: '{ id, title }' }, 400: { description: 'invalid_title', content: errorContent }, 404: notFound } };
+P['/analyses/{id}'].delete = { summary: 'Borrar un análisis y su plan de acción (no devuelve cuota)', parameters: P['/analyses/{id}'].get.parameters,
+  responses: { 200: { description: '{ deleted: true, id }' }, 404: notFound } };
 P['/jobs'].get.description = 'Solo los trabajos del modo de la clave (real o prueba).';
 P['/jobs/{id}'].get.responses[404] = notFound;
 P['/customers'].get.description = 'Con una clave de prueba la lista está vacía (la libreta es real).';
