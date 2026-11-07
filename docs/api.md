@@ -10,7 +10,7 @@
 > contraseña**. IA con **Groq → Cloudflare Workers AI → IA local** (llama.cpp en
 > el propio VPS, último respaldo desde 2026-10; topes opcionales en `utils/aiBudget.js`). Emisión de facturas con
 > **VERI*FACTU** (envío a la AEAT apagado: `VERIFACTU_ENV=off`), API pública
-> **v1**, servidor **MCP 1.3.0** y nodo **n8n 0.4.0**. e2e: **545**.
+> **v1**, servidor **MCP 1.3.0** y nodo **n8n 0.4.0**. e2e: **641**.
 >
 > §1-§6 son el contrato de la web; §8-§14 (al final) recogen lo añadido de la
 > sesión 4 a la 12. El detalle de la API pública está en

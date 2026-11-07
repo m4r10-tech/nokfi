@@ -418,6 +418,7 @@ const spec = {
     '/tax/quarter': {
       get: {
         summary: 'Resumen del trimestre desde tu libro: 303 y 130 (sin IA)',
+        description: 'vat.result es el 303 a ingresar: vat.quarter_result (repercutido − soportado del trimestre) − vat.previous_compensation (cuota a compensar de trimestres anteriores del mismo año).',
         parameters: [{ name: 'year', in: 'query', schema: { type: 'integer' } }, { name: 'quarter', in: 'query', schema: { type: 'integer' } }],
         responses: taxOk('{ vat, irpf130, total_estimated, reserved, missing, vat_refund, due_date }')
       }
