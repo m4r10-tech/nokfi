@@ -653,6 +653,61 @@ async function main() {
     });
   }
 
+  // ═══════════════════════════════════════════════════════════
+  // S15 — Eventos de Stripe con la versión del endpoint de prod (≥ basil,
+  //   2026-06-24.dahlia): sin invoice.subscription / invoice.payment_intent /
+  //   sub.current_period_end. Antes se ignoraban (renovaciones y cobros fallidos
+  //   no se registraban). Se leen los dos formatos.
+  // ═══════════════════════════════════════════════════════════
+  {
+    const { _stripeCompat: sc } = require('../routes/webhooks');
+    const { getLicenseById } = require('../db/database');
+    const oldEnd = new Date(Date.now() - 60 * 86400000).toISOString();
+    const dl = dbCreateLicense({
+      email: 'dahlia@nokfi.local', plan: 'pro', payment_provider: 'stripe',
+      payment_ref: 'cs_dahlia', billing_model: 'subscription',
+      stripe_customer_id: 'cus_dahlia', stripe_subscription_id: 'sub_dahlia',
+      current_period_ends_at: oldEnd, password: 'DahliaP4ss!', created_by: 'webhook_stripe_sub'
+    });
+    const newEnd = Math.floor(Date.now() / 1000) + 30 * 86400;
+    check('S15 Stripe compat: helpers leen formato viejo y nuevo', () =>
+      sc.invoiceSubscriptionId({ subscription: 'sub_a' }) === 'sub_a'
+      && sc.invoiceSubscriptionId({ parent: { subscription_details: { subscription: 'sub_b' } } }) === 'sub_b'
+      && sc.invoiceSubscriptionId({ lines: { data: [{ parent: { subscription_item_details: { subscription: 'sub_c' } } }] } }) === 'sub_c'
+      && sc.invoicePaymentIntentId({ payment_intent: 'pi_a' }) === 'pi_a'
+      && sc.invoicePaymentIntentId({ payments: { data: [{ payment: { type: 'payment_intent', payment_intent: 'pi_b' } }] } }) === 'pi_b'
+      && sc.subscriptionPeriodEnd({ current_period_end: 10 }) === 10
+      && sc.subscriptionPeriodEnd({ items: { data: [{ current_period_end: 20 }, { current_period_end: 30 }] } }) === 30);
+
+    const paidEvt = { id: 'evt_dahlia_paid', type: 'invoice.paid', api_version: '2026-06-24.dahlia', created: Math.floor(Date.now() / 1000),
+      data: { object: { id: 'in_dahlia_1', object: 'invoice', customer: 'cus_dahlia', billing_reason: 'subscription_cycle',
+        amount_paid: 2000, currency: 'eur',
+        parent: { type: 'subscription_details', subscription_details: { subscription: 'sub_dahlia' } },
+        payments: { data: [{ payment: { type: 'payment_intent', payment_intent: 'pi_dahlia_1' } }] },
+        lines: { data: [{ period: { start: newEnd - 30 * 86400, end: newEnd } }] } } } };
+    const rPaid = await postStripeWebhook(paidEvt);
+    const afterPaid = getLicenseById(dl.id);
+    check('S15 Stripe dahlia: invoice.paid de renovación amplía el periodo y guarda el pi_', () =>
+      rPaid.status === 200 && afterPaid.current_period_ends_at === new Date(newEnd * 1000).toISOString()
+      && afterPaid.payment_intent_ref === 'pi_dahlia_1' && afterPaid.status === 'active');
+
+    const failEvt = { id: 'evt_dahlia_fail', type: 'invoice.payment_failed', api_version: '2026-06-24.dahlia', created: Math.floor(Date.now() / 1000),
+      data: { object: { id: 'in_dahlia_2', object: 'invoice', customer: 'cus_dahlia', attempt_count: 1, amount_paid: 0,
+        parent: { type: 'subscription_details', subscription_details: { subscription: 'sub_dahlia' } } } } };
+    const rFail = await postStripeWebhook(failEvt);
+    check('S15 Stripe dahlia: invoice.payment_failed suspende la licencia', () =>
+      rFail.status === 200 && getLicenseById(dl.id).status === 'suspended');
+
+    const end2 = newEnd + 30 * 86400;
+    const updEvt = { id: 'evt_dahlia_upd', type: 'customer.subscription.updated', api_version: '2026-06-24.dahlia', created: Math.floor(Date.now() / 1000),
+      data: { object: { id: 'sub_dahlia', object: 'subscription', customer: 'cus_dahlia', status: 'active', cancel_at_period_end: false,
+        trial_end: null, metadata: { plan: 'pro' }, items: { data: [{ current_period_end: end2, price: { id: 'price_unknown' } }] } } } };
+    const rUpd = await postStripeWebhook(updEvt);
+    const afterUpd = getLicenseById(dl.id);
+    check('S15 Stripe dahlia: subscription.updated lee el periodo de items y reactiva', () =>
+      rUpd.status === 200 && afterUpd.current_period_ends_at === new Date(end2 * 1000).toISOString() && afterUpd.status === 'active');
+  }
+
   const cbLicense = dbCreateLicense({
     email: 'cb@nokfi.local', plan: 'pro', payment_provider: 'stripe',
     payment_ref: 'cs_cb_test', payment_intent_ref: 'pi_cb_ok', billing_model: 'subscription',

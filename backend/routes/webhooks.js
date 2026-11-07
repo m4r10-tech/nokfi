@@ -75,6 +75,40 @@ function planFromSubscription(sub) {
   return 'mini';
 }
 
+/* ── Compatibilidad de versiones de la API de Stripe (S15) ───────────────────
+ * Los EVENTOS llegan con la versión del endpoint de webhook (en prod,
+ * 2026-06-24.dahlia), no con la que fijamos en las llamadas salientes
+ * (config/stripe-version.js). Desde 2025-03-31 (basil) Stripe movió:
+ *   invoice.subscription      → invoice.parent.subscription_details.subscription
+ *   invoice.payment_intent    → invoice.payments.data[].payment.payment_intent
+ *   subscription.current_period_end → subscription.items.data[].current_period_end
+ * Estos helpers leen los dos formatos. */
+function idOf(v) { return (v && typeof v === 'object') ? v.id : (v || null); }
+
+function invoiceSubscriptionId(invoice) {
+  if (!invoice) return null;
+  return idOf(invoice.subscription)
+    || idOf(invoice.parent?.subscription_details?.subscription)
+    || idOf(invoice.lines?.data?.find((l) => l?.parent?.subscription_item_details?.subscription)
+      ?.parent?.subscription_item_details?.subscription)
+    || idOf(invoice.lines?.data?.find((l) => l?.subscription)?.subscription)
+    || null;
+}
+
+function invoicePaymentIntentId(invoice) {
+  if (!invoice) return null;
+  if (invoice.payment_intent) return idOf(invoice.payment_intent);
+  const pay = invoice.payments?.data?.find((p) => p?.payment?.payment_intent);
+  return pay ? idOf(pay.payment.payment_intent) : null;
+}
+
+function subscriptionPeriodEnd(sub) {
+  if (!sub) return undefined;
+  if (sub.current_period_end) return sub.current_period_end;
+  const ends = (sub.items?.data || []).map((i) => Number(i?.current_period_end)).filter(Number.isFinite);
+  return ends.length ? Math.max(...ends) : undefined;
+}
+
 /** Convierte un unix epoch (segundos) → ISO string, o undefined si falta. */
 function isoFromUnix(unixSeconds) {
   if (!unixSeconds) return undefined;
@@ -186,7 +220,7 @@ async function handleStripeCheckoutCompleted(event, ip) {
   if (subId) {
     try {
       const sub = await fetchStripeSubscription(subId);
-      current_period_ends_at = isoFromUnix(sub.current_period_end) || null;
+      current_period_ends_at = isoFromUnix(subscriptionPeriodEnd(sub)) || null;
       cancel_at_period_end = sub.cancel_at_period_end ? 1 : 0;
       confirmedPlan = planFromSubscription(sub) || plan;
       // Bug C: coerción explícita a null (no undefined). isoFromUnix(null) es
@@ -235,7 +269,7 @@ async function handleStripeCheckoutCompleted(event, ip) {
 /** invoice.paid — renovación recurrente (o primer pago). Renueva current_period_ends_at. */
 async function handleStripeInvoicePaid(event, ip) {
   const invoice = event.data.object;
-  const subId = invoice.subscription;
+  const subId = invoiceSubscriptionId(invoice);
   const customerId = invoice.customer;
   const isRenewal = invoice.billing_reason === 'subscription_cycle';
 
@@ -294,7 +328,7 @@ async function handleStripeInvoicePaid(event, ip) {
     // pi_… del cobro: es la referencia por la que llegan los chargebacks
     // (charge.dispute.created). En modo suscripción el checkout NO lo trae, así
     // que invoice.paid es la fuente fiable que rellena payment_intent_ref.
-    payment_intent_ref: invoice.payment_intent || undefined,
+    payment_intent_ref: (await resolveInvoicePaymentIntent(invoice)) || undefined,
     // null explícito fuerza el WRITE (ver bug C). Solo cuando cobró de verdad.
     ...(actuallyPaid ? { trial_ends_at: null } : {})
   });
@@ -322,7 +356,7 @@ async function handleStripeSubscriptionUpdated(event, ip) {
   }
 
   const plan = planFromSubscription(sub);
-  const current_period_ends_at = isoFromUnix(sub.current_period_end);
+  const current_period_ends_at = isoFromUnix(subscriptionPeriodEnd(sub));
   const cancel_at_period_end = sub.cancel_at_period_end ? 1 : 0;
   // Bug C (defensa por duplicado): trial_end llega null cuando el trial ha
   // terminado (Stripe lo pone así al pasar trialing→active). Coercemos null
@@ -383,7 +417,7 @@ async function handleStripeSubscriptionDeleted(event, ip) {
   updateSubscription(license.id, {
     status: 'expired',
     cancel_at_period_end: 1,
-    current_period_ends_at: isoFromUnix(sub.ended_at || sub.current_period_end)
+    current_period_ends_at: isoFromUnix(sub.ended_at || subscriptionPeriodEnd(sub))
   });
   deleteSessionsForLicense(license.id);
 
@@ -395,7 +429,7 @@ async function handleStripeSubscriptionDeleted(event, ip) {
  *  Stripe reintenta; al llegar invoice.paid se reactiva). */
 async function handleStripeInvoicePaymentFailed(event, ip) {
   const invoice = event.data.object;
-  const subId = invoice.subscription;
+  const subId = invoiceSubscriptionId(invoice);
   const license = subId ? getLicenseByStripeSubscriptionId(subId) : null;
   if (!license) {
     console.warn('[WEBHOOK STRIPE] invoice.payment_failed sin licencia (sub=%s)', subId);
@@ -528,11 +562,26 @@ async function resolveLicenseForDisputeViaStripe(dispute) {
     const invoiceId = charge?.invoice;
     if (!invoiceId) return null;
     const invoice = await fetchStripeObject(`invoices/${invoiceId}`);
-    const subId = invoice?.subscription;
+    const subId = invoiceSubscriptionId(invoice);
     if (!subId) return null;
     return getLicenseByStripeSubscriptionId(subId) || null;
   } catch (e) {
     console.error('[CHARGEBACK] Resolución vía Stripe API falló:', e.message);
+    return null;
+  }
+}
+
+/** pi_… del cobro de una factura. Si el evento (versión ≥ basil) no lo trae
+ *  expandido, se pide la factura con la versión fijada, que sí incluye
+ *  `payment_intent`. No es fatal: sin red o sin clave devuelve null. */
+async function resolveInvoicePaymentIntent(invoice) {
+  const direct = invoicePaymentIntentId(invoice);
+  if (direct || !invoice?.id || !(Number(invoice.amount_paid) > 0) || !process.env.STRIPE_SECRET_KEY) return direct;
+  try {
+    const full = await fetchStripeObject(`invoices/${encodeURIComponent(invoice.id)}`);
+    return invoicePaymentIntentId(full);
+  } catch (e) {
+    console.warn('[WEBHOOK STRIPE] no se pudo leer el pi_ de la factura %s: %s', invoice.id, e.message);
     return null;
   }
 }
@@ -550,3 +599,5 @@ async function fetchStripeObject(path) {
 }
 
 module.exports = router;
+// Exportados para los e2e (compatibilidad de versiones de la API de Stripe).
+module.exports._stripeCompat = { invoiceSubscriptionId, invoicePaymentIntentId, subscriptionPeriodEnd };

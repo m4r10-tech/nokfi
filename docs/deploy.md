@@ -139,7 +139,13 @@ all simulated renewals succeeded`).
   `invoice.payment_failed`, `charge.dispute.created`. Entrega OK a través de CF.
 - **Verificado end-to-end**: pago real mini (trial 14d → 0€) creó la licencia
   `id=2` (`trial_ends_at = día+14`), reveal 200, login, Portal. API version fija
-  `2024-04-10` (`config/stripe-version.js`).
+  `2024-04-10` (`config/stripe-version.js`) **solo en las llamadas salientes**.
+- **Versión de los eventos**: los webhooks llegan con la versión del endpoint
+  (en prod `2026-06-24.dahlia`), no con la fijada. Desde basil Stripe movió
+  `invoice.subscription`, `invoice.payment_intent` y `current_period_end`;
+  `routes/webhooks.js` lee los dos formatos (arreglado en la S15: antes las
+  renovaciones y los cobros fallidos se ignoraban). Si se cambia la versión del
+  endpoint, añadir un e2e con el formato nuevo.
 - Tarjeta de test Stripe: `4242 4242 4242 4242` (OK), `4000 0000 0000 0341`
   (fallo de cobro al día 14).
 
