@@ -418,7 +418,9 @@ Aviso previo, sin tocar Stripe.
 ### `POST /api/payments/stripe/credit-checkout`  *(auth: Bearer, requireLicense)*  — S15b (U1)
 **Body:** `{ pack: "pack50" | "pack220" | "pack550", locale? }` → `200 { checkout_url }`
 (Checkout `mode=payment` con el Price `STRIPE_PRICE_PACK_<créditos>` y
-`metadata { kind: "credit_pack", pack, license_id }`). Vuelve a
+`metadata { kind: "credit_pack", pack, license_id }`; junto al botón de pagar,
+`custom_text.submit.message` dice en el idioma de `locale` cuántos créditos se compran y
+que no son reembolsables). Vuelve a
 `/app/configuracion?s=plan&credits=ok` (o `credits=cancelled`). Los créditos los suma
 el webhook `checkout.session.completed` (o `checkout.session.async_payment_succeeded`)
 una sola vez por sesión, nunca este endpoint.
@@ -474,7 +476,7 @@ RAW para verificar la firma **HMAC-SHA256** (`verifyStripeSignature`, replay
   cuenta bloqueada (`blocked_reason='payment_failed'`, `suspended`), sesiones
   cerradas, la suscripción se cancela ya en Stripe y la factura se anula. Solo se
   reactiva pagando un plan nuevo (`resume-checkout`)
-- `charge.dispute.created` → chargeback → revocación
+- `charge.dispute.created` → chargeback → revocación; si el cobro es de un paquete de créditos, solo se retiran los créditos de ese paquete (sin bajar de 0, una sola vez aunque Stripe repita el evento) y la cuenta sigue activa
 
 Los webhooks `paypal`/`coinbase`/`revolut` se retiraron → `404`.
 

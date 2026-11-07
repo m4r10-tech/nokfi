@@ -19,7 +19,7 @@
  *   customer.subscription.deleted      → fin de suscripción (status='expired', sesiones cerradas)
  *   invoice.payment_failed             → renovación rechazada → se para la suscripción
  *                                        y la cuenta queda bloqueada (S15b, U4)
- *   charge.dispute.created             → chargeback → revocación
+ *   charge.dispute.created             → chargeback → revocación (paquete: solo se quitan sus créditos)
  *   checkout.session.completed (mode=payment, metadata.kind=credit_pack)
  *   checkout.session.async_payment_succeeded → paquete de créditos pagado:
  *                                        suma los créditos UNA vez por sesión (S15b, U1)
@@ -72,7 +72,7 @@ const PENDING = { pending: true };
 // Fuente única de planes válidos (config/plans.js). Antes era un literal local
 // ['mini','pro','max'] duplicado en payments.js/admin.js/database.js → drift.
 const { VALID_PLANS, CREDIT_PACKS } = require('../config/plans');
-const { grantPack, purchaseByPaymentIntent } = require('../db/credits');
+const { grantPack, purchaseByPaymentIntent, revokePackCredits } = require('../db/credits');
 
 /** Coerce un plan entrante a un id conocido, con 'mini' como conservador. */
 function coerceStripePlan(plan) { return VALID_PLANS.includes(plan) ? plan : 'mini'; }
@@ -700,21 +700,29 @@ function verifyStripeSignature(rawBody, signatureHeader, secret) {
  *   2. Local por payment_ref (cubre filas antiguas/manual).
  *   3. Stripe API: charge → invoice → subscription → licencia. Necesario
  *      para disputas de cobros anteriores a esta columna.
+ * Si el cobro es de un paquete de créditos, solo se quitan esos créditos y se
+ * devuelve la licencia sin revocarla.
  * Devuelve la licencia revocada, o null si no se pudo localizar (el caller
  * responde 500 para que Stripe reintente y audita la alerta).
  */
 async function handleChargebackByPaymentRef(provider, dispute, ip) {
   const pi = dispute.payment_intent || null;
 
+  // S15b (U1): contracargo de un paquete de créditos → solo se quitan los
+  // créditos de ese paquete; la cuenta y el plan siguen como estaban.
+  const purchase = purchaseByPaymentIntent(pi);
+  if (purchase) {
+    const packLicense = getLicenseById(purchase.license_id);
+    if (packLicense) {
+      const r = revokePackCredits(purchase.id);
+      audit('CREDIT_PACK_CHARGEBACK', { license_id: packLicense.id, ip, detail: `provider=${provider} dispute=${dispute.id} pack=${purchase.pack} removed=${r ? r.removed : 0}${r && r.already ? ' (repetido)' : ''}` });
+      return packLicense;
+    }
+  }
+
   let license = getLicenseByPaymentIntent(provider, pi)
     || getLicenseByPaymentRef(provider, pi)
     || getLicenseByPaymentRef(provider, dispute.id);
-
-  // S15b (U1): contracargo de un paquete de créditos → misma política que el resto.
-  if (!license) {
-    const purchase = purchaseByPaymentIntent(pi);
-    if (purchase) license = getLicenseById(purchase.license_id);
-  }
 
   if (!license) {
     license = await resolveLicenseForDisputeViaStripe(dispute);

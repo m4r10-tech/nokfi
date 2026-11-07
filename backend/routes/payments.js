@@ -143,6 +143,16 @@ router.get('/credits', requireLicense, (req, res) => {
   });
 });
 
+const PACK_CHECKOUT_TEXT = {
+  es: n => `Compras ${n} créditos de IA para Nokfi. No caducan y no son reembolsables.`,
+  en: n => `You are buying ${n} Nokfi AI credits. They never expire and are non-refundable.`,
+  fr: n => `Vous achetez ${n} crédits d'IA Nokfi. Ils n'expirent pas et ne sont pas remboursables.`,
+  de: n => `Du kaufst ${n} KI-Credits für Nokfi. Sie verfallen nicht und werden nicht erstattet.`,
+  it: n => `Stai acquistando ${n} crediti IA di Nokfi. Non scadono e non sono rimborsabili.`,
+  pl: n => `Kupujesz ${n} kredytów AI w Nokfi. Nie wygasają i nie podlegają zwrotowi.`
+};
+const packCheckoutMessage = (credits, locale) => (PACK_CHECKOUT_TEXT[locale] || PACK_CHECKOUT_TEXT.es)(credits);
+
 /* POST /api/payments/stripe/credit-checkout  { pack, locale }   (auth: Bearer) → { checkout_url } */
 router.post('/stripe/credit-checkout', packCheckoutLimiter, requireLicense, async (req, res) => {
   const license = req.license;
@@ -172,6 +182,9 @@ router.post('/stripe/credit-checkout', packCheckoutLimiter, requireLicense, asyn
   if (license.stripe_customer_id) params.customer = license.stripe_customer_id;
   else params.customer_email = license.email;
   if (CHECKOUT_LOCALES.includes(req.body?.locale)) params.locale = req.body.locale;
+  // El Checkout solo muestra el producto «Paquetes de créditos» y el precio:
+  // junto al botón de pagar se dice cuántos créditos se compran.
+  params['custom_text[submit][message]'] = packCheckoutMessage(CREDIT_PACKS[pack].credits, req.body?.locale);
 
   try {
     const r = await stripeApi('POST', 'checkout/sessions', params);

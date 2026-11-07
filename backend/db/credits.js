@@ -38,6 +38,8 @@ function runCreditsSchema(db) {
     CREATE INDEX IF NOT EXISTS idx_credit_purchases_license ON credit_purchases(license_id, created_at);
     CREATE INDEX IF NOT EXISTS idx_credit_purchases_pi      ON credit_purchases(payment_intent);
   `);
+  // Contracargo de un paquete: se quitan sus créditos una sola vez (S15b, decisión del usuario).
+  ensureColumn(db, 'credit_purchases', 'disputed_at', 'TEXT');
 }
 
 /** Saldo de créditos de paquetes de la cuenta. */
@@ -86,4 +88,22 @@ function purchaseByPaymentIntent(payment_intent) {
   return getDB().prepare('SELECT * FROM credit_purchases WHERE payment_intent = ?').get(payment_intent) || null;
 }
 
-module.exports = { runCreditsSchema, creditBalance, takeCredit, refundCredit, grantPack, listPurchases, purchaseByPaymentIntent };
+/**
+ * Contracargo de un paquete: quita los créditos de ESA compra (sin bajar de 0)
+ * y no toca la cuenta ni el plan. Idempotente: si Stripe repite la disputa, no
+ * vuelve a restar. @returns {{ removed: number, balance: number, already: boolean }}
+ */
+function revokePackCredits(purchase_id) {
+  const db = getDB();
+  return db.transaction(() => {
+    const p = db.prepare('SELECT * FROM credit_purchases WHERE id = ?').get(purchase_id);
+    if (!p) return null;
+    if (p.disputed_at) return { removed: 0, balance: creditBalance(p.license_id), already: true };
+    const removed = Math.min(Number(p.credits) || 0, creditBalance(p.license_id));
+    db.prepare('UPDATE licenses SET ai_credits = ai_credits - ? WHERE id = ?').run(removed, p.license_id);
+    db.prepare("UPDATE credit_purchases SET disputed_at = datetime('now') WHERE id = ?").run(p.id);
+    return { removed, balance: creditBalance(p.license_id), already: false };
+  })();
+}
+
+module.exports = { revokePackCredits, runCreditsSchema, creditBalance, takeCredit, refundCredit, grantPack, listPurchases, purchaseByPaymentIntent };

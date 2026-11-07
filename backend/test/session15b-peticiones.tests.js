@@ -107,6 +107,8 @@ module.exports = async function session15bPeticionesTests({ post, put, get, chec
       co.status === 200 && co.data.checkout_url && c0 && c0.params.mode === 'payment' && c0.params['line_items[0][price]'] === 'price_t_pack220'
       && c0.params['metadata[kind]'] === 'credit_pack' && c0.params['metadata[pack]'] === 'pack220' && c0.params['metadata[license_id]'] === String(P.lid)
       && c0.params['payment_intent_data[metadata][license_id]'] === String(P.lid) && c0.params.locale === 'fr' && !c0.params['subscription_data[trial_period_days]']);
+    check('S15b U1: el Checkout del paquete dice cuántos créditos se compran, en el idioma del usuario y que no se reembolsan', () =>
+      /220 crédits/.test(c0.params['custom_text[submit][message]'] || '') && /pas remboursables/.test(c0.params['custom_text[submit][message]']));
     const bad = await post('/api/payments/stripe/credit-checkout', { pack: 'pack999' }, P.tok);
     check('S15b U1: paquete desconocido → 400 invalid_pack', () => bad.status === 400 && bad.data.error === 'invalid_pack');
 
@@ -183,7 +185,22 @@ module.exports = async function session15bPeticionesTests({ post, put, get, chec
     const D = await account('peticiones-disputa@nokfi.local', null, 'pro');
     await webhook(evt('evt_pack_d', 'checkout.session.completed', packSession('cs_pack_d', D.lid)));
     const disp = await webhook(evt('evt_pack_dispute', 'charge.dispute.created', { id: 'dp_pack', object: 'dispute', payment_intent: 'pi_cs_pack_d', charge: null }));
-    check('S15b U1: un contracargo de un paquete encuentra la cuenta (no queda en 500)', () => disp.status === 200 && db.getLicenseById(D.lid).status === 'revoked');
+    const afterDispute = credits.creditBalance(D.lid);
+    check('S15b U1: un contracargo de un paquete quita solo sus créditos y la cuenta sigue activa (no 500, no revocada)', () =>
+      disp.status === 200 && db.getLicenseById(D.lid).status === 'active' && afterDispute === 0);
+    const disp2 = await webhook(evt('evt_pack_dispute_2', 'charge.dispute.created', { id: 'dp_pack', object: 'dispute', payment_intent: 'pi_cs_pack_d', charge: null }));
+    check('S15b U1: la misma disputa repetida no vuelve a restar créditos', () => disp2.status === 200 && credits.creditBalance(D.lid) === 0);
+    // Si ya gastó parte del paquete, el saldo no baja de 0 y no toca otros paquetes ya quitados.
+    const G = await account('peticiones-disputa-gastado@nokfi.local', null, 'pro');
+    await webhook(evt('evt_pack_g1', 'checkout.session.completed', packSession('cs_pack_g1', G.lid)));
+    await webhook(evt('evt_pack_g2', 'checkout.session.completed', packSession('cs_pack_g2', G.lid)));
+    const full = credits.creditBalance(G.lid);
+    await webhook(evt('evt_pack_g_disp', 'charge.dispute.created', { id: 'dp_pack_g', object: 'dispute', payment_intent: 'pi_cs_pack_g1', charge: null }));
+    check('S15b U1: con dos paquetes, la disputa de uno quita solo los de ese paquete', () =>
+      full > 0 && credits.creditBalance(G.lid) === full / 2 && db.getLicenseById(G.lid).status === 'active');
+    for (let i = 0; i < full / 2 - 5; i++) credits.takeCredit(G.lid);
+    await webhook(evt('evt_pack_g_disp2', 'charge.dispute.created', { id: 'dp_pack_g2', object: 'dispute', payment_intent: 'pi_cs_pack_g2', charge: null }));
+    check('S15b U1: si ya gastó parte del paquete disputado, el saldo queda en 0 (nunca negativo)', () => credits.creditBalance(G.lid) === 0);
   } finally {
     global.fetch = savedFetch;
     for (const [k, v] of Object.entries(saved)) { if (v === undefined) delete process.env[k]; else process.env[k] = v; }
