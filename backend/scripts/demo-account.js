@@ -14,7 +14,8 @@ const os = require('os');
 const path = require('path');
 const http = require('http');
 
-const PORT = 4105, WEB = 4106;
+// DEMO_PORT / DEMO_WEB_PORT: para correr varias réplicas a la vez (QA S15).
+const PORT = Number(process.env.DEMO_PORT) || 4105, WEB = Number(process.env.DEMO_WEB_PORT) || 4106;
 const DB = path.join(os.tmpdir(), `nokfi-screens-${Date.now()}.db`);
 Object.assign(process.env, {
   NODE_ENV: 'test', PORT: String(PORT), DB_PATH: DB, BASE_URL: `http://localhost:${PORT}`,
