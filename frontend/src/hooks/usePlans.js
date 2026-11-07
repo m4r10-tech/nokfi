@@ -28,7 +28,8 @@ import { paymentsApi } from '../middleware/api';
 let prerenderPlans = null;
 export function setPrerenderPlans(raw) { prerenderPlans = raw; }
 
-const toPlans = (raw) => raw.map(p => ({
+// S15b (U6): siempre de menor a mayor precio (Mini 5 € → Pro 20 € → Max 50 €).
+export const toPlans = (raw) => [...raw].sort((a, b) => Number(a.price_eur) - Number(b.price_eur)).map(p => ({
   id: p.id,
   name: p.name,
   price: String(p.price_eur),

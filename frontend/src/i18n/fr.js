@@ -1299,7 +1299,7 @@ export default {
     includedInfo: 'L’e-mail au support inclut votre e-mail, votre offre et la version de l’app. Jamais votre clé de licence ni vos données financières.',
     supportSubject: 'Support Nokfi', bodyIntro: 'Racontez-nous ce qui s’est passé :', bodyEmail: 'E-mail', bodyPlan: 'Offre', bodyVersion: 'Version', bodyBrowser: 'Navigateur',
     more: 'Plus de ressources', askAssistant: 'Demander à l’assistant', apiDocs: 'Documentation de l’API',
-    person: 'C’est Mario, qui développe Nokfi, qui vous répond', response: 'En général en moins de 24 heures ouvrées.', responseMax: 'Votre formule Max inclut le support prioritaire : nous répondons en moins de 4 heures ouvrées.', guides: 'Guides rapides',
+    person: 'C’est l’équipe Nokfi qui vous répond', response: 'En général en moins de 24 heures ouvrées.', responseMax: 'Votre formule Max inclut le support prioritaire : nous répondons en moins de 4 heures ouvrées.', guides: 'Guides rapides',
     faq: [
       { q: 'Comment lire mes factures avec l’IA ?', a: 'Dans Finances › Registre, cliquez sur « Lire des factures avec l’IA » et choisissez des photos ou des PDF (ou un dossier entier). Vérifiez chaque facture à côté du document et enregistrez. Les fichiers ne sont pas conservés : seulement les données que vous confirmez.', cta: 'Aller au registre' },
       { q: 'Qu’est-ce que le modèle 303 et combien dois-je mettre de côté ?', a: 'C’est la déclaration trimestrielle de TVA : la TVA facturée moins la TVA payée sur vos dépenses. Dans Impôts, vous voyez le montant du trimestre, l’échéance et ce que vous avez mis de côté.', cta: 'Voir mes impôts' },

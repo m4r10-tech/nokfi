@@ -1303,7 +1303,7 @@ export default {
     includedInfo: 'El correo de soporte incluye tu email, tu plan y la versión de la app. Nunca tu clave de licencia ni tus datos financieros.',
     supportSubject: 'Soporte Nokfi', bodyIntro: 'Cuéntanos qué ha pasado:', bodyEmail: 'Email', bodyPlan: 'Plan', bodyVersion: 'Versión', bodyBrowser: 'Navegador',
     more: 'Más recursos', askAssistant: 'Preguntar al asistente', apiDocs: 'Documentación de la API',
-    person: 'Te responde Mario, que hace Nokfi', response: 'Normalmente en menos de 24 horas laborables.', responseMax: 'Tu plan Max tiene soporte prioritario: te respondemos en menos de 4 horas laborables.', guides: 'Guías rápidas',
+    person: 'Te responde el equipo de Nokfi', response: 'Normalmente en menos de 24 horas laborables.', responseMax: 'Tu plan Max tiene soporte prioritario: te respondemos en menos de 4 horas laborables.', guides: 'Guías rápidas',
     faq: [
       { q: '¿Cómo leo mis facturas con IA?', a: 'En Finanzas › Libro, pulsa «Leer facturas con IA» y elige fotos o PDF (o una carpeta entera). Revisa cada factura junto al documento y guarda. Los archivos no se guardan: solo los datos que confirmas.', cta: 'Ir al libro' },
       { q: '¿Qué es el modelo 303 y cuánto tengo que apartar?', a: 'Es la declaración trimestral del IVA: el IVA que cobras en tus facturas menos el que pagas en tus gastos. En Impuestos ves cuánto te sale este trimestre, el plazo y lo que llevas apartado.', cta: 'Ver mis impuestos' },

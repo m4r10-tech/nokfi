@@ -1306,7 +1306,7 @@ export default {
     includedInfo: 'E-mail do pomocy zawiera twój adres, plan i wersję aplikacji. Nigdy klucza licencyjnego ani danych finansowych.',
     supportSubject: 'Pomoc Nokfi', bodyIntro: 'Opisz, co się stało:', bodyEmail: 'E-mail', bodyPlan: 'Plan', bodyVersion: 'Wersja', bodyBrowser: 'Przeglądarka',
     more: 'Więcej zasobów', askAssistant: 'Zapytaj asystenta', apiDocs: 'Dokumentacja API',
-    person: 'Odpowiada Mario, twórca Nokfi', response: 'Zwykle w ciągu 24 godzin roboczych.', responseMax: 'Plan Max ma wsparcie priorytetowe: odpowiadamy w ciągu 4 godzin roboczych.', guides: 'Krótkie poradniki',
+    person: 'Odpowiada zespół Nokfi', response: 'Zwykle w ciągu 24 godzin roboczych.', responseMax: 'Plan Max ma wsparcie priorytetowe: odpowiadamy w ciągu 4 godzin roboczych.', guides: 'Krótkie poradniki',
     faq: [
       { q: 'Jak odczytać faktury za pomocą AI?', a: 'W Finanse › Księga kliknij „Czytaj faktury z AI” i wybierz zdjęcia lub PDF (albo cały folder). Sprawdź każdą fakturę obok dokumentu i zapisz. Pliki nie są przechowywane: tylko dane, które potwierdzisz.', cta: 'Przejdź do księgi' },
       { q: 'Czym jest model 303 i ile odkładać?', a: 'To kwartalna deklaracja VAT: VAT z twoich faktur minus VAT z wydatków. W Podatkach widzisz kwotę za ten kwartał, termin i ile już odłożyłeś.', cta: 'Moje podatki' },

@@ -284,8 +284,12 @@ con alerta por email. No se puede crear desde Claude Code (necesita cuenta).
 - Redirect `www.nokfi.app → nokfi.app` (301): anotado como pendiente en
   `deploy/nginx-nokfi.conf`; requiere editar el server block y recargar Nginx
   (sudo, usuario).
-- `robots.txt` y `og-image.png` se sirven desde `frontend/dist` (los copia el
-  build de Vite desde `public/`); sin config extra de Nginx.
+- `robots.txt`, `og-image-square.png` (imagen al compartir, 512×512 con
+  `twitter:card=summary`, S15b) y `og-image.png` (imagen de las guías en el
+  JSON-LD) se sirven desde `frontend/dist` (los copia el build de Vite desde
+  `public/`); sin config extra de Nginx. Las redes cachean la vista previa unos
+  días: tras un cambio, forzarla con sus depuradores (Facebook Sharing
+  Debugger, LinkedIn Post Inspector).
 
 ## 13. IA local (último respaldo, desde 2026-10-24)
 

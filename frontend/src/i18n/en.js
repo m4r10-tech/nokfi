@@ -1300,7 +1300,7 @@ export default {
     includedInfo: 'The support email includes your email, plan and app version. Never your license key or your financial data.',
     supportSubject: 'Nokfi support', bodyIntro: 'Tell us what happened:', bodyEmail: 'Email', bodyPlan: 'Plan', bodyVersion: 'Version', bodyBrowser: 'Browser',
     more: 'More resources', askAssistant: 'Ask the assistant', apiDocs: 'API documentation',
-    person: 'Mario, who builds Nokfi, will answer you', response: 'Usually within 24 working hours.', responseMax: 'Your Max plan includes priority support: we reply within 4 working hours.', guides: 'Quick guides',
+    person: 'The Nokfi team will answer you', response: 'Usually within 24 working hours.', responseMax: 'Your Max plan includes priority support: we reply within 4 working hours.', guides: 'Quick guides',
     faq: [
       { q: 'How do I read my invoices with AI?', a: 'In Finance › Ledger, click "Read invoices with AI" and choose photos or PDFs (or a whole folder). Check each invoice next to the document and save. The files aren\'t stored: only the data you confirm.', cta: 'Go to the ledger' },
       { q: 'What is form 303 and how much should I set aside?', a: 'It\'s the quarterly VAT return: the VAT you charge on your invoices minus the VAT you pay on your expenses. In Taxes you see how much it comes to this quarter, the deadline and what you\'ve set aside.', cta: 'See my taxes' },

@@ -1299,7 +1299,7 @@ export default {
     includedInfo: 'Die Support-E-Mail enthält deine E-Mail, deinen Plan und die App-Version. Nie deinen Lizenzschlüssel oder deine Finanzdaten.',
     supportSubject: 'Nokfi-Support', bodyIntro: 'Erzähl uns, was passiert ist:', bodyEmail: 'E-Mail', bodyPlan: 'Plan', bodyVersion: 'Version', bodyBrowser: 'Browser',
     more: 'Weitere Ressourcen', askAssistant: 'Assistenten fragen', apiDocs: 'API-Dokumentation',
-    person: 'Dir antwortet Mario, der Nokfi entwickelt', response: 'Meist innerhalb von 24 Arbeitsstunden.', responseMax: 'Dein Max-Tarif hat Priority-Support: Wir antworten innerhalb von 4 Arbeitsstunden.', guides: 'Kurzanleitungen',
+    person: 'Dir antwortet das Nokfi-Team', response: 'Meist innerhalb von 24 Arbeitsstunden.', responseMax: 'Dein Max-Tarif hat Priority-Support: Wir antworten innerhalb von 4 Arbeitsstunden.', guides: 'Kurzanleitungen',
     faq: [
       { q: 'Wie lese ich meine Rechnungen mit KI?', a: 'Unter Finanzen › Journal auf „Rechnungen mit KI lesen“ klicken und Fotos oder PDFs (oder einen ganzen Ordner) wählen. Jede Rechnung neben dem Dokument prüfen und speichern. Die Dateien werden nicht gespeichert, nur die bestätigten Daten.', cta: 'Zum Journal' },
       { q: 'Was ist das Modell 303 und wie viel sollte ich zurücklegen?', a: 'Die vierteljährliche Umsatzsteuererklärung: die MwSt. auf deinen Rechnungen minus die MwSt. deiner Ausgaben. Unter Steuern siehst du den Betrag des Quartals, die Frist und was du zurückgelegt hast.', cta: 'Meine Steuern ansehen' },
