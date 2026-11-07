@@ -10,6 +10,7 @@ import { useCompanyProfile } from '../hooks/useCompanyProfile';
 import { useLang } from '../context/LangContext';
 import { useToast } from '../context/ToastContext';
 import { ChatProvider } from '../context/ChatContext';
+import { SkipLink } from '../components/ui';
 
 const COLLAPSE_KEY = 'nokfi_sidebar_collapsed';
 
@@ -69,6 +70,7 @@ export default function DashboardLayout() {
   return (
     <ChatProvider>
     <div className="min-h-screen md:flex" style={{ background: 'var(--bg-base)' }}>
+      <SkipLink />
       <Sidebar collapsed={collapsed} onToggle={toggleCollapsed} companyName={profile.companyName} />
 
       <div className="flex-1 min-w-0 flex flex-col">
@@ -77,7 +79,7 @@ export default function DashboardLayout() {
           <Link to={space === 'dev' ? '/app/dev' : '/app/home'} aria-label="Nokfi"><Logo size="sm" /></Link>
         </header>
 
-        <main className="app-main w-full max-w-6xl mx-auto">
+        <main id="contenido" tabIndex={-1} className="app-main w-full max-w-6xl mx-auto">
           {parent && (
             <Link to={parent.to}
               className="inline-flex items-center gap-1.5 -ml-1 mb-3 md:mb-4 rounded-lg px-1.5 py-1 text-sm font-medium transition-colors hover:text-[var(--text-primary)]"

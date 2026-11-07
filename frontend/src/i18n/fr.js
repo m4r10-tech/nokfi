@@ -177,7 +177,7 @@ export default {
     save: 'Enregistrer', cancel: 'Annuler', continue: 'Continuer', back: 'Retour',
     loading: 'Chargement…', error: 'Une erreur s’est produite', retry: 'Réessayer',
     open: 'Ouvrir', yes: 'Oui', no: 'Non', close: 'Fermer', copy: 'Copier', copied: 'Copié',
-    download: 'Télécharger', export: 'Exporter', analyze: 'Analyser avec l’IA'
+    download: 'Télécharger', export: 'Exporter', analyze: 'Analyser avec l’IA', skipToContent: 'Aller au contenu'
   },
   nav: {
     home: 'Accueil', questionnaire: 'Questionnaire', questionnaireShort: 'Diagnostic', excel: 'Analyse Excel', excelShort: 'Excel',
@@ -333,6 +333,7 @@ export default {
     goodMorning: 'Bonjour', goodAfternoon: 'Bon après-midi', goodEvening: 'Bonsoir',
     trialBanner: 'Vous êtes en période d’essai : il vous reste {n} jours.', trialBanner_one: 'Vous êtes en période d’essai : il vous reste {n} jour.', trialManage: 'Voir l’abonnement',
     newsTitle: "Nouveau : vous pouvez émettre des factures.",
+    newsClose: "Fermer l’annonce des nouveautés",
     newsText: "Numérotées, avec PDF et facture électronique, et prêtes pour VERI*FACTU. Nous avons mis à jour les conditions, l'accord de traitement et la politique de confidentialité pour l'expliquer.",
     newsCta: "Émettre une facture",
     newsTerms: "Conditions",
@@ -608,7 +609,7 @@ export default {
     licenseInactive: 'Votre licence n’est plus active. Vous avez été déconnecté.',
     aiSlow: 'L’IA met plus de temps que d’habitude. Nous continuons : ne fermez pas cet onglet.'
   },
-  footer: { rights: 'Tous droits réservés' },
+  footer: { rights: 'Tous droits réservés', linksNav: 'Autres liens' },
   landing: {
     screensEyebrow: 'À l’intérieur', screensHeading: 'Voici Nokfi', screensSubtitle: 'Des captures réelles de l’app avec un compte d’exemple : un garage avec ses factures du trimestre.',
     screensTabs: ['Accueil', 'Impôts', 'Encaissements', 'Diagnostic'], screensNote: 'Compte d’exemple avec des données fictives.',

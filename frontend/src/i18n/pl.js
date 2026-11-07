@@ -179,7 +179,7 @@ export default {
     save: 'Zapisz', cancel: 'Anuluj', continue: 'Dalej', back: 'Wstecz',
     loading: 'Ładowanie…', error: 'Wystąpił błąd', retry: 'Spróbuj ponownie',
     open: 'Otwórz', yes: 'Tak', no: 'Nie', close: 'Zamknij', copy: 'Kopiuj', copied: 'Skopiowano',
-    download: 'Pobierz', export: 'Eksportuj', analyze: 'Analizuj z AI'
+    download: 'Pobierz', export: 'Eksportuj', analyze: 'Analizuj z AI', skipToContent: 'Przejdź do treści'
   },
   nav: {
     home: 'Start', questionnaire: 'Kwestionariusz', questionnaireShort: 'Diagnoza', excel: 'Analiza Excel', excelShort: 'Excel',
@@ -336,6 +336,7 @@ export default {
     goodMorning: 'Dzień dobry', goodAfternoon: 'Dzień dobry', goodEvening: 'Dobry wieczór',
     trialBanner: 'Korzystasz z okresu próbnego: zostało {n} dnia.', trialBanner_one: 'Korzystasz z okresu próbnego: został {n} dzień.', trialBanner_few: 'Korzystasz z okresu próbnego: zostały {n} dni.', trialBanner_many: 'Korzystasz z okresu próbnego: zostało {n} dni.', trialManage: 'Zobacz subskrypcję',
     newsTitle: "Nowość: możesz już wystawiać faktury.",
+    newsClose: "Zamknij komunikat o nowościach",
     newsText: "Numerowane, z PDF i e-fakturą, gotowe na VERI*FACTU. Zaktualizowaliśmy regulamin, umowę powierzenia i politykę prywatności, aby to wyjaśnić.",
     newsCta: "Wystaw fakturę",
     newsTerms: "Regulamin",
@@ -611,7 +612,7 @@ export default {
     licenseInactive: 'Twoja licencja nie jest już aktywna. Zostałeś wylogowany.',
     aiSlow: 'AI potrzebuje więcej czasu niż zwykle. Nadal pracujemy – nie zamykaj tej karty.'
   },
-  footer: { rights: 'Wszelkie prawa zastrzeżone' },
+  footer: { rights: 'Wszelkie prawa zastrzeżone', linksNav: 'Więcej linków' },
   landing: {
     screensEyebrow: 'Od środka', screensHeading: 'Tak wygląda Nokfi', screensSubtitle: 'Prawdziwe zrzuty ekranu aplikacji z przykładowym kontem: warsztat samochodowy z fakturami z kwartału.',
     screensTabs: ['Start', 'Podatki', 'Należności', 'Diagnoza'], screensNote: 'Przykładowe konto z fikcyjnymi danymi.',

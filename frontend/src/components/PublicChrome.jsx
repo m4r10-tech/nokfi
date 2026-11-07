@@ -5,6 +5,7 @@ import { LANGUAGES } from '../i18n/languages';
 import Logo from './Logo';
 import { useTheme } from '../context/ThemeContext';
 import { useLang } from '../context/LangContext';
+import { SkipLink } from './ui';
 import { seoMatch, pathFor, seoLang, TOOL_IDS } from '../seo/routes';
 
 /**
@@ -82,10 +83,11 @@ export function PublicHeader({ links = [] }) {
         borderBottom: `1px solid ${scrolled ? 'var(--border)' : 'transparent'}`,
         transition: 'background-color var(--dur-base) var(--ease-std), border-color var(--dur-base) var(--ease-std)'
       }}>
+      <SkipLink />
       <div className="max-w-6xl mx-auto px-4 h-16 flex items-center justify-between gap-3">
         <Link to={pub('home')} aria-label="Nokfi" className="rounded-lg"><Logo size="md" /></Link>
         {links.length > 0 && (
-          <nav className="hidden lg:flex items-center gap-1">
+          <nav aria-label={t('nav.mainNav')} className="hidden lg:flex items-center gap-1">
             {links.map(l => (
               <a key={l.href} href={l.href} onClick={(e) => smoothTo(e, l.href)} className="whitespace-nowrap rounded-lg px-3 py-1.5 text-sm font-medium transition-colors hover:text-[var(--text-primary)]"
                 style={{ color: 'var(--text-secondary)' }}>{l.label}</a>
@@ -96,7 +98,9 @@ export function PublicHeader({ links = [] }) {
           <span className="hidden sm:inline-flex"><LangSwitch /></span>
           <button onClick={toggleTheme} aria-label={t(theme === 'dark' ? 'nav.lightMode' : 'nav.darkMode')}
             className="btn btn-ghost btn-sm !px-2">
-            {theme === 'dark' ? <Sun size={16} /> : <Moon size={16} />}
+            {/* S15b (A6): los dos iconos y CSS decide cuál se ve; así el HTML prerenderizado
+                y el hidratado son iguales y la cabecera no se repinta al cargar en claro. */}
+            <Sun size={16} className="theme-icon-dark" /><Moon size={16} className="theme-icon-light" />
           </button>
           <Link to="/login" className="btn btn-secondary btn-sm">{t('landing.login')}</Link>
         </div>
@@ -132,7 +136,7 @@ export function PublicFooter() {
           <Logo variant="icon" size="sm" />
           <p className="text-xs" style={{ color: 'var(--text-muted)' }}>© {new Date().getFullYear()} Nokfi · {t('footer.rights')}</p>
         </div>
-        <nav className="flex flex-wrap justify-center items-center gap-x-5 gap-y-1 text-xs" style={{ color: 'var(--text-secondary)' }}>
+        <nav aria-label={t('footer.linksNav')} className="flex flex-wrap justify-center items-center gap-x-5 gap-y-1 text-xs" style={{ color: 'var(--text-secondary)' }}>
           <Link to={pub('pricing')} className="inline-flex items-center min-h-6 hover:underline">{t('landing.plansHeading')}</Link>
           <Link to="/privacidad" className="inline-flex items-center min-h-6 hover:underline">{t('landing.privacyLink')}</Link>
           <Link to="/terminos" className="inline-flex items-center min-h-6 hover:underline">{t('legal.terms')}</Link>

@@ -118,7 +118,7 @@ function NewsNotice({ t }) {
           <Link to="/privacidad" className="link">{t('home.newsPrivacy')}</Link>
         </p>
       </div>
-      <button onClick={close} className="btn btn-ghost btn-sm !px-2 -mr-1 -mt-1" aria-label={t('common.close')} title={t('common.close')}><X size={15} /></button>
+      <button onClick={close} className="btn btn-ghost btn-sm !px-2 -mr-1 -mt-1" aria-label={t('home.newsClose')} title={t('home.newsClose')}><X size={15} /></button>
     </div>
   );
 }

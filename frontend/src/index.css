@@ -345,6 +345,21 @@ html { scroll-padding-top: 80px; }
 
 /* S15b (A4): las capturas de la landing ya salen solo en el tema que se está viendo (Landing.jsx). */
 
+/* S15b (A5): «Saltar al contenido», fuera de la vista hasta que recibe el foco con Tab. */
+.skip-link {
+  position: fixed; top: 12px; left: 12px; z-index: 100;
+  padding: 10px 16px; border-radius: 10px; font-size: 14px; font-weight: 600;
+  background: var(--accent); color: var(--on-accent); box-shadow: var(--shadow-lg);
+  transform: translateY(calc(-100% - 24px));
+}
+.skip-link:focus { transform: none; }
+main[tabindex="-1"]:focus { outline: none; }
+
+/* S15b (A6): el icono del botón de tema de la cabecera pública sale por CSS (el HTML
+   prerenderizado es oscuro y así no cambia nada al hidratar con el tema claro). */
+html.theme-light .theme-icon-dark,
+html:not(.theme-light) .theme-icon-light { display: none; }
+
 /* Sesión 10: filas de pestañas con scroll horizontal sin barra visible. */
 .no-scrollbar { scrollbar-width: none; }
 .no-scrollbar::-webkit-scrollbar { display: none; }

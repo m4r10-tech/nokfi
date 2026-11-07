@@ -177,7 +177,7 @@ export default {
     save: 'Guardar', cancel: 'Cancelar', continue: 'Continuar', back: 'Atrás',
     loading: 'Cargando...', error: 'Ha ocurrido un error', retry: 'Reintentar',
     open: 'Abrir', yes: 'Sí', no: 'No', close: 'Cerrar', copy: 'Copiar', copied: 'Copiado',
-    download: 'Descargar', export: 'Exportar', analyze: 'Analizar con IA'
+    download: 'Descargar', export: 'Exportar', analyze: 'Analizar con IA', skipToContent: 'Saltar al contenido'
   },
   nav: {
     home: 'Inicio', questionnaire: 'Cuestionario', questionnaireShort: 'Diagnóstico', excel: 'Análisis Excel', excelShort: 'Excel',
@@ -334,6 +334,7 @@ export default {
     goodMorning: 'Buenos días', goodAfternoon: 'Buenas tardes', goodEvening: 'Buenas noches',
     trialBanner: 'Estás en el periodo de prueba: te quedan {n} días.', trialBanner_one: 'Estás en el periodo de prueba: te queda {n} día.', trialManage: 'Ver suscripción',
     newsTitle: "Novedad: ya puedes emitir facturas.",
+    newsClose: "Cerrar el aviso de novedades",
     newsText: "Numeradas, con PDF y factura electrónica, y preparadas para VERI*FACTU. Hemos actualizado los términos, el encargo de tratamiento y la privacidad para explicarlo.",
     newsCta: "Emitir una factura",
     newsTerms: "Términos",
@@ -612,7 +613,7 @@ export default {
     licenseInactive: 'Tu licencia ya no está activa. Se ha cerrado la sesión.',
     aiSlow: 'La IA está tardando más de lo normal. Seguimos trabajando: no cierres esta pestaña.'
   },
-  footer: { rights: 'Todos los derechos reservados' },
+  footer: { rights: 'Todos los derechos reservados', linksNav: 'Más enlaces' },
   landing: {
     screensEyebrow: 'Por dentro', screensHeading: 'Así se ve Nokfi', screensSubtitle: 'Capturas reales de la app con una cuenta de ejemplo: un taller mecánico con sus facturas del trimestre.',
     screensTabs: ['Inicio', 'Impuestos', 'Cobros', 'Diagnóstico'], screensNote: 'Cuenta de ejemplo con datos ficticios.',
