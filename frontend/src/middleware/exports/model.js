@@ -62,9 +62,11 @@ export function buildModel(doc, t, lang) {
 }
 
 export function htmlToParagraphs(html) {
-  const div = document.createElement('div');
-  div.innerHTML = String(html || '').replace(/<\/(p|li|h3|h4|div)>/gi, '\n').replace(/<br\s*\/?>/gi, '\n');
-  return (div.textContent || '').split('\n').map(s => s.trim()).filter(Boolean);
+  // S15b (sub7 A7): DOMParser crea un documento inerte (no carga imágenes ni
+  // ejecuta onerror); un div con innerHTML sí lo hacía con HTML sin sanear.
+  const text = String(html || '').replace(/<\/(p|li|h3|h4|div)>/gi, '\n').replace(/<br\s*\/?>/gi, '\n');
+  const body = new DOMParser().parseFromString(text, 'text/html').body;
+  return (body?.textContent || '').split('\n').map(s => s.trim()).filter(Boolean);
 }
 
 /** Texto plano (copiar al portapapeles / CSV). */

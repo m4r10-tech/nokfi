@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import { useOutletContext, useSearchParams, Link } from 'react-router-dom';
 import { Moon, Sun, LogOut, KeyRound, Copy, Eye, EyeOff, Loader2, CreditCard, Check, CloudOff, Code2, Trash2, Download, BellRing, LifeBuoy, Mail, Share2, ArrowLeftRight, XCircle } from 'lucide-react';
 import { usePlans } from '../hooks/usePlans';
@@ -397,6 +397,9 @@ function ShareSection() {
   const [error, setError] = useState(null);
   const [confirming, setConfirming] = useState(null);
   const [revoking, setRevoking] = useState(false);
+  // S15b (sub7 A8): dos envíos seguidos (doble clic, Intro repetido) antes de que
+  // se pinte el botón deshabilitado creaban dos enlaces; el ref lo corta al momento.
+  const creatingRef = useRef(false);
 
   const load = async () => {
     const res = await shareApi.list();
@@ -406,8 +409,11 @@ function ShareSection() {
 
   const create = async (e) => {
     e.preventDefault();
+    if (creatingRef.current) return;
+    creatingRef.current = true;
     setCreating(true); setError(null);
-    const res = await shareApi.create(label.trim(), days);
+    let res;
+    try { res = await shareApi.create(label.trim(), days); } finally { creatingRef.current = false; }
     setCreating(false);
     if (res.ok) { setCreated(`${window.location.origin}/compartido/${res.data.link.token}`); setLabel(''); load(); }
     else setError(res.data?.error === 'too_many_links' ? t('share.tooMany') : apiErrorMessage(t, res));
