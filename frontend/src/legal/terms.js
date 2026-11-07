@@ -25,7 +25,8 @@ export const TERMS = {
       { h: 'Planes, prueba y pagos', list: [
         'Los planes (Mini, Pro y Max) y sus precios se muestran en nokfi.app/pricing. Se pagan por adelantado cada mes con tarjeta a través de Stripe; Nokfi no ve ni guarda los datos de tu tarjeta.',
         'El plan Mini incluye 14 días de prueba. Si cancelas antes de que termine no se te cobra nada; si no, el día 14 se cobra el primer mes.',
-        'Cada plan incluye una cuota diaria de análisis con IA. El asistente de chat tiene sus propios límites de uso razonable.',
+        'Cada plan incluye unos créditos de IA al día (1 crédito = 1 análisis o lectura de facturas con IA), que se renuevan cada día. El asistente de chat tiene sus propios límites de uso razonable.',
+        'Con un plan activo puedes comprar paquetes de créditos (pago único, por el precio que se muestra en nokfi.app/pricing). Los créditos de los paquetes no caducan, se gastan cuando se acaban los créditos del día y sirven igual en la web y en la API.',
         'Puedes cambiar de plan desde Configuración → Plan («Cambiar de plan»). Cualquier cambio, a un plan mayor o menor, se cobra ese mismo día por el precio completo del plan nuevo y empieza un periodo nuevo de un mes desde ese día, sin prorrateos, descuentos ni devolución de lo que quedaba del plan anterior. Si el cobro falla, el plan no cambia. Si cambias durante la prueba, la prueba termina y se cobra ese día.',
         'Si no se puede cobrar una renovación mensual, la suscripción se detiene y la cuenta queda bloqueada hasta que pagues un plan nuevo; tus datos se conservan.',
         'Podemos cambiar los precios avisándote con al menos 30 días de antelación; el nuevo precio se aplicará a partir de la siguiente renovación y podrás cancelar antes.'
@@ -91,7 +92,8 @@ export const TERMS = {
       { h: 'Plans, trial and payments', list: [
         'Plans (Mini, Pro and Max) and their prices are shown at nokfi.app/pricing. They are paid monthly in advance by card through Stripe; Nokfi never sees or stores your card details.',
         'The Mini plan includes a 14-day trial. If you cancel before it ends you are not charged; otherwise the first month is charged on day 14.',
-        'Each plan includes a daily quota of AI analyses. The chat assistant has its own fair-use limits.',
+        'Each plan includes a number of AI credits per day (1 credit = 1 AI analysis or invoice reading), renewed every day. The chat assistant has its own fair-use limits.',
+        'With an active plan you can buy credit packs (one-off payment, at the price shown at nokfi.app/pricing). Pack credits never expire, are used once the daily credits run out and work the same on the web and in the API.',
         'You can change plan from Settings → Plan (“Change plan”). Any change, up or down, is charged that same day at the full price of the new plan and starts a new one-month period from that day, with no proration, discounts or refund of what was left of the previous plan. If the charge fails, the plan does not change. If you change during the trial, the trial ends and you are charged that day.',
         'If a monthly renewal cannot be charged, the subscription stops and the account is blocked until you pay for a new plan; your data is kept.',
         'We may change prices with at least 30 days’ notice; the new price applies from the next renewal and you may cancel before then.'

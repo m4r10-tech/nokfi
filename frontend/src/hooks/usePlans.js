@@ -50,6 +50,8 @@ export function usePlans() {
   const [plans, setPlans] = useState(() => initialPlans() || []);
   const [failed, setFailed] = useState(false);
   const [notLoaded, setNotLoaded] = useState(() => !plans.length);
+  // S15b (U1): paquetes de créditos del mismo catálogo ({ id, credits, price_eur }).
+  const [packs, setPacks] = useState([]);
 
   useEffect(() => {
     let cancelled = false;
@@ -57,6 +59,7 @@ export function usePlans() {
       if (cancelled) return;
       if (ok && Array.isArray(data.plans) && data.plans.length) {
         setPlans(toPlans(data.plans));
+        if (Array.isArray(data.credit_packs)) setPacks(data.credit_packs);
         setFailed(false);
       } else {
         setFailed(true);
@@ -70,5 +73,5 @@ export function usePlans() {
     return () => { cancelled = true; };
   }, []);
 
-  return { plans, failed, notLoaded };
+  return { plans, failed, notLoaded, packs };
 }

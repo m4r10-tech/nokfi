@@ -228,7 +228,7 @@ function WithData({ dash, stats, items, license, onChange, t, lang, company }) {
         <QuickActions t={t} />
       </div>
 
-      <UsageLine total={stats.total} used={dash.ai_used_today ?? stats.usedToday} quota={license?.ai_quota ?? null} t={t} lang={lang} />
+      <UsageLine total={stats.total} used={dash.ai_used_today ?? stats.usedToday} quota={license?.ai_quota ?? null} pack={dash.ai_pack_credits || 0} t={t} lang={lang} />
     </>
   );
 }
@@ -433,13 +433,14 @@ function QuickActions({ t }) {
 }
 
 /** Métricas de uso en una línea discreta (antes eran las tres tarjetas de arriba). */
-function UsageLine({ total, used, quota, t, lang }) {
+function UsageLine({ total, used, quota, pack = 0, t, lang }) {
   const now = new Date();
   const reset = new Date(Date.UTC(now.getUTCFullYear(), now.getUTCMonth(), now.getUTCDate() + 1));
   return (
     <p className="text-xs tabular" style={{ color: 'var(--text-muted)' }}>
       {t('home.usageTotal', { n: total })}
       {quota != null && ` · ${t('home.usageToday', { used, quota, time: formatTime(reset, lang) })}`}
+      {pack > 0 && ` · ${t('home.usagePack', { n: pack })}`}
     </p>
   );
 }

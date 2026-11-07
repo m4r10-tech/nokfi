@@ -24,7 +24,9 @@ const KNOWN = [
   // IA local (2026-10): respuestas aplazadas
   'pending_not_found', 'too_many_pending', 'ai_timeout',
   // S15b: cambio de plan
-  'same_plan', 'subscription_not_active'
+  'same_plan', 'subscription_not_active',
+  // S15b: paquetes de créditos
+  'plan_required', 'invalid_pack'
 ];
 
 export function apiErrorMessage(t, result, fallbackKey = 'common.error') {
