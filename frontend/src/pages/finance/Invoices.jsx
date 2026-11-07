@@ -270,12 +270,13 @@ function InvoiceDetail({ id, onClose, onChanged }) {
   const issued = inv?.status === 'issued';
   const st = inv ? invoiceState(inv) : null;
   return (
-    <Modal title={inv ? `${inv.kind.startsWith('R') ? t('invoices.kind.R') : t('invoices.invoice')} ${inv.number}` : t('invoices.invoice')} onClose={onClose} wide footer={inv && <>
-      {issued && !inv.rectified_by.length && <button onClick={() => { setError(null); setStep('cancel'); }} className="btn btn-ghost sm:mr-auto" style={{ color: 'var(--negative)' }}><Ban size={15} /> {t('invoices.cancel')}</button>}
-      {issued && !inv.kind.startsWith('R') && <button onClick={() => navigate(`/app/finanzas/facturas/nueva?rectify=${inv.id}`)} className="btn btn-secondary"><Undo2 size={15} /> {t('invoices.rectify')}</button>}
-      {!inv.kind.startsWith('R') && <button onClick={() => navigate(`/app/finanzas/facturas/nueva?from=${inv.id}`)} className="btn btn-secondary"><Copy size={15} /> {t('invoices.duplicate')}</button>}
-      {issued && <button onClick={() => { setError(null); setStep('send'); }} className="btn btn-secondary"><Send size={15} /> {t('invoices.send')}</button>}
-      <div className="relative">
+    <Modal title={inv ? `${inv.kind.startsWith('R') ? t('invoices.kind.R') : t('invoices.invoice')} ${inv.number}` : t('invoices.invoice')} onClose={onClose} wide footer={inv && <div className="grid grid-cols-2 gap-2 sm:contents">
+      {/* S15b V3: en el móvil, Descargar a lo ancho y el resto en dos columnas (antes 5 botones apilados). */}
+      {issued && !inv.rectified_by.length && <button onClick={() => { setError(null); setStep('cancel'); }} className="btn btn-ghost order-5 sm:order-none sm:mr-auto" style={{ color: 'var(--negative)' }}><Ban size={15} /> {t('invoices.cancel')}</button>}
+      {issued && !inv.kind.startsWith('R') && <button onClick={() => navigate(`/app/finanzas/facturas/nueva?rectify=${inv.id}`)} className="btn btn-secondary order-4 sm:order-none"><Undo2 size={15} /> {t('invoices.rectify')}</button>}
+      {!inv.kind.startsWith('R') && <button onClick={() => navigate(`/app/finanzas/facturas/nueva?from=${inv.id}`)} className="btn btn-secondary order-3 sm:order-none"><Copy size={15} /> {t('invoices.duplicate')}</button>}
+      {issued && <button onClick={() => { setError(null); setStep('send'); }} className="btn btn-secondary order-2 sm:order-none"><Send size={15} /> {t('invoices.send')}</button>}
+      <div className="relative order-1 col-span-2 sm:order-none">
         <button onClick={() => setMenu(m => !m)} disabled={downloading} className="btn btn-primary w-full" aria-haspopup="menu" aria-expanded={menu}>
           {downloading ? <Loader2 size={15} className="animate-spin" /> : <Download size={15} />} {t('invoices.download')} <ChevronDown size={14} />
         </button>
@@ -290,7 +291,7 @@ function InvoiceDetail({ id, onClose, onChanged }) {
           </div>
         )}
       </div>
-    </>}>
+    </div>}>
       {!inv ? (error ? <ErrorBox>{error}</ErrorBox> : <div className="flex flex-col gap-3">{[0, 1, 2].map(i => <Skeleton key={i} className="h-10" />)}</div>) : (
         <div className="flex flex-col gap-4 text-sm">
           <div className="flex flex-wrap items-center gap-2">
