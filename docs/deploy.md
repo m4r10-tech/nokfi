@@ -147,10 +147,17 @@ all simulated renewals succeeded`).
   (`whsec_`) + `STRIPE_PRICE_{MINI,PRO,MAX}` en el `.env` del VPS. Precios que se
   cobran = `STRIPE_PRICE_*`; precios que se muestran = `PLAN_PRICE_*_EUR`
   (mantenerlos sincronizados a mano — drift caveat).
+- **Paquetes de créditos (S15b, U1)**: Product «Paquetes de créditos» con 3 Prices
+  de pago único EUR (50 créditos = 5 €, 220 = 20 €, 550 = 50 €) y sus ids en
+  `STRIPE_PRICE_PACK_50`, `STRIPE_PRICE_PACK_220`, `STRIPE_PRICE_PACK_550`. El
+  importe que se muestra sale de `config/plans.js` (`CREDIT_PACKS`): si cambia en
+  Stripe, cambiarlo también allí. Añadir al webhook el evento
+  `checkout.session.async_payment_succeeded` (pagos asíncronos de paquetes).
 - **Webhook LIVE** registrado en `https://nokfi.app/api/webhooks/stripe` con **6
   eventos**: `checkout.session.completed`, `invoice.paid`,
   `customer.subscription.updated`, `customer.subscription.deleted`,
-  `invoice.payment_failed`, `charge.dispute.created`. Entrega OK a través de CF.
+  `invoice.payment_failed`, `charge.dispute.created` (S15b: añadir
+  `checkout.session.async_payment_succeeded` para los paquetes de créditos). Entrega OK a través de CF.
   Un evento que llega antes que su licencia recibe `503` (Stripe lo reintenta);
   en el panel de webhooks pueden verse algunos `503` sueltos en las altas: es normal.
 - **Verificado end-to-end**: pago real mini (trial 14d → 0€) creó la licencia
@@ -288,8 +295,12 @@ con alerta por email. No se puede crear desde Claude Code (necesita cuenta).
 - Redirect `www.nokfi.app → nokfi.app` (301): anotado como pendiente en
   `deploy/nginx-nokfi.conf`; requiere editar el server block y recargar Nginx
   (sudo, usuario).
-- `robots.txt` y `og-image.png` se sirven desde `frontend/dist` (los copia el
-  build de Vite desde `public/`); sin config extra de Nginx.
+- `robots.txt`, `og-image-square.png` (imagen al compartir, 512×512 con
+  `twitter:card=summary`, S15b) y `og-image.png` (imagen de las guías en el
+  JSON-LD) se sirven desde `frontend/dist` (los copia el build de Vite desde
+  `public/`); sin config extra de Nginx. Las redes cachean la vista previa unos
+  días: tras un cambio, forzarla con sus depuradores (Facebook Sharing
+  Debugger, LinkedIn Post Inspector).
 
 ## 13. IA local (último respaldo, desde 2026-10-24)
 

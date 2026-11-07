@@ -84,6 +84,10 @@ function financeContext(licenseId, { lang = 'es', maxChars = 3000, today = iso(n
       : `; Nokfi no estima el importe de ${next.models.filter(m => !estimated.includes(m)).map(m => `el ${m}`).join(' ni ')}`;
     lines.push(`Próximo plazo fiscal (${next.period}) el ${f.date(next.date)}, faltan ${next.days_left} días: ${next.models.map(modelLabel).join('; ')}${note} [enlace: calendario].`);
   }
+  // S15b (U10/F2): una sociedad no presenta el 130 ni paga IRPF por su actividad.
+  if (profile.legal_form === 'sociedad') {
+    lines.push('Es una sociedad: NO presenta el modelo 130 ni el IRPF de la actividad (son de autónomos); no los menciones como suyos. Sus modelos son el 303 (IVA), el 111 y el 115 si practica retenciones (nóminas, profesionales, alquiler), el 202 (pagos fraccionados) y el 200 (Impuesto sobre Sociedades). Nokfi todavía no calcula el 200, el 202, el 111 ni el 115: no des cifras de ellos.');
+  }
 
   if (!entries.length) {
     lines.push('El libro de facturas está vacío: no hay cifras reales de ingresos, gastos, cobros ni impuestos. No inventes ninguna; puedes proponer registrar las facturas en el libro [enlace: libro].');

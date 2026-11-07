@@ -56,6 +56,28 @@ const VALID_PLANS = Object.keys(PLANS);
 /** Cuota diaria de análisis IA por plan — mapa plano para aiQuotaForPlan. */
 const AI_QUOTAS = Object.fromEntries(VALID_PLANS.map(p => [p, PLANS[p].quota]));
 
+/**
+ * Paquetes de créditos (S15b, U1; decidido 2026-11-05). Pago único en Stripe
+ * (producto «Paquetes de créditos», un Price por paquete en
+ * STRIPE_PRICE_PACK_<créditos>). Los créditos NO caducan, solo los compra quien
+ * tiene un plan activo (Q1), se gastan cuando se acaban los créditos del día del
+ * plan (Q2) y son un único saldo por cuenta, web y /api/v1 (Q3).
+ * 1 crédito = 1 análisis o lectura de facturas con IA (lo que antes se llamaba
+ * «análisis de IA»). El precio NO viene del .env: lo fija el Price de Stripe y
+ * este catálogo solo lo muestra (mantener los dos iguales).
+ */
+const CREDIT_PACKS = {
+  pack50:  { credits: 50,  eur: 5 },
+  pack220: { credits: 220, eur: 20 },
+  pack550: { credits: 550, eur: 50 }
+};
+for (const p of Object.keys(CREDIT_PACKS)) CREDIT_PACKS[p].cents = Math.round(CREDIT_PACKS[p].eur * 100);
+
+/** Variable del .env con el Price de Stripe de un paquete (STRIPE_PRICE_PACK_50…). */
+function packPriceEnv(pack) {
+  return `STRIPE_PRICE_PACK_${CREDIT_PACKS[pack].credits}`;
+}
+
 /** Trial gratis (días) y a qué planes aplica. */
 const TRIAL_DAYS = 14;
 const TRIAL_PLANS = ['mini'];
@@ -76,6 +98,8 @@ module.exports = {
   AI_QUOTAS,
   TRIAL_DAYS,
   TRIAL_PLANS,
+  CREDIT_PACKS,
+  packPriceEnv,
   coercePlan,
   planHasTrial
 };

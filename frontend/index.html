@@ -11,21 +11,23 @@
        esta copia solo la usan /, /app y el acceso. -->
 
   <!-- Open Graph / Twitter — presentación al compartir nokfi.app en redes.
-       og-image.png (1200x630) se genera del logo real (public/favicon.svg)
-       sobre fondo oscuro; vive en public/ y la CSP no le aplica (la piden
-       los crawlers, no la página). -->
+       S15b (U8): imagen CUADRADA og-image-square.png (512x512, el logo del
+       favicon con margen sobre el azul de Nokfi) y twitter:card=summary, para
+       que WhatsApp, Telegram y las redes enseñen el logo bien encajado y no un
+       rectángulo recortado. Vive en public/ y la CSP no le aplica (la piden
+       los crawlers, no la página). npm run check:seo lo comprueba. -->
   <meta property="og:type" content="website" />
   <meta property="og:site_name" content="Nokfi" />
   <meta property="og:title" content="Nokfi — Facturas, impuestos y finanzas para autónomos y pymes" />
   <meta property="og:description" content="Lee tus facturas con IA, calcula el 303 y el 130, emite facturas con VERI*FACTU y controla cobros y plazos fiscales. Para autónomos y pymes. 14 días gratis." />
   <meta property="og:url" content="https://nokfi.app/home" />
-  <meta property="og:image" content="https://nokfi.app/og-image.png" />
-  <meta property="og:image:width" content="1200" />
-  <meta property="og:image:height" content="630" />
-  <meta name="twitter:card" content="summary_large_image" />
+  <meta property="og:image" content="https://nokfi.app/og-image-square.png" />
+  <meta property="og:image:width" content="512" />
+  <meta property="og:image:height" content="512" />
+  <meta name="twitter:card" content="summary" />
   <meta name="twitter:title" content="Nokfi — Facturas, impuestos y finanzas para autónomos y pymes" />
   <meta name="twitter:description" content="Lee tus facturas con IA, calcula el 303 y el 130, emite facturas con VERI*FACTU y controla cobros y plazos fiscales. Para autónomos y pymes. 14 días gratis." />
-  <meta name="twitter:image" content="https://nokfi.app/og-image.png" />
+  <meta name="twitter:image" content="https://nokfi.app/og-image-square.png" />
 
   <!--
     CSP (sesión 4, §2.4): se define SOLO como cabecera HTTP en Nginx

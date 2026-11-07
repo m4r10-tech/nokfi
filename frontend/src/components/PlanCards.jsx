@@ -22,7 +22,8 @@ import Skeleton from './Skeleton';
  *                se deshabilitan TODAS las tarjetas (anti-doble-envío) y solo la
  *                que coincide muestra el spinner.
  *
- * Móvil: tarjetas apiladas con el plan destacado PRIMERO (order-first).
+ * Orden (S15b, U6): de menor a mayor precio también en el móvil (Mini → Pro →
+ * Max); el destacado ya no sube al principio. usePlans ya los da ordenados.
  * Sección 19: solo variables CSS de tema, nunca hex.
  */
 export default function PlanCards({ plans = [], notLoaded = false, failed = false, ctaLabel, onChoose, loadingId = null, selectedId = null }) {
@@ -57,7 +58,7 @@ export default function PlanCards({ plans = [], notLoaded = false, failed = fals
           const features = t(`pricing.features.${plan.id}`);
           return (
             <div key={plan.id}
-              className={`card anim-enter relative p-6 flex flex-col ${plan.highlight ? 'order-first md:order-none' : ''}`}
+              className="card anim-enter relative p-6 flex flex-col"
               style={{
                 '--i': i,
                 borderColor: selected ? 'var(--accent)' : plan.highlight ? 'var(--border-strong)' : 'var(--border)',

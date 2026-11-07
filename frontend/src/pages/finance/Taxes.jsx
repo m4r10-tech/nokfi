@@ -74,6 +74,8 @@ export default function Taxes() {
           {!data.legal_form && (
             <Notice icon={Info}>{t('finance.taxes.noLegalForm')} <Link to="/app/configuracion" className="link">{t('nav.settings')}</Link></Notice>
           )}
+          {/* S15b (U10): sociedad → solo IVA; IS, 202, 111 y 115 aún no se calculan. */}
+          {data.legal_form === 'sociedad' && <Notice tone="warning" icon={Info}>{t('finance.taxes.companyWarning')}</Notice>}
 
           <section className="card p-5 md:p-6 flex flex-col gap-4" style={{ borderColor: 'var(--border-strong)' }}>
             <div className="flex items-start gap-3">
@@ -144,7 +146,7 @@ export default function Taxes() {
                 <Row label={t('finance.taxes.result')} value={eur(s.irpf130.result, lang)} strong />
               </Section>
             ) : (
-              <Section title={t('finance.taxes.irpfTitle')}>
+              <Section title={t('finance.taxes.companyTitle')}>
                 <p className="text-sm" style={{ color: 'var(--text-secondary)' }}>{t('finance.taxes.companyNote')}</p>
               </Section>
             )}

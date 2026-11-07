@@ -31,6 +31,7 @@ const { listLedger } = require('../db/finance');
 const { verifyPassword } = require('../utils/password');
 const { sanitizeFreeText } = require('../utils/sanitize');
 const { stripeApi, isGone } = require('../utils/stripe');
+const { creditBalance } = require('../db/credits');
 
 const keys = express.Router();
 const me = express.Router();
@@ -49,7 +50,7 @@ keys.get('/summary', requireLicense, (req, res) => {
   res.json({
     plan: req.license.plan,
     available: API_PLANS.includes(req.license.plan),
-    quota: { daily: aiQuotaForPlan(req.license.plan), used_today: countAiAnalysesToday(id) },
+    quota: { daily: aiQuotaForPlan(req.license.plan), used_today: countAiAnalysesToday(id), pack: creditBalance(id) },
     ...keyCounts(listApiKeys(id)),
     webhooks_total: getDB().prepare('SELECT COUNT(*) c FROM webhook_endpoints WHERE license_id = ?').get(id).c,
     ...apiSummary(id)

@@ -1099,12 +1099,12 @@ async function main() {
     check('Deuda H: 10 análisis mini (cuota 10) → los 10 fueron 200', () => tenOk);
     check('Deuda H: countAiAnalysesToday(id) == 10 tras los 10 usos', () => countAiAnalysesToday(quotaId) === 10);
 
-    await checkAsync('Deuda H: 11.ª petición (cuota 10) → 429 + mensaje "Has agotado tu cuota diaria"',
+    await checkAsync('Deuda H: 11.ª petición (cuota 10) → 429 + mensaje "Has gastado los 10 créditos de hoy" (S15b: «créditos»)',
       post('/api/ai/analyze', quotaPrompt, quotaToken),
       r => r.status === 429
         && r.data.error === 'license_daily_limit_reached'
         && typeof r.data.message === 'string'
-        && r.data.message.includes('Has agotado tu cuota diaria')
+        && r.data.message.includes('Has gastado los 10 créditos de hoy')
         && r.data.message.includes('10') // menciona la cuota concreta
     );
     check('Deuda H: tras el 429, countAiAnalysesToday sigue == 10 (no se infló)', () => countAiAnalysesToday(quotaId) === 10);
@@ -1556,6 +1556,8 @@ async function main() {
   await require('./session15b-seguridad.tests')({ post, put, get, call, check, checkAsync, getDB });
   // Sesión 15b, lote 5 — IA y diagnóstico (chat en otros idiomas, plazos etiquetados, historial).
   await require('./session15b-ia.tests')({ post, put, get, call, check, checkAsync, getDB });
+  // S15b lote 1 — peticiones: packs de créditos, «créditos», sociedades sin 130.
+  await require('./session15b-peticiones.tests')({ post, put, get, call, check, checkAsync, getDB });
 
   } catch (e) {
     console.error('TEST CRASH:', e.message);

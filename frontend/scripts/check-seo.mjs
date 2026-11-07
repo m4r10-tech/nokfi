@@ -4,8 +4,14 @@
  *     (app, API, avisos por email) dan las mismas fechas.
  *  2. Cada página pública tiene contenido en es y en (título, descripción,
  *     H1, FAQ) y las rutas no se repiten.
+ *  3. S15b (U8): la imagen al compartir es cuadrada (og:image 512x512 que
+ *     existe en public/ con esas medidas, twitter:card=summary) en index.html
+ *     y, si hay build, en todas las páginas prerenderizadas de dist/.
  */
 import { createRequire } from 'node:module';
+import fs from 'node:fs';
+import path from 'node:path';
+import { fileURLToPath } from 'node:url';
 import { deadlinesFor } from '../src/utils/fiscalCalendar.js';
 import { SEO_PAGES } from '../src/seo/routes.js';
 import es from '../src/seo/content/es.js';
@@ -41,5 +47,34 @@ for (const page of SEO_PAGES) {
   }
 }
 
-console.log(problems ? `❌ ${problems} problemas` : `✅ SEO: calendario igual en frontend y backend; ${seen.size} rutas públicas con contenido`);
+// 3. Imagen al compartir cuadrada (U8).
+const ROOT = path.join(path.dirname(fileURLToPath(import.meta.url)), '..');
+const metaOf = (html, attr, name) => (html.match(new RegExp(`<meta ${attr}="${name}" content="([^"]*)"`)) || [])[1];
+function checkShare(file, html) {
+  const img = metaOf(html, 'property', 'og:image');
+  const w = metaOf(html, 'property', 'og:image:width');
+  const h = metaOf(html, 'property', 'og:image:height');
+  if (!img) return fail(`${file}: sin og:image`);
+  if (!w || w !== h) fail(`${file}: og:image no es cuadrada (${w}x${h})`);
+  if (metaOf(html, 'name', 'twitter:card') !== 'summary') fail(`${file}: twitter:card debe ser summary`);
+  if (metaOf(html, 'name', 'twitter:image') !== img) fail(`${file}: twitter:image distinta de og:image`);
+  const local = path.join(ROOT, 'public', new URL(img).pathname);
+  if (!fs.existsSync(local)) return fail(`${file}: ${img} no existe en public/`);
+  const png = fs.readFileSync(local);
+  const pw = png.readUInt32BE(16), ph = png.readUInt32BE(20);
+  if (pw !== ph || String(pw) !== w) fail(`${file}: la imagen mide ${pw}x${ph} y las etiquetas dicen ${w}x${h}`);
+}
+checkShare('index.html', fs.readFileSync(path.join(ROOT, 'index.html'), 'utf8'));
+let shared = 1;
+const walk = (dir) => {
+  if (!fs.existsSync(dir)) return;
+  for (const e of fs.readdirSync(dir, { withFileTypes: true })) {
+    const f = path.join(dir, e.name);
+    if (e.isDirectory()) walk(f);
+    else if (e.name === 'index.html') { checkShare(path.relative(ROOT, f), fs.readFileSync(f, 'utf8')); shared++; }
+  }
+};
+walk(path.join(ROOT, 'dist'));
+
+console.log(problems ? `❌ ${problems} problemas` : `✅ SEO: calendario igual en frontend y backend; ${seen.size} rutas públicas con contenido; imagen al compartir cuadrada en ${shared} páginas`);
 process.exit(problems ? 1 : 0);

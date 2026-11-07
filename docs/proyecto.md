@@ -11,7 +11,8 @@
 
 - **Producto**: diagnóstico y finanzas para autónomos y pymes de España. Libro de
   facturas (lectura con IA de PDF, fotos y facturas electrónicas), impuestos del
-  trimestre (303 y 130) y lo apartado, cobros con reclamación, fugas, previsión,
+  trimestre (303 y 130; en sociedades solo el 303, con aviso de que el Impuesto
+  sobre Sociedades, el 202 y los 111/115 aún no se calculan) y lo apartado, cobros con reclamación, fugas, previsión,
   comparación con el sector, calendario fiscal con avisos, **emisión de facturas
   con VERI*FACTU** (registros encadenados y QR; envío a la AEAT apagado) y
   factura electrónica (UBL 2.5, Facturae 3.2.2, Factur-X, CII), cuestionario y
@@ -52,7 +53,7 @@ Cambiar de plan (subir o bajar) cobra hoy el precio completo del plan nuevo y
 empieza un mes nuevo (S15b).
 Tres tiers:
 
-| Plan | Precio/mes | Análisis IA/día | Trial |
+| Plan | Precio/mes | Créditos IA/día | Trial |
 |------|-----------|-----------------|-------|
 | **mini** | 5 € | 10 | **14 días gratis** (tarjeta obligatoria) |
 | **pro** | 20 € | 50 | — |
@@ -85,6 +86,14 @@ cambio de plan.
   misma cuenta con sus datos.
 - **Un trial por tarjeta**: si la huella de la tarjeta (`card.fingerprint`) ya tuvo
   trial, la prueba se acaba en el alta y se cobra el primer mes.
+- **Paquetes de créditos (S15b, U1)**: 1 crédito = 1 análisis o lectura de facturas
+  con IA (antes «análisis de IA»). Producto de Stripe «Paquetes de créditos» con 3
+  Prices de pago único (`STRIPE_PRICE_PACK_50/220/550`): 50 créditos = 5 €, 220 =
+  20 €, 550 = 50 €. No caducan; solo con un plan activo; se compran en Ajustes ›
+  Plan (Checkout `mode=payment`) y el webhook `checkout.session.completed` los suma
+  una sola vez por sesión (`credit_purchases`, saldo en `licenses.ai_credits`). Se
+  gastan cuando se acaban los créditos del día del plan y el saldo es único para la
+  web y `/api/v1`. Precios y /pricing van de menor a mayor (Mini → Pro → Max).
 - **Anti-drift de precios**: el frontend SIEMPRE pasa por `GET /api/payments/plans`,
   nunca hardcodea. Lo que muestra la web == lo que cobra Stripe.
 - **Trial**: `subscription_data[trial_period_days]=14` (tarjeta obligatoria, no

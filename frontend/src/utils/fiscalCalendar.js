@@ -50,6 +50,17 @@ export function deadlinesForYear(year) {
 export function deadlinesFor(year, legalForm) {
   return deadlinesForYear(year)
     .filter(d => !legalForm || d.applies.includes(legalForm))
-    .map(d => (legalForm === 'sociedad' ? { ...d, models: d.models.filter(m => m !== '130') } : d))
+    .flatMap(d => (legalForm === 'sociedad' ? forCompany(d) : [d]))
     .filter(d => d.models.length);
+}
+
+/** S15b (U10): en una sociedad el trimestral es solo el IVA (303, sin «IRPF»)
+ *  y los 111/115 van aparte, como «Si te aplica» (igual que en el 4T). */
+function forCompany(d) {
+  const models = d.models.filter(m => m !== '130');
+  if (d.kind !== 'quarterly') return [{ ...d, models }];
+  const withholdings = models.filter(m => m === '111' || m === '115');
+  const out = [{ ...d, models: models.filter(m => !withholdings.includes(m)), kind: 'quarterly_vat' }];
+  if (withholdings.length) out.push({ ...d, key: `${d.key}-111-115`, models: withholdings, conditional: true, kind: 'withholdings' });
+  return out;
 }

@@ -41,7 +41,7 @@ Stripe).
 **Suscripción mensual** vía Stripe (sin permanencia; cambiar de plan cobra hoy el
 plan nuevo completo y empieza un mes nuevo; cancelar dura hasta fin de periodo):
 
-| Plan | Precio/mes | Análisis IA/día | Extra |
+| Plan | Precio/mes | Créditos IA/día | Extra |
 |------|-----------|-----------------|-------|
 | **Mini** | 5 € | 10 | **14 días gratis** |
 | **Pro** | 20 € | 50 | API para automatizaciones |
@@ -50,6 +50,10 @@ plan nuevo completo y empieza un mes nuevo; cancelar dura hasta fin de periodo):
 - Stripe: **3 Products** (Mini/Pro/Max), un Price mensual EUR cada uno; cambio de
   plan y cancelación desde Ajustes, Customer Portal para tarjeta y facturas. El catálogo público
   `GET /api/payments/plans` evita que la web y Stripe muestren precios distintos.
+- **Créditos**: 1 crédito = 1 análisis o lectura de facturas con IA. **Paquetes de
+  créditos** (pago único, no caducan, solo con plan activo): 50 créditos = 5 €,
+  220 = 20 €, 550 = 50 €. Se gastan cuando se acaban los del día y el saldo es el
+  mismo en la web y en la API (producto de Stripe «Paquetes de créditos»).
 - **Acceso**: email + clave de licencia (`XXXX-XXXX-XXXX-XXXX`) + contraseña
   (scrypt). Tokens hasheados en reposo.
 

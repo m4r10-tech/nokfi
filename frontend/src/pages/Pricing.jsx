@@ -38,7 +38,7 @@ export default function Pricing() {
   const [email, setEmail] = useState('');
   const [loadingPlan, setLoadingPlan] = useState(null); // plan id en curso, o null
   const [error, setError] = useState(null); // { msg, field? }
-  const { plans, failed, notLoaded } = usePlans(); // catálogo desde /plans (anti-drift)
+  const { plans, failed, notLoaded, packs } = usePlans(); // catálogo desde /plans (anti-drift)
   const checkoutRef = useRef(null);
   const emailRef = useRef(null);
   const [formRef, shake] = useShake();
@@ -165,6 +165,23 @@ export default function Pricing() {
               </p>
               <LegalAccept className="text-center" />
             </form>
+          </section>
+        )}
+
+        {/* S15b (U1): paquetes de créditos (pago único, no caducan). Se compran
+            desde Configuración › Plan con un plan activo; aquí solo se informa. */}
+        {packs.length > 0 && (
+          <section className="w-full max-w-5xl mt-10 card p-5 sm:p-6 flex flex-col gap-3" aria-labelledby="packs-title">
+            <h2 id="packs-title" className="text-lg font-semibold" style={{ color: 'var(--text-primary)' }}>{t('pricing.packsTitle')}</h2>
+            <p className="text-sm" style={{ color: 'var(--text-secondary)' }}>{t('pricing.packsText')}</p>
+            <ul className="grid grid-cols-1 sm:grid-cols-3 gap-2">
+              {packs.map(p => (
+                <li key={p.id} className="rounded-lg px-3 py-2.5 flex items-baseline justify-between gap-2 text-sm" style={{ background: 'var(--surface-2)' }}>
+                  <span style={{ color: 'var(--text-primary)' }}>{t('pricing.packItem', { n: p.credits })}</span>
+                  <span className="font-semibold tabular" style={{ color: 'var(--text-primary)' }}>{Number(p.price_eur).toLocaleString(localeOf(lang), { style: 'currency', currency: 'EUR', minimumFractionDigits: 0 })}</span>
+                </li>
+              ))}
+            </ul>
           </section>
         )}
 

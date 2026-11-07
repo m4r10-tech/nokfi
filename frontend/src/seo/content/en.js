@@ -64,6 +64,7 @@ export default {
       otherYear: 'Spain tax calendar {y}',
       kinds: {
         quarterly: 'Quarterly returns: VAT, income tax, withholdings and rent',
+        quarterly_vat: 'Quarterly VAT return',
         withholdings: 'Withholdings on staff and freelancers (111) and on rent (115)',
         vat_annual: 'Annual VAT summary (390)',
         withholdings_annual: 'Annual withholding summaries (190 and 180)',

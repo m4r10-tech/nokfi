@@ -43,7 +43,7 @@ export default function DevSummary() {
           <div className="grid grid-cols-2 lg:grid-cols-4 gap-2 sm:gap-3">
             <Kpi label={t('dev.callsToday')} value={num(data.calls_today, lang, 0)}
               hint={data.errors_today > 0 ? t('dev.errorsToday', { n: data.errors_today }) : undefined} tone={data.errors_today > 0 ? 'var(--warning)' : undefined} />
-            <Kpi label={t('dev.quota')} value={`${num(data.quota.used_today, lang, 0)} / ${num(data.quota.daily, lang, 0)}`} hint={t('dev.quotaHint')} />
+            <Kpi label={t('dev.quota')} value={`${num(data.quota.used_today, lang, 0)} / ${num(data.quota.daily, lang, 0)}`} hint={data.quota.pack > 0 ? t('dev.quotaPackHint', { n: num(data.quota.pack, lang, 0) }) : t('dev.quotaHint')} />
             <Kpi label={t('dev.keysActive')} value={num(data.keys_active, lang, 0)} />
             <Kpi label={t('dev.lastCall')} value={data.last_call_at ? shortDateTime(data.last_call_at, lang) : '—'} />
           </div>

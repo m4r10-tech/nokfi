@@ -270,6 +270,7 @@ function initDB() {
       require('./schema4').runSession4Schema(db); // sesión 4: IA estructurada, libro, API keys…
       require('./invoicing').runInvoicingSchema(db); // sesión 11: emisión de facturas
       require('./verifactu').runVerifactuSchema(db); // sesión 11 (tanda 4): VERI*FACTU
+      require('./credits').runCreditsSchema(db); // S15b (U1): paquetes de créditos
 
       console.log('✅  Base de datos inicializada en', DB_PATH);
       resolve(db);

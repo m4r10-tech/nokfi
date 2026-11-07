@@ -51,6 +51,7 @@ const { idempotency, idempotencyFor, isAsync, INVOICE_TTL_HOURS } = require('../
 const { runAnalysis, checkInput } = require('../services/ai/analyze');
 const { quotaMessage } = require('../services/ai/quota');
 const { listAnalyses, getAnalysis, renameAnalysis, deleteAnalysis, aiQuotaForPlan, countAiAnalysesToday, audit } = require('../db/database');
+const { creditBalance } = require('../db/credits');
 const { listActionsForAnalysis } = require('../db/actions');
 const openapi = require('../config/openapi');
 const { pdfText } = require('../utils/pdfText');
@@ -90,8 +91,18 @@ async function analyze({ license, body, ip, source = 'api', livemode = true }) {
   return { status: 200, body: absoluteLinks({ id: b.analysis_id, type: b.kind, title: b.title, report: b.report, health: b.health, actions: b.actions }) };
 }
 
+/* S15b (U1/U2): «análisis» pasa a llamarse «créditos». Se mantienen daily_quota y
+ * used_today (integraciones existentes) y se añaden los campos nuevos; el saldo
+ * de paquetes es el mismo que en la web (Q3). */
 function usage(license, livemode = true) {
-  return { plan: license.plan, mode: livemode ? 'live' : 'test', daily_quota: aiQuotaForPlan(license.plan), used_today: countAiAnalysesToday(license.id) };
+  const daily = aiQuotaForPlan(license.plan);
+  const used = countAiAnalysesToday(license.id);
+  const pack = creditBalance(license.id);
+  const leftToday = Math.max(0, daily - used);
+  return {
+    plan: license.plan, mode: livemode ? 'live' : 'test', daily_quota: daily, used_today: used,
+    daily_credits: daily, daily_credits_used: used, daily_credits_left: leftToday, pack_credits: pack, credits_available: leftToday + pack
+  };
 }
 
 /* Los análisis de prueba no se guardan: con una clave de prueba el historial está vacío (S15). */
@@ -229,7 +240,7 @@ async function respond(req, res, { kind, validate, run }) {
   if (pre?.error) return res.status(pre.error.status).json(pre.error.body);
   if (req.livemode && (pre?.files ? needsAi(pre) : true)) {
     const limit = aiQuotaForPlan(req.license.plan);
-    if (countAiAnalysesToday(req.license.id) >= limit) {
+    if (countAiAnalysesToday(req.license.id) >= limit && creditBalance(req.license.id) <= 0) {
       return res.status(429).json({ error: 'license_daily_limit_reached', message: quotaMessage(limit) });
     }
   }

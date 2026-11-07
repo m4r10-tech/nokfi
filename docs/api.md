@@ -230,13 +230,16 @@ cambia: para trabajos largos tiene su modo asíncrono (`?async=true`).
 **Cuota diaria por licencia (atómica):** `reserveAiSlot` reserva un hueco en
 `ai_usage` (PK `license_id+day+slot`) **antes** de llamar a la IA; si el análisis
 falla, `releaseAiSlot` lo libera (un fallo no gasta cuota). Mini 10, Pro 50,
-Max 130 al día; la API v1 comparte la misma cuota.
+Max 130 créditos al día; la API v1 comparte la misma cuota. **S15b (U1):** cuando se
+acaban los del día se gasta 1 crédito de paquetes (`licenses.ai_credits`, UPDATE
+condicionado, nunca baja de 0) y se devuelve si la IA falla; el 429 solo sale sin
+créditos del día ni de paquetes.
 
 | Status | Body | Cuándo |
 |--------|------|--------|
 | 200 | informe (`{ analysis_id, kind, title, report, health, actions, … }`), `{ notes }` (folder_map) o `{ invoices }` | Éxito |
 | 400 | `{ error: "invalid_input", message }` | Tipo o datos no válidos |
-| 429 | `{ error: "license_daily_limit_reached", message }` | Cuota del día agotada |
+| 429 | `{ error: "license_daily_limit_reached", message }` | Sin créditos del día ni de paquetes |
 | 500 | `{ error: "ai_not_configured", message }` | Ningún proveedor configurado |
 | 502 | `{ error: "ai_provider_error" \| "ai_empty_response", message }` | Fallaron todos los proveedores (no gasta cuota) |
 | 503 | `{ error: "ai_quota_exceeded", message }` | Tope global de gasto de IA del día (`utils/aiBudget.js`) |
@@ -322,9 +325,16 @@ Catálogo público de planes — **única fuente de precios del frontend** (anti
     { "id": "mini", "name": "Mini", "price_eur": 5, "quota": 10, "trial": true },
     { "id": "pro",  "name": "Pro",  "price_eur": 20, "quota": 50, "trial": false },
     { "id": "max",  "name": "Max",  "price_eur": 50, "quota": 130, "trial": false }
+  ],
+  "credit_packs": [
+    { "id": "pack50",  "credits": 50,  "price_eur": 5 },
+    { "id": "pack220", "credits": 220, "price_eur": 20 },
+    { "id": "pack550", "credits": 550, "price_eur": 50 }
   ]
 }
 ```
+`quota` = créditos de IA al día del plan (1 crédito = 1 análisis o lectura de
+facturas con IA). `credit_packs` (S15b): paquetes de pago único que no caducan.
 `price_eur` sale de `PLAN_PRICE_{MINI,PRO,MAX}_EUR` (defaults 5/20/50). La `quota`
 (10/50/130) es decisión de producto, no env-driven.
 
@@ -400,6 +410,20 @@ Aviso previo, sin tocar Stripe.
 ### `POST /api/payments/stripe/cancel`  *(auth: Bearer, requireLicense)*
 `cancel_at_period_end=true` en Stripe → `200 { success, cancel_at_period_end: true, current_period_ends_at }`.
 `400 not_stripe_customer` · `500 stripe_not_configured` · `502 stripe_error`.
+
+### `GET /api/payments/credits`  *(auth: Bearer, requireLicense)*  — S15b (U1)
+`200 { balance, can_buy, packs: [{ id, credits, price_eur }], purchases: [{ pack, credits, amount_cents, currency, created_at }] }`.
+`balance` = créditos de paquetes que quedan (no caducan). `can_buy` = tiene un plan activo.
+
+### `POST /api/payments/stripe/credit-checkout`  *(auth: Bearer, requireLicense)*  — S15b (U1)
+**Body:** `{ pack: "pack50" | "pack220" | "pack550", locale? }` → `200 { checkout_url }`
+(Checkout `mode=payment` con el Price `STRIPE_PRICE_PACK_<créditos>` y
+`metadata { kind: "credit_pack", pack, license_id }`). Vuelve a
+`/app/configuracion?s=plan&credits=ok` (o `credits=cancelled`). Los créditos los suma
+el webhook `checkout.session.completed` (o `checkout.session.async_payment_succeeded`)
+una sola vez por sesión, nunca este endpoint.
+`400 invalid_pack` · `403 plan_required` (sin plan activo) · `429 rate_limited` ·
+`500 stripe_not_configured | stripe_price_not_configured` · `502 stripe_error`.
 
 ### `POST /api/payments/stripe/resume-checkout`  *(auth: Bearer = `resume_token` del login)*
 **Body:** `{ plan, locale? }`. Solo para cuentas bloqueadas por impago. Checkout
@@ -595,7 +619,7 @@ hueco; la cuota diaria, hasta las 00:00 UTC).
 | Grupo | Rutas |
 |---|---|
 | Especificación | `GET /openapi.json` (pública) |
-| Cuota | `GET /usage` |
+| Créditos | `GET /usage` → `{ plan, mode, daily_quota, used_today, daily_credits, daily_credits_used, daily_credits_left, pack_credits, credits_available }` (S15b: `daily_quota`/`used_today` se mantienen por compatibilidad e igualan a `daily_credits`/`daily_credits_used`; `pack_credits` es el saldo de paquetes, el mismo que en la web) |
 | Análisis | `POST /analyze`, `GET /analyses`, `GET /analyses/:id`, `PATCH /analyses/:id` (`{ title }`, renombrar), `DELETE /analyses/:id` (borrar con su plan de acción; no devuelve cuota) |
 | Facturas recibidas | `POST /invoices/extract` (PDF, imagen o texto con IA; XML UBL/Facturae/CII y Factur-X sin IA ni cuota) |
 | Emisión | `POST/GET /invoices`, `GET /invoices/:id`, `POST /invoices/:id/rectify`, `/cancel`, `/status`, `GET /invoices/:id/pdf`, `/xml?format=` · `GET/POST /customers` |

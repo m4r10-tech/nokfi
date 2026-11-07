@@ -285,6 +285,9 @@ export const paymentsApi = {
   changePlanPreview: (plan) => request('/payments/stripe/change-plan/preview?plan=' + encodeURIComponent(plan), { auth: true }),
   changePlan: (plan) => request('/payments/stripe/change-plan', { method: 'POST', auth: true, body: { plan } }),
   cancelSubscription: () => request('/payments/stripe/cancel', { method: 'POST', auth: true }),
+  // S15b (U1): paquetes de créditos (pago único, no caducan; solo con plan activo).
+  getCredits: () => request('/payments/credits', { auth: true }),
+  creditCheckout: (pack, locale) => request('/payments/stripe/credit-checkout', { method: 'POST', auth: true, body: { pack, locale } }),
   // Cuenta bloqueada por impago: token propio (no es la sesión de la app).
   resumeCheckout: async (token, plan, locale) => {
     try {

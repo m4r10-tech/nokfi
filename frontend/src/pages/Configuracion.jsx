@@ -43,7 +43,7 @@ export default function Configuracion() {
       </nav>
       <div key={tab} className="anim-enter flex flex-col gap-4 md:gap-5">
         {tab === 'perfil' && <ProfileTab />}
-        {tab === 'plan' && <><SubscriptionSection /><ApiKeysSection /></>}
+        {tab === 'plan' && <><SubscriptionSection /><CreditPacksSection /><ApiKeysSection /></>}
         {tab === 'compartir' && <ShareSection />}
         {tab === 'seguridad' && <><SessionSection /><ChangePasswordSection /><RevealKeySection /></>}
         {tab === 'datos' && <MyDataSection />}
@@ -306,6 +306,70 @@ function SubscriptionSection() {
         </>
       ) : (
         <p className="text-xs mt-1" style={{ color: 'var(--text-muted)' }}>{t('config.legacyNote')}</p>
+      )}
+    </Section>
+  );
+}
+
+/* ── S15b (U1): paquetes de créditos ──
+   Pago único en Stripe Checkout; los créditos los suma el webhook (no esta
+   pantalla) y no caducan. Solo con plan activo (Q1); se gastan cuando se acaban
+   los del día (Q2) y el saldo es el mismo en la web y en la API (Q3). */
+function CreditPacksSection() {
+  const { t, lang } = useLang();
+  const toast = useToast();
+  const [params, setParams] = useSearchParams();
+  const [data, setData] = useState(null);
+  const [busy, setBusy] = useState(null);
+
+  const load = () => paymentsApi.getCredits().then(r => { if (r.ok) setData(r.data); });
+  useEffect(() => {
+    load();
+    const back = params.get('credits');
+    if (!back) return undefined;
+    if (back === 'ok') toast.success(t('config.creditsPaid'));
+    else toast.info(t('config.creditsCancelled'));
+    const next = new URLSearchParams(params); next.delete('credits'); setParams(next, { replace: true });
+    // El webhook puede llegar unos segundos después de volver de Stripe.
+    const timer = back === 'ok' ? setTimeout(load, 4000) : null;
+    return () => timer && clearTimeout(timer);
+  }, []); // eslint-disable-line react-hooks/exhaustive-deps
+
+  useEffect(() => {
+    const onShow = (e) => { if (e.persisted) setBusy(null); };
+    window.addEventListener('pageshow', onShow);
+    return () => window.removeEventListener('pageshow', onShow);
+  }, []);
+
+  if (!data) return null;
+  const eur = (n) => Number(n).toLocaleString(localeOf(lang), { style: 'currency', currency: 'EUR', minimumFractionDigits: Number.isInteger(Number(n)) ? 0 : 2 });
+  const buy = async (pack) => {
+    setBusy(pack);
+    const res = await paymentsApi.creditCheckout(pack, lang);
+    if (res.ok && res.data.checkout_url) { window.location.href = res.data.checkout_url; return; }
+    setBusy(null);
+    toast.error(apiErrorMessage(t, res));
+  };
+
+  return (
+    <Section title={t('config.creditsSection')}>
+      <Row label={t('config.creditsBalance')}>
+        <span className="font-medium tabular" style={{ color: 'var(--text-primary)' }}>{Number(data.balance).toLocaleString(localeOf(lang))}</span>
+      </Row>
+      <p className="text-xs" style={{ color: 'var(--text-muted)' }}>{t('config.creditsHint')}</p>
+      {data.can_buy ? (
+        <div className="grid grid-cols-1 sm:grid-cols-3 gap-2">
+          {data.packs.map(p => (
+            <button key={p.id} onClick={() => buy(p.id)} disabled={busy != null} className="btn btn-secondary w-full"
+              aria-label={`${t('config.creditsBuy')}: ${t('config.creditsItem', { n: p.credits })}, ${eur(p.price_eur)}`}>
+              {busy === p.id && <Loader2 size={15} className="animate-spin" />}
+              <span>{t('config.creditsItem', { n: p.credits })}</span>
+              <span className="tabular" style={{ color: 'var(--text-muted)' }}>· {eur(p.price_eur)}</span>
+            </button>
+          ))}
+        </div>
+      ) : (
+        <p className="text-sm" style={{ color: 'var(--text-secondary)' }}>{t('config.creditsNeedPlan')}</p>
       )}
     </Section>
   );
