@@ -38,7 +38,7 @@ export default function Calculadoras() {
               <p className="hidden md:block text-xs font-medium px-2.5 mb-1" style={{ color: 'var(--text-muted)' }}>{t(`calc.${g}`)}</p>
               {ids.map(id => (
                 <button key={id} onClick={() => setTab(id)} aria-current={tab === id ? 'page' : undefined}
-                  className="whitespace-nowrap text-left rounded-lg px-2.5 h-9 text-sm font-medium"
+                  className="whitespace-nowrap md:whitespace-normal text-left rounded-lg px-2.5 h-10 md:h-auto md:min-h-9 md:py-1.5 md:leading-snug text-sm font-medium"
                   style={{
                     ...(tab === id ? { background: 'var(--accent-soft)', color: 'var(--accent-text)' } : { color: 'var(--text-secondary)' }),
                     transition: 'background-color var(--dur-fast) var(--ease-std), color var(--dur-fast) var(--ease-std)'

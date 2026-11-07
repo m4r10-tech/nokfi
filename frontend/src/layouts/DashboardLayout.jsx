@@ -76,13 +76,13 @@ export default function DashboardLayout() {
       <div className="flex-1 min-w-0 flex flex-col">
         <header className="md:hidden sticky top-0 z-30 flex items-center h-14 px-4"
           style={{ background: 'var(--bg-base)', borderBottom: '1px solid var(--border)', paddingTop: 'env(safe-area-inset-top)', boxSizing: 'content-box' }}>
-          <Link to={space === 'dev' ? '/app/dev' : '/app/home'} aria-label="Nokfi"><Logo size="sm" /></Link>
+          <Link to={space === 'dev' ? '/app/dev' : '/app/home'} aria-label="Nokfi" className="inline-flex items-center min-h-10"><Logo size="sm" /></Link>
         </header>
 
         <main id="contenido" tabIndex={-1} className="app-main w-full max-w-6xl mx-auto">
           {parent && (
             <Link to={parent.to}
-              className="inline-flex items-center gap-1.5 -ml-1 mb-3 md:mb-4 rounded-lg px-1.5 py-1 text-sm font-medium transition-colors hover:text-[var(--text-primary)]"
+              className="inline-flex items-center gap-1.5 -ml-1 mb-3 md:mb-4 rounded-lg px-1.5 py-1 min-h-10 md:min-h-0 text-sm font-medium transition-colors hover:text-[var(--text-primary)]"
               style={{ color: 'var(--text-secondary)' }}>
               <ArrowLeft size={16} /> {t(parent.key)}
             </Link>

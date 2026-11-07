@@ -1,4 +1,4 @@
-import { createContext, useContext, useEffect, useState, useCallback, startTransition } from 'react';
+import { createContext, useContext, useEffect, useState, useCallback, useRef, startTransition } from 'react';
 import { authApi, setSessionToken, setSessionExpiredHandler } from '../middleware/api';
 import { useToast } from './ToastContext';
 import { useLang } from './LangContext';
@@ -11,8 +11,12 @@ const SESSION_STORAGE_KEY = 'nokfi_session_token';
 
 export function AuthProvider({ children }) {
   const [license, setLicense] = useState(null);
-  const [status, setStatus] = useState('checking'); // checking | authenticated | unauthenticated
+  const [status, setStatus] = useState('checking'); // checking | authenticated | unauthenticated | unreachable
   const [authError, setAuthError] = useState(null);
+  // S15b V4: por qué no se pudo comprobar la sesión ('network' | 'rate_limited'), para
+  // enseñar «sin conexión · Reintentar» en vez de un spinner sin fin (ProtectedRoute).
+  const [connError, setConnError] = useState(null);
+  const retryRef = useRef(() => {});
   const toast = useToast();
   const { t } = useLang();
 
@@ -48,6 +52,8 @@ export function AuthProvider({ children }) {
     // una vez a los 2.5s y se vuelve a intentar cuando el navegador recupera
     // conectividad (evento 'online'); el token se conserva mientras tanto
     // (ProtectedRoute muestra el spinner de 'checking').
+    // S15b V4: si el reintento también falla (o el servidor responde 429), pasa a
+    // 'unreachable' y ProtectedRoute ofrece «Reintentar» (antes: spinner infinito).
     let cancelled = false;
     let retried = false;
 
@@ -57,17 +63,23 @@ export function AuthProvider({ children }) {
         if (ok && data.valid) {
           startTransition(() => {
             setLicense(data.license);
+            setConnError(null);
             setStatus('authenticated');
           });
           return;
         }
         if (st === 401 || st === 403) { handleLogout(); return; }
+        if (st === 429) { setConnError('rate_limited'); setStatus('unreachable'); return; }
         if (!retried) {
           retried = true;
           setTimeout(() => { if (!cancelled) attempt(); }, 2500);
+          return;
         }
+        setConnError('network');
+        setStatus('unreachable');
       });
     };
+    retryRef.current = () => { retried = true; setStatus('checking'); attempt(); };
 
     const onOnline = () => { retried = false; attempt(); };
     window.addEventListener('online', onOnline);
@@ -93,13 +105,15 @@ export function AuthProvider({ children }) {
     if (ok && data.valid) setLicense(data.license);
   };
 
+  const retryVerify = useCallback(() => retryRef.current(), []);
+
   const logout = async () => {
     await authApi.logout();
     handleLogout();
   };
 
   return (
-    <AuthContext.Provider value={{ license, status, authError, applySession, logout, setAuthError, refreshLicense }}>
+    <AuthContext.Provider value={{ license, status, authError, connError, retryVerify, applySession, logout, setAuthError, refreshLicense }}>
       {children}
     </AuthContext.Provider>
   );

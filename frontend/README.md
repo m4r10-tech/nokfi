@@ -28,6 +28,7 @@ VITE_API_URL=/api npx vite build && node test/s15b-cifras.e2e.cjs   # Impuestos,
 VITE_API_URL=/api npx vite build && node test/s15b-seguridad.e2e.cjs   # exportar informes sin innerHTML y un solo enlace de gestoría por envío (Playwright)
 node test/s15b-ia.test.mjs       # botones del asistente a partir de «[enlace: clave]» (sin navegador)
 VITE_API_URL=/api npx vite build && node test/s15b-ia.e2e.cjs   # Cuestionario, Reclamar, asistente e Historial con la IA simulada (Playwright)
+VITE_API_URL=/api npx vite build && node test/s15b-visual.e2e.cjs   # móvil/tablet: sin scroll horizontal a 390/360/768/1366, táctiles ≥ 40 px, «sin conexión», plantillas n8n y manifest (Playwright; ~10 min; ONLY=V1,V4… CFGS=m390 LANGS=es para acotar)
 npm i --prefix /tmp/a11y-tools axe-core@4.10.2   # una vez, FUERA del proyecto (no es dependencia)
 VITE_API_URL=/api npm run build && AXE_PATH=/tmp/a11y-tools/node_modules/axe-core/axe.min.js node test/s15b-a11y.e2e.cjs
                                  # accesibilidad (Playwright): axe sin fallos serious/critical en 25 pantallas en claro y

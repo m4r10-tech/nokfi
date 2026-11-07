@@ -1,0 +1,156 @@
+{
+  "name": "Nokfi · Report settimanale di cassa su Telegram",
+  "nodes": [
+    {
+      "parameters": {
+        "rule": {
+          "interval": [
+            {
+              "field": "weeks",
+              "triggerAtDay": [
+                1
+              ],
+              "triggerAtHour": 8
+            }
+          ]
+        }
+      },
+      "id": "44abcfc9-a3bb-5444-8913-7c7693f4ab1c",
+      "name": "Ogni lunedì",
+      "type": "n8n-nodes-base.scheduleTrigger",
+      "typeVersion": 1.2,
+      "position": [
+        0,
+        0
+      ]
+    },
+    {
+      "parameters": {
+        "operation": "read",
+        "documentId": {
+          "__rl": true,
+          "mode": "url",
+          "value": ""
+        },
+        "sheetName": {
+          "__rl": true,
+          "mode": "name",
+          "value": "Caja"
+        },
+        "options": {}
+      },
+      "id": "4f17c128-049d-59e9-8484-db0b4bc5fcbf",
+      "name": "Leggi i movimenti di cassa",
+      "type": "n8n-nodes-base.googleSheets",
+      "typeVersion": 4.5,
+      "position": [
+        220,
+        0
+      ],
+      "notes": "Colonne: fecha, concepto, entrada, salida, saldo (data, voce, entrata, uscita, saldo).",
+      "notesInFlow": true
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "https://nokfi.app/api/v1/analyze",
+        "authentication": "genericCredentialType",
+        "genericAuthType": "httpBearerAuth",
+        "sendBody": true,
+        "specifyBody": "json",
+        "jsonBody": "={{ JSON.stringify({ type: 'excel', lang: 'es', title: 'Caja semanal', data: { module: 'caja', files: [{ name: 'caja', rows: $input.all().map(i => i.json).slice(0, 5000), total_rows: $input.all().length }] } }) }}",
+        "options": {}
+      },
+      "id": "b138230a-d9bb-593a-a5c2-25260a63bffa",
+      "name": "Nokfi · Analizza cassa",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [
+        440,
+        0
+      ],
+      "notes": "Credenziale: Bearer Auth con la tua chiave nk_live_…",
+      "notesInFlow": true,
+      "executeOnce": true
+    },
+    {
+      "parameters": {
+        "jsCode": "// Mensaje corto con el resumen y las prioridades del informe de Nokfi.\nconst r = $json.report || {};\nconst top = (r.priorities || []).slice(0, 3).map(p => `• ${p.title}: ${p.detail}`);\nreturn [{ json: { text: [`Caja de la semana — ${$json.title || 'Nokfi'}`, '', r.summary || '', '', ...(top.length ? ['Prioridades:', ...top] : [])].join('\\n') } }];"
+      },
+      "id": "769aa9b3-5b14-5dfb-9f1c-92e30af96dca",
+      "name": "Prepara messaggio",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        660,
+        0
+      ]
+    },
+    {
+      "parameters": {
+        "chatId": "",
+        "text": "={{ $json.text }}",
+        "additionalFields": {}
+      },
+      "id": "902bf63d-fa99-54d1-b876-43eb3d2c2c7a",
+      "name": "Invia a Telegram",
+      "type": "n8n-nodes-base.telegram",
+      "typeVersion": 1.2,
+      "position": [
+        880,
+        0
+      ],
+      "notes": "Inserisci il chat ID. Per Slack, sostituisci questo nodo con Slack › Send Message.",
+      "notesInFlow": true
+    }
+  ],
+  "connections": {
+    "Ogni lunedì": {
+      "main": [
+        [
+          {
+            "node": "Leggi i movimenti di cassa",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Leggi i movimenti di cassa": {
+      "main": [
+        [
+          {
+            "node": "Nokfi · Analizza cassa",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Nokfi · Analizza cassa": {
+      "main": [
+        [
+          {
+            "node": "Prepara messaggio",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Prepara messaggio": {
+      "main": [
+        [
+          {
+            "node": "Invia a Telegram",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "settings": {
+    "executionOrder": "v1"
+  }
+}

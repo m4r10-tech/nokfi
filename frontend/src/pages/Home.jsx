@@ -75,7 +75,7 @@ export default function Home() {
           style={{ background: 'var(--accent-soft)', color: 'var(--text-primary)', border: '1px solid var(--border)' }}>
           <Gift size={16} className="shrink-0" style={{ color: 'var(--accent-text)' }} />
           <span className="flex-1">{t('home.trialBanner', { n: trialDaysLeft })}</span>
-          <Link to="/app/configuracion?s=plan" className="link text-sm font-medium shrink-0">{t('home.trialManage')}</Link>
+          <Link to="/app/configuracion?s=plan" className="link tap-target text-sm font-medium shrink-0">{t('home.trialManage')}</Link>
         </div>
       )}
 
@@ -112,10 +112,10 @@ function NewsNotice({ t }) {
       <div className="flex-1">
         <p><span className="font-semibold">{t('home.newsTitle')}</span> {t('home.newsText')}</p>
         <p className="mt-1 flex flex-wrap gap-x-3 gap-y-1">
-          <Link to="/app/finanzas/facturas" className="link font-medium">{t('home.newsCta')}</Link>
-          <Link to="/terminos" className="link">{t('home.newsTerms')}</Link>
-          <Link to="/encargo-tratamiento" className="link">{t('home.newsDpa')}</Link>
-          <Link to="/privacidad" className="link">{t('home.newsPrivacy')}</Link>
+          <Link to="/app/finanzas/facturas" className="link tap-target font-medium">{t('home.newsCta')}</Link>
+          <Link to="/terminos" className="link tap-target">{t('home.newsTerms')}</Link>
+          <Link to="/encargo-tratamiento" className="link tap-target">{t('home.newsDpa')}</Link>
+          <Link to="/privacidad" className="link tap-target">{t('home.newsPrivacy')}</Link>
         </p>
       </div>
       <button onClick={close} className="btn btn-ghost btn-sm !px-2 -mr-1 -mt-1" aria-label={t('home.newsClose')} title={t('home.newsClose')}><X size={15} /></button>
@@ -290,7 +290,7 @@ function MoneyCard({ dash, t, lang, company = false, className = '' }) {
               <span className="flex-1 min-w-0">
                 <span className="block text-sm" style={{ color: 'var(--text-secondary)' }}>{r.label}</span>
                 {r.hint && (
-                  <span className="block text-xs mt-0.5" style={{ color: r.warn ? 'var(--warning)' : 'var(--text-muted)' }}>
+                  <span className="block text-xs mt-0.5 break-words" style={{ color: r.warn ? 'var(--warning)' : 'var(--text-muted)' }}>
                     {r.warn && <AlertTriangle size={12} className="inline -mt-0.5 mr-1" />}{r.hint}
                   </span>
                 )}
@@ -338,7 +338,7 @@ function ActionsCard({ actions, t, onChange, className = '' }) {
                 </span>
               </button>
               {toolLabelKey(a.link) && (
-                <Link to={a.link} className="btn btn-ghost btn-sm shrink-0 mt-1.5" title={t('report.goTo', { name: t(toolLabelKey(a.link)) })} aria-label={t('report.goTo', { name: t(toolLabelKey(a.link)) })}>
+                <Link to={a.link} className="btn btn-ghost btn-sm min-w-10 md:min-w-0 shrink-0 mt-1.5" title={t('report.goTo', { name: t(toolLabelKey(a.link)) })} aria-label={t('report.goTo', { name: t(toolLabelKey(a.link)) })}>
                   <span className="hidden sm:inline">{t(toolLabelKey(a.link))}</span> <ArrowRight size={13} />
                 </Link>
               )}
@@ -380,7 +380,7 @@ function RecentCard({ items, t, lang, className = '' }) {
     <section className={`card p-4 md:p-5 ${className}`}>
       <div className="flex items-center justify-between mb-2">
         <h2 className="section-title">{t('home.recent')}</h2>
-        {items.length > 0 && <Link to="/app/historial" className="link text-sm font-medium">{t('home.seeAll')}</Link>}
+        {items.length > 0 && <Link to="/app/historial" className="link tap-target text-sm font-medium">{t('home.seeAll')}</Link>}
       </div>
       {items.length ? (
         <ul className="flex flex-col -mx-2">

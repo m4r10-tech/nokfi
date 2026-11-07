@@ -51,9 +51,25 @@ export function useChat() {
 
 function Launcher({ onClick }) {
   const { t } = useLang();
+  // S15b V8: se aparta mientras se baja por la página (en el móvil tapaba los importes
+  // de la columna derecha) y vuelve al subir o al llegar al final. El CSS solo lo
+  // aplica por debajo de 768 px (index.css, .chat-launcher.is-away).
+  const [away, setAway] = useState(false);
+  useEffect(() => {
+    let last = window.scrollY;
+    const onScroll = () => {
+      const y = window.scrollY;
+      const atEnd = window.innerHeight + y >= document.documentElement.scrollHeight - 8;
+      if (Math.abs(y - last) < 6 && !atEnd) return;
+      setAway(y > last && y > 40 && !atEnd);
+      last = y;
+    };
+    window.addEventListener('scroll', onScroll, { passive: true });
+    return () => window.removeEventListener('scroll', onScroll);
+  }, []);
   return (
     <button onClick={onClick} aria-label={t('chat.open')} title={t('chat.open')}
-      className="chat-launcher fixed z-40 right-4 md:right-6 w-12 h-12 rounded-full grid place-items-center anim-scale"
+      className={`chat-launcher ${away ? 'is-away' : ''} fixed z-40 right-4 md:right-6 w-12 h-12 rounded-full grid place-items-center anim-scale`}
       style={{ background: 'var(--accent)', color: 'var(--on-accent)', boxShadow: 'var(--shadow-lg)' }}>
       <MessageCircle size={21} />
     </button>

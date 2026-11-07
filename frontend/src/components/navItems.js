@@ -26,7 +26,7 @@ export const NAV_ITEMS = [
  * Sesión 9: Webhooks, Playground, Registro de llamadas y Clientes.
  */
 export const DEV_NAV_ITEMS = [
-  { to: '/app/dev', end: true, icon: Gauge, key: 'nav.devSummary', mobile: 'bar' },
+  { to: '/app/dev', end: true, icon: Gauge, key: 'nav.devSummary', shortKey: 'nav.devSummaryShort', mobile: 'bar' },
   { to: '/app/dev/claves', icon: KeyRound, key: 'nav.devKeys', mobile: 'bar' },
   { to: '/app/dev/webhooks', icon: Webhook, key: 'nav.devWebhooks', mobile: 'bar' },
   { to: '/app/dev/playground', icon: Play, key: 'nav.devPlayground', mobile: 'bar' },

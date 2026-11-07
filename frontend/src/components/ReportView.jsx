@@ -115,11 +115,11 @@ function StructuredReport({ report, actions, health, onActionsChange }) {
         <Block title={t('report.glossary')} icon={BookOpen}>
           <div className="flex flex-col -my-1">
             {report.glossary.map((g, i) => (
-              <details key={i} className="group py-2" style={{ borderTop: i ? '1px solid var(--border)' : 'none' }}>
-                <summary className="flex items-center justify-between gap-3 cursor-pointer text-sm font-medium select-none" style={{ color: 'var(--text-primary)' }}>
+              <details key={i} className="group py-0.5" style={{ borderTop: i ? '1px solid var(--border)' : 'none' }}>
+                <summary className="flex items-center justify-between gap-3 min-h-10 cursor-pointer text-sm font-medium select-none" style={{ color: 'var(--text-primary)' }}>
                   {g.term}<ChevronDown size={16} className="details-chevron shrink-0" style={{ color: 'var(--text-muted)' }} />
                 </summary>
-                <p className="text-sm mt-1.5 leading-relaxed" style={{ color: 'var(--text-secondary)' }}>{g.definition}</p>
+                <p className="text-sm mt-0.5 pb-2 leading-relaxed" style={{ color: 'var(--text-secondary)' }}>{g.definition}</p>
               </details>
             ))}
           </div>

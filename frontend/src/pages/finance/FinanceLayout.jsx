@@ -31,7 +31,7 @@ export default function FinanceLayout() {
         <div className="inline-flex gap-1 rounded-xl p-1" style={{ background: 'var(--surface-1)', border: '1px solid var(--border)' }}>
           {FINANCE_TABS.map(({ to, icon: Icon, key }) => (
             <NavLink key={to} to={`/app/finanzas/${to}`}
-              className={({ isActive }) => `inline-flex items-center gap-1.5 rounded-lg px-3 h-9 text-sm font-medium whitespace-nowrap ${isActive ? 'tab-active' : ''}`}
+              className={({ isActive }) => `inline-flex items-center gap-1.5 rounded-lg px-3 h-10 md:h-9 text-sm font-medium whitespace-nowrap ${isActive ? 'tab-active' : ''}`}
               style={({ isActive }) => (isActive
                 ? { background: 'var(--surface-2)', color: 'var(--text-primary)', boxShadow: '0 0 0 1px var(--border-strong)' }
                 : { color: 'var(--text-secondary)' })}>

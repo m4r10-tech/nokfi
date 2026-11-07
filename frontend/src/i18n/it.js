@@ -188,6 +188,7 @@ export default {
     spaceBusiness: 'Azienda',
     spaceDev: 'Sviluppatori',
     devSummary: 'Panoramica',
+    devSummaryShort: 'Panoramica',
     devKeys: 'Chiavi',
     devDocs: 'Documentazione',
     devTemplates: 'Modelli',
@@ -312,6 +313,7 @@ export default {
   onboarding: {
     companyPlaceholder: 'Il nome della tua attività', sectorSelect: 'Scegli un settore',
     sectors: { taller: 'Officina meccanica', automocion: 'Automotive (vendita di veicoli)', transporte: 'Trasporti', industria: 'Industria', mayorista: 'Commercio all\'ingrosso', alojamiento: 'Alloggio', inmobiliaria: 'Immobiliare', estetica: 'Parrucchiere ed estetica', deporte: 'Sport e tempo libero', asesoria: 'Consulenza fiscale e contabile', arquitectura: 'Architettura e ingegneria', marketing: 'Marketing e pubblicità', limpieza: 'Pulizie', agricultura: 'Agricoltura', comercio: 'Commercio al dettaglio', hosteleria: 'Ristorazione e ospitalità', salud: 'Salute', legal: 'Legale', construccion: 'Edilizia', tecnologia: 'Tecnologia', consultoria: 'Consulenza', diseno: 'Design', educacion: 'Istruzione', otro: 'Altro' },
+    sectorAliases: { taller: 'officina meccanico auto gomme carrozzeria verniciatura', automocion: 'concessionaria auto moto usato', transporte: 'camion corriere consegne traslochi logistica taxi', industria: 'fabbrica produzione metallo falegnameria', comercio: 'negozio dettaglio boutique panetteria fruttivendolo', mayorista: 'distribuzione magazzino ingrosso', hosteleria: 'bar ristorante caffè pizzeria', alojamiento: 'hotel ostello appartamenti turistici agriturismo b&b', construccion: 'cantiere ristrutturazioni muratore idraulico elettricista', inmobiliaria: 'appartamenti affitti agenzia immobiliare', salud: 'clinica medico dentista fisioterapia psicologia', estetica: 'parrucchiere barbiere unghie spa estetista', deporte: 'palestra fitness scuola di ballo', educacion: 'scuola formazione corsi ripetizioni', legal: 'avvocato studio legale', asesoria: 'commercialista contabilità consulente fiscale', consultoria: 'consulente consulenza', arquitectura: 'architetto ingegnere studio', tecnologia: 'software informatica programmazione web', marketing: 'agenzia social media pubblicità', diseno: 'grafico fotografia', limpieza: 'pulizie manutenzione', agricultura: 'fattoria agricoltore allevamento campo' },
     sizes: { solo: 'Da solo (autonomo)', s2: '2–5 persone', s6: '6–20 persone', s20: 'Più di 20 persone' },
     expenses: { alquiler: 'Affitto', personal: 'Personale', proveedores: 'Fornitori', marketing: 'Marketing', suministros: 'Utenze', tecnologia: 'Tecnologia', transporte: 'Trasporti', otro: 'Altro' },
     welcome: 'Benvenuto in Nokfi', subtitle: 'Raccontaci un po’ della tua attività per personalizzare le analisi',

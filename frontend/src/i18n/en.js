@@ -188,6 +188,7 @@ export default {
     spaceBusiness: 'Business',
     spaceDev: 'Developers',
     devSummary: 'Overview',
+    devSummaryShort: 'Overview',
     devKeys: 'Keys',
     devDocs: 'Documentation',
     devTemplates: 'Templates',

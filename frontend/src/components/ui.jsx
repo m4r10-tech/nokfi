@@ -53,7 +53,7 @@ export function Segmented({ value, onChange, options, size = 'md', label }) {
     <div role="radiogroup" aria-label={label} className="inline-flex flex-wrap gap-1 rounded-lg p-0.5" style={{ background: 'var(--surface-2)', border: '1px solid var(--border)' }}>
       {options.map(({ value: v, label: l, icon: Icon }) => (
         <button key={v} type="button" role="radio" aria-checked={value === v} onClick={() => onChange(v)}
-          className={`inline-flex items-center gap-1.5 rounded-md font-medium ${size === 'sm' ? 'px-2.5 h-7 text-xs' : 'px-3 h-8 text-sm'}`}
+          className={`inline-flex items-center gap-1.5 rounded-md font-medium justify-center min-w-10 md:min-w-0 ${size === 'sm' ? 'px-2.5 h-10 md:h-7 text-xs' : 'px-3 h-10 md:h-8 text-sm'}`}
           style={{
             ...(value === v
               ? { background: 'var(--surface-1)', color: 'var(--text-primary)', boxShadow: '0 0 0 1px var(--border-strong)' }

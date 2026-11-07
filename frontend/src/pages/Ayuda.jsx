@@ -73,7 +73,7 @@ export default function Ayuda() {
                 </summary>
                 <div className="pb-3 -mt-1 flex flex-col gap-2">
                   <p className="text-sm" style={{ color: 'var(--text-secondary)' }}>{item.a}</p>
-                  {FAQ_LINKS[i] && <Link to={FAQ_LINKS[i]} className="link text-sm inline-flex items-center gap-1 self-start">{item.cta} <ArrowRight size={13} /></Link>}
+                  {FAQ_LINKS[i] && <Link to={FAQ_LINKS[i]} className="link text-sm inline-flex items-center gap-1 self-start min-h-10 md:min-h-0">{item.cta} <ArrowRight size={13} /></Link>}
                 </div>
               </details>
             ))}

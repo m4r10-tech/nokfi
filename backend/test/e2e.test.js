@@ -1572,6 +1572,8 @@ async function main() {
   await require('./session15b-ia.tests')({ post, put, get, call, check, checkAsync, getDB });
   // S15b lote 1 — peticiones: packs de créditos, «créditos», sociedades sin 130.
   await require('./session15b-peticiones.tests')({ post, put, get, call, check, checkAsync, getDB });
+  // S15b lote 6 — visual y móvil: /api/auth/verify fuera del limitador general.
+  await require('./session15b-visual.tests')({ post, check });
 
   } catch (e) {
     console.error('TEST CRASH:', e.message);

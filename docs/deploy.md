@@ -115,7 +115,7 @@ Rule).
 la conexión entrante proviene de un rango CF → **anti-spoof**: un atacante que
 conecte directo al VPS con su IP real no pasa el rewrite y `req.ip` es su IP
 verdadera. Con `trust proxy:1` (`server.js:39`) el único proxy que Express ve es
-Nginx → `req.ip` correcto, los 5 rate-limiters auditan por visitante real. Fuente
+Nginx → `req.ip` correcto, todos los rate-limiters auditan por visitante real. Fuente
 de rangos: `https://www.cloudflare.com/ips/` (revisar en cada cambio).
 
 ### Cert LE

@@ -199,7 +199,9 @@ const generalLimiter = rateLimit({
   max: isProduction ? 200 : 2000,
   // Consultas de respuestas aplazadas (services/deferred.js): baratas, con sesión,
   // y un análisis lento hace decenas mientras espera.
-  skip: (req) => req.path.startsWith('/pending/'),
+  // S15b V4: /auth/verify y /auth/logout van aparte (sessionLimiter): con 200/15 min
+  // compartidos, un 429 en verify dejaba la app en un spinner sin fin.
+  skip: (req) => req.path.startsWith('/pending/') || req.path === '/auth/verify' || req.path === '/auth/logout',
   standardHeaders: true,
   legacyHeaders: false,
   message: { error: 'rate_limited', message: 'Demasiadas peticiones. Inténtalo en unos minutos.' }
@@ -217,6 +219,16 @@ const authLimiter = rateLimit({
   // aplicando a login, activación, recuperación y resets (lo que se ataca).
   skip: (req) => req.path === '/verify' || req.path === '/logout',
   message: { error: 'rate_limited', message: 'Demasiados intentos. Espera 15 minutos.' }
+});
+
+// S15b V4: límite propio para comprobar la sesión (una llamada por carga de página):
+// holgado para una NAT compartida, pero sigue frenando un bucle o un abuso.
+const sessionLimiter = rateLimit({
+  windowMs: 15 * 60 * 1000,
+  max: isProduction ? 600 : 5000,
+  standardHeaders: true,
+  legacyHeaders: false,
+  message: { error: 'rate_limited', message: 'Demasiadas peticiones. Inténtalo en unos minutos.' }
 });
 
 // Sesión 4: 40/min en producción (una carpeta grande o un lote de facturas son
@@ -252,6 +264,7 @@ const adminLimiter = rateLimit({
 });
 
 app.use('/api/auth/', authLimiter);
+app.use(['/api/auth/verify', '/api/auth/logout'], sessionLimiter);
 app.use('/api/proxy/', aiLimiter);
 app.use('/api/ai/', aiLimiter);
 app.use('/api/webhooks/', webhookLimiter);

@@ -163,25 +163,27 @@ export default function InvoiceEditor() {
       <Section title={t('invoices.lines')}>
         <div className="flex flex-col gap-3">
           {f.lines.map((l, i) => (
-            <div key={i} className="grid grid-cols-2 sm:grid-cols-[1fr_80px_110px_70px_90px_96px_36px] gap-2 items-end pb-3" style={{ borderBottom: '1px solid var(--border)' }}>
-              <Field label={i === 0 ? t('invoices.description') : ''} htmlFor={`ie-d${i}`} className="col-span-2 sm:col-span-1">
+            // S15b V1/V3: fila de tabla solo cuando cabe (xl, también con la barra lateral);
+            // en móvil y tablet cada concepto lleva sus etiquetas.
+            <div key={i} className="grid grid-cols-2 sm:grid-cols-4 xl:grid-cols-[1fr_80px_110px_70px_90px_96px_36px] gap-2 items-end pb-3" style={{ borderBottom: '1px solid var(--border)' }}>
+              <Field label={t('invoices.description')} htmlFor={`ie-d${i}`} className={`col-span-2 sm:col-span-4 xl:col-span-1 ${i ? 'xl:[&>label]:hidden' : ''}`}>
                 <input id={`ie-d${i}`} value={l.description} onChange={(e) => setLine(i, 'description', e.target.value)} maxLength={500} className="input" required aria-label={t('invoices.description')} />
               </Field>
-              <Field label={i === 0 ? t('invoices.qty') : ''} htmlFor={`ie-q${i}`}>
+              <Field label={t('invoices.qty')} className={i ? 'xl:[&>label]:hidden' : ''} htmlFor={`ie-q${i}`}>
                 <input id={`ie-q${i}`} type="number" step="any" value={l.quantity} onChange={(e) => setLine(i, 'quantity', e.target.value)} className="input" inputMode="decimal" aria-label={t('invoices.qty')} />
               </Field>
-              <Field label={i === 0 ? t('invoices.price') : ''} htmlFor={`ie-p${i}`}>
+              <Field label={t('invoices.price')} className={i ? 'xl:[&>label]:hidden' : ''} htmlFor={`ie-p${i}`}>
                 <input id={`ie-p${i}`} type="number" step="any" value={l.unit_price} onChange={(e) => setLine(i, 'unit_price', e.target.value)} className="input" inputMode="decimal" required aria-label={t('invoices.price')} />
               </Field>
-              <Field label={i === 0 ? t('invoices.discount') : ''} htmlFor={`ie-ds${i}`}>
+              <Field label={t('invoices.discount')} className={i ? 'xl:[&>label]:hidden' : ''} htmlFor={`ie-ds${i}`}>
                 <input id={`ie-ds${i}`} type="number" min="0" max="100" step="any" value={l.discount_pct} onChange={(e) => setLine(i, 'discount_pct', e.target.value)} className="input" inputMode="decimal" aria-label={t('invoices.discount')} />
               </Field>
-              <Field label={i === 0 ? t('finance.vatRate') : ''} htmlFor={`ie-v${i}`}>
+              <Field label={t('finance.vatRate')} className={i ? 'xl:[&>label]:hidden' : ''} htmlFor={`ie-v${i}`}>
                 <select id={`ie-v${i}`} value={l.vat_rate} onChange={(e) => setLine(i, 'vat_rate', Number(e.target.value))} className="input" aria-label={t('finance.vatRate')}>
                   {VAT_RATES.map(v => <option key={v} value={v}>{v} %</option>)}
                 </select>
               </Field>
-              <p className="text-sm font-medium tabular text-right sm:pb-2.5" style={{ color: 'var(--text-primary)' }}>{eur(lineAmount(l), lang)}</p>
+              <p className="text-sm font-medium tabular text-right sm:col-span-3 xl:col-span-1 sm:pb-2.5" style={{ color: 'var(--text-primary)' }}>{eur(lineAmount(l), lang)}</p>
               <button type="button" onClick={() => setF(prev => ({ ...prev, lines: prev.lines.filter((_, j) => j !== i) }))} disabled={f.lines.length === 1}
                 className="btn btn-ghost btn-sm !px-2 justify-self-end" aria-label={t('invoices.removeLine')}><Trash2 size={14} /></button>
             </div>
