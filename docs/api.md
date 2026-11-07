@@ -81,6 +81,7 @@ Comprobar token al cargar la app. **Headers:** `Authorization: Bearer`.
 | 200 | `{ valid: true, license }` |
 | 401 | `{ valid: false, error: "no_token" \| "session_invalid" }` |
 | 403 | `{ valid: false, error: "license_inactive" }` |
+| 429 | `{ error: "rate_limited" }` (límite propio de `verify` + `logout`: 600 cada 15 min por IP; no cuentan para el general de `/api`) |
 
 > **Única ruta que devuelve `valid`** en vez de `success`. No homogeneizar sin
 > tocar el backend.
