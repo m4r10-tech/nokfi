@@ -31,6 +31,11 @@
  *   GET/POST /api/v1/customers
  *   Claves nk_test_: facturas de prueba (TEST-…) que no entran al libro ni van a la AEAT.
  *
+ * S15 (lote 8): modo prueba separado de verdad, como en Stripe. Una clave
+ * nk_test_ solo ve datos de prueba: ni el historial de análisis, ni la libreta
+ * de clientes, ni el libro (impuestos desde el libro = libro vacío), ni los
+ * trabajos o webhooks reales; y una clave real no ve los de prueba.
+ *
  * Nunca acepta prompts libres: los tipos son los de la web y el backend arma
  * el prompt (F2).
  */
@@ -40,7 +45,7 @@
 const express = require('express');
 const router = express.Router();
 const { requireApiKey } = require('../middleware/requireApiKey');
-const { idempotency, isAsync } = require('../middleware/idempotency');
+const { idempotency, idempotencyFor, isAsync, INVOICE_TTL_HOURS } = require('../middleware/idempotency');
 const { runAnalysis, checkInput } = require('../services/ai/analyze');
 const { quotaMessage } = require('../services/ai/quota');
 const { listAnalyses, getAnalysis, aiQuotaForPlan, countAiAnalysesToday, audit } = require('../db/database');
@@ -86,12 +91,15 @@ function usage(license, livemode = true) {
   return { plan: license.plan, mode: livemode ? 'live' : 'test', daily_quota: aiQuotaForPlan(license.plan), used_today: countAiAnalysesToday(license.id) };
 }
 
-function listApiAnalyses(license, limit) {
+/* Los análisis de prueba no se guardan: con una clave de prueba el historial está vacío (S15). */
+function listApiAnalyses(license, limit, livemode = true) {
+  if (!livemode) return { analyses: [] };
   const n = Math.min(Math.max(Number(limit) || 50, 1), 100);
   return { analyses: listAnalyses(license.id, n).map(a => ({ id: a.id, type: a.kind, title: a.title, format: a.format, source: a.source || 'web', created_at: a.created_at })) };
 }
 
-function getApiAnalysis(license, rawId) {
+function getApiAnalysis(license, rawId, livemode = true) {
+  if (!livemode) return null;
   const id = Number(rawId);
   const a = Number.isInteger(id) ? getAnalysis(license.id, id) : null;
   if (!a) return null;
@@ -103,10 +111,10 @@ function getApiAnalysis(license, rawId) {
   });
 }
 
-router.get('/analyses', requireApiKey, (req, res) => res.json(listApiAnalyses(req.license, req.query.limit)));
+router.get('/analyses', requireApiKey, (req, res) => res.json(listApiAnalyses(req.license, req.query.limit, req.livemode)));
 
 router.get('/analyses/:id', requireApiKey, (req, res) => {
-  const a = getApiAnalysis(req.license, req.params.id);
+  const a = getApiAnalysis(req.license, req.params.id, req.livemode);
   if (!a) return res.status(404).json({ error: 'not_found' });
   res.json(a);
 });
@@ -205,6 +213,8 @@ async function respond(req, res, { kind, validate, run }) {
     }
   }
   const job = jobs.createJob({ license: req.license, keyId: req.apiKey.id, kind, livemode: req.livemode, run: () => run(pre) });
+  // RFC 7240: si se pidió con Prefer, se confirma que se ha respetado (S15).
+  if (/respond-async/i.test(req.get('Prefer') || '')) res.set('Preference-Applied', 'respond-async');
   res.status(202).set('Location', `/api/v1/jobs/${job.id}`).json(job);
 }
 
@@ -226,27 +236,31 @@ router.post('/invoices/extract', requireApiKey, idempotency, (req, res) => respo
 }));
 
 /* ── Sesión 9: trabajos ── */
-router.get('/jobs', requireApiKey, (req, res) => res.json({ jobs: jobs.listJobs(req.license.id, req.query.limit) }));
+router.get('/jobs', requireApiKey, (req, res) => res.json({ jobs: jobs.listJobs(req.license.id, req.query.limit, req.livemode) }));
 
 router.get('/jobs/:id', requireApiKey, (req, res) => {
-  const job = jobs.getJob(req.license.id, req.params.id);
+  const job = jobs.getJob(req.license.id, req.params.id, req.livemode);
   if (!job) return res.status(404).json({ error: 'not_found', message: 'No existe un trabajo con ese id.' });
   res.json(job);
 });
 
-/* ── Sesión 9: webhooks (compartido con el panel, routes/dev.js) ── */
-function createWebhook(license, body, ip) {
+/* ── Sesión 9: webhooks (compartido con el panel, routes/dev.js) ──
+ * S15: cada webhook tiene modo (`livemode`): el que crea una clave de prueba
+ * solo recibe eventos de prueba, y una clave solo ve y toca los de su modo.
+ * Desde el panel (livemode undefined en update/delete) se gestionan todos. */
+function createWebhook(license, body, ip, livemode = true) {
   const u = webhooks.validateUrl(body?.url);
   if (u.error) return { status: 400, body: u };
   const events = W.normalizeEvents(body?.events);
   if (!events) return { status: 400, body: { error: 'invalid_events', message: `events debe ser "*" o una lista de: ${W.EVENT_TYPES.join(', ')}.` } };
-  const out = W.createEndpoint(license.id, { url: u.url, events, description: body?.description });
+  const out = W.createEndpoint(license.id, { url: u.url, events, description: body?.description, livemode });
   if (out.error) return { status: 400, body: { error: out.error, message: `Máximo ${W.MAX_ENDPOINTS} webhooks por cuenta.` } };
-  audit('WEBHOOK_CREATED', { license_id: license.id, ip, detail: `id=${out.endpoint.id}` });
+  audit('WEBHOOK_CREATED', { license_id: license.id, ip, detail: `id=${out.endpoint.id}${livemode ? '' : ' test'}` });
   return { status: 201, body: out.endpoint };
 }
 
-function updateWebhook(license, id, body) {
+function updateWebhook(license, id, body, livemode) {
+  if (!W.getEndpointRow(license.id, id, livemode)) return { status: 404, body: { error: 'not_found' } };
   const patch = {};
   if (body?.url !== undefined) {
     const u = webhooks.validateUrl(body.url);
@@ -263,8 +277,8 @@ function updateWebhook(license, id, body) {
   return ep ? { status: 200, body: ep } : { status: 404, body: { error: 'not_found' } };
 }
 
-function deleteWebhook(license, id, ip) {
-  if (!W.deleteEndpoint(license.id, id)) return { status: 404, body: { error: 'not_found' } };
+function deleteWebhook(license, id, ip, livemode) {
+  if (!W.getEndpointRow(license.id, id, livemode) || !W.deleteEndpoint(license.id, id)) return { status: 404, body: { error: 'not_found' } };
   audit('WEBHOOK_DELETED', { license_id: license.id, ip, detail: `id=${id}` });
   return { status: 200, body: { deleted: true, id } };
 }
@@ -272,16 +286,16 @@ function deleteWebhook(license, id, ip) {
 const idParam = (req) => { const n = Number(req.params.id); return Number.isInteger(n) ? n : 0; };
 const send = (res, out) => res.status(out.status).json(out.body);
 
-router.get('/webhooks', requireApiKey, (req, res) => res.json({ webhooks: W.listEndpoints(req.license.id), event_types: W.EVENT_TYPES }));
-router.post('/webhooks', requireApiKey, idempotency, (req, res) => send(res, createWebhook(req.license, req.body, req.ip)));
+router.get('/webhooks', requireApiKey, (req, res) => res.json({ webhooks: W.listEndpoints(req.license.id, { livemode: req.livemode }), event_types: W.EVENT_TYPES }));
+router.post('/webhooks', requireApiKey, idempotency, (req, res) => send(res, createWebhook(req.license, req.body, req.ip, req.livemode)));
 router.get('/webhooks/:id', requireApiKey, (req, res) => {
-  const ep = W.getEndpoint(req.license.id, idParam(req));
+  const ep = W.getEndpoint(req.license.id, idParam(req), { livemode: req.livemode });
   return ep ? res.json(ep) : res.status(404).json({ error: 'not_found' });
 });
-router.patch('/webhooks/:id', requireApiKey, (req, res) => send(res, updateWebhook(req.license, idParam(req), req.body)));
-router.delete('/webhooks/:id', requireApiKey, (req, res) => send(res, deleteWebhook(req.license, idParam(req), req.ip)));
+router.patch('/webhooks/:id', requireApiKey, (req, res) => send(res, updateWebhook(req.license, idParam(req), req.body, req.livemode)));
+router.delete('/webhooks/:id', requireApiKey, (req, res) => send(res, deleteWebhook(req.license, idParam(req), req.ip, req.livemode)));
 router.post('/webhooks/:id/test', requireApiKey, async (req, res) => {
-  const r = await webhooks.sendTest(req.license.id, idParam(req));
+  const r = await webhooks.sendTest(req.license.id, idParam(req), req.livemode);
   return r ? res.json(r) : res.status(404).json({ error: 'not_found' });
 });
 
@@ -300,16 +314,36 @@ function requireIdempotencyKey(req, res, next) {
 const ctx = (req) => ({ license: req.license, livemode: req.livemode, ip: req.ip });
 const body = (req) => (req.body && typeof req.body === 'object' && !Array.isArray(req.body) ? req.body : {});
 
+/** S15: la libreta de clientes es real; con una clave de prueba no se puede usar (customer_id). */
+const testCustomerId = (b, livemode) => (!livemode && b && b.customer_id !== undefined && b.customer_id !== null && b.customer_id !== ''
+  ? { status: 404, body: { error: 'customer_not_found', message: 'Con una clave de prueba no se usa la libreta de clientes real: envía los datos del cliente en "customer".' } }
+  : null);
+
 function issueInvoice({ license, body: b, livemode, ip, source = 'api' }) {
   const { rectifies_id: _r, ...rest } = b || {};
-  return S.issue({ license, body: rest, source, livemode, ip });
+  return testCustomerId(rest, livemode) || S.issue({ license, body: rest, source, livemode, ip });
 }
 function rectifyInvoice({ license, id, body: b, livemode, ip, source = 'api' }) {
-  return S.issue({ license, body: { ...(b || {}), rectifies_id: id }, source, livemode, ip });
+  return testCustomerId(b, livemode) || S.issue({ license, body: { ...(b || {}), rectifies_id: id }, source, livemode, ip });
 }
 
-function listCustomers(license, q) {
-  return { status: 200, body: { customers: DI.listCustomers(license.id, q || '') } };
+/**
+ * Estado de una factura. S15: las facturas de prueba no tienen asiento en el
+ * libro, así que «paid/unpaid» no se puede aplicar: error propio y claro en
+ * vez del 409 status_conflict («primero revierte el estado anterior»).
+ */
+function setInvoiceStatus({ license, id, body: b = {}, livemode, ip }) {
+  if (!livemode && (b.status === 'paid' || b.status === 'unpaid')) {
+    const found = S.get({ license, id, livemode });
+    if (found.status !== 200) return found;
+    return { status: 409, body: { error: 'test_invoice_not_in_ledger', message: 'Las facturas de prueba (TEST-) no entran en el libro, así que no se pueden marcar como cobradas ni pendientes. «rejected» y «accepted» sí funcionan en modo prueba.' } };
+  }
+  return S.setStatus({ license, id, body: b, livemode, ip });
+}
+
+function listCustomers(license, q, livemode = true) {
+  // Con una clave de prueba no se ve la libreta real (nombres, NIF, direcciones).
+  return { status: 200, body: { customers: livemode ? DI.listCustomers(license.id, q || '') : [] } };
 }
 function createCustomer(license, b, livemode) {
   // Con una clave de prueba no se escribe en la libreta real: se valida y se devuelve.
@@ -324,15 +358,17 @@ async function sendFile(res, out) {
   res.send(out.file.body);
 }
 
-router.post('/invoices', requireApiKey, requireIdempotencyKey, idempotency, (req, res) => send(res, issueInvoice({ ...ctx(req), body: body(req) })));
+// S15 (Q6): la Idempotency-Key de una emisión dura 30 días, no 24 h.
+const invoiceIdempotency = idempotencyFor({ hours: INVOICE_TTL_HOURS });
+router.post('/invoices', requireApiKey, requireIdempotencyKey, invoiceIdempotency, (req, res) => send(res, issueInvoice({ ...ctx(req), body: body(req) })));
 router.get('/invoices', requireApiKey, (req, res) => send(res, S.list({ license: req.license, query: req.query, livemode: req.livemode })));
 router.get('/invoices/:id', requireApiKey, (req, res) => send(res, S.get({ license: req.license, id: idParam(req), livemode: req.livemode })));
-router.post('/invoices/:id/rectify', requireApiKey, requireIdempotencyKey, idempotency, (req, res) => send(res, rectifyInvoice({ ...ctx(req), id: idParam(req), body: body(req) })));
+router.post('/invoices/:id/rectify', requireApiKey, requireIdempotencyKey, invoiceIdempotency, (req, res) => send(res, rectifyInvoice({ ...ctx(req), id: idParam(req), body: body(req) })));
 router.post('/invoices/:id/cancel', requireApiKey, idempotency, (req, res) => send(res, S.cancel({ ...ctx(req), id: idParam(req), reason: body(req).reason })));
-router.post('/invoices/:id/status', requireApiKey, idempotency, (req, res) => send(res, S.setStatus({ ...ctx(req), id: idParam(req), body: body(req) })));
+router.post('/invoices/:id/status', requireApiKey, idempotency, (req, res) => send(res, setInvoiceStatus({ ...ctx(req), id: idParam(req), body: body(req) })));
 router.get('/invoices/:id/pdf', requireApiKey, async (req, res) => sendFile(res, await S.pdf({ license: req.license, id: idParam(req), livemode: req.livemode })));
 router.get('/invoices/:id/xml', requireApiKey, async (req, res) => sendFile(res, await S.einvoice({ license: req.license, id: idParam(req), format: req.query.format, livemode: req.livemode })));
-router.get('/customers', requireApiKey, (req, res) => send(res, listCustomers(req.license, req.query.q)));
+router.get('/customers', requireApiKey, (req, res) => send(res, listCustomers(req.license, req.query.q, req.livemode)));
 router.post('/customers', requireApiKey, idempotency, (req, res) => send(res, createCustomer(req.license, body(req), req.livemode)));
 
 /* ── Sesión 9: herramientas fiscales sin IA (no gastan cuota) ── */
@@ -342,13 +378,13 @@ router.get('/tax/nif', requireApiKey, nif);
 router.post('/tax/nif', requireApiKey, nif);
 router.post('/tax/vat', requireApiKey, (req, res) => send(res, T.vat(req.body)));
 router.post('/tax/withholding', requireApiKey, (req, res) => send(res, T.withholding(req.body)));
-router.post('/tax/model-130', requireApiKey, (req, res) => send(res, T.model130(req.license, req.body)));
-router.get('/tax/quarter', requireApiKey, (req, res) => send(res, T.quarter(req.license, req.query)));
+router.post('/tax/model-130', requireApiKey, (req, res) => send(res, T.model130(req.license, req.body, { livemode: req.livemode })));
+router.get('/tax/quarter', requireApiKey, (req, res) => send(res, T.quarter(req.license, req.query, { livemode: req.livemode })));
 router.get('/tax/calendar', requireApiKey, (req, res) => send(res, T.calendar(req.license, req.query)));
 
 module.exports = router;
 module.exports.handlers = {
   analyze, extractInvoices, readInvoiceFiles, usage, listApiAnalyses, getApiAnalysis, createWebhook, updateWebhook, deleteWebhook,
-  issueInvoice, rectifyInvoice, listCustomers, createCustomer,
+  issueInvoice, rectifyInvoice, setInvoiceStatus, listCustomers, createCustomer,
   TYPES, INVOICE_MAX_FILES
 };

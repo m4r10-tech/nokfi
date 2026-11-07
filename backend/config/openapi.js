@@ -84,6 +84,7 @@ const WebhookEndpoint = {
     id: { type: 'integer' }, url: { type: 'string' },
     events: { type: 'array', items: { type: 'string', enum: ['*', ...require('../db/webhooks').EVENT_TYPES] } },
     description: { type: 'string' }, enabled: { type: 'boolean' }, disabled_reason: { type: 'string', nullable: true },
+    livemode: { type: 'boolean', description: 'false: creado con una clave de prueba, solo recibe eventos de prueba' },
     secret: { type: 'string', description: 'Solo al crear: whsec_… para comprobar la firma.' }
   }
 };
@@ -161,32 +162,50 @@ const IssuedInvoice = {
 const INVOICING_DOC = 'Emite facturas en nombre de tu cuenta con la misma lógica que la app: numeración correlativa sin huecos, libro, PDF, factura electrónica (UBL 2.5, Facturae 3.2.2, Factur-X) y registro VERI*FACTU con huella encadenada. Una factura emitida no se edita ni se borra: se rectifica o se anula. Con claves nk_test_ son facturas de prueba (TEST-…) que no entran en el libro ni van a la AEAT. Los datos del emisor se completan en la app (Finanzas › Facturas › Mis datos); si faltan, 422 issuer_incomplete.';
 
 const idPath = { name: 'id', in: 'path', required: true, schema: { type: 'integer' } };
-const IdemRequired = { name: 'Idempotency-Key', in: 'header', required: true, schema: { type: 'string', maxLength: 255 }, description: 'OBLIGATORIA: evita emitir dos veces la misma factura al reintentar. Sin ella → 400 idempotency_key_required.' };
+const IdemRequired = { name: 'Idempotency-Key', in: 'header', required: true, schema: { type: 'string', maxLength: 255 }, description: 'OBLIGATORIA: evita emitir dos veces la misma factura al reintentar. Sin ella → 400 idempotency_key_required. En la emisión la clave dura 30 días (en el resto de POST, 24 h).' };
 const invoiceResp = (code, desc) => ({ [code]: { description: desc, content: { 'application/json': { schema: { $ref: '#/components/schemas/IssuedInvoice' } } } } });
 const invoiceErrors = { 400: { description: 'invalid_input (field: line_description, customer_tax_id, issue_date…)' }, 404: { description: 'No existe (o es del otro modo: real/prueba)' }, 409: { description: 'Estado incompatible (anulada, con rectificativas…)' }, 422: { description: 'issuer_incomplete, customer_tax_id_required…' } };
 
 
 const taxOk = (desc) => ({ 200: { description: desc }, 400: { description: 'invalid_input (con el motivo en message)' } });
 
-module.exports = {
+// S15: esquema de error común y respuestas que puede dar cualquier operación con clave.
+const ErrorSchema = {
+  type: 'object', required: ['error'],
+  properties: {
+    error: { type: 'string', description: 'Código estable para programar (invalid_input, not_found, rate_limited…)' },
+    message: { type: 'string', description: 'Explicación para personas (en español)' },
+    field: { type: 'string', description: 'Campo con el problema, si aplica' },
+    retry_after: { type: 'integer', description: 'Solo en rate_limited: segundos de espera (igual que la cabecera Retry-After)' }
+  }
+};
+const errorContent = { 'application/json': { schema: { $ref: '#/components/schemas/Error' } } };
+const RetryAfter = { description: 'Segundos que hay que esperar antes de reintentar', schema: { type: 'integer' } };
+const COMMON_RESPONSES = {
+  401: { description: 'invalid_api_key (clave inexistente o sin cabecera Bearer) o api_key_revoked', content: errorContent },
+  403: { description: 'license_inactive (licencia no activa) o api_plan_required (clave real en un plan sin API: la clave es válida pero el plan no da acceso)', content: errorContent },
+  429: { description: 'rate_limited (30 peticiones por minuto y clave; en un lote JSON-RPC del MCP cuenta cada mensaje) o license_daily_limit_reached (cuota diaria agotada; Retry-After hasta las 00:00 UTC)', headers: { 'Retry-After': RetryAfter }, content: errorContent }
+};
+
+const spec = {
   openapi: '3.0.3',
   info: {
     title: 'Nokfi API',
-    version: '1.2.0',
-    description: 'API de Nokfi para automatizaciones (n8n, Make, Zapier…). Claves reales (nk_live_) en los planes Pro y Max; cada análisis o extracción consume 1 de la cuota diaria del plan, igual que en la web. Claves de prueba (nk_test_) en todos los planes: devuelven datos de ejemplo con la misma forma, validan la entrada igual y no gastan cuota. Las herramientas fiscales (/tax/*) y la emisión de facturas (/invoices, /customers) no usan IA ni gastan cuota. Todos los POST admiten Idempotency-Key (24 h): un reintento con la misma clave devuelve la misma respuesta sin ejecutarse ni cobrarse dos veces. ' + WEBHOOKS_DOC
+    version: '1.3.0',
+    description: 'API de Nokfi para automatizaciones (n8n, Make, Zapier…). Claves reales (nk_live_) en los planes Pro y Max; cada análisis o extracción consume 1 de la cuota diaria del plan, igual que en la web. Claves de prueba (nk_test_) en todos los planes: devuelven datos de ejemplo con la misma forma, validan la entrada igual y no gastan cuota. El modo prueba está separado del real, como en Stripe: una clave nk_test_ no ve el historial de análisis, la libreta de clientes, el libro (los impuestos calculados desde el libro salen a cero), los trabajos ni los webhooks reales, y una clave real no ve los de prueba. Las herramientas fiscales (/tax/*) y la emisión de facturas (/invoices, /customers) no usan IA ni gastan cuota. Idempotency-Key: la admiten los POST de /analyze, /invoices/extract, /webhooks, /invoices (obligatoria), /invoices/{id}/rectify (obligatoria), /invoices/{id}/cancel, /invoices/{id}/status y /customers; las herramientas /tax/* y /webhooks/{id}/test la ignoran (no cambian nada). Un reintento con la misma clave y el mismo cuerpo devuelve la misma respuesta sin ejecutarse ni cobrarse dos veces; la clave dura 24 h, y 30 días al emitir facturas. Solo se guardan las respuestas correctas: tras un error (4xx o 5xx) el reintento con la misma clave se ejecuta de verdad. Los 429 llevan la cabecera Retry-After (segundos). ' + WEBHOOKS_DOC
   },
   servers: [{ url: 'https://nokfi.app/api/v1' }],
   components: {
     securitySchemes: { bearer: { type: 'http', scheme: 'bearer', description: 'Clave de API (nk_live_… o nk_test_…) creada en Desarrolladores → Claves.' } },
     parameters: {
-      IdempotencyKey: { name: 'Idempotency-Key', in: 'header', schema: { type: 'string', maxLength: 255 }, description: 'Hasta 255 caracteres. Misma clave + mismo cuerpo → misma respuesta (Idempotent-Replayed: true). Otro cuerpo → 422 idempotency_key_reused; aún en curso → 409.' }
+      IdempotencyKey: { name: 'Idempotency-Key', in: 'header', schema: { type: 'string', maxLength: 255 }, description: 'Hasta 255 caracteres; dura 24 h. Misma clave + mismo cuerpo → misma respuesta (Idempotent-Replayed: true). Otro cuerpo → 422 idempotency_key_reused; aún en curso → 409 idempotency_in_progress. Los errores (4xx/5xx) no se guardan: el reintento se ejecuta de verdad. Las claves de prueba y las reales no comparten claves.' }
     },
-    schemas: { Report, FileInput, Invoice, Job, WebhookEndpoint, InvoiceLine, InvoiceInput, IssuedInvoice, Customer: Party }
+    schemas: { Report, FileInput, Invoice, Job, WebhookEndpoint, InvoiceLine, InvoiceInput, IssuedInvoice, Customer: Party, Error: ErrorSchema }
   },
   security: [{ bearer: [] }],
   paths: {
     '/usage': {
-      get: { summary: 'Cuota de hoy', responses: { 200: { description: 'OK', content: { 'application/json': { schema: { type: 'object', properties: { plan: { type: 'string' }, daily_quota: { type: 'integer' }, used_today: { type: 'integer' } } } } } } } }
+      get: { summary: 'Cuota de hoy', responses: { 200: { description: 'OK', content: { 'application/json': { schema: { type: 'object', properties: { plan: { type: 'string' }, mode: { type: 'string', enum: ['live', 'test'], description: 'Modo de la clave usada' }, daily_quota: { type: 'integer' }, used_today: { type: 'integer' } } } } } } } }
     },
     '/analyze': {
       post: {
@@ -416,3 +435,48 @@ module.exports = {
     }
   }
 };
+
+/* ── S15: lo que faltaba para que la especificación cuadre con la API real ── */
+const P = spec.paths;
+const notFound = { description: 'not_found (no existe o es del otro modo: real/prueba)', content: errorContent };
+
+P['/openapi.json'] = { get: { summary: 'Esta especificación (pública, sin clave)', security: [], responses: { 200: { description: 'OpenAPI 3.0 en JSON' } } } };
+P['/tax/nif'].post = { ...P['/tax/nif'].get, summary: 'Validar NIF, NIE o CIF (igual que el GET, con el valor en el cuerpo)', parameters: undefined,
+  requestBody: { required: true, content: { 'application/json': { schema: { type: 'object', required: ['value'], properties: { value: { type: 'string', example: 'B12345674' } } } } } } };
+delete P['/tax/nif'].post.parameters;
+
+P['/analyses'].get.description = 'Con una clave de prueba la lista está vacía: los análisis de prueba no se guardan y el historial real no se ve.';
+P['/analyses/{id}'].get.responses[404] = notFound;
+P['/jobs'].get.description = 'Solo los trabajos del modo de la clave (real o prueba).';
+P['/jobs/{id}'].get.responses[404] = notFound;
+P['/customers'].get.description = 'Con una clave de prueba la lista está vacía (la libreta es real).';
+P['/customers'].post.responses[200] = { description: 'Clave de prueba: cliente validado, no se guarda (id null)' };
+P['/webhooks'].get.description = 'Solo los webhooks del modo de la clave: los creados con una clave de prueba solo reciben eventos de prueba (livemode false) y los creados con una real, solo eventos reales.';
+P['/webhooks/{id}'].get.responses[404] = notFound;
+P['/webhooks/{id}'].patch.requestBody = { required: true, content: { 'application/json': { schema: { type: 'object', properties: {
+  url: { type: 'string' }, events: { oneOf: [{ type: 'string', example: '*' }, { type: 'array', items: { type: 'string' } }] }, description: { type: 'string' },
+  enabled: { type: 'boolean', description: 'true reactiva uno desactivado (pone a cero la racha de fallos)' } } } } } };
+Object.assign(P['/webhooks/{id}'].patch.responses, { 400: { description: 'invalid_url o invalid_events', content: errorContent }, 404: notFound });
+P['/webhooks/{id}'].delete.responses[404] = notFound;
+P['/webhooks/{id}/test'].post.responses[404] = notFound;
+P['/invoices/{id}/status'].post.responses = { ...P['/invoices/{id}/status'].post.responses,
+  409: { description: 'status_conflict (p. ej. cobrar una rechazada), invoice_cancelled, o test_invoice_not_in_ledger (paid/unpaid en una factura de prueba, que no tiene asiento en el libro)', content: errorContent } };
+
+// 202 asíncrono: Location del trabajo y Preference-Applied si se pidió con Prefer.
+for (const p of ['/analyze', '/invoices/extract']) {
+  P[p].post.responses[202].headers = {
+    Location: { description: '/api/v1/jobs/{id}', schema: { type: 'string' } },
+    'Preference-Applied': { description: 'respond-async, si la petición llevaba Prefer: respond-async (RFC 7240)', schema: { type: 'string' } }
+  };
+}
+
+// Errores comunes en todas las operaciones con clave; 4xx sin esquema → Error.
+for (const item of Object.values(P)) {
+  for (const op of Object.values(item)) {
+    if (op.security && !op.security.length) continue;
+    Object.assign(op.responses, COMMON_RESPONSES);
+    for (const [code, r] of Object.entries(op.responses)) if (code >= 400 && !r.content) r.content = errorContent;
+  }
+}
+
+module.exports = spec;

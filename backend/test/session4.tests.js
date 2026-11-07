@@ -592,8 +592,8 @@ module.exports = async function session4Tests({ post, put, get, call, check, che
     return !cols.some(c => /body|data|input|content/.test(c));
   });
   getDB().prepare("UPDATE licenses SET plan = 'mini' WHERE id = ?").run(lid);
-  await checkAsync('F4: licencia bajada a Mini → su clave da 401 api_plan_required (no se borra)',
-    get('/api/v1/usage', apiKey), r => r.status === 401 && r.data.error === 'api_plan_required');
+  await checkAsync('F4: licencia bajada a Mini → su clave da 403 api_plan_required (no se borra; S15: 403, la clave es válida)',
+    get('/api/v1/usage', apiKey), r => r.status === 403 && r.data.error === 'api_plan_required');
   await checkAsync('F4: Mini no puede crear claves → 403 api_plan_required',
     post('/api/keys', { name: 'x' }, tok), r => r.status === 403 && r.data.error === 'api_plan_required');
   getDB().prepare("UPDATE licenses SET plan = 'pro' WHERE id = ?").run(lid);

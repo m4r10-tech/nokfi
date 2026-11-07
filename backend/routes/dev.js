@@ -49,7 +49,17 @@ router.get('/webhooks', (req, res) => res.json({
   event_types: W.EVENT_TYPES,
   live_events: API_PLANS.includes(req.license.plan)
 }));
-router.post('/webhooks', (req, res) => send(res, H.createWebhook(req.license, req.body, req.ip)));
+// S15: cada webhook es real o de prueba. Desde el panel, `mode` (live|test);
+// sin él, real en Pro/Max y de prueba en Mini (que no tiene eventos reales).
+router.post('/webhooks', (req, res) => {
+  const hasApi = API_PLANS.includes(req.license.plan);
+  const mode = req.body?.mode === 'live' || req.body?.mode === 'test' ? req.body.mode : (hasApi ? 'live' : 'test');
+  if (mode === 'live' && !hasApi) {
+    return res.status(403).json({ error: 'api_plan_required', message: 'Los webhooks reales son de los planes Pro y Max. En modo prueba puedes crearlos en cualquier plan.' });
+  }
+  const { mode: _m, ...body } = req.body || {};
+  send(res, H.createWebhook(req.license, body, req.ip, mode === 'live'));
+});
 router.patch('/webhooks/:id', (req, res) => send(res, H.updateWebhook(req.license, idParam(req), req.body)));
 router.delete('/webhooks/:id', (req, res) => send(res, H.deleteWebhook(req.license, idParam(req), req.ip)));
 router.get('/webhooks/:id/secret', (req, res) => {
@@ -88,8 +98,8 @@ const OPERATIONS = {
   'tax.nif': { method: 'GET', path: '/api/v1/tax/nif', run: (c) => T.taxId(c.body.value) },
   'tax.vat': { method: 'POST', path: '/api/v1/tax/vat', run: (c) => T.vat(c.body) },
   'tax.withholding': { method: 'POST', path: '/api/v1/tax/withholding', run: (c) => T.withholding(c.body) },
-  'tax.model-130': { method: 'POST', path: '/api/v1/tax/model-130', run: (c) => T.model130(c.license, c.body) },
-  'tax.quarter': { method: 'GET', path: '/api/v1/tax/quarter', run: (c) => T.quarter(c.license, c.body) },
+  'tax.model-130': { method: 'POST', path: '/api/v1/tax/model-130', run: (c) => T.model130(c.license, c.body, { livemode: c.livemode }) },
+  'tax.quarter': { method: 'GET', path: '/api/v1/tax/quarter', run: (c) => T.quarter(c.license, c.body, { livemode: c.livemode }) },
   'tax.calendar': { method: 'GET', path: '/api/v1/tax/calendar', run: (c) => T.calendar(c.license, c.body) },
   'usage': { method: 'GET', path: '/api/v1/usage', run: (c) => ({ status: 200, body: H.usage(c.license, c.livemode) }) },
   // Facturas: en el Playground solo en modo prueba (TEST-…), para no emitir una factura real por accidente.

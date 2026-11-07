@@ -1546,6 +1546,8 @@ async function main() {
   await require('./session13.tests').media({ get, check });
   // S15b lote 2 — modelo de cobro nuevo, bloqueo por impago, /reveal una vez, borrado de cuenta.
   await require('./session15b.tests')({ post, put, get, call, check, checkAsync, getDB });
+  // S15b lote 8: API (modo prueba separado, lotes MCP, Retry-After, idempotencia, SSRF IPv6).
+  await require('./session15api.tests')({ post, put, get, call, check, checkAsync, getDB });
 
   } catch (e) {
     console.error('TEST CRASH:', e.message);

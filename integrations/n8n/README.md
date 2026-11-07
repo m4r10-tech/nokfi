@@ -22,7 +22,7 @@ Follow the [installation guide](https://docs.n8n.io/integrations/community-nodes
 1. Sign in to Nokfi and open **Developers → Keys**.
 2. Create a key. Name it after the client or workflow: Nokfi shows the usage of each key separately.
    - **Live keys** (`nk_live_…`, Pro and Max plans) work with your data and use your quota.
-   - **Test keys** (`nk_test_…`, every plan) validate input the same way and return realistic sample data, without using quota. Build and test with them, then switch.
+   - **Test keys** (`nk_test_…`, every plan) validate input the same way and return realistic sample data, without using quota. Test mode is separate from live: a test key never sees your real analyses, customers, books or webhooks. Build and test with them, then switch.
 3. In n8n, create a **Nokfi API** credential and paste the key. Leave the base URL as `https://nokfi.app`.
 
 The credential test calls `GET /api/v1/usage`.
@@ -40,22 +40,25 @@ The credential test calls `GET /api/v1/usage`.
 | Invoice | Extract | Reads up to 5 documents per request (PDF, JPG, PNG, WebP or text). Use `*` as the binary field to send every attachment of the item. Outputs one item per invoice (or one item with all of them). |
 | Analysis | Create | Runs an analysis. For spreadsheets, "All Input Items as Rows" sends the whole input (e.g. a Google Sheets node) as one table. |
 | Analysis | Get / Get Many | Reads reports you already have. |
+| Customer | Get Many / Create | Lists or searches your address book, or adds a customer (with a test key the list is empty and a new customer is only validated). |
+| Job | Get | Status and result of a background job (*Run in Background*), kept 24 h. |
 | Tax | Validate Tax ID | NIF, NIE or CIF check digit, entity type and EU VAT number. |
 | Tax | Calculate VAT | VAT with or without VAT included, plus the equivalence surcharge. |
 | Tax | Calculate Withholding | IRPF withholding (professional 15 %, new professional 7 %, rental 19 %…) and the invoice total. |
 | Tax | Estimate Modelo 130 | From your year-to-date figures or from your Nokfi ledger. |
+| Tax | Get Quarter Summary | VAT (303) and IRPF (130) of a quarter from your Nokfi ledger. |
 | Tax | Get Fiscal Calendar | Upcoming deadlines (303, 130, 111, 115, 390…) with days left, one item each. |
 | Usage | Get | Plan, daily quota and analyses used today. |
 
-Issuing and managing invoices uses no AI and no quota; your issuer details (legal name, tax ID, address) are filled in once in the Nokfi app. Issued invoices are never edited: rectify or cancel them. With a test key, invoices are test documents (`TEST-` numbering) that never reach your books or the tax agency. Every Issue and Rectify request carries an `Idempotency-Key` (set your own, e.g. the order ID, in *Additional Fields*).
+Issuing and managing invoices uses no AI and no quota; your issuer details (legal name, tax ID, address) are filled in once in the Nokfi app. Issued invoices are never edited: rectify or cancel them. With a test key, invoices are test documents (`TEST-` numbering) that never reach your books or the tax agency. Every Issue and Rectify request carries an `Idempotency-Key` (set your own, e.g. the order ID, in *Additional Fields*): for **30 days** the same key returns the same invoice instead of issuing a new one; after that it can be used again.
 
-Every invoice extraction and every analysis uses **1 analysis from your daily quota** (the same quota as the web app); the tax tools use none. Maximum 30 requests per minute per key. Requests carry an `Idempotency-Key`, so n8n's *Retry On Fail* never charges twice.
+Every invoice extraction and every analysis uses **1 analysis from your daily quota** (the same quota as the web app); the tax tools use none. Maximum 30 requests per minute per key. Requests carry an `Idempotency-Key`, so n8n's *Retry On Fail* never charges twice (keys last 24 h; errors are not stored, so a retry after an error really runs). Rate-limited responses (429) carry a `Retry-After` header.
 
-**Run in Background**: Invoice › Extract and Analysis › Create can return a job right away (`?async=true`). Pair it with the Nokfi Trigger (*Job Completed*) to get the result.
+**Run in Background**: Invoice › Extract and Analysis › Create can return a job right away (`?async=true`). Pair it with the Nokfi Trigger (*Job Completed*) or Job › Get to get the result.
 
 ### Nokfi Trigger
 
-Choose the events and activate the workflow: the trigger registers its webhook in Nokfi (you'll see it in **Developers → Webhooks**) and deletes it when you deactivate the workflow. Every request is checked against the `Nokfi-Signature` HMAC; unsigned or old requests get a 401. Your n8n instance must be reachable on a public https URL.
+Choose the events and activate the workflow: the trigger registers its webhook in Nokfi (you'll see it in **Developers → Webhooks**) and deletes it when you deactivate the workflow. Every request is checked against the `Nokfi-Signature` HMAC; unsigned or old requests get a 401. Your n8n instance must be reachable on a public https URL. If Nokfi disabled the webhook after too many failed deliveries, or you changed the events, the trigger reactivates and updates it the next time the workflow is activated. **Only Live Events** is on by default; a webhook created with a test key only receives test events, so turn it off while you build with a test key.
 
 | Event | When |
 |---|---|

@@ -16,17 +16,17 @@
 
 const express = require('express');
 const router = express.Router();
-const { requireApiKey } = require('../middleware/requireApiKey');
+const { requireApiKey, takeRate, rateLimited } = require('../middleware/requireApiKey');
 const { handlers: H } = require('./v1');
 const T = require('../services/taxTools');
 const S = require('../services/invoicing');
-const { runIdempotent } = require('../middleware/idempotency');
+const { runIdempotent, INVOICE_TTL_HOURS } = require('../middleware/idempotency');
 
-const SERVER_INFO = { name: 'nokfi', title: 'Nokfi', version: '1.2.0' };
+const SERVER_INFO = { name: 'nokfi', title: 'Nokfi', version: '1.3.0' };
 const PROTOCOL_VERSIONS = ['2025-11-25', '2025-06-18', '2025-03-26'];
 const LANGS = ['es', 'en', 'fr', 'it', 'de', 'pl'];
 
-const INSTRUCTIONS = 'Nokfi is an AI for small-business documents and finance (Spain). Use extract_invoices to turn invoices (PDF/image as base64, or text) into validated JSON: the checks object is computed by Nokfi, not by the AI. Structured e-invoices (Facturae, UBL, CII, Factur-X/ZUGFeRD PDF) are read exactly, without AI and without quota. Use analyze for financial reports. Every analysis and every extract_invoices call that needs the AI uses 1 analysis of the user\'s daily quota; check get_usage first when running many. The tax tools (validate_tax_id, calculate_vat, calculate_withholding, estimate_model_130, fiscal_calendar) are deterministic Spanish tax calculations and do NOT use quota: prefer them over doing the math yourself. With a test key (nk_test_) AI tools return realistic sample data. Invoicing: issue_invoice issues a real, legally binding invoice in the user\'s name (numbered, added to their books and, when enabled, reported to the Spanish tax agency under VERI*FACTU): confirm the details with the user before calling it, and always pass an idempotency_key so a retry never issues it twice. Issued invoices are never edited: fix them with a corrective invoice (issue_invoice with rectifies_id) or cancel_invoice. With a test key, invoices are test documents (TEST- numbering) that never reach the books or the tax agency.';
+const INSTRUCTIONS = 'Nokfi is an AI for small-business documents and finance (Spain). Use extract_invoices to turn invoices (PDF/image as base64, or text) into validated JSON: the checks object is computed by Nokfi, not by the AI. Structured e-invoices (Facturae, UBL, CII, Factur-X/ZUGFeRD PDF) are read exactly, without AI and without quota. Use analyze for financial reports. Every analysis and every extract_invoices call that needs the AI uses 1 analysis of the user\'s daily quota; check get_usage first when running many. The tax tools (validate_tax_id, calculate_vat, calculate_withholding, estimate_model_130, fiscal_calendar) are deterministic Spanish tax calculations and do NOT use quota: prefer them over doing the math yourself. With a test key (nk_test_) AI tools return realistic sample data. Invoicing: issue_invoice issues a real, legally binding invoice in the user\'s name (numbered, added to their books and, when enabled, reported to the Spanish tax agency under VERI*FACTU): confirm the details with the user before calling it, and always pass an idempotency_key so a retry never issues it twice. Issued invoices are never edited: fix them with a corrective invoice (issue_invoice with rectifies_id) or cancel_invoice. With a test key, invoices are test documents (TEST- numbering) that never reach the books or the tax agency, and the real data of the account (analyses, customers, books) is not visible.';
 
 const TOOLS = [
   {
@@ -147,7 +147,7 @@ const TOOLS = [
     inputSchema: {
       type: 'object',
       properties: {
-        idempotency_key: { type: 'string', description: 'Unique key for this invoice (e.g. an order id). Retrying with the same key returns the same invoice.' },
+        idempotency_key: { type: 'string', description: 'Unique key for this invoice (e.g. an order id). Retrying with the same key within 30 days returns the same invoice.' },
         customer_id: { type: 'integer', description: 'Customer from the address book (list via the API /customers)' },
         customer: {
           type: 'object', description: 'Customer data (saved to the address book). Tax ID required for a full invoice.',
@@ -253,13 +253,13 @@ async function callTool(req, name, args = {}) {
     case 'validate_tax_id': return toolResult(T.taxId(args.value));
     case 'calculate_vat': return toolResult(T.vat(args));
     case 'calculate_withholding': return toolResult(T.withholding(args));
-    case 'estimate_model_130': return toolResult(T.model130(license, args));
+    case 'estimate_model_130': return toolResult(T.model130(license, args, { livemode }));
     case 'fiscal_calendar': return toolResult(T.calendar(license, args));
     case 'issue_invoice': {
       const { idempotency_key: key, ...body } = args;
       if (!key) return toolResult({ status: 400, body: { error: 'idempotency_key_required', message: 'issue_invoice needs idempotency_key so a retry never issues the invoice twice.' } });
       const out = await runIdempotent({
-        license_id: license.id, mode: livemode ? 'live' : 'test', key, scope: 'issue_invoice', payload: body,
+        license_id: license.id, mode: livemode ? 'live' : 'test', key, scope: 'issue_invoice', payload: body, ttlHours: INVOICE_TTL_HOURS,
         run: async () => (body.rectifies_id ? H.rectifyInvoice({ license, id: body.rectifies_id, body, livemode, ip: req.ip, source: 'mcp' }) : H.issueInvoice({ license, body, livemode, ip: req.ip, source: 'mcp' }))
       });
       return toolResult(out);
@@ -267,11 +267,11 @@ async function callTool(req, name, args = {}) {
     case 'list_invoices': return toolResult(S.list({ license, query: args, livemode }));
     case 'get_invoice': return toolResult(S.get({ license, id: args.id, livemode }));
     case 'cancel_invoice': return toolResult(S.cancel({ license, id: args.id, reason: args.reason, livemode, ip: req.ip }));
-    case 'set_invoice_status': return toolResult(S.setStatus({ license, id: args.id, body: args, livemode, ip: req.ip }));
+    case 'set_invoice_status': return toolResult(H.setInvoiceStatus({ license, id: args.id, body: args, livemode, ip: req.ip }));
     case 'get_usage': return toolResult({ status: 200, body: H.usage(license, livemode) });
-    case 'list_analyses': return toolResult({ status: 200, body: H.listApiAnalyses(license, args.limit) });
+    case 'list_analyses': return toolResult({ status: 200, body: H.listApiAnalyses(license, args.limit, livemode) });
     case 'get_analysis': {
-      const a = H.getApiAnalysis(license, args.id);
+      const a = H.getApiAnalysis(license, args.id, livemode);
       return toolResult(a ? { status: 200, body: a } : { status: 404, body: { error: 'not_found', message: 'No existe un análisis con ese id.' } });
     }
     default: return null;
@@ -301,6 +301,12 @@ async function handleMessage(req, msg) {
 router.post('/', requireApiKey, async (req, res) => {
   const body = req.body;
   if (Array.isArray(body)) {
+    // S15: cada mensaje de un lote cuenta en el límite por minuto de la clave
+    // (requireApiKey ya contó uno). Si no caben todos, 429 y no se ejecuta ninguno.
+    if (body.length > 1) {
+      const rate = takeRate(req.apiKey.id, body.length - 1);
+      if (!rate.ok) return rateLimited(res, rate.retryAfter, ' (en un lote JSON-RPC cuenta cada mensaje)');
+    }
     const replies = (await Promise.all(body.map(m => handleMessage(req, m)))).filter(Boolean);
     return replies.length ? res.json(replies) : res.status(202).end();
   }

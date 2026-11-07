@@ -254,6 +254,15 @@ function runSession4Schema(db) {
   ensureColumn(db, 'api_keys', 'mode', "TEXT NOT NULL DEFAULT 'live'");
   ensureColumn(db, 'api_keys', 'client', "TEXT NOT NULL DEFAULT ''");
   ensureColumn(db, 'api_calls', 'livemode', 'INTEGER NOT NULL DEFAULT 1');
+  // S15 (lote 8): cada webhook es de prueba o real, como su clave. Los que ya
+  // existían quedan reales, salvo los de cuentas sin API real (Mini), que
+  // hasta ahora solo recibían eventos de prueba.
+  if (!hasColumn(db, 'webhook_endpoints', 'livemode')) {
+    ensureColumn(db, 'webhook_endpoints', 'livemode', 'INTEGER NOT NULL DEFAULT 1');
+    db.prepare("UPDATE webhook_endpoints SET livemode = 0 WHERE license_id IN (SELECT id FROM licenses WHERE plan NOT IN ('pro', 'max'))").run();
+  }
+  // S15: ventana de cada Idempotency-Key (24 h; 30 días al emitir facturas).
+  ensureColumn(db, 'idempotency_keys', 'ttl_hours', 'INTEGER NOT NULL DEFAULT 24');
 
   ensureColumn(db, 'analyses', 'result_json', 'TEXT DEFAULT NULL');
   ensureColumn(db, 'analyses', 'meta_json', 'TEXT DEFAULT NULL');

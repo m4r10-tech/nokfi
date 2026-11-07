@@ -45,13 +45,16 @@ function publicJob(row) {
   };
 }
 
-function getJob(license_id, id) {
-  return publicJob(getDB().prepare('SELECT * FROM api_jobs WHERE id = ? AND license_id = ?').get(String(id), license_id));
+/** S15: con `livemode` (true/false) solo los trabajos de ese modo (clave de prueba ↔ real); sin él, todos (panel). */
+const modeSql = (livemode) => (livemode === undefined || livemode === null ? '' : ` AND livemode = ${livemode ? 1 : 0}`);
+
+function getJob(license_id, id, livemode) {
+  return publicJob(getDB().prepare(`SELECT * FROM api_jobs WHERE id = ? AND license_id = ?${modeSql(livemode)}`).get(String(id), license_id));
 }
 
-function listJobs(license_id, limit = 20) {
+function listJobs(license_id, limit = 20, livemode) {
   const n = Math.min(Math.max(Number(limit) || 20, 1), 100);
-  return getDB().prepare('SELECT * FROM api_jobs WHERE license_id = ? ORDER BY created_at DESC, rowid DESC LIMIT ?').all(license_id, n)
+  return getDB().prepare(`SELECT * FROM api_jobs WHERE license_id = ?${modeSql(livemode)} ORDER BY created_at DESC, rowid DESC LIMIT ?`).all(license_id, n)
     .map(r => { const j = publicJob(r); delete j.result; return j; });
 }
 

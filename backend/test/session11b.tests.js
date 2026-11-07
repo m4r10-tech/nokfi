@@ -302,6 +302,8 @@ async function tanda5({ post, put, get, check, checkAsync, getDB }) {
   await new Promise(r => srv.listen(0, '127.0.0.1', r));
   const hook = await req('POST', '/api/v1/webhooks', { body: { url: `http://127.0.0.1:${srv.address().port}/h`, events: ['invoice.issued', 'invoice.cancelled', 'invoice.paid', 'invoice.rejected', 'verifactu.accepted', 'verifactu.rejected'] }, auth: live });
   check('S11 API: webhook suscrito a los eventos de facturas y VERI*FACTU', () => hook.status === 201 && W.EVENT_TYPES.includes('invoice.issued') && W.EVENT_TYPES.includes('verifactu.rejected'));
+  // S15: los eventos de prueba van solo a los webhooks creados con una clave de prueba.
+  const testHook = await req('POST', '/api/v1/webhooks', { body: { url: `http://127.0.0.1:${srv.address().port}/t`, events: ['invoice.issued'] }, auth: test });
   const events = (type) => getDB().prepare('SELECT payload_json FROM webhook_deliveries WHERE license_id = ? AND event_type = ? ORDER BY id').all(lid, type).map(r => JSON.parse(r.payload_json));
 
   try {
@@ -360,7 +362,12 @@ async function tanda5({ post, put, get, check, checkAsync, getDB }) {
       ([x, y, l, app, appList, cx]) => x.status === 404 && y.status === 404 && l.data.invoices.length === 1 && l.data.invoices[0].id === t1.data.id
         && app.status === 404 && !appList.data.invoices.some(i => i.id === t1.data.id) && cx.status === 404);
     await checkAsync('S11 API: el PDF de prueba se genera (marca PRUEBA)', req('GET', `/api/v1/invoices/${t1.data.id}/pdf`, { auth: test }), r => r.status === 200 && Buffer.isBuffer(r.data));
-    check('S11 API: los webhooks de una factura de prueba van marcados como test', () => events('invoice.issued').some(e => e.livemode === false && e.data.id === t1.data.id));
+    check('S11 API: los webhooks de una factura de prueba van marcados como test (y solo al webhook de prueba, S15)', () => {
+      const rows = getDB().prepare("SELECT endpoint_id, payload_json FROM webhook_deliveries WHERE license_id = ? AND event_type = 'invoice.issued'").all(lid).map(r => ({ ep: r.endpoint_id, e: JSON.parse(r.payload_json) }));
+      const mine = rows.filter(r => r.e.data.id === t1.data.id);
+      return testHook.status === 201 && testHook.data.livemode === false && mine.length === 1 && mine[0].ep === testHook.data.id && mine[0].e.livemode === false
+        && rows.filter(r => r.ep === testHook.data.id).every(r => r.e.livemode === false);
+    });
     await checkAsync('S11 API: crear cliente con nk_test_ valida pero no guarda', req('POST', '/api/v1/customers', { auth: test, body: { name: 'Solo Prueba SL', tax_id: '12345678Z' } }),
       r => r.status === 200 && r.data.id === null && !getDB().prepare("SELECT 1 FROM customers WHERE license_id = ? AND name = 'Solo Prueba SL'").get(lid));
 
