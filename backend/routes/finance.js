@@ -150,9 +150,14 @@ Factura nº ${entry.invoice_number || '(sin número)'} del ${entry.invoice_date}
 Importe: ${formatEur(entry.total, req.body?.lang)}. ${days > 0 ? `Días desde el vencimiento: ${days}.` : 'Todavía no ha vencido: es un recordatorio previo al vencimiento.'}
 Concepto: ${entry.concept || '—'}.`;
   try {
-    const { text } = await freeText({ system, prompt });
-    const m = text.match(/^\s*ASUNTO:\s*(.+)\n+([\s\S]+)$/i) || text.match(/^\s*(?:SUBJECT|OBJET|OGGETTO|BETREFF|TEMAT):\s*(.+)\n+([\s\S]+)$/i);
-    res.json({ subject: m ? m[1].trim() : '', body: (m ? m[2] : text).trim(), tone });
+    const { text, provider } = await freeText({ system, prompt });
+    // S15b D5: la línea del asunto puede no ser la primera (p. ej. «Aquí tienes el email:»
+    // antes) o venir en negrita: se busca en cualquier línea y lo de antes se descarta.
+    const m = text.match(/^[ \t>*_#-]*(?:ASUNTO|SUBJECT|OBJET|OGGETTO|BETREFF|TEMAT)[ \t*_]*:[ \t*_]*(.+?)[ \t*_]*$/im);
+    const subject = m ? m[1].trim() : '';
+    const body = m ? text.slice(m.index + m[0].length) : text;
+    // provider: la web avisa cuando ha respondido la IA de respaldo ("local").
+    res.json({ subject, body: body.trim(), tone, provider });
   } catch (e) {
     if (e.code === 'chat_unavailable') return res.status(503).json({ error: 'chat_unavailable' });
     res.status(500).json({ error: 'internal_error' });

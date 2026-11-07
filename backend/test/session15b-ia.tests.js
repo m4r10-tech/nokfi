@@ -79,4 +79,40 @@ module.exports = async function session15bIaTests({ post, put, get, check, check
     check('S15b D3: en una sociedad la línea de impuestos dice «solo modelo 303» (sin 130)', () =>
       (financeContext(s.lid, { today: '2027-01-10' }).text.split('\n').find(l => l.startsWith('Impuestos estimados')) || '').includes('solo modelo 303 ('));
   }
+
+  // ── D5: asunto tolerante + provider ──
+  {
+    const saved = { fetch: global.fetch, GK: process.env.GEMINI_API_KEY };
+    process.env.GEMINI_API_KEY = 'fake-key-for-test';
+    let reply = '';
+    global.fetch = async () => ({ ok: true, status: 200, json: async () => ({ candidates: [{ content: { parts: [{ text: reply }] } }] }), text: async () => '' });
+    const a = await account('ia-d5@nokfi.local');
+    const id = (await post('/api/ledger', { entries: [{ type: 'income', party_name: 'Delta SL', invoice_number: 'D5-1', invoice_date: '2026-08-01', base: 100, vat_amount: 21, total: 121 }] }, a.tok)).data.ids?.[0];
+    reply = 'Claro, aquí tienes el email:\n\n**ASUNTO:** Factura D5-1 pendiente\n\nHola,\nle recordamos la factura D5-1.\n\nTaller Delta';
+    await checkAsync('S15b D5: con texto antes de «ASUNTO:» (y en negrita) el asunto sale y no queda en el cuerpo',
+      post('/api/finance/collection-email', { entry_id: id, tone: 'friendly', lang: 'es' }, a.tok),
+      r => r.status === 200 && r.data.subject === 'Factura D5-1 pendiente' && r.data.body.startsWith('Hola,') && !/ASUNTO|aquí tienes/i.test(r.data.body));
+    reply = 'SUBJECT: Invoice D5-1\n\nHello,\nfriendly reminder.';
+    await checkAsync('S15b D5: el formato normal (primera línea) sigue igual, también en inglés, y devuelve el proveedor',
+      post('/api/finance/collection-email', { entry_id: id, tone: 'friendly', lang: 'en' }, a.tok),
+      r => r.status === 200 && r.data.subject === 'Invoice D5-1' && r.data.body === 'Hello,\nfriendly reminder.' && r.data.provider === 'gemini');
+    global.fetch = saved.fetch;
+    if (saved.GK === undefined) delete process.env.GEMINI_API_KEY; else process.env.GEMINI_API_KEY = saved.GK;
+  }
+
+  // ── D6: media sin las filas a 0 ──
+  {
+    const { tableStats } = require('../utils/tableStats');
+    const caja = [
+      { Fecha: '2026-10-01', Concepto: 'Cobro A', Entradas: 1200, Salidas: 0, Saldo: 2200 },
+      { Fecha: '2026-10-05', Concepto: 'Alquiler', Entradas: 0, Salidas: 600, Saldo: 1600 },
+      { Fecha: '2026-10-10', Concepto: 'Luz', Entradas: 0, Salidas: 150, Saldo: 1450 },
+      { Fecha: '2026-10-15', Concepto: 'Cobro B', Entradas: 900, Salidas: 0, Saldo: 2350 },
+      { Fecha: '2026-10-20', Concepto: 'Gestoría', Entradas: 0, Salidas: 200, Saldo: 2150 },
+      { Fecha: '2026-10-25', Concepto: 'Material', Entradas: 0, Salidas: 300, Saldo: 1850 }
+    ];
+    const st = tableStats(caja);
+    check('S15b D6: Excel › Caja: media de entradas 1.050 (no 350) y de salidas 312,50; la suma no cambia', () =>
+      st.totales.Entradas.media === 1050 && st.totales.Entradas.suma === 2100 && st.totales.Salidas.media === 312.5 && st.totales.Salidas.suma === 1250);
+  }
 };
