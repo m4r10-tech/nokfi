@@ -8,7 +8,7 @@
 export const TERMS = {
   es: {
     title: 'Términos de uso',
-    updated: 'Última actualización: 2 de octubre de 2026',
+    updated: 'Última actualización: 7 de noviembre de 2026',
     intro: 'Estos términos regulan el uso de Nokfi (nokfi.app), una aplicación web de análisis financiero y facturación para autónomos y pymes. Al activar una licencia o usar la aplicación los aceptas. Están escritos para entenderse; si algo no queda claro, escríbenos.',
     sections: [
       { h: 'Quién presta el servicio', ps: ['{OWNER}. Soporte: soporte@nokfi.app.'] },
@@ -26,11 +26,12 @@ export const TERMS = {
         'Los planes (Mini, Pro y Max) y sus precios se muestran en nokfi.app/pricing. Se pagan por adelantado cada mes con tarjeta a través de Stripe; Nokfi no ve ni guarda los datos de tu tarjeta.',
         'El plan Mini incluye 14 días de prueba. Si cancelas antes de que termine no se te cobra nada; si no, el día 14 se cobra el primer mes.',
         'Cada plan incluye una cuota diaria de análisis con IA. El asistente de chat tiene sus propios límites de uso razonable.',
-        'Puedes cambiar de plan desde Configuración → Gestionar suscripción. El cambio se aplica al final del periodo que ya has pagado, sin cobros ni abonos parciales.',
+        'Puedes cambiar de plan desde Configuración → Plan («Cambiar de plan»). Cualquier cambio, a un plan mayor o menor, se cobra ese mismo día por el precio completo del plan nuevo y empieza un periodo nuevo de un mes desde ese día, sin prorrateos, descuentos ni devolución de lo que quedaba del plan anterior. Si el cobro falla, el plan no cambia. Si cambias durante la prueba, la prueba termina y se cobra ese día.',
+        'Si no se puede cobrar una renovación mensual, la suscripción se detiene y la cuenta queda bloqueada hasta que pagues un plan nuevo; tus datos se conservan.',
         'Podemos cambiar los precios avisándote con al menos 30 días de antelación; el nuevo precio se aplicará a partir de la siguiente renovación y podrás cancelar antes.'
       ] },
       { h: 'Cancelación y reembolsos', ps: [
-        'Puedes cancelar cuando quieras desde Configuración → Gestionar suscripción. Mantienes el acceso hasta el final del periodo pagado y no se renueva. No se reembolsan periodos ya iniciados, salvo que la ley lo exija o que el servicio no haya funcionado por causa nuestra.',
+        'Puedes cancelar cuando quieras desde Configuración → Plan («Cancelar plan»). Mantienes el acceso hasta el final del periodo pagado y no se renueva. No se reembolsan periodos ya iniciados, salvo que la ley lo exija o que el servicio no haya funcionado por causa nuestra.',
         'Nokfi es un servicio para profesionales y empresas. Si contratas como consumidor, conservas los derechos que te reconozca la ley; en particular, al empezar a usar el servicio digital durante el plazo de desistimiento con tu consentimiento expreso, este derecho se pierde en la parte ya prestada.'
       ] },
       { h: 'Emails a tus clientes (reclamación automática de cobros)', list: [
@@ -73,7 +74,7 @@ export const TERMS = {
   },
   en: {
     title: 'Terms of use',
-    updated: 'Last updated: 2 October 2026',
+    updated: 'Last updated: 7 November 2026',
     intro: 'These terms govern the use of Nokfi (nokfi.app), a financial analysis and invoicing web app for freelancers and small businesses. By activating a licence or using the app you accept them. The Spanish version prevails in case of discrepancy.',
     sections: [
       { h: 'Who provides the service', ps: ['{OWNER}. Support: soporte@nokfi.app.'] },
@@ -91,11 +92,12 @@ export const TERMS = {
         'Plans (Mini, Pro and Max) and their prices are shown at nokfi.app/pricing. They are paid monthly in advance by card through Stripe; Nokfi never sees or stores your card details.',
         'The Mini plan includes a 14-day trial. If you cancel before it ends you are not charged; otherwise the first month is charged on day 14.',
         'Each plan includes a daily quota of AI analyses. The chat assistant has its own fair-use limits.',
-        'You can change plan from Settings → Manage subscription. The change applies at the end of the period already paid, with no partial charges or credits.',
+        'You can change plan from Settings → Plan (“Change plan”). Any change, up or down, is charged that same day at the full price of the new plan and starts a new one-month period from that day, with no proration, discounts or refund of what was left of the previous plan. If the charge fails, the plan does not change. If you change during the trial, the trial ends and you are charged that day.',
+        'If a monthly renewal cannot be charged, the subscription stops and the account is blocked until you pay for a new plan; your data is kept.',
         'We may change prices with at least 30 days’ notice; the new price applies from the next renewal and you may cancel before then.'
       ] },
       { h: 'Cancellation and refunds', ps: [
-        'You can cancel at any time from Settings → Manage subscription. You keep access until the end of the paid period and it will not renew. Periods already started are not refunded, unless required by law or the service failed through our fault.',
+        'You can cancel at any time from Settings → Plan (“Cancel plan”). You keep access until the end of the paid period and it will not renew. Periods already started are not refunded, unless required by law or the service failed through our fault.',
         'Nokfi is a service for professionals and businesses. If you contract as a consumer you keep your statutory rights; in particular, by starting to use the digital service during the withdrawal period with your express consent, that right is lost for the part already provided.'
       ] },
       { h: 'Emails to your clients (automatic payment reminders)', list: [

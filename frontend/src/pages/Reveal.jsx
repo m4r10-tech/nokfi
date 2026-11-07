@@ -30,7 +30,7 @@ export default function Reveal() {
 }
 
 function RevealStep({ session_id }) {
-  const [state, setState] = useState('loading'); // loading | success | pending | not_found
+  const [state, setState] = useState('loading'); // loading | success | pending | not_found | already
   const [data, setData] = useState(null);        // { key, email, plan }
   const attempts = useRef(0);
   const timer = useRef(null);
@@ -51,6 +51,12 @@ function RevealStep({ session_id }) {
       if (ok && data.key) {
         setData(data);
         setState('success');
+        return;
+      }
+      // S15b (P6): la clave se muestra una sola vez; después solo queda el email.
+      if (data.error === 'already_revealed') {
+        setData({ email: data.email });
+        setState('already');
         return;
       }
       // 404: el webhook puede no haber llegado todavía → reintenta con backoff
@@ -90,12 +96,22 @@ function RevealStep({ session_id }) {
         </div>
       )}
 
+      {state === 'already' && (
+        <div className="flex flex-col items-center gap-4 py-6 text-center anim-scale">
+          <div className="rounded-full p-3" style={{ background: 'var(--accent-soft)', color: 'var(--accent-text)' }}><KeyRound size={26} /></div>
+          <p className="text-sm" style={{ color: 'var(--text-secondary)' }}>{t('reveal.alreadyShown')}</p>
+          <button onClick={() => navigate('/login', { state: { email: data?.email || '' } })} className="btn btn-primary w-full">
+            {t('reveal.goLogin')}
+          </button>
+        </div>
+      )}
+
       {state === 'success' && data && (
         <div className="flex flex-col gap-5 anim-scale">
           <div className="text-center">
             <div className="mx-auto mb-3 w-fit rounded-full p-3" style={{ background: 'var(--positive-soft)', color: 'var(--positive)' }}><CheckCircle2 size={28} /></div>
-            <h1 className="text-xl font-semibold tracking-tight mb-1" style={{ color: 'var(--text-primary)' }}>{t('reveal.title')}</h1>
-            <p className="text-sm" style={{ color: 'var(--text-secondary)' }}>{t('reveal.subtitle')}</p>
+            <h1 className="text-xl font-semibold tracking-tight mb-1" style={{ color: 'var(--text-primary)' }}>{t(data.trial ? 'reveal.titleTrial' : 'reveal.title')}</h1>
+            <p className="text-sm" style={{ color: 'var(--text-secondary)' }}>{t(data.trial ? 'reveal.subtitleTrial' : 'reveal.subtitle')}</p>
           </div>
 
           <div>
@@ -114,7 +130,9 @@ function RevealStep({ session_id }) {
             <p className="text-xs mt-2" style={{ color: 'var(--text-muted)' }}>{t('reveal.alsoEmailed')}</p>
           </div>
 
-          <button onClick={() => navigate('/login')} className="btn btn-primary w-full">
+          {/* P9: el login llega con el email y la clave ya puestos (por estado de la
+              navegación, no en la URL). */}
+          <button onClick={() => navigate('/login', { state: { email: data.email, key: data.key } })} className="btn btn-primary w-full">
             {t('reveal.goLogin')}
           </button>
         </div>

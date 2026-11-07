@@ -15,6 +15,7 @@ import { useSeo, ldGraph, softwareLd } from '../seo/useSeo';
 import { track } from '../utils/track';
 import { localeOf } from '../utils/dates';
 import { EMAIL_REGEX } from '../utils/license';
+import { useToast } from '../context/ToastContext';
 
 /**
  * Página pública de precios — flujo de ALTA de una suscripción (Fase 3).
@@ -46,6 +47,16 @@ export default function Pricing() {
 
   const selected = plans.find(p => p.id === selectedId) || null;
 
+
+  // S15b (P9): al abandonar el checkout Stripe vuelve aquí (?plan=…&cancelled=true).
+  const toast = useToast();
+  useEffect(() => {
+    if (searchParams.get('cancelled') !== 'true') return;
+    toast.info(t('landing.checkoutCancelled'));
+    const url = new URL(window.location.href);
+    url.searchParams.delete('cancelled');
+    window.history.replaceState(window.history.state, '', url.pathname + url.search + url.hash);
+  }, []); // eslint-disable-line react-hooks/exhaustive-deps
 
   // Volver desde Stripe con "atrás" (bfcache) restauraría el spinner activo.
   useEffect(() => {

@@ -217,7 +217,8 @@ export default {
     passwordRequired: 'Introduce tu contraseña.', invalidEmail: 'Introduce un email válido.', showPassword: 'Mostrar contraseña', hidePassword: 'Ocultar contraseña',
     passwordMismatch: 'Las contraseñas no coinciden.',
     weakPassword: 'La contraseña debe tener al menos 8 caracteres.',
-    noLicense: '¿Aún no tienes licencia? Ver planes y precios'
+    noLicense: '¿Aún no tienes licencia? Ver planes y precios',
+    blockedTitle: 'Tu cuenta está bloqueada', blockedBody: 'No hemos podido cobrar la renovación de tu suscripción. Hasta que no renueves la suscripción no puedes usar la cuenta. Tus datos siguen guardados.', blockedPick: 'Elige un plan para reanudar', blockedPayNote: 'Se cobra hoy el precio completo y empieza un mes nuevo desde hoy. Se renueva cada mes hasta que canceles.', blockedResume: 'Pagar y reanudar', blockedBack: 'Volver', blockedExpired: 'La sesión para reanudar ha caducado. Vuelve a iniciar sesión.', blockedResumed: 'Pago recibido: tu cuenta vuelve a estar activa. Inicia sesión.', blockedResumeCancelled: 'Pago cancelado: no se ha cobrado nada y tu cuenta sigue bloqueada.'
   },
   resetPassword: {
     title: 'Restablecer contraseña', email: 'Email', licenseKey: 'Clave de licencia',
@@ -233,7 +234,8 @@ export default {
     title: '¡Pago completado!', subtitle: 'Esta es tu clave de licencia de Nokfi.',
     yourKey: 'Tu clave de licencia', alsoEmailed: 'También te la hemos enviado por email.',
     goLogin: 'Ir a iniciar sesión', notFound: 'No se encontró tu pago. Si crees que es un error, escríbenos.',
-    pending: 'Estamos confirmando tu pago, un momento...'
+    pending: 'Estamos confirmando tu pago, un momento...',
+    titleTrial: '¡Prueba activada!', subtitleTrial: 'Hoy no se ha cobrado nada. Esta es tu clave de licencia de Nokfi.', alreadyShown: 'Esta clave ya se mostró y, por seguridad, no se vuelve a enseñar aquí. La tienes en el email que te enviamos; si no lo encuentras, recupérala desde «¿Olvidaste tu clave?».'
   },
   config: {
     title: 'Configuración',
@@ -253,8 +255,8 @@ export default {
     trialRow: 'Período de prueba',
     trialDaysLeft: 'Quedan {n} días', trialDaysLeft_one: 'Queda {n} día',
     aiQuota: 'Cuota de análisis IA', aiQuotaPerDay: 'análisis/día',
-    manageSubscription: 'Gestionar suscripción',
-    manageHint: 'Cambia de plan, actualiza tu tarjeta o cancela desde el portal seguro de Stripe. Los cambios de plan se aplican al final del periodo en curso.',
+    manageSubscription: 'Tarjeta y facturas',
+    manageHint: 'En el portal seguro de Stripe puedes cambiar tu tarjeta, descargar tus facturas o cancelar.',
     sectorPlaceholder: 'Ej.: Hostelería', saving: 'Guardando…', saved: 'Guardado', saveError: 'No se pudo guardar',
     status_active: 'Activa', status_suspended: 'Suspendida', status_expired: 'Caducada', status_revoked: 'Revocada', status_past_due: 'Pago pendiente',
     wrongPassword: 'La contraseña no es correcta.', keyCopied: 'Clave copiada al portapapeles',
@@ -267,7 +269,7 @@ export default {
     api: {
       title: 'API para automatizaciones', docs: 'Documentación',
       desc: 'Conecta Nokfi con n8n, Make, Zapier o tus propios scripts. Cada análisis por API gasta 1 de tu cuota diaria, igual que en la web.',
-      locked: 'La API está disponible en los planes Pro y Max.', lockedHint: 'Puedes mejorar tu plan desde «Gestionar suscripción».',
+      locked: 'La API está disponible en los planes Pro y Max.', lockedHint: 'Puedes mejorar tu plan con «Cambiar de plan».',
       namePlaceholder: 'Nombre de la clave (p. ej. n8n)', create: 'Crear clave',
       createdOnce: 'Copia tu clave ahora: por seguridad no la volveremos a mostrar.', savedIt: 'Ya la he guardado',
       unnamed: 'Sin nombre', lastUsed: 'Último uso: {date}', neverUsed: 'Sin usar todavía',
@@ -280,9 +282,10 @@ export default {
       desc: 'Descarga todo lo que Nokfi guarda de ti (perfil, historial, libro, tareas…) o borra tu cuenta.',
       download: 'Descargar mis datos (JSON)', delete: 'Borrar mi cuenta',
       deleteTitle: 'Borrar la cuenta', confirmWord: 'BORRAR',
-      deleteWarning: 'Se borrarán para siempre tu licencia, tu perfil, tu historial de análisis, tu libro de facturas, tus tareas y tus claves de API. No se puede deshacer. Si tienes una suscripción activa, cancélala antes desde «Gestionar suscripción».',
+      deleteWarning: 'Se borrarán para siempre tu licencia, tu perfil, tu historial de análisis, tu libro de facturas, tus tareas y tus claves de API. No se puede deshacer. Si tienes una suscripción activa, cancélala antes con «Cancelar plan» (Configuración › Plan).',
       typeToConfirm: 'Escribe {word} para confirmar', deleteForever: 'Borrar para siempre', deleted: 'Tu cuenta se ha borrado.'
-    }
+    },
+    changePlan: 'Cambiar de plan', cancelPlan: 'Cancelar plan', changePlanTitle: 'Cambiar de plan', changePlanPick: 'Elige el plan nuevo. Al cambiar se cobra hoy su precio completo y empieza un mes nuevo desde hoy.', changePlanNotice: 'Se te cobrarán {amount} hoy y tu plan {plan} durará hasta el {date}. Lo que queda del plan actual no se devuelve.', changePlanTrialNote: 'Con este cambio tu prueba gratuita termina hoy.', changePlanCancelledNote: 'Tu plan sigue cancelado: no se renovará al terminar este periodo.', changePlanConfirm: 'Pagar {amount} y cambiar', changePlanDone: 'Listo: ya tienes el plan {plan}.', changePlanDeclined: 'No se pudo cobrar tu tarjeta, así que tu plan no ha cambiado. Revisa tu tarjeta en «Tarjeta y facturas» e inténtalo de nuevo.', currentPlanTag: 'Tu plan actual', perMonth: 'mes', cancelPlanTitle: '¿Cancelar tu plan?', cancelPlanBody: 'Seguirás usando tu plan {plan} hasta el {date}. Después la suscripción termina y no se te cobrará nada más.', cancelPlanTrialBody: 'Tu prueba sigue hasta el {date}. Después termina y no se te cobrará nada.', cancelPlanConfirm: 'Cancelar plan', cancelPlanDone: 'Plan cancelado. Puedes usarlo hasta el final del periodo pagado.'
   },
   pricing: {
     title: 'Elige tu plan', subtitle: 'Suscripción mensual. Cancela cuando quieras.',
@@ -589,14 +592,15 @@ export default {
     chat_rate_limited: 'Vas muy rápido. Espera un minuto y vuelve a preguntar.',
     chat_unavailable: 'El asistente está saturado. Prueba en un minuto.',
     api_plan_required: 'Las claves de API están disponibles en los planes Pro y Max.',
-    subscription_active: 'Primero cancela tu suscripción desde «Gestionar suscripción». Después podrás borrar la cuenta.',
+    subscription_active: 'Primero cancela tu plan en Configuración › Plan («Cancelar plan»). Después podrás borrar la cuenta.',
     payload_too_large: 'Los archivos pesan demasiado para un solo envío. Prueba con menos archivos.',
     pending_not_found: 'La tarea se ha interrumpido. Vuelve a lanzarla.',
     too_many_pending: 'Tienes varias tareas de IA en curso. Espera a que terminen antes de lanzar otra.',
     ai_timeout: 'La IA no ha terminado a tiempo. Inténtalo de nuevo en unos minutos.',
     offlineTitle: 'No podemos conectar con Nokfi',
     offlineDesc: 'Puede ser tu conexión o que el servidor se esté reiniciando. Vuelve a intentarlo en unos segundos.',
-    genericTitle: 'No se pudo cargar'
+    genericTitle: 'No se pudo cargar',
+    same_plan: 'Ya tienes ese plan.', subscription_not_active: 'Tu suscripción no está activa, así que no se puede cambiar de plan.'
   },
   toast: {
     profileCreated: 'Perfil guardado. ¡Bienvenido a Nokfi!',
@@ -659,7 +663,7 @@ export default {
       { q: '¿Qué es Nokfi?', a: 'Una aplicación web de diagnóstico financiero para autónomos y pymes: un cuestionario guiado, análisis de tus hojas de Excel y PDF con IA, calculadoras financieras e informes exportables a PDF y Excel.' },
       { q: '¿Tengo que instalar algo o subir mis archivos?', a: 'No hay que instalar nada: funciona en el navegador. Tus Excel, PDF y carpetas se leen en tu propio dispositivo: el archivo no sale de tu equipo. Para el análisis solo enviamos las filas o el texto necesarios, y no los guardamos. Al leer facturas escaneadas o en foto se envía una copia reducida a la IA para leerla, sin guardarla.' },
       { q: '¿Cómo funciona la prueba gratuita?', a: 'El plan Mini incluye 14 días gratis. Se pide una tarjeta al registrarte, pero no se cobra nada hasta que termina la prueba. Si cancelas antes, no pagas.' },
-      { q: '¿Puedo cambiar de plan o cancelar cuando quiera?', a: 'Sí, sin permanencia. Desde Configuración accedes al portal de Stripe para cambiar de plan o cancelar; los cambios se aplican al final del periodo en curso.' },
+      { q: '¿Puedo cambiar de plan o cancelar cuando quiera?', a: 'Sí, sin permanencia, desde Configuración › Plan. Al cambiar de plan (a uno mayor o menor) se cobra ese día el precio completo del plan nuevo y empieza un mes nuevo desde ese día; lo que quedaba del anterior no se devuelve. Si cambias durante la prueba, la prueba termina y se cobra ese día. Si cancelas, lo sigues usando hasta el final del mes pagado y no se te cobra más.' },
       { q: '¿En qué se diferencian los planes?', a: 'Todos incluyen todas las funciones de la app (diagnóstico, Excel y carpetas, facturas leídas por IA, impuestos, cobros, previsión de caja y el asistente). Cambia la cuota diaria de análisis con IA: 10 al día en Mini, 50 en Pro y 130 en Max. Pro y Max incluyen además la API para automatizaciones (n8n, Make, Zapier), y Max, soporte prioritario.' },
       { q: '¿Nokfi sustituye a mi gestoría?', a: 'No. Nokfi te ordena las facturas y te dice con antelación cuánto apartar para el IVA y el IRPF, quién te debe y cómo irá tu caja, pero son estimaciones orientativas. La gestoría sigue teniendo la última palabra; de hecho, puedes exportarle el libro en CSV o Excel.' }
     ],
@@ -722,7 +726,7 @@ export default {
   },
   privacy: {
     title: 'Política de privacidad',
-    updated: 'Última actualización: 24 de octubre de 2026',
+    updated: 'Última actualización: 7 de noviembre de 2026',
     intro: 'Esta política describe, sin letra pequeña, qué datos trata Nokfi (nokfi.app), para qué y qué servicios de terceros intervienen. Refleja exactamente cómo funciona la aplicación.',
     sections: [
       { h: 'Responsable y contacto', ps: ['El responsable del tratamiento de los datos de tu cuenta es {OWNER}. Para cualquier cuestión de privacidad o para ejercer tus derechos, escribe a info@nokfi.app. Para problemas con tu cuenta o tus pagos, a soporte@nokfi.app.'] },
@@ -752,7 +756,7 @@ export default {
       ] },
       { h: 'Datos de tus clientes y proveedores', ps: ['Para los datos de terceros que introduces en Nokfi (clientes y proveedores de tus facturas), tú eres el responsable y Nokfi actúa como encargado del tratamiento: solo los usamos para prestarte el servicio. Las condiciones están en el contrato de encargo de tratamiento (nokfi.app/encargo-tratamiento). Si activas la reclamación automática, los recordatorios salen con el nombre de tu empresa y las respuestas llegan directamente a tu email.'] },
       { h: 'Cookies y analítica', ps: ['Nokfi no utiliza cookies de seguimiento. Para saber cuántas personas visitan la web pública usamos Cloudflare Web Analytics, que no usa cookies, no guarda tu IP y no te identifica. Además contamos, sin ningún dato personal, cuántas veces se pulsa «Probar gratis», se empieza un pago o se usa una herramienta pública (solo el total por día y por página). Tu sesión, tu idioma y tu tema se guardan en el almacenamiento local de tu navegador.'] },
-      { h: 'Conservación y eliminación', ps: ['Conservamos tus datos mientras tu licencia exista. Desde Configuración → Mis datos puedes descargar todos tus datos en un archivo o borrar tu cuenta: se eliminan con ella tu perfil, tu historial, tu libro de facturas, tus tareas, tus claves de API y tus sesiones. Los informes técnicos de errores se borran a los 30 días. Al borrar la cuenta se borran también las facturas que hayas emitido y sus registros; la obligación de conservarlas durante el plazo legal es tuya, así que descárgalas antes.'] },
+      { h: 'Conservación y eliminación', ps: ['Conservamos tus datos mientras tu licencia exista. Desde Configuración → Mis datos puedes descargar todos tus datos en un archivo o borrar tu cuenta: se eliminan con ella tu perfil, tu historial, tu libro de facturas, tus tareas, tus claves de API y tus sesiones. Los informes técnicos de errores se borran a los 30 días. Al borrar la cuenta se borran también las facturas que hayas emitido y sus registros; la obligación de conservarlas durante el plazo legal es tuya, así que descárgalas antes. Al borrar la cuenta también se cancela tu suscripción y se borra tu ficha de cliente en Stripe; en los registros de seguridad que se conservan, tu email se sustituye por un código (hash) que no permite leerlo.'] },
       { h: 'Tus derechos', ps: ['Puedes ejercer tus derechos de acceso, rectificación, supresión, portabilidad y oposición desde Configuración o escribiendo a info@nokfi.app. También puedes reclamar ante la Agencia Española de Protección de Datos (aepd.es).'] },
       { h: 'Seguridad', ps: ['Aplicamos HTTPS en todo el servicio, contraseñas hasheadas con scrypt, tokens de sesión, de recuperación y claves de API almacenados como hash, y copias de seguridad diarias de la base de datos en el servidor y, cifradas (AES-256), en Cloudflare R2 dentro de la UE, donde se borran a los 30 días.'] }
     ]
@@ -1298,7 +1302,7 @@ export default {
       { q: '¿Puedo darle acceso a mi gestoría?', a: 'Sí. En Configuración › Compartir creas un enlace de solo lectura, con fecha de caducidad, que puedes revocar cuando quieras.', cta: 'Crear un enlace' },
       { q: '¿Qué pasa con mis datos?', a: 'Son tuyos. Los proveedores de IA que usamos no entrenan con ellos. Desde Configuración › Datos puedes descargarlos todos o borrar tu cuenta.', cta: 'Mis datos' },
       { q: '¿Cuántos análisis con IA tengo?', a: 'Depende del plan: 10 al día en Mini, 50 en Pro y 130 en Max. La cuota se renueva cada día. Las facturas electrónicas y las calculadoras no gastan análisis.', cta: 'Ver mi plan' },
-      { q: '¿Cómo cambio de plan o cancelo?', a: 'En Configuración › Plan, «Gestionar suscripción». No hay permanencia y los cambios se aplican al final del periodo que ya has pagado.', cta: 'Ir a mi plan' }
+      { q: '¿Cómo cambio de plan o cancelo?', a: 'En Configuración › Plan tienes «Cambiar de plan» y «Cancelar plan». Al cambiar se cobra hoy el precio completo del plan nuevo y empieza un mes nuevo; al cancelar, lo usas hasta el final del periodo pagado. No hay permanencia.', cta: 'Ir a mi plan' }
     ]
   },
   apiDocs: {

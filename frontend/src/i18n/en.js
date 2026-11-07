@@ -217,7 +217,8 @@ export default {
     passwordRequired: 'Enter your password.', invalidEmail: 'Please enter a valid email.', showPassword: 'Show password', hidePassword: 'Hide password',
     passwordMismatch: 'Passwords do not match.',
     weakPassword: 'Password must be at least 8 characters.',
-    noLicense: 'No license yet? See plans and pricing'
+    noLicense: 'No license yet? See plans and pricing',
+    blockedTitle: 'Your account is blocked', blockedBody: 'We could not charge your subscription renewal. Until you renew the subscription you cannot use the account. Your data is still saved.', blockedPick: 'Choose a plan to resume', blockedPayNote: 'The full price is charged today and a new month starts from today. It renews every month until you cancel.', blockedResume: 'Pay and resume', blockedBack: 'Back', blockedExpired: 'The resume session has expired. Please sign in again.', blockedResumed: 'Payment received: your account is active again. Please sign in.', blockedResumeCancelled: 'Payment cancelled: nothing was charged and your account is still blocked.'
   },
   resetPassword: {
     title: 'Reset password', email: 'Email', licenseKey: 'License key',
@@ -233,7 +234,8 @@ export default {
     title: 'Payment complete!', subtitle: 'This is your Nokfi license key.',
     yourKey: 'Your license key', alsoEmailed: 'We have also emailed it to you.',
     goLogin: 'Go to login', notFound: 'We could not find your payment. If you believe this is an error, contact us.',
-    pending: 'We are confirming your payment, one moment...'
+    pending: 'We are confirming your payment, one moment...',
+    titleTrial: 'Trial activated!', subtitleTrial: 'Nothing has been charged today. This is your Nokfi licence key.', alreadyShown: 'This key has already been shown and, for security, is not displayed here again. You have it in the email we sent you; if you can’t find it, recover it from “Forgot your key?”.'
   },
   config: {
     title: 'Settings',
@@ -253,8 +255,8 @@ export default {
     trialRow: 'Trial period',
     trialDaysLeft: '{n} days left', trialDaysLeft_one: '{n} day left',
     aiQuota: 'AI analysis quota', aiQuotaPerDay: 'analyses/day',
-    manageSubscription: 'Manage subscription',
-    manageHint: 'Switch plans, update your card or cancel from Stripe’s secure portal. Plan changes take effect at the end of the current period.',
+    manageSubscription: 'Card and invoices',
+    manageHint: 'In Stripe’s secure portal you can change your card, download your invoices or cancel.',
     sectorPlaceholder: 'E.g. Hospitality', saving: 'Saving…', saved: 'Saved', saveError: 'Couldn’t save',
     status_active: 'Active', status_suspended: 'Suspended', status_expired: 'Expired', status_revoked: 'Revoked', status_past_due: 'Payment due',
     wrongPassword: 'The password is incorrect.', keyCopied: 'Key copied to clipboard',
@@ -267,7 +269,7 @@ export default {
     api: {
       title: 'API for automations', docs: 'Documentation',
       desc: 'Connect Nokfi to n8n, Make, Zapier or your own scripts. Each API analysis uses 1 of your daily quota, just like on the web.',
-      locked: 'The API is available on the Pro and Max plans.', lockedHint: 'You can upgrade from “Manage subscription”.',
+      locked: 'The API is available on the Pro and Max plans.', lockedHint: 'You can upgrade with “Change plan”.',
       namePlaceholder: 'Key name (e.g. n8n)', create: 'Create key',
       createdOnce: 'Copy your key now: for security we will not show it again.', savedIt: 'I have saved it',
       unnamed: 'Unnamed', lastUsed: 'Last used: {date}', neverUsed: 'Not used yet',
@@ -280,9 +282,10 @@ export default {
       desc: 'Download everything Nokfi stores about you (profile, history, ledger, tasks…) or delete your account.',
       download: 'Download my data (JSON)', delete: 'Delete my account',
       deleteTitle: 'Delete account', confirmWord: 'DELETE',
-      deleteWarning: 'Your license, profile, analysis history, invoice ledger, tasks and API keys will be deleted forever. This cannot be undone. If you have an active subscription, cancel it first from “Manage subscription”.',
+      deleteWarning: 'Your license, profile, analysis history, invoice ledger, tasks and API keys will be deleted forever. This cannot be undone. If you have an active subscription, cancel it first with “Cancel plan” (Settings › Plan).',
       typeToConfirm: 'Type {word} to confirm', deleteForever: 'Delete forever', deleted: 'Your account has been deleted.'
-    }
+    },
+    changePlan: 'Change plan', cancelPlan: 'Cancel plan', changePlanTitle: 'Change plan', changePlanPick: 'Choose the new plan. Changing charges its full price today and starts a new month from today.', changePlanNotice: 'You will be charged {amount} today and your {plan} plan will last until {date}. What is left of your current plan is not refunded.', changePlanTrialNote: 'With this change your free trial ends today.', changePlanCancelledNote: 'Your plan is still cancelled: it will not renew when this period ends.', changePlanConfirm: 'Pay {amount} and change', changePlanDone: 'Done: you now have the {plan} plan.', changePlanDeclined: 'Your card could not be charged, so your plan has not changed. Check your card in “Card and invoices” and try again.', currentPlanTag: 'Your current plan', perMonth: 'month', cancelPlanTitle: 'Cancel your plan?', cancelPlanBody: 'You will keep using your {plan} plan until {date}. Then the subscription ends and you will not be charged again.', cancelPlanTrialBody: 'Your trial continues until {date}. Then it ends and you will not be charged anything.', cancelPlanConfirm: 'Cancel plan', cancelPlanDone: 'Plan cancelled. You can use it until the end of the paid period.'
   },
   pricing: {
     title: 'Choose your plan', subtitle: 'Monthly subscription. Cancel anytime.',
@@ -586,14 +589,15 @@ export default {
     chat_rate_limited: 'You are going too fast. Wait a minute and ask again.',
     chat_unavailable: 'The assistant is busy. Try again in a minute.',
     api_plan_required: 'API keys are available on the Pro and Max plans.',
-    subscription_active: 'First cancel your subscription from “Manage subscription”. Then you can delete the account.',
+    subscription_active: 'First cancel your plan in Settings › Plan (“Cancel plan”). Then you can delete the account.',
     payload_too_large: 'The files are too large for a single upload. Try with fewer files.',
     pending_not_found: 'The task was interrupted. Please run it again.',
     too_many_pending: 'You have several AI tasks running. Wait for them to finish before starting another one.',
     ai_timeout: 'The AI didn’t finish in time. Please try again in a few minutes.',
     offlineTitle: 'We can’t reach Nokfi',
     offlineDesc: 'It may be your connection or the server restarting. Try again in a few seconds.',
-    genericTitle: 'Couldn’t load'
+    genericTitle: 'Couldn’t load',
+    same_plan: 'You already have that plan.', subscription_not_active: 'Your subscription is not active, so the plan cannot be changed.'
   },
   toast: {
     profileCreated: 'Profile saved. Welcome to Nokfi!',
@@ -656,7 +660,7 @@ export default {
       { q: 'What is Nokfi?', a: 'A web app for financial diagnosis aimed at freelancers and small businesses: a guided questionnaire, AI analysis of your Excel sheets and PDFs, financial calculators and reports you can export to PDF and Excel.' },
       { q: 'Do I have to install anything or upload my files?', a: 'Nothing to install: it runs in your browser. Your Excel files, PDFs and folders are read on your own device: the file never leaves it. For the analysis we only send the rows or text needed, and we don’t store them. When reading scanned or photographed invoices, a reduced copy is sent to the AI to read it, without storing it.' },
       { q: 'How does the free trial work?', a: 'The Mini plan includes a 14-day free trial. A card is required at sign-up, but nothing is charged until the trial ends. Cancel before it ends and you pay nothing.' },
-      { q: 'Can I change plans or cancel anytime?', a: 'Yes, no lock-in. From Settings you open the Stripe portal to switch plans or cancel; changes take effect at the end of the current period.' },
+      { q: 'Can I change plans or cancel anytime?', a: 'Yes, no lock-in, from Settings › Plan. When you change plan (up or down) the full price of the new plan is charged that day and a new month starts from that day; what was left of the old one is not refunded. If you change during the trial, the trial ends and you are charged that day. If you cancel, you keep using it until the end of the paid month and are not charged again.' },
       { q: 'What is the difference between plans?', a: 'Every plan includes all the app features (diagnosis, Excel and folders, AI-read invoices, taxes, receivables, cash forecast and the assistant). The daily AI analysis quota changes: 10 per day on Mini, 50 on Pro and 130 on Max. Pro and Max also include the API for automations (n8n, Make, Zapier), and Max includes priority support.' },
       { q: 'Does Nokfi replace my accountant?', a: 'No. Nokfi keeps your invoices in order and tells you in advance how much to set aside for VAT and income tax, who owes you and how your cash will go, but these are estimates. Your accountant still has the final say — in fact, you can export the ledger for them as CSV or Excel.' }
     ],
@@ -719,7 +723,7 @@ export default {
   },
   privacy: {
     title: 'Privacy policy',
-    updated: 'Last updated: 24 October 2026',
+    updated: 'Last updated: 7 November 2026',
     intro: 'This policy describes, in plain terms, which data Nokfi (nokfi.app) processes, why, and which third-party services are involved. It reflects exactly how the application works.',
     sections: [
       { h: 'Controller & contact', ps: ['The controller for your account data is {OWNER}. For any privacy question or to exercise your rights, write to info@nokfi.app. For account or payment issues, to soporte@nokfi.app.'] },
@@ -749,7 +753,7 @@ export default {
       ] },
       { h: 'Your clients’ and suppliers’ data', ps: ['For third-party data you enter in Nokfi (clients and suppliers on your invoices), you are the controller and Nokfi acts as processor: we use it only to provide the service. The terms are in the data processing agreement (nokfi.app/encargo-tratamiento). If you enable automatic reminders, they are sent in your company’s name and replies go straight to your email.'] },
       { h: 'Cookies & analytics', ps: ['Nokfi does not use tracking cookies. To know how many people visit the public website we use Cloudflare Web Analytics, which uses no cookies, does not store your IP address and does not identify you. We also count, without any personal data, how many times “Try for free” is clicked, a payment is started or a public tool is used (only the total per day and page). Your session, language and theme are kept in your browser’s local storage.'] },
-      { h: 'Retention & deletion', ps: ['We keep your data while your license exists. From Settings → My data you can download all your data as a file or delete your account: your profile, history, invoice ledger, tasks, API keys and sessions are deleted with it. Technical error reports are deleted after 30 days. Deleting your account also deletes the invoices you issued and their records; keeping them for the legal period is your obligation, so download them first.'] },
+      { h: 'Retention & deletion', ps: ['We keep your data while your license exists. From Settings → My data you can download all your data as a file or delete your account: your profile, history, invoice ledger, tasks, API keys and sessions are deleted with it. Technical error reports are deleted after 30 days. Deleting your account also deletes the invoices you issued and their records; keeping them for the legal period is your obligation, so download them first. Deleting the account also cancels your subscription and deletes your customer record at Stripe; in the security logs that are kept, your email is replaced by a code (hash) from which it cannot be read.'] },
       { h: 'Your rights', ps: ['You can exercise your rights of access, rectification, erasure, portability and objection from Settings or by writing to info@nokfi.app. You can also lodge a complaint with the Spanish Data Protection Agency (aepd.es).'] },
       { h: 'Security', ps: ['We enforce HTTPS across the service, passwords hashed with scrypt, session tokens, recovery tokens and API keys stored as hashes, and daily database backups on the server and, encrypted (AES-256), in Cloudflare R2 within the EU, where they are deleted after 30 days.'] }
     ]
@@ -1295,7 +1299,7 @@ export default {
       { q: 'Can I give my accountant access?', a: 'Yes. In Settings › Sharing you create a read-only link with an expiry date that you can revoke at any time.', cta: 'Create a link' },
       { q: 'What happens to my data?', a: 'It\'s yours. The AI providers we use don\'t train on it. From Settings › Data you can download all of it or delete your account.', cta: 'My data' },
       { q: 'How many AI analyses do I have?', a: 'It depends on the plan: 10 a day on Mini, 50 on Pro and 130 on Max. The quota renews every day. E-invoices and calculators don\'t use analyses.', cta: 'See my plan' },
-      { q: 'How do I change plan or cancel?', a: 'In Settings › Plan, "Manage subscription". There\'s no lock-in and changes apply at the end of the period you\'ve already paid for.', cta: 'Go to my plan' }
+      { q: 'How do I change plan or cancel?', a: 'In Settings › Plan you have “Change plan” and “Cancel plan”. Changing charges the full price of the new plan today and starts a new month; cancelling lets you use it until the end of the paid period. There is no lock-in.', cta: 'Go to my plan' }
     ]
   },
   apiDocs: {

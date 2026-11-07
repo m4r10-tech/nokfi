@@ -1,6 +1,7 @@
 import { useState, useEffect } from 'react';
 import { useOutletContext, useSearchParams, Link } from 'react-router-dom';
-import { Moon, Sun, LogOut, KeyRound, Copy, Eye, EyeOff, Loader2, CreditCard, Check, CloudOff, Code2, Trash2, Download, BellRing, LifeBuoy, Mail, Share2 } from 'lucide-react';
+import { Moon, Sun, LogOut, KeyRound, Copy, Eye, EyeOff, Loader2, CreditCard, Check, CloudOff, Code2, Trash2, Download, BellRing, LifeBuoy, Mail, Share2, ArrowLeftRight, XCircle } from 'lucide-react';
+import { usePlans } from '../hooks/usePlans';
 import { sortedSectors, SIZES } from '../components/OnboardingModal';
 import { LANGUAGES } from '../i18n/languages';
 import { Modal, ErrorBox } from '../components/ui';
@@ -180,9 +181,14 @@ const STATUS_KEYS = ['active', 'suspended', 'expired', 'revoked', 'past_due'];
 /* ── Suscripción (Fase 3) — plan, estado, cuota IA, gestión vía Stripe Portal ── */
 function SubscriptionSection() {
   const { t, lang } = useLang();
-  const { license } = useAuth();
+  const { license, refreshLicense } = useAuth();
+  const toast = useToast();
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState(null);
+  // S15b (U5): cambiar de plan (cobro completo hoy) y cancelar desde aquí.
+  const [changing, setChanging] = useState(false);
+  const [cancelling, setCancelling] = useState(false);
+  const [cancelBusy, setCancelBusy] = useState(false);
 
   // Volver del portal con "atrás" restaura la página desde bfcache con el
   // spinner aún activo: se resetea al re-mostrarse.
@@ -219,6 +225,16 @@ function SubscriptionSection() {
     }
     setLoading(false);
     setError(apiErrorMessage(t, res, 'config.portalError'));
+  };
+
+  const cancelPlan = async () => {
+    setCancelBusy(true);
+    const res = await paymentsApi.cancelSubscription();
+    setCancelBusy(false);
+    setCancelling(false);
+    if (!res.ok) { toast.error(apiErrorMessage(t, res)); return; }
+    await refreshLicense();
+    toast.success(t('config.cancelPlanDone'));
   };
 
   return (
@@ -260,17 +276,111 @@ function SubscriptionSection() {
 
       {hasSubscription ? (
         <>
+          {isActive && (
+            <div className="flex flex-col sm:flex-row gap-2 mt-1">
+              <button onClick={() => setChanging(true)} className="btn btn-primary w-full sm:w-auto">
+                <ArrowLeftRight size={15} /> {t('config.changePlan')}
+              </button>
+              {!cancelled && (
+                <button onClick={() => setCancelling(true)} className="btn btn-secondary w-full sm:w-auto">
+                  <XCircle size={15} /> {t('config.cancelPlan')}
+                </button>
+              )}
+            </div>
+          )}
           <p className="text-xs mt-1" style={{ color: 'var(--text-muted)' }}>{t('config.manageHint')}</p>
           <button onClick={openPortal} disabled={loading} className="btn btn-secondary mt-1 w-full sm:w-auto sm:self-start">
             {loading ? <Loader2 size={15} className="animate-spin" /> : <CreditCard size={15} />}
             {t('config.manageSubscription')}
           </button>
           {error && <ErrorMsg>{error}</ErrorMsg>}
+          {changing && <ChangePlanModal license={license} onClose={() => setChanging(false)}
+            onDone={async (planName) => { setChanging(false); await refreshLicense(); toast.success(t('config.changePlanDone', { plan: planName })); }} />}
+          {cancelling && (
+            <ConfirmModal title={t('config.cancelPlanTitle')} cta={t('config.cancelPlanConfirm')} danger busy={cancelBusy}
+              text={trialDaysLeft != null
+                ? t('config.cancelPlanTrialBody', { date: trialEnd.toLocaleDateString(localeOf(lang), { day: 'numeric', month: 'long', year: 'numeric' }) })
+                : t('config.cancelPlanBody', { plan, date: renewal || '—' })}
+              onConfirm={cancelPlan} onClose={() => setCancelling(false)} />
+          )}
         </>
       ) : (
         <p className="text-xs mt-1" style={{ color: 'var(--text-muted)' }}>{t('config.legacyNote')}</p>
       )}
     </Section>
+  );
+}
+
+/* ── S15b (U3/U5): cambio de plan con aviso previo del cobro ──
+   Cualquier cambio (subir o bajar) cobra HOY el precio completo del plan nuevo y
+   empieza un periodo nuevo de un mes; lo que queda del plan actual no se devuelve.
+   Si la tarjeta falla, el plan no cambia. */
+function ChangePlanModal({ license, onClose, onDone }) {
+  const { t, lang } = useLang();
+  const { plans } = usePlans();
+  const [selected, setSelected] = useState(null);
+  const [preview, setPreview] = useState(null);
+  const [busy, setBusy] = useState(false);
+  const [error, setError] = useState(null);
+
+  const choose = async (id) => {
+    setSelected(id); setPreview(null); setError(null);
+    const res = await paymentsApi.changePlanPreview(id);
+    if (res.ok) setPreview(res.data);
+    else setError(apiErrorMessage(t, res));
+  };
+
+  const money = (eur) => Number(eur).toLocaleString(localeOf(lang), { style: 'currency', currency: 'EUR', minimumFractionDigits: Number.isInteger(Number(eur)) ? 0 : 2 });
+  const planName = (id) => plans.find(p => p.id === id)?.name || String(id || '').toUpperCase();
+
+  const confirm = async () => {
+    setBusy(true); setError(null);
+    const res = await paymentsApi.changePlan(selected);
+    setBusy(false);
+    if (res.ok) { onDone(planName(selected)); return; }
+    setError(res.data?.error === 'payment_failed' ? t('config.changePlanDeclined') : apiErrorMessage(t, res));
+  };
+
+  return (
+    <Modal title={t('config.changePlanTitle')} onClose={onClose}
+      footer={<>
+        <button type="button" onClick={onClose} className="btn btn-secondary">{t('common.cancel')}</button>
+        <button type="button" onClick={confirm} disabled={!preview || busy} className="btn btn-primary">
+          {busy && <Loader2 size={15} className="animate-spin" />}
+          {preview ? t('config.changePlanConfirm', { amount: money(preview.amount_eur) }) : t('config.changePlan')}
+        </button>
+      </>}>
+      <div className="flex flex-col gap-3">
+        <p className="text-sm" style={{ color: 'var(--text-secondary)' }}>{t('config.changePlanPick')}</p>
+        <div className="grid grid-cols-1 sm:grid-cols-3 gap-2" role="radiogroup" aria-label={t('config.changePlanTitle')}>
+          {plans.map(p => {
+            const current = p.id === license.plan;
+            const on = selected === p.id;
+            return (
+              <button key={p.id} type="button" role="radio" aria-checked={on} disabled={current} onClick={() => choose(p.id)}
+                className="rounded-lg px-3 py-2.5 text-left min-h-[44px]"
+                style={{ border: `1px solid ${on ? 'var(--accent)' : 'var(--border)'}`, background: on ? 'var(--accent-soft)' : 'var(--surface-2)', opacity: current ? 0.6 : 1 }}>
+                <span className="block text-sm font-semibold" style={{ color: 'var(--text-primary)' }}>{p.name}</span>
+                <span className="block text-xs" style={{ color: 'var(--text-secondary)' }}>
+                  {current ? t('config.currentPlanTag') : `${money(p.price)} / ${t('config.perMonth')}`}
+                </span>
+              </button>
+            );
+          })}
+        </div>
+        {preview && (
+          <div className="rounded-lg p-3 text-sm" role="status" style={{ background: 'var(--surface-2)', border: '1px solid var(--border-strong)', color: 'var(--text-primary)' }}>
+            {t('config.changePlanNotice', {
+              amount: money(preview.amount_eur), plan: planName(preview.plan),
+              date: new Date(preview.ends_at).toLocaleDateString(localeOf(lang), { day: 'numeric', month: 'long', year: 'numeric' })
+            })}
+            {preview.ends_trial && <span className="block mt-1.5" style={{ color: 'var(--text-secondary)' }}>{t('config.changePlanTrialNote')}</span>}
+            {preview.cancel_at_period_end && <span className="block mt-1.5" style={{ color: 'var(--text-secondary)' }}>{t('config.changePlanCancelledNote')}</span>}
+          </div>
+        )}
+        {error && <ErrorBox>{error}</ErrorBox>}
+      </div>
+    </Modal>
   );
 }
 
@@ -422,7 +532,7 @@ function DeleteAccountModal({ license, onClose, onDeleted }) {
     <Modal title={t('config.data.deleteTitle')} onClose={onClose}
       footer={<>
         <button type="button" onClick={onClose} className="btn btn-secondary">{t('common.cancel')}</button>
-        <button type="submit" form="delete-account" disabled={loading || !password || confirmText.trim().toUpperCase() !== word.toUpperCase()} className="btn btn-danger">
+        <button type="submit" form="delete-account" disabled={loading || subActive || !password || confirmText.trim().toUpperCase() !== word.toUpperCase()} className="btn btn-danger">
           {loading && <Loader2 size={15} className="animate-spin" />} {t('config.data.deleteForever')}
         </button>
       </>}>

@@ -1,6 +1,6 @@
 import LegalAccept from '../components/LegalAccept';
-import { useState, useRef } from 'react';
-import { useNavigate, Link } from 'react-router-dom';
+import { useState, useRef, useEffect } from 'react';
+import { useNavigate, Link, useLocation, useSearchParams } from 'react-router-dom';
 import { KeyRound, Mail, Lock, Eye, EyeOff, Loader2, Laptop } from 'lucide-react';
 import { authApi } from '../middleware/api';
 import { apiErrorMessage } from '../middleware/errors';
@@ -13,6 +13,7 @@ import FormField from '../components/FormField';
 import { useShake } from '../hooks/useShake';
 import { formatLicenseKey, KEY_REGEX, EMAIL_REGEX } from '../utils/license';
 import { usePageMeta } from '../hooks/usePageMeta';
+import AccountBlocked from './AccountBlocked';
 
 /**
  * /login — inicio de sesión y activación inicial (primera contraseña).
@@ -21,9 +22,11 @@ import { usePageMeta } from '../hooks/usePageMeta';
  * formulario + borde rojo en el campo que falla (y foco en él).
  */
 export default function Login() {
+  // P9 (S15b): desde /reveal llegan el email y la clave por el estado de la navegación.
+  const location = useLocation();
   const [mode, setMode] = useState('login'); // 'login' | 'activate'
-  const [email, setEmail] = useState('');
-  const [licenseKey, setLicenseKey] = useState('');
+  const [email, setEmail] = useState(() => location.state?.email || '');
+  const [licenseKey, setLicenseKey] = useState(() => (location.state?.key ? formatLicenseKey(location.state.key) : ''));
   const [password, setPassword] = useState('');
   const [confirmPassword, setConfirmPassword] = useState('');
   const [deviceName, setDeviceName] = useState('');
@@ -31,6 +34,8 @@ export default function Login() {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState(null); // { msg, fields: [], support? }
   const [showResetHint, setShowResetHint] = useState(false);
+  const [blocked, setBlocked] = useState(null); // S15b (U4): { token, plan } si la cuenta está bloqueada por impago
+  const [searchParams, setSearchParams] = useSearchParams();
   const [formRef, shake] = useShake();
   const refs = { email: useRef(null), key: useRef(null), password: useRef(null), confirm: useRef(null) };
 
@@ -39,6 +44,16 @@ export default function Login() {
   const pub = usePublicPath();
   const navigate = useNavigate();
   usePageMeta(t('meta.loginTitle'));
+
+  // Vuelta de Stripe tras reanudar (o abandonar) el pago de una cuenta bloqueada.
+  useEffect(() => {
+    const resumed = searchParams.get('resumed') === '1';
+    const resumeCancelled = searchParams.get('resume_cancelled') === '1';
+    if (!resumed && !resumeCancelled) return;
+    setError({ msg: t(resumed ? 'login.blockedResumed' : 'login.blockedResumeCancelled'), fields: [], tone: resumed ? 'positive' : 'accent' });
+    searchParams.delete('resumed'); searchParams.delete('resume_cancelled');
+    setSearchParams(searchParams, { replace: true });
+  }, []); // eslint-disable-line react-hooks/exhaustive-deps
 
   const fail = (msg, fields = [], extra = {}) => {
     setError({ msg, fields, ...extra });
@@ -97,6 +112,9 @@ export default function Login() {
       case 'license_inactive':
         fail(t('errors.license_inactive'), [], { support: true });
         break;
+      case 'account_blocked':
+        setBlocked({ token: data.resume_token, plan: data.plan });
+        break;
       case 'weak_password':
         fail(data.message || t('login.weakPassword'), ['password']);
         break;
@@ -117,6 +135,14 @@ export default function Login() {
       {showPwd ? <EyeOff size={16} /> : <Eye size={16} />}
     </button>
   );
+
+  if (blocked) {
+    return (
+      <AuthShell>
+        <AccountBlocked token={blocked.token} currentPlan={blocked.plan} onBack={() => { setBlocked(null); setPassword(''); }} />
+      </AuthShell>
+    );
+  }
 
   return (
     <AuthShell footer={<>

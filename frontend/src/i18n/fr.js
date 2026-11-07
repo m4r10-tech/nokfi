@@ -217,7 +217,8 @@ export default {
     passwordRequired: 'Saisissez votre mot de passe.', invalidEmail: 'Saisissez un e-mail valide.', showPassword: 'Afficher le mot de passe', hidePassword: 'Masquer le mot de passe',
     passwordMismatch: 'Les mots de passe ne correspondent pas.',
     weakPassword: 'Le mot de passe doit contenir au moins 8 caractères.',
-    noLicense: 'Pas encore de licence ? Voir les offres et tarifs'
+    noLicense: 'Pas encore de licence ? Voir les offres et tarifs',
+    blockedTitle: 'Votre compte est bloqué', blockedBody: 'Nous n’avons pas pu débiter le renouvellement de votre abonnement. Tant que vous ne renouvelez pas l’abonnement, vous ne pouvez pas utiliser le compte. Vos données restent enregistrées.', blockedPick: 'Choisissez une offre pour reprendre', blockedPayNote: 'Le prix complet est débité aujourd’hui et un nouveau mois commence aujourd’hui. Il se renouvelle chaque mois jusqu’à ce que vous résiliiez.', blockedResume: 'Payer et reprendre', blockedBack: 'Retour', blockedExpired: 'La session de reprise a expiré. Reconnectez-vous.', blockedResumed: 'Paiement reçu : votre compte est de nouveau actif. Connectez-vous.', blockedResumeCancelled: 'Paiement annulé : rien n’a été débité et votre compte reste bloqué.'
   },
   resetPassword: {
     title: 'Réinitialiser le mot de passe', email: 'E-mail', licenseKey: 'Clé de licence',
@@ -233,7 +234,8 @@ export default {
     title: 'Paiement effectué !', subtitle: 'Voici votre clé de licence Nokfi.',
     yourKey: 'Votre clé de licence', alsoEmailed: 'Nous vous l’avons aussi envoyée par e-mail.',
     goLogin: 'Aller à la connexion', notFound: 'Nous n’avons pas trouvé votre paiement. Si vous pensez qu’il s’agit d’une erreur, écrivez-nous.',
-    pending: 'Nous confirmons votre paiement, un instant…'
+    pending: 'Nous confirmons votre paiement, un instant…',
+    titleTrial: 'Essai activé !', subtitleTrial: 'Rien n’a été débité aujourd’hui. Voici votre clé de licence Nokfi.', alreadyShown: 'Cette clé a déjà été affichée et, par sécurité, elle n’est plus montrée ici. Vous l’avez dans l’e-mail que nous vous avons envoyé ; si vous ne le trouvez pas, récupérez-la via « Clé oubliée ? ».'
   },
   config: {
     title: 'Paramètres',
@@ -253,8 +255,8 @@ export default {
     trialRow: 'Période d’essai',
     trialDaysLeft: 'Il reste {n} jours', trialDaysLeft_one: 'Il reste {n} jour',
     aiQuota: 'Quota d’analyses IA', aiQuotaPerDay: 'analyses/jour',
-    manageSubscription: 'Gérer l’abonnement',
-    manageHint: 'Changez d’offre, mettez à jour votre carte ou résiliez depuis le portail sécurisé de Stripe. Les changements d’offre s’appliquent à la fin de la période en cours.',
+    manageSubscription: 'Carte et factures',
+    manageHint: 'Dans le portail sécurisé de Stripe, vous pouvez changer de carte, télécharger vos factures ou résilier.',
     sectorPlaceholder: 'Ex. : Restauration', saving: 'Enregistrement…', saved: 'Enregistré', saveError: 'Impossible d’enregistrer',
     status_active: 'Active', status_suspended: 'Suspendue', status_expired: 'Expirée', status_revoked: 'Révoquée', status_past_due: 'Paiement en attente',
     wrongPassword: 'Le mot de passe est incorrect.', keyCopied: 'Clé copiée dans le presse-papiers',
@@ -267,7 +269,7 @@ export default {
     api: {
       title: 'API pour automatisations', docs: 'Documentation',
       desc: 'Connectez Nokfi à n8n, Make, Zapier ou à vos propres scripts. Chaque analyse via l’API consomme 1 analyse de votre quota quotidien, comme sur le web.',
-      locked: 'L’API est disponible avec les offres Pro et Max.', lockedHint: 'Vous pouvez changer d’offre depuis « Gérer l’abonnement ».',
+      locked: 'L’API est disponible avec les offres Pro et Max.', lockedHint: 'Vous pouvez changer d’offre avec « Changer d’offre ».',
       namePlaceholder: 'Nom de la clé (ex. : n8n)', create: 'Créer une clé',
       createdOnce: 'Copiez votre clé maintenant : pour des raisons de sécurité, elle ne sera plus affichée.', savedIt: 'Je l’ai enregistrée',
       unnamed: 'Sans nom', lastUsed: 'Dernière utilisation : {date}', neverUsed: 'Pas encore utilisée',
@@ -280,9 +282,10 @@ export default {
       desc: 'Téléchargez tout ce que Nokfi conserve sur vous (profil, historique, registre, tâches…) ou supprimez votre compte.',
       download: 'Télécharger mes données (JSON)', delete: 'Supprimer mon compte',
       deleteTitle: 'Supprimer le compte', confirmWord: 'SUPPRIMER',
-      deleteWarning: 'Votre licence, votre profil, votre historique d’analyses, votre registre de factures, vos tâches et vos clés d’API seront supprimés définitivement. Cette action est irréversible. Si vous avez un abonnement actif, résiliez-le d’abord depuis « Gérer l’abonnement ».',
+      deleteWarning: 'Votre licence, votre profil, votre historique d’analyses, votre registre de factures, vos tâches et vos clés d’API seront supprimés définitivement. Cette action est irréversible. Si vous avez un abonnement actif, résiliez-le d’abord avec « Résilier l’offre » (Paramètres › Formule).',
       typeToConfirm: 'Tapez {word} pour confirmer', deleteForever: 'Supprimer définitivement', deleted: 'Votre compte a été supprimé.'
-    }
+    },
+    changePlan: 'Changer d’offre', cancelPlan: 'Résilier l’offre', changePlanTitle: 'Changer d’offre', changePlanPick: 'Choisissez la nouvelle offre. Le changement débite aujourd’hui son prix complet et un nouveau mois commence aujourd’hui.', changePlanNotice: '{amount} vous seront débités aujourd’hui et votre offre {plan} durera jusqu’au {date}. Ce qui reste de l’offre actuelle n’est pas remboursé.', changePlanTrialNote: 'Avec ce changement, votre essai gratuit se termine aujourd’hui.', changePlanCancelledNote: 'Votre offre reste résiliée : elle ne sera pas renouvelée à la fin de cette période.', changePlanConfirm: 'Payer {amount} et changer', changePlanDone: 'C’est fait : vous avez maintenant l’offre {plan}.', changePlanDeclined: 'Votre carte n’a pas pu être débitée, votre offre n’a donc pas changé. Vérifiez votre carte dans « Carte et factures » et réessayez.', currentPlanTag: 'Votre offre actuelle', perMonth: 'mois', cancelPlanTitle: 'Résilier votre offre ?', cancelPlanBody: 'Vous continuerez à utiliser l’offre {plan} jusqu’au {date}. Ensuite l’abonnement prend fin et rien ne vous sera plus débité.', cancelPlanTrialBody: 'Votre essai continue jusqu’au {date}. Ensuite il prend fin et rien ne vous sera débité.', cancelPlanConfirm: 'Résilier l’offre', cancelPlanDone: 'Offre résiliée. Vous pouvez l’utiliser jusqu’à la fin de la période payée.'
   },
   pricing: {
     title: 'Choisissez votre offre', subtitle: 'Abonnement mensuel. Résiliable à tout moment.',
@@ -585,14 +588,15 @@ export default {
     chat_rate_limited: 'Vous allez trop vite. Patientez une minute et reposez votre question.',
     chat_unavailable: 'L’assistant est saturé. Réessayez dans une minute.',
     api_plan_required: 'Les clés d’API sont disponibles avec les offres Pro et Max.',
-    subscription_active: 'Résiliez d’abord votre abonnement depuis « Gérer l’abonnement ». Vous pourrez ensuite supprimer le compte.',
+    subscription_active: 'Résiliez d’abord votre offre dans Paramètres › Formule (« Résilier l’offre »). Vous pourrez ensuite supprimer le compte.',
     payload_too_large: 'Les fichiers sont trop lourds pour un seul envoi. Essayez avec moins de fichiers.',
     pending_not_found: 'La tâche a été interrompue. Relancez-la.',
     too_many_pending: 'Plusieurs tâches d’IA sont en cours. Attendez qu’elles se terminent avant d’en lancer une autre.',
     ai_timeout: 'L’IA n’a pas terminé à temps. Réessayez dans quelques minutes.',
     offlineTitle: 'Impossible de joindre Nokfi',
     offlineDesc: 'Il peut s’agir de votre connexion ou d’un redémarrage du serveur. Réessayez dans quelques secondes.',
-    genericTitle: 'Chargement impossible'
+    genericTitle: 'Chargement impossible',
+    same_plan: 'Vous avez déjà cette offre.', subscription_not_active: 'Votre abonnement n’est pas actif, l’offre ne peut donc pas être changée.'
   },
   toast: {
     profileCreated: 'Profil enregistré. Bienvenue sur Nokfi !',
@@ -655,7 +659,7 @@ export default {
       { q: 'Qu’est-ce que Nokfi ?', a: 'Une application web de diagnostic financier pour indépendants et PME : un questionnaire guidé, l’analyse de vos Excel et PDF avec l’IA, des calculateurs financiers et des rapports exportables en PDF et Excel.' },
       { q: 'Dois-je installer quelque chose ou envoyer mes fichiers ?', a: 'Rien à installer : tout fonctionne dans le navigateur. Vos Excel, PDF et dossiers sont lus sur votre propre appareil : le fichier ne le quitte pas. Pour l’analyse, nous n’envoyons que les lignes ou le texte nécessaires, sans les conserver. La lecture de factures numérisées ou photographiées envoie une copie réduite à l’IA pour la lire, sans la conserver.' },
       { q: 'Comment fonctionne l’essai gratuit ?', a: 'L’offre Mini inclut 14 jours gratuits. Une carte est demandée à l’inscription, mais rien n’est débité avant la fin de l’essai. Si vous résiliez avant, vous ne payez rien.' },
-      { q: 'Puis-je changer d’offre ou résilier quand je veux ?', a: 'Oui, sans engagement. Depuis les Paramètres, vous accédez au portail Stripe pour changer d’offre ou résilier ; les changements s’appliquent à la fin de la période en cours.' },
+      { q: 'Puis-je changer d’offre ou résilier quand je veux ?', a: 'Oui, sans engagement, depuis Paramètres › Formule. En changeant d’offre (supérieure ou inférieure), le prix complet de la nouvelle offre est débité le jour même et un nouveau mois commence ce jour-là ; ce qui restait de l’ancienne n’est pas remboursé. Si vous changez pendant l’essai, l’essai se termine et vous êtes débité le jour même. Si vous résiliez, vous continuez à l’utiliser jusqu’à la fin du mois payé, sans autre débit.' },
       { q: 'Quelle différence entre les offres ?', a: 'Toutes les offres incluent toutes les fonctions de l’app (diagnostic, Excel et dossiers, factures lues par l’IA, impôts, encaissements, prévision de trésorerie et assistant). Seul le quota quotidien d’analyses IA change : 10 par jour avec Mini, 50 avec Pro et 130 avec Max. Pro et Max incluent aussi l’API pour automatisations (n8n, Make, Zapier), et Max le support prioritaire.' },
       { q: 'Nokfi remplace-t-il mon comptable ?', a: 'Non. Nokfi range vos factures et vous dit à l’avance combien mettre de côté pour la TVA et l’impôt sur le revenu, qui vous doit de l’argent et comment évoluera votre trésorerie, mais ce sont des estimations. Votre comptable garde le dernier mot ; vous pouvez d’ailleurs lui exporter le registre en CSV ou Excel.' }
     ],
@@ -718,7 +722,7 @@ export default {
   },
   privacy: {
     title: 'Politique de confidentialité',
-    updated: 'Dernière mise à jour : 24 octobre 2026',
+    updated: 'Dernière mise à jour : 7 novembre 2026',
     intro: 'Cette politique décrit, sans petits caractères, quelles données Nokfi (nokfi.app) traite, dans quel but et quels services tiers interviennent. Elle reflète exactement le fonctionnement de l’application.',
     sections: [
       { h: 'Responsable et contact', ps: ['Le responsable du traitement des données de votre compte est {OWNER}. Pour toute question de confidentialité ou pour exercer vos droits, écrivez à info@nokfi.app. Pour un problème de compte ou de paiement, à soporte@nokfi.app.'] },
@@ -748,7 +752,7 @@ export default {
       ] },
       { h: 'Données de vos clients et fournisseurs', ps: ['Pour les données de tiers que vous saisissez dans Nokfi (clients et fournisseurs de vos factures), vous êtes responsable du traitement et Nokfi agit comme sous-traitant : nous ne les utilisons que pour fournir le service. Les conditions figurent dans l’accord de sous-traitance (nokfi.app/encargo-tratamiento). Si vous activez les relances automatiques, elles partent au nom de votre entreprise et les réponses arrivent directement sur votre e-mail.'] },
       { h: 'Cookies et mesure d’audience', ps: ['Nokfi n’utilise pas de cookies de suivi. Pour savoir combien de personnes visitent le site public, nous utilisons Cloudflare Web Analytics, qui n’utilise pas de cookies, ne conserve pas votre adresse IP et ne vous identifie pas. Nous comptons aussi, sans aucune donnée personnelle, combien de fois on clique sur « Essayer gratuitement », on commence un paiement ou on utilise un outil public (seulement le total par jour et par page). Votre session, votre langue et votre thème sont conservés dans le stockage local de votre navigateur.'] },
-      { h: 'Conservation et suppression', ps: ['Nous conservons vos données tant que votre licence existe. Depuis Paramètres → Mes données, vous pouvez télécharger toutes vos données dans un fichier ou supprimer votre compte : votre profil, votre historique, votre registre de factures, vos tâches, vos clés d’API et vos sessions sont supprimés avec lui. Les rapports techniques d’erreurs sont supprimés au bout de 30 jours. La suppression du compte supprime aussi les factures émises et leurs enregistrements ; leur conservation pendant le délai légal vous incombe, téléchargez-les donc avant.'] },
+      { h: 'Conservation et suppression', ps: ['Nous conservons vos données tant que votre licence existe. Depuis Paramètres → Mes données, vous pouvez télécharger toutes vos données dans un fichier ou supprimer votre compte : votre profil, votre historique, votre registre de factures, vos tâches, vos clés d’API et vos sessions sont supprimés avec lui. Les rapports techniques d’erreurs sont supprimés au bout de 30 jours. La suppression du compte supprime aussi les factures émises et leurs enregistrements ; leur conservation pendant le délai légal vous incombe, téléchargez-les donc avant. La suppression du compte résilie aussi votre abonnement et supprime votre fiche client chez Stripe ; dans les journaux de sécurité conservés, votre e-mail est remplacé par un code (hash) qui ne permet pas de le lire.'] },
       { h: 'Vos droits', ps: ['Vous pouvez exercer vos droits d’accès, de rectification, d’effacement, de portabilité et d’opposition depuis les Paramètres ou en écrivant à info@nokfi.app. Vous pouvez aussi introduire une réclamation auprès de l’Agence espagnole de protection des données (aepd.es).'] },
       { h: 'Sécurité', ps: ['Nous appliquons le HTTPS sur tout le service, des mots de passe hachés avec scrypt, des jetons de session, de récupération et des clés d’API stockés sous forme d’empreinte, ainsi que des sauvegardes quotidiennes de la base de données sur le serveur et, chiffrées (AES-256), dans Cloudflare R2 au sein de l’UE, où elles sont supprimées au bout de 30 jours.'] }
     ]
@@ -1294,7 +1298,7 @@ export default {
       { q: 'Puis-je donner accès à mon comptable ?', a: 'Oui. Dans Paramètres › Partage, créez un lien en lecture seule avec une date d’expiration, révocable à tout moment.', cta: 'Créer un lien' },
       { q: 'Que deviennent mes données ?', a: 'Elles vous appartiennent. Les fournisseurs d’IA que nous utilisons ne s’entraînent pas avec. Dans Paramètres › Données, vous pouvez tout télécharger ou supprimer votre compte.', cta: 'Mes données' },
       { q: 'Combien d’analyses IA ai-je ?', a: 'Cela dépend de la formule : 10 par jour en Mini, 50 en Pro et 130 en Max. Le quota se renouvelle chaque jour. Les factures électroniques et les calculatrices n’en consomment pas.', cta: 'Voir ma formule' },
-      { q: 'Comment changer de formule ou résilier ?', a: 'Dans Paramètres › Formule, « Gérer l’abonnement ». Sans engagement ; les changements s’appliquent à la fin de la période déjà payée.', cta: 'Aller à ma formule' }
+      { q: 'Comment changer de formule ou résilier ?', a: 'Dans Paramètres › Formule, vous avez « Changer d’offre » et « Résilier l’offre ». Le changement débite aujourd’hui le prix complet de la nouvelle offre et commence un nouveau mois ; en résiliant, vous l’utilisez jusqu’à la fin de la période payée. Sans engagement.', cta: 'Aller à ma formule' }
     ]
   },
   apiDocs: {

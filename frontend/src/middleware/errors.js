@@ -22,7 +22,9 @@ const KNOWN = [
   'client_outdated', 'invalid_job', 'ai_bad_output', 'invalid_input', 'chat_rate_limited', 'chat_unavailable',
   'api_plan_required', 'subscription_active', 'payload_too_large',
   // IA local (2026-10): respuestas aplazadas
-  'pending_not_found', 'too_many_pending', 'ai_timeout'
+  'pending_not_found', 'too_many_pending', 'ai_timeout',
+  // S15b: cambio de plan
+  'same_plan', 'subscription_not_active'
 ];
 
 export function apiErrorMessage(t, result, fallbackKey = 'common.error') {

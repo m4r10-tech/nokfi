@@ -87,13 +87,19 @@ export function AuthProvider({ children }) {
     setAuthError(null);
   };
 
+  // S15b: tras cambiar o cancelar el plan, recargar los datos de la licencia.
+  const refreshLicense = async () => {
+    const { ok, data } = await authApi.verify();
+    if (ok && data.valid) setLicense(data.license);
+  };
+
   const logout = async () => {
     await authApi.logout();
     handleLogout();
   };
 
   return (
-    <AuthContext.Provider value={{ license, status, authError, applySession, logout, setAuthError }}>
+    <AuthContext.Provider value={{ license, status, authError, applySession, logout, setAuthError, refreshLicense }}>
       {children}
     </AuthContext.Provider>
   );

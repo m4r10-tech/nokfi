@@ -217,7 +217,8 @@ export default {
     passwordRequired: 'Gib dein Passwort ein.', invalidEmail: 'Gib eine gültige E-Mail-Adresse ein.', showPassword: 'Passwort anzeigen', hidePassword: 'Passwort verbergen',
     passwordMismatch: 'Die Passwörter stimmen nicht überein.',
     weakPassword: 'Das Passwort muss mindestens 8 Zeichen lang sein.',
-    noLicense: 'Noch keine Lizenz? Pläne und Preise ansehen'
+    noLicense: 'Noch keine Lizenz? Pläne und Preise ansehen',
+    blockedTitle: 'Dein Konto ist gesperrt', blockedBody: 'Wir konnten die Verlängerung deines Abos nicht abbuchen. Solange du das Abo nicht verlängerst, kannst du das Konto nicht nutzen. Deine Daten bleiben gespeichert.', blockedPick: 'Wähle einen Tarif, um fortzufahren', blockedPayNote: 'Heute wird der volle Preis abgebucht und ab heute beginnt ein neuer Monat. Er verlängert sich jeden Monat, bis du kündigst.', blockedResume: 'Zahlen und fortfahren', blockedBack: 'Zurück', blockedExpired: 'Die Sitzung zum Fortfahren ist abgelaufen. Melde dich erneut an.', blockedResumed: 'Zahlung erhalten: Dein Konto ist wieder aktiv. Melde dich an.', blockedResumeCancelled: 'Zahlung abgebrochen: Es wurde nichts abgebucht und dein Konto bleibt gesperrt.'
   },
   resetPassword: {
     title: 'Passwort zurücksetzen', email: 'E-Mail', licenseKey: 'Lizenzschlüssel',
@@ -233,7 +234,8 @@ export default {
     title: 'Zahlung abgeschlossen!', subtitle: 'Das ist dein Nokfi-Lizenzschlüssel.',
     yourKey: 'Dein Lizenzschlüssel', alsoEmailed: 'Wir haben ihn dir auch per E-Mail geschickt.',
     goLogin: 'Zur Anmeldung', notFound: 'Wir haben deine Zahlung nicht gefunden. Wenn du glaubst, dass das ein Fehler ist, schreib uns.',
-    pending: 'Wir bestätigen deine Zahlung, einen Moment…'
+    pending: 'Wir bestätigen deine Zahlung, einen Moment…',
+    titleTrial: 'Test aktiviert!', subtitleTrial: 'Heute wurde nichts abgebucht. Das ist dein Nokfi-Lizenzschlüssel.', alreadyShown: 'Dieser Schlüssel wurde bereits angezeigt und wird aus Sicherheitsgründen hier nicht noch einmal gezeigt. Du findest ihn in der E-Mail, die wir dir geschickt haben; falls nicht, stelle ihn über „Schlüssel vergessen?“ wieder her.'
   },
   config: {
     title: 'Einstellungen',
@@ -253,8 +255,8 @@ export default {
     trialRow: 'Testphase',
     trialDaysLeft: 'Noch {n} Tage', trialDaysLeft_one: 'Noch {n} Tag',
     aiQuota: 'KI-Analysekontingent', aiQuotaPerDay: 'Analysen/Tag',
-    manageSubscription: 'Abonnement verwalten',
-    manageHint: 'Wechsle den Plan, aktualisiere deine Karte oder kündige im sicheren Stripe-Portal. Planwechsel gelten zum Ende der laufenden Periode.',
+    manageSubscription: 'Karte und Rechnungen',
+    manageHint: 'Im sicheren Stripe-Portal kannst du deine Karte ändern, Rechnungen herunterladen oder kündigen.',
     sectorPlaceholder: 'z. B. Gastronomie', saving: 'Wird gespeichert…', saved: 'Gespeichert', saveError: 'Speichern fehlgeschlagen',
     status_active: 'Aktiv', status_suspended: 'Gesperrt', status_expired: 'Abgelaufen', status_revoked: 'Widerrufen', status_past_due: 'Zahlung ausstehend',
     wrongPassword: 'Das Passwort ist falsch.', keyCopied: 'Schlüssel in die Zwischenablage kopiert',
@@ -267,7 +269,7 @@ export default {
     api: {
       title: 'API für Automatisierungen', docs: 'Dokumentation',
       desc: 'Verbinde Nokfi mit n8n, Make, Zapier oder eigenen Skripten. Jede Analyse per API verbraucht 1 deines Tageskontingents – wie im Web.',
-      locked: 'Die API ist in den Plänen Pro und Max verfügbar.', lockedHint: 'Du kannst den Plan unter „Abonnement verwalten“ wechseln.',
+      locked: 'Die API ist in den Plänen Pro und Max verfügbar.', lockedHint: 'Du kannst den Plan mit „Tarif wechseln“ ändern.',
       namePlaceholder: 'Name des Schlüssels (z. B. n8n)', create: 'Schlüssel erstellen',
       createdOnce: 'Kopiere deinen Schlüssel jetzt: Aus Sicherheitsgründen zeigen wir ihn nicht noch einmal an.', savedIt: 'Ich habe ihn gespeichert',
       unnamed: 'Ohne Namen', lastUsed: 'Zuletzt verwendet: {date}', neverUsed: 'Noch nicht verwendet',
@@ -280,9 +282,10 @@ export default {
       desc: 'Lade alles herunter, was Nokfi über dich speichert (Profil, Verlauf, Journal, Aufgaben…), oder lösche dein Konto.',
       download: 'Meine Daten herunterladen (JSON)', delete: 'Mein Konto löschen',
       deleteTitle: 'Konto löschen', confirmWord: 'LÖSCHEN',
-      deleteWarning: 'Deine Lizenz, dein Profil, dein Analyseverlauf, dein Rechnungsjournal, deine Aufgaben und deine API-Schlüssel werden endgültig gelöscht. Das lässt sich nicht rückgängig machen. Wenn du ein aktives Abonnement hast, kündige es zuerst unter „Abonnement verwalten“.',
+      deleteWarning: 'Deine Lizenz, dein Profil, dein Analyseverlauf, dein Rechnungsjournal, deine Aufgaben und deine API-Schlüssel werden endgültig gelöscht. Das lässt sich nicht rückgängig machen. Wenn du ein aktives Abonnement hast, kündige es zuerst mit „Tarif kündigen“ (Einstellungen › Tarif).',
       typeToConfirm: 'Gib {word} zur Bestätigung ein', deleteForever: 'Endgültig löschen', deleted: 'Dein Konto wurde gelöscht.'
-    }
+    },
+    changePlan: 'Tarif wechseln', cancelPlan: 'Tarif kündigen', changePlanTitle: 'Tarif wechseln', changePlanPick: 'Wähle den neuen Tarif. Beim Wechsel wird heute der volle Preis abgebucht und ab heute beginnt ein neuer Monat.', changePlanNotice: 'Dir werden heute {amount} abgebucht und dein Tarif {plan} läuft bis zum {date}. Der Rest des aktuellen Tarifs wird nicht erstattet.', changePlanTrialNote: 'Mit diesem Wechsel endet dein kostenloser Test heute.', changePlanCancelledNote: 'Dein Tarif bleibt gekündigt: Er verlängert sich am Ende dieses Zeitraums nicht.', changePlanConfirm: '{amount} zahlen und wechseln', changePlanDone: 'Erledigt: Du hast jetzt den Tarif {plan}.', changePlanDeclined: 'Deine Karte konnte nicht belastet werden, daher hat sich dein Tarif nicht geändert. Prüfe deine Karte unter „Karte und Rechnungen“ und versuche es erneut.', currentPlanTag: 'Dein aktueller Tarif', perMonth: 'Monat', cancelPlanTitle: 'Tarif kündigen?', cancelPlanBody: 'Du nutzt deinen Tarif {plan} weiter bis zum {date}. Danach endet das Abo und es wird nichts mehr abgebucht.', cancelPlanTrialBody: 'Dein Test läuft weiter bis zum {date}. Danach endet er und es wird nichts abgebucht.', cancelPlanConfirm: 'Tarif kündigen', cancelPlanDone: 'Tarif gekündigt. Du kannst ihn bis zum Ende des bezahlten Zeitraums nutzen.'
   },
   pricing: {
     title: 'Wähle deinen Plan', subtitle: 'Monatliches Abo. Jederzeit kündbar.',
@@ -585,14 +588,15 @@ export default {
     chat_rate_limited: 'Du bist zu schnell. Warte eine Minute und frag noch einmal.',
     chat_unavailable: 'Der Assistent ist ausgelastet. Versuche es in einer Minute erneut.',
     api_plan_required: 'API-Schlüssel sind in den Plänen Pro und Max verfügbar.',
-    subscription_active: 'Kündige zuerst dein Abonnement unter „Abonnement verwalten“. Danach kannst du das Konto löschen.',
+    subscription_active: 'Kündige zuerst deinen Tarif unter Einstellungen › Tarif („Tarif kündigen“). Danach kannst du das Konto löschen.',
     payload_too_large: 'Die Dateien sind für einen einzigen Upload zu groß. Versuche es mit weniger Dateien.',
     pending_not_found: 'Die Aufgabe wurde unterbrochen. Starte sie erneut.',
     too_many_pending: 'Du hast mehrere KI-Aufgaben in Bearbeitung. Warte, bis sie fertig sind, bevor du eine neue startest.',
     ai_timeout: 'Die KI ist nicht rechtzeitig fertig geworden. Versuche es in ein paar Minuten erneut.',
     offlineTitle: 'Nokfi ist nicht erreichbar',
     offlineDesc: 'Das kann an deiner Verbindung oder einem Serverneustart liegen. Versuche es in ein paar Sekunden erneut.',
-    genericTitle: 'Laden nicht möglich'
+    genericTitle: 'Laden nicht möglich',
+    same_plan: 'Du hast diesen Tarif bereits.', subscription_not_active: 'Dein Abo ist nicht aktiv, daher kann der Tarif nicht gewechselt werden.'
   },
   toast: {
     profileCreated: 'Profil gespeichert. Willkommen bei Nokfi!',
@@ -655,7 +659,7 @@ export default {
       { q: 'Was ist Nokfi?', a: 'Eine Web-App zur Finanzdiagnose für Selbstständige und KMU: ein geführter Fragebogen, KI-Analyse deiner Excel-Tabellen und PDFs, Finanzrechner und Berichte zum Export als PDF und Excel.' },
       { q: 'Muss ich etwas installieren oder meine Dateien hochladen?', a: 'Nichts zu installieren: Es läuft im Browser. Deine Excel-Dateien, PDFs und Ordner werden auf deinem Gerät gelesen: Die Datei verlässt es nicht. Für die Analyse senden wir nur die nötigen Zeilen oder Texte und speichern sie nicht. Beim Lesen gescannter oder fotografierter Rechnungen wird eine verkleinerte Kopie an die KI gesendet, ohne sie zu speichern.' },
       { q: 'Wie funktioniert der kostenlose Test?', a: 'Der Mini-Plan enthält 14 Tage gratis. Bei der Anmeldung ist eine Karte nötig, aber bis zum Ende des Tests wird nichts abgebucht. Kündigst du vorher, zahlst du nichts.' },
-      { q: 'Kann ich den Plan jederzeit wechseln oder kündigen?', a: 'Ja, ohne Bindung. In den Einstellungen öffnest du das Stripe-Portal, um den Plan zu wechseln oder zu kündigen; Änderungen gelten zum Ende der laufenden Periode.' },
+      { q: 'Kann ich den Plan jederzeit wechseln oder kündigen?', a: 'Ja, ohne Mindestlaufzeit, unter Einstellungen › Tarif. Beim Tarifwechsel (höher oder niedriger) wird am selben Tag der volle Preis des neuen Tarifs abgebucht und ab diesem Tag beginnt ein neuer Monat; der Rest des alten wird nicht erstattet. Wechselst du während des Tests, endet der Test und es wird am selben Tag abgebucht. Kündigst du, nutzt du ihn bis zum Ende des bezahlten Monats weiter, ohne weitere Abbuchungen.' },
       { q: 'Worin unterscheiden sich die Pläne?', a: 'Alle Pläne enthalten alle Funktionen der App (Diagnose, Excel und Ordner, Rechnungen per KI, Steuern, Forderungen, Liquiditätsprognose und Assistent). Es ändert sich das tägliche KI-Analysekontingent: 10 pro Tag bei Mini, 50 bei Pro und 130 bei Max. Pro und Max enthalten außerdem die API für Automatisierungen (n8n, Make, Zapier), Max zusätzlich priorisierten Support.' },
       { q: 'Ersetzt Nokfi meinen Steuerberater?', a: 'Nein. Nokfi ordnet deine Rechnungen und sagt dir im Voraus, wie viel du für Umsatz- und Einkommensteuer zurücklegen solltest, wer dir Geld schuldet und wie sich deine Liquidität entwickelt – das sind aber Schätzungen. Das letzte Wort hat dein Steuerberater; du kannst ihm das Journal sogar als CSV oder Excel exportieren.' }
     ],
@@ -718,7 +722,7 @@ export default {
   },
   privacy: {
     title: 'Datenschutzerklärung',
-    updated: 'Zuletzt aktualisiert: 24. Oktober 2026',
+    updated: 'Zuletzt aktualisiert: 7. November 2026',
     intro: 'Diese Erklärung beschreibt ohne Kleingedrucktes, welche Daten Nokfi (nokfi.app) verarbeitet, wofür und welche Drittanbieter beteiligt sind. Sie entspricht genau der Funktionsweise der Anwendung.',
     sections: [
       { h: 'Verantwortlicher und Kontakt', ps: ['Verantwortlicher für die Daten deines Kontos ist {OWNER}. Für Datenschutzfragen oder zur Ausübung deiner Rechte schreibe an info@nokfi.app. Bei Problemen mit Konto oder Zahlungen an soporte@nokfi.app.'] },
@@ -748,7 +752,7 @@ export default {
       ] },
       { h: 'Daten deiner Kunden und Lieferanten', ps: ['Für Daten Dritter, die du in Nokfi eingibst (Kunden und Lieferanten deiner Rechnungen), bist du der Verantwortliche und Nokfi handelt als Auftragsverarbeiter: Wir nutzen sie nur, um dir den Dienst zu erbringen. Die Bedingungen stehen im Auftragsverarbeitungsvertrag (nokfi.app/encargo-tratamiento). Wenn du automatische Erinnerungen aktivierst, werden sie im Namen deiner Firma versendet und Antworten gehen direkt an deine E-Mail.'] },
       { h: 'Cookies und Analyse', ps: ['Nokfi verwendet keine Tracking-Cookies. Um zu wissen, wie viele Menschen die öffentliche Website besuchen, nutzen wir Cloudflare Web Analytics: ohne Cookies, ohne Speicherung deiner IP-Adresse und ohne dich zu identifizieren. Außerdem zählen wir ohne personenbezogene Daten, wie oft „Kostenlos testen“ geklickt, eine Zahlung begonnen oder ein öffentliches Tool genutzt wird (nur die Summe pro Tag und Seite). Sitzung, Sprache und Design werden im lokalen Speicher deines Browsers gehalten.'] },
-      { h: 'Speicherdauer und Löschung', ps: ['Wir speichern deine Daten, solange deine Lizenz besteht. Unter Einstellungen → Meine Daten kannst du alle Daten als Datei herunterladen oder dein Konto löschen: Profil, Verlauf, Rechnungsjournal, Aufgaben, API-Schlüssel und Sitzungen werden dabei gelöscht. Technische Fehlerberichte werden nach 30 Tagen gelöscht. Beim Löschen des Kontos werden auch deine ausgestellten Rechnungen und ihre Datensätze gelöscht; sie für die gesetzliche Frist aufzubewahren ist deine Pflicht, lade sie also vorher herunter.'] },
+      { h: 'Speicherdauer und Löschung', ps: ['Wir speichern deine Daten, solange deine Lizenz besteht. Unter Einstellungen → Meine Daten kannst du alle Daten als Datei herunterladen oder dein Konto löschen: Profil, Verlauf, Rechnungsjournal, Aufgaben, API-Schlüssel und Sitzungen werden dabei gelöscht. Technische Fehlerberichte werden nach 30 Tagen gelöscht. Beim Löschen des Kontos werden auch deine ausgestellten Rechnungen und ihre Datensätze gelöscht; sie für die gesetzliche Frist aufzubewahren ist deine Pflicht, lade sie also vorher herunter. Beim Löschen des Kontos wird auch dein Abo beendet und dein Kundendatensatz bei Stripe gelöscht; in den aufbewahrten Sicherheitsprotokollen wird deine E-Mail durch einen Code (Hash) ersetzt, aus dem sie sich nicht lesen lässt.'] },
       { h: 'Deine Rechte', ps: ['Deine Rechte auf Auskunft, Berichtigung, Löschung, Datenübertragbarkeit und Widerspruch kannst du in den Einstellungen oder per E-Mail an info@nokfi.app ausüben. Du kannst dich auch bei der spanischen Datenschutzbehörde (aepd.es) beschweren.'] },
       { h: 'Sicherheit', ps: ['Wir nutzen durchgehend HTTPS, mit scrypt gehashte Passwörter, als Hash gespeicherte Sitzungs- und Wiederherstellungstoken sowie API-Schlüssel und tägliche Datenbank-Backups auf dem Server sowie verschlüsselt (AES-256) in Cloudflare R2 innerhalb der EU, wo sie nach 30 Tagen gelöscht werden.'] }
     ]
@@ -1294,7 +1298,7 @@ export default {
       { q: 'Kann ich meinem Steuerberater Zugriff geben?', a: 'Ja. Unter Einstellungen › Teilen erstellst du einen Nur-Lese-Link mit Ablaufdatum, den du jederzeit widerrufen kannst.', cta: 'Link erstellen' },
       { q: 'Was passiert mit meinen Daten?', a: 'Sie gehören dir. Die KI-Anbieter, die wir nutzen, trainieren nicht damit. Unter Einstellungen › Daten kannst du alles herunterladen oder dein Konto löschen.', cta: 'Meine Daten' },
       { q: 'Wie viele KI-Analysen habe ich?', a: 'Je nach Tarif: 10 pro Tag in Mini, 50 in Pro und 130 in Max. Das Kontingent erneuert sich täglich. E-Rechnungen und Rechner verbrauchen keine Analysen.', cta: 'Meinen Tarif ansehen' },
-      { q: 'Wie wechsle ich den Tarif oder kündige?', a: 'Unter Einstellungen › Tarif, „Abo verwalten“. Keine Mindestlaufzeit; Änderungen gelten zum Ende des bereits bezahlten Zeitraums.', cta: 'Zu meinem Tarif' }
+      { q: 'Wie wechsle ich den Tarif oder kündige?', a: 'Unter Einstellungen › Tarif findest du „Tarif wechseln“ und „Tarif kündigen“. Beim Wechsel wird heute der volle Preis des neuen Tarifs abgebucht und ein neuer Monat beginnt; nach einer Kündigung nutzt du ihn bis zum Ende des bezahlten Zeitraums. Keine Mindestlaufzeit.', cta: 'Zu meinem Tarif' }
     ]
   },
   apiDocs: {

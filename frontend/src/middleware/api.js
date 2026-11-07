@@ -271,7 +271,24 @@ export const paymentsApi = {
   stripeCheckout: (email, plan, locale) => request('/payments/stripe/create-checkout', { method: 'POST', body: { email, plan, locale } }),
   // Customer Portal de Stripe: cancelar / mejorar plan / actualizar método de pago.
   stripePortal: (locale) => request('/payments/stripe/create-portal-session', { method: 'POST', auth: true, body: { locale } }),
-  reveal: (session_id) => request('/payments/stripe/reveal?session_id=' + encodeURIComponent(session_id))
+  reveal: (session_id) => request('/payments/stripe/reveal?session_id=' + encodeURIComponent(session_id)),
+  // S15b: cambio de plan con cobro completo hoy (aviso previo + confirmación) y cancelar.
+  changePlanPreview: (plan) => request('/payments/stripe/change-plan/preview?plan=' + encodeURIComponent(plan), { auth: true }),
+  changePlan: (plan) => request('/payments/stripe/change-plan', { method: 'POST', auth: true, body: { plan } }),
+  cancelSubscription: () => request('/payments/stripe/cancel', { method: 'POST', auth: true }),
+  // Cuenta bloqueada por impago: token propio (no es la sesión de la app).
+  resumeCheckout: async (token, plan, locale) => {
+    try {
+      const res = await fetch(`${API_BASE}/payments/stripe/resume-checkout`, {
+        method: 'POST', headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${token}` },
+        body: JSON.stringify({ plan, locale })
+      });
+      const data = await res.json().catch(() => ({}));
+      return { ok: res.ok, status: res.status, data };
+    } catch {
+      return { ok: false, status: 0, data: { error: 'network_error' } };
+    }
+  }
 };
 
 export default request;
