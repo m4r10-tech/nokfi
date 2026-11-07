@@ -264,6 +264,7 @@ function initDB() {
       runSubscriptionMigration(db);
       runTrialMigration(db);
       runPaymentIntentRefMigration(db);
+      runBillingS15bMigration(db); // S15b: bloqueo por impago, /reveal una vez, anti-trial repetido
       runRecoveryPurposeMigration(db);
       hashTokensAtRest(db); // ⚠️ auditoría: hashear tokens planos preexistentes
       require('./schema4').runSession4Schema(db); // sesión 4: IA estructurada, libro, API keys…
@@ -584,6 +585,33 @@ function runPaymentIntentRefMigration(database) {
     database.exec(`ALTER TABLE licenses ADD COLUMN payment_intent_ref TEXT DEFAULT NULL`);
     console.log('✅  Migración payment_intent_ref: añadida columna licenses.payment_intent_ref');
   }
+}
+
+/**
+ * Migración S15b (pagos) — idempotente por detección (PRAGMA / IF NOT EXISTS):
+ *   licenses.blocked_reason   'payment_failed' cuando una renovación se rechaza:
+ *                             la suscripción se para y la cuenta queda bloqueada
+ *                             hasta que se paga un plan nuevo (resume-checkout).
+ *   licenses.key_revealed_at  primera vez que /reveal mostró la clave (solo una vez).
+ *   trial_fingerprints        huellas de tarjeta (card.fingerprint de Stripe) que ya
+ *                             tuvieron trial: la misma tarjeta no repite prueba.
+ */
+function runBillingS15bMigration(database) {
+  const cols = database.prepare(`PRAGMA table_info(licenses)`).all().map(c => c.name);
+  if (!cols.includes('blocked_reason')) {
+    database.exec(`ALTER TABLE licenses ADD COLUMN blocked_reason TEXT DEFAULT NULL`);
+    console.log('✅  Migración S15b: añadida columna licenses.blocked_reason');
+  }
+  if (!cols.includes('key_revealed_at')) {
+    database.exec(`ALTER TABLE licenses ADD COLUMN key_revealed_at TEXT DEFAULT NULL`);
+    console.log('✅  Migración S15b: añadida columna licenses.key_revealed_at');
+  }
+  database.exec(`
+    CREATE TABLE IF NOT EXISTS trial_fingerprints (
+      fingerprint TEXT PRIMARY KEY,
+      created_at  TEXT NOT NULL DEFAULT (datetime('now'))
+    )
+  `);
 }
 
 /**
@@ -1257,7 +1285,7 @@ function getLicenseByStripeSubscriptionId(subscription_id) {
 function updateSubscription(id, {
   plan, status, billing_model, stripe_customer_id, stripe_subscription_id,
   current_period_ends_at, cancel_at_period_end, amount_eur, trial_ends_at,
-  payment_intent_ref
+  payment_intent_ref, blocked_reason
 }) {
   const db = getDB();
   const setClauses = [];
@@ -1281,6 +1309,7 @@ function updateSubscription(id, {
   setIf('amount_eur', amount_eur);
   setIf('trial_ends_at', trial_ends_at);
   setIf('payment_intent_ref', payment_intent_ref);
+  setIf('blocked_reason', blocked_reason);
   if (!setClauses.length) return getLicenseById(id);
   vals.push(id);
   db.prepare(`UPDATE licenses SET ${setClauses.join(', ')} WHERE id = ?`).run(...vals);

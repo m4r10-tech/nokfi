@@ -17,8 +17,14 @@
  *   invoice.paid                       → renovación recurrente (reactiva/renueva periodo)
  *   customer.subscription.updated      → cambio de plan / cancelación programada
  *   customer.subscription.deleted      → fin de suscripción (status='expired', sesiones cerradas)
- *   invoice.payment_failed             → cobro fallido tras reintentos → 'suspended'
+ *   invoice.payment_failed             → renovación rechazada → se para la suscripción
+ *                                        y la cuenta queda bloqueada (S15b, U4)
  *   charge.dispute.created             → chargeback → revocación
+ *
+ * S15b: un evento que llega antes que la licencia (orden no garantizado) se
+ * guarda processed=0 y se responde 503 para que Stripe lo reintente (antes 200:
+ * Stripe no reintentaba nunca). Solo dentro de PENDING_RETRY_WINDOW_S desde que
+ * Stripe creó el evento; más tarde ya no va a casar y se responde 200.
  *
  * (PayPal / Coinbase / Revolut se retiraron al pasar a Stripe-only: solo
  * Stripe acepta nueva suscripción, así que también se eliminaron sus webhooks
@@ -52,6 +58,13 @@ const {
 
 const { sendLicenseKeyEmail, sendLicenseRevokedEmail } = require('../utils/mailer');
 const { fetchWithTimeout } = require('../utils/http');
+const { stripeApi, isGone } = require('../utils/stripe');
+const { getDB, getLicenseById } = require('../db/database');
+
+/** Ventana en la que un evento sin licencia se devuelve con 503 para que Stripe
+ *  lo reintente (los desórdenes reales se resuelven en segundos o minutos). */
+const PENDING_RETRY_WINDOW_S = 6 * 3600;
+const PENDING = { pending: true };
 
 // Fuente única de planes válidos (config/plans.js). Antes era un literal local
 // ['mini','pro','max'] duplicado en payments.js/admin.js/database.js → drift.
@@ -102,6 +115,14 @@ function invoicePaymentIntentId(invoice) {
   return pay ? idOf(pay.payment.payment_intent) : null;
 }
 
+/** Fin del trial SOLO si la suscripción sigue en prueba. Al acabar el trial
+ *  antes de tiempo (cambio de plan o tarjeta que ya tuvo trial), Stripe deja
+ *  trial_end con la hora del cambio: guardarlo dejaba trial_ends_at con una fecha
+ *  pasada en vez de null (P3). */
+function trialEndIso(sub) {
+  return (sub?.status === 'trialing' && sub.trial_end) ? isoFromUnix(sub.trial_end) : null;
+}
+
 function subscriptionPeriodEnd(sub) {
   if (!sub) return undefined;
   if (sub.current_period_end) return sub.current_period_end;
@@ -142,15 +163,16 @@ router.post('/stripe', async (req, res) => {
   }
 
   try {
+    let result;
     switch (event.type) {
       case 'checkout.session.completed':
         await handleStripeCheckoutCompleted(event, req.ip);
         break;
       case 'invoice.paid':
-        await handleStripeInvoicePaid(event, req.ip);
+        result = await handleStripeInvoicePaid(event, req.ip);
         break;
       case 'customer.subscription.updated':
-        await handleStripeSubscriptionUpdated(event, req.ip);
+        result = await handleStripeSubscriptionUpdated(event, req.ip);
         break;
       case 'customer.subscription.deleted':
         await handleStripeSubscriptionDeleted(event, req.ip);
@@ -178,6 +200,13 @@ router.post('/stripe', async (req, res) => {
         recordPaymentEvent({ provider: 'stripe', event_id: event.id, event_type: event.type, processed: true });
     }
 
+    // P5: pendiente (llegó antes que la licencia) → no-2xx para que Stripe reintente.
+    if (result === PENDING) {
+      const age = Date.now() / 1000 - Number(event.created || 0);
+      if (!event.created || age < PENDING_RETRY_WINDOW_S) {
+        return res.status(503).json({ error: 'event_pending', retry: true });
+      }
+    }
     res.json({ received: true });
   } catch (e) {
     console.error('[WEBHOOK STRIPE] Error procesando evento:', e.message);
@@ -196,10 +225,16 @@ async function handleStripeCheckoutCompleted(event, ip) {
     return;
   }
 
-  const email = (session.customer_email || session.metadata?.email || '').toLowerCase();
+  const email = (session.customer_email || session.metadata?.email || session.customer_details?.email || '').toLowerCase();
   const plan = coerceStripePlan(session.metadata?.plan);
   const subId = session.subscription;     // id de la suscripción (string)
   const customerId = session.customer;    // id del customer (string)
+
+  // S15b (U4): pago de un plan nuevo desde una cuenta bloqueada por impago →
+  // misma licencia (no se crea otra clave), suscripción nueva y desbloqueo.
+  if (session.metadata?.resume_license_id) {
+    return resumeBlockedLicense(event, session, ip);
+  }
 
   if (!email) {
     console.error('[WEBHOOK STRIPE] checkout.session.completed sin email — no se genera licencia');
@@ -227,7 +262,16 @@ async function handleStripeCheckoutCompleted(event, ip) {
       // undefined y createLicense/updateSubscription saltarían el INSERT/write
       // del campo → la licencia NUNCA llevaría el flag de trial al alta. null ≠
       // undefined → se persiste NULL (o la fecha futura) según corresponda.
-      trial_ends_at = sub.trial_end ? isoFromUnix(sub.trial_end) : null;
+      trial_ends_at = trialEndIso(sub);
+      // P4 (Q4): una tarjeta que ya tuvo trial no repite prueba → se acaba hoy y
+      // se cobra el primer mes. Nunca lanza (un fallo aquí no puede duplicar la licencia).
+      if (trial_ends_at) {
+        const t = await enforceSingleTrialPerCard(sub, ip);
+        if (t.ended) {
+          trial_ends_at = null;
+          current_period_ends_at = t.current_period_ends_at || current_period_ends_at;
+        }
+      }
     } catch (e) {
       console.error('[WEBHOOK STRIPE] no se pudo fetch la suscripción %s: %s', subId, e.message);
     }
@@ -298,7 +342,7 @@ async function handleStripeInvoicePaid(event, ip) {
     console.warn('[WEBHOOK STRIPE] invoice.paid sin licencia (sub=%s) — %s',
       subId, isRenewal ? 'renovación huérfana' : 'primer pago adelantado');
     recordPaymentEvent({ provider: 'stripe', event_id: event.id, event_type: event.type, processed: false });
-    return;
+    return PENDING;
   }
 
   const periodEnd = invoice.lines?.data?.[0]?.period?.end;
@@ -320,8 +364,10 @@ async function handleStripeInvoicePaid(event, ip) {
   // los 14 días o cualquier renovación posterior. subscription.updated (trialing
   // → active) también lo limpia → defensa por duplicado consistente.
   const actuallyPaid = (typeof invoice.amount_paid === 'number' && invoice.amount_paid > 0);
+  // S15b: una cuenta bloqueada por impago solo se reactiva pagando un plan nuevo
+  // (resume-checkout); un evento tardío de la suscripción parada no la desbloquea.
   updateSubscription(license.id, {
-    status: 'active',
+    status: license.blocked_reason ? undefined : 'active',
     current_period_ends_at,
     stripe_customer_id: customerId || undefined,
     amount_eur: amount_eur ?? undefined,
@@ -350,20 +396,23 @@ async function handleStripeSubscriptionUpdated(event, ip) {
     // Llega también al CREAR la suscripción; si checkout.created aún no corrió:
     // lo dejamos como no procesado para que reintente (sin idempotencia rotativa,
     // porque el event.id ya marca este intento concreto).
-    console.warn('[WEBHOOK STRIPE] customer.subscription.updated sin licencia (sub=%s) — pendiente', sub.id);
-    recordPaymentEvent({ provider: 'stripe', event_id: event.id, event_type: event.type, processed: false });
-    return;
+    // Una suscripción ya terminada (p. ej. la parada por impago o la de una
+    // cuenta borrada) nunca va a casar: no se pide reintento.
+    const finished = ['canceled', 'incomplete_expired'].includes(sub.status);
+    console.warn('[WEBHOOK STRIPE] customer.subscription.updated sin licencia (sub=%s) — %s', sub.id, finished ? 'terminada' : 'pendiente');
+    recordPaymentEvent({ provider: 'stripe', event_id: event.id, event_type: event.type, processed: finished });
+    return finished ? undefined : PENDING;
   }
 
   const plan = planFromSubscription(sub);
   const current_period_ends_at = isoFromUnix(subscriptionPeriodEnd(sub));
   const cancel_at_period_end = sub.cancel_at_period_end ? 1 : 0;
-  // Bug C (defensa por duplicado): trial_end llega null cuando el trial ha
-  // terminado (Stripe lo pone así al pasar trialing→active). Coercemos null
-  // explícito para que updateSubscription lo persista; isoFromUnix(null) sería
-  // undefined → setIf lo saltaría → trial Ends_at quedaría stale, la licencia
-  // no dejaría nunca de ser "en trial" y el MRR/HUD la contarían mal.
-  const trial_ends_at = sub.trial_end ? isoFromUnix(sub.trial_end) : null;
+  // Bug C (defensa por duplicado): al terminar el trial se persiste null
+  // explícito (isoFromUnix(null) sería undefined → setIf lo saltaría y la
+  // licencia quedaría "en trial" para siempre). S15b (P3): Stripe deja trial_end
+  // con la hora del cambio cuando el trial acaba antes de tiempo; solo cuenta si
+  // la suscripción sigue en 'trialing'.
+  const trial_ends_at = trialEndIso(sub);
 
   // Mapeo de stripe subscription.status → status interno Nokfi.
   let status;
@@ -376,6 +425,8 @@ async function handleStripeSubscriptionUpdated(event, ip) {
   } else {
     status = 'active'; // trialing | active
   }
+  // S15b: bloqueada por impago → sigue bloqueada hasta pagar un plan nuevo.
+  if (license.blocked_reason && status === 'active') status = license.status;
 
   updateSubscription(license.id, {
     plan, status,
@@ -425,8 +476,15 @@ async function handleStripeSubscriptionDeleted(event, ip) {
   recordPaymentEvent({ provider: 'stripe', event_id: event.id, event_type: event.type, license_id: license.id, processed: true });
 }
 
-/** invoice.payment_failed — cobro fallido. Marca 'suspended' (acceso cortado ya,
- *  Stripe reintenta; al llegar invoice.paid se reactiva). */
+/** invoice.payment_failed — S15b (U4): una renovación rechazada (o el primer
+ *  cobro al acabar el trial) PARA la suscripción y BLOQUEA la cuenta con
+ *  blocked_reason='payment_failed': «hasta que no renueves la suscripción no
+ *  puedes usar la cuenta». Se reanuda pagando un plan nuevo (resume-checkout).
+ *  La suscripción se cancela ya en Stripe y la factura fallida se anula, para
+ *  que Stripe no siga reintentando el cobro por su cuenta. Si Stripe no responde
+ *  se lanza → 500 → Stripe reintenta el evento (el bloqueo ya está guardado).
+ *  El alta (billing_reason='subscription_create') no bloquea: ese cobro lo
+ *  gestiona Checkout y sin pago no hay licencia. */
 async function handleStripeInvoicePaymentFailed(event, ip) {
   const invoice = event.data.object;
   const subId = invoiceSubscriptionId(invoice);
@@ -437,14 +495,91 @@ async function handleStripeInvoicePaymentFailed(event, ip) {
     return;
   }
 
-  // Solo suspendemos si seguía activa — evita pisar un 'revoked' manual del admin.
-  if (license.status === 'active') {
-    updateSubscription(license.id, { status: 'suspended' });
+  if (invoice.billing_reason === 'subscription_create' || license.status === 'revoked') {
+    recordPaymentEvent({ provider: 'stripe', event_id: event.id, event_type: event.type, license_id: license.id, processed: true });
+    return;
+  }
+
+  if (license.blocked_reason !== 'payment_failed') {
+    updateSubscription(license.id, { status: 'suspended', blocked_reason: 'payment_failed' });
     deleteSessionsForLicense(license.id);
-    audit('SUBSCRIPTION_PAYMENT_FAILED', { license_id: license.id, ip, detail: `sub=${subId} attempt=${invoice.attempt_count}` });
+    audit('SUBSCRIPTION_PAYMENT_FAILED', { license_id: license.id, ip, detail: `sub=${subId} reason=${invoice.billing_reason || '?'} attempt=${invoice.attempt_count} → bloqueada` });
+  }
+
+  // Parar la suscripción en Stripe (sin prorrata ni factura final) y anular la factura.
+  if (process.env.STRIPE_SECRET_KEY) {
+    const del = await stripeApi('DELETE', `subscriptions/${encodeURIComponent(subId)}`, { invoice_now: 'false', prorate: 'false' });
+    if (!del.ok && !isGone(del) && !/canceled/i.test(del.data?.error?.message || '')) {
+      throw new Error(`no se pudo parar la suscripción ${subId}: ${del.status}`);
+    }
+    if (invoice.id && invoice.status !== 'void') {
+      const v = await stripeApi('POST', `invoices/${encodeURIComponent(invoice.id)}/void`);
+      if (!v.ok) console.warn('[WEBHOOK STRIPE] no se pudo anular la factura %s: %s', invoice.id, v.data?.error?.message);
+    }
+    audit('SUBSCRIPTION_STOPPED_PAYMENT_FAILED', { license_id: license.id, ip, detail: `sub=${subId} invoice=${invoice.id || '?'}` });
+  } else {
+    console.warn('[WEBHOOK STRIPE] sin STRIPE_SECRET_KEY: la suscripción %s no se ha parado en Stripe', subId);
   }
 
   recordPaymentEvent({ provider: 'stripe', event_id: event.id, event_type: event.type, license_id: license.id, processed: true });
+}
+
+/** S15b (U4): checkout.session.completed de resume-checkout → reactiva la misma licencia. */
+async function resumeBlockedLicense(event, session, ip) {
+  const license = getLicenseById(Number(session.metadata.resume_license_id));
+  if (!license) {
+    console.warn('[WEBHOOK STRIPE] reanudar: licencia %s ya no existe', session.metadata.resume_license_id);
+    recordPaymentEvent({ provider: 'stripe', event_id: event.id, event_type: event.type, processed: true });
+    return;
+  }
+  const subId = session.subscription;
+  let plan = coerceStripePlan(session.metadata?.plan);
+  let current_period_ends_at;
+  try {
+    const sub = await fetchStripeSubscription(subId);
+    plan = planFromSubscription(sub) || plan;
+    current_period_ends_at = isoFromUnix(subscriptionPeriodEnd(sub));
+  } catch (e) {
+    console.error('[WEBHOOK STRIPE] reanudar: no se pudo leer la suscripción %s: %s', subId, e.message);
+  }
+  const amount_eur = session.amount_total ? session.amount_total / 100 : undefined;
+  updateSubscription(license.id, {
+    plan, status: 'active', blocked_reason: null, billing_model: 'subscription',
+    stripe_subscription_id: subId, stripe_customer_id: session.customer || undefined,
+    current_period_ends_at, cancel_at_period_end: 0, trial_ends_at: null, amount_eur
+  });
+  recordPaymentEvent({ provider: 'stripe', event_id: event.id, event_type: event.type, license_id: license.id, amount_eur: amount_eur ?? null, processed: true });
+  audit('SUBSCRIPTION_RESUMED', { license_id: license.id, ip, detail: `plan=${plan} sub=${subId}` });
+}
+
+/** S15b (P4, Q4): huella de la tarjeta del trial. Si ya tuvo trial, se acaba la
+ *  prueba ahora (Stripe cobra el primer mes; si el cobro falla llega
+ *  invoice.payment_failed y la cuenta queda bloqueada). Si no, se guarda la
+ *  huella. No lanza nunca: sin huella (fallo de red) se deja el trial. */
+async function enforceSingleTrialPerCard(sub, ip) {
+  try {
+    if (!process.env.STRIPE_SECRET_KEY) return { ended: false };
+    const pmId = idOf(sub.default_payment_method);
+    if (!pmId) return { ended: false };
+    const pm = await stripeApi('GET', `payment_methods/${encodeURIComponent(pmId)}`);
+    const fingerprint = pm.ok ? pm.data?.card?.fingerprint : null;
+    if (!fingerprint) return { ended: false };
+    const seen = getDB().prepare('SELECT 1 FROM trial_fingerprints WHERE fingerprint = ?').get(fingerprint);
+    if (!seen) {
+      getDB().prepare('INSERT OR IGNORE INTO trial_fingerprints (fingerprint) VALUES (?)').run(fingerprint);
+      return { ended: false };
+    }
+    const up = await stripeApi('POST', `subscriptions/${encodeURIComponent(sub.id)}`, { trial_end: 'now', proration_behavior: 'none' });
+    if (!up.ok) {
+      console.error('[WEBHOOK STRIPE] no se pudo acabar el trial repetido de %s: %s', sub.id, up.data?.error?.message);
+      return { ended: false };
+    }
+    audit('TRIAL_REPEATED_CARD', { ip, detail: `sub=${sub.id} sin trial: la tarjeta ya tuvo uno` });
+    return { ended: true, current_period_ends_at: isoFromUnix(subscriptionPeriodEnd(up.data)) };
+  } catch (e) {
+    console.error('[WEBHOOK STRIPE] anti-trial: %s', e.message);
+    return { ended: false };
+  }
 }
 
 /** Trae la suscripción de Stripe (para current_period_end / items / trial_end

@@ -30,6 +30,7 @@ const { listActions } = require('../db/actions');
 const { listLedger } = require('../db/finance');
 const { verifyPassword } = require('../utils/password');
 const { sanitizeFreeText } = require('../utils/sanitize');
+const { stripeApi, isGone } = require('../utils/stripe');
 
 const keys = express.Router();
 const me = express.Router();
@@ -123,24 +124,62 @@ me.get('/export', requireLicense, (req, res) => {
   });
 });
 
-me.delete('/', requireLicense, (req, res) => {
+me.delete('/', requireLicense, async (req, res) => {
   const l = req.license;
   const password = typeof req.body?.password === 'string' ? req.body.password : '';
   if (!verifyPassword(password, l.password_hash)) {
     audit('ACCOUNT_DELETE_FAILED', { license_id: l.id, ip: req.ip });
     return res.status(401).json({ error: 'invalid_credentials', message: 'La contraseña no es correcta.' });
   }
-  // No se toca Stripe desde aquí (cuidado extremo con pagos): la suscripción
-  // debe estar ya cancelada (a fin de periodo) desde el Portal de Stripe.
+  // La suscripción debe estar ya cancelada (a fin de periodo) desde Ajustes ›
+  // Plan: así el usuario decide conscientemente renunciar a lo que queda pagado.
   const subscriptionActive = l.billing_model === 'subscription' && l.stripe_subscription_id && !l.cancel_at_period_end;
   if (subscriptionActive) {
-    return res.status(409).json({ error: 'subscription_active', message: 'Cancela primero tu suscripción desde "Gestionar suscripción".' });
+    return res.status(409).json({ error: 'subscription_active', message: 'Cancela primero tu plan en Configuración › Plan.' });
+  }
+  // S15b (P8, Q5): se termina ya la suscripción y se borra el cliente de Stripe
+  // (email y nombre). Si Stripe falla, la cuenta NO se borra (se puede reintentar)
+  // para no dejar datos personales huérfanos en Stripe.
+  if (l.billing_model === 'subscription' && (l.stripe_subscription_id || l.stripe_customer_id)) {
+    if (!process.env.STRIPE_SECRET_KEY) {
+      console.warn('[ACCOUNT] sin STRIPE_SECRET_KEY: no se borra el cliente de Stripe de la licencia %s', l.id);
+    } else {
+      try {
+        if (l.stripe_subscription_id) {
+          const s = await stripeApi('DELETE', `subscriptions/${encodeURIComponent(l.stripe_subscription_id)}`, { invoice_now: 'false', prorate: 'false' });
+          if (!s.ok && !isGone(s) && !/canceled/i.test(s.data?.error?.message || '')) throw new Error(`suscripción: ${s.status}`);
+        }
+        if (l.stripe_customer_id) {
+          const c = await stripeApi('DELETE', `customers/${encodeURIComponent(l.stripe_customer_id)}`);
+          if (!c.ok && !isGone(c)) throw new Error(`cliente: ${c.status}`);
+        }
+      } catch (e) {
+        console.error('[ACCOUNT] Stripe no respondió al borrar la cuenta %s: %s', l.id, e.message);
+        return res.status(502).json({ error: 'stripe_error' });
+      }
+    }
   }
   audit('ACCOUNT_DELETED_BY_USER', { license_id: l.id, ip: req.ip, detail: `plan=${l.plan}` });
   getDB().prepare('DELETE FROM ai_usage WHERE license_id = ?').run(l.id);
   deleteLicense(l.id); // CASCADE: sesiones, perfil, historial, tareas, libro, claves…
+  anonymizeLogs(l);
   res.json({ success: true });
 });
+
+/** P8 (Q5): en los registros que sobreviven a la cuenta (audit_log es el
+ *  histórico forense, sin FK a propósito; auth_request_log cuenta peticiones de
+ *  recuperación) el email se sustituye por un hash. Si otra licencia usa el
+ *  mismo email, solo se tocan las filas de esta. */
+function anonymizeLogs(l) {
+  const email = String(l.email || '').toLowerCase();
+  if (!email) return;
+  const hash = 'sha256:' + require('crypto').createHash('sha256').update(email).digest('hex');
+  const db = getDB();
+  const shared = db.prepare('SELECT 1 FROM licenses WHERE email = ? AND id <> ?').get(email, l.id);
+  db.prepare(`UPDATE audit_log SET detail = REPLACE(detail, ?, ?) WHERE instr(detail, ?) > 0 AND (license_id = ?${shared ? '' : ' OR license_id IS NULL'})`)
+    .run(email, hash, email, l.id);
+  if (!shared) db.prepare('UPDATE auth_request_log SET email = ? WHERE email = ?').run(hash, email);
+}
 
 /* ── C8 ── */
 const errorLimiter = rateLimit({ windowMs: 60 * 1000, max: 20, standardHeaders: true, legacyHeaders: false, message: { error: 'rate_limited' } });

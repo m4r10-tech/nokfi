@@ -166,6 +166,14 @@ router.post('/login', (req, res) => {
 
   if (license.status !== 'active') {
     audit('LOGIN_FAILED_INACTIVE', { license_id: license.id, ip, detail: `status=${license.status}` });
+    // S15b (U4): bloqueada por una renovación rechazada. Solo con la contraseña
+    // correcta se dice que está bloqueada y se da una sesión que únicamente sirve
+    // para pagar un plan nuevo (POST /api/payments/stripe/resume-checkout).
+    if (license.blocked_reason === 'payment_failed' && license.status !== 'revoked'
+        && isPasswordSet(license) && verifyPassword(password, license.password_hash)) {
+      const { token } = createSession(license.id, ip);
+      return res.status(403).json({ error: 'account_blocked', reason: 'payment_failed', resume_token: token, email: license.email, plan: license.plan });
+    }
     // Mensaje genérico para no revelar que SÍ existe la cuenta pero está inactiva vía credenciales.
     return res.status(401).json({ error: 'invalid_credentials', message: 'Email, clave o contraseña incorrectos.' });
   }

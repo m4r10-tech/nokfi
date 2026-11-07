@@ -704,8 +704,10 @@ async function main() {
         trial_end: null, metadata: { plan: 'pro' }, items: { data: [{ current_period_end: end2, price: { id: 'price_unknown' } }] } } } };
     const rUpd = await postStripeWebhook(updEvt);
     const afterUpd = getLicenseById(dl.id);
-    check('S15 Stripe dahlia: subscription.updated lee el periodo de items y reactiva', () =>
-      rUpd.status === 200 && afterUpd.current_period_ends_at === new Date(end2 * 1000).toISOString() && afterUpd.status === 'active');
+    // S15b (U4): tras una renovación rechazada la cuenta queda bloqueada hasta pagar un plan nuevo;
+    // un subscription.updated posterior actualiza el periodo pero NO la reactiva.
+    check('S15 Stripe dahlia: subscription.updated lee el periodo de items (y no desbloquea tras impago)', () =>
+      rUpd.status === 200 && afterUpd.current_period_ends_at === new Date(end2 * 1000).toISOString() && afterUpd.status === 'suspended' && afterUpd.blocked_reason === 'payment_failed');
   }
 
   const cbLicense = dbCreateLicense({
@@ -1542,6 +1544,8 @@ async function main() {
   await require('./session12.tests')({ post, put, get, call, check, checkAsync, getDB });
   await require('./session13.tests')({ post, check });
   await require('./session13.tests').media({ get, check });
+  // S15b lote 2 — modelo de cobro nuevo, bloqueo por impago, /reveal una vez, borrado de cuenta.
+  await require('./session15b.tests')({ post, put, get, call, check, checkAsync, getDB });
 
   } catch (e) {
     console.error('TEST CRASH:', e.message);
