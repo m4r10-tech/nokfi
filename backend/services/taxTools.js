@@ -143,12 +143,15 @@ function quarterArgs(input) {
   return { year, quarter };
 }
 
-function model130(license, input = {}) {
+/** S15: con una clave de prueba el libro real no se lee: cuenta como vacío. */
+const ledgerOf = (license, livemode) => (livemode === false ? [] : F.allEntries(license.id));
+
+function model130(license, input = {}, { livemode = true } = {}) {
   const q = quarterArgs(input);
   if (q.error) return q.error;
   const { year, quarter } = q;
   if (input.source === 'ledger') {
-    const r = irpf130ForQuarter(F.allEntries(license.id), year, quarter);
+    const r = irpf130ForQuarter(ledgerOf(license, livemode), year, quarter);
     return { status: 200, body: { year, quarter, source: 'ledger', due_date: quarterlyDueDate(year, quarter), ...r, note: NOTE } };
   }
   const income = num(input.income), expenses = num(input.expenses);
@@ -172,17 +175,17 @@ function model130(license, input = {}) {
 }
 
 /* ── Resumen del trimestre (desde el libro) ── */
-function quarter(license, input = {}) {
+function quarter(license, input = {}, { livemode = true } = {}) {
   const q = quarterArgs(input);
   if (q.error) return q.error;
   const profile = getCompanyProfile(license.id) || {};
-  const entries = F.allEntries(license.id);
+  const entries = ledgerOf(license, livemode);
   return {
     status: 200,
     body: {
       legal_form: profile.legal_form || null,
       entries_in_ledger: entries.length,
-      ...taxSummary(entries, { ...q, legalForm: profile.legal_form, reserve: F.getReserve(license.id, q.year, q.quarter) }),
+      ...taxSummary(entries, { ...q, legalForm: profile.legal_form, reserve: livemode === false ? 0 : F.getReserve(license.id, q.year, q.quarter) }),
       note: NOTE
     }
   };

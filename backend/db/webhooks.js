@@ -36,36 +36,45 @@ function publicEndpoint(row, { withSecret = false } = {}) {
     events: row.events === '*' ? ['*'] : row.events.split(','),
     description: row.description,
     enabled: !!row.enabled,
+    livemode: row.livemode === undefined ? true : !!row.livemode,
     disabled_reason: row.disabled_reason || null,
     created_at: row.created_at,
     ...(withSecret ? { secret: row.secret } : {})
   };
 }
 
-function createEndpoint(license_id, { url, events, description = '' }) {
+function createEndpoint(license_id, { url, events, description = '', livemode = true }) {
   const n = getDB().prepare('SELECT COUNT(*) c FROM webhook_endpoints WHERE license_id = ?').get(license_id).c;
   if (n >= MAX_ENDPOINTS) return { error: 'too_many_endpoints' };
-  const info = getDB().prepare('INSERT INTO webhook_endpoints (license_id, url, events, description, secret) VALUES (?, ?, ?, ?, ?)')
-    .run(license_id, url, events.join(','), String(description || '').slice(0, 120), newSecret());
+  const info = getDB().prepare('INSERT INTO webhook_endpoints (license_id, url, events, description, secret, livemode) VALUES (?, ?, ?, ?, ?, ?)')
+    .run(license_id, url, events.join(','), String(description || '').slice(0, 120), newSecret(), livemode ? 1 : 0);
   return { endpoint: getEndpoint(license_id, Number(info.lastInsertRowid), { withSecret: true }) };
 }
 
-function getEndpointRow(license_id, id) {
-  return getDB().prepare('SELECT * FROM webhook_endpoints WHERE id = ? AND license_id = ?').get(id, license_id) || null;
+/**
+ * S15: `livemode` (true/false) limita al modo de la clave que pregunta: una
+ * clave de prueba no ve ni toca los webhooks reales, ni al revés. Sin él
+ * (panel con sesión web) se ven todos.
+ */
+const modeOk = (row, livemode) => livemode === undefined || livemode === null || !!row.livemode === !!livemode;
+
+function getEndpointRow(license_id, id, livemode) {
+  const row = getDB().prepare('SELECT * FROM webhook_endpoints WHERE id = ? AND license_id = ?').get(id, license_id) || null;
+  return row && modeOk(row, livemode) ? row : null;
 }
 
-function getEndpoint(license_id, id, opts) {
-  return publicEndpoint(getEndpointRow(license_id, id), opts);
+function getEndpoint(license_id, id, opts = {}) {
+  return publicEndpoint(getEndpointRow(license_id, id, opts.livemode), opts);
 }
 
-function listEndpoints(license_id) {
+function listEndpoints(license_id, { livemode } = {}) {
   const db = getDB();
   const stats = db.prepare(`
     SELECT endpoint_id, COUNT(*) total, SUM(status = 'failed') failed, SUM(status = 'pending') pending, MAX(created_at) last_at
     FROM webhook_deliveries WHERE license_id = ? AND created_at >= datetime('now', '-7 days') GROUP BY endpoint_id
   `).all(license_id);
   const by = Object.fromEntries(stats.map(s => [s.endpoint_id, s]));
-  return db.prepare('SELECT * FROM webhook_endpoints WHERE license_id = ? ORDER BY id DESC').all(license_id).map(r => ({
+  return db.prepare('SELECT * FROM webhook_endpoints WHERE license_id = ? ORDER BY id DESC').all(license_id).filter(r => modeOk(r, livemode)).map(r => ({
     ...publicEndpoint(r),
     last_7_days: { deliveries: by[r.id]?.total || 0, failed: by[r.id]?.failed || 0, pending: by[r.id]?.pending || 0, last_at: by[r.id]?.last_at || null }
   }));
@@ -98,15 +107,15 @@ function deleteEndpoint(license_id, id) {
   return getDB().prepare('DELETE FROM webhook_endpoints WHERE id = ? AND license_id = ?').run(id, license_id).changes > 0;
 }
 
-/** Endpoints activos suscritos a un tipo de evento. */
-function endpointsFor(license_id, type) {
-  return getDB().prepare('SELECT * FROM webhook_endpoints WHERE license_id = ? AND enabled = 1').all(license_id)
+/** Endpoints activos suscritos a un tipo de evento, del mismo modo que el evento (S15). */
+function endpointsFor(license_id, type, livemode = true) {
+  return getDB().prepare('SELECT * FROM webhook_endpoints WHERE license_id = ? AND enabled = 1 AND livemode = ?').all(license_id, livemode ? 1 : 0)
     .filter(r => r.events === '*' || r.events.split(',').includes(type));
 }
 
-/** Licencias con algún endpoint activo suscrito a `type` (para eventos programados). */
+/** Licencias con algún endpoint real activo suscrito a `type` (para eventos programados, que son reales). */
 function licensesSubscribedTo(type) {
-  const rows = getDB().prepare('SELECT DISTINCT license_id, events FROM webhook_endpoints WHERE enabled = 1').all();
+  const rows = getDB().prepare('SELECT DISTINCT license_id, events FROM webhook_endpoints WHERE enabled = 1 AND livemode = 1').all();
   return [...new Set(rows.filter(r => r.events === '*' || r.events.split(',').includes(type)).map(r => r.license_id))];
 }
 
@@ -132,14 +141,14 @@ function getDeliveryRow(license_id, id) {
   return getDB().prepare('SELECT * FROM webhook_deliveries WHERE id = ? AND license_id = ?').get(id, license_id) || null;
 }
 
-/** Datos con caducidad: cuerpos de envío y resultados de trabajos (24 h), idempotencia (24 h). */
+/** Datos con caducidad: cuerpos de envío y resultados de trabajos (24 h), idempotencia (24 h; 30 días al emitir facturas). */
 function purgeWebhookData() {
   const db = getDB();
   db.prepare("UPDATE webhook_deliveries SET payload_json = NULL WHERE payload_json IS NOT NULL AND status != 'pending' AND created_at < datetime('now', '-24 hours')").run();
   db.prepare("DELETE FROM webhook_deliveries WHERE created_at < datetime('now', '-30 days')").run();
   db.prepare("UPDATE api_jobs SET result_json = NULL WHERE result_json IS NOT NULL AND created_at < datetime('now', '-24 hours')").run();
   db.prepare("DELETE FROM api_jobs WHERE created_at < datetime('now', '-30 days')").run();
-  db.prepare("DELETE FROM idempotency_keys WHERE created_at < datetime('now', '-24 hours')").run();
+  db.prepare("DELETE FROM idempotency_keys WHERE created_at < datetime('now', '-' || ttl_hours || ' hours')").run();
   db.prepare("DELETE FROM event_marks WHERE created_at < datetime('now', '-400 days')").run();
 }
 

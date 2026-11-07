@@ -49,7 +49,9 @@ for (const [a, p] of [['0.0.0.0', 8], ['10.0.0.0', 8], ['100.64.0.0', 10], ['127
   ['192.0.0.0', 24], ['192.168.0.0', 16], ['198.18.0.0', 15], ['224.0.0.0', 4], ['240.0.0.0', 4]]) blocked.addSubnet(a, p, 'ipv4');
 // Ojo: no se añade ::ffff:0:0/96 porque BlockList lo aplica también a TODAS
 // las IPv4; las IPv4 mapeadas (::ffff:a.b.c.d) se comprueban aparte abajo.
-for (const [a, p] of [['::', 128], ['::1', 128], ['fc00::', 7], ['fe80::', 10], ['64:ff9b::', 96]]) blocked.addSubnet(a, p, 'ipv6');
+// S15: ::/96 (IPv4 compatibles, ::127.0.0.1), ff00::/8 (multicast) y 2002::/16
+// (6to4, puede llevar dentro una IPv4 privada). ::/96 incluye :: y ::1.
+for (const [a, p] of [['::', 96], ['fc00::', 7], ['fe80::', 10], ['64:ff9b::', 96], ['ff00::', 8], ['2002::', 16]]) blocked.addSubnet(a, p, 'ipv6');
 
 function isPrivateIp(ip) {
   const v = net.isIP(ip);
@@ -71,7 +73,8 @@ function validateUrl(raw) {
   if (u.href.length > 500) return bad('La URL es demasiado larga (máximo 500 caracteres).');
   if (u.protocol !== 'https:' && !(u.protocol === 'http:' && allowHttp())) return bad('La URL debe empezar por https://.');
   if (u.username || u.password) return bad('La URL no puede llevar usuario ni contraseña.');
-  const host = u.hostname.replace(/^\[|\]$/g, '');
+  // S15: sin el punto final de un nombre absoluto («localhost.» = «localhost»).
+  const host = u.hostname.replace(/^\[|\]$/g, '').replace(/\.+$/, '');
   if (!allowPrivate() && (/^localhost$/i.test(host) || /\.(localhost|local|internal)$/i.test(host) || (net.isIP(host) && isPrivateIp(host)))) {
     return bad('La URL apunta a una red privada: usa una dirección pública (en n8n, la "Production URL" del webhook).');
   }
@@ -188,7 +191,8 @@ function newEvent(type, data, livemode) {
  */
 function emit(license_id, type, data, { livemode = true } = {}) {
   try {
-    const eps = W.endpointsFor(license_id, type);
+    // S15: un evento real solo va a webhooks reales y uno de prueba solo a los de prueba.
+    const eps = W.endpointsFor(license_id, type, livemode);
     if (!eps.length) return null;
     // Los eventos reales solo salen con la API contratada (Pro/Max); en Mini,
     // un webhook creado con una clave de prueba recibe solo eventos de prueba.
@@ -209,8 +213,8 @@ function emit(license_id, type, data, { livemode = true } = {}) {
 }
 
 /** "Enviar prueba": evento ping solo a ese endpoint, esperando el resultado. */
-async function sendTest(license_id, endpoint_id) {
-  const ep = W.getEndpointRow(license_id, endpoint_id);
+async function sendTest(license_id, endpoint_id, livemode) {
+  const ep = W.getEndpointRow(license_id, endpoint_id, livemode);
   if (!ep) return null;
   const event = newEvent('ping', { message: 'Evento de prueba de Nokfi. Si lo ves, el webhook funciona.', endpoint_id }, false);
   const id = W.insertDelivery({ endpoint_id, license_id, event });

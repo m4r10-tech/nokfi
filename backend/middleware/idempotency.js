@@ -9,9 +9,15 @@
  *   misma clave, otro cuerpo        → 422 idempotency_key_reused
  *   misma clave, aún en curso       → 409 idempotency_in_progress
  *
- * No se guardan los errores que merece la pena reintentar (5xx, 409 y 429):
- * con ellos la clave se libera y el reintento se ejecuta de verdad. Las claves
- * de prueba (nk_test_) y las reales no comparten espacio de claves.
+ * Solo se guardan las respuestas correctas (2xx/3xx). S15: los errores (4xx y
+ * 5xx) no hacen nada en el servidor y muchos dependen de su estado
+ * (issuer_incomplete, status_conflict, cuota…): se libera la clave y el
+ * reintento se ejecuta de verdad. Las claves de prueba (nk_test_) y las
+ * reales no comparten espacio de claves.
+ *
+ * Ventana: 24 h; la emisión de facturas (POST /invoices, /rectify y la
+ * herramienta issue_invoice del MCP) guarda la clave 30 días (S15, Q6), para
+ * que un flujo que reprocese un pedido días después no emita otra factura.
  *
  * Va DESPUÉS de requireApiKey (necesita req.license y req.apiKey).
  */
@@ -22,12 +28,24 @@ const crypto = require('crypto');
 const { getDB } = require('../db/database');
 
 const STALE_MINUTES = 15; // una petición "en curso" más vieja que esto se da por perdida
+const DEFAULT_TTL_HOURS = 24;
+const INVOICE_TTL_HOURS = 30 * 24;
+
+/** ¿Se guarda esta respuesta? Solo las correctas (S15). */
+const cacheable = (status) => status < 400;
 
 function isAsync(req) {
   return req.query?.async === 'true' || req.query?.async === '1' || /respond-async/i.test(req.get('Prefer') || '');
 }
 
-function idempotency(req, res, next) {
+/** Middleware con una ventana propia (horas). `idempotency` es el de 24 h. */
+function idempotencyFor({ hours = DEFAULT_TTL_HOURS } = {}) {
+  return (req, res, next) => idempotent(req, res, next, hours);
+}
+
+function idempotency(req, res, next) { return idempotent(req, res, next, DEFAULT_TTL_HOURS); }
+
+function idempotent(req, res, next, ttlHours) {
   const raw = req.get('Idempotency-Key');
   if (raw === undefined) return next();
   const k = String(raw).trim();
@@ -40,11 +58,11 @@ function idempotency(req, res, next) {
     .update(JSON.stringify([req.method, req.baseUrl + req.path, isAsync(req), req.body ?? null])).digest('hex');
   const db = getDB();
 
-  const claim = () => db.prepare('INSERT OR IGNORE INTO idempotency_keys (license_id, idem_key, request_hash) VALUES (?, ?, ?)')
-    .run(license_id, key, hash).changes > 0;
+  const claim = () => db.prepare('INSERT OR IGNORE INTO idempotency_keys (license_id, idem_key, request_hash, ttl_hours) VALUES (?, ?, ?, ?)')
+    .run(license_id, key, hash, ttlHours).changes > 0;
 
   if (!claim()) {
-    const row = db.prepare('SELECT *, created_at < datetime(\'now\', ?) AS stale, created_at < datetime(\'now\', \'-24 hours\') AS expired FROM idempotency_keys WHERE license_id = ? AND idem_key = ?')
+    const row = db.prepare('SELECT *, created_at < datetime(\'now\', ?) AS stale, created_at < datetime(\'now\', \'-\' || ttl_hours || \' hours\') AS expired FROM idempotency_keys WHERE license_id = ? AND idem_key = ?')
       .get(`-${STALE_MINUTES} minutes`, license_id, key);
     const takeOver = row && (row.expired || (row.status === null && row.stale));
     if (takeOver) {
@@ -70,7 +88,7 @@ function idempotency(req, res, next) {
       stored = true;
       const s = res.statusCode;
       try {
-        if (s >= 500 || s === 409 || s === 429) release();
+        if (!cacheable(s)) release();
         else db.prepare('UPDATE idempotency_keys SET status = ?, response_json = ? WHERE license_id = ? AND idem_key = ?')
           .run(s, JSON.stringify(body ?? null), license_id, key);
       } catch (e) { console.error('[IDEMPOTENCY]', e.message); }
@@ -86,15 +104,15 @@ function idempotency(req, res, next) {
  * ejecuta una vez por clave y cuerpo; los reintentos devuelven lo guardado.
  * → { status, body, replayed? }
  */
-async function runIdempotent({ license_id, mode = 'live', key, scope, payload, run }) {
+async function runIdempotent({ license_id, mode = 'live', key, scope, payload, run, ttlHours = DEFAULT_TTL_HOURS }) {
   const k = String(key || '').trim();
   if (!k || k.length > 255) return { status: 400, body: { error: 'invalid_idempotency_key', message: 'idempotency_key debe tener entre 1 y 255 caracteres.' } };
   const idemKey = `${mode}:${k}`;
   const hash = crypto.createHash('sha256').update(JSON.stringify(['MCP', scope, payload ?? null])).digest('hex');
   const db = getDB();
-  const claim = () => db.prepare('INSERT OR IGNORE INTO idempotency_keys (license_id, idem_key, request_hash) VALUES (?, ?, ?)').run(license_id, idemKey, hash).changes > 0;
+  const claim = () => db.prepare('INSERT OR IGNORE INTO idempotency_keys (license_id, idem_key, request_hash, ttl_hours) VALUES (?, ?, ?, ?)').run(license_id, idemKey, hash, ttlHours).changes > 0;
   if (!claim()) {
-    const row = db.prepare("SELECT *, created_at < datetime('now', '-24 hours') AS expired FROM idempotency_keys WHERE license_id = ? AND idem_key = ?").get(license_id, idemKey);
+    const row = db.prepare("SELECT *, created_at < datetime('now', '-' || ttl_hours || ' hours') AS expired FROM idempotency_keys WHERE license_id = ? AND idem_key = ?").get(license_id, idemKey);
     if (row?.expired) {
       db.prepare('DELETE FROM idempotency_keys WHERE license_id = ? AND idem_key = ?').run(license_id, idemKey);
       if (!claim()) return { status: 409, body: { error: 'idempotency_in_progress', message: 'Ya hay una petición en curso con esta clave.' } };
@@ -106,9 +124,9 @@ async function runIdempotent({ license_id, mode = 'live', key, scope, payload, r
   }
   let out;
   try { out = await run(); } catch (e) { db.prepare('DELETE FROM idempotency_keys WHERE license_id = ? AND idem_key = ? AND status IS NULL').run(license_id, idemKey); throw e; }
-  if (out.status >= 500 || out.status === 409 || out.status === 429) db.prepare('DELETE FROM idempotency_keys WHERE license_id = ? AND idem_key = ? AND status IS NULL').run(license_id, idemKey);
+  if (!cacheable(out.status)) db.prepare('DELETE FROM idempotency_keys WHERE license_id = ? AND idem_key = ? AND status IS NULL').run(license_id, idemKey);
   else db.prepare('UPDATE idempotency_keys SET status = ?, response_json = ? WHERE license_id = ? AND idem_key = ?').run(out.status, JSON.stringify(out.body ?? null), license_id, idemKey);
   return out;
 }
 
-module.exports = { idempotency, isAsync, runIdempotent };
+module.exports = { idempotency, idempotencyFor, isAsync, runIdempotent, DEFAULT_TTL_HOURS, INVOICE_TTL_HOURS };

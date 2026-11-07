@@ -1542,6 +1542,8 @@ async function main() {
   await require('./session12.tests')({ post, put, get, call, check, checkAsync, getDB });
   await require('./session13.tests')({ post, check });
   await require('./session13.tests').media({ get, check });
+  // S15b lote 8: API (modo prueba separado, lotes MCP, Retry-After, idempotencia, SSRF IPv6).
+  await require('./session15api.tests')({ post, put, get, call, check, checkAsync, getDB });
 
   } catch (e) {
     console.error('TEST CRASH:', e.message);
