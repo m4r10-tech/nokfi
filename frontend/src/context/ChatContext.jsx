@@ -1,6 +1,6 @@
 import { createContext, useContext, useState, useCallback, useRef, useEffect } from 'react';
 import { Link } from 'react-router-dom';
-import { MessageCircle, X, Send, Loader2, Trash2 } from 'lucide-react';
+import { MessageCircle, X, Send, Loader2, Trash2, Info } from 'lucide-react';
 import { chatApi, dashboardApi } from '../middleware/api';
 import { apiErrorMessage } from '../middleware/errors';
 import { useLang } from './LangContext';
@@ -60,13 +60,20 @@ function Launcher({ onClick }) {
 }
 
 /** Respuesta del asistente: las rutas de Nokfi que cite salen como botón (sesión 8). */
-function AssistantMessage({ content, onNavigate }) {
+function AssistantMessage({ content, backup, onNavigate }) {
+  const { t } = useLang();
   const { text, links } = extractToolLinks(content);
   return (
     <div className="max-w-[88%] self-start flex flex-col gap-2">
       <div className="rounded-2xl px-3.5 py-2.5 text-sm whitespace-pre-wrap leading-relaxed" style={{ background: 'var(--surface-2)', color: 'var(--text-primary)' }}>
         {text}
       </div>
+      {backup && (
+        // S15b: aviso de IA de respaldo (provider "local"), como en los informes.
+        <p role="note" className="flex items-start gap-1.5 text-xs" style={{ color: 'var(--text-muted)' }}>
+          <Info size={13} className="shrink-0 mt-0.5" /> <span>{t('chat.backupAi')}</span>
+        </p>
+      )}
       {links.map(l => <ToolLink key={l} to={l} onClick={onNavigate} />)}
     </div>
   );
@@ -125,7 +132,7 @@ function ChatPanel({ analysis, messages, setMessages, onClose, onClearContext })
     setSending(true);
     const res = await chatApi.send(next, { analysisId: analysis?.id, lang });
     setSending(false);
-    if (res.ok && res.data.reply) setMessages([...next, { role: 'assistant', content: res.data.reply }]);
+    if (res.ok && res.data.reply) setMessages([...next, { role: 'assistant', content: res.data.reply, ...(res.data.provider === 'local' ? { backup: true } : {}) }]);
     else setError(apiErrorMessage(t, res));
   };
 
@@ -161,7 +168,7 @@ function ChatPanel({ analysis, messages, setMessages, onClose, onClearContext })
               {m.content}
             </div>
           )
-          : <AssistantMessage key={i} content={m.content} onNavigate={onClose} />
+          : <AssistantMessage key={i} content={m.content} backup={m.backup} onNavigate={onClose} />
         ))}
         {sending && <div className="self-start rounded-2xl px-3.5 py-2.5" style={{ background: 'var(--surface-2)' }}><Loader2 size={15} className="animate-spin" style={{ color: 'var(--text-muted)' }} /></div>}
         {error && <p role="alert" className="text-sm rounded-lg px-3 py-2" style={{ background: 'var(--negative-soft)', color: 'var(--negative)' }}>{error}</p>}

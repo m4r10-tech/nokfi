@@ -1,6 +1,6 @@
 import { useState, useEffect, useCallback } from 'react';
-import { useParams, Link } from 'react-router-dom';
-import { Copy, SearchX, FileText } from 'lucide-react';
+import { useParams, Link, useNavigate } from 'react-router-dom';
+import { Copy, SearchX, FileText, Pencil, Trash2 } from 'lucide-react';
 import { analysesApi } from '../middleware/api';
 import { apiErrorMessage, isConnectivityError } from '../middleware/errors';
 import { sanitizeAiHtml } from '../middleware/sanitize';
@@ -14,6 +14,7 @@ import EmptyState from '../components/EmptyState';
 import ErrorState from '../components/ErrorState';
 import Skeleton, { SkeletonText } from '../components/Skeleton';
 import { formatDateTime } from '../utils/dates';
+import { Modal, Field } from '../components/ui';
 import { KIND_ICON, kindLabel, analysisTitle, analysisSource } from './Historial';
 
 /**
@@ -28,6 +29,11 @@ export default function HistorialDetalle() {
   const toast = useToast();
   const [analysis, setAnalysis] = useState(null);
   const [failure, setFailure] = useState(null);
+  // S15b D8: renombrar y borrar (borrar con confirmación en un modal propio).
+  const navigate = useNavigate();
+  const [renaming, setRenaming] = useState(null); // null | texto del campo
+  const [confirmDelete, setConfirmDelete] = useState(false);
+  const [busy, setBusy] = useState(false);
 
   const load = useCallback(async () => {
     setFailure(null);
@@ -84,6 +90,35 @@ export default function HistorialDetalle() {
     }
   };
 
+  const actionError = (res) => {
+    if (res?.data?.error === 'invalid_title') return t('history.renameInvalid');
+    if (res?.status === 404) return t('history.notFoundTitle');
+    return apiErrorMessage(t, { ...res, data: { ...res?.data, message: undefined } }, 'history.actionError');
+  };
+
+  const saveTitle = async (e) => {
+    e.preventDefault();
+    const next = (renaming || '').replace(/\s+/g, ' ').trim();
+    if (!next || next.length > 120) { toast.error(t('history.renameInvalid')); return; }
+    setBusy(true);
+    const res = await analysesApi.rename(analysis.id, next);
+    setBusy(false);
+    if (!res.ok) { toast.error(actionError(res)); return; }
+    setAnalysis(a => ({ ...a, title: res.data.title }));
+    setRenaming(null);
+    toast.success(t('history.renamed'));
+  };
+
+  const remove = async () => {
+    setBusy(true);
+    const res = await analysesApi.remove(analysis.id);
+    setBusy(false);
+    if (!res.ok && res.status !== 404) { toast.error(actionError(res)); return; }
+    setConfirmDelete(false);
+    toast.success(t('history.deleted'));
+    navigate('/app/historial', { replace: true });
+  };
+
   return (
     <article className="max-w-3xl">
       <span className="inline-flex items-center gap-1.5 rounded-full px-2.5 py-1 text-xs font-medium mb-3"
@@ -104,7 +139,38 @@ export default function HistorialDetalle() {
         <button onClick={copyText} className="btn btn-ghost btn-sm">
           <Copy size={14} /> {t('history.copyText')}
         </button>
+        <button onClick={() => setRenaming(analysis.title)} className="btn btn-ghost btn-sm">
+          <Pencil size={14} /> {t('history.rename')}
+        </button>
+        <button onClick={() => setConfirmDelete(true)} className="btn btn-ghost btn-sm" style={{ color: 'var(--negative)' }}>
+          <Trash2 size={14} /> {t('history.delete')}
+        </button>
       </div>
+
+      {renaming !== null && (
+        <Modal title={t('history.renameTitle')} onClose={() => !busy && setRenaming(null)}
+          footer={<>
+            <button type="button" onClick={() => setRenaming(null)} disabled={busy} className="btn btn-secondary">{t('common.cancel')}</button>
+            <button type="submit" form="rename-analysis" disabled={busy || !renaming.trim()} className="btn btn-primary">{t('common.save')}</button>
+          </>}>
+          <form id="rename-analysis" onSubmit={saveTitle}>
+            <Field label={t('history.renameLabel')} htmlFor="rename-analysis-title">
+              <input id="rename-analysis-title" className="input" value={renaming} maxLength={120} autoFocus
+                onChange={(e) => setRenaming(e.target.value)} />
+            </Field>
+          </form>
+        </Modal>
+      )}
+
+      {confirmDelete && (
+        <Modal title={t('history.deleteTitle')} onClose={() => !busy && setConfirmDelete(false)}
+          footer={<>
+            <button type="button" onClick={() => setConfirmDelete(false)} disabled={busy} className="btn btn-secondary">{t('common.cancel')}</button>
+            <button type="button" onClick={remove} disabled={busy} className="btn btn-danger"><Trash2 size={15} /> {t('history.deleteConfirm')}</button>
+          </>}>
+          <p className="text-sm" style={{ color: 'var(--text-secondary)' }}>{t('history.deleteDesc', { title })}</p>
+        </Modal>
+      )}
 
       <ReportView report={analysis.report} html={analysis.result_html} actions={analysis.actions} health={analysis.health} />
     </article>

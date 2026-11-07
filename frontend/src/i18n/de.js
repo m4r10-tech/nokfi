@@ -523,7 +523,7 @@ export default {
     convertToExcel: 'In Excel umwandeln', continueAnyway: 'Trotzdem fortfahren',
     aiAnalysis: 'KI-Analyse', exportResult: 'Ergebnis exportieren',
     reading: 'Datei wird gelesen…',
-    analyzing: 'Deine Daten werden analysiert…', analyzingHint: 'Das dauert meist 10 bis 30 Sekunden.',
+    analyzing: 'Deine Daten werden analysiert…', analyzingHint: 'Das dauert meist 20 Sekunden bis 1 Minute.',
     analysisReady: 'Analyse fertig und im Verlauf gespeichert',
     tooBig: '„{name}“ überschreitet das Limit von 5 MB.',
     readError: '„{name}“ konnte nicht gelesen werden (beschädigt, geschützt oder Format nicht unterstützt).',
@@ -558,7 +558,9 @@ export default {
     notFoundTitle: 'Diese Analyse existiert nicht',
     notFoundDesc: 'Der Link ist vielleicht falsch oder die Analyse gehört zu einer anderen Lizenz.',
     loadDetailError: 'Diese Analyse konnte nicht geladen werden.',
-    viaApi: 'per API'
+    viaApi: 'per API',
+    rename: 'Umbenennen', renameTitle: 'Bericht umbenennen', renameLabel: 'Name des Berichts', renamed: 'Name geändert', renameInvalid: 'Gib einen Namen mit 1 bis 120 Zeichen ein.',
+    delete: 'Löschen', deleteTitle: 'Diesen Bericht löschen?', deleteDesc: '„{title}“ wird mit seinem Aktionsplan gelöscht. Das lässt sich nicht rückgängig machen, und das verbrauchte Guthaben wird nicht erstattet.', deleteConfirm: 'Endgültig löschen', deleted: 'Bericht gelöscht', actionError: 'Die Änderung konnte nicht gespeichert werden. Versuch es noch einmal.'
   },
   errors: {
     network_error: 'Keine Verbindung. Prüfe dein Netzwerk und versuche es erneut.',
@@ -783,6 +785,7 @@ export default {
     json: 'JSON', jsonDesc: 'Für Automatisierungen'
   },
   chat: {
+    backupAi: 'Antwort der Ersatz-KI von Nokfi (die üblichen Dienste haben nicht geantwortet). Sie ist einfacher: Prüfe die Zahlen in deinen Ansichten.',
     open: 'Assistent öffnen', title: 'Nokfi-Assistent', subtitle: 'Frag zu deinen Finanzen oder zu Nokfi',
     aboutReport: 'Zu:', clearContext: 'Bericht vergessen und neu beginnen', askReport: 'Assistenten fragen',
     empty: 'Hallo! Frag mich alles zu den Finanzen deines Unternehmens oder zu deinen Berichten.',
@@ -1224,6 +1227,7 @@ export default {
       claim: 'Mahnen', claimTitle: 'Zahlungserinnerung · {name}', toneFriendly: 'Freundlich', toneFirm: 'Bestimmt', toneFormal: 'Formell',
       writing: 'Wird verfasst…', subject: 'Betreff', body: 'Nachricht', openMail: 'Im E-Mail-Programm öffnen',
       reviewNote: 'Prüfe den Text vor dem Senden. Er stammt vom kostenlosen KI-Assistenten.',
+      backupAi: 'Mit der Ersatz-KI von Nokfi geschrieben (die üblichen Dienste haben nicht geantwortet). Prüfe ihn besonders sorgfältig.',
       autoTitle: 'Überfällige Rechnungen automatisch anmahnen', autoHint: 'Nokfi schickt deinem Kunden 7 Tage nach Fälligkeit eine Erinnerung (freundlich), nach 30 (bestimmt) und nach 60 (formell) – in deinem Namen, Antworten gehen direkt an deine E-Mail. Ohne Fälligkeit gelten 30 Tage ab Ausstellung. Nur Rechnungen mit Kunden-E-Mail.',
       autoSent: 'Erinnerung {n} von 3 gesendet', autoNone: 'Noch keine Erinnerungen', addEmail: 'Kunden-E-Mail hinzufügen, um zu mahnen', addEmailTitle: 'E-Mail von {name}', addEmailNote: 'Erinnerungen werden mit deinem Firmennamen gesendet, Antworten kommen an deine E-Mail.',
       collectedToast: 'Rechnung als erhalten markiert', emptyTitle: 'Niemand schuldet dir etwas', emptyDesc: 'Sobald du unbezahlte Ausgangsrechnungen im Journal hast, siehst du hier, was man dir schuldet und was überfällig ist, und kannst per E-Mail mahnen.',

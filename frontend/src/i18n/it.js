@@ -523,7 +523,7 @@ export default {
     convertToExcel: 'Converti in Excel', continueAnyway: 'Continua comunque',
     aiAnalysis: 'Analisi dell’IA', exportResult: 'Esporta il risultato',
     reading: 'Lettura del file…',
-    analyzing: 'Analisi dei tuoi dati…', analyzingHint: 'Di solito richiede tra 10 e 30 secondi.',
+    analyzing: 'Analisi dei tuoi dati…', analyzingHint: 'Di solito richiede da 20 secondi a 1 minuto.',
     analysisReady: 'Analisi pronta e salvata nella cronologia',
     tooBig: '«{name}» supera il limite di 5 MB.',
     readError: 'Impossibile leggere «{name}» (danneggiato, protetto o formato non supportato).',
@@ -558,7 +558,9 @@ export default {
     notFoundTitle: 'Questa analisi non esiste',
     notFoundDesc: 'Il link potrebbe essere errato o l’analisi appartenere a un’altra licenza.',
     loadDetailError: 'Impossibile caricare questa analisi.',
-    viaApi: 'via API'
+    viaApi: 'via API',
+    rename: 'Rinomina', renameTitle: 'Rinomina il report', renameLabel: 'Nome del report', renamed: 'Nome modificato', renameInvalid: 'Inserisci un nome da 1 a 120 caratteri.',
+    delete: 'Elimina', deleteTitle: 'Eliminare questo report?', deleteDesc: '«{title}» verrà eliminato insieme al suo piano d’azione. Non si può annullare e il credito usato non viene restituito.', deleteConfirm: 'Elimina definitivamente', deleted: 'Report eliminato', actionError: 'Non è stato possibile salvare la modifica. Riprova.'
   },
   errors: {
     network_error: 'Nessuna connessione. Controlla la rete e riprova.',
@@ -783,6 +785,7 @@ export default {
     json: 'JSON', jsonDesc: 'Per le automazioni'
   },
   chat: {
+    backupAi: 'Risposta dell’IA di riserva di Nokfi (i servizi abituali non rispondevano). È più semplice: verifica le cifre nelle tue schermate.',
     open: 'Apri l’assistente', title: 'Assistente Nokfi', subtitle: 'Chiedi delle tue finanze o di Nokfi',
     aboutReport: 'Su:', clearContext: 'Dimentica il report e ricomincia', askReport: 'Chiedi all’assistente',
     empty: 'Ciao. Chiedimi quello che vuoi sulle finanze della tua attività o sui tuoi report.',
@@ -1224,6 +1227,7 @@ export default {
       claim: 'Sollecita', claimTitle: 'Email di sollecito · {name}', toneFriendly: 'Cordiale', toneFirm: 'Deciso', toneFormal: 'Formale',
       writing: 'Scrittura in corso…', subject: 'Oggetto', body: 'Messaggio', openMail: 'Apri nella posta',
       reviewNote: 'Rileggi il testo prima di inviarlo. È scritto dall’assistente IA gratuito.',
+      backupAi: 'Scritto con l’IA di riserva di Nokfi (i servizi abituali non rispondevano). Rileggilo con più attenzione.',
       autoTitle: 'Sollecita automaticamente le fatture scadute', autoHint: 'Nokfi invia un promemoria al tuo cliente 7 giorni dopo la scadenza (cordiale), a 30 (fermo) e a 60 (formale), a tuo nome e con risposta diretta alla tua email. Senza scadenza si contano 30 giorni dall’emissione. Solo fatture con email del cliente.',
       autoSent: 'Promemoria {n} di 3 inviato', autoNone: 'Ancora nessun promemoria', addEmail: 'Aggiungi l’email del cliente per sollecitare', addEmailTitle: 'Email di {name}', addEmailNote: 'I promemoria partono con il nome della tua azienda e le risposte arrivano alla tua email.',
       collectedToast: 'Fattura segnata come incassata', emptyTitle: 'Nessuno ti deve nulla', emptyDesc: 'Quando aggiungerai al registro fatture emesse non incassate, qui vedrai quanto ti devono, cosa è scaduto e potrai sollecitarlo via email.',

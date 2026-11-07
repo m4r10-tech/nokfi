@@ -526,7 +526,7 @@ export default {
     convertToExcel: 'Konwertuj do Excela', continueAnyway: 'Kontynuuj mimo to',
     aiAnalysis: 'Analiza AI', exportResult: 'Eksportuj wynik',
     reading: 'Czytanie pliku…',
-    analyzing: 'Analizujemy twoje dane…', analyzingHint: 'Zwykle trwa to 10–30 sekund.',
+    analyzing: 'Analizujemy twoje dane…', analyzingHint: 'Zwykle trwa to od 20 sekund do 1 minuty.',
     analysisReady: 'Analiza gotowa i zapisana w historii',
     tooBig: '„{name}” przekracza limit 5 MB.',
     readError: 'Nie udało się odczytać „{name}” (uszkodzony, chroniony lub nieobsługiwany format).',
@@ -561,7 +561,9 @@ export default {
     notFoundTitle: 'Ta analiza nie istnieje',
     notFoundDesc: 'Link może być błędny albo analiza należy do innej licencji.',
     loadDetailError: 'Nie udało się wczytać tej analizy.',
-    viaApi: 'przez API'
+    viaApi: 'przez API',
+    rename: 'Zmień nazwę', renameTitle: 'Zmień nazwę raportu', renameLabel: 'Nazwa raportu', renamed: 'Nazwa zmieniona', renameInvalid: 'Wpisz nazwę od 1 do 120 znaków.',
+    delete: 'Usuń', deleteTitle: 'Usunąć ten raport?', deleteDesc: '„{title}” zostanie usunięty razem z planem działania. Tego nie można cofnąć, a wykorzystany kredyt nie zostanie zwrócony.', deleteConfirm: 'Usuń na zawsze', deleted: 'Raport usunięty', actionError: 'Nie udało się zapisać zmiany. Spróbuj ponownie.'
   },
   errors: {
     network_error: 'Brak połączenia. Sprawdź sieć i spróbuj ponownie.',
@@ -786,6 +788,7 @@ export default {
     json: 'JSON', jsonDesc: 'Do automatyzacji'
   },
   chat: {
+    backupAi: 'Odpowiedź zapasowej AI Nokfi (zwykłe usługi nie odpowiadały). Jest prostsza: sprawdź liczby na swoich ekranach.',
     open: 'Otwórz asystenta', title: 'Asystent Nokfi', subtitle: 'Pytaj o swoje finanse lub o Nokfi',
     aboutReport: 'Dotyczy:', clearContext: 'Zapomnij raport i zacznij od nowa', askReport: 'Zapytaj asystenta',
     empty: 'Cześć! Zapytaj mnie o finanse swojej firmy lub o swoje raporty.',
@@ -1227,6 +1230,7 @@ export default {
       claim: 'Upomnij', claimTitle: 'E-mail z przypomnieniem · {name}', toneFriendly: 'Uprzejmy', toneFirm: 'Stanowczy', toneFormal: 'Formalny',
       writing: 'Piszę…', subject: 'Temat', body: 'Treść', openMail: 'Otwórz w poczcie',
       reviewNote: 'Sprawdź tekst przed wysłaniem. Napisał go darmowy asystent AI.',
+      backupAi: 'Napisane przez zapasową AI Nokfi (zwykłe usługi nie odpowiadały). Sprawdź je dokładniej.',
       autoTitle: 'Automatycznie upominaj się o przeterminowane faktury', autoHint: 'Nokfi wysyła klientowi przypomnienie 7 dni po terminie (uprzejme), po 30 (stanowcze) i po 60 (formalne), w twoim imieniu, a odpowiedzi trafiają na twój e-mail. Bez terminu liczy się 30 dni od wystawienia. Tylko faktury z e-mailem klienta.',
       autoSent: 'Wysłano przypomnienie {n} z 3', autoNone: 'Brak przypomnień', addEmail: 'Dodaj e-mail klienta, aby się upominać', addEmailTitle: 'E-mail: {name}', addEmailNote: 'Przypomnienia wychodzą z nazwą twojej firmy, a odpowiedzi trafiają na twój e-mail.',
       collectedToast: 'Faktura oznaczona jako pobrana', emptyTitle: 'Nikt nie jest ci nic winien', emptyDesc: 'Gdy dodasz do rejestru wystawione, nieopłacone faktury, zobaczysz tu, ile ci są winni i co jest po terminie, i upomnisz się e-mailem.',

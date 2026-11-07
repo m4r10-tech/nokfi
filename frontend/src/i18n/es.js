@@ -527,7 +527,7 @@ export default {
     convertToExcel: 'Convertir a Excel', continueAnyway: 'Continuar igualmente',
     aiAnalysis: 'Análisis de la IA', exportResult: 'Exportar resultado',
     reading: 'Leyendo archivo…',
-    analyzing: 'Analizando tus datos…', analyzingHint: 'Suele tardar entre 10 y 30 segundos.',
+    analyzing: 'Analizando tus datos…', analyzingHint: 'Suele tardar entre 20 segundos y 1 minuto.',
     analysisReady: 'Análisis listo y guardado en tu historial',
     tooBig: '"{name}" supera el límite de 5 MB.',
     readError: 'No se pudo leer "{name}" (corrupto, protegido o formato no soportado).',
@@ -562,7 +562,9 @@ export default {
     notFoundTitle: 'Este análisis no existe',
     notFoundDesc: 'Puede que el enlace sea incorrecto o que el análisis pertenezca a otra licencia.',
     loadDetailError: 'No se pudo cargar este análisis.',
-    viaApi: 'vía API'
+    viaApi: 'vía API',
+    rename: 'Renombrar', renameTitle: 'Renombrar el informe', renameLabel: 'Nombre del informe', renamed: 'Nombre cambiado', renameInvalid: 'Escribe un nombre de 1 a 120 caracteres.',
+    delete: 'Borrar', deleteTitle: '¿Borrar este informe?', deleteDesc: 'Se borrará «{title}» con su plan de acción. No se puede deshacer y no te devuelve el crédito gastado.', deleteConfirm: 'Borrar para siempre', deleted: 'Informe borrado', actionError: 'No se pudo guardar el cambio. Inténtalo de nuevo.'
   },
   errors: {
     network_error: 'Sin conexión. Revisa tu red e inténtalo de nuevo.',
@@ -787,6 +789,7 @@ export default {
     json: 'JSON', jsonDesc: 'Para automatizaciones'
   },
   chat: {
+    backupAi: 'Respuesta de la IA de respaldo de Nokfi (los servicios habituales no respondían). Es más sencilla: contrasta las cifras con tus pantallas.',
     open: 'Abrir el asistente', title: 'Asistente Nokfi', subtitle: 'Pregunta sobre tus finanzas o sobre Nokfi',
     aboutReport: 'Sobre:', clearContext: 'Olvidar el informe y empezar de cero', askReport: 'Preguntar al asistente',
     empty: 'Hola. Pregúntame lo que quieras sobre las finanzas de tu negocio o sobre tus informes.',
@@ -1228,6 +1231,7 @@ export default {
       claim: 'Reclamar', claimTitle: 'Email de reclamación · {name}', toneFriendly: 'Amable', toneFirm: 'Firme', toneFormal: 'Formal',
       writing: 'Redactando…', subject: 'Asunto', body: 'Mensaje', openMail: 'Abrir en el correo',
       reviewNote: 'Revisa el texto antes de enviarlo. Lo redacta el asistente de IA gratuito.',
+      backupAi: 'Redactado con la IA de respaldo de Nokfi (los servicios habituales no respondían). Revísalo con más cuidado.',
       autoTitle: 'Reclamar automáticamente las facturas vencidas', autoHint: 'Nokfi envía un recordatorio a tu cliente a los 7 días del vencimiento (amable), a los 30 (firme) y a los 60 (formal), en tu nombre y con respuesta directa a tu email. Si no hay vencimiento, se cuenta 30 días desde la emisión. Solo a facturas con email del cliente.',
       autoSent: 'Recordatorio {n} de 3 enviado', autoNone: 'Aún sin recordatorios', addEmail: 'Añadir email del cliente para reclamar', addEmailTitle: 'Email de {name}', addEmailNote: 'Los recordatorios salen con el nombre de tu empresa y las respuestas llegan a tu email.',
       collectedToast: 'Factura marcada como cobrada', emptyTitle: 'Nadie te debe nada', emptyDesc: 'Cuando añadas al libro facturas emitidas sin cobrar, aquí verás cuánto te deben, qué está vencido y podrás reclamarlo con un email.',

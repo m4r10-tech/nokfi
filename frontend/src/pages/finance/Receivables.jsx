@@ -1,6 +1,6 @@
-import { useState, useEffect, useCallback } from 'react';
+import { useState, useEffect, useCallback, useRef } from 'react';
 import { useOutletContext } from 'react-router-dom';
-import { HandCoins, Mail, Check, Loader2, Copy, BellRing, AtSign } from 'lucide-react';
+import { HandCoins, Mail, Check, Loader2, Copy, BellRing, AtSign, Info } from 'lucide-react';
 import { financeApi, ledgerApi } from '../../middleware/api';
 import { apiErrorMessage, isConnectivityError } from '../../middleware/errors';
 import { useLang } from '../../context/LangContext';
@@ -132,13 +132,26 @@ function ClaimEmail({ item, onClose }) {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState(null);
 
-  const generate = async () => {
+  // S15b D4: al cambiar de tono se cancela la generación anterior (y su espera) y una
+  // respuesta vieja no pisa la nueva; cada tono ya redactado (y lo que se haya
+  // editado) se guarda y se reutiliza sin volver a gastar IA.
+  const drafts = useRef({});
+  const current = useRef(null); // { tone, ctrl }
+  const generate = async (tn) => {
+    current.current?.ctrl.abort();
+    if (drafts.current[tn]) { current.current = null; setLoading(false); setError(null); setDraft(drafts.current[tn]); return; }
+    const req = { tone: tn, ctrl: new AbortController() };
+    current.current = req;
     setLoading(true); setError(null);
-    const res = await financeApi.collectionEmail(item.id, tone, lang);
+    const res = await financeApi.collectionEmail(item.id, tn, lang, req.ctrl.signal);
+    if (current.current !== req || res.aborted) return; // otro tono la ha sustituido
+    current.current = null;
     setLoading(false);
-    if (res.ok) setDraft(res.data); else setError(apiErrorMessage(t, res));
+    if (res.ok) { drafts.current[tn] = res.data; setDraft(res.data); } else setError(apiErrorMessage(t, res));
   };
-  useEffect(() => { generate(); }, [tone]); // eslint-disable-line react-hooks/exhaustive-deps
+  useEffect(() => { generate(tone); }, [tone]); // eslint-disable-line react-hooks/exhaustive-deps
+  useEffect(() => () => current.current?.ctrl.abort(), []); // al cerrar, deja de esperar
+  const editDraft = (patch) => setDraft(d => { const n = { ...d, ...patch }; drafts.current[tone] = n; return n; });
 
   const copy = async () => {
     try { await navigator.clipboard.writeText(`${draft.subject}\n\n${draft.body}`); toast.success(t('common.copied')); } catch { /* sin portapapeles */ }
@@ -161,8 +174,14 @@ function ClaimEmail({ item, onClose }) {
         {error && <ErrorBox>{error}</ErrorBox>}
         {draft && !loading && (
           <>
-            <input value={draft.subject} onChange={(e) => setDraft(d => ({ ...d, subject: e.target.value }))} className="input font-medium" aria-label={t('finance.receivables.subject')} />
-            <textarea value={draft.body} onChange={(e) => setDraft(d => ({ ...d, body: e.target.value }))} rows={12} className="input resize-y !leading-relaxed" aria-label={t('finance.receivables.body')} />
+            {draft.provider === 'local' && (
+              <p role="note" className="flex items-start gap-2 rounded-xl px-3.5 py-2.5 text-sm" style={{ background: 'var(--surface-2)', color: 'var(--text-secondary)' }}>
+                <Info size={16} className="shrink-0 mt-0.5" style={{ color: 'var(--accent-text)' }} />
+                <span>{t('finance.receivables.backupAi')}</span>
+              </p>
+            )}
+            <input value={draft.subject} onChange={(e) => editDraft({ subject: e.target.value })} className="input font-medium" aria-label={t('finance.receivables.subject')} />
+            <textarea value={draft.body} onChange={(e) => editDraft({ body: e.target.value })} rows={12} className="input resize-y !leading-relaxed" aria-label={t('finance.receivables.body')} />
             <p className="text-xs" style={{ color: 'var(--text-muted)' }}>{t('finance.receivables.reviewNote')}</p>
           </>
         )}

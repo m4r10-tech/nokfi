@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import { useOutletContext, Link } from 'react-router-dom';
 import { RefreshCw, RotateCw, ArrowLeft, ArrowRight, Loader2, AlertCircle, History, Info } from 'lucide-react';
 import { aiApi } from '../middleware/api';
@@ -34,12 +34,22 @@ const initialAnswers = (sector) => (NO_STOCK_SECTORS.includes(sector)
   : {});
 
 export default function Cuestionario() {
-  const { profile } = useOutletContext();
+  const { profile, loading: profileLoading } = useOutletContext();
   const { t, lang } = useLang();
   const toast = useToast();
   const REPORT_TITLE = t('questionnaire.reportTitle');
   const [step, setStep] = useState(0);
-  const [answers, setAnswers] = useState(() => initialAnswers(profile.sector));
+  const [answers, setAnswers] = useState(() => (profileLoading ? {} : initialAnswers(profile.sector)));
+  // S15b D1: al entrar por URL o recargar, el perfil (y su sector) llega después del
+  // primer render: el «No aplica» de stock se aplica cuando termina de cargar, sin
+  // pisar lo que el usuario ya haya contestado.
+  const presetDone = useRef(!profileLoading);
+  useEffect(() => {
+    if (presetDone.current || profileLoading) return;
+    presetDone.current = true;
+    const preset = initialAnswers(profile.sector);
+    if (Object.keys(preset).length) setAnswers(a => ({ ...preset, ...a }));
+  }, [profileLoading, profile.sector]);
   const presetNoStock = NO_STOCK_SECTORS.includes(profile.sector);
   const [phase, setPhase] = useState('form'); // form | loading | result | error
   const [report, setReport] = useState(null); // respuesta de /api/ai/analyze
