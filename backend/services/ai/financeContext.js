@@ -38,6 +38,15 @@ function normalizeLink(v) {
   return LINK_PATHS.has(s) ? s : '';
 }
 
+/* Nombre de cada modelo de Hacienda (contexto de la IA, S15b D3). */
+const MODEL_NAMES = {
+  '303': 'IVA trimestral', '130': 'pago fraccionado del IRPF', '111': 'retenciones de trabajadores y profesionales',
+  '115': 'retenciones de alquileres', '390': 'resumen anual del IVA', '190': 'resumen anual de retenciones',
+  '180': 'resumen anual de retenciones de alquileres', '347': 'operaciones con terceros', '202': 'pago fraccionado del Impuesto sobre Sociedades',
+  '100': 'declaración de la renta', '200': 'Impuesto sobre Sociedades'
+};
+const modelLabel = (m) => (MODEL_NAMES[m] ? `modelo ${m} (${MODEL_NAMES[m]})` : `modelo ${m}`);
+
 const LOCALES = { es: 'es-ES', en: 'en-GB', fr: 'fr-FR', it: 'it-IT', de: 'de-DE', pl: 'pl-PL' };
 
 function formatters(lang) {
@@ -65,9 +74,15 @@ function financeContext(licenseId, { lang = 'es', maxChars = 3000, today = iso(n
   const f = formatters(lang);
   const lines = [`Hoy es ${f.date(today)}.`];
 
+  // S15b D3: cada modelo con su nombre y su plazo, para que la IA no junte el importe
+  // estimado (303/130) con la fecha de otro modelo (p. ej. 111/115 el 20 de enero).
   const next = upcoming(profile.legal_form || undefined, today, 1)[0];
   if (next) {
-    lines.push(`Próximo plazo fiscal: modelos ${next.models.join(', ')} (${next.period}) el ${f.date(next.date)}, faltan ${next.days_left} días [enlace: calendario].`);
+    const estimated = next.models.filter(m => m === '303' || m === '130');
+    const note = estimated.length === next.models.length
+      ? ''
+      : `; Nokfi no estima el importe de ${next.models.filter(m => !estimated.includes(m)).map(m => `el ${m}`).join(' ni ')}`;
+    lines.push(`Próximo plazo fiscal (${next.period}) el ${f.date(next.date)}, faltan ${next.days_left} días: ${next.models.map(modelLabel).join('; ')}${note} [enlace: calendario].`);
   }
 
   if (!entries.length) {
@@ -85,7 +100,8 @@ function financeContext(licenseId, { lang = 'es', maxChars = 3000, today = iso(n
     ? `IVA (303) a compensar ${f.eur(-tax.vat.result)}: no se paga ni se devuelve ahora, se descuenta en los trimestres siguientes`
     : `IVA (303) a pagar ${f.eur(tax.vat.result)}`;
   const irpf = tax.irpf130 ? `; IRPF (130) ${f.eur(tax.irpf130.result)}` : '';
-  lines.push(`Impuestos estimados del ${cq.quarter}T ${cq.year} (se presentan hasta el ${f.date(tax.due_date)}): ${vat}${irpf}; total a pagar ${f.eur(tax.total_estimated)}; apartado ${f.eur(tax.reserved)}; falta por apartar ${f.eur(tax.missing)} [enlace: impuestos].`);
+  const estModels = tax.irpf130 ? 'modelos 303 y 130' : 'modelo 303';
+  lines.push(`Impuestos estimados del ${cq.quarter}T ${cq.year}, solo ${estModels} (plazo de estos modelos: hasta el ${f.date(tax.due_date)}; no mezcles este importe ni este plazo con los de otros modelos como el 111 o el 115): ${vat}${irpf}; total a pagar ${f.eur(tax.total_estimated)}; apartado ${f.eur(tax.reserved)}; falta por apartar ${f.eur(tax.missing)} [enlace: impuestos].`);
 
   // Cobros pendientes: total, vencido y los deudores más importantes.
   const rec = receivables(entries, today);
