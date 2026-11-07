@@ -54,6 +54,11 @@ export default defineConfig({
       registerType: 'prompt',
       includeAssets: ['favicon.svg', 'icons/favicon-16.png', 'icons/favicon-32.png', 'icons/apple-touch-icon.png'],
       manifest: {
+        // S15b V7: id fijo (= start_url de siempre, no cambia la app ya instalada) y lang
+        // coherente con el nombre y la descripción, que están en castellano.
+        id: '/app/home',
+        lang: 'es',
+        dir: 'ltr',
         name: 'Nokfi — Análisis financiero para pymes',
         short_name: 'Nokfi',
         description: 'Diagnóstico financiero y análisis de datos con IA para autónomos y pymes',
@@ -65,8 +70,15 @@ export default defineConfig({
         icons: [
           { src: '/icons/icon-192.png', sizes: '192x192', type: 'image/png' },
           { src: '/icons/icon-512.png', sizes: '512x512', type: 'image/png' },
-          { src: '/icons/icon-512.png', sizes: '512x512', type: 'image/png', purpose: 'maskable' },
+          // S15b V7: maskable propio, con el logo dentro de la zona segura (antes, el mismo icono y salía recortado).
+          { src: '/icons/icon-maskable-192.png', sizes: '192x192', type: 'image/png', purpose: 'maskable' },
+          { src: '/icons/icon-maskable-512.png', sizes: '512x512', type: 'image/png', purpose: 'maskable' },
           { src: '/icons/apple-touch-icon.png', sizes: '180x180', type: 'image/png' }
+        ],
+        // Capturas reales de la app (las mismas de la landing, cuenta de ejemplo).
+        screenshots: [
+          { src: '/screens/inicio-dark.jpg', sizes: '1920x1200', type: 'image/jpeg', form_factor: 'wide', label: 'Inicio: próximo plazo fiscal, lo que apartar para Hacienda y cobros vencidos' },
+          { src: '/screens/cobros-dark.jpg', sizes: '1920x1200', type: 'image/jpeg', form_factor: 'wide', label: 'Cobros: quién te debe y cuánto' }
         ]
       },
       workbox: {

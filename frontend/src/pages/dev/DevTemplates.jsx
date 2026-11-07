@@ -3,7 +3,7 @@ import { Download, ArrowRight, KeyRound } from 'lucide-react';
 import { useLang } from '../../context/LangContext';
 import PageHeader from '../../components/PageHeader';
 import { Section, Badge } from '../../components/ui';
-import { N8N_TEMPLATES } from './templates';
+import { N8N_TEMPLATES, templateFile } from './templates';
 
 /**
  * Sesión 7 — Desarrolladores › Plantillas: flujos de n8n para importar. Cada
@@ -26,13 +26,14 @@ export default function DevTemplates() {
 }
 
 function TemplateCard({ tpl }) {
-  const { t } = useLang();
+  const { t, lang } = useLang();
   const [steps, setSteps] = useState(null);
+  const file = templateFile(tpl, lang);
 
   // Pasos en el orden de las conexiones, empezando por el nodo que nadie alimenta.
   useEffect(() => {
     let alive = true;
-    fetch(tpl.file).then(r => r.json()).then(wf => {
+    fetch(file).then(r => r.json()).then(wf => {
       const targets = new Set(Object.values(wf.connections).flatMap(c => c.main.flat().map(x => x.node)));
       let name = wf.nodes.find(n => !targets.has(n.name))?.name;
       const order = [];
@@ -40,7 +41,7 @@ function TemplateCard({ tpl }) {
       if (alive) setSteps(order);
     }).catch(() => alive && setSteps([]));
     return () => { alive = false; };
-  }, [tpl.file]);
+  }, [file]);
 
   return (
     <section className="card p-4 sm:p-5 flex flex-col gap-3">
@@ -49,7 +50,7 @@ function TemplateCard({ tpl }) {
           <h2 className="text-base font-semibold" style={{ color: 'var(--text-primary)' }}>{t(`dev.tpl_${tpl.id}_title`)}</h2>
           <p className="text-sm mt-1" style={{ color: 'var(--text-secondary)' }}>{t(`dev.tpl_${tpl.id}_desc`)}</p>
         </div>
-        <a href={tpl.file} download className="btn btn-primary btn-sm shrink-0 self-start"><Download size={14} /> {t('dev.downloadJson')}</a>
+        <a href={file} download className="btn btn-primary btn-sm shrink-0 self-start"><Download size={14} /> {t('dev.downloadJson')}</a>
       </div>
       {steps?.length > 0 && (
         <ol className="flex flex-wrap items-center gap-1.5" aria-label={t('dev.flow')}>

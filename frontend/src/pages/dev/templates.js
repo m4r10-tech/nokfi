@@ -17,3 +17,8 @@ export const N8N_TEMPLATES = [
     credentials: ['Google Sheets OAuth2', 'Telegram API', 'Bearer Auth (Nokfi)']
   }
 ];
+
+/** S15b: copia con los nombres de los nodos traducidos (public/templates/n8n/<idioma>/); el castellano es la original. */
+export function templateFile(tpl, lang) {
+  return lang && lang !== 'es' ? tpl.file.replace('/templates/n8n/', `/templates/n8n/${lang}/`) : tpl.file;
+}
