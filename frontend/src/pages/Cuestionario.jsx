@@ -164,13 +164,13 @@ export default function Cuestionario() {
 
       <ol key={step} className="card mb-6">
         {section.items.map((id, i) => (
-          <li key={id} className="anim-enter p-4 sm:p-5 flex flex-col md:flex-row md:items-center gap-3 md:gap-6"
+          <li key={id} className="anim-enter p-4 sm:p-5 flex flex-col lg:flex-row lg:items-center gap-3 lg:gap-6"
             style={{ '--i': i, borderTop: i ? '1px solid var(--border)' : undefined }}>
             <div className="flex-1 min-w-0">
               <p id={`q-${id}`} className="text-sm font-medium" style={{ color: 'var(--text-primary)' }}>{t(`questionnaire.ask.${id}`)}</p>
               <p className="text-xs mt-1" style={{ color: 'var(--text-muted)' }}>{t(`questionnaire.help.${id}`)}</p>
             </div>
-            <div role="radiogroup" aria-labelledby={`q-${id}`} className="grid grid-cols-4 gap-1 p-1 rounded-lg shrink-0 md:w-[340px]" style={{ background: 'var(--surface-2)' }}>
+            <div role="radiogroup" aria-labelledby={`q-${id}`} className="grid grid-cols-4 gap-1 p-1 rounded-lg shrink-0 lg:w-[340px]" style={{ background: 'var(--surface-2)' }}>
               {OPTIONS.map(([value, key]) => (
                 <Choice key={key} active={answers[id] === value} onClick={() => setAnswer(id, value)} label={t(`questionnaire.opts.${key}`)} />
               ))}
@@ -203,7 +203,7 @@ export default function Cuestionario() {
 function Choice({ active, onClick, label }) {
   return (
     <button type="button" role="radio" aria-checked={active} onClick={onClick}
-      className="rounded-md min-h-9 py-1 px-1 text-xs font-medium leading-tight active:scale-[0.97]"
+      className="rounded-md min-h-10 py-1 px-1 text-xs font-medium leading-tight active:scale-[0.97]"
       style={{
         ...(active
           ? { background: 'var(--accent-soft)', color: 'var(--accent-text)', boxShadow: '0 0 0 1.5px var(--accent)' }
