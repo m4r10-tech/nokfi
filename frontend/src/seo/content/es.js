@@ -68,6 +68,7 @@ export default {
       otherYear: 'Calendario fiscal {y}',
       kinds: {
         quarterly: 'Declaraciones trimestrales: IVA, IRPF, retenciones y alquileres',
+        quarterly_vat: 'Declaración trimestral del IVA',
         withholdings: 'Retenciones de trabajadores y profesionales (111) y alquileres (115)',
         vat_annual: 'Resumen anual de IVA (390)',
         withholdings_annual: 'Resúmenes anuales de retenciones (190 y 180)',

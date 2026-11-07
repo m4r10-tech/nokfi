@@ -88,7 +88,7 @@ export default function Home() {
           <Skeleton className="h-48 lg:col-span-1" /><Skeleton className="h-48 lg:col-span-2" />
         </div>
       ) : hasData ? (
-        <WithData dash={dash} stats={stats} items={items} license={license} onChange={load} t={t} lang={lang} />
+        <WithData dash={dash} stats={stats} items={items} license={license} onChange={load} t={t} lang={lang} company={profile?.legalForm === 'sociedad'} />
       ) : (
         <WithoutData dash={dash} stats={stats} items={items} profile={profile} onChange={load}
           onDismiss={() => updateProfile({ welcomeCardDismissed: true })} t={t} lang={lang} />
@@ -210,12 +210,12 @@ function GettingStarted({ stats, profile, onDismiss, t, className = '' }) {
 }
 
 /* ── Modo con datos: el dinero y el plazo arriba ── */
-function WithData({ dash, stats, items, license, onChange, t, lang }) {
+function WithData({ dash, stats, items, license, onChange, t, lang, company }) {
   return (
     <>
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-4 md:gap-5 items-stretch">
         <DeadlineCard deadline={dash.next_deadline} t={t} lang={lang} big />
-        <MoneyCard dash={dash} t={t} lang={lang} className="lg:col-span-2" />
+        <MoneyCard dash={dash} t={t} lang={lang} company={company} className="lg:col-span-2" />
       </div>
 
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-4 md:gap-5 items-start">
@@ -254,7 +254,7 @@ function DeadlineCard({ deadline, t, lang, big }) {
   );
 }
 
-function MoneyCard({ dash, t, lang, className = '' }) {
+function MoneyCard({ dash, t, lang, company = false, className = '' }) {
   const tx = dash.taxes, rec = dash.receivables, fc = dash.forecast, lk = dash.leaks;
   const q = quarterLabel(t, tx.quarter);
   const rows = [
@@ -273,6 +273,8 @@ function MoneyCard({ dash, t, lang, className = '' }) {
           hint: fc.first_below ? t('home.fBelow', { date: isoDate(fc.first_below.date, lang, { day: 'numeric', month: 'short' }) }) : t('home.fForecastOk') }
       : { to: '/app/finanzas/prevision', icon: LineChart, label: t('home.fForecast'), value: '—', hint: t('home.fForecastSetup') }
   ];
+  // S15b (U10): en una sociedad «a apartar» es solo el IVA; se avisa de lo que aún no se calcula.
+  if (company) rows[0] = { ...rows[0], hint: [rows[0].hint, t('home.mTaxCompanyHint')].filter(Boolean).join(' · ') };
   if (lk.alerts > 0) {
     rows.push({ to: '/app/finanzas/fugas', icon: Droplets, label: t('home.fLeaksAlerts'), value: t('home.fLeaksHint', { n: lk.alerts }),
       hint: lk.recurring_monthly_total > 0 ? t('home.fRecurring', { v: eur(lk.recurring_monthly_total, lang) }) : '' });

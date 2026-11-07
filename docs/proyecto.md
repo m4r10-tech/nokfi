@@ -11,7 +11,8 @@
 
 - **Producto**: diagnóstico y finanzas para autónomos y pymes de España. Libro de
   facturas (lectura con IA de PDF, fotos y facturas electrónicas), impuestos del
-  trimestre (303 y 130) y lo apartado, cobros con reclamación, fugas, previsión,
+  trimestre (303 y 130; en sociedades solo el 303, con aviso de que el Impuesto
+  sobre Sociedades, el 202 y los 111/115 aún no se calculan) y lo apartado, cobros con reclamación, fugas, previsión,
   comparación con el sector, calendario fiscal con avisos, **emisión de facturas
   con VERI*FACTU** (registros encadenados y QR; envío a la AEAT apagado) y
   factura electrónica (UBL 2.5, Facturae 3.2.2, Factur-X, CII), cuestionario y
