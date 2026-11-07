@@ -184,11 +184,27 @@ function anonymizeLogs(l) {
 /* ── C8 ── */
 const errorLimiter = rateLimit({ windowMs: 60 * 1000, max: 20, standardHeaders: true, legacyHeaders: false, message: { error: 'rate_limited' } });
 
+/* S15b (sub7 A2): límite global para que la tabla no se pueda llenar. El limitador
+   por IP de POST /api/client-errors no basta (muchas IP, o errores del servidor que
+   no pasan por él): como mucho ERRORS_MAX_PER_MIN filas por minuto entre todas las
+   fuentes y ERRORS_MAX_ROWS filas en total (se borran las más antiguas). */
+const ERRORS_MAX_PER_MIN = 60;
+const ERRORS_MAX_ROWS = 5000;
+const errorWindow = { start: 0, count: 0, warned: false };
+
 function recordError({ source, message, stack, path, version, userAgent }) {
   try {
+    const now = Date.now();
+    if (now - errorWindow.start >= 60 * 1000) { errorWindow.start = now; errorWindow.count = 0; errorWindow.warned = false; }
+    if (errorWindow.count >= ERRORS_MAX_PER_MIN) {
+      if (!errorWindow.warned) { errorWindow.warned = true; console.warn(`[ERRORS] más de ${ERRORS_MAX_PER_MIN} errores en un minuto: el resto no se guarda`); }
+      return;
+    }
+    errorWindow.count++;
     getDB().prepare('INSERT INTO client_errors (source, message, stack, path, version, user_agent) VALUES (?, ?, ?, ?, ?, ?)')
       .run(source, String(message || '').slice(0, 500), String(stack || '').slice(0, 3000), String(path || '').split('?')[0].slice(0, 200),
         String(version || '').slice(0, 40), String(userAgent || '').slice(0, 200));
+    getDB().prepare('DELETE FROM client_errors WHERE id <= (SELECT id FROM client_errors ORDER BY id DESC LIMIT 1 OFFSET ?)').run(ERRORS_MAX_ROWS);
     // Retención: 30 días.
     if (Math.random() < 0.05) getDB().prepare("DELETE FROM client_errors WHERE created_at < datetime('now', '-30 days')").run();
   } catch (e) {
@@ -212,4 +228,4 @@ webEvents.post('/', eventLimiter, (req, res) => {
   res.status(204).end();
 });
 
-module.exports = { keys, me, telemetry, webEvents, recordError };
+module.exports = { keys, me, telemetry, webEvents, recordError, ERRORS_MAX_PER_MIN, ERRORS_MAX_ROWS };

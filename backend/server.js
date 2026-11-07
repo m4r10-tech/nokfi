@@ -75,7 +75,10 @@ app.use(helmet({
     includeSubDomains: true,
     preload: false // activar 'preload: true' solo cuando TODOS los subdominios sirvan HTTPS permanentemente
   },
-  referrerPolicy: { policy: 'no-referrer' }
+  referrerPolicy: { policy: 'no-referrer' },
+  // S15b (sub7 A3): DENY, igual que Nginx; con SAMEORIGIN (el default) /api salía
+  // con dos X-Frame-Options contradictorios. Quitar los duplicados es de Nginx.
+  frameguard: { action: 'deny' }
 }));
 
 /**
@@ -120,8 +123,12 @@ function corsOriginValidator(origin, callback) {
 
   if (rawOrigins.includes(origin)) return callback(null, true);
 
-  console.warn(`[CORS] Origen rechazado: ${origin}`);
-  return callback(new Error('Origen no permitido por CORS'));
+  // S15b (sub7 A2 / sub5 #3): antes un Error genérico → 500 + traza en el log y una
+  // fila en client_errors por petición (antes de los limitadores). Ahora se marca y el
+  // manejador de errores responde 403 origin_not_allowed sin registrar nada.
+  const err = new Error('Origen no permitido por CORS');
+  err.code = 'cors_origin_not_allowed';
+  return callback(err);
 }
 
 app.use(cors({
@@ -154,7 +161,20 @@ app.use(cors({
  */
 
 
-app.use(morgan(process.env.NODE_ENV === 'production' ? 'combined' : 'dev'));
+/* S15b (sub7 A5): el token de un enlace de gestoría (/api/shared/<token>) es la
+   credencial; en la BD solo está su hash, así que en el log no puede ir en claro.
+   :safe-url sustituye a :url en los dos formatos (combined en prod, dev en local), y
+   :safe-referrer a :referrer: la página /compartido/<token> manda su URL como Referer. */
+function maskLogUrl(url) {
+  return String(url || '')
+    .replace(/^\/api\/shared\/[^/?#]+/, '/api/shared/***')
+    .replace(/\/compartido\/[^/?#]+/, '/compartido/***');
+}
+morgan.token('safe-url', (req) => maskLogUrl(req.originalUrl || req.url));
+morgan.token('safe-referrer', (req) => maskLogUrl(req.headers.referer || req.headers.referrer || '-'));
+const LOG_COMBINED = ':remote-addr - :remote-user [:date[clf]] ":method :safe-url HTTP/:http-version" :status :res[content-length] ":safe-referrer" ":user-agent"';
+const LOG_DEV = ':method :safe-url :status :response-time ms - :res[content-length]';
+app.use(morgan(process.env.NODE_ENV === 'production' ? LOG_COMBINED : LOG_DEV));
 
 /* ════════════════════════════════════════════════════════════
    2. Body parsing — RAW primero para los webhooks que lo requieren
@@ -327,6 +347,8 @@ app.use((err, req, res, _next) => {
   // Cuerpo demasiado grande o JSON mal formado → 4xx claros (no son fallos del servidor).
   if (err.type === 'entity.too.large') return res.status(413).json({ error: 'payload_too_large' });
   if (err.type === 'entity.parse.failed') return res.status(400).json({ error: 'invalid_json' });
+  // Origin ajeno (ver corsOriginValidator): 403 claro, sin traza ni fila en client_errors.
+  if (err.code === 'cors_origin_not_allowed') return res.status(403).json({ error: 'origin_not_allowed' });
   console.error('[UNHANDLED ERROR]', err);
   // C8: queda registrado (sin cuerpo de la petición → sin datos del usuario).
   accountRoutes.recordError({ source: 'server', message: err.message, stack: err.stack, path: req.path, version: 'backend' });

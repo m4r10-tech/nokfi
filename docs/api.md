@@ -35,6 +35,9 @@
   `message`, cuando existe, es texto en español para mostrar al usuario.
 - Cualquier ruta puede devolver `500 { error: "internal_error" }` ante una
   excepción — el frontend lo trata como fallback genérico.
+- Una petición con cabecera `Origin` que no está en `ALLOWED_ORIGINS` (preflight
+  `OPTIONS` incluida) devuelve `403 { error: "origin_not_allowed" }`, sin traza en el
+  log ni fila en `client_errors`. Sin `Origin` (curl, servidores, n8n) no aplica.
 
 ---
 
@@ -538,9 +541,9 @@ está **apagado**: los registros se generan y quedan pendientes, no se envían.
 |---|---|---|
 | `GET/POST /api/keys`, `GET /api/keys/summary`, `PATCH/DELETE /api/keys/:id` | Bearer | Claves de API: `nk_live_` (Pro y Max) y `nk_test_` (todos los planes) |
 | `GET /api/me/export` · `DELETE /api/me` | Bearer | Descargar todos mis datos · borrar la cuenta (RGPD) |
-| `GET/POST /api/share`, `DELETE /api/share/:id` · `GET /api/shared/:token` | Bearer · público | Enlaces de solo lectura para la gestoría (la página `/compartido/:token` lleva `noindex`) |
+| `GET/POST /api/share`, `DELETE /api/share/:id` · `GET /api/shared/:token` | Bearer · público | Enlaces de solo lectura para la gestoría (la página `/compartido/:token` lleva `noindex`). El token sale como `***` en el log de peticiones (URL y Referer) |
 | `/api/dev/*` (webhooks, deliveries, calls, clients, jobs, playground) | Bearer | Panel de Desarrolladores de la app |
-| `POST /api/client-errors` | público, 20/min | Errores técnicos del frontend (`client_errors`) |
+| `POST /api/client-errors` | público, 20/min | Errores técnicos del frontend (`client_errors`). La tabla guarda como mucho 60 errores por minuto entre todas las fuentes (frontend y servidor) y 5.000 filas (se borran las más antiguas) |
 | `POST /api/events` | público, 30/min | **Sesión 12**: `{ name: 'cta_trial'|'checkout_start'|'tool_use', path }` → recuento por día, evento y ruta en `web_events` (sin IP, sin user-agent, sin cookies). Sale en el informe diario. 204 / 400 |
 | `GET /api/geo` | público | País de la conexión (cabecera de Cloudflare) para el idioma inicial; no se guarda |
 

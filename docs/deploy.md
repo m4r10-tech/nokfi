@@ -183,6 +183,10 @@ records MX/TXT SPF/DKIM/DMARC en Namecheap). SendGrid retirado (rama + switch
   Referrer-Policy, Permissions-Policy. `trust proxy:1` correcto con el chain
   CF→Nginx→Express.
 - Edge: Cloudflare anti-DDoS + WAF (skip se limita al webhook de Stripe).
+- Log de peticiones (morgan, en el log de PM2 `nokfi-backend`): formato `combined`
+  propio en el que el token de los enlaces de gestoría sale como `***`
+  (`/api/shared/***` y `/compartido/***` en la URL y en el Referer). Un `Origin`
+  ajeno da `403 origin_not_allowed` sin traza en el log.
 - `xlsx` (SheetJS): vulnerabilidad upstream high, sin parche; corre solo en el
   **navegador del usuario** (el backend nunca procesa Excel) → riesgo aceptado.
   Detalle en `frontend/README.md`.

@@ -25,6 +25,8 @@ process.env.PLAN_PRICE_MAX_EUR = '50';
 // Los tests de análisis simulan la respuesta de Gemini; la capa de proveedores
 // (groq/cloudflare por defecto) se prueba aparte en session4.tests.js.
 process.env.AI_PROVIDERS = 'gemini';
+// S15b lote 3: orígenes CORS fijos (un .env local con otro valor no cambia el test de Origin ajeno).
+process.env.ALLOWED_ORIGINS = 'http://localhost:5173';
 process.env.CHAT_PROVIDERS = 'gemini';
 
 const fs = require('fs');
