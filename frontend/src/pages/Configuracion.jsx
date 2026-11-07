@@ -93,7 +93,7 @@ function ProfileTab() {
             <span className="block text-xs mt-0.5" style={{ color: 'var(--text-muted)' }}>{t('finance.calendar.remindHint')}</span></span>
         </label>
         <label className="flex items-start gap-2.5 text-sm cursor-pointer" style={{ color: 'var(--text-primary)' }}>
-          <input type="checkbox" checked={profile.monthlySummary !== false} onChange={(e) => updateProfile({ monthlySummary: e.target.checked })} className="w-4 h-4 mt-0.5" />
+          <input type="checkbox" checked={!!profile.monthlySummary} onChange={(e) => updateProfile({ monthlySummary: e.target.checked })} className="w-4 h-4 mt-0.5" />
           <span><span className="font-medium inline-flex items-center gap-1.5"><Mail size={14} /> {t('config.monthlySummary')}</span>
             <span className="block text-xs mt-0.5" style={{ color: 'var(--text-muted)' }}>{t('config.monthlySummaryHint')}</span></span>
         </label>

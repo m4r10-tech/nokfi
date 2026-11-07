@@ -99,7 +99,7 @@ function toCamel(stored) {
     taxId: stored.tax_id || '',
     lang: stored.lang || '',
     fiscalReminders: !!stored.fiscal_reminders,
-    monthlySummary: stored.monthly_summary !== false,
+    monthlySummary: stored.monthly_summary === true,
     autoCollections: !!stored.auto_collections,
     cashBalance: stored.cash_balance,
     cashBalanceDate: stored.cash_balance_date,

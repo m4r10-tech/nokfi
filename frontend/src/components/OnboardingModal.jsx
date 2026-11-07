@@ -48,7 +48,7 @@ const chip = (on) => (on
 /**
  * Onboarding (sección 14; rehecho en la sesión 8): nombre, forma jurídica,
  * sector con buscador, tamaño y gastos principales, con los avisos de plazos
- * fiscales activados por defecto. Se puede omitir ("Omitir por ahora"): lo
+ * fiscales desactivados por defecto (S15b). Se puede omitir ("Omitir por ahora"): lo
  * que falte se completa luego en Configuración.
  */
 export default function OnboardingModal({ onComplete }) {
@@ -58,7 +58,8 @@ export default function OnboardingModal({ onComplete }) {
   const [sector, setSector] = useState('');
   const [size, setSize] = useState('');
   const [mainExpenses, setMainExpenses] = useState([]);
-  const [fiscalReminders, setFiscalReminders] = useState(true);
+  // S15b F10: los avisos por email van desactivados por defecto (también al «Omitir»).
+  const [fiscalReminders, setFiscalReminders] = useState(false);
 
   const toggleExpense = (exp) => {
     setMainExpenses(prev => prev.includes(exp) ? prev.filter(e => e !== exp) : [...prev, exp]);

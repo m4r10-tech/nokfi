@@ -1444,7 +1444,8 @@ function upsertCompanyProfile(license_id, partial) {
     tax_id:       pick('tax_id', ''),
     lang:         pick('lang', ''),
     fiscal_reminders: !!pick('fiscal_reminders', false),
-    monthly_summary: !!pick('monthly_summary', true),
+    // S15b F10: en cuentas nuevas el resumen mensual va desactivado (se activa en Ajustes).
+    monthly_summary: !!pick('monthly_summary', false),
     auto_collections: !!pick('auto_collections', false),
     cash_balance: pick('cash_balance', null),
     cash_balance_date: pick('cash_balance_date', null),
