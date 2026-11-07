@@ -51,6 +51,11 @@ export function currentQuarter(d = new Date()) {
   return { year: d.getFullYear(), quarter: Math.floor(d.getMonth() / 3) + 1 };
 }
 
+/** S15b F9: trimestre en el idioma de la app: «3T 2026», «Q3 2026», «T3 2026»… */
+export function quarterLabel(t, n, year) {
+  return `${t('finance.quarterShort', { n })}${year ? ` ${year}` : ''}`;
+}
+
 export function quarterRange(year, q) {
   const from = `${year}-${String((q - 1) * 3 + 1).padStart(2, '0')}-01`;
   const last = new Date(year, q * 3, 0).getDate();

@@ -1548,6 +1548,8 @@ async function main() {
   await require('./session15b.tests')({ post, put, get, call, check, checkAsync, getDB });
   // S15b lote 8: API (modo prueba separado, lotes MCP, Retry-After, idempotencia, SSRF IPv6).
   await require('./session15api.tests')({ post, put, get, call, check, checkAsync, getDB });
+  // Sesión 15b, lote 4 — cifras e impuestos.
+  await require('./session15b-cifras.tests')({ post, put, get, call, check, checkAsync, getDB });
 
   } catch (e) {
     console.error('TEST CRASH:', e.message);

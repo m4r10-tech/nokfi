@@ -6,14 +6,14 @@ import { apiErrorMessage, isConnectivityError } from '../../middleware/errors';
 import { useLang } from '../../context/LangContext';
 import { useToast } from '../../context/ToastContext';
 import InvoiceImport from '../../components/finance/InvoiceImport';
-import EntryForm, { emptyEntry, categoryLabel } from '../../components/finance/EntryForm';
+import EntryForm, { emptyEntry, categoryLabel, PaidDateModal } from '../../components/finance/EntryForm';
 import ExportMenu from '../../components/ExportMenu';
 import EmptyState from '../../components/EmptyState';
 import ErrorState from '../../components/ErrorState';
 import Skeleton from '../../components/Skeleton';
 import { Section, Kpi, Segmented, Badge } from '../../components/ui';
 import ConfirmModal from '../../components/dev/ConfirmModal';
-import { eur, isoDate, currentQuarter, quarterRange } from '../../utils/money';
+import { eur, isoDate, currentQuarter, quarterRange, quarterLabel } from '../../utils/money';
 
 /**
  * V1 — Libro de ingresos y gastos (sesión 4). Periodo por trimestre o año,
@@ -80,26 +80,35 @@ export default function Ledger() {
     else toast.error(apiErrorMessage(t, res));
   };
 
-  const togglePaid = async (e) => {
-    const res = await ledgerApi.update(e.id, { paid: !e.paid });
-    if (res.ok) setEntries(list => list.map(x => (x.id === e.id ? res.data.entry : x)));
+  // S15b F5: al marcarlo como cobrado/pagado se pide la fecha (antes se guardaba la de hoy).
+  const [paying, setPaying] = useState(null);
+  const [payBusy, setPayBusy] = useState(false);
+  const [payError, setPayError] = useState(null);
+  const setPaid = async (e, paid, paidAt) => {
+    setPayBusy(true); setPayError(null);
+    const res = await ledgerApi.update(e.id, paid ? { paid: true, paid_at: paidAt } : { paid: false });
+    setPayBusy(false);
+    if (res.ok) { setEntries(list => list.map(x => (x.id === e.id ? res.data.entry : x))); setPaying(null); }
+    else if (paid) setPayError(apiErrorMessage(t, res));
   };
+  const togglePaid = (e) => { if (e.paid) setPaid(e, false); else { setPayError(null); setPaying(e); } };
 
   // Export para la gestoría: libro registro con columnas estándar.
   const exportTable = {
     name: t('finance.ledgerSheet'),
     columns: [
-      ['invoice_date', t('finance.date')], ['type_label', t('finance.type')], ['invoice_number', t('finance.invoiceNumber')],
+      ['invoice_date', t('finance.date'), 'date'], ['type_label', t('finance.type')], ['invoice_number', t('finance.invoiceNumber')],
       ['party_name', t('finance.party')], ['party_nif', t('finance.nif')], ['concept', t('finance.concept')], ['category_label', t('finance.category')],
-      ['base', t('finance.base')], ['vat_rate', t('finance.vatRate')], ['vat_amount', t('finance.vat')],
-      ['irpf_rate', t('finance.irpfRate')], ['irpf_amount', t('finance.irpf')], ['total', t('finance.total')], ['paid_label', t('finance.paidCol')]
-    ].map(([key, label]) => ({ key, label })),
+      ['base', t('finance.base'), 'money'], ['vat_rate', t('finance.vatRate')], ['vat_amount', t('finance.vat'), 'money'],
+      ['irpf_rate', t('finance.irpfRate')], ['irpf_amount', t('finance.irpf'), 'money'], ['total', t('finance.total'), 'money'], ['paid_label', t('finance.paidCol')]
+    // S15b L2: `type` = cómo sale en el CSV (fecha DD/MM/AAAA, importes con 2 decimales).
+    ].map(([key, label, type]) => ({ key, label, type })),
     rows: (entries || []).slice().sort((a, b) => a.invoice_date.localeCompare(b.invoice_date)).map(e => ({
       ...e, type_label: e.type === 'income' ? t('finance.income') : t('finance.expense'),
       category_label: e.category ? categoryLabel(t, e.category) : '', paid_label: e.paid ? t('common.yes') : t('common.no')
     }))
   };
-  const periodLabel = quarter ? `${quarter}T_${year}` : `${year}`;
+  const periodLabel = quarter ? `${t('finance.quarterShort', { n: quarter })}_${year}` : `${year}`;
 
   return (
     <div className="flex flex-col gap-4">
@@ -109,7 +118,7 @@ export default function Ledger() {
             {[cq.year + 1, cq.year, cq.year - 1, cq.year - 2].map(y => <option key={y} value={y}>{y}</option>)}
           </select>
           <Segmented value={quarter} onChange={setQuarter} size="sm" label={t('finance.quarter')}
-            options={[{ value: 1, label: '1T' }, { value: 2, label: '2T' }, { value: 3, label: '3T' }, { value: 4, label: '4T' }, { value: 0, label: t('finance.fullYear') }]} />
+            options={[...[1, 2, 3, 4].map(n => ({ value: n, label: quarterLabel(t, n) })), { value: 0, label: t('finance.fullYear') }]} />
         </div>
         <div className="flex flex-wrap gap-2">
           <button onClick={() => setImporting(true)} className="btn btn-primary btn-sm"><ScanLine size={14} /> {t('finance.readInvoices')}</button>
@@ -191,12 +200,13 @@ export default function Ledger() {
               </li>
             ))}
           </ul>
-          {visible.length === 0 && <p className="text-sm py-6 text-center" style={{ color: 'var(--text-secondary)' }}>{t('history.noResults')}</p>}
+          {visible.length === 0 && <p className="text-sm py-6 text-center" style={{ color: 'var(--text-secondary)' }}>{t('finance.noResults')}</p>}
         </Section>
       )}
 
       {editing && <EntryForm initial={editing} saving={saving} error={formError} onClose={() => setEditing(null)} onSave={save}
         onDelete={() => { const e = editing; setEditing(null); setDeleting(e); }} />}
+      {paying && <PaidDateModal entry={paying} busy={payBusy} error={payError} onClose={() => setPaying(null)} onConfirm={(d) => setPaid(paying, true, d)} />}
       {deleting && (
         <ConfirmModal title={t('finance.delete')} text={`${t('finance.confirmDelete')} ${deleting.party_name || deleting.party_nif || ''}${deleting.invoice_number ? ` · ${deleting.invoice_number}` : ''}`}
           cta={t('finance.delete')} danger busy={removing} onConfirm={remove} onClose={() => setDeleting(null)} />

@@ -223,8 +223,9 @@ module.exports = async function session4Tests({ post, put, get, call, check, che
   {
     const savedResend = process.env.RESEND_API_KEY;
     delete process.env.RESEND_API_KEY;
-    await checkAsync('Perfil: monthlySummary activado por defecto; autoCollections se guarda',
-      put('/api/profile', { autoCollections: true }, tok),
+    // S15b F10: en cuentas nuevas el resumen mensual va desactivado; aquí se activa a mano.
+    await checkAsync('Perfil: monthlySummary se activa a mano; autoCollections se guarda',
+      put('/api/profile', { autoCollections: true, monthlySummary: true }, tok),
       r => r.status === 200 && r.data.profile.monthlySummary === true && r.data.profile.autoCollections === true);
     const { buildSummary, runMonthlySummaries } = require('../services/monthlySummary');
     const sum = buildSummary(lid, '2026-02', '2026-03-02');

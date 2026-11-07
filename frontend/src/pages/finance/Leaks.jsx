@@ -130,7 +130,11 @@ export default function Leaks() {
                     </div>
                     <div className="text-right">
                       <p className="text-sm font-semibold tabular" style={{ color: 'var(--text-primary)' }}>{eur(r.monthly, lang)}</p>
-                      <p className="text-xs tabular" style={{ color: 'var(--text-muted)' }}>{t('finance.leaks.perYear').replace('{v}', eur(r.yearly, lang))}</p>
+                      <p className="text-xs tabular" style={{ color: 'var(--text-muted)' }}>
+                        {/* S15b F4: un pago trimestral se muestra como tal (y su equivalente al mes arriba). */}
+                        {r.period_months > 1 && `${t('finance.leaks.perCharge', { v: eur(r.amount, lang), n: r.period_months })} · `}
+                        {t('finance.leaks.perYear').replace('{v}', eur(r.yearly, lang))}
+                      </p>
                     </div>
                     <button onClick={() => dismiss(r.party_key, r.party_name)} className="btn btn-ghost btn-sm shrink-0" title={t('finance.leaks.dismiss')} aria-label={`${t('finance.leaks.dismiss')}: ${r.party_name}`}><EyeOff size={14} /></button>
                   </li>

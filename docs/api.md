@@ -502,8 +502,8 @@ Aplica a `/api/proxy/ai`, `/api/analyses`, `/api/profile`,
 
 | Ruta | Qué hace |
 |---|---|
-| `GET/POST /api/ledger`, `PATCH/DELETE /api/ledger/:id` | Libro de facturas recibidas y emitidas (base, IVA, IRPF, total, cobro) |
-| `GET /api/finance/taxes` · `PUT /api/finance/reserve` | 303 y 130 del trimestre desde el libro; lo apartado para Hacienda |
+| `GET/POST /api/ledger`, `PATCH/DELETE /api/ledger/:id` | Libro de facturas recibidas y emitidas (base, IVA, IRPF, total, cobro y su fecha `paid_at`). Fechas reales (`2026-02-30` → 400); la retención se guarda en positivo |
+| `GET /api/finance/taxes` · `PUT /api/finance/reserve` | 303 (descontando la cuota a compensar de trimestres anteriores del año: `vat.previous_compensation`) y 130 del trimestre desde el libro; lo apartado para Hacienda |
 | `GET /api/finance/receivables` · `POST /api/finance/collection-email` | Cobros pendientes y email de reclamación (amable, firme, formal) |
 | `GET /api/finance/leaks` · `POST/DELETE /api/finance/leaks/dismiss` | Fugas de dinero (suscripciones, subidas de proveedores…) |
 | `GET /api/finance/forecast` · `GET /api/finance/benchmark` | Previsión de caja y comparación con el sector |

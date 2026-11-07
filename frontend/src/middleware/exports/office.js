@@ -82,15 +82,25 @@ export async function exportSheet(model, filename, bookType, labels) {
 }
 
 /* ── CSV (lo que importan A3, Sage, Holded, ContaSol… y las gestorías) ── */
-export function toCsv(rows, sep = ';') {
-  const esc = (v) => {
+// S15b L2: `types` por columna. 'money' → siempre 2 decimales (200,00); 'date' → DD/MM/AAAA.
+export function toCsv(rows, sep = ';', types = []) {
+  const esc = (v, i) => {
+    const type = types[i];
+    if (type === 'money' && v !== '' && v != null && Number.isFinite(Number(v))) v = Math.round(Number(v) * 100) / 100;
     // Con ';' como separador (convención española) los decimales van con coma.
-    if (typeof v === 'number' && Number.isFinite(v)) return sep === ';' ? String(v).replace('.', ',') : String(v);
+    if (typeof v === 'number' && Number.isFinite(v)) {
+      const n = type === 'money' ? v.toFixed(2) : String(v);
+      return sep === ';' ? n.replace('.', ',') : n;
+    }
+    if (type === 'date' && /^\d{4}-\d{2}-\d{2}$/.test(String(v ?? '').slice(0, 10))) {
+      const [y, m, d] = String(v).slice(0, 10).split('-');
+      return `${d}/${m}/${y}`;
+    }
     const s = String(neutralize(v ?? ''));
     return /[";\n\r,]/.test(s) ? `"${s.replace(/"/g, '""')}"` : s;
   };
   // BOM → Excel abre el UTF-8 con tildes correctas. ';' = separador habitual en España.
-  return '﻿' + rows.map(r => r.map(esc).join(sep)).join('\r\n');
+  return '﻿' + rows.map((r, ri) => r.map((v, i) => esc(v, ri ? i : -1)).join(sep)).join('\r\n');
 }
 
 export function exportCsv(model, filename, labels) {
@@ -100,7 +110,8 @@ export function exportCsv(model, filename, labels) {
     const tb = model.tables[0] || { columns: [], rows: [] };
     rows = [tb.columns.map(c => c.label), ...tb.rows.map(r => tb.columns.map(c => r[c.key]))];
   }
-  saveBlob(new Blob([toCsv(rows)], { type: 'text/csv;charset=utf-8' }), filename);
+  const types = model.blocks.length ? [] : (model.tables[0]?.columns || []).map(c => c.type);
+  saveBlob(new Blob([toCsv(rows, ';', types)], { type: 'text/csv;charset=utf-8' }), filename);
 }
 
 /* ── OpenDocument texto (.odt) — ZIP con content.xml (LibreOffice) ── */

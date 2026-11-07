@@ -325,8 +325,8 @@ export default {
     deadlineToday: 'Due today', deadlineDays: '{n} days left', deadlineDays_one: '{n} day left',
     deadlineModels: 'Forms {m} · {period}', deadlineSee: 'See calendar', moneyTitle: 'Your money',
     mTaxSave: 'To set aside for tax ({q})', mTaxCompensate: 'VAT to offset ({q})', mTaxCompensateHint: 'Nothing to pay: it is deducted in the next quarters',
-    mTaxNone: 'Tax ({q})', mOverdue: 'Overdue receivables', mOverdueTop: '{name} · {n} days ago',
-    mOverdueTop_one: '{name} · {n} day ago', mNoOverdue: 'Nothing overdue', actionsFrom: 'From “{title}”',
+    mTaxNone: 'Tax ({q})', mOverdue: 'Overdue receivables', mOverdueTop: 'Oldest: {name}, {v} ({n} days ago)',
+    mOverdueTop_one: 'Oldest: {name}, {v} ({n} day ago)', mNoOverdue: 'Nothing overdue', actionsFrom: 'From “{title}”',
     actionDone: 'Mark as done: {title}', usageTotal: '{n} analyses run', usageTotal_one: '{n} analysis run',
     usageToday: '{used} of {quota} AI analyses today (resets at {time})',
     welcomeCard: 'Your dashboard is ready. Start wherever you like — there is no required order.',
@@ -804,7 +804,8 @@ export default {
     ERR_PDF_READ: 'The PDF "{name}" could not be read.',
     ERR_XLSX_READ: 'The spreadsheet "{name}" could not be read (damaged or unsupported format).',
     ERR_IMAGE_READ: 'The image "{name}" could not be read.',
-    ERR_FILE_READ: '"{name}" could not be read.'
+    ERR_FILE_READ: '"{name}" could not be read.',
+    ERR_NOT_EINVOICE: '"{name}" is not a recognised e-invoice (Facturae, UBL or CII).'
   },
   legal: {
     privacy: 'Privacy policy', terms: 'Terms of use', dpa: 'Data processing agreement',
@@ -881,6 +882,7 @@ export default {
     chainOk: "Chain intact: {n} records checked.",
     chainBroken: "The chain doesn't match at record #{id}.",
     empty: "No records yet: they are created when you issue invoices.",
+    noResults: "No records match the filter.",
     record: "VERI*FACTU record",
     fixedBy: "corrected by #{id}"
   },
@@ -1136,7 +1138,8 @@ export default {
     addEntry: 'Add manually', editEntry: 'Edit entry', readInvoices: 'Read invoices with AI',
     markCollected: 'Collected', markPaid: 'Paid', collected: 'Collected', paid: 'Paid', pendingCollection: 'To collect', pendingPayment: 'To pay',
     totalMismatch: 'Net + VAT − withholding does not match the total. Please check it.',
-    duplicateEntry: 'There is already an invoice with that number and tax ID in the ledger.',
+    duplicateEntry: 'There is already an invoice with that number from the same client or supplier in the ledger.',
+    noResults: 'No entries match your search.', quarterShort: 'Q{n}', paidAtIncome: 'Collection date', paidAtExpense: 'Payment date', collectTitle: 'Mark as collected · {name}', collectText: 'Enter the day you were paid: it is used to work out your average collection time.',
     confirmDelete: 'Delete this ledger entry?', deleted: 'Entry deleted', delete: 'Delete',
     incomeBase: 'Income (net)', expenseBase: 'Expenses (net)', vatBalance: 'VAT to pay', vatBalanceNeg: 'VAT to offset', result: 'Result',
     reviewCount: '{n} entries do not add up: please review them.', reviewCount_one: '{n} entry does not add up: please review it.', search: 'Search…', ledgerSheet: 'Income and expense ledger',
@@ -1208,7 +1211,13 @@ export default {
       refundHeadline: 'This quarter ({q}) your VAT is to be refunded or offset:',
       nothingToPay: 'Nothing to set aside this quarter',
       noData: 'No invoices from this quarter in the ledger yet',
-      goLedger: 'Go to the ledger'
+      goLedger: 'Go to the ledger',
+      prevCompensation: 'VAT to offset from previous quarters',
+      quarterResult: 'Result for the quarter',
+      headlinePast: 'Result for {q} (deadline passed):',
+      compensateHeadlinePast: 'In {q} your VAT came out to be offset:',
+      refundHeadlinePast: 'In {q} your VAT came out to be refunded or offset:',
+      nothingToPayPast: 'Nothing to pay for this quarter'
     },
     receivables: {
       pending: 'Pending collection', invoices: '{n} invoices', invoices_one: '{n} invoice', overdue60: 'Overdue by more than 60 days', avgDays: 'Average collection days',
@@ -1241,7 +1250,8 @@ export default {
       dismiss: 'Not a leak',
       dismissedToast: 'We will stop flagging {name}',
       dismissedTitle: 'Dismissed suppliers',
-      restore: 'Watch again'
+      restore: 'Watch again',
+      perCharge: '{v} every {n} months'
     },
     forecast: {
       startTitle: 'Cash forecast', startDesc: 'Enter how much money you have today in the bank and in cash. With your ledger, Nokfi will work out how your balance will go over the next 90 days.',

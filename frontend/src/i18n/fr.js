@@ -324,8 +324,8 @@ export default {
     deadlineToday: 'Échéance aujourd\'hui', deadlineDays: 'Plus que {n} jours', deadlineDays_one: 'Plus qu\'{n} jour',
     deadlineModels: 'Modèles {m} · {period}', deadlineSee: 'Voir le calendrier', moneyTitle: 'Votre argent',
     mTaxSave: 'À mettre de côté pour les impôts ({q})', mTaxCompensate: 'TVA à reporter ({q})', mTaxCompensateHint: 'Rien à payer : elle se déduit des prochains trimestres',
-    mTaxNone: 'Impôts ({q})', mOverdue: 'Impayés échus', mOverdueTop: '{name} · il y a {n} jours',
-    mOverdueTop_one: '{name} · il y a {n} jour', mNoOverdue: 'Rien d\'échu', actionsFrom: 'De « {title} »',
+    mTaxNone: 'Impôts ({q})', mOverdue: 'Impayés échus', mOverdueTop: 'Le plus ancien : {name}, {v} (il y a {n} jours)',
+    mOverdueTop_one: 'Le plus ancien : {name}, {v} (il y a {n} jour)', mNoOverdue: 'Rien d\'échu', actionsFrom: 'De « {title} »',
     actionDone: 'Marquer comme faite : {title}', usageTotal: '{n} analyses réalisées', usageTotal_one: '{n} analyse réalisée',
     usageToday: '{used} sur {quota} analyses IA aujourd\'hui (renouvelé à {time})',
     welcomeCard: 'Votre tableau de bord est prêt. Commencez par où vous voulez : il n’y a pas d’ordre imposé.',
@@ -803,7 +803,8 @@ export default {
     ERR_PDF_READ: 'Impossible de lire le PDF « {name} ».',
     ERR_XLSX_READ: 'Impossible de lire la feuille de calcul « {name} » (endommagée ou format non pris en charge).',
     ERR_IMAGE_READ: 'Impossible de lire l’image « {name} ».',
-    ERR_FILE_READ: 'Impossible de lire « {name} ».'
+    ERR_FILE_READ: 'Impossible de lire « {name} ».',
+    ERR_NOT_EINVOICE: '« {name} » n’est pas une facture électronique reconnue (Facturae, UBL ou CII).'
   },
   legal: {
     privacy: 'Politique de confidentialité', terms: 'Conditions d’utilisation', dpa: 'Accord de sous-traitance',
@@ -880,6 +881,7 @@ export default {
     chainOk: "Chaîne intègre : {n} enregistrements vérifiés.",
     chainBroken: "La chaîne ne correspond pas à l'enregistrement n° {id}.",
     empty: "Aucun enregistrement pour l'instant : ils sont créés à l'émission des factures.",
+    noResults: "Aucun enregistrement ne correspond au filtre.",
     record: "Enregistrement VERI*FACTU",
     fixedBy: "corrigé par n° {id}"
   },
@@ -1135,7 +1137,8 @@ export default {
     addEntry: 'Ajouter manuellement', editEntry: 'Modifier l’écriture', readInvoices: 'Lire des factures avec l’IA',
     markCollected: 'Encaissée', markPaid: 'Payée', collected: 'Encaissée', paid: 'Payée', pendingCollection: 'À encaisser', pendingPayment: 'À payer',
     totalMismatch: 'HT + TVA − retenue ne correspond pas au total. Vérifiez-le.',
-    duplicateEntry: 'Une facture avec ce numéro et ce numéro fiscal figure déjà dans le registre.',
+    duplicateEntry: 'Une facture avec ce numéro du même client ou fournisseur figure déjà dans le registre.',
+    noResults: 'Aucune écriture ne correspond à votre recherche.', quarterShort: 'T{n}', paidAtIncome: 'Date d’encaissement', paidAtExpense: 'Date de paiement', collectTitle: 'Marquer comme encaissée · {name}', collectText: 'Indiquez le jour où vous avez été payé : il sert à calculer le délai moyen d’encaissement.',
     confirmDelete: 'Supprimer cette écriture du registre ?', deleted: 'Écriture supprimée', delete: 'Supprimer',
     incomeBase: 'Recettes (HT)', expenseBase: 'Dépenses (HT)', vatBalance: 'TVA à payer', vatBalanceNeg: 'TVA à reporter', result: 'Résultat',
     reviewCount: '{n} écritures ne sont pas cohérentes : vérifiez-les.', reviewCount_one: '{n} écriture n’est pas cohérente : vérifiez-la.', search: 'Rechercher…', ledgerSheet: 'Registre des recettes et dépenses',
@@ -1207,7 +1210,13 @@ export default {
       refundHeadline: 'Ce trimestre ({q}), votre TVA est à rembourser ou à reporter :',
       nothingToPay: 'Rien à mettre de côté ce trimestre',
       noData: 'Pas encore de factures de ce trimestre dans le registre',
-      goLedger: 'Aller au registre'
+      goLedger: 'Aller au registre',
+      prevCompensation: 'TVA à reporter des trimestres précédents',
+      quarterResult: 'Résultat du trimestre',
+      headlinePast: 'Résultat du {q} (échéance passée) :',
+      compensateHeadlinePast: 'Au {q}, votre TVA était à reporter :',
+      refundHeadlinePast: 'Au {q}, votre TVA était à rembourser ou à reporter :',
+      nothingToPayPast: 'Rien à payer pour ce trimestre'
     },
     receivables: {
       pending: 'En attente d’encaissement', invoices: '{n} factures', invoices_one: '{n} facture', overdue60: 'Échu depuis plus de 60 jours', avgDays: 'Délai moyen d’encaissement',
@@ -1240,7 +1249,8 @@ export default {
       dismiss: 'Ce n’est pas une fuite',
       dismissedToast: 'Nous ne vous alerterons plus pour {name}',
       dismissedTitle: 'Fournisseurs écartés',
-      restore: 'Surveiller à nouveau'
+      restore: 'Surveiller à nouveau',
+      perCharge: '{v} tous les {n} mois'
     },
     forecast: {
       startTitle: 'Prévision de trésorerie', startDesc: 'Indiquez combien d’argent vous avez aujourd’hui en banque et en caisse. Avec votre registre, Nokfi calculera l’évolution de votre solde sur les 90 prochains jours.',

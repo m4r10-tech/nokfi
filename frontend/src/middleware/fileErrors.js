@@ -13,12 +13,13 @@ export class FileReadError extends Error {
 
 export const FILE_ERROR_CODES = [
   'ERR_FILE_TOO_BIG', 'ERR_FILE_TYPE', 'ERR_PDF_TIMEOUT', 'ERR_PDF_PASSWORD', 'ERR_PDF_INVALID', 'ERR_PDF_READ',
-  'ERR_XLSX_READ', 'ERR_IMAGE_READ', 'ERR_FILE_READ'
+  'ERR_XLSX_READ', 'ERR_IMAGE_READ', 'ERR_FILE_READ', 'ERR_NOT_EINVOICE'
 ];
 
 /** "No se pudo leer X (protegido con contraseña). · ERR_PDF_PASSWORD" */
 export function fileErrorMessage(t, err, fallbackName = '') {
-  const code = err instanceof FileReadError ? err.code : 'ERR_FILE_READ';
+  // S15b L4: también los errores con un código conocido (no solo FileReadError).
+  const code = err instanceof FileReadError || FILE_ERROR_CODES.includes(err?.code) ? err.code : 'ERR_FILE_READ';
   const name = err?.fileName || fallbackName;
   const msg = t(`fileErrors.${code}`).replace('{name}', name);
   return { message: msg, code };

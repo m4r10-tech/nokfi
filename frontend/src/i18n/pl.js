@@ -327,8 +327,8 @@ export default {
     deadlineToday: 'Termin dziś', deadlineDays: 'Zostało {n} dni', deadlineDays_one: 'Został {n} dzień',
     deadlineModels: 'Deklaracje {m} · {period}', deadlineSee: 'Zobacz kalendarz', moneyTitle: 'Twoje pieniądze',
     mTaxSave: 'Do odłożenia na podatki ({q})', mTaxCompensate: 'VAT do rozliczenia ({q})', mTaxCompensateHint: 'Nic do zapłaty: pomniejsza kolejne kwartały',
-    mTaxNone: 'Podatki ({q})', mOverdue: 'Zaległe należności', mOverdueTop: '{name} · {n} dni temu',
-    mOverdueTop_one: '{name} · {n} dzień temu', mNoOverdue: 'Nic zaległego', actionsFrom: 'Z „{title}”',
+    mTaxNone: 'Podatki ({q})', mOverdue: 'Zaległe należności', mOverdueTop: 'Najstarsze: {name}, {v} ({n} dni temu)',
+    mOverdueTop_one: 'Najstarsze: {name}, {v} ({n} dzień temu)', mNoOverdue: 'Nic zaległego', actionsFrom: 'Z „{title}”',
     actionDone: 'Oznacz jako zrobione: {title}', usageTotal: 'Wykonano {n} analiz', usageTotal_one: 'Wykonano {n} analizę',
     usageToday: '{used} z {quota} analiz AI dziś (odnowienie o {time})',
     welcomeCard: 'Twój panel jest gotowy. Zacznij od czego chcesz — nie ma obowiązkowej kolejności.',
@@ -806,7 +806,8 @@ export default {
     ERR_PDF_READ: 'Nie udało się odczytać PDF „{name}”.',
     ERR_XLSX_READ: 'Nie udało się odczytać arkusza „{name}” (uszkodzony lub nieobsługiwany format).',
     ERR_IMAGE_READ: 'Nie udało się odczytać obrazu „{name}”.',
-    ERR_FILE_READ: 'Nie udało się odczytać „{name}”.'
+    ERR_FILE_READ: 'Nie udało się odczytać „{name}”.',
+    ERR_NOT_EINVOICE: '„{name}” nie jest rozpoznaną e-fakturą (Facturae, UBL lub CII).'
   },
   legal: {
     privacy: 'Polityka prywatności', terms: 'Warunki korzystania', dpa: 'Umowa powierzenia przetwarzania danych',
@@ -883,6 +884,7 @@ export default {
     chainOk: "Łańcuch nienaruszony: sprawdzono {n} rekordów.",
     chainBroken: "Łańcuch się nie zgadza przy rekordzie nr {id}.",
     empty: "Brak rekordów: powstają przy wystawianiu faktur.",
+    noResults: "Żaden rekord nie pasuje do filtra.",
     record: "Rekord VERI*FACTU",
     fixedBy: "poprawiony przez nr {id}"
   },
@@ -1138,7 +1140,8 @@ export default {
     addEntry: 'Dodaj ręcznie', editEntry: 'Edytuj wpis', readInvoices: 'Czytaj faktury z AI',
     markCollected: 'Pobrana', markPaid: 'Zapłacona', collected: 'Pobrana', paid: 'Zapłacona', pendingCollection: 'Do pobrania', pendingPayment: 'Do zapłaty',
     totalMismatch: 'Netto + VAT − potrącenie nie zgadza się z kwotą razem. Sprawdź to.',
-    duplicateEntry: 'W rejestrze jest już faktura o tym numerze i numerze podatkowym.',
+    duplicateEntry: 'W rejestrze jest już faktura o tym numerze od tego samego klienta lub dostawcy.',
+    noResults: 'Żaden wpis nie pasuje do wyszukiwania.', quarterShort: 'Q{n}', paidAtIncome: 'Data wpływu', paidAtExpense: 'Data zapłaty', collectTitle: 'Oznacz jako opłaconą · {name}', collectText: 'Podaj dzień, w którym otrzymałeś zapłatę: na tej podstawie liczony jest średni czas spłaty.',
     confirmDelete: 'Usunąć ten wpis z rejestru?', deleted: 'Wpis usunięty', delete: 'Usuń',
     incomeBase: 'Przychody (netto)', expenseBase: 'Wydatki (netto)', vatBalance: 'VAT do zapłaty', vatBalanceNeg: 'VAT do rozliczenia', result: 'Wynik',
     reviewCount: '{n} wpisu się nie zgadza: sprawdź.', reviewCount_one: '{n} wpis się nie zgadza: sprawdź go.', reviewCount_few: '{n} wpisy się nie zgadzają: sprawdź je.', reviewCount_many: '{n} wpisów się nie zgadza: sprawdź je.', search: 'Szukaj…', ledgerSheet: 'Rejestr przychodów i wydatków',
@@ -1210,7 +1213,13 @@ export default {
       refundHeadline: 'W tym kwartale ({q}) VAT do zwrotu lub przeniesienia:',
       nothingToPay: 'W tym kwartale nie trzeba nic odkładać',
       noData: 'Brak faktur z tego kwartału w rejestrze',
-      goLedger: 'Przejdź do rejestru'
+      goLedger: 'Przejdź do rejestru',
+      prevCompensation: 'VAT do przeniesienia z poprzednich kwartałów',
+      quarterResult: 'Wynik kwartału',
+      headlinePast: 'Wynik za {q} (termin minął):',
+      compensateHeadlinePast: 'W {q} VAT wyszedł do przeniesienia:',
+      refundHeadlinePast: 'W {q} VAT wyszedł do zwrotu lub przeniesienia:',
+      nothingToPayPast: 'Za ten kwartał nie było nic do zapłaty'
     },
     receivables: {
       pending: 'Do pobrania', invoices: '{n} faktury', invoices_one: '{n} faktura', invoices_few: '{n} faktury', invoices_many: '{n} faktur', overdue60: 'Po terminie ponad 60 dni', avgDays: 'Średni czas płatności',
@@ -1247,7 +1256,8 @@ export default {
       dismiss: 'To nie wyciek',
       dismissedToast: 'Nie będziemy już ostrzegać o {name}',
       dismissedTitle: 'Pominięci dostawcy',
-      restore: 'Obserwuj ponownie'
+      restore: 'Obserwuj ponownie',
+      perCharge: '{v} co {n} mies.'
     },
     forecast: {
       startTitle: 'Prognoza gotówki', startDesc: 'Podaj, ile pieniędzy masz dziś na koncie i w kasie. Na podstawie rejestru Nokfi obliczy, jak zmieni się saldo w ciągu 90 dni.',

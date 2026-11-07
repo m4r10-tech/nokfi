@@ -29,7 +29,7 @@ const { deferrable } = require('../services/deferred');
 const { getCompanyProfile, getLatestAnalysisOfKind, audit, countAiAnalysesToday } = require('../db/database');
 const F = require('../db/finance');
 const { sentStages } = require('../services/collections');
-const { taxSummary, receivables, leaks, forecast, quarterOf } = require('../utils/finance');
+const { taxSummary, receivables, leaks, forecast, quarterOf, formatEur } = require('../utils/finance');
 const { deadlinesFor, upcoming, iso } = require('../utils/fiscalCalendar');
 const { listActions, actionStats } = require('../db/actions');
 const { freeText, allowMessage } = require('../services/ai/chat');
@@ -147,7 +147,7 @@ finance.post('/collection-email', requireLicense, deferrable(async (req, res) =>
   const prompt = `Tono: ${TONES[tone]}.
 Cliente: ${entry.party_name || 'cliente'}.
 Factura nº ${entry.invoice_number || '(sin número)'} del ${entry.invoice_date}${pend ? `, con vencimiento el ${pend.effective_due_date}` : ''}.
-Importe: ${entry.total.toFixed(2)} €. ${days > 0 ? `Días desde el vencimiento: ${days}.` : 'Todavía no ha vencido: es un recordatorio previo al vencimiento.'}
+Importe: ${formatEur(entry.total, req.body?.lang)}. ${days > 0 ? `Días desde el vencimiento: ${days}.` : 'Todavía no ha vencido: es un recordatorio previo al vencimiento.'}
 Concepto: ${entry.concept || '—'}.`;
   try {
     const { text } = await freeText({ system, prompt });

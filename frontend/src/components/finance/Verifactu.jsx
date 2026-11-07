@@ -94,7 +94,7 @@ export default function Verifactu({ onClose, onOpenInvoice }) {
         {!data ? (
           <div className="flex flex-col gap-2">{[0, 1, 2].map(i => <Skeleton key={i} className="h-10" />)}</div>
         ) : data.records.length === 0 ? (
-          <p className="py-6 text-center" style={{ color: 'var(--text-secondary)' }}>{s.total ? t('history.noResults') : t('verifactu.empty')}</p>
+          <p className="py-6 text-center" style={{ color: 'var(--text-secondary)' }}>{s.total ? t('verifactu.noResults') : t('verifactu.empty')}</p>
         ) : (
           <ul className="flex flex-col -mx-1">
             {data.records.map(r => {

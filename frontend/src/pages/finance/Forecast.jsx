@@ -8,7 +8,7 @@ import { useLang } from '../../context/LangContext';
 import ErrorState from '../../components/ErrorState';
 import Skeleton from '../../components/Skeleton';
 import { Section, Kpi, Segmented, Notice, Field } from '../../components/ui';
-import { eur, isoDate } from '../../utils/money';
+import { eur, isoDate, quarterLabel } from '../../utils/money';
 
 /**
  * V3 — Previsión de caja a 30/60/90 días con escenarios (sesión 4).
@@ -141,7 +141,7 @@ export default function Forecast() {
               {data.flows.slice(0, 40).map((f, i) => (
                 <li key={i} className="flex items-center justify-between gap-3 px-1 py-1.5 text-sm" style={{ borderTop: i ? '1px solid var(--border)' : 'none' }}>
                   <span className="min-w-0">
-                    <span className="block truncate" style={{ color: 'var(--text-primary)' }}>{f.kind.startsWith('scenario') ? t(`finance.forecast.flow_${f.kind}`) : f.label || t(`finance.forecast.flow_${f.kind}`)}</span>
+                    <span className="block truncate" style={{ color: 'var(--text-primary)' }}>{f.kind.startsWith('scenario') ? t(`finance.forecast.flow_${f.kind}`) : f.kind === 'tax' && f.quarter ? quarterLabel(t, f.quarter, f.year) : f.label || t(`finance.forecast.flow_${f.kind}`)}</span>
                     <span className="block text-xs" style={{ color: 'var(--text-muted)' }}>{isoDate(f.date, lang)} · {t(`finance.forecast.flow_${f.kind}`)}</span>
                   </span>
                   <span className="tabular font-medium shrink-0" style={{ color: f.amount >= 0 ? 'var(--positive)' : 'var(--text-primary)' }}>{f.amount >= 0 ? '+' : ''}{eur(f.amount, lang)}</span>
