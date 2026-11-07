@@ -343,9 +343,7 @@ html { scroll-padding-top: 80px; }
 :root:has(.bottom-nav) .update-prompt { bottom: calc(var(--bottom-nav-h) + 12px + env(safe-area-inset-bottom)); }
 @media (min-width: 768px) { :root:has(.bottom-nav) .update-prompt { bottom: 24px; } }
 
-/* Sesión 10: capturas de la landing en el tema que se está viendo. */
-html.theme-light .shot-dark,
-html:not(.theme-light) .shot-light { display: none; }
+/* S15b (A4): las capturas de la landing ya salen solo en el tema que se está viendo (Landing.jsx). */
 
 /* Sesión 10: filas de pestañas con scroll horizontal sin barra visible. */
 .no-scrollbar { scrollbar-width: none; }
