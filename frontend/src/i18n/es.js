@@ -322,8 +322,8 @@ export default {
     deadlineToday: 'Vence hoy', deadlineDays: 'Faltan {n} días', deadlineDays_one: 'Falta {n} día',
     deadlineModels: 'Modelos {m} · {period}', deadlineSee: 'Ver calendario', moneyTitle: 'Tu dinero',
     mTaxSave: 'A apartar para Hacienda ({q})', mTaxCompensate: 'IVA a compensar ({q})', mTaxCompensateHint: 'No se paga: se descuenta en los próximos trimestres',
-    mTaxNone: 'Hacienda ({q})', mOverdue: 'Por cobrar vencido', mOverdueTop: '{name} · hace {n} días',
-    mOverdueTop_one: '{name} · hace {n} día', mNoOverdue: 'Nada vencido', actionsFrom: 'De «{title}»',
+    mTaxNone: 'Hacienda ({q})', mOverdue: 'Por cobrar vencido', mOverdueTop: 'Lo más antiguo: {name}, {v} (hace {n} días)',
+    mOverdueTop_one: 'Lo más antiguo: {name}, {v} (hace {n} día)', mNoOverdue: 'Nada vencido', actionsFrom: 'De «{title}»',
     actionDone: 'Marcar como hecha: {title}', usageTotal: '{n} análisis realizados', usageTotal_one: '{n} análisis realizado',
     usageToday: '{used} de {quota} análisis de IA hoy (se renueva a las {time})',
     welcomeCard: 'Tu panel está listo. Empieza por donde quieras: no hay un orden obligatorio.',
@@ -803,7 +803,8 @@ export default {
     ERR_PDF_READ: 'No se pudo leer el PDF "{name}".',
     ERR_XLSX_READ: 'No se pudo leer la hoja de cálculo "{name}" (dañada o formato no soportado).',
     ERR_IMAGE_READ: 'No se pudo leer la imagen "{name}".',
-    ERR_FILE_READ: 'No se pudo leer "{name}".'
+    ERR_FILE_READ: 'No se pudo leer "{name}".',
+    ERR_NOT_EINVOICE: '"{name}" no es una factura electrónica reconocida (Facturae, UBL o CII).'
   },
   legal: {
     privacy: 'Política de privacidad', terms: 'Términos de uso', dpa: 'Encargo de tratamiento',
@@ -880,6 +881,7 @@ export default {
     chainOk: "Cadena íntegra: {n} registros comprobados.",
     chainBroken: "La cadena no cuadra en el registro #{id}.",
     empty: "Aún no hay registros: se crean al emitir facturas.",
+    noResults: "Ningún registro coincide con el filtro.",
     record: "Registro VERI*FACTU",
     fixedBy: "subsanado por #{id}"
   },
@@ -1135,7 +1137,8 @@ export default {
     addEntry: 'Añadir a mano', editEntry: 'Editar apunte', readInvoices: 'Leer facturas con IA',
     markCollected: 'Cobrada', markPaid: 'Pagada', collected: 'Cobrada', paid: 'Pagada', pendingCollection: 'Por cobrar', pendingPayment: 'Por pagar',
     totalMismatch: 'Base + IVA − retención no coincide con el total. Revísalo.',
-    duplicateEntry: 'Ya hay una factura con ese número y ese NIF en el libro.',
+    duplicateEntry: 'Ya hay en el libro una factura con ese número del mismo cliente o proveedor.',
+    noResults: 'Ningún apunte coincide con tu búsqueda.', quarterShort: '{n}T', paidAtIncome: 'Fecha de cobro', paidAtExpense: 'Fecha de pago', collectTitle: 'Marcar como cobrada · {name}', collectText: 'Indica el día en que te pagaron: con él se calculan los días medios de cobro.',
     confirmDelete: '¿Borrar este apunte del libro?', deleted: 'Apunte borrado', delete: 'Borrar',
     incomeBase: 'Ingresos (base)', expenseBase: 'Gastos (base)', vatBalance: 'IVA a pagar', vatBalanceNeg: 'IVA a compensar', result: 'Resultado',
     reviewCount: '{n} apuntes no cuadran: revísalos.', reviewCount_one: '{n} apunte no cuadra: revísalo.', search: 'Buscar…', ledgerSheet: 'Libro de ingresos y gastos',
@@ -1207,7 +1210,13 @@ export default {
       refundHeadline: 'Este trimestre ({q}) el IVA te sale a devolver o compensar:',
       nothingToPay: 'Nada que apartar este trimestre',
       noData: 'Aún no hay facturas de este trimestre en el libro',
-      goLedger: 'Ir al libro'
+      goLedger: 'Ir al libro',
+      prevCompensation: 'IVA a compensar de trimestres anteriores',
+      quarterResult: 'Resultado del trimestre',
+      headlinePast: 'Resultado del {q} (plazo ya vencido):',
+      compensateHeadlinePast: 'En el {q} el IVA salió a compensar:',
+      refundHeadlinePast: 'En el {q} el IVA salió a devolver o compensar:',
+      nothingToPayPast: 'Nada que pagar en este trimestre'
     },
     receivables: {
       pending: 'Pendiente de cobro', invoices: '{n} facturas', invoices_one: '{n} factura', overdue60: 'Vencido hace más de 60 días', avgDays: 'Días medios de cobro',
@@ -1240,7 +1249,8 @@ export default {
       dismiss: 'No es una fuga',
       dismissedToast: 'No volveremos a avisarte de {name}',
       dismissedTitle: 'Proveedores descartados',
-      restore: 'Volver a vigilar'
+      restore: 'Volver a vigilar',
+      perCharge: '{v} cada {n} meses'
     },
     forecast: {
       startTitle: 'Previsión de caja', startDesc: 'Indica cuánto dinero tienes hoy en el banco y en caja. Con tu libro, Nokfi calculará cómo irá tu saldo los próximos 90 días.',

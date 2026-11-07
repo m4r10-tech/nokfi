@@ -6,7 +6,7 @@ import {
 } from 'lucide-react';
 import { analysesApi, dashboardApi, actionsApi } from '../middleware/api';
 import { ScoreRing, healthTone } from '../components/HealthScore';
-import { eur, isoDate } from '../utils/money';
+import { eur, isoDate, quarterLabel } from '../utils/money';
 import { apiErrorMessage, isConnectivityError } from '../middleware/errors';
 import { useLang } from '../context/LangContext';
 import { useAuth } from '../context/AuthContext';
@@ -256,7 +256,7 @@ function DeadlineCard({ deadline, t, lang, big }) {
 
 function MoneyCard({ dash, t, lang, className = '' }) {
   const tx = dash.taxes, rec = dash.receivables, fc = dash.forecast, lk = dash.leaks;
-  const q = `${tx.quarter}T`;
+  const q = quarterLabel(t, tx.quarter);
   const rows = [
     tx.total_estimated > 0
       ? { to: '/app/finanzas/impuestos', icon: Landmark, label: t('home.mTaxSave', { q }), value: eur(tx.total_estimated, lang),
@@ -266,7 +266,7 @@ function MoneyCard({ dash, t, lang, className = '' }) {
         : { to: '/app/finanzas/impuestos', icon: Landmark, label: t('home.mTaxNone', { q }), value: eur(0, lang), hint: t('finance.taxes.nothingToPay') },
     rec.overdue_total > 0
       ? { to: '/app/finanzas/cobros', icon: HandCoins, label: t('home.mOverdue'), value: eur(rec.overdue_total, lang), warn: true,
-          hint: rec.top_overdue ? t('home.mOverdueTop', { name: rec.top_overdue.party_name || '—', n: rec.top_overdue.days_overdue }) : t('home.fOverdue', { v: eur(rec.overdue_total, lang) }) }
+          hint: rec.top_overdue ? t('home.mOverdueTop', { name: rec.top_overdue.party_name || '—', v: eur(rec.top_overdue.total, lang), n: rec.top_overdue.days_overdue }) : t('home.fOverdue', { v: eur(rec.overdue_total, lang) }) }
       : { to: '/app/finanzas/cobros', icon: HandCoins, label: t('home.fReceivables'), value: eur(rec.total, lang), hint: t('home.mNoOverdue') },
     fc
       ? { to: '/app/finanzas/prevision', icon: LineChart, label: t('home.fForecast'), value: eur(fc.at90, lang), warn: !!fc.first_below,

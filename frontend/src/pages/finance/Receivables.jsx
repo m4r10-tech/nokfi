@@ -10,6 +10,7 @@ import EmptyState from '../../components/EmptyState';
 import Skeleton from '../../components/Skeleton';
 import { Section, Kpi, Segmented, Modal, Badge, ErrorBox } from '../../components/ui';
 import { eur, isoDate } from '../../utils/money';
+import { PaidDateModal } from '../../components/finance/EntryForm';
 
 /**
  * V4 — Cobros pendientes y morosos (sesión 4). Facturas emitidas sin cobrar
@@ -43,9 +44,15 @@ export default function Receivables() {
   }, []);
   useEffect(() => { load(); }, [load]);
 
-  const markCollected = async (p) => {
-    const res = await ledgerApi.update(p.id, { paid: true });
-    if (res.ok) { toast.success(t('finance.receivables.collectedToast')); load(); } else toast.error(apiErrorMessage(t, res));
+  // S15b F5: se pide la fecha de cobro (cuenta para los días medios de cobro).
+  const [collecting, setCollecting] = useState(null);
+  const [collectBusy, setCollectBusy] = useState(false);
+  const [collectError, setCollectError] = useState(null);
+  const markCollected = async (p, paidAt) => {
+    setCollectBusy(true); setCollectError(null);
+    const res = await ledgerApi.update(p.id, { paid: true, paid_at: paidAt });
+    setCollectBusy(false);
+    if (res.ok) { setCollecting(null); toast.success(t('finance.receivables.collectedToast')); load(); } else setCollectError(apiErrorMessage(t, res));
   };
 
   if (failure) return <ErrorState offline={isConnectivityError(failure)} message={apiErrorMessage(t, failure)} onRetry={load} />;
@@ -98,7 +105,7 @@ export default function Receivables() {
                 <Badge tone={LEVEL_TONE[p.level]}>{dueLabel(t, p)}</Badge>
                 <span className="text-sm font-semibold tabular" style={{ color: 'var(--text-primary)' }}>{eur(p.total, lang)}</span>
                 {p.is_overdue && <button onClick={() => setEmailFor(p)} className="btn btn-secondary btn-sm"><Mail size={14} /> {t('finance.receivables.claim')}</button>}
-                <button onClick={() => markCollected(p)} className="btn btn-ghost btn-sm"><Check size={14} /> {t('finance.collected')}</button>
+                <button onClick={() => { setCollectError(null); setCollecting(p); }} className="btn btn-ghost btn-sm"><Check size={14} /> {t('finance.collected')}</button>
               </div>
             </li>
           ))}
@@ -107,6 +114,7 @@ export default function Receivables() {
 
       {emailFor && <ClaimEmail item={emailFor} onClose={() => setEmailFor(null)} />}
       {addressFor && <ClientEmail item={addressFor} onClose={() => setAddressFor(null)} onSaved={() => { setAddressFor(null); load(); }} />}
+      {collecting && <PaidDateModal entry={{ ...collecting, type: 'income' }} busy={collectBusy} error={collectError} onClose={() => setCollecting(null)} onConfirm={(d) => markCollected(collecting, d)} />}
     </div>
   );
 }

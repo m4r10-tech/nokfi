@@ -22,6 +22,9 @@ npm run build          # → dist/ (listo para Nginx o cualquier servidor estát
 npm run build:spa      # solo la SPA, sin prerender (más rápido para probar)
 npm run check:i18n     # mismas claves en los 6 idiomas
 npm run check:seo      # páginas públicas con contenido es/en y calendario igual que el backend
+npm run test:einvoice  # lector de facturas electrónicas (Facturae, UBL, CII)
+node test/s15b-cifras.test.mjs   # CSV del libro, trimestres traducidos, errores de XML (sin navegador)
+VITE_API_URL=/api npx vite build && node test/s15b-cifras.e2e.cjs   # Impuestos, Cobros, Libro e Inicio en Chromium (Playwright)
 ```
 
 `npm run build` hace tres pasos (sesión 12, SEO): `vite build` (la SPA),

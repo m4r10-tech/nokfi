@@ -8,7 +8,7 @@ import { useToast } from '../../context/ToastContext';
 import ErrorState from '../../components/ErrorState';
 import Skeleton from '../../components/Skeleton';
 import { Section, Kpi, Segmented, Notice } from '../../components/ui';
-import { eur, isoDate, currentQuarter } from '../../utils/money';
+import { eur, isoDate, currentQuarter, quarterLabel, todayIso } from '../../utils/money';
 
 /**
  * V2 — Cuánto apartar para Hacienda (sesión 4). Estimación del IVA trimestral
@@ -49,9 +49,13 @@ export default function Taxes() {
   const pct = s && s.total_estimated > 0 ? Math.min(100, (s.reserved / s.total_estimated) * 100) : 100;
   // Sesión 6: sin nada que pagar no hay barra "Cubierto" (engañaba). Si el IVA
   // sale a compensar, se dice así y con su importe; sin datos, se dice que no hay.
+  // S15b F6: un trimestre cuyo plazo ya venció se cuenta en pasado y sin barra de apartado.
+  const past = !!s && s.due_date < todayIso();
   const toPay = s && s.total_estimated > 0;
+  const showReserve = toPay && !past;
+  const ql = quarterLabel(t, quarter, year);
   const noData = s && !s.vat.output && !s.vat.input && (!s.irpf130 || (!s.irpf130.income && !s.irpf130.expense));
-  const refundKey = quarter === 4 ? 'finance.taxes.refundHeadline' : 'finance.taxes.compensateHeadline';
+  const refundKey = `finance.taxes.${quarter === 4 ? 'refundHeadline' : 'compensateHeadline'}${past ? 'Past' : ''}`;
 
   return (
     <div className="flex flex-col gap-4">
@@ -60,7 +64,7 @@ export default function Taxes() {
           {[cq.year, cq.year - 1, cq.year - 2].map(y => <option key={y} value={y}>{y}</option>)}
         </select>
         <Segmented value={quarter} onChange={setQuarter} size="sm" label={t('finance.quarter')}
-          options={[1, 2, 3, 4].map(n => ({ value: n, label: `${n}T` }))} />
+          options={[1, 2, 3, 4].map(n => ({ value: n, label: quarterLabel(t, n) }))} />
       </div>
 
       {!data ? (
@@ -76,18 +80,18 @@ export default function Taxes() {
               <div className="min-w-0">
                 {toPay ? (
                   <>
-                    <p className="text-sm" style={{ color: 'var(--text-secondary)' }}>{t('finance.taxes.headline').replace('{q}', `${quarter}T ${year}`)}</p>
+                    <p className="text-sm" style={{ color: 'var(--text-secondary)' }}>{t(past ? 'finance.taxes.headlinePast' : 'finance.taxes.headline').replace('{q}', ql)}</p>
                     <p className="text-3xl font-semibold tabular tracking-tight mt-1" style={{ color: 'var(--text-primary)' }}>≈ {eur(s.total_estimated, lang)}</p>
                   </>
                 ) : s.vat_refund > 0 ? (
                   <>
-                    <p className="text-sm" style={{ color: 'var(--text-secondary)' }}>{t(refundKey).replace('{q}', `${quarter}T ${year}`)}</p>
+                    <p className="text-sm" style={{ color: 'var(--text-secondary)' }}>{t(refundKey).replace('{q}', ql)}</p>
                     <p className="text-3xl font-semibold tabular tracking-tight mt-1" style={{ color: 'var(--positive)' }}>{eur(s.vat_refund, lang)}</p>
                   </>
                 ) : (
                   <>
-                    <p className="text-sm" style={{ color: 'var(--text-secondary)' }}>{`${quarter}T ${year}`}</p>
-                    <p className="text-lg font-semibold mt-1" style={{ color: 'var(--text-primary)' }}>{t(noData ? 'finance.taxes.noData' : 'finance.taxes.nothingToPay')}</p>
+                    <p className="text-sm" style={{ color: 'var(--text-secondary)' }}>{ql}</p>
+                    <p className="text-lg font-semibold mt-1" style={{ color: 'var(--text-primary)' }}>{t(noData ? 'finance.taxes.noData' : past ? 'finance.taxes.nothingToPayPast' : 'finance.taxes.nothingToPay')}</p>
                     {noData && <Link to="/app/finanzas/libro" className="link text-sm">{t('finance.taxes.goLedger')}</Link>}
                   </>
                 )}
@@ -96,7 +100,7 @@ export default function Taxes() {
                 </p>
               </div>
             </div>
-            {toPay && <div>
+            {showReserve && <div>
               <div className="flex justify-between text-xs mb-1.5" style={{ color: 'var(--text-secondary)' }}>
                 <span>{t('finance.taxes.reserved').replace('{v}', eur(s.reserved, lang))}</span>
                 <span className="tabular">{s.missing > 0 ? t('finance.taxes.missing').replace('{v}', eur(s.missing, lang)) : t('finance.taxes.covered')}</span>
@@ -105,7 +109,7 @@ export default function Taxes() {
                 <div className="h-full rounded-full" style={{ width: `${pct}%`, background: pct >= 100 ? 'var(--positive)' : 'var(--warning)', transition: 'width 600ms var(--ease-out)' }} />
               </div>
             </div>}
-            {toPay && <form onSubmit={saveReserve} className="flex flex-col sm:flex-row gap-2 sm:items-end">
+            {showReserve && <form onSubmit={saveReserve} className="flex flex-col sm:flex-row gap-2 sm:items-end">
               <label className="flex-1">
                 <span className="field-label">{t('finance.taxes.setAside')}</span>
                 <input type="number" min="0" step="0.01" inputMode="decimal" value={reserve} onChange={(e) => setReserve(e.target.value)} className="input" />
@@ -121,6 +125,11 @@ export default function Taxes() {
                 <Kpi label={t('finance.taxes.vatOutput')} value={eur(s.vat.output, lang)} />
                 <Kpi label={t('finance.taxes.vatInput')} value={eur(s.vat.input, lang)} />
               </div>
+              {/* S15b F1: la cuota a compensar de trimestres anteriores se descuenta aquí. */}
+              {s.vat.previous_compensation > 0 && <>
+                <Row label={t('finance.taxes.quarterResult')} value={eur(s.vat.quarter_result, lang)} />
+                <Row label={t('finance.taxes.prevCompensation')} value={minus(s.vat.previous_compensation, lang)} />
+              </>}
               <Row label={s.vat.result < 0 ? t('finance.vatBalanceNeg') : t('finance.taxes.result')} value={eur(Math.abs(s.vat.result), lang)} strong />
               <p className="text-xs mt-2" style={{ color: 'var(--text-muted)' }}>{t('finance.taxes.vatExplain')}</p>
             </Section>

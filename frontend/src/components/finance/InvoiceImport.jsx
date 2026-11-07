@@ -4,7 +4,7 @@ import { Loader2, ScanLine, AlertTriangle, Info, Check, X, FileText, FileCode2, 
 import { aiApi, ledgerApi } from '../../middleware/api';
 import { apiErrorMessage } from '../../middleware/errors';
 import { readPdf, imageToJpeg, extOf, IMAGE_EXT } from '../../middleware/fileReaders';
-import { fileErrorMessage } from '../../middleware/fileErrors';
+import { fileErrorMessage, FileReadError } from '../../middleware/fileErrors';
 import { useLang } from '../../context/LangContext';
 import { useToast } from '../../context/ToastContext';
 import FolderSource from '../FolderSource';
@@ -67,7 +67,7 @@ export default function InvoiceImport({ profile, onSaved, onCancel }) {
     if (XML_EXT.includes(ext)) {
       const { parseEInvoiceXml } = await import('../../middleware/einvoice');
       const local = parseEInvoiceXml(await file.text(), file.name);
-      if (!local?.length) throw Object.assign(new Error('xml'), { code: 'ERR_FILE_TYPE', fileName: file.name });
+      if (!local?.length) throw new FileReadError('ERR_NOT_EINVOICE', file.name);
       return { local };
     }
     if (ext === '.pdf') {
@@ -153,7 +153,7 @@ export default function InvoiceImport({ profile, onSaved, onCancel }) {
       invoice_number: r.invoice_number, concept: r.concept, category: r.category,
       base: Number(r.base) || 0, vat_rate: Number(r.vat_rate) || 0, vat_amount: Number(r.vat_amount) || 0,
       irpf_rate: Number(r.irpf_rate) || 0, irpf_amount: Number(r.irpf_amount) || 0, total: Number(r.total) || 0,
-      paid: r.paid, source: 'ai', file_name: r.file_name
+      paid: r.paid, source: r.source_format ? 'einvoice' : 'ai', file_name: r.file_name
     }));
     if (!entries.length) { setSaving(false); onCancel(); return; }
     const res = await ledgerApi.create(entries, force);

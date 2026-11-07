@@ -321,8 +321,8 @@ export default {
     deadlineToday: 'Scade oggi', deadlineDays: 'Mancano {n} giorni', deadlineDays_one: 'Manca {n} giorno',
     deadlineModels: 'Modelli {m} · {period}', deadlineSee: 'Vedi calendario', moneyTitle: 'I tuoi soldi',
     mTaxSave: 'Da accantonare per le tasse ({q})', mTaxCompensate: 'IVA a credito ({q})', mTaxCompensateHint: 'Niente da pagare: si scala nei prossimi trimestri',
-    mTaxNone: 'Tasse ({q})', mOverdue: 'Crediti scaduti', mOverdueTop: '{name} · {n} giorni fa',
-    mOverdueTop_one: '{name} · {n} giorno fa', mNoOverdue: 'Niente di scaduto', actionsFrom: 'Da «{title}»',
+    mTaxNone: 'Tasse ({q})', mOverdue: 'Crediti scaduti', mOverdueTop: 'Il più vecchio: {name}, {v} ({n} giorni fa)',
+    mOverdueTop_one: 'Il più vecchio: {name}, {v} ({n} giorno fa)', mNoOverdue: 'Niente di scaduto', actionsFrom: 'Da «{title}»',
     actionDone: 'Segna come fatta: {title}', usageTotal: '{n} analisi eseguite', usageTotal_one: '{n} analisi eseguita',
     usageToday: '{used} di {quota} analisi IA oggi (si rinnova alle {time})',
     welcomeCard: 'La tua dashboard è pronta. Inizia da dove vuoi: non c’è un ordine obbligatorio.',
@@ -799,7 +799,8 @@ export default {
     ERR_PDF_READ: 'Impossibile leggere il PDF «{name}».',
     ERR_XLSX_READ: 'Impossibile leggere il foglio di calcolo «{name}» (danneggiato o formato non supportato).',
     ERR_IMAGE_READ: 'Impossibile leggere l’immagine «{name}».',
-    ERR_FILE_READ: 'Impossibile leggere «{name}».'
+    ERR_FILE_READ: 'Impossibile leggere «{name}».',
+    ERR_NOT_EINVOICE: '«{name}» non è una fattura elettronica riconosciuta (Facturae, UBL o CII).'
   },
   legal: {
     privacy: 'Informativa sulla privacy', terms: 'Termini di utilizzo', dpa: 'Accordo sul trattamento dei dati',
@@ -876,6 +877,7 @@ export default {
     chainOk: "Catena integra: {n} registri verificati.",
     chainBroken: "La catena non corrisponde al registro n. {id}.",
     empty: "Ancora nessun registro: si creano all'emissione delle fatture.",
+    noResults: "Nessun registro corrisponde al filtro.",
     record: "Registro VERI*FACTU",
     fixedBy: "corretto dal n. {id}"
   },
@@ -1131,7 +1133,8 @@ export default {
     addEntry: 'Aggiungi a mano', editEntry: 'Modifica registrazione', readInvoices: 'Leggi fatture con l’IA',
     markCollected: 'Incassata', markPaid: 'Pagata', collected: 'Incassata', paid: 'Pagata', pendingCollection: 'Da incassare', pendingPayment: 'Da pagare',
     totalMismatch: 'Imponibile + IVA − ritenuta non corrisponde al totale. Controllalo.',
-    duplicateEntry: 'Nel registro c’è già una fattura con questo numero e questo codice fiscale.',
+    duplicateEntry: 'Nel registro c’è già una fattura con questo numero dello stesso cliente o fornitore.',
+    noResults: 'Nessuna registrazione corrisponde alla ricerca.', quarterShort: 'T{n}', paidAtIncome: 'Data di incasso', paidAtExpense: 'Data di pagamento', collectTitle: 'Segna come incassata · {name}', collectText: 'Indica il giorno in cui ti hanno pagato: serve a calcolare i giorni medi di incasso.',
     confirmDelete: 'Eliminare questa registrazione dal registro?', deleted: 'Registrazione eliminata', delete: 'Elimina',
     incomeBase: 'Entrate (imponibile)', expenseBase: 'Uscite (imponibile)', vatBalance: 'IVA da versare', vatBalanceNeg: 'IVA da compensare', result: 'Risultato',
     reviewCount: '{n} registrazioni non quadrano: controllale.', reviewCount_one: '{n} registrazione non quadra: controllala.', search: 'Cerca…', ledgerSheet: 'Registro di entrate e uscite',
@@ -1203,7 +1206,13 @@ export default {
       refundHeadline: 'Questo trimestre ({q}) l’IVA è a rimborso o a credito:',
       nothingToPay: 'Niente da accantonare questo trimestre',
       noData: 'Ancora nessuna fattura di questo trimestre nel registro',
-      goLedger: 'Vai al registro'
+      goLedger: 'Vai al registro',
+      prevCompensation: 'IVA a credito dei trimestri precedenti',
+      quarterResult: 'Risultato del trimestre',
+      headlinePast: 'Risultato del {q} (scadenza passata):',
+      compensateHeadlinePast: 'Nel {q} l’IVA è risultata a credito:',
+      refundHeadlinePast: 'Nel {q} l’IVA è risultata a rimborso o a credito:',
+      nothingToPayPast: 'Niente da pagare per questo trimestre'
     },
     receivables: {
       pending: 'Da incassare', invoices: '{n} fatture', invoices_one: '{n} fattura', overdue60: 'Scaduto da oltre 60 giorni', avgDays: 'Giorni medi d’incasso',
@@ -1236,7 +1245,8 @@ export default {
       dismiss: 'Non è una perdita',
       dismissedToast: 'Non ti avviseremo più per {name}',
       dismissedTitle: 'Fornitori esclusi',
-      restore: 'Controlla di nuovo'
+      restore: 'Controlla di nuovo',
+      perCharge: '{v} ogni {n} mesi'
     },
     forecast: {
       startTitle: 'Previsione di cassa', startDesc: 'Indica quanti soldi hai oggi in banca e in cassa. Con il tuo registro, Nokfi calcolerà l’andamento del saldo nei prossimi 90 giorni.',

@@ -26,17 +26,54 @@ export function emptyEntry(type = 'expense') {
     base: '', vat_rate: 21, vat_amount: '', irpf_rate: 0, irpf_amount: '', total: '', paid: type === 'expense' };
 }
 
+// Gastos: pagados el día de la factura; ingresos: cobrados hoy (siempre se puede cambiar).
+function defaultPaidAt(e) {
+  return e.type === 'expense' && e.invoice_date ? e.invoice_date : todayIso();
+}
+
+/**
+ * S15b F5: al marcar una factura como cobrada (o pagada) se pide la fecha, que
+ * cuenta para los días medios de cobro y la previsión.
+ */
+export function PaidDateModal({ entry, onConfirm, onClose, busy, error }) {
+  const { t } = useLang();
+  const income = entry.type === 'income';
+  const [date, setDate] = useState(todayIso() < entry.invoice_date ? entry.invoice_date : todayIso());
+  return (
+    <Modal title={t('finance.collectTitle', { name: entry.party_name || entry.party_nif || entry.invoice_number || '—' })} onClose={onClose} footer={<>
+      <button type="button" onClick={onClose} className="btn btn-ghost">{t('common.cancel')}</button>
+      <button type="submit" form="paid-date-form" disabled={busy || !date} className="btn btn-primary">
+        {busy && <Loader2 size={15} className="animate-spin" />} {income ? t('finance.markCollected') : t('finance.markPaid')}
+      </button>
+    </>}>
+      <form id="paid-date-form" onSubmit={(ev) => { ev.preventDefault(); if (date) onConfirm(date); }} className="flex flex-col gap-3">
+        {income && <p className="text-sm" style={{ color: 'var(--text-secondary)' }}>{t('finance.collectText')}</p>}
+        <Field label={income ? t('finance.paidAtIncome') : t('finance.paidAtExpense')} htmlFor="pd-date">
+          <input id="pd-date" type="date" value={date} min={entry.invoice_date} max={todayIso()} onChange={(ev) => setDate(ev.target.value)} className="input" required autoFocus />
+        </Field>
+        {error && <ErrorBox>{error}</ErrorBox>}
+      </form>
+    </Modal>
+  );
+}
+
 export function checkOk(e) {
   return Math.abs(r2(e.base) + r2(e.vat_amount) - r2(e.irpf_amount) - r2(e.total)) <= 0.05;
 }
 
 export default function EntryForm({ initial, onSave, onClose, onDelete, saving, error }) {
   const { t } = useLang();
-  const [e, setE] = useState(() => ({ ...emptyEntry(), ...initial, due_date: initial?.due_date || '' }));
+  const [e, setE] = useState(() => {
+    const base = { ...emptyEntry(), ...initial, due_date: initial?.due_date || '' };
+    return { ...base, paid_at: base.paid_at ? String(base.paid_at).slice(0, 10) : (base.paid ? defaultPaidAt(base) : '') };
+  });
   const set = (k, v) => setE(prev => {
     const next = { ...prev, [k]: v };
     // Al cambiar el tipo en un apunte nuevo: gastos pagados, ingresos pendientes de cobro (V4).
-    if (k === 'type' && !initial?.id) next.paid = v === 'expense';
+    if (k === 'type' && !initial?.id) { next.paid = v === 'expense'; next.paid_at = next.paid ? defaultPaidAt(next) : ''; }
+    // S15b F5: la fecha de cobro/pago se elige (antes era siempre hoy).
+    if (k === 'paid') next.paid_at = v ? (prev.paid_at || defaultPaidAt(next)) : '';
+    if (k === 'invoice_date' && next.paid_at && v && next.paid_at < v) next.paid_at = v;
     if (['base', 'vat_rate', 'irpf_rate'].includes(k)) {
       next.vat_amount = r2((Number(next.base) || 0) * (Number(next.vat_rate) || 0) / 100);
       next.irpf_amount = r2((Number(next.base) || 0) * (Number(next.irpf_rate) || 0) / 100);
@@ -53,6 +90,7 @@ export default function EntryForm({ initial, onSave, onClose, onDelete, saving, 
     onSave({
       ...e,
       due_date: e.due_date || null,
+      paid_at: e.paid ? (e.paid_at || defaultPaidAt(e)) : null,
       base: r2(e.base), vat_rate: r2(e.vat_rate), vat_amount: r2(e.vat_amount),
       irpf_rate: r2(e.irpf_rate), irpf_amount: r2(e.irpf_amount), total: r2(e.total)
     });
@@ -114,13 +152,19 @@ export default function EntryForm({ initial, onSave, onClose, onDelete, saving, 
               {[0, 7, 15, 19].map(v => <option key={v} value={v}>{v} %</option>)}
             </select>
           </Field>
-          <Field label={t('finance.irpf')} htmlFor="ef-irpf_amount">{input('irpf_amount', { type: 'number', step: '0.01', inputMode: 'decimal' })}</Field>
+          {/* S15b L1: la retención siempre en positivo (resta del total). */}
+          <Field label={t('finance.irpf')} htmlFor="ef-irpf_amount">{input('irpf_amount', { type: 'number', step: '0.01', min: '0', inputMode: 'decimal' })}</Field>
         </div>
         <Field label={t('finance.total')} htmlFor="ef-total">{input('total', { type: 'number', step: '0.01', inputMode: 'decimal', required: true })}</Field>
         <label className="flex items-center gap-2 text-sm sm:col-span-2" style={{ color: 'var(--text-secondary)' }}>
           <input type="checkbox" checked={!!e.paid} onChange={(ev) => set('paid', ev.target.checked)} className="w-4 h-4" />
           {e.type === 'income' ? t('finance.markCollected') : t('finance.markPaid')}
         </label>
+        {!!e.paid && (
+          <Field label={e.type === 'income' ? t('finance.paidAtIncome') : t('finance.paidAtExpense')} htmlFor="ef-paid_at">
+            {input('paid_at', { type: 'date', required: true, min: e.invoice_date || undefined, max: todayIso() })}
+          </Field>
+        )}
         {mismatch && (
           <p className="sm:col-span-2 text-xs flex items-center gap-1.5" style={{ color: 'var(--warning)' }}><AlertTriangle size={13} /> {t('finance.totalMismatch')}</p>
         )}

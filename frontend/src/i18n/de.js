@@ -321,8 +321,8 @@ export default {
     deadlineToday: 'Heute fällig', deadlineDays: 'Noch {n} Tage', deadlineDays_one: 'Noch {n} Tag',
     deadlineModels: 'Modelle {m} · {period}', deadlineSee: 'Kalender ansehen', moneyTitle: 'Dein Geld',
     mTaxSave: 'Für Steuern zurücklegen ({q})', mTaxCompensate: 'USt.-Guthaben ({q})', mTaxCompensateHint: 'Nichts zu zahlen: wird in den nächsten Quartalen verrechnet',
-    mTaxNone: 'Steuern ({q})', mOverdue: 'Überfällige Forderungen', mOverdueTop: '{name} · vor {n} Tagen',
-    mOverdueTop_one: '{name} · vor {n} Tag', mNoOverdue: 'Nichts überfällig', actionsFrom: 'Aus „{title}“',
+    mTaxNone: 'Steuern ({q})', mOverdue: 'Überfällige Forderungen', mOverdueTop: 'Am ältesten: {name}, {v} (vor {n} Tagen)',
+    mOverdueTop_one: 'Am ältesten: {name}, {v} (vor {n} Tag)', mNoOverdue: 'Nichts überfällig', actionsFrom: 'Aus „{title}“',
     actionDone: 'Als erledigt markieren: {title}', usageTotal: '{n} Analysen durchgeführt', usageTotal_one: '{n} Analyse durchgeführt',
     usageToday: '{used} von {quota} KI-Analysen heute (Erneuerung um {time})',
     welcomeCard: 'Dein Dashboard ist bereit. Fang an, wo du willst – es gibt keine feste Reihenfolge.',
@@ -799,7 +799,8 @@ export default {
     ERR_PDF_READ: 'Das PDF „{name}“ konnte nicht gelesen werden.',
     ERR_XLSX_READ: 'Die Tabelle „{name}“ konnte nicht gelesen werden (beschädigt oder Format nicht unterstützt).',
     ERR_IMAGE_READ: 'Das Bild „{name}“ konnte nicht gelesen werden.',
-    ERR_FILE_READ: '„{name}“ konnte nicht gelesen werden.'
+    ERR_FILE_READ: '„{name}“ konnte nicht gelesen werden.',
+    ERR_NOT_EINVOICE: '„{name}“ ist keine erkannte E-Rechnung (Facturae, UBL oder CII).'
   },
   legal: {
     privacy: 'Datenschutzerklärung', terms: 'Nutzungsbedingungen', dpa: 'Auftragsverarbeitungsvertrag',
@@ -876,6 +877,7 @@ export default {
     chainOk: "Kette intakt: {n} Datensätze geprüft.",
     chainBroken: "Die Kette stimmt bei Datensatz Nr. {id} nicht.",
     empty: "Noch keine Datensätze: Sie entstehen beim Ausstellen von Rechnungen.",
+    noResults: "Kein Datensatz entspricht dem Filter.",
     record: "VERI*FACTU-Datensatz",
     fixedBy: "berichtigt durch Nr. {id}"
   },
@@ -1131,7 +1133,8 @@ export default {
     addEntry: 'Manuell hinzufügen', editEntry: 'Buchung bearbeiten', readInvoices: 'Rechnungen mit KI lesen',
     markCollected: 'Erhalten', markPaid: 'Bezahlt', collected: 'Erhalten', paid: 'Bezahlt', pendingCollection: 'Offen', pendingPayment: 'Zu zahlen',
     totalMismatch: 'Netto + USt. − Einbehalt entspricht nicht dem Gesamtbetrag. Bitte prüfen.',
-    duplicateEntry: 'Im Journal gibt es bereits eine Rechnung mit dieser Nummer und Steuernummer.',
+    duplicateEntry: 'Im Journal gibt es bereits eine Rechnung mit dieser Nummer vom selben Kunden oder Lieferanten.',
+    noResults: 'Keine Buchung entspricht deiner Suche.', quarterShort: 'Q{n}', paidAtIncome: 'Zahlungseingang am', paidAtExpense: 'Bezahlt am', collectTitle: 'Als bezahlt markieren · {name}', collectText: 'Gib den Tag an, an dem du bezahlt wurdest: Daraus wird die durchschnittliche Zahlungsdauer berechnet.',
     confirmDelete: 'Diese Buchung aus dem Journal löschen?', deleted: 'Buchung gelöscht', delete: 'Löschen',
     incomeBase: 'Einnahmen (netto)', expenseBase: 'Ausgaben (netto)', vatBalance: 'USt.-Zahllast', vatBalanceNeg: 'USt. zur Verrechnung', result: 'Ergebnis',
     reviewCount: '{n} Buchungen stimmen nicht: bitte prüfen.', reviewCount_one: '{n} Buchung stimmt nicht: bitte prüfen.', search: 'Suchen…', ledgerSheet: 'Einnahmen- und Ausgabenjournal',
@@ -1203,7 +1206,13 @@ export default {
       refundHeadline: 'Dieses Quartal ({q}) erhältst du Umsatzsteuer zurück oder verrechnest sie:',
       nothingToPay: 'Dieses Quartal nichts zurückzulegen',
       noData: 'Noch keine Rechnungen aus diesem Quartal im Journal',
-      goLedger: 'Zum Journal'
+      goLedger: 'Zum Journal',
+      prevCompensation: 'Vorsteuerüberhang aus Vorquartalen',
+      quarterResult: 'Ergebnis des Quartals',
+      headlinePast: 'Ergebnis {q} (Frist abgelaufen):',
+      compensateHeadlinePast: 'Im {q} ergab sich ein Vorsteuerüberhang zum Verrechnen:',
+      refundHeadlinePast: 'Im {q} ergab sich eine Erstattung oder Verrechnung der Umsatzsteuer:',
+      nothingToPayPast: 'Für dieses Quartal nichts zu zahlen'
     },
     receivables: {
       pending: 'Offene Forderungen', invoices: '{n} Rechnungen', invoices_one: '{n} Rechnung', overdue60: 'Seit über 60 Tagen überfällig', avgDays: 'Durchschnittliche Zahlungsdauer',
@@ -1236,7 +1245,8 @@ export default {
       dismiss: 'Kein Leck',
       dismissedToast: 'Wir warnen dich nicht mehr bei {name}',
       dismissedTitle: 'Ausgeblendete Lieferanten',
-      restore: 'Wieder beobachten'
+      restore: 'Wieder beobachten',
+      perCharge: '{v} alle {n} Monate'
     },
     forecast: {
       startTitle: 'Liquiditätsprognose', startDesc: 'Gib an, wie viel Geld du heute auf dem Konto und in der Kasse hast. Mit deinem Journal berechnet Nokfi, wie sich dein Kontostand in den nächsten 90 Tagen entwickelt.',
