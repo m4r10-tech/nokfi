@@ -11,12 +11,13 @@
  *   2. La sesión existe y no ha expirado
  *   3. La licencia asociada existe
  *   4. La licencia está 'active' (no suspendida ni revokada)
- *   5. La contraseña no se reseteó mientras esta sesión estaba viva:
- *      aunque las sesiones no se revocan en un change-password (para no
- *      cerrar la pestaña desde la que el usuario cambia la clave), sí
- *      invalidamos TODAS las sesiones previas en un reset por EMAIL
- *      (clearPasswordAndSessions). Aquí no hay nada extra que comprobar:
- *      el token de la sesión es el secreto; sin él, no hay acceso.
+ *   5. La contraseña no se cambió ni restableció mientras esta sesión estaba
+ *      viva: cambiar la contraseña (change-password) cierra las DEMÁS sesiones
+ *      de la cuenta (deleteOtherSessions; la pestaña desde la que se cambia
+ *      sigue abierta), y restablecerla por email, por recuperación o desde el
+ *      admin las cierra TODAS (deleteSessionsForLicense /
+ *      clearPasswordAndSessions). Aquí no hay nada extra que comprobar: la
+ *      sesión borrada ya no existe y el paso 2 la rechaza.
  *
  * (Fase 2: el viejo check de device-fingerprint vs session.fingerprint ya
  *  no aplica — el fingerprint se eliminó de la BD.)

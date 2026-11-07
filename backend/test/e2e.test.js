@@ -1550,6 +1550,8 @@ async function main() {
   await require('./session15api.tests')({ post, put, get, call, check, checkAsync, getDB });
   // Sesión 15b, lote 4 — cifras e impuestos.
   await require('./session15b-cifras.tests')({ post, put, get, call, check, checkAsync, getDB });
+  // S15b lote 3 — seguridad de la app (sesiones, CORS, client_errors, log, webhooks).
+  await require('./session15b-seguridad.tests')({ post, put, get, call, check, checkAsync, getDB });
 
   } catch (e) {
     console.error('TEST CRASH:', e.message);

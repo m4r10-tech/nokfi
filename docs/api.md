@@ -100,6 +100,8 @@ Revela la clave tras reintroducir la contraseña. **Body:** `{ password }`.
 **Body:** `{ current_password, new_password (mín 8) }`.
 `200 { success: true }` | `401 invalid_credentials` | `400 weak_password` |
 `403/409` como reveal-key.
+Al cambiarla se **cierran las demás sesiones** de la cuenta (pasan a `401 session_invalid`);
+la sesión desde la que se cambia sigue abierta.
 
 ### `POST /api/auth/request-password-reset`
 Sin sesión. **Body:** `{ email, license_key }`.
@@ -121,8 +123,9 @@ Desde el enlace del email. **Setea contraseña y crea sesión** (no hace falta l
 | 400 | `{ error: "missing_token" \| "weak_password" \| "invalid_or_expired_token" }` | |
 | 403 | `{ error: "license_inactive" }` | revocada/suspendida en el ínterin |
 
-> El reset por email **no** revoca sesiones previas. El reset forzado por admin
-> (ver §5) sí limpia sesiones.
+> El reset por email **cierra todas las sesiones previas** (pasan a `401 session_invalid`);
+> solo vale el `token` nuevo de la respuesta. Lo mismo hacen `confirm-recovery` y el reset
+> forzado por admin (ver §5).
 
 ### Recuperación de acceso con OTP (olvido de clave y/o contraseña)
 
@@ -161,8 +164,8 @@ Reenvía las claves por email SIN consumir el token (acción repetible mientras 
 **Body:** `{ recovery_token }` → `200 { success, message }` | `400 invalid_or_expired_token` | `403 license_inactive`
 
 #### `POST /api/auth/confirm-recovery`
-Cambia la contraseña SOLO de la licencia indicada (del email verificado) y
-**crea sesión** en ella.
+Cambia la contraseña SOLO de la licencia indicada (del email verificado),
+**cierra sus sesiones previas** y **crea sesión** en ella.
 
 **Body:** `{ recovery_token, license_key, new_password, device_name? }`
 

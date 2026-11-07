@@ -859,6 +859,12 @@ function deleteSessionsForLicense(license_id) {
   return getDB().prepare('DELETE FROM sessions WHERE license_id = ?').run(license_id);
 }
 
+/** S15b (sub7 A1): cierra todas las sesiones de la licencia menos la indicada
+ *  (la pestaña desde la que se cambia la contraseña sigue abierta). */
+function deleteOtherSessions(license_id, keepToken) {
+  return getDB().prepare('DELETE FROM sessions WHERE license_id = ? AND token != ?').run(license_id, hashToken(keepToken));
+}
+
 function cleanExpiredSessions() {
   return getDB().prepare(`DELETE FROM sessions WHERE expires_at < ${NOW_ISO}`).run().changes;
 }
@@ -1540,6 +1546,7 @@ module.exports = {
   getSession,
   deleteSession,
   deleteSessionsForLicense,
+  deleteOtherSessions,
   cleanExpiredSessions,
   createResetToken,
   consumeResetToken,
