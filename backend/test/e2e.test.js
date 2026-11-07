@@ -80,8 +80,11 @@ function check(label, fn) {
   else { failed++; console.log('❌', label); }
 }
 function checkAsync(label, promise, fn) {
-  return promise.then(r => {
-    const ok = fn(r);
+  // fn puede ser async (p. ej. releer un XML generado): se espera su resultado.
+  // Antes `fn(r)` devolvía una Promise, que siempre es «verdadera», y el test
+  // salía ✅ dijera lo que dijera la comprobación.
+  return promise.then(async r => {
+    const ok = await fn(r);
     if (ok) { passed++; console.log('✅', label); }
     else { failed++; console.log('❌', label, '→', JSON.stringify(r).slice(0, 120)); }
     return r;
@@ -126,6 +129,17 @@ async function main() {
   const testPassword = 'StrongP4ss!';
 
   try {
+
+  // Autocomprobación: una comprobación async que responde false cuenta como fallo.
+  {
+    const p0 = passed, f0 = failed, log = console.log;
+    console.log = () => {};
+    try { await checkAsync('autocomprobación', Promise.resolve({}), async () => false); }
+    finally { console.log = log; }
+    const counted = failed === f0 + 1 && passed === p0;
+    passed = p0; failed = f0;
+    check('checkAsync espera a las comprobaciones async (una que responde false cuenta como fallo)', () => counted);
+  }
 
   // ═══════════════════════════════════════════════════════════
   // 1. Admin: create license WITH password
@@ -837,7 +851,7 @@ async function main() {
   const idB1 = createAnalysis({ license_id: licenseIdB, kind: 'excel', title: 'Caja B', result_html: '<h3>Resumen B1</h3>', prompt_chars: 789 });
   check('createAnalysis devuelve Number ids', () => [idA1, idA2, idB1].every(x => Number.isInteger(x)));
 
-  checkAsync('GET /api/analyses SIN auth → 401',
+  await checkAsync('GET /api/analyses SIN auth → 401',
     get('/api/analyses'),
     r => r.status === 401
   );

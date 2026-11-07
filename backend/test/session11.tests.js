@@ -313,11 +313,19 @@ async function tanda3({ post, put, get, check, checkAsync, getDB }) {
   }
   await checkAsync('S11 XML: Factur-X con recargo de equivalencia → 422 format_unsupported', xml(re, 'facturx'),
     r => r.status === 422 && r.data.error === 'format_unsupported');
-  await checkAsync('S11 XML: Factur-X = PDF/A-3 con factur-x.xml dentro, que se lee sin IA', xml(f1, 'facturx'),
+  // El PDF se descarga como bytes: el helper `get` lo convierte en texto UTF-8 y
+  // estropea el XML comprimido que lleva dentro (antes no se notaba porque
+  // checkAsync no esperaba a las comprobaciones async).
+  const pdfBytes = async (inv) => {
+    const rr = await fetch(`http://localhost:${process.env.PORT}/api/invoicing/invoices/${inv.id}/xml?format=facturx`, { headers: { Authorization: `Bearer ${tok}` } });
+    const buf = Buffer.from(await rr.arrayBuffer());
+    return { status: rr.status, buf, data: buf.toString('latin1') };
+  };
+  await checkAsync('S11 XML: Factur-X = PDF/A-3 con factur-x.xml dentro, que se lee sin IA', pdfBytes(f1),
     async r => {
-      if (r.status !== 200 || !String(r.data).startsWith('%PDF')) return false;
-      const raw = String(r.data);
-      const [p] = (await E.parsePdf(Buffer.from(raw, 'latin1').toString('base64'), 'fx.pdf')) || [];
+      if (r.status !== 200 || !r.data.startsWith('%PDF')) return false;
+      const raw = r.data;
+      const [p] = (await E.parsePdf(r.buf.toString('base64'), 'fx.pdf')) || [];
       return raw.includes('pdfaid:part>3') && raw.includes('fx:ConformanceLevel>EN 16931') && raw.includes('/AFRelationship /Alternative') && p?.total === f1.total;
     });
   await checkAsync('S11 XML: formato desconocido → 400', xml(f1, 'pdf'), r => r.status === 400 && r.data.field === 'format');
