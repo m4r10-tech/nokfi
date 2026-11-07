@@ -20,11 +20,24 @@ export const toolLabelKey = (path) => TOOL_LINKS[path] || null;
 
 const PATH_RE = /\/app\/(?:finanzas\/(?:cobros|impuestos|prevision|calendario|libro|fugas|sector)|calculadoras|excel|configuracion)\b/g;
 
+/* S15b D7: a veces el modelo copia la marca de los datos («[enlace: cobros]»,
+   «/enlace: cobros») en vez de la ruta: se convierte en la ruta para que salga
+   el botón. Claves = NOKFI_LINKS del backend. */
+const KEY_PATHS = {
+  cobros: '/app/finanzas/cobros', impuestos: '/app/finanzas/impuestos', prevision: '/app/finanzas/prevision',
+  calendario: '/app/finanzas/calendario', libro: '/app/finanzas/libro', fugas: '/app/finanzas/fugas',
+  sector: '/app/finanzas/sector', calculadoras: '/app/calculadoras', excel: '/app/excel', configuracion: '/app/configuracion'
+};
+const MARK_RE = /[[(/]?[ \t]*(?:enlace|link|lien|collegamento|verknüpfung|odnośnik|łącze)[ \t]*:[ \t]*(cobros|impuestos|previsi[oó]n|calendario|libro|fugas|sector|calculadoras|excel|configuraci[oó]n)\b[ \t]*[\])]?/gi;
+const keyMarksToPaths = (text) => String(text).replace(MARK_RE, (_m, k) =>
+  KEY_PATHS[k.toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g, '')] || _m);
+
 /**
  * Separa las rutas de Nokfi que el asistente pone en su respuesta (normalmente
  * en la última línea) y devuelve el texto limpio + los enlaces, sin repetir.
  */
-export function extractToolLinks(text) {
+export function extractToolLinks(raw) {
+  const text = keyMarksToPaths(raw);
   const links = [...new Set(String(text).match(PATH_RE) || [])].filter(p => TOOL_LINKS[p]);
   if (!links.length) return { text, links };
   const clean = String(text)

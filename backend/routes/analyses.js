@@ -13,6 +13,8 @@
  * Endpoints:
  *   GET /api/analyses       → lista ligera (sin result_html) del historial, más recientes primero
  *   GET /api/analyses/:id   → análisis completo (con result_html) — 404 si no es tuyo
+ *   PATCH /api/analyses/:id { title } → renombrar (S15b D8) — 404 si no es tuyo
+ *   DELETE /api/analyses/:id → borrar con sus tareas (S15b D8) — 404 si no es tuyo
  *
  * (auth: Bearer; rate-limit general via /api/ en server.js)
  */
@@ -22,7 +24,7 @@
 const express = require('express');
 const router = express.Router();
 const { requireLicense } = require('../middleware/requireLicense');
-const { listAnalyses, getAnalysis } = require('../db/database');
+const { listAnalyses, getAnalysis, renameAnalysis, deleteAnalysis } = require('../db/database');
 const { listActionsForAnalysis } = require('../db/actions');
 
 const parse = (s) => { try { return s ? JSON.parse(s) : null; } catch { return null; } };
@@ -72,4 +74,29 @@ router.get('/:id', requireLicense, (req, res) => {
   });
 });
 
+/* ── S15b D8: renombrar y borrar (la API /api/v1 usa los mismos helpers) ── */
+const MAX_TITLE = 120;
+function validTitle(v) {
+  const t = typeof v === 'string' ? v.replace(/\s+/g, ' ').trim() : '';
+  return t && t.length <= MAX_TITLE ? t : null;
+}
+
+router.patch('/:id', requireLicense, (req, res) => {
+  const id = Number(req.params.id);
+  if (!Number.isInteger(id)) return res.status(400).json({ error: 'invalid_id', message: 'El identificador del análisis no es válido.' });
+  const title = validTitle(req.body?.title);
+  if (!title) return res.status(400).json({ error: 'invalid_title', message: `El título no puede estar vacío ni pasar de ${MAX_TITLE} caracteres.` });
+  if (!renameAnalysis(req.license.id, id, title)) return res.status(404).json({ error: 'not_found', message: 'Análisis no encontrado.' });
+  res.json({ id, title });
+});
+
+router.delete('/:id', requireLicense, (req, res) => {
+  const id = Number(req.params.id);
+  if (!Number.isInteger(id)) return res.status(400).json({ error: 'invalid_id', message: 'El identificador del análisis no es válido.' });
+  if (!deleteAnalysis(req.license.id, id)) return res.status(404).json({ error: 'not_found', message: 'Análisis no encontrado.' });
+  res.json({ success: true, id });
+});
+
 module.exports = router;
+module.exports.validTitle = validTitle;
+module.exports.MAX_TITLE = MAX_TITLE;

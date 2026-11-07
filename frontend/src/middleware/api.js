@@ -26,13 +26,17 @@ function setWaiting(delta) {
   try { window.dispatchEvent(new CustomEvent('nokfi:ai-wait', { detail: { waiting } })); } catch { /* sin window (tests) */ }
 }
 
-async function waitPending(id, auth) {
+const ABORTED = { ok: false, status: 0, aborted: true, data: { error: 'aborted' } };
+
+async function waitPending(id, auth, signal) {
   setWaiting(1);
   try {
     const t0 = Date.now();
     for (let i = 0; Date.now() - t0 < PENDING_MAX_MS; i++) {
       await sleep(i < 5 ? 3000 : 5000);
-      const r = await request(`/pending/${encodeURIComponent(id)}`, { auth, noDefer: true });
+      if (signal?.aborted) return ABORTED; // S15b D4: ya no interesa (p. ej. otro tono)
+      const r = await request(`/pending/${encodeURIComponent(id)}`, { auth, noDefer: true, signal });
+      if (r.aborted) return r;
       if (r.status === 202 && r.data?.pending) continue;
       if (r.status === 0) continue; // un corte de red puntual no pierde el trabajo
       return r;
@@ -43,7 +47,7 @@ async function waitPending(id, auth) {
   }
 }
 
-async function request(path, { method = 'GET', body, auth = false, isFormData = false, noDefer = false } = {}) {
+async function request(path, { method = 'GET', body, auth = false, isFormData = false, noDefer = false, signal } = {}) {
   const headers = {};
   if (!isFormData) headers['Content-Type'] = 'application/json';
   if (auth && sessionToken) headers['Authorization'] = `Bearer ${sessionToken}`;
@@ -53,9 +57,11 @@ async function request(path, { method = 'GET', body, auth = false, isFormData = 
     res = await fetch(`${API_BASE}${path}`, {
       method,
       headers,
-      body: body ? (isFormData ? body : JSON.stringify(body)) : undefined
+      body: body ? (isFormData ? body : JSON.stringify(body)) : undefined,
+      signal
     });
   } catch {
+    if (signal?.aborted) return ABORTED;
     return { ok: false, status: 0, data: { error: 'network_error', message: 'No se pudo conectar con el servidor.' } };
   }
 
@@ -87,7 +93,7 @@ async function request(path, { method = 'GET', body, auth = false, isFormData = 
     if (onSessionExpired) onSessionExpired(data.error);
   }
 
-  if (!noDefer && res.status === 202 && typeof data.pending === 'string') return waitPending(data.pending, auth);
+  if (!noDefer && res.status === 202 && typeof data.pending === 'string') return waitPending(data.pending, auth, signal);
   return { ok: res.ok, status: res.status, data };
 }
 
@@ -158,7 +164,7 @@ export const financeApi = {
   taxes: (year, quarter) => request(`/finance/taxes${qs({ year, quarter })}`, { auth: true }),
   setReserve: (year, quarter, amount) => request('/finance/reserve', { method: 'PUT', auth: true, body: { year, quarter, amount } }),
   receivables: () => request('/finance/receivables', { auth: true }),
-  collectionEmail: (entry_id, tone, lang) => request('/finance/collection-email', { method: 'POST', auth: true, body: { entry_id, tone, lang } }),
+  collectionEmail: (entry_id, tone, lang, signal) => request('/finance/collection-email', { method: 'POST', auth: true, body: { entry_id, tone, lang }, signal }),
   leaks: () => request('/finance/leaks', { auth: true }),
   dismissLeak: (party_key, party_name) => request('/finance/leaks/dismiss', { method: 'POST', auth: true, body: { party_key, party_name } }),
   restoreLeak: (party_key) => request('/finance/leaks/dismiss', { method: 'DELETE', auth: true, body: { party_key } }),
@@ -251,7 +257,10 @@ export const meApi = {
 // licencia de la sesión (Bearer); el frontend no envía license_id.
 export const analysesApi = {
   list: () => request('/analyses', { auth: true }),
-  get: (id) => request(`/analyses/${encodeURIComponent(id)}`, { auth: true })
+  get: (id) => request(`/analyses/${encodeURIComponent(id)}`, { auth: true }),
+  // S15b D8: renombrar y borrar (el borrado se confirma antes en la pantalla).
+  rename: (id, title) => request(`/analyses/${encodeURIComponent(id)}`, { method: 'PATCH', auth: true, body: { title } }),
+  remove: (id) => request(`/analyses/${encodeURIComponent(id)}`, { method: 'DELETE', auth: true })
 };
 
 // Perfil de empresa del onboarding (G-a — sección 14). El backend scopea por

@@ -25,7 +25,7 @@ const { audit } = require('../../db/database');
 const budget = require('../../utils/aiBudget');
 const gemini = require('./gemini');
 const localAi = require('./localQueue');
-const { profileContext, langDirective } = require('./prompts');
+const { profileContext } = require('./prompts');
 const { NOKFI_LINKS } = require('./financeContext');
 
 const MAX_MESSAGES = 10;
@@ -121,10 +121,18 @@ function providerOrder() {
   return list.filter(p => PROVIDERS[p]?.configured() && !budget.expired(p));
 }
 
+/* S15b D2: el chat responde en el idioma de la PREGUNTA, no en el de la interfaz.
+   El idioma de la interfaz solo se usa si la pregunta no deja claro el suyo. */
+const LANG_NAMES = { es: 'español de España', en: 'inglés', fr: 'francés', de: 'alemán', it: 'italiano', pl: 'polaco' };
+function chatLangDirective(lang) {
+  const ui = LANG_NAMES[lang] || LANG_NAMES.es;
+  return `Idioma: responde SIEMPRE en el mismo idioma en que está escrita la última pregunta del usuario, aunque no coincida con el idioma de la interfaz ni con el de estas instrucciones o los datos (si pregunta en inglés, responde en inglés; si pregunta en francés, en francés). Solo si no se puede saber el idioma de la pregunta, responde en ${ui}. Las cifras y fechas de los datos se copian igual, sea cual sea el idioma.`;
+}
+
 function chatSystemPrompt({ profile, lang, analysisContext, financeText }) {
   return [
     'Eres el asistente de Nokfi, el director financiero de bolsillo de autónomos y pymes españolas.',
-    'Responde SOLO sobre finanzas del negocio del usuario, sus informes de Nokfi o cómo usar Nokfi. Si te preguntan otra cosa, di amablemente que solo puedes ayudar con eso.',
+    'Temas: finanzas del negocio del usuario (impuestos, IVA, IRPF, plazos, facturas, cobros, pagos, gastos, caja, previsiones), sus informes de Nokfi y cómo usar Nokfi. Estas preguntas son SIEMPRE válidas y se contestan, estén escritas en el idioma que estén (español, inglés, francés, alemán, italiano, polaco u otro): que la pregunta no esté en español NO la convierte en ajena. Solo si la pregunta no tiene nada que ver con el dinero ni con el negocio (recetas, deportes, programación…) di amablemente que solo puedes ayudar con eso. Si antes en la conversación rechazaste por error una pregunta de este tipo, no repitas esa negativa: respóndela.',
     'Sé breve y concreto (máximo unas 180 palabras), con lenguaje llano. Texto plano: sin Markdown, sin tablas, sin emojis. Puedes usar guiones para listas.',
     'No inventes cifras: si no tienes el dato, dilo. Para temas fiscales, recuerda que es orientativo y que la gestoría tiene la última palabra.',
     'Regla fiscal española: si el IVA (modelo 303) sale negativo en el 1T, 2T o 3T no se puede pedir la devolución: se compensa en los trimestres siguientes; la devolución solo se solicita en el 4T (salvo empresas inscritas en el REDEME, que pueden pedirla cada mes).',
@@ -136,7 +144,7 @@ function chatSystemPrompt({ profile, lang, analysisContext, financeText }) {
       : '',
     `Si tu respuesta usa una cifra o una tarea de una pantalla de Nokfi, termina con una última línea que sea SOLO la ruta de esa pantalla (una como mucho). Las marcas [enlace: clave] de los datos indican qué pantalla corresponde. Rutas válidas: ${Object.entries(NOKFI_LINKS).map(([k, v]) => `${k} = ${v}`).join(', ')}.`,
     analysisContext ? `Informe sobre el que pregunta el usuario:\n${analysisContext.slice(0, MAX_CONTEXT_CHARS)}` : '',
-    langDirective(lang)
+    chatLangDirective(lang)
   ].filter(Boolean).join('\n\n');
 }
 

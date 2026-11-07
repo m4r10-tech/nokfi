@@ -264,6 +264,15 @@ Análisis completo.
 | 400 | `{ error: "invalid_id" }` | `:id` no es entero |
 | 404 | `{ error: "not_found" }` | No existe, O existe pero es de otra licencia (sin leakage) |
 
+### `PATCH /api/analyses/:id`  *(renombrar)*
+Cuerpo `{ title }` (1–120 caracteres; los espacios repetidos se juntan).
+**200:** `{ id, title }`. **400** `invalid_id` / `invalid_title`. **404** `not_found` (no existe o es de otra licencia).
+
+### `DELETE /api/analyses/:id`  *(borrar)*
+Borra el análisis y su plan de acción. **No devuelve cuota** (el uso del día se cuenta aparte).
+**200:** `{ success: true, id }`. **400** `invalid_id`. **404** `not_found`.
+La web pide confirmación antes de borrar.
+
 > **Seguridad frontend:** renderizar `result_html` SIEMPRE con `sanitizeAiHtml`
 > (`middleware/sanitize.js`), nunca `dangerouslySetInnerHTML` directo.
 
@@ -557,7 +566,8 @@ defecto, por clave) y la cuota diaria de IA de la licencia. `?async=true` o
 
 **Modo prueba (`nk_test_`)**, separado del real como en Stripe: funciona sin gastar
 cuota (datos de ejemplo y facturas `TEST-…` que no entran al libro ni van a la AEAT)
-y **no ve nada real**: `GET /analyses` vacío y `GET /analyses/:id` → 404,
+y **no ve nada real**: `GET /analyses` vacío y `GET /analyses/:id` → 404 (también
+`PATCH`/`DELETE /analyses/:id`: no renombra ni borra nada real),
 `GET /customers` vacío y `customer_id` → `404 customer_not_found`, `/tax/quarter` y
 `/tax/model-130` con `source: "ledger"` calculan con el libro vacío, y los trabajos y
 webhooks solo son los de su modo. Una clave real tampoco ve los de prueba. En una
@@ -586,7 +596,7 @@ hueco; la cuota diaria, hasta las 00:00 UTC).
 |---|---|
 | Especificación | `GET /openapi.json` (pública) |
 | Cuota | `GET /usage` |
-| Análisis | `POST /analyze`, `GET /analyses`, `GET /analyses/:id` |
+| Análisis | `POST /analyze`, `GET /analyses`, `GET /analyses/:id`, `PATCH /analyses/:id` (`{ title }`, renombrar), `DELETE /analyses/:id` (borrar con su plan de acción; no devuelve cuota) |
 | Facturas recibidas | `POST /invoices/extract` (PDF, imagen o texto con IA; XML UBL/Facturae/CII y Factur-X sin IA ni cuota) |
 | Emisión | `POST/GET /invoices`, `GET /invoices/:id`, `POST /invoices/:id/rectify`, `/cancel`, `/status`, `GET /invoices/:id/pdf`, `/xml?format=` · `GET/POST /customers` |
 | Herramientas sin IA | `GET/POST /tax/nif`, `POST /tax/vat`, `/tax/withholding`, `/tax/model-130`, `GET /tax/quarter`, `/tax/calendar` |

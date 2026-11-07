@@ -523,7 +523,7 @@ export default {
     convertToExcel: 'Convertir en Excel', continueAnyway: 'Continuer quand même',
     aiAnalysis: 'Analyse de l’IA', exportResult: 'Exporter le résultat',
     reading: 'Lecture du fichier…',
-    analyzing: 'Analyse de vos données…', analyzingHint: 'Cela prend en général 10 à 30 secondes.',
+    analyzing: 'Analyse de vos données…', analyzingHint: 'Cela prend en général de 20 secondes à 1 minute.',
     analysisReady: 'Analyse prête et enregistrée dans votre historique',
     tooBig: '« {name} » dépasse la limite de 5 Mo.',
     readError: 'Impossible de lire « {name} » (fichier endommagé, protégé ou format non pris en charge).',
@@ -558,7 +558,9 @@ export default {
     notFoundTitle: 'Cette analyse n’existe pas',
     notFoundDesc: 'Le lien est peut-être erroné ou l’analyse appartient à une autre licence.',
     loadDetailError: 'Impossible de charger cette analyse.',
-    viaApi: 'via l’API'
+    viaApi: 'via l’API',
+    rename: 'Renommer', renameTitle: 'Renommer le rapport', renameLabel: 'Nom du rapport', renamed: 'Nom modifié', renameInvalid: 'Saisissez un nom de 1 à 120 caractères.',
+    delete: 'Supprimer', deleteTitle: 'Supprimer ce rapport ?', deleteDesc: '« {title} » sera supprimé avec son plan d’action. C’est irréversible et le crédit utilisé n’est pas rendu.', deleteConfirm: 'Supprimer définitivement', deleted: 'Rapport supprimé', actionError: 'La modification n’a pas pu être enregistrée. Réessayez.'
   },
   errors: {
     network_error: 'Pas de connexion. Vérifiez votre réseau et réessayez.',
@@ -783,6 +785,7 @@ export default {
     json: 'JSON', jsonDesc: 'Pour les automatisations'
   },
   chat: {
+    backupAi: 'Réponse de l’IA de secours de Nokfi (les services habituels ne répondaient pas). Elle est plus simple : vérifiez les chiffres dans vos écrans.',
     open: 'Ouvrir l’assistant', title: 'Assistant Nokfi', subtitle: 'Posez vos questions sur vos finances ou sur Nokfi',
     aboutReport: 'À propos de :', clearContext: 'Oublier le rapport et recommencer', askReport: 'Demander à l’assistant',
     empty: 'Bonjour. Posez-moi vos questions sur les finances de votre activité ou sur vos rapports.',
@@ -1224,6 +1227,7 @@ export default {
       claim: 'Relancer', claimTitle: 'E-mail de relance · {name}', toneFriendly: 'Aimable', toneFirm: 'Ferme', toneFormal: 'Formel',
       writing: 'Rédaction…', subject: 'Objet', body: 'Message', openMail: 'Ouvrir dans la messagerie',
       reviewNote: 'Relisez le texte avant de l’envoyer. Il est rédigé par l’assistant IA gratuit.',
+      backupAi: 'Rédigé avec l’IA de secours de Nokfi (les services habituels ne répondaient pas). Relisez-le avec plus d’attention.',
       autoTitle: 'Relancer automatiquement les factures échues', autoHint: 'Nokfi envoie une relance à votre client 7 jours après l’échéance (aimable), à 30 (ferme) et à 60 (formelle), en votre nom et avec réponse directe à votre email. Sans échéance, on compte 30 jours après l’émission. Uniquement les factures avec l’email du client.',
       autoSent: 'Relance {n} sur 3 envoyée', autoNone: 'Aucune relance pour l’instant', addEmail: 'Ajouter l’email du client pour relancer', addEmailTitle: 'Email de {name}', addEmailNote: 'Les relances partent au nom de votre entreprise et les réponses arrivent sur votre email.',
       collectedToast: 'Facture marquée comme encaissée', emptyTitle: 'Personne ne vous doit rien', emptyDesc: 'Quand vous ajouterez au registre des factures émises non encaissées, vous verrez ici combien on vous doit, ce qui est échu, et vous pourrez relancer par e-mail.',

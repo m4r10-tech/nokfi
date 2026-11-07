@@ -109,7 +109,11 @@ function tableStats(rows, { maxGroups = 25 } = {}) {
       totals[c] = { saldo_final: r2(nums[nums.length - 1]), saldo_inicial: r2(nums[0]), min: r2(Math.min(...nums)), max: r2(Math.max(...nums)) };
       continue;
     }
-    totals[c] = { ...(AVG_ONLY.test(c) && !MONEY.test(c) ? {} : { suma: total }), media: r2(nums.reduce((a, b) => a + b, 0) / nums.length), min: r2(Math.min(...nums)), max: r2(Math.max(...nums)) };
+    // S15b D6: la media no cuenta las filas a 0 (en una hoja de caja, la fila de una salida
+    // lleva 0 en «Entradas»: 1.200 y 900 en 6 filas daban 350 € en vez de 1.050 €).
+    const nonZero = nums.filter(n => n !== 0);
+    const media = nonZero.length ? r2(nonZero.reduce((a, b) => a + b, 0) / nonZero.length) : 0;
+    totals[c] = { ...(AVG_ONLY.test(c) && !MONEY.test(c) ? {} : { suma: total }), media, min: r2(Math.min(...nums)), max: r2(Math.max(...nums)) };
   }
   const balance = numeric.find(c => BALANCE.test(c)) || null;
 

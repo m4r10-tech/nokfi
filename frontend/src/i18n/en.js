@@ -524,7 +524,7 @@ export default {
     convertToExcel: 'Convert to Excel', continueAnyway: 'Continue anyway',
     aiAnalysis: 'AI analysis', exportResult: 'Export result',
     reading: 'Reading file…',
-    analyzing: 'Analysing your data…', analyzingHint: 'It usually takes 10 to 30 seconds.',
+    analyzing: 'Analysing your data…', analyzingHint: 'It usually takes 20 seconds to a minute.',
     analysisReady: 'Analysis ready and saved to your history',
     tooBig: '"{name}" exceeds the 5 MB limit.',
     readError: 'Could not read "{name}" (corrupted, protected or unsupported format).',
@@ -559,7 +559,9 @@ export default {
     notFoundTitle: 'This analysis does not exist',
     notFoundDesc: 'The link may be wrong or the analysis may belong to another license.',
     loadDetailError: 'Could not load this analysis.',
-    viaApi: 'via API'
+    viaApi: 'via API',
+    rename: 'Rename', renameTitle: 'Rename report', renameLabel: 'Report name', renamed: 'Name changed', renameInvalid: 'Enter a name between 1 and 120 characters.',
+    delete: 'Delete', deleteTitle: 'Delete this report?', deleteDesc: '“{title}” and its action plan will be deleted. This cannot be undone and the credit used is not refunded.', deleteConfirm: 'Delete for good', deleted: 'Report deleted', actionError: 'The change could not be saved. Please try again.'
   },
   errors: {
     network_error: 'No connection. Check your network and try again.',
@@ -784,6 +786,7 @@ export default {
     json: 'JSON', jsonDesc: 'For automations'
   },
   chat: {
+    backupAi: 'Answer from Nokfi’s backup AI (the usual services were not responding). It is simpler: check the figures against your Nokfi screens.',
     open: 'Open the assistant', title: 'Nokfi assistant', subtitle: 'Ask about your finances or about Nokfi',
     aboutReport: 'About:', clearContext: 'Forget the report and start over', askReport: 'Ask the assistant',
     empty: 'Hi. Ask me anything about your business finances or your reports.',
@@ -1225,6 +1228,7 @@ export default {
       claim: 'Chase', claimTitle: 'Payment reminder · {name}', toneFriendly: 'Friendly', toneFirm: 'Firm', toneFormal: 'Formal',
       writing: 'Writing…', subject: 'Subject', body: 'Message', openMail: 'Open in email',
       reviewNote: 'Check the text before sending it. It is written by the free AI assistant.',
+      backupAi: 'Written with Nokfi’s backup AI (the usual services were not responding). Check it more carefully.',
       autoTitle: 'Chase overdue invoices automatically', autoHint: 'Nokfi sends your client a reminder 7 days after the due date (friendly), at 30 (firm) and at 60 (formal), on your behalf and with replies going straight to your email. With no due date, 30 days from issue are assumed. Only invoices with a client email.',
       autoSent: 'Reminder {n} of 3 sent', autoNone: 'No reminders yet', addEmail: 'Add the client email to chase it', addEmailTitle: 'Email for {name}', addEmailNote: 'Reminders are sent with your company name and replies go to your email.',
       collectedToast: 'Invoice marked as collected', emptyTitle: 'Nobody owes you anything', emptyDesc: 'Once you add unpaid issued invoices to the ledger, you will see here how much you are owed, what is overdue, and you can chase it by email.',

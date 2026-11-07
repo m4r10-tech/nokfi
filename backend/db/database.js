@@ -1398,6 +1398,23 @@ function getAnalysis(license_id, id) {
   };
 }
 
+/** S15b D8: renombrar un análisis propio → true si existía (scopeado por license_id). */
+function renameAnalysis(license_id, id, title) {
+  return getDB().prepare('UPDATE analyses SET title = ? WHERE id = ? AND license_id = ?')
+    .run(String(title).slice(0, 120), id, license_id).changes > 0;
+}
+
+/** S15b D8: borrar un análisis propio (sus tareas se van por ON DELETE CASCADE).
+ *  No devuelve cuota: el uso diario se cuenta en ai_usage, no aquí. */
+function deleteAnalysis(license_id, id) {
+  const db = getDB();
+  return db.transaction(() => {
+    // Por si la BD se abrió sin foreign_keys: las tareas se borran también a mano.
+    db.prepare('DELETE FROM action_items WHERE analysis_id = ? AND license_id = ?').run(id, license_id);
+    return db.prepare('DELETE FROM analyses WHERE id = ? AND license_id = ?').run(id, license_id).changes > 0;
+  })();
+}
+
 /** Último análisis de un tipo con sus metadatos (C1: última nota de salud). */
 function getLatestAnalysisOfKind(license_id, kind) {
   const row = getDB().prepare(`
@@ -1571,6 +1588,8 @@ module.exports = {
   createAnalysis,
   listAnalyses,
   getAnalysis,
+  renameAnalysis,
+  deleteAnalysis,
   getLatestAnalysisOfKind,
   getCompanyProfile,
   upsertCompanyProfile,
