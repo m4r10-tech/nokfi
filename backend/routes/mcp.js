@@ -22,7 +22,7 @@ const T = require('../services/taxTools');
 const S = require('../services/invoicing');
 const { runIdempotent, INVOICE_TTL_HOURS } = require('../middleware/idempotency');
 
-const SERVER_INFO = { name: 'nokfi', title: 'Nokfi', version: '1.2.0' };
+const SERVER_INFO = { name: 'nokfi', title: 'Nokfi', version: '1.3.0' };
 const PROTOCOL_VERSIONS = ['2025-11-25', '2025-06-18', '2025-03-26'];
 const LANGS = ['es', 'en', 'fr', 'it', 'de', 'pl'];
 

@@ -22,7 +22,7 @@
   último respaldo desde 2026-10; ver `docs/deploy.md` «IA local»). Cerebras
   salió el 2026-10-22. Topes de gasto opcionales en `utils/aiBudget.js`. Gemini
   ya no se usa por defecto (queda como proveedor opcional en el código).
-- **Integraciones**: API pública v1, servidor MCP 1.2.0, nodo n8n 0.3.0 (npm).
+- **Integraciones**: API pública v1, servidor MCP 1.3.0, nodo n8n 0.4.0 (en npm, 0.3.0 hasta publicar la 0.4.0).
 - **Web pública (sesión 12)**: landing, precios, 5 calculadoras, calendario
   fiscal, validador de NIF y 8 guías, en castellano (raíz) e inglés (`/en/…`),
   prerenderizadas en el build y con `sitemap.xml`. Ver §24.

@@ -10,7 +10,7 @@
 > contraseña**. IA con **Groq → Cloudflare Workers AI → IA local** (llama.cpp en
 > el propio VPS, último respaldo desde 2026-10; topes opcionales en `utils/aiBudget.js`). Emisión de facturas con
 > **VERI*FACTU** (envío a la AEAT apagado: `VERIFACTU_ENV=off`), API pública
-> **v1**, servidor **MCP 1.2.0** y nodo **n8n 0.3.0**. e2e: **545**.
+> **v1**, servidor **MCP 1.3.0** y nodo **n8n 0.4.0**. e2e: **545**.
 >
 > §1-§6 son el contrato de la web; §8-§14 (al final) recogen lo añadido de la
 > sesión 4 a la 12. El detalle de la API pública está en
@@ -488,11 +488,37 @@ está **apagado**: los registros se generan y quedan pendientes, no se envían.
 ## 11. API pública v1 (`/api/v1`)  *(auth: `Bearer nk_live_…` o `nk_test_…`)*
 
 Para n8n, Make, Zapier o código propio. Límite `API_RATE_PER_MINUTE` (30/min por
-defecto) y la cuota diaria de IA de la licencia. `Idempotency-Key` en todos los
-POST (obligatoria al emitir y rectificar). `?async=true` o `Prefer: respond-async`
-en `analyze` e `invoices/extract` → `202` + job (`GET /api/v1/jobs/:id`, 24 h).
-Con `nk_test_` todo funciona sin gastar cuota: datos de ejemplo y facturas `TEST-…`
-que no entran al libro ni van a la AEAT.
+defecto, por clave) y la cuota diaria de IA de la licencia. `?async=true` o
+`Prefer: respond-async` en `analyze` e `invoices/extract` → `202` + job
+(`GET /api/v1/jobs/:id`, 24 h), con `Location` y, si se pidió con `Prefer`,
+`Preference-Applied: respond-async`.
+
+**Modo prueba (`nk_test_`)**, separado del real como en Stripe: funciona sin gastar
+cuota (datos de ejemplo y facturas `TEST-…` que no entran al libro ni van a la AEAT)
+y **no ve nada real**: `GET /analyses` vacío y `GET /analyses/:id` → 404,
+`GET /customers` vacío y `customer_id` → `404 customer_not_found`, `/tax/quarter` y
+`/tax/model-130` con `source: "ledger"` calculan con el libro vacío, y los trabajos y
+webhooks solo son los de su modo. Una clave real tampoco ve los de prueba. En una
+factura de prueba, `status: paid|unpaid` → `409 test_invoice_not_in_ledger`
+(no tiene asiento en el libro).
+
+**Idempotency-Key** (hasta 255 caracteres): la admiten los POST de `analyze`,
+`invoices/extract`, `webhooks`, `invoices` y `invoices/:id/rectify` (en estas dos es
+**obligatoria**, si no `400 idempotency_key_required`), `invoices/:id/cancel`,
+`invoices/:id/status` y `customers`; `/tax/*` y `webhooks/:id/test` la ignoran.
+Misma clave y mismo cuerpo → la misma respuesta con `Idempotent-Replayed: true`, sin
+ejecutar ni cobrar otra vez; otro cuerpo → `422 idempotency_key_reused`; aún en curso
+→ `409 idempotency_in_progress`. Dura **24 h**, y **30 días** al emitir facturas
+(`POST /invoices`, `/rectify` y la herramienta MCP `issue_invoice`). Solo se guardan
+las respuestas correctas: tras un error (4xx o 5xx, p. ej. `422 issuer_incomplete`)
+el reintento con la misma clave se ejecuta de verdad. Las claves de prueba y las
+reales no comparten claves de idempotencia.
+
+**Errores comunes** (`{ error, message }`): `401 invalid_api_key` / `api_key_revoked`,
+`403 license_inactive`, `403 api_plan_required` (clave real en un plan sin API; antes
+de la S15 era 401), `429 rate_limited` y `429 license_daily_limit_reached`. Los 429
+llevan **`Retry-After`** en segundos (el límite por minuto, hasta que se libera un
+hueco; la cuota diaria, hasta las 00:00 UTC).
 
 | Grupo | Rutas |
 |---|---|
@@ -514,22 +540,35 @@ creciente (1 min → 12 h) y reenvío manual desde el panel. Eventos:
 `invoice.rejected` · `invoice.accepted` · `invoice.paid` · `invoice.unpaid` ·
 `verifactu.accepted` · `verifactu.rejected`.
 
+Cada endpoint tiene modo (`livemode`): el que se crea con una clave `nk_test_` solo
+recibe eventos de prueba y el que se crea con una real, solo eventos reales. Desde el
+panel (`POST /api/dev/webhooks`) se elige con `mode: live|test`; sin él, real en Pro y
+Max y de prueba en Mini (`mode: live` en Mini → `403 api_plan_required`). Solo `https`
+y direcciones públicas: se rechazan `localhost` (también `localhost.`), `*.local`,
+`*.internal` y las redes privadas, de loopback, link-local, IPv4 compatibles
+(`::/96`), multicast (`ff00::/8`) y 6to4 (`2002::/16`), al registrar y al conectar.
+
 (No confundir con `POST /api/webhooks/stripe`, el webhook **entrante** de Stripe de §4.)
 
-## 13. Servidor MCP (`/api/mcp`, versión 1.2.0)
+## 13. Servidor MCP (`/api/mcp`, versión 1.3.0)
 
 MCP por HTTP (`POST /api/mcp`, JSON-RPC) con la misma clave de API. Herramientas:
 `extract_invoices`, `analyze`, `validate_tax_id`, `calculate_vat`,
 `calculate_withholding`, `estimate_model_130`, `fiscal_calendar`, `get_usage`,
 `issue_invoice`, `list_invoices`, `get_invoice`, `cancel_invoice`,
-`set_invoice_status`, `list_analyses`, `get_analysis`.
+`set_invoice_status`, `list_analyses`, `get_analysis`. Misma separación de modos
+que la API REST. En un lote JSON-RPC (array) **cada mensaje cuenta** en el límite por
+minuto de la clave: si no caben todos → `429 rate_limited` con `Retry-After` y no se
+ejecuta ninguno.
 
-## 14. Nodo de n8n (`n8n-nodes-nokfi` 0.3.0)
+## 14. Nodo de n8n (`n8n-nodes-nokfi` 0.4.0)
 
-Paquete npm en el repositorio hermano `../n8n-nodes-nokfi`: nodo de acciones
-(análisis, facturas recibidas, emisión, herramientas fiscales) y Trigger por
-webhooks (crea y borra su endpoint con `/api/v1/webhooks`). Publicado en npm
-el 2026-10-02.
+La copia buena es la del repositorio, `integrations/n8n/`; el repositorio hermano
+`../n8n-nodes-nokfi` es desde donde se publica en npm y se copia de aquí. Nodo de
+acciones (análisis, facturas recibidas, emisión, clientes, trabajos, herramientas
+fiscales) y Trigger por webhooks (crea y borra su endpoint con `/api/v1/webhooks`;
+«Only Live Events» activado por defecto). 0.3.0 publicada en npm el 2026-10-02;
+0.4.0 pendiente de publicar (cambios en `integrations/n8n/CHANGELOG.md`).
 
 ---
 

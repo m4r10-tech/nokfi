@@ -58,6 +58,22 @@ module.exports = async function session15ApiTests({ post, put, get, call, check,
   const hookUrl = (p) => `http://127.0.0.1:${srv.address().port}/${p}`;
 
   try {
+    // ── N3: la especificación OpenAPI cuadra con las rutas reales ──
+    {
+      const spec = (await get('/api/v1/openapi.json')).data;
+      const src = require('fs').readFileSync(require('path').join(__dirname, '../routes/v1.js'), 'utf8');
+      const routes = [...src.matchAll(/router\.(get|post|patch|delete)\('([^']+)'/g)].map(m => [m[1], m[2].replace(/:id/g, '{id}')]);
+      const ops = Object.entries(spec.paths).flatMap(([p, item]) => Object.entries(item).map(([m, op]) => ({ p, m, op })));
+      check('S15 OpenAPI: todas las rutas de /api/v1 están en la especificación (POST /tax/nif incluido)', () =>
+        routes.length > 25 && routes.every(([m, p]) => spec.paths[p]?.[m]) && !!spec.paths['/tax/nif'].post);
+      check('S15 OpenAPI: errores comunes (401/403 api_plan_required/429 con Retry-After) en cada operación; /openapi.json sin seguridad', () =>
+        ops.filter(o => o.p !== '/openapi.json').every(o => o.op.responses[401] && /api_plan_required/.test(o.op.responses[403]?.description) && o.op.responses[429]?.headers?.['Retry-After'])
+        && Array.isArray(spec.paths['/openapi.json'].get.security) && spec.paths['/openapi.json'].get.security.length === 0 && !!spec.components.schemas.Error);
+      check('S15 OpenAPI: /usage declara mode, PATCH/DELETE de webhooks declaran 404 y POST /customers el 200 de prueba', () =>
+        !!spec.paths['/usage'].get.responses[200].content['application/json'].schema.properties.mode
+        && spec.paths['/webhooks/{id}'].patch.responses[404] && spec.paths['/webhooks/{id}'].delete.responses[404] && spec.paths['/customers'].post.responses[200]);
+    }
+
     const c = await post('/api/admin/licenses', { email: 'api15@nokfi.local', plan: 'pro', password: 'ApiQuince15!' }, 'admin');
     const tok = (await post('/api/auth/login', { email: 'api15@nokfi.local', license_key: c.data.key, password: 'ApiQuince15!' })).data.token;
     const lid = c.data.id;
