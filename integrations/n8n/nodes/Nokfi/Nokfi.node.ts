@@ -35,8 +35,10 @@ export class Nokfi implements INodeType {
 				type: 'options',
 				noDataExpression: true,
 				options: [
-					{ name: 'Invoice', value: 'invoice' },
 					{ name: 'Analysis', value: 'analysis' },
+					{ name: 'Customer', value: 'customer' },
+					{ name: 'Invoice', value: 'invoice' },
+					{ name: 'Job', value: 'job' },
 					{ name: 'Tax', value: 'tax' },
 					{ name: 'Usage', value: 'usage' },
 				],
@@ -186,7 +188,7 @@ export class Nokfi implements INodeType {
 						],
 						default: 'E1',
 					},
-					{ displayName: 'Idempotency Key', name: 'idempotencyKey', type: 'string', default: '', description: 'E.g. the order ID: the same key always returns the same invoice, even across executions.' },
+					{ displayName: 'Idempotency Key', name: 'idempotencyKey', type: 'string', default: '', description: 'E.g. the order ID: for 30 days, the same key returns the same invoice instead of issuing a new one, even across executions. After 30 days the key can be used again.' },
 					{
 						displayName: 'Invoice Language',
 						name: 'lang',
@@ -478,6 +480,7 @@ export class Nokfi implements INodeType {
 					{ name: 'Calculate Withholding', value: 'withholding', action: 'Calculate IRPF withholding', description: 'IRPF withholding for an invoice and the total to collect' },
 					{ name: 'Estimate Modelo 130', value: 'model130', action: 'Estimate modelo 130', description: 'Quarterly IRPF payment, from your figures or from your Nokfi ledger' },
 					{ name: 'Get Fiscal Calendar', value: 'calendar', action: 'Get upcoming tax deadlines', description: 'Upcoming Spanish tax deadlines with days left' },
+					{ name: 'Get Quarter Summary', value: 'quarter', action: 'Get the quarter tax summary', description: 'VAT (303) and IRPF (130) of a quarter from your Nokfi ledger' },
 					{ name: 'Validate Tax ID', value: 'taxId', action: 'Validate a spanish tax ID', description: 'NIF, NIE or CIF check digit, entity type and EU VAT number' },
 				],
 				default: 'taxId',
@@ -559,14 +562,14 @@ export class Nokfi implements INodeType {
 				displayName: 'Year',
 				name: 'year',
 				type: 'number',
-				displayOptions: { show: { resource: ['tax'], operation: ['model130'] } },
+				displayOptions: { show: { resource: ['tax'], operation: ['model130', 'quarter'] } },
 				default: 2026,
 			},
 			{
 				displayName: 'Quarter',
 				name: 'quarter',
 				type: 'options',
-				displayOptions: { show: { resource: ['tax'], operation: ['model130'] } },
+				displayOptions: { show: { resource: ['tax'], operation: ['model130', 'quarter'] } },
 				options: [
 					{ name: 'Q1', value: 1 },
 					{ name: 'Q2', value: 2 },
@@ -611,6 +614,74 @@ export class Nokfi implements INodeType {
 				description: 'Max number of results to return',
 			},
 
+			// ── Customer (address book) ──
+			{
+				displayName: 'Operation',
+				name: 'operation',
+				type: 'options',
+				noDataExpression: true,
+				displayOptions: { show: { resource: ['customer'] } },
+				options: [
+					{ name: 'Create', value: 'create', action: 'Create a customer', description: 'Add a customer to your Nokfi address book (with a test key it is only validated, not saved)' },
+					{ name: 'Get Many', value: 'getAll', action: 'Get many customers', description: 'List or search your address book (empty with a test key)' },
+				],
+				default: 'getAll',
+			},
+			{
+				displayName: 'Search',
+				name: 'customerSearch',
+				type: 'string',
+				displayOptions: { show: { resource: ['customer'], operation: ['getAll'] } },
+				default: '',
+				description: 'Name or tax ID',
+			},
+			{
+				displayName: 'Name',
+				name: 'customerName',
+				type: 'string',
+				required: true,
+				displayOptions: { show: { resource: ['customer'], operation: ['create'] } },
+				default: '',
+			},
+			{
+				displayName: 'Additional Fields',
+				name: 'customerFields',
+				type: 'collection',
+				placeholder: 'Add Field',
+				displayOptions: { show: { resource: ['customer'], operation: ['create'] } },
+				default: {},
+				options: [
+					{ displayName: 'Address', name: 'address', type: 'string', default: '' },
+					{ displayName: 'City', name: 'city', type: 'string', default: '' },
+					{ displayName: 'Country', name: 'country', type: 'string', default: 'ES', description: 'ISO 3166-1 alpha-2 code' },
+					{ displayName: 'Email', name: 'email', type: 'string', placeholder: 'name@email.com', default: '' },
+					{ displayName: 'Equivalence Surcharge', name: 'equivalence_surcharge', type: 'boolean', default: false, description: 'Whether the customer is in the recargo de equivalencia regime' },
+					{ displayName: 'Postal Code', name: 'postal_code', type: 'string', default: '' },
+					{ displayName: 'Province', name: 'province', type: 'string', default: '' },
+					{ displayName: 'Tax ID', name: 'tax_id', type: 'string', default: '', placeholder: 'B12345674' },
+				],
+			},
+
+			// ── Job (Run in Background) ──
+			{
+				displayName: 'Operation',
+				name: 'operation',
+				type: 'options',
+				noDataExpression: true,
+				displayOptions: { show: { resource: ['job'] } },
+				options: [{ name: 'Get', value: 'get', action: 'Get a job', description: 'Status and, when finished, the result of a background job (kept 24 h)' }],
+				default: 'get',
+			},
+			{
+				displayName: 'Job ID',
+				name: 'jobId',
+				type: 'string',
+				required: true,
+				displayOptions: { show: { resource: ['job'], operation: ['get'] } },
+				default: '',
+				placeholder: 'job_3f9c…',
+			},
+
 			// ── Usage ──
 			{
 				displayName: 'Operation',
@@ -629,7 +700,7 @@ export class Nokfi implements INodeType {
 				type: 'boolean',
 				displayOptions: { show: { resource: ['analysis', 'invoice'], operation: ['create', 'extract'] } },
 				default: false,
-				description: 'Whether to return a job right away instead of waiting. Get the result with the Nokfi Trigger (Job Completed event) or GET /api/v1/jobs/{ID}.',
+				description: 'Whether to return a job right away instead of waiting. Get the result with the Nokfi Trigger (Job Completed event) or the Job › Get operation.',
 			},
 			{
 				displayName: 'Report Language',
@@ -695,6 +766,19 @@ export class Nokfi implements INodeType {
 				if (resource === 'usage') {
 					out.push({ json: await api('GET', '/usage', undefined, i), pairedItem: { item: i } });
 					if (i === 0) break; // la cuota no depende del ítem
+				} else if (resource === 'customer' && operation === 'getAll') {
+					const q = (this.getNodeParameter('customerSearch', i, '') as string).trim();
+					const res = await api('GET', `/customers${q ? `?q=${encodeURIComponent(q)}` : ''}`, undefined, i);
+					for (const c of (res.customers as IDataObject[]) || []) out.push({ json: c, pairedItem: { item: i } });
+				} else if (resource === 'customer' && operation === 'create') {
+					const body: IDataObject = { ...(this.getNodeParameter('customerFields', i, {}) as IDataObject), name: this.getNodeParameter('customerName', i) };
+					out.push({ json: await api('POST', '/customers', body, i), pairedItem: { item: i } });
+				} else if (resource === 'job') {
+					const id = (this.getNodeParameter('jobId', i) as string).trim();
+					out.push({ json: await api('GET', `/jobs/${encodeURIComponent(id)}`, undefined, i), pairedItem: { item: i } });
+				} else if (resource === 'tax' && operation === 'quarter') {
+					const qs = `year=${this.getNodeParameter('year', i)}&quarter=${this.getNodeParameter('quarter', i)}`;
+					out.push({ json: await api('GET', `/tax/quarter?${qs}`, undefined, i), pairedItem: { item: i } });
 				} else if (resource === 'tax') {
 					let res: IDataObject;
 					if (operation === 'taxId') {

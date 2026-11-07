@@ -1,5 +1,15 @@
 # Changelog
 
+## 0.4.0
+
+- New **Customer** resource: Get Many (list or search your address book) and Create.
+- New **Job** resource: Get the status and result of a background job (*Run in Background*).
+- New **Tax › Get Quarter Summary**: VAT (303) and IRPF (130) of a quarter from your Nokfi ledger.
+- Invoice › Issue: the **Idempotency Key** lasts **30 days** (the description used to say "always"; before, the API kept it 24 h).
+- Nokfi Trigger: **Only Live Events** is now **on by default** (workflows that relied on the old default receive no test events; turn it off while building with a test key). A webhook created with a test key only receives test events.
+- Nokfi Trigger: the saved webhook is only forgotten when Nokfi answers 404 (a 429 or a network error no longer creates a second, orphaned webhook), and a webhook disabled after too many failed deliveries, or with different events, is reactivated and updated on activation. Deleting an already deleted webhook no longer fails.
+- API behaviour this release relies on: test keys no longer see live data, 429 responses carry `Retry-After`, and errors are not stored by `Idempotency-Key`.
+
 ## 0.3.0
 
 - **Issue invoices** from n8n (Invoice › Issue): Nokfi numbers them without gaps, computes VAT per rate, IRPF withholding and the equivalence surcharge, adds them to your books and creates the VERI*FACTU record. Customer from your address book, typed in, or none (simplified invoice).

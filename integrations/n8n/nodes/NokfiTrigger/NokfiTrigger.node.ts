@@ -68,8 +68,8 @@ export class NokfiTrigger implements INodeType {
 				displayName: 'Only Live Events',
 				name: 'onlyLive',
 				type: 'boolean',
-				default: false,
-				description: 'Whether to ignore test events (sent when you use an nk_test_ key)',
+				default: true,
+				description: 'Whether to ignore test events (livemode false). A webhook created with a test key (nk_test_) only receives test events, so turn this off while you build with a test key.',
 			},
 		],
 	};
@@ -79,14 +79,28 @@ export class NokfiTrigger implements INodeType {
 			async checkExists(this: IHookFunctions): Promise<boolean> {
 				const data = this.getWorkflowStaticData('node');
 				if (!data.webhookId) return false;
+				let endpoint: IDataObject;
 				try {
-					await nokfiApi.call(this, 'GET', `/webhooks/${data.webhookId}`);
-					return true;
-				} catch {
+					endpoint = await nokfiApi.call(this, 'GET', `/webhooks/${data.webhookId}`);
+				} catch (error) {
+					// Only a 404 means it is gone. Any other error (429, network…) keeps the saved
+					// webhook: creating a new one would leave the old one orphaned in Nokfi.
+					if (httpStatus(error) !== 404) {
+						this.logger.warn(`Nokfi: could not check webhook ${data.webhookId}, keeping it: ${(error as Error).message}`);
+						return true;
+					}
 					delete data.webhookId;
 					delete data.secret;
 					return false;
 				}
+				// Disabled after too many failed deliveries, or the events changed: reactivate and update it.
+				const events = this.getNodeParameter('events') as string[];
+				const current = (endpoint.events as string[]) || [];
+				const sameEvents = current.length === events.length && events.every((e) => current.includes(e));
+				if (endpoint.enabled === false || !sameEvents || endpoint.url !== this.getNodeWebhookUrl('default')) {
+					await nokfiApi.call(this, 'PATCH', `/webhooks/${data.webhookId}`, { enabled: true, events, url: this.getNodeWebhookUrl('default') });
+				}
+				return true;
 			},
 			async create(this: IHookFunctions): Promise<boolean> {
 				const url = this.getNodeWebhookUrl('default');
@@ -107,6 +121,12 @@ export class NokfiTrigger implements INodeType {
 					try {
 						await nokfiApi.call(this, 'DELETE', `/webhooks/${data.webhookId}`);
 					} catch (error) {
+						// Already gone (404): nothing left to delete.
+						if (httpStatus(error) === 404) {
+							delete data.webhookId;
+							delete data.secret;
+							return true;
+						}
 						this.logger.warn(`Nokfi: could not delete webhook ${data.webhookId}: ${(error as Error).message}`);
 						return false;
 					}
@@ -136,6 +156,12 @@ export class NokfiTrigger implements INodeType {
 		if (!events.includes(String(event.type)) || (onlyLive && event.livemode === false)) return {};
 		return { workflowData: [this.helpers.returnJsonArray(event)] };
 	}
+}
+
+/** HTTP status of a failed request (NodeApiError or the raw request error), or 0 if unknown. */
+function httpStatus(error: unknown): number {
+	const e = error as { httpCode?: string; cause?: { httpCode?: string; statusCode?: number; response?: { status?: number } }; statusCode?: number; response?: { status?: number } };
+	return Number(e?.httpCode || e?.statusCode || e?.response?.status || e?.cause?.httpCode || e?.cause?.statusCode || e?.cause?.response?.status || 0);
 }
 
 async function nokfiApi(this: IHookFunctions, method: IHttpRequestMethods, path: string, body?: IDataObject): Promise<IDataObject> {

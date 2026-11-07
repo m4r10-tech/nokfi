@@ -1,6 +1,6 @@
 {
 	"name": "n8n-nodes-nokfi",
-	"version": "0.3.0",
+	"version": "0.4.0",
 	"description": "n8n nodes for Nokfi: issue invoices (PDF, e-invoice, VERI*FACTU), extract and validate invoices, run financial analyses, Spanish tax tools (NIF, VAT, IRPF, Modelo 130, tax calendar) and a trigger for Nokfi events.",
 	"license": "MIT",
 	"homepage": "https://nokfi.app/api-docs",
