@@ -226,6 +226,17 @@ module.exports = async function session15bTests({ post, get, call, check, getDB 
     check('S15b U4: si no se puede parar la suscripción → 500 (Stripe reintenta) y la cuenta ya está bloqueada', () =>
       pf2.status === 500 && getLicenseById(B2.l.id).blocked_reason === 'payment_failed');
 
+    // Stripe responde 429 (lock_timeout) mientras aún procesa la factura: se reintenta (visto en Stripe test real).
+    reset();
+    const B3 = mkLicense('mini');
+    let tries = 0;
+    routes[`DELETE subscriptions/${B3.l.stripe_subscription_id}`] = () => (++tries === 1
+      ? { status: 429, body: { error: { code: 'lock_timeout', message: 'locked' } } }
+      : { status: 200, body: { id: B3.l.stripe_subscription_id, status: 'canceled' } });
+    const pf3 = await webhook(evt('evt_s15b_pf3', 'invoice.payment_failed', { ...failInv, id: 'in_s15b_fail3', parent: { subscription_details: { subscription: B3.l.stripe_subscription_id } } }));
+    check('S15b U4: un 429 de Stripe al parar la suscripción se reintenta y el evento queda procesado', () =>
+      pf3.status === 200 && tries === 2 && getLicenseById(B3.l.id).blocked_reason === 'payment_failed');
+
     // ═══ P5 — eventos pendientes → no-2xx ═══
     reset();
     const pend = await webhook(evt('evt_s15b_pend_paid', 'invoice.paid', { id: 'in_orphan', object: 'invoice', customer: 'cus_x', billing_reason: 'subscription_cycle', amount_paid: 2000, currency: 'eur',

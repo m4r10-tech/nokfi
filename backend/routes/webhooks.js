@@ -510,7 +510,7 @@ async function handleStripeInvoicePaymentFailed(event, ip) {
   if (process.env.STRIPE_SECRET_KEY) {
     const del = await stripeApi('DELETE', `subscriptions/${encodeURIComponent(subId)}`, { invoice_now: 'false', prorate: 'false' });
     if (!del.ok && !isGone(del) && !/canceled/i.test(del.data?.error?.message || '')) {
-      throw new Error(`no se pudo parar la suscripción ${subId}: ${del.status}`);
+      throw new Error(`no se pudo parar la suscripción ${subId}: ${del.status} ${del.data?.error?.code || ""}`);
     }
     if (invoice.id && invoice.status !== 'void') {
       const v = await stripeApi('POST', `invoices/${encodeURIComponent(invoice.id)}/void`);
