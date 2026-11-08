@@ -10,7 +10,7 @@ import ErrorState from '../../components/ErrorState';
 import Skeleton from '../../components/Skeleton';
 import CodeBlock from '../../components/dev/CodeBlock';
 import ConfirmModal from '../../components/dev/ConfirmModal';
-import { Section, Badge, ErrorBox, Notice, Field } from '../../components/ui';
+import { Section, Badge, ErrorBox, Notice, Field, Segmented } from '../../components/ui';
 
 const VERIFY = `// Node.js (Express): comprobar la firma de Nokfi
 import crypto from 'node:crypto';
@@ -42,6 +42,7 @@ export default function DevWebhooks() {
   const [description, setDescription] = useState('');
   const [all, setAll] = useState(true);
   const [events, setEvents] = useState([]);
+  const [mode, setMode] = useState('live'); // S15b T4: real o de prueba (solo Pro/Max eligen)
   const [saving, setSaving] = useState(false);
   const [error, setError] = useState(null);
   const [created, setCreated] = useState(null);
@@ -60,10 +61,10 @@ export default function DevWebhooks() {
     e.preventDefault();
     if (!all && !events.length) { setError(t('dev.whPickEvents')); return; }
     setSaving(true); setError(null);
-    const res = await devApi.createWebhook({ url: url.trim(), description: description.trim(), events: all ? '*' : events });
+    const res = await devApi.createWebhook({ url: url.trim(), description: description.trim(), events: all ? '*' : events, mode: data.live_events ? mode : 'test' });
     setSaving(false);
     if (!res.ok) { setError(apiErrorMessage(t, res)); return; }
-    setCreated(res.data); setUrl(''); setDescription(''); setAll(true); setEvents([]);
+    setCreated(res.data); setUrl(''); setDescription(''); setAll(true); setEvents([]); setMode('live');
     load();
   };
 
@@ -92,6 +93,16 @@ export default function DevWebhooks() {
               <Field label={t('dev.whDescription')} htmlFor="wh-desc">
                 <input id="wh-desc" value={description} onChange={(e) => setDescription(e.target.value)} maxLength={120} className="input" />
               </Field>
+              {data.live_events && (
+                <div className="flex flex-col gap-1.5">
+                  <span className="field-label">{t('dev.modeLabel')}</span>
+                  <div className="self-start">
+                    <Segmented label={t('dev.modeLabel')} value={mode} onChange={setMode}
+                      options={[{ value: 'live', label: t('dev.modeLive') }, { value: 'test', label: t('dev.modeTest') }]} />
+                  </div>
+                  <p className="text-xs" style={{ color: 'var(--text-muted)' }}>{mode === 'live' ? t('dev.whModeLiveHint') : t('dev.whModeTestHint')}</p>
+                </div>
+              )}
               <fieldset className="flex flex-col gap-2">
                 <legend className="field-label">{t('dev.whEvents')}</legend>
                 <label className="flex items-center gap-2 text-sm" style={{ color: 'var(--text-primary)' }}>
@@ -190,6 +201,9 @@ function Endpoint({ w, first, open, onToggle, onChange, t, lang, toast }) {
             {w.events[0] === '*' ? t('dev.whAllEvents') : w.events.map(ev => t(`dev.ev_${ev.replace('.', '_')}`)).join(', ')}
           </p>
         </div>
+        <span title={w.livemode ? t('dev.whModeLiveHint') : t('dev.whModeTestHint')}>
+          <Badge tone={w.livemode ? 'muted' : 'accent'}>{w.livemode ? t('dev.modeLive') : t('dev.testBadge')}</Badge>
+        </span>
         {w.enabled
           ? <Badge tone="positive">{t('dev.whEnabled')}</Badge>
           : <Badge tone="warning">{w.disabled_reason === 'too_many_failures' ? t('dev.whAutoDisabled') : t('dev.whDisabled')}</Badge>}

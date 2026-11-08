@@ -69,6 +69,7 @@ export default {
     whUrlHint: 'Deve essere pubblico e in https. In n8n usa la «Production URL» del nodo Webhook o il Trigger di Nokfi.',
     whDescription: 'Descrizione (facoltativa)',
     whEvents: 'Eventi',
+    whModeLiveHint: 'Riceve gli eventi dei tuoi dati reali e delle chiavi reali (nk_live_).', whModeTestHint: 'Riceve solo gli eventi di prova: quelli delle chiavi nk_test_ e di «Invia prova».',
     whAllEvents: 'Tutti gli eventi',
     whPickEvents: 'Scegli almeno un evento.',
     whCreate: 'Crea webhook',

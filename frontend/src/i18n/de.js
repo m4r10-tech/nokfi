@@ -69,6 +69,7 @@ export default {
     whUrlHint: 'Muss öffentlich sein und https verwenden. In n8n nimm die „Production URL“ des Webhook-Knotens oder den Nokfi-Trigger.',
     whDescription: 'Beschreibung (optional)',
     whEvents: 'Ereignisse',
+    whModeLiveHint: 'Empfängt die Ereignisse deiner echten Daten und der Live-Schlüssel (nk_live_).', whModeTestHint: 'Empfängt nur Testereignisse: die der nk_test_-Schlüssel und von „Test senden“.',
     whAllEvents: 'Alle Ereignisse',
     whPickEvents: 'Wähle mindestens ein Ereignis.',
     whCreate: 'Webhook erstellen',
