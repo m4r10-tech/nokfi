@@ -13,7 +13,7 @@
 > no renovarlo. Recuperado en **FreakHosting BVPS-5** (Frankfurt, Ubuntu 24.04,
 > 5 vCPU, 8 GB RAM, 200 GB, 8,99 €/mes, renovación automática por PayPal):
 > **`<IP_DEL_VPS>`**. BD restaurada desde R2 (copia del 16-10 03:30, íntegra,
-> sin pérdida de datos). Node 24 + PM2 7 + Nginx 1.24, ufw (SSH/80/443),
+> sin pérdida de datos). Node 24 + PM2 7 + Nginx 1.24, ufw (SSH; 80/443 solo desde Cloudflare desde la S15b),
 > fail2ban, 2 GB de swap, SSH solo por clave (`nokfi-deploy`, root y deploy).
 > Sitio en `/etc/nginx/sites-available/nokfi` y real-IP en
 > `/etc/nginx/conf.d/cloudflare-realip.conf`. Certificado LE nuevo (emitido con
@@ -204,6 +204,48 @@ records MX/TXT SPF/DKIM/DMARC en Namecheap). SendGrid retirado (rama + switch
   **navegador del usuario** (el backend nunca procesa Excel) → riesgo aceptado.
   Detalle en `frontend/README.md`.
 
+### Endurecimiento del servidor (S15b, 2026-11-08)
+
+Copias de cada archivo tocado en `/home/deploy/backups/s15b-2026-11-08/` (700/600).
+
+- **Cortafuegos (`ufw`)**: entrada por defecto DROP; `22/tcp` abierto (y `OpenSSH`);
+  **80/443 solo desde los rangos de Cloudflare** (15 v4 + 7 v6, reglas con comentario
+  `cloudflare`). Acceso directo a `https://<IP_DEL_VPS>/` → se agota el tiempo. Los rangos
+  salen de `https://www.cloudflare.com/ips-v4` e `/ips-v6` (los mismos que el real-IP de
+  Nginx): si Cloudflare los cambia, añadir los nuevos con
+  `ufw allow proto tcp from <rango> to any port 80,443 comment cloudflare` (y en
+  `cloudflare-realip.conf`) y borrar los viejos.
+- **Nginx** (`deploy/nginx-nokfi.conf` = `/etc/nginx/sites-available/nokfi`, copia exacta):
+  - `server` `default_server` en 80 y 443 (`ssl_reject_handshake on`, `return 444`):
+    un Host desconocido o una conexión sin SNI se cierra.
+  - HSTS (`max-age=31536000; includeSubDomains`) en la web.
+  - En `location /api/`: `proxy_hide_header` de HSTS, X-Frame-Options,
+    X-Content-Type-Options y Referrer-Policy de helmet, y Nginx pone una sola de cada
+    (`Referrer-Policy: no-referrer` en la API) + Permissions-Policy, **sin la CSP de la
+    web**. Las `Access-Control-*` de Express no se tocan (CORS abierto en
+    `/api/v1/openapi.json` y `/api/mcp`). Sin `proxy_ignore_client_abort` (la cancelación
+    de la IA necesita que el corte del navegador llegue al backend).
+  - Log de acceso con formato `nokfi_safe`: el token de `/compartido/<token>` y
+    `/api/shared/<token>` sale como `***` en la petición y en el Referer.
+  - `/screens/` y `/fonts/` con caché de 30 días (`Cache-Control: max-age=2592000`);
+    `/assets/` sigue en 1 año.
+  - `/etc/nginx/nginx.conf`: `ssl_protocols TLSv1.2 TLSv1.3` y `server_tokens off` a nivel
+    `http` (vale también para vhosts nuevos).
+- **Permisos**: `backend/` y `backend/db/` 750; `backend/db/backups/` 700 con archivos 600
+  (`umask 077` en el cron y en `backup-db.sh`). Nginx (www-data) solo lee
+  `frontend/dist`. `~/.pm2` y `~/.pm2/logs` 700, logs 600.
+- **Logs de PM2**: módulo `pm2-logrotate` (usuario deploy): rota a diario o al pasar de
+  10 MB, guarda 14 y comprime (`pm2 conf pm2-logrotate`).
+- **SSH**: `/etc/ssh/sshd_config.d/99-nokfi.conf` añade `X11Forwarding no`; `sshd -T`
+  confirma `passwordauthentication no`, `kbdinteractiveauthentication no` y
+  `permitrootlogin without-password` (solo clave).
+- **fail2ban** (`/etc/fail2ban/jail.d/nokfi.local`): `bantime 1h`, `findtime 10m`,
+  `maxretry 4` y jail `recidive` (reincidentes: 1 semana).
+- **Actualizaciones**: `unattended-upgrades` activo (orígenes `noble-security`).
+- **Pendiente**: el backend escucha en `*:3001` (todas las interfaces) porque
+  `server.js` llama a `app.listen(PORT)` sin host; hoy lo tapa `ufw` (3001 no está
+  abierto). Para dejarlo en `127.0.0.1` hace falta un cambio de código.
+
 ### Endurecimientos de seguridad (2026-09-14)
 
 Aplicados y verificados (**107/107 e2e PASS**), detalle en `proyecto.md` §7 y §21:
@@ -232,7 +274,7 @@ Todo lo crítico está resuelto. Restos **no bloqueantes / opcionales**:
 | I | `create-checkout` validaba plan tarde (coerción a mini) | — | ✅ **RESUELTO** (`400 invalid_plan` antes de tocar Stripe). |
 | K | 1er `invoice.paid` del trial huérfano (`processed:false`) | — | ✅ **RESUELTO** (no-op reconocido `INVOICE_PAID_TRIAL_OPEN_NOOP`). |
 | ⟶ | Forwarding `info@/help@/soporte@nokfi.app` | — | ⏳ Cosmético, Namecheap forwarding gratis; el backend no lo usa. |
-| ⟶ | ufw lock a IPs de CF | — | ⏳ Diferido (riesgo: CF cambia rangos; el rewrite anti-spoof ya cubre lo crítico). |
+| ⟶ | ufw lock a IPs de CF | — | ✅ **RESUELTO (S15b, 2026-11-08)**: 80/443 solo desde Cloudflare (ver §6). |
 
 ## 8. Cómo operar
 
@@ -270,7 +312,7 @@ vía `sqlite3 .backup` (seguro con WAL), verificación `PRAGMA integrity_check`
 Para activarlo en el VPS, añadir al cron de `deploy` (`crontab -e`):
 
 ```cron
-30 3 * * * /home/deploy/nokfi/backend/scripts/backup-db.sh >> /home/deploy/nokfi/backend/db/backups/backup.log 2>&1
+30 3 * * * umask 077; /home/deploy/nokfi/backend/scripts/backup-db.sh >> /home/deploy/nokfi/backend/db/backups/backup.log 2>&1
 ```
 
 Notas:
