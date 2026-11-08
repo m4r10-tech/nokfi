@@ -101,11 +101,11 @@ Rule).
   2026-11-08; las 3 Cache Rules y la Redirect Rule que se crearon en agosto ya no están).
   Funciona con la caché por defecto de CF: `/assets/*`, `/screens/*` y `/fonts/*` salen
   `HIT` con el TTL del origen (1 año y 30 días); `/`, `/login`, `/app/*` y `/api/*` salen
-  `DYNAMIC` (CF no cachea HTML ni `/api`). **Única diferencia:** `sw.js` lo cachea CF
-  (`REVALIDATED`) y el «Browser Cache TTL» de la zona le pone `max-age=14400` aunque
-  Nginx mande `expires -1`; el navegador revalida igualmente el script del service
-  worker al buscar actualizaciones. Si se quiere dejar como antes: Cache Rule «Bypass
-  cache» para `/sw.js`, `/registerSW.js` y `/manifest.webmanifest`.
+  `DYNAMIC` (CF no cachea HTML ni `/api`). **Browser Cache TTL = «Respect Existing
+  Headers»** (Caching › Configuration, desde el 2026-11-08): CF no pisa las cabeceras de
+  Nginx, así que `sw.js` y `manifest.webmanifest` llegan con `no-cache` (CF revalida
+  con el origen, `REVALIDATED`). Antes estaba en «4 hours» y le ponía `max-age=14400` a
+  `sw.js`. Si se cambia la caché de algo, se cambia en Nginx, no en CF.
 - **www → nokfi.app 301 lo hace Nginx** (`if ($host = www.nokfi.app)` en el server de
   443, ver `deploy/nginx-nokfi.conf`), no Cloudflare. El reto HTTP-01 de www entra por
   el puerto 80 y la renovación funciona (`certbot renew --dry-run` OK el 2026-11-08).
