@@ -18,11 +18,14 @@
 #   pm2 start nokfi-backend
 #
 # Cron recomendado en el VPS (crontab -e del usuario deploy), diario 03:30:
-#   30 3 * * * /home/deploy/nokfi/backend/scripts/backup-db.sh >> /home/deploy/nokfi/backend/db/backups/backup.log 2>&1
+#   30 3 * * * umask 077; /home/deploy/nokfi/backend/scripts/backup-db.sh >> /home/deploy/nokfi/backend/db/backups/backup.log 2>&1
+# (el `umask 077` del cron hace que también backup.log nazca 600)
 #
 # Retención: se borran copias de más de RETENTION_DAYS días (default 14).
 # ==========================================================================
 set -euo pipefail
+# Copias legibles solo por deploy (600; db/backups va en 700).
+umask 077
 # cron arranca con un PATH mínimo: asegurar node.
 export PATH="/usr/local/bin:/usr/bin:/bin:$PATH"
 
