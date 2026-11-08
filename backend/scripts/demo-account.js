@@ -19,7 +19,8 @@ const PORT = Number(process.env.DEMO_PORT) || 4105, WEB = Number(process.env.DEM
 const DB = path.join(os.tmpdir(), `nokfi-screens-${Date.now()}.db`);
 Object.assign(process.env, {
   NODE_ENV: 'test', PORT: String(PORT), DB_PATH: DB, BASE_URL: `http://localhost:${PORT}`,
-  ADMIN_SECRET: 'f'.repeat(64), ALLOWED_ORIGINS: `http://localhost:4106`, PLAN_PRICE_MINI_EUR: '5', PLAN_PRICE_PRO_EUR: '20', PLAN_PRICE_MAX_EUR: '50'
+  // S15b T4: el origen permitido sigue a DEMO_WEB_PORT (antes fijo en 4106: con otro puerto, CORS rechazaba los POST).
+  ADMIN_SECRET: 'f'.repeat(64), ALLOWED_ORIGINS: `http://localhost:${WEB}`, PLAN_PRICE_MINI_EUR: '5', PLAN_PRICE_PRO_EUR: '20', PLAN_PRICE_MAX_EUR: '50'
 });
 
 const DIST = path.join(__dirname, '../../frontend/dist');

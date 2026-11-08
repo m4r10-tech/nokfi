@@ -81,7 +81,10 @@ export default defineConfig({
         // Capturas reales de la app (las mismas de la landing, cuenta de ejemplo).
         screenshots: [
           { src: '/screens/inicio-dark.jpg', sizes: '1920x1200', type: 'image/jpeg', form_factor: 'wide', label: 'Inicio: próximo plazo fiscal, lo que apartar para Hacienda y cobros vencidos' },
-          { src: '/screens/cobros-dark.jpg', sizes: '1920x1200', type: 'image/jpeg', form_factor: 'wide', label: 'Cobros: quién te debe y cuánto' }
+          { src: '/screens/cobros-dark.jpg', sizes: '1920x1200', type: 'image/jpeg', form_factor: 'wide', label: 'Cobros: quién te debe y cuánto' },
+          // S15b T4: móvil («narrow»), con la cuenta de ejemplo (backend/scripts/landing-screens.js, SHOTS_ONLY=narrow).
+          { src: '/screens/inicio-dark-narrow.webp', sizes: '780x1688', type: 'image/webp', form_factor: 'narrow', label: 'Inicio: próximo plazo fiscal, lo que apartar para Hacienda y cobros vencidos' },
+          { src: '/screens/cobros-dark-narrow.webp', sizes: '780x1688', type: 'image/webp', form_factor: 'narrow', label: 'Cobros: quién te debe y cuánto' }
         ]
       },
       workbox: {
