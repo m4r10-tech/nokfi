@@ -72,7 +72,8 @@ module.exports = async function session15bSeguridadTests({ post, get, call, chec
   {
     const before = getDB().prepare('SELECT COUNT(*) c FROM client_errors').get().c;
     const r1 = await raw('GET', '/api/payments/plans', { Origin: 'https://evil.example' });
-    const r2 = await raw('OPTIONS', '/api/v1/openapi.json', { Origin: 'https://evil.example', 'Access-Control-Request-Method': 'GET' });
+    // (T4: /api/v1/openapi.json y /api/mcp ya admiten cualquier origen; se prueba otra ruta de /api/v1)
+    const r2 = await raw('OPTIONS', '/api/v1/usage', { Origin: 'https://evil.example', 'Access-Control-Request-Method': 'GET' });
     const after = getDB().prepare('SELECT COUNT(*) c FROM client_errors').get().c;
     check('S6 Origin ajeno → 403 origin_not_allowed (GET y preflight), sin ACAO',
       r1.status === 403 && r1.data?.error === 'origin_not_allowed' && r2.status === 403 && !r1.headers['access-control-allow-origin']);

@@ -47,8 +47,8 @@ async function waitPending(id, auth, signal) {
   }
 }
 
-async function request(path, { method = 'GET', body, auth = false, isFormData = false, noDefer = false, signal } = {}) {
-  const headers = {};
+async function request(path, { method = 'GET', body, auth = false, isFormData = false, noDefer = false, signal, headers: extraHeaders } = {}) {
+  const headers = { ...(extraHeaders || {}) };
   if (!isFormData) headers['Content-Type'] = 'application/json';
   if (auth && sessionToken) headers['Authorization'] = `Bearer ${sessionToken}`;
 
@@ -197,6 +197,14 @@ async function download(path, fallbackName) {
 }
 
 /* ── Sesión 11: emisión de facturas ── */
+/** Clave aleatoria para Idempotency-Key (crypto.randomUUID solo existe en contextos seguros). */
+export function newIdempotencyKey() {
+  if (globalThis.crypto?.randomUUID) return globalThis.crypto.randomUUID();
+  const b = new Uint8Array(16);
+  globalThis.crypto.getRandomValues(b);
+  return Array.from(b, x => x.toString(16).padStart(2, '0')).join('');
+}
+
 export const invoicingApi = {
   settings: () => request('/invoicing/settings', { auth: true }),
   saveSettings: (data) => request('/invoicing/settings', { method: 'PUT', auth: true, body: data }),
@@ -206,7 +214,8 @@ export const invoicingApi = {
   removeCustomer: (id) => request(`/invoicing/customers/${encodeURIComponent(id)}`, { method: 'DELETE', auth: true }),
   list: (filters) => request(`/invoicing/invoices${qs(filters)}`, { auth: true }),
   get: (id) => request(`/invoicing/invoices/${encodeURIComponent(id)}`, { auth: true }),
-  issue: (data) => request('/invoicing/invoices', { method: 'POST', auth: true, body: data }),
+  // S15b T4 (A6): Idempotency-Key por intento de emisión (ver newIdempotencyKey).
+  issue: (data, idempotencyKey) => request('/invoicing/invoices', { method: 'POST', auth: true, body: data, headers: idempotencyKey ? { 'Idempotency-Key': idempotencyKey } : undefined }),
   cancel: (id, reason) => request(`/invoicing/invoices/${encodeURIComponent(id)}/cancel`, { method: 'POST', auth: true, body: { reason } }),
   send: (id, data) => request(`/invoicing/invoices/${encodeURIComponent(id)}/send`, { method: 'POST', auth: true, body: data }),
   pdf: (id, number) => download(`/invoicing/invoices/${encodeURIComponent(id)}/pdf`, `factura_${number || id}.pdf`),

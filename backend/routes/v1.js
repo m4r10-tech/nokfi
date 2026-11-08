@@ -17,7 +17,10 @@
  * Sesión 9 (Bloque 2):
  *   ?async=true | Prefer: respond-async   en analyze e invoices/extract → 202 + job
  *   GET  /api/v1/jobs, /api/v1/jobs/:id   estado y resultado (24 h)
- *   Idempotency-Key                        en todos los POST
+ *   Idempotency-Key                        opcional en los POST que crean o cambian algo (analyze,
+ *                                          invoices/extract, webhooks, customers, invoices/:id/cancel
+ *                                          y /status); OBLIGATORIA en emitir y rectificar (30 días).
+ *                                          /tax/* y webhooks/:id/test la ignoran (no cambian nada).
  *   /api/v1/webhooks[/:id][/test]          endpoints de webhook (los usa el Trigger de n8n)
  *   /api/v1/tax/*                          herramientas sin IA (no gastan cuota)
  *
@@ -134,21 +137,32 @@ router.get('/analyses/:id', requireApiKey, (req, res) => {
 });
 
 /* S15b D8: renombrar y borrar. Los análisis de prueba no se guardan, así que una
-   clave nk_test_ no puede tocar ninguno (404, como al leerlos): nunca toca el historial real. */
+   clave nk_test_ no puede tocar ninguno (404, como al leerlos): nunca toca el historial real.
+   Las mismas funciones las usa el MCP (rename_analysis / delete_analysis, S15b T4). */
+function renameApiAnalysis(license, rawId, rawTitle, livemode = true) {
+  const id = Number(rawId);
+  if (!livemode || !Number.isInteger(id)) return { status: 404, body: { error: 'not_found' } };
+  const title = validTitle(rawTitle);
+  if (!title) return { status: 400, body: { error: 'invalid_title', message: `title: texto de 1 a ${MAX_TITLE} caracteres.` } };
+  if (!renameAnalysis(license.id, id, title)) return { status: 404, body: { error: 'not_found' } };
+  return { status: 200, body: { id, title } };
+}
+
+function deleteApiAnalysis(license, rawId, livemode = true) {
+  const id = Number(rawId);
+  if (!livemode || !Number.isInteger(id)) return { status: 404, body: { error: 'not_found' } };
+  if (!deleteAnalysis(license.id, id)) return { status: 404, body: { error: 'not_found' } };
+  return { status: 200, body: { deleted: true, id } };
+}
+
 router.patch('/analyses/:id', requireApiKey, (req, res) => {
-  const id = Number(req.params.id);
-  if (!req.livemode || !Number.isInteger(id)) return res.status(404).json({ error: 'not_found' });
-  const title = validTitle(req.body?.title);
-  if (!title) return res.status(400).json({ error: 'invalid_title', message: `title: texto de 1 a ${MAX_TITLE} caracteres.` });
-  if (!renameAnalysis(req.license.id, id, title)) return res.status(404).json({ error: 'not_found' });
-  res.json({ id, title });
+  const out = renameApiAnalysis(req.license, req.params.id, req.body?.title, req.livemode);
+  res.status(out.status).json(out.body);
 });
 
 router.delete('/analyses/:id', requireApiKey, (req, res) => {
-  const id = Number(req.params.id);
-  if (!req.livemode || !Number.isInteger(id)) return res.status(404).json({ error: 'not_found' });
-  if (!deleteAnalysis(req.license.id, id)) return res.status(404).json({ error: 'not_found' });
-  res.json({ deleted: true, id });
+  const out = deleteApiAnalysis(req.license, req.params.id, req.livemode);
+  res.status(out.status).json(out.body);
 });
 
 /* ── Sesión 7: extracción de facturas (Bloque 1.2) ──
@@ -286,7 +300,7 @@ function createWebhook(license, body, ip, livemode = true) {
   const events = W.normalizeEvents(body?.events);
   if (!events) return { status: 400, body: { error: 'invalid_events', message: `events debe ser "*" o una lista de: ${W.EVENT_TYPES.join(', ')}.` } };
   const out = W.createEndpoint(license.id, { url: u.url, events, description: body?.description, livemode });
-  if (out.error) return { status: 400, body: { error: out.error, message: `Máximo ${W.MAX_ENDPOINTS} webhooks por cuenta.` } };
+  if (out.error) return { status: 400, body: { error: out.error, message: `Máximo ${W.MAX_ENDPOINTS} webhooks ${livemode ? 'reales' : 'de prueba'} por cuenta.` } };
   audit('WEBHOOK_CREATED', { license_id: license.id, ip, detail: `id=${out.endpoint.id}${livemode ? '' : ' test'}` });
   return { status: 201, body: out.endpoint };
 }
@@ -420,7 +434,7 @@ router.get('/tax/calendar', requireApiKey, (req, res) => send(res, T.calendar(re
 
 module.exports = router;
 module.exports.handlers = {
-  analyze, extractInvoices, readInvoiceFiles, usage, listApiAnalyses, getApiAnalysis, createWebhook, updateWebhook, deleteWebhook,
+  analyze, extractInvoices, readInvoiceFiles, usage, listApiAnalyses, getApiAnalysis, renameApiAnalysis, deleteApiAnalysis, createWebhook, updateWebhook, deleteWebhook,
   issueInvoice, rectifyInvoice, setInvoiceStatus, listCustomers, createCustomer,
   TYPES, INVOICE_MAX_FILES
 };

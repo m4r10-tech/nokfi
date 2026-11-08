@@ -40,6 +40,7 @@ The credential test calls `GET /api/v1/usage`.
 | Invoice | Extract | Reads up to 5 documents per request (PDF, JPG, PNG, WebP or text). Use `*` as the binary field to send every attachment of the item. Outputs one item per invoice (or one item with all of them). |
 | Analysis | Create | Runs an analysis. For spreadsheets, "All Input Items as Rows" sends the whole input (e.g. a Google Sheets node) as one table. |
 | Analysis | Get / Get Many | Reads reports you already have. |
+| Analysis | Rename / Delete | Changes the title of a saved report, or deletes it with its action plan (the credit is not returned). With a test key they return "not found". |
 | Customer | Get Many / Create | Lists or searches your address book, or adds a customer (with a test key the list is empty and a new customer is only validated). |
 | Job | Get | Status and result of a background job (*Run in Background*), kept 24 h. |
 | Tax | Validate Tax ID | NIF, NIE or CIF check digit, entity type and EU VAT number. |
@@ -99,6 +100,17 @@ Documents that cannot be read come out as items with `is_invoice: false` and an 
 - [Nokfi API documentation](https://nokfi.app/api-docs)
 - [OpenAPI specification](https://nokfi.app/api/v1/openapi.json)
 - [n8n community nodes documentation](https://docs.n8n.io/integrations/#community-nodes)
+
+## Source and publishing
+
+The source of truth for this node is the Nokfi repository, folder `integrations/n8n/`:
+every change is made and reviewed there first, together with the API change it needs.
+The [`n8n-nodes-nokfi`](https://github.com/m4r10-tech/n8n-nodes-nokfi) repository is the
+copy that gets published (n8n requires publishing from GitHub Actions with npm provenance).
+To sync it, copy everything from `integrations/n8n/` into that repository except
+`node_modules/`, `dist/`, `.git/`, `.github/`, `.gitignore` and `.prettierrc.js` (those only
+exist there), run `npm run lint` and `npm run build`, and commit. Pushing a `vX.Y.Z` tag
+there publishes that version to npm. Never edit the published copy directly.
 
 ## Compatibility
 

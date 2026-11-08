@@ -69,6 +69,7 @@ export default {
     whUrlHint: 'Muss öffentlich sein und https verwenden. In n8n nimm die „Production URL“ des Webhook-Knotens oder den Nokfi-Trigger.',
     whDescription: 'Beschreibung (optional)',
     whEvents: 'Ereignisse',
+    whModeLiveHint: 'Empfängt die Ereignisse deiner echten Daten und der Live-Schlüssel (nk_live_).', whModeTestHint: 'Empfängt nur Testereignisse: die der nk_test_-Schlüssel und von „Test senden“.',
     whAllEvents: 'Alle Ereignisse',
     whPickEvents: 'Wähle mindestens ein Ereignis.',
     whCreate: 'Webhook erstellen',
@@ -236,7 +237,7 @@ export default {
     yourKey: 'Dein Lizenzschlüssel', alsoEmailed: 'Wir haben ihn dir auch per E-Mail geschickt.',
     goLogin: 'Zur Anmeldung', notFound: 'Wir haben deine Zahlung nicht gefunden. Wenn du glaubst, dass das ein Fehler ist, schreib uns.',
     pending: 'Wir bestätigen deine Zahlung, einen Moment…',
-    titleTrial: 'Test aktiviert!', subtitleTrial: 'Heute wurde nichts abgebucht. Das ist dein Nokfi-Lizenzschlüssel.', alreadyShown: 'Dieser Schlüssel wurde bereits angezeigt und wird aus Sicherheitsgründen hier nicht noch einmal gezeigt. Du findest ihn in der E-Mail, die wir dir geschickt haben; falls nicht, stelle ihn über „Schlüssel vergessen?“ wieder her.'
+    titleTrial: 'Test aktiviert!', subtitleTrial: 'Heute wurde nichts abgebucht. Das ist dein Nokfi-Lizenzschlüssel.', alreadyShown: 'Dieser Schlüssel wurde bereits angezeigt und wird aus Sicherheitsgründen hier nicht noch einmal gezeigt. Du findest ihn in der E-Mail, die wir dir geschickt haben; falls nicht, stelle ihn über „Schlüssel vergessen?“ wieder her.', titleBlocked: 'Der erste Monat konnte nicht abgebucht werden', subtitleBlocked: 'Diese Karte hat den kostenlosen Test schon genutzt und die Zahlung ist nicht durchgegangen, daher ist das Konto pausiert. Bewahre deinen Schlüssel auf: Beim Anmelden kannst du einen Tarif bezahlen und loslegen.'
   },
   config: {
     title: 'Einstellungen',
@@ -1087,6 +1088,7 @@ export default {
       "date": "Das Datum ist ungültig (zwischen Rechnungsdatum und heute).",
       "status_unchanged": "Die Rechnung hat diesen Status bereits.",
       "status_conflict": "Diese Änderung ist nicht möglich: Mache zuerst den vorherigen Status rückgängig.",
+      "not_in_ledger": "Diese Rechnung hat keinen Eintrag im Buch, daher kann sie weder als bezahlt noch als offen markiert werden.",
       "customer_incomplete": "Für dieses Format braucht der Kunde eine Steuernummer und eine vollständige Adresse (5-stellige PLZ in Spanien).",
       "format_unsupported": "Factur-X unterstützt den Ausgleichszuschlag nicht: Nutze UBL oder Facturae.",
       "not_fixable": "Nur ein abgelehnter oder mit Fehlern angenommener Ausstellungsdatensatz kann berichtigt werden."
@@ -1365,7 +1367,7 @@ export default {
     invoicesChecks: 'Nokfi prüft jede Rechnung selbst, ohne der KI zu vertrauen: Netto + MwSt. − Einbehalt muss den Gesamtbetrag ergeben, Prüfziffer der spanischen NIF/CIF/NIE, gültiges und nicht zukünftiges Datum, üblicher MwSt.-Satz. Was nicht passt, kommt in warnings. Gescannte PDFs kommen in errors zurück (pdf_scanned): sende sie als Bild.',
     mcpTitle: 'MCP-Server für KI-Agenten',
     mcpText: 'Binde Nokfi als Tool in Claude, ChatGPT, Cursor oder den AI Agent von n8n ein. Gleicher API-Schlüssel, gleiches Kontingent und gleiche Regeln wie die API.',
-    mcpTools: 'Tools: extract_invoices, analyze, validate_tax_id, calculate_vat, calculate_withholding, estimate_model_130, fiscal_calendar, get_usage, list_analyses, get_analysis, issue_invoice, list_invoices, get_invoice, cancel_invoice und set_invoice_status.'
+    mcpTools: 'Tools: extract_invoices, analyze, validate_tax_id, calculate_vat, calculate_withholding, estimate_model_130, fiscal_calendar, get_usage, list_analyses, get_analysis, rename_analysis, delete_analysis, issue_invoice, list_invoices, get_invoice, cancel_invoice und set_invoice_status.'
   },
   crash: { title: 'Etwas ist schiefgelaufen', desc: 'Wir haben den Fehler protokolliert, um ihn zu beheben. Lade die Seite neu, um fortzufahren.', reload: 'Neu laden' },
   update: { available: 'Eine neue Version von Nokfi ist verfügbar.', reload: 'Neu laden' },

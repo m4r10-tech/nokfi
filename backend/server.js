@@ -131,12 +131,36 @@ function corsOriginValidator(origin, callback) {
   return callback(err);
 }
 
-app.use(cors({
+const corsOptions = {
   origin: corsOriginValidator,
   credentials: false, // no usamos cookies de sesión — el token va en Authorization header, nunca ambient credentials
   methods: ['GET', 'POST', 'PUT', 'PATCH', 'DELETE'],
-  allowedHeaders: ['Content-Type', 'Authorization'],
-}));
+  // S15b T4: Idempotency-Key (emisión de facturas desde la web) y Prefer (202 asíncrono).
+  allowedHeaders: ['Content-Type', 'Authorization', 'Idempotency-Key', 'Prefer'],
+};
+
+/**
+ * S15b T4 (sub5 #3): la especificación OpenAPI y el servidor MCP se abren a
+ * CUALQUIER origen y sin credenciales, para Swagger/Postman web y el MCP
+ * Inspector. Es seguro: la especificación es pública y el MCP solo acepta la
+ * clave de API en Authorization (el navegador nunca la añade solo). El resto de
+ * la API sigue limitado a ALLOWED_ORIGINS.
+ */
+function isOpenCorsRequest(req) {
+  const p = req.path;
+  if (p === '/api/v1/openapi.json') return ['GET', 'HEAD', 'OPTIONS'].includes(req.method);
+  return p === '/api/mcp' || p === '/api/mcp/';
+}
+const openCorsOptions = {
+  origin: '*',
+  credentials: false,
+  methods: ['GET', 'POST', 'DELETE'],
+  allowedHeaders: ['Content-Type', 'Authorization', 'Accept', 'Mcp-Session-Id', 'Mcp-Protocol-Version'],
+  exposedHeaders: ['Retry-After', 'Mcp-Session-Id'],
+  maxAge: 600,
+};
+
+app.use(cors((req, callback) => callback(null, isOpenCorsRequest(req) ? openCorsOptions : corsOptions)));
 
 /**
  * ⚠️ AUDITORÍA DE SEGURIDAD — análisis de CSRF (Cross-Site Request Forgery).

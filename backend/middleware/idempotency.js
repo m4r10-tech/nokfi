@@ -19,7 +19,9 @@
  * herramienta issue_invoice del MCP) guarda la clave 30 días (S15, Q6), para
  * que un flujo que reprocese un pedido días después no emita otra factura.
  *
- * Va DESPUÉS de requireApiKey (necesita req.license y req.apiKey).
+ * Va DESPUÉS de requireApiKey (necesita req.license y req.apiKey). S15b T4 (A6):
+ * también en la emisión desde la web (POST /api/invoicing/invoices, tras
+ * requireLicense, sin req.apiKey), con su propio espacio de claves y 30 días.
  */
 
 'use strict';
@@ -53,7 +55,8 @@ function idempotent(req, res, next, ttlHours) {
     return res.status(400).json({ error: 'invalid_idempotency_key', message: 'Idempotency-Key debe tener entre 1 y 255 caracteres.' });
   }
   const license_id = req.license.id;
-  const key = `${req.apiKey.mode || 'live'}:${k}`;
+  // Con clave de API: espacio 'live' o 'test'. Desde la web (sesión, sin clave; S15b T4 A6): 'web'.
+  const key = `${req.apiKey ? (req.apiKey.mode || 'live') : 'web'}:${k}`;
   const hash = crypto.createHash('sha256')
     .update(JSON.stringify([req.method, req.baseUrl + req.path, isAsync(req), req.body ?? null])).digest('hex');
   const db = getDB();

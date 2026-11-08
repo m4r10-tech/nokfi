@@ -390,8 +390,10 @@ export class Nokfi implements INodeType {
 				displayOptions: { show: { resource: ['analysis'] } },
 				options: [
 					{ name: 'Create', value: 'create', action: 'Create an analysis', description: 'Run an AI financial analysis and get a structured report' },
+					{ name: 'Delete', value: 'delete', action: 'Delete an analysis', description: 'Delete a saved analysis and its action plan (the credit is not returned)' },
 					{ name: 'Get', value: 'get', action: 'Get an analysis', description: 'Get a report by ID' },
 					{ name: 'Get Many', value: 'getAll', action: 'Get many analyses', description: 'List your latest analyses' },
+					{ name: 'Rename', value: 'rename', action: 'Rename an analysis', description: 'Change the title of a saved analysis' },
 				],
 				default: 'create',
 			},
@@ -455,8 +457,19 @@ export class Nokfi implements INodeType {
 				name: 'analysisId',
 				type: 'number',
 				required: true,
-				displayOptions: { show: { resource: ['analysis'], operation: ['get'] } },
+				displayOptions: { show: { resource: ['analysis'], operation: ['get', 'rename', 'delete'] } },
 				default: 0,
+				description: 'With a test key (nk_test_…) there are no saved analyses: Get, Rename and Delete return "not found" and never touch real data',
+			},
+			{
+				displayName: 'New Title',
+				name: 'newTitle',
+				type: 'string',
+				required: true,
+				displayOptions: { show: { resource: ['analysis'], operation: ['rename'] } },
+				default: '',
+				placeholder: 'September sales',
+				description: 'From 1 to 120 characters',
 			},
 			{
 				displayName: 'Limit',
@@ -809,6 +822,13 @@ export class Nokfi implements INodeType {
 				} else if (resource === 'analysis' && operation === 'get') {
 					const id = this.getNodeParameter('analysisId', i) as number;
 					out.push({ json: await api('GET', `/analyses/${encodeURIComponent(String(id))}`, undefined, i), pairedItem: { item: i } });
+				} else if (resource === 'analysis' && operation === 'rename') {
+					const id = this.getNodeParameter('analysisId', i) as number;
+					const title = (this.getNodeParameter('newTitle', i) as string).trim();
+					out.push({ json: await api('PATCH', `/analyses/${encodeURIComponent(String(id))}`, { title }, i), pairedItem: { item: i } });
+				} else if (resource === 'analysis' && operation === 'delete') {
+					const id = this.getNodeParameter('analysisId', i) as number;
+					out.push({ json: await api('DELETE', `/analyses/${encodeURIComponent(String(id))}`, undefined, i), pairedItem: { item: i } });
 				} else if (resource === 'analysis' && operation === 'getAll') {
 					const limit = this.getNodeParameter('limit', i) as number;
 					const res = await api('GET', `/analyses?limit=${limit}`, undefined, i);

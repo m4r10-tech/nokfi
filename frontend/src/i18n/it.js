@@ -69,6 +69,7 @@ export default {
     whUrlHint: 'Deve essere pubblico e in https. In n8n usa la «Production URL» del nodo Webhook o il Trigger di Nokfi.',
     whDescription: 'Descrizione (facoltativa)',
     whEvents: 'Eventi',
+    whModeLiveHint: 'Riceve gli eventi dei tuoi dati reali e delle chiavi reali (nk_live_).', whModeTestHint: 'Riceve solo gli eventi di prova: quelli delle chiavi nk_test_ e di «Invia prova».',
     whAllEvents: 'Tutti gli eventi',
     whPickEvents: 'Scegli almeno un evento.',
     whCreate: 'Crea webhook',
@@ -236,7 +237,7 @@ export default {
     yourKey: 'La tua chiave di licenza', alsoEmailed: 'Te l’abbiamo inviata anche via email.',
     goLogin: 'Vai all’accesso', notFound: 'Non abbiamo trovato il tuo pagamento. Se pensi che sia un errore, scrivici.',
     pending: 'Stiamo confermando il pagamento, un momento…',
-    titleTrial: 'Prova attivata!', subtitleTrial: 'Oggi non è stato addebitato nulla. Questa è la tua chiave di licenza Nokfi.', alreadyShown: 'Questa chiave è già stata mostrata e, per sicurezza, qui non viene mostrata di nuovo. La trovi nell’email che ti abbiamo inviato; se non la trovi, recuperala da «Hai dimenticato la chiave?».'
+    titleTrial: 'Prova attivata!', subtitleTrial: 'Oggi non è stato addebitato nulla. Questa è la tua chiave di licenza Nokfi.', alreadyShown: 'Questa chiave è già stata mostrata e, per sicurezza, qui non viene mostrata di nuovo. La trovi nell’email che ti abbiamo inviato; se non la trovi, recuperala da «Hai dimenticato la chiave?».', titleBlocked: 'Non è stato possibile addebitare il primo mese', subtitleBlocked: 'Questa carta ha già usato la prova gratuita e il pagamento non è andato a buon fine, quindi l’account è in pausa. Conserva la chiave: quando accedi potrai pagare un piano e iniziare.'
   },
   config: {
     title: 'Impostazioni',
@@ -1087,6 +1088,7 @@ export default {
       "date": "La data non è valida (tra la data della fattura e oggi).",
       "status_unchanged": "La fattura ha già questo stato.",
       "status_conflict": "Questo cambio non è possibile: prima annulla lo stato precedente.",
+      "not_in_ledger": "Questa fattura non ha una registrazione nel registro, quindi non si può segnare come incassata né come in sospeso.",
       "customer_incomplete": "Per questo formato il cliente deve avere codice fiscale e indirizzo completo (CAP di 5 cifre in Spagna).",
       "format_unsupported": "Factur-X non supporta la sovrattassa di equivalenza: usa UBL o Facturae.",
       "not_fixable": "Si può correggere solo un registro di emissione rifiutato o accettato con errori."
@@ -1365,7 +1367,7 @@ export default {
     invoicesChecks: 'Nokfi controlla da sé ogni fattura, senza fidarsi dell’IA: imponibile + IVA − ritenuta uguale al totale, cifra di controllo del NIF/CIF/NIE spagnolo, data valida e non futura, aliquota IVA abituale. Ciò che non torna arriva in warnings. I PDF scansionati tornano in errors (pdf_scanned): inviali come immagine.',
     mcpTitle: 'Server MCP per agenti IA',
     mcpText: 'Collega Nokfi come strumento di Claude, ChatGPT, Cursor o dell’AI Agent di n8n. Stessa chiave API, stessa quota e stesse regole dell’API.',
-    mcpTools: 'Strumenti: extract_invoices, analyze, validate_tax_id, calculate_vat, calculate_withholding, estimate_model_130, fiscal_calendar, get_usage, list_analyses, get_analysis, issue_invoice, list_invoices, get_invoice, cancel_invoice e set_invoice_status.'
+    mcpTools: 'Strumenti: extract_invoices, analyze, validate_tax_id, calculate_vat, calculate_withholding, estimate_model_130, fiscal_calendar, get_usage, list_analyses, get_analysis, rename_analysis, delete_analysis, issue_invoice, list_invoices, get_invoice, cancel_invoice e set_invoice_status.'
   },
   crash: { title: 'Qualcosa è andato storto', desc: 'Abbiamo registrato l’errore per correggerlo. Ricarica la pagina per continuare.', reload: 'Ricarica' },
   update: { available: 'È disponibile una nuova versione di Nokfi.', reload: 'Ricarica' },

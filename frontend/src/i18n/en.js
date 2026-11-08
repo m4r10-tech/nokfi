@@ -69,6 +69,7 @@ export default {
     whUrlHint: 'Must be public and use https. In n8n, use the Webhook node’s “Production URL” or the Nokfi Trigger.',
     whDescription: 'Description (optional)',
     whEvents: 'Events',
+    whModeLiveHint: 'Receives the events of your real data and of live keys (nk_live_).', whModeTestHint: 'Receives only test events: those of nk_test_ keys and “Send test”.',
     whAllEvents: 'All events',
     whPickEvents: 'Choose at least one event.',
     whCreate: 'Create webhook',
@@ -236,7 +237,7 @@ export default {
     yourKey: 'Your license key', alsoEmailed: 'We have also emailed it to you.',
     goLogin: 'Go to login', notFound: 'We could not find your payment. If you believe this is an error, contact us.',
     pending: 'We are confirming your payment, one moment...',
-    titleTrial: 'Trial activated!', subtitleTrial: 'Nothing has been charged today. This is your Nokfi licence key.', alreadyShown: 'This key has already been shown and, for security, is not displayed here again. You have it in the email we sent you; if you can’t find it, recover it from “Forgot your key?”.'
+    titleTrial: 'Trial activated!', subtitleTrial: 'Nothing has been charged today. This is your Nokfi licence key.', alreadyShown: 'This key has already been shown and, for security, is not displayed here again. You have it in the email we sent you; if you can’t find it, recover it from “Forgot your key?”.', titleBlocked: 'We couldn’t charge the first month', subtitleBlocked: 'This card has already used the free trial and the payment didn’t go through, so the account is on hold. Keep your key: when you sign in you can pay for a plan and get started.'
   },
   config: {
     title: 'Settings',
@@ -1087,6 +1088,7 @@ export default {
       "date": "The date isn't valid (between the invoice date and today).",
       "status_unchanged": "The invoice already has that status.",
       "status_conflict": "That change isn't possible: undo the previous status first.",
+      "not_in_ledger": "This invoice has no entry in the ledger, so it can't be marked as paid or unpaid.",
       "customer_incomplete": "For this format the customer needs a tax ID and a full address (5-digit postcode in Spain).",
       "format_unsupported": "Factur-X doesn't support the equivalence surcharge: use UBL or Facturae.",
       "not_fixable": "Only a rejected or accepted-with-errors issue record can be corrected."
@@ -1365,7 +1367,7 @@ export default {
     invoicesChecks: 'Nokfi checks every invoice itself, without trusting the AI: base + VAT − withholding must match the total, the NIF/CIF/NIE check digit, a valid, non-future date and a usual VAT rate. Anything that doesn’t add up comes back in warnings. Scanned PDFs come back in errors (pdf_scanned): send them as images.',
     mcpTitle: 'MCP server for AI agents',
     mcpText: 'Connect Nokfi as a tool for Claude, ChatGPT, Cursor or n8n’s AI Agent. It uses the same API key, the same quota and the same rules as the API.',
-    mcpTools: 'Tools: extract_invoices, analyze, validate_tax_id, calculate_vat, calculate_withholding, estimate_model_130, fiscal_calendar, get_usage, list_analyses, get_analysis, issue_invoice, list_invoices, get_invoice, cancel_invoice and set_invoice_status.'
+    mcpTools: 'Tools: extract_invoices, analyze, validate_tax_id, calculate_vat, calculate_withholding, estimate_model_130, fiscal_calendar, get_usage, list_analyses, get_analysis, rename_analysis, delete_analysis, issue_invoice, list_invoices, get_invoice, cancel_invoice and set_invoice_status.'
   },
   crash: { title: 'Something went wrong', desc: 'We have logged the error so we can fix it. Reload the page to continue.', reload: 'Reload' },
   update: { available: 'A new version of Nokfi is available.', reload: 'Reload' },

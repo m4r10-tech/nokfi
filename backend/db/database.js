@@ -866,6 +866,24 @@ function deleteOtherSessions(license_id, keepToken) {
   return getDB().prepare('DELETE FROM sessions WHERE license_id = ? AND token != ?').run(license_id, hashToken(keepToken));
 }
 
+/** S15b T4: al cambiar o restablecer la contraseña dejan de valer los enlaces
+ *  pendientes que permitirían cambiarla otra vez: los reset-tokens de esta
+ *  licencia y, como la recuperación va por email (sirve para cualquier licencia
+ *  del mismo email), los tokens de recuperación y los códigos OTP de ese email.
+ *  Devuelve cuántos tokens/códigos se anularon. */
+function invalidatePendingPasswordTokens(license_id) {
+  const db = getDB();
+  const lic = db.prepare('SELECT email FROM licenses WHERE id = ?').get(license_id);
+  let n = db.prepare("UPDATE reset_tokens SET used = 1 WHERE license_id = ? AND purpose = 'password_reset' AND used = 0").run(license_id).changes;
+  if (lic?.email) {
+    const email = String(lic.email).trim().toLowerCase();
+    n += db.prepare(`UPDATE reset_tokens SET used = 1 WHERE purpose = 'recovery' AND used = 0
+      AND license_id IN (SELECT id FROM licenses WHERE lower(email) = ?)`).run(email).changes;
+    n += db.prepare('UPDATE otp_codes SET used = 1 WHERE email = ? AND used = 0').run(email).changes;
+  }
+  return n;
+}
+
 function cleanExpiredSessions() {
   return getDB().prepare(`DELETE FROM sessions WHERE expires_at < ${NOW_ISO}`).run().changes;
 }
@@ -1565,6 +1583,7 @@ module.exports = {
   deleteSession,
   deleteSessionsForLicense,
   deleteOtherSessions,
+  invalidatePendingPasswordTokens,
   cleanExpiredSessions,
   createResetToken,
   consumeResetToken,

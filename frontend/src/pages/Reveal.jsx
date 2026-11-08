@@ -110,8 +110,8 @@ function RevealStep({ session_id }) {
         <div className="flex flex-col gap-5 anim-scale">
           <div className="text-center">
             <div className="mx-auto mb-3 w-fit rounded-full p-3" style={{ background: 'var(--positive-soft)', color: 'var(--positive)' }}><CheckCircle2 size={28} /></div>
-            <h1 className="text-xl font-semibold tracking-tight mb-1" style={{ color: 'var(--text-primary)' }}>{t(data.trial ? 'reveal.titleTrial' : 'reveal.title')}</h1>
-            <p className="text-sm" style={{ color: 'var(--text-secondary)' }}>{t(data.trial ? 'reveal.subtitleTrial' : 'reveal.subtitle')}</p>
+            <h1 className="text-xl font-semibold tracking-tight mb-1" style={{ color: 'var(--text-primary)' }}>{t(data.blocked ? 'reveal.titleBlocked' : data.trial ? 'reveal.titleTrial' : 'reveal.title')}</h1>
+            <p className="text-sm" style={{ color: 'var(--text-secondary)' }}>{t(data.blocked ? 'reveal.subtitleBlocked' : data.trial ? 'reveal.subtitleTrial' : 'reveal.subtitle')}</p>
           </div>
 
           <div>

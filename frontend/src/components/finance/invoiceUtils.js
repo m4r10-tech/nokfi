@@ -67,6 +67,8 @@ export function invoiceError(t, res) {
     const line = Number.isInteger(d.index) ? ` (${t('invoices.line')} ${d.index + 1})` : '';
     return t(`invoices.errors.${d.field}`, { date: d.last_date || '' }) + line;
   }
+  // S15b T4: factura real sin apunte en el libro (no es «revierte el estado anterior»).
+  if (d.error === 'status_conflict' && d.reason === 'not_in_ledger') return t('invoices.errors.not_in_ledger');
   if (KNOWN_ERRORS.includes(d.error)) return t(`invoices.errors.${d.error}`, { max: SIMPLIFIED_MAX });
   return apiErrorMessage(t, res);
 }

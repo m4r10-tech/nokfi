@@ -231,6 +231,20 @@ const TOOLS = [
     description: 'Get a full report by id.',
     inputSchema: { type: 'object', properties: { id: { type: 'integer' } }, required: ['id'] },
     annotations: { readOnlyHint: true }
+  },
+  {
+    name: 'rename_analysis',
+    title: 'Rename an analysis',
+    description: 'Change the title of a saved analysis (1 to 120 characters). With a test key (nk_test_) there are no saved analyses, so it returns not_found and never touches real data.',
+    inputSchema: { type: 'object', properties: { id: { type: 'integer' }, title: { type: 'string', minLength: 1, maxLength: 120 } }, required: ['id', 'title'] },
+    annotations: { readOnlyHint: false, destructiveHint: false, idempotentHint: true }
+  },
+  {
+    name: 'delete_analysis',
+    title: 'Delete an analysis',
+    description: 'Permanently delete a saved analysis and its action plan from the user\'s history (it does not give the credit back). Confirm with the user before calling it. With a test key (nk_test_) it returns not_found and never touches real data.',
+    inputSchema: { type: 'object', properties: { id: { type: 'integer' } }, required: ['id'] },
+    annotations: { readOnlyHint: false, destructiveHint: true, idempotentHint: true }
   }
 ];
 
@@ -243,6 +257,9 @@ function toolResult(out) {
   if (out.status >= 300) return { content: [{ type: 'text', text }], isError: true };
   return { content: [{ type: 'text', text }], structuredContent: out.body };
 }
+
+/** 404 de análisis con el mismo mensaje que get_analysis. */
+const withNotFoundMessage = (out) => (out.status === 404 ? { status: 404, body: { error: 'not_found', message: 'No existe un análisis con ese id.' } } : out);
 
 async function callTool(req, name, args = {}) {
   const license = req.license;
@@ -274,6 +291,8 @@ async function callTool(req, name, args = {}) {
       const a = H.getApiAnalysis(license, args.id, livemode);
       return toolResult(a ? { status: 200, body: a } : { status: 404, body: { error: 'not_found', message: 'No existe un análisis con ese id.' } });
     }
+    case 'rename_analysis': return toolResult(withNotFoundMessage(H.renameApiAnalysis(license, args.id, args.title, livemode)));
+    case 'delete_analysis': return toolResult(withNotFoundMessage(H.deleteApiAnalysis(license, args.id, livemode)));
     default: return null;
   }
 }
@@ -307,7 +326,13 @@ router.post('/', requireApiKey, async (req, res) => {
       const rate = takeRate(req.apiKey.id, body.length - 1);
       if (!rate.ok) return rateLimited(res, rate.retryAfter, ' (en un lote JSON-RPC cuenta cada mensaje)');
     }
-    const replies = (await Promise.all(body.map(m => handleMessage(req, m)))).filter(Boolean);
+    // S15b T4: en orden, uno tras otro (antes Promise.all: varias IA a la vez y
+    // un mensaje podía adelantarse al anterior del que depende).
+    const replies = [];
+    for (const m of body) {
+      const r = await handleMessage(req, m);
+      if (r) replies.push(r);
+    }
     return replies.length ? res.json(replies) : res.status(202).end();
   }
   const reply = await handleMessage(req, body);

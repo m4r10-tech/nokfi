@@ -38,6 +38,11 @@
 - Una petición con cabecera `Origin` que no está en `ALLOWED_ORIGINS` (preflight
   `OPTIONS` incluida) devuelve `403 { error: "origin_not_allowed" }`, sin traza en el
   log ni fila en `client_errors`. Sin `Origin` (curl, servidores, n8n) no aplica.
+  **Excepción:** `GET /api/v1/openapi.json` y `/api/mcp` admiten **cualquier origen sin
+  credenciales** (`Access-Control-Allow-Origin: *`) para Swagger/Postman web y el MCP
+  Inspector; el MCP sigue exigiendo la clave de API en `Authorization`.
+- Cabeceras que la web puede mandar (CORS `allowedHeaders`): `Content-Type`,
+  `Authorization`, `Idempotency-Key` y `Prefer`.
 
 ---
 
@@ -58,6 +63,7 @@ Primer acceso (licencia sin contraseña todavía).
 |--------|------|--------|
 | 201 | `{ success: true, token, expires_at, license }` | Activación correcta |
 | 409 | `{ error: "already_activated" }` | Ya tiene contraseña → `/login` |
+| 403 | `{ error: "account_blocked", reason: "payment_failed", resume_token, email, plan }` | Alta bloqueada nada más nacer (tarjeta que ya tuvo trial y el primer cobro falla): guarda la contraseña y da el `resume_token` para pagar un plan, como el login |
 | 403 | `{ error: "license_inactive" }` | Suspendida/revocada (mensaje distingue) |
 | 404 | `{ error: "not_found" }` | email+clave no coinciden (anti-enumeración) |
 | 400 | `{ error: "weak_password" \| "invalid_email" \| "invalid_key_format" }` | Validación |
@@ -68,7 +74,7 @@ Primer acceso (licencia sin contraseña todavía).
 | Status | Body | Cuándo |
 |--------|------|--------|
 | 200 | `{ success: true, token, expires_at, license }` | Login correcto |
-| 409 | `{ error: "not_activated" }` | No tiene contraseña → flujo `/activate` |
+| 409 | `{ error: "not_activated" }` | No tiene contraseña → flujo `/activate` (también si está bloqueada por impago y nunca se activó) |
 | 401 | `{ error: "invalid_credentials" }` | Credenciales incorrectas (mensaje SIEMPRE genérico) |
 | 403 | `{ error: "account_blocked", reason: "payment_failed", resume_token, email, plan }` | Cuenta bloqueada por una renovación rechazada **y contraseña correcta**. `resume_token` solo sirve para `POST /api/payments/stripe/resume-checkout` (con contraseña mala → 401 genérico) |
 | 400 | `{ error: "invalid_input" }` | Formato inválido |
@@ -105,7 +111,9 @@ Revela la clave tras reintroducir la contraseña. **Body:** `{ password }`.
 `200 { success: true }` | `401 invalid_credentials` | `400 weak_password` |
 `403/409` como reveal-key.
 Al cambiarla se **cierran las demás sesiones** de la cuenta (pasan a `401 session_invalid`);
-la sesión desde la que se cambia sigue abierta.
+la sesión desde la que se cambia sigue abierta. También dejan de valer los **enlaces
+pendientes** de restablecer la contraseña de esa licencia y los de recuperación (token y
+código OTP) de su email (`400 invalid_or_expired_token` si se usan después).
 
 ### `POST /api/auth/request-password-reset`
 Sin sesión. **Body:** `{ email, license_key }`.
@@ -129,7 +137,8 @@ Desde el enlace del email. **Setea contraseña y crea sesión** (no hace falta l
 
 > El reset por email **cierra todas las sesiones previas** (pasan a `401 session_invalid`);
 > solo vale el `token` nuevo de la respuesta. Lo mismo hacen `confirm-recovery` y el reset
-> forzado por admin (ver §5).
+> forzado por admin (ver §5). `confirm-password-reset` y `confirm-recovery` anulan además los
+> demás enlaces pendientes (como `change-password`).
 
 ### Recuperación de acceso con OTP (olvido de clave y/o contraseña)
 
@@ -340,7 +349,8 @@ facturas con IA). `credit_packs` (S15b): paquetes de pago único que no caducan.
 (10/50/130) es decisión de producto, no env-driven.
 
 ### `POST /api/payments/stripe/create-checkout`  *(público)*
-Crea una Checkout Session en modo **suscripción** mensual.
+Crea una Checkout Session en modo **suscripción** mensual, **solo con tarjeta**
+(`payment_method_types[0]=card`; los paquetes de créditos mantienen los métodos dinámicos).
 
 **Body:** `{ email, plan: "mini" | "pro" | "max" }`
 
@@ -376,7 +386,7 @@ periodo. **El cambio de plan NO está en el Portal** (se hace con `change-plan`)
 | 502 | `{ error: "stripe_error" }` | Error de Stripe |
 
 > **Configuración del Portal (en Stripe, no en código):** `subscription_update`
-> **desactivado**; `payment_method_update`, `invoice_history` y
+> y `customer_update` (cambiar el email) **desactivados**; `payment_method_update`, `invoice_history` y
 > `subscription_cancel` (`at_period_end`) activados.
 
 ### Modelo de cobro (S15b)
@@ -447,7 +457,7 @@ solo entrega al navegador del comprador).
 
 | Status | Body | Cuándo |
 |--------|------|--------|
-| 200 | `{ key, email, plan, trial, trial_ends_at }` | El webhook ya creó la licencia (`active`). `trial=true` → hoy no se ha cobrado |
+| 200 | `{ key, email, plan, trial, trial_ends_at, blocked }` | El webhook ya creó la licencia (`active`). `trial=true` → hoy no se ha cobrado. `blocked=true` → la cuenta nació bloqueada (tarjeta que ya tuvo trial y el primer cobro falló): al entrar se paga un plan |
 | 400 | `{ error: "missing_session_id" }` | Falta el parámetro |
 | 404 | `{ error: "not_found" }` | Webhook aún no llegó, o id inexistente |
 | 410 | `{ error: "already_revealed", email }` | La clave ya se mostró (se tolera repetir 2 min tras la primera vez) |
@@ -566,6 +576,13 @@ Misma lógica para la app, la API v1 y el MCP (`services/invoicing`).
 | `POST /invoices/:id/send` | Enviar por email al cliente |
 | `GET /verifactu`, `GET /verifactu/chain`, `POST /verifactu/retry`, `POST /verifactu/records/:id/resubmit` | Panel VERI*FACTU: registros encadenados (SHA-256), comprobación de la cadena y reintentos |
 
+`POST /invoices` admite **`Idempotency-Key`** (opcional, 1–255 caracteres; S15b T4): la web
+manda una por intento de emitir o rectificar (la misma mientras no cambie la factura). Un
+reintento con la misma clave y el mismo cuerpo devuelve la misma factura
+(`Idempotent-Replayed: true`); con otro cuerpo, `422 idempotency_key_reused`; en curso,
+`409 idempotency_in_progress`. Se guarda **30 días**, en un espacio propio (no se cruza con
+las claves de la API v1), y solo si la respuesta es correcta.
+
 VERI*FACTU: `VERIFACTU_ENV=off|test|prod` (prod, además, `VERIFACTU_PROD_ENABLED=1`),
 `VERIFACTU_LICENSES` (licencias con envío), certificado `VERIFACTU_CERT_PATH` +
 `VERIFACTU_CERT_PASSWORD`, productor `VERIFACTU_PRODUCER_NAME` / `_NIF`. En producción
@@ -599,7 +616,14 @@ y **no ve nada real**: `GET /analyses` vacío y `GET /analyses/:id` → 404 (tam
 `/tax/model-130` con `source: "ledger"` calculan con el libro vacío, y los trabajos y
 webhooks solo son los de su modo. Una clave real tampoco ve los de prueba. En una
 factura de prueba, `status: paid|unpaid` → `409 test_invoice_not_in_ledger`
-(no tiene asiento en el libro).
+(no tiene asiento en el libro). Una factura real sin apunte en el libro da
+`409 status_conflict` con `reason: "not_in_ledger"` y un mensaje que lo dice (el resto
+de `status_conflict` siguen siendo «primero revierte el estado anterior»).
+Con clave de prueba, `GET /tax/calendar` (y `fiscal_calendar` del MCP) usa la **forma
+jurídica real del perfil** y la emisión de facturas de prueba usa los **datos de emisor
+reales** de Ajustes › Facturación (razón social, NIF, dirección): son datos del propio
+titular, no de terceros, y la factura `TEST-…` sale como saldría la real (decisión T7 de
+la S15b). Lo que no se ve en prueba son los datos de terceros y el libro.
 
 **Idempotency-Key** (hasta 255 caracteres): la admiten los POST de `analyze`,
 `invoices/extract`, `webhooks`, `invoices` y `invoices/:id/rectify` (en estas dos es
@@ -646,6 +670,8 @@ Max y de prueba en Mini (`mode: live` en Mini → `403 api_plan_required`). Solo
 y direcciones públicas: se rechazan `localhost` (también `localhost.`), `*.local`,
 `*.internal` y las redes privadas, de loopback, link-local, IPv4 compatibles
 (`::/96`), multicast (`ff00::/8`) y 6to4 (`2002::/16`), al registrar y al conectar.
+Máximo **10 webhooks por modo** (10 reales y 10 de prueba; S15b T4): el 11.º del mismo
+modo → `400 too_many_endpoints`.
 
 `PATCH /webhooks/:id` (y `PATCH /api/dev/webhooks/:id`) exige que `enabled` sea booleano
 (`true`/`false`); cualquier otro valor, como la cadena `"false"`, da `400 invalid_enabled`.
@@ -658,15 +684,18 @@ MCP por HTTP (`POST /api/mcp`, JSON-RPC) con la misma clave de API. Herramientas
 `extract_invoices`, `analyze`, `validate_tax_id`, `calculate_vat`,
 `calculate_withholding`, `estimate_model_130`, `fiscal_calendar`, `get_usage`,
 `issue_invoice`, `list_invoices`, `get_invoice`, `cancel_invoice`,
-`set_invoice_status`, `list_analyses`, `get_analysis`. Misma separación de modos
-que la API REST. En un lote JSON-RPC (array) **cada mensaje cuenta** en el límite por
+`set_invoice_status`, `list_analyses`, `get_analysis`, `rename_analysis` (`{ id, title }`)
+y `delete_analysis` (`{ id }`, destructiva: borra el análisis y su plan de acción; no
+devuelve el crédito) — S15b T4. Misma separación de modos que la API REST (con
+`nk_test_`, `rename_analysis`/`delete_analysis` dan `not_found` y no tocan nada real). En un lote JSON-RPC (array) **cada mensaje cuenta** en el límite por
 minuto de la clave: si no caben todos → `429 rate_limited` con `Retry-After` y no se
-ejecuta ninguno.
+ejecuta ninguno. Los mensajes de un lote se ejecutan **en orden, uno tras otro** (S15b T4).
 
 ## 14. Nodo de n8n (`n8n-nodes-nokfi` 0.4.0)
 
 La copia buena es la del repositorio, `integrations/n8n/`; el repositorio hermano
-`../n8n-nodes-nokfi` es desde donde se publica en npm y se copia de aquí. Nodo de
+`../n8n-nodes-nokfi` es desde donde se publica en npm y se copia de aquí (qué se copia y
+cómo se publica: «Source and publishing» en `integrations/n8n/README.md`). Nodo de
 acciones (análisis, facturas recibidas, emisión, clientes, trabajos, herramientas
 fiscales) y Trigger por webhooks (crea y borra su endpoint con `/api/v1/webhooks`;
 «Only Live Events» activado por defecto). 0.3.0 publicada en npm el 2026-10-02;

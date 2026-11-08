@@ -27,6 +27,7 @@
 
 const express = require('express');
 const { requireLicense } = require('../middleware/requireLicense');
+const { idempotencyFor, INVOICE_TTL_HOURS } = require('../middleware/idempotency');
 const { audit } = require('../db/database');
 const D = require('../db/invoicing');
 const S = require('../services/invoicing');
@@ -81,7 +82,9 @@ router.delete('/customers/:id', (req, res) => {
 /* ── Facturas ── */
 router.get('/invoices', (req, res) => res.json({ invoices: D.listInvoices(req.license.id, { ...req.query, livemode: true }) }));
 
-router.post('/invoices', (req, res) => send(res, S.issue({ license: req.license, body: req.body || {}, source: 'web', ip: req.ip })));
+// S15b T4 (sub7 A6): la web manda Idempotency-Key en cada intento de emitir o
+// rectificar; un doble envío (red, reintento) devuelve la misma factura.
+router.post('/invoices', idempotencyFor({ hours: INVOICE_TTL_HOURS }), (req, res) => send(res, S.issue({ license: req.license, body: req.body || {}, source: 'web', ip: req.ip })));
 
 router.get('/invoices/:id', (req, res) => {
   const inv = D.getInvoice(req.license.id, idOf(req));

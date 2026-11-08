@@ -228,7 +228,10 @@ router.get('/stripe/reveal', (req, res) => {
   }
 
   const license = getLicenseByPaymentRef('stripe', session_id);
-  if (!license || license.status !== 'active') {
+  // S15b T4: una cuenta que nace bloqueada (tarjeta que ya tuvo trial y el
+  // primer cobro falla) también ve su clave, para poder entrar y pagar un plan.
+  const blocked = !!license && license.status !== 'active' && license.blocked_reason === 'payment_failed' && license.status !== 'revoked';
+  if (!license || (license.status !== 'active' && !blocked)) {
     return res.status(404).json({ error: 'not_found' });
   }
 
@@ -244,7 +247,7 @@ router.get('/stripe/reveal', (req, res) => {
 
   // P7: en un trial no se ha cobrado nada hoy → el título no puede decir «pago completado».
   const trial = !!license.trial_ends_at && Date.parse(license.trial_ends_at) > Date.now();
-  res.json({ key: license.key, email: license.email, plan: license.plan, trial, trial_ends_at: trial ? license.trial_ends_at : null });
+  res.json({ key: license.key, email: license.email, plan: license.plan, trial: trial && !blocked, trial_ends_at: trial && !blocked ? license.trial_ends_at : null, blocked });
 });
 
 /* ──────────────────────────────────────────────────────────
@@ -292,6 +295,10 @@ router.post('/stripe/create-checkout', checkoutLimiter, async (req, res) => {
       // checkout y no servía para intercambio de plan por el Portal.
       'line_items[0][price]': priceId,
       'line_items[0][quantity]': '1',
+      // T2 (S15b T4): las suscripciones, solo con tarjeta (sin Klarna, MB Way,
+      // Bancontact…: no sirven para renovar cada mes). Los packs siguen con los
+      // métodos dinámicos.
+      'payment_method_types[0]': 'card',
       'subscription_data[metadata][plan]': plan,
       'subscription_data[metadata][email]': email,
       'metadata[plan]': plan,
@@ -576,6 +583,7 @@ router.post('/stripe/resume-checkout', checkoutLimiter, requireBlockedLicense, a
     'cancel_url': `${process.env.APP_PUBLIC_URL}/login?resume_cancelled=1`,
     'line_items[0][price]': priceId,
     'line_items[0][quantity]': '1',
+    'payment_method_types[0]': 'card', // T2: suscripción solo con tarjeta
     'subscription_data[metadata][plan]': plan,
     'subscription_data[metadata][email]': license.email,
     'metadata[plan]': plan,
