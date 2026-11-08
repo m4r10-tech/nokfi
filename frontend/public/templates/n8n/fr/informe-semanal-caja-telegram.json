@@ -35,7 +35,7 @@
         "sheetName": {
           "__rl": true,
           "mode": "name",
-          "value": "Caja"
+          "value": "Caisse"
         },
         "options": {}
       },
@@ -58,7 +58,7 @@
         "genericAuthType": "httpBearerAuth",
         "sendBody": true,
         "specifyBody": "json",
-        "jsonBody": "={{ JSON.stringify({ type: 'excel', lang: 'es', title: 'Caja semanal', data: { module: 'caja', files: [{ name: 'caja', rows: $input.all().map(i => i.json).slice(0, 5000), total_rows: $input.all().length }] } }) }}",
+        "jsonBody": "={{ JSON.stringify({ type: 'excel', lang: 'fr', title: 'Trésorerie hebdomadaire', data: { module: 'caja', files: [{ name: 'caja', rows: $input.all().map(i => i.json).slice(0, 5000), total_rows: $input.all().length }] } }) }}",
         "options": {}
       },
       "id": "b138230a-d9bb-593a-a5c2-25260a63bffa",
@@ -75,7 +75,7 @@
     },
     {
       "parameters": {
-        "jsCode": "// Mensaje corto con el resumen y las prioridades del informe de Nokfi.\nconst r = $json.report || {};\nconst top = (r.priorities || []).slice(0, 3).map(p => `• ${p.title}: ${p.detail}`);\nreturn [{ json: { text: [`Caja de la semana — ${$json.title || 'Nokfi'}`, '', r.summary || '', '', ...(top.length ? ['Prioridades:', ...top] : [])].join('\\n') } }];"
+        "jsCode": "// Message court avec le résumé et les priorités du rapport Nokfi.\nconst r = $json.report || {};\nconst top = (r.priorities || []).slice(0, 3).map(p => `• ${p.title}: ${p.detail}`);\nreturn [{ json: { text: [`Trésorerie de la semaine — ${$json.title || 'Nokfi'}`, '', r.summary || '', '', ...(top.length ? ['Priorités :', ...top] : [])].join('\\n') } }];"
       },
       "id": "769aa9b3-5b14-5dfb-9f1c-92e30af96dca",
       "name": "Préparer le message",
