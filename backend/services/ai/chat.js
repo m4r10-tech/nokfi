@@ -48,7 +48,7 @@ setInterval(() => {
 }, 5 * 60 * 1000).unref();
 
 /* ── Proveedores (API compatible con OpenAI salvo Gemini) ── */
-async function openAiCompatible(url, key, model, system, messages, extraHeaders = {}, name = '', { timeoutMs = 30000, extraBody = {}, long = false } = {}) {
+async function openAiCompatible(url, key, model, system, messages, extraHeaders = {}, name = '', { timeoutMs = 30000, extraBody = {}, long = false, signal } = {}) {
   // Tope de seguridad por proveedor (utils/aiBudget.js): si no cabe, se prueba el siguiente.
   if (name) {
     const chars = system.length + messages.reduce((n, m) => n + String(m.content || '').length, 0);
@@ -63,7 +63,8 @@ async function openAiCompatible(url, key, model, system, messages, extraHeaders 
       temperature: 0.4,
       messages: [{ role: 'system', content: system }, ...messages],
       ...extraBody
-    })
+    }),
+    ...(signal ? { signal } : {}) // S15b T4 (D4): el usuario canceló
   }, timeoutMs);
   if (!res.ok) throw new Error(`status ${res.status}`);
   const data = await res.json();
@@ -78,38 +79,38 @@ const PROVIDERS = {
     configured: () => !!process.env.GROQ_API_KEY,
     // gpt-oss razona antes de contestar y ese razonamiento cuenta en max_tokens: con 700 a
     // veces no quedaba sitio para la respuesta ("empty"). Razonamiento corto y más margen.
-    call: (system, messages) => {
+    call: (system, messages, { signal } = {}) => {
       const model = process.env.GROQ_CHAT_MODEL || 'openai/gpt-oss-120b';
       return openAiCompatible('https://api.groq.com/openai/v1/chat/completions',
         process.env.GROQ_API_KEY, model, system, messages, {}, 'groq',
-        { extraBody: model.includes('gpt-oss') ? { reasoning_effort: 'low', max_tokens: 2000 } : {} });
+        { extraBody: model.includes('gpt-oss') ? { reasoning_effort: 'low', max_tokens: 2000 } : {}, signal });
     }
   },
   openrouter: {
     configured: () => !!process.env.OPENROUTER_API_KEY,
-    call: (system, messages) => openAiCompatible('https://openrouter.ai/api/v1/chat/completions',
+    call: (system, messages, { signal } = {}) => openAiCompatible('https://openrouter.ai/api/v1/chat/completions',
       process.env.OPENROUTER_API_KEY, process.env.OPENROUTER_MODEL || 'meta-llama/llama-3.3-70b-instruct:free', system, messages,
-      { 'HTTP-Referer': 'https://nokfi.app', 'X-Title': 'Nokfi' })
+      { 'HTTP-Referer': 'https://nokfi.app', 'X-Title': 'Nokfi' }, '', { signal })
   },
   cloudflare: {
     configured: () => !!(process.env.CF_ACCOUNT_ID && process.env.CF_AI_TOKEN),
-    call: (system, messages) => openAiCompatible(`https://api.cloudflare.com/client/v4/accounts/${process.env.CF_ACCOUNT_ID}/ai/v1/chat/completions`,
-      process.env.CF_AI_TOKEN, process.env.CF_AI_CHAT_MODEL || '@cf/meta/llama-3.3-70b-instruct-fp8-fast', system, messages, {}, 'cloudflare')
+    call: (system, messages, { signal } = {}) => openAiCompatible(`https://api.cloudflare.com/client/v4/accounts/${process.env.CF_ACCOUNT_ID}/ai/v1/chat/completions`,
+      process.env.CF_AI_TOKEN, process.env.CF_AI_CHAT_MODEL || '@cf/meta/llama-3.3-70b-instruct-fp8-fast', system, messages, {}, 'cloudflare', { signal })
   },
   // IA local del VPS (2026-10): último respaldo, comparte turno con los análisis.
   local: {
     configured: () => !!process.env.LOCAL_AI_URL,
-    call: (system, messages) => localAi.run(() => openAiCompatible(`${process.env.LOCAL_AI_URL}/v1/chat/completions`,
+    call: (system, messages, { signal } = {}) => localAi.run(() => openAiCompatible(`${process.env.LOCAL_AI_URL}/v1/chat/completions`,
       '', process.env.LOCAL_AI_MODEL || 'local', system, messages, {}, 'local',
-      { timeoutMs: Number(process.env.LOCAL_AI_CHAT_TIMEOUT_MS) || 5 * 60000, extraBody: { chat_template_kwargs: { enable_thinking: false } }, long: true }))
+      { timeoutMs: Number(process.env.LOCAL_AI_CHAT_TIMEOUT_MS) || 5 * 60000, extraBody: { chat_template_kwargs: { enable_thinking: false } }, long: true, signal }), { signal })
   },
   gemini: {
     configured: () => !!process.env.GEMINI_API_KEY,
-    call: async (system, messages) => {
+    call: async (system, messages, { signal } = {}) => {
       const contents = messages.map(m => ({ role: m.role === 'assistant' ? 'model' : 'user', parts: [{ text: m.content }] }));
       const { text } = await gemini.generate({
         system, contents, maxTokens: 1024, temperature: 0.4,
-        model: process.env.GEMINI_CHAT_MODEL || 'gemini-flash-lite-latest', timeoutMs: 30000
+        model: process.env.GEMINI_CHAT_MODEL || 'gemini-flash-lite-latest', timeoutMs: 30000, signal
       });
       return text;
     }
@@ -162,15 +163,24 @@ function sanitizeMessages(messages) {
 // que la fuente de la app pinta sin ancho: "2.904,00€", "14de agosto".
 const tidy = (text) => String(text).replace(/[\u00a0\u2007\u2009\u202f]/g, ' ').replace(/[\u2010\u2011]/g, '-').trim().slice(0, 6000);
 
+/** S15b T4 (D4): el usuario canceló; no se prueba otro proveedor. */
+function cancelled() {
+  const err = new Error('ai_cancelled');
+  err.code = 'ai_cancelled';
+  return err;
+}
+
 /** @returns {Promise<{ text, provider }>} — lanza { code:'chat_unavailable' } si todos fallan. */
-async function chat({ profile, lang, analysisContext, financeText, messages }) {
+async function chat({ profile, lang, analysisContext, financeText, messages, signal }) {
   const system = chatSystemPrompt({ profile, lang, analysisContext, financeText });
   const order = providerOrder();
   for (const name of order) {
+    if (signal?.aborted) throw cancelled();
     try {
-      const text = await PROVIDERS[name].call(system, messages);
+      const text = await PROVIDERS[name].call(system, messages, { signal });
       return { text: tidy(text), provider: name };
     } catch (e) {
+      if (signal?.aborted) throw cancelled();
       console.warn(`[CHAT] proveedor ${name} falló: ${e.message}`);
       audit('AI_PROVIDER_FAILED', { detail: `chat ${name}: ${String(e.message).slice(0, 120)}` });
     }
@@ -181,12 +191,14 @@ async function chat({ profile, lang, analysisContext, financeText, messages }) {
 }
 
 /** Texto libre con la MISMA capa de proveedores gratuitos (p.ej. email de reclamación, V4). */
-async function freeText({ system, prompt }) {
+async function freeText({ system, prompt, signal }) {
   for (const name of providerOrder()) {
+    if (signal?.aborted) throw cancelled();
     try {
-      const text = await PROVIDERS[name].call(system, [{ role: 'user', content: prompt }]);
+      const text = await PROVIDERS[name].call(system, [{ role: 'user', content: prompt }], { signal });
       return { text: tidy(text), provider: name };
     } catch (e) {
+      if (signal?.aborted) throw cancelled();
       console.warn(`[CHAT] proveedor ${name} falló: ${e.message}`);
       audit('AI_PROVIDER_FAILED', { detail: `chat ${name}: ${String(e.message).slice(0, 120)}` });
     }

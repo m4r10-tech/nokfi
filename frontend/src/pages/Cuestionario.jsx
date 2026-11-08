@@ -132,6 +132,8 @@ export default function Cuestionario() {
   const answeredInSection = section.items.every(id => answers[id] !== undefined);
   const totalQuestions = SECTIONS.reduce((n, sec) => n + sec.items.length, 0);
   const answeredTotal = Object.keys(answers).length;
+  // S15b T4: el progreso no empieza en 6/30 sin explicar: se dice que cuenta los «No aplica» del sector.
+  const presetCounted = presetNoStock ? SECTIONS.find(s => s.key === 'pedidos').items.filter(id => answers[id] === 'na').length : 0;
 
   return (
     <div className="max-w-3xl">
@@ -152,6 +154,11 @@ export default function Cuestionario() {
             transition: 'width var(--dur-slow) var(--ease-out)'
           }} />
         </div>
+        {presetCounted > 0 && section.key !== 'pedidos' && (
+          <p className="text-xs mt-2 flex items-start gap-1.5" style={{ color: 'var(--text-muted)' }}>
+            <Info size={13} className="mt-0.5 shrink-0" style={{ color: 'var(--accent-text)' }} /> {t('questionnaire.presetCounted', { n: presetCounted })}
+          </p>
+        )}
       </div>
 
       <p className="text-sm mb-4" style={{ color: 'var(--text-secondary)' }}>{t('questionnaire.question')}</p>

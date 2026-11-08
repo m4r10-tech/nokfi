@@ -1,6 +1,6 @@
 import { useState, useEffect, useCallback, useRef } from 'react';
 import { useOutletContext } from 'react-router-dom';
-import { HandCoins, Mail, Check, Loader2, Copy, BellRing, AtSign, Info } from 'lucide-react';
+import { HandCoins, Mail, Check, Loader2, Copy, BellRing, AtSign, Info, Sparkles } from 'lucide-react';
 import { financeApi, ledgerApi } from '../../middleware/api';
 import { apiErrorMessage, isConnectivityError } from '../../middleware/errors';
 import { useLang } from '../../context/LangContext';
@@ -124,10 +124,17 @@ function dueLabel(t, p) {
   return p.days_to_due === 0 ? t('finance.receivables.dueToday') : t('finance.receivables.dueIn', { n: p.days_to_due });
 }
 
+/** Tono por defecto: amable en el primer aviso; firme tras el 1.er recordatorio automático y formal tras el 2.º. */
+function defaultTone(item) {
+  const sent = Number(item?.auto_stage) || 0;
+  return sent >= 2 ? 'formal' : sent === 1 ? 'firm' : 'friendly';
+}
+
 function ClaimEmail({ item, onClose }) {
   const { t, lang } = useLang();
   const toast = useToast();
-  const [tone, setTone] = useState(item.days_overdue > 60 ? 'formal' : item.days_overdue > 30 ? 'firm' : 'friendly');
+  // S15b T4: el primer aviso es siempre amable; después, el tono sigue a los recordatorios ya enviados.
+  const [tone, setTone] = useState(defaultTone(item));
   const [draft, setDraft] = useState(null);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState(null);
@@ -149,8 +156,18 @@ function ClaimEmail({ item, onClose }) {
     setLoading(false);
     if (res.ok) { drafts.current[tn] = res.data; setDraft(res.data); } else setError(apiErrorMessage(t, res));
   };
-  useEffect(() => { generate(tone); }, [tone]); // eslint-disable-line react-hooks/exhaustive-deps
-  useEffect(() => () => current.current?.ctrl.abort(), []); // al cerrar, deja de esperar
+  // S15b T4: abrir Reclamar no gasta IA; se redacta solo al pulsar el botón, con el tono elegido.
+  // Cambiar de tono cancela lo que se estaba redactando (también en el servidor) y enseña
+  // el borrador de ese tono si ya existe.
+  const pickTone = (tn) => {
+    if (tn === tone) return;
+    current.current?.ctrl.abort();
+    current.current = null;
+    setLoading(false); setError(null);
+    setTone(tn);
+    setDraft(drafts.current[tn] || null);
+  };
+  useEffect(() => () => current.current?.ctrl.abort(), []); // al cerrar, deja de esperar (y se cancela en el servidor)
   const editDraft = (patch) => setDraft(d => { const n = { ...d, ...patch }; drafts.current[tone] = n; return n; });
 
   const copy = async () => {
@@ -165,11 +182,17 @@ function ClaimEmail({ item, onClose }) {
         <a href={mailto} className="btn btn-primary"><Mail size={15} /> {t('finance.receivables.openMail')}</a>
       </>}>
       <div className="flex flex-col gap-3">
-        <Segmented value={tone} onChange={setTone} size="sm" options={[
+        <Segmented value={tone} onChange={pickTone} size="sm" options={[
           { value: 'friendly', label: t('finance.receivables.toneFriendly') },
           { value: 'firm', label: t('finance.receivables.toneFirm') },
           { value: 'formal', label: t('finance.receivables.toneFormal') }
         ]} />
+        {!draft && !loading && (
+          <div className="flex flex-col items-start gap-2">
+            <p className="text-sm" style={{ color: 'var(--text-secondary)' }}>{t('finance.receivables.generateHint')}</p>
+            <button type="button" onClick={() => generate(tone)} className="btn btn-primary"><Sparkles size={15} /> {t('finance.receivables.generate')}</button>
+          </div>
+        )}
         {loading && <p className="text-sm flex items-center gap-2" style={{ color: 'var(--text-secondary)' }}><Loader2 size={15} className="animate-spin" /> {t('finance.receivables.writing')}</p>}
         {error && <ErrorBox>{error}</ErrorBox>}
         {draft && !loading && (

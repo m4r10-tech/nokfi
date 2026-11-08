@@ -236,6 +236,11 @@ caduca a los 30 min; `404 pending_not_found` si se reinició el servidor). Máxi
 en curso por licencia (`429 too_many_pending`). El navegador lo hace solo
 (`frontend/src/middleware/api.js`) y muestra un aviso mientras espera. La API v1 no
 cambia: para trabajos largos tiene su modo asíncrono (`?async=true`).
+**Cancelar (S15b T4):** si el navegador corta la petición antes de la respuesta, o
+llama a `DELETE /api/pending/:id` (con sesión; `{ cancelled }`, `404 pending_not_found`
+si no es suya o ya no existe), la generación se cancela en el servidor: sale de la
+cola de la IA local o se corta la conexión con el proveedor, y un análisis cancelado
+no gasta crédito. La web lo hace al cambiar de tono o cerrar Reclamar.
 
 **Cuota diaria por licencia (atómica):** `reserveAiSlot` reserva un hueco en
 `ai_usage` (PK `license_id+day+slot`) **antes** de llamar a la IA; si el análisis
@@ -556,7 +561,7 @@ Aplica a `/api/proxy/ai`, `/api/analyses`, `/api/profile`,
 |---|---|
 | `GET/POST /api/ledger`, `PATCH/DELETE /api/ledger/:id` | Libro de facturas recibidas y emitidas (base, IVA, IRPF, total, cobro y su fecha `paid_at`). Fechas reales (`2026-02-30` → 400); la retención se guarda en positivo; un `paid_at` vacío sobre un apunte que sigue cobrado no borra su fecha de cobro. `GET` devuelve además `has_any` (el libro tiene apuntes aunque el periodo pedido no tenga ninguno) |
 | `GET /api/finance/taxes` · `PUT /api/finance/reserve` | 303 (descontando la cuota a compensar de trimestres anteriores del año: `vat.previous_compensation`) y 130 del trimestre desde el libro; lo apartado para Hacienda |
-| `GET /api/finance/receivables` · `POST /api/finance/collection-email` | Cobros pendientes y email de reclamación (amable, firme, formal) |
+| `GET /api/finance/receivables` · `POST /api/finance/collection-email` | Cobros pendientes y email de reclamación (amable, firme, formal; sin `tone`, amable). La IA sabe si es el primer aviso o cuántos recordatorios automáticos se han enviado; la web lo redacta solo al pulsar «Redactar el email» |
 | `GET /api/finance/leaks` · `POST/DELETE /api/finance/leaks/dismiss` | Fugas de dinero (suscripciones, subidas de proveedores…) |
 | `GET /api/finance/forecast` · `GET /api/finance/benchmark` | Previsión de caja y comparación con el sector |
 | `GET /api/finance/calendar?year=` | Calendario fiscal (`utils/fiscalCalendar.js`; la web pública usa una copia en `frontend/src/utils/fiscalCalendar.js`, comprobada con `npm run check:seo`) |

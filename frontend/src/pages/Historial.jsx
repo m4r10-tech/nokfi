@@ -9,7 +9,7 @@ import EmptyState from '../components/EmptyState';
 import ErrorState from '../components/ErrorState';
 import Skeleton from '../components/Skeleton';
 import { parseDbDate, dayDiff, formatDate, formatTime, localeOf } from '../utils/dates';
-import { num } from '../utils/money';
+import { keyFigureValue } from '../utils/keyFigure';
 
 /**
  * Historial de análisis (sección 14) — sesión 3, Tanda N: Historial e Informes
@@ -60,8 +60,9 @@ export function analysisResult(a, t, lang) {
   if (typeof a.summary?.score === 'number') return t('history.score', { n: a.summary.score });
   const k = a.key_figure;
   if (!k?.value) return '';
-  // Informes antiguos: a veces la IA devolvía el número pelado ("2301.58").
-  const value = /^-?\d+(\.\d+)?$/.test(String(k.value).trim()) ? num(Number(k.value), lang) : k.value;
+  // Informes antiguos: la IA devolvía la cifra en formatos distintos («2301.58», «2.301,58»
+  // sin €, «€2301.58»…). S15b T4: se reescribe en el formato del idioma, con € si es dinero.
+  const value = keyFigureValue(k.value, k.label, lang);
   return `${k.label ? `${k.label}: ` : ''}${value}`;
 }
 

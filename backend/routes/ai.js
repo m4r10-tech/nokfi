@@ -33,7 +33,8 @@ aiRouter.post('/analyze', requireLicense, deferrable(async (req, res) => {
     title: b.title,
     jobId: typeof b.job === 'string' ? b.job : undefined,
     ip: req.ip,
-    source: 'web'
+    source: 'web',
+    signal: req.aiSignal // S15b T4 (D4): si el navegador cancela, no gasta crédito
   });
   res.status(out.status).json(out.body);
 }));

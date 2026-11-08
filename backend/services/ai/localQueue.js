@@ -9,7 +9,7 @@
 
 'use strict';
 
-const { AiError } = require('./gemini');
+const { AiError, cancelledError } = require('./gemini');
 
 let running = 0;
 const waiting = [];
@@ -18,7 +18,13 @@ function maxQueue() {
   return Number(process.env.LOCAL_AI_MAX_QUEUE) || 3;
 }
 
-async function run(task) {
+/**
+ * S15b T4 (D4): `signal` opcional. Si se aborta mientras espera turno, sale de la
+ * cola sin ocupar el hueco; si ya está generando, la tarea recibe la señal (corta
+ * la conexión con llama-server, que deja de generar) y el turno pasa al siguiente.
+ */
+async function run(task, { signal } = {}) {
+  if (signal?.aborted) throw cancelledError();
   if (running >= 1 && waiting.length >= maxQueue()) {
     const err = new AiError('ai_provider_error', 'local: cola llena');
     err.retryable = true;
@@ -26,10 +32,21 @@ async function run(task) {
   }
   // El turno se pasa directamente al siguiente (sin dejar el hueco libre un
   // instante), así nunca hay dos generando a la vez.
-  if (running >= 1) await new Promise(resolve => waiting.push(resolve));
-  else running++;
+  if (running >= 1) {
+    await new Promise((resolve, reject) => {
+      const onAbort = () => {
+        const i = waiting.indexOf(turn);
+        if (i >= 0) waiting.splice(i, 1);
+        reject(cancelledError());
+      };
+      const turn = () => { signal?.removeEventListener('abort', onAbort); resolve(); };
+      waiting.push(turn);
+      signal?.addEventListener('abort', onAbort, { once: true });
+    });
+  } else running++;
   try {
-    return await task();
+    if (signal?.aborted) throw cancelledError();
+    return await task(signal);
   } finally {
     const next = waiting.shift();
     if (next) next();

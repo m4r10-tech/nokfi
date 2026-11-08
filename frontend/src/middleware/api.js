@@ -19,7 +19,11 @@ export function getSessionToken() { return sessionToken; }
 // /pending/:id hasta tener el resultado, que llega como si fuera la respuesta
 // original. Mientras, se avisa con el evento `nokfi:ai-wait` (lo pinta ToastContext).
 const PENDING_MAX_MS = 20 * 60 * 1000;
-const sleep = (ms) => new Promise(r => setTimeout(r, ms));
+// S15b T4 (D4): la espera se corta al abortar, para cancelar en el servidor en el acto.
+const sleep = (ms, signal) => new Promise(r => {
+  const t = setTimeout(r, ms);
+  signal?.addEventListener('abort', () => { clearTimeout(t); r(); }, { once: true });
+});
 let waiting = 0;
 function setWaiting(delta) {
   waiting = Math.max(0, waiting + delta);
@@ -28,15 +32,22 @@ function setWaiting(delta) {
 
 const ABORTED = { ok: false, status: 0, aborted: true, data: { error: 'aborted' } };
 
+// S15b T4 (D4): la respuesta aplazada ya no interesa → se cancela también en el
+// servidor (deja la cola de la IA local y, si era un análisis, no gasta crédito).
+function cancelPending(id, auth) {
+  request(`/pending/${encodeURIComponent(id)}`, { method: 'DELETE', auth, noDefer: true }).catch(() => {});
+  return ABORTED;
+}
+
 async function waitPending(id, auth, signal) {
   setWaiting(1);
   try {
     const t0 = Date.now();
     for (let i = 0; Date.now() - t0 < PENDING_MAX_MS; i++) {
-      await sleep(i < 5 ? 3000 : 5000);
-      if (signal?.aborted) return ABORTED; // S15b D4: ya no interesa (p. ej. otro tono)
+      await sleep(i < 5 ? 3000 : 5000, signal);
+      if (signal?.aborted) return cancelPending(id, auth); // S15b D4: ya no interesa (p. ej. otro tono)
       const r = await request(`/pending/${encodeURIComponent(id)}`, { auth, noDefer: true, signal });
-      if (r.aborted) return r;
+      if (r.aborted) return cancelPending(id, auth);
       if (r.status === 202 && r.data?.pending) continue;
       if (r.status === 0) continue; // un corte de red puntual no pierde el trabajo
       return r;

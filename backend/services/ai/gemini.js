@@ -24,6 +24,13 @@ class AiError extends Error {
   }
 }
 
+/** S15b T4 (D4): el usuario canceló (cerró, cambió de tono…). No se prueba otro proveedor. */
+function cancelledError() {
+  const err = new AiError('ai_cancelled', 'cancelada por el usuario');
+  err.retryable = false;
+  return err;
+}
+
 /** Modelo de respaldo si el principal está saturado (503) o sin cuota (429):
  *  la cuota gratuita de Gemini es POR MODELO, así que el lite suele seguir
  *  disponible. Vacío ('none') desactiva el respaldo. */
@@ -56,6 +63,7 @@ async function generate(opts) {
   try {
     return await generateOnce({ ...opts, model: primary });
   } catch (e) {
+    if (opts.signal?.aborted) throw cancelledError();
     const fb = fallbackModel();
     if (!(e instanceof AiError) || !e.retryable || !fb || fb === primary) throw e;
     console.warn(`[AI] ${primary} no disponible (${e.message}); reintento con ${fb}`);
@@ -63,7 +71,8 @@ async function generate(opts) {
   }
 }
 
-async function generateOnce({ system, parts, contents, schema, maxTokens = 8192, model, timeoutMs = 90000, temperature }) {
+async function generateOnce({ system, parts, contents, schema, maxTokens = 8192, model, timeoutMs = 90000, temperature, signal }) {
+  if (signal?.aborted) throw cancelledError();
   if (!process.env.GEMINI_API_KEY) throw new AiError('ai_not_configured');
   const m = model;
   const generationConfig = { maxOutputTokens: maxTokens };
@@ -86,11 +95,13 @@ async function generateOnce({ system, parts, contents, schema, maxTokens = 8192,
       {
         method: 'POST',
         headers: { 'Content-Type': 'application/json', 'x-goog-api-key': process.env.GEMINI_API_KEY },
-        body: JSON.stringify(body)
+        body: JSON.stringify(body),
+        ...(signal ? { signal } : {})
       },
       timeoutMs
     );
   } catch (e) {
+    if (signal?.aborted) throw cancelledError();
     const err = new AiError('ai_provider_error', e.message);
     err.retryable = true;
     throw err;
@@ -133,4 +144,4 @@ function parseJsonLoose(text) {
   return null;
 }
 
-module.exports = { generate, AiError, parseJsonLoose, defaultModel, fallbackModel };
+module.exports = { generate, AiError, cancelledError, parseJsonLoose, defaultModel, fallbackModel };

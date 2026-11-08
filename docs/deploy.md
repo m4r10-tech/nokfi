@@ -340,7 +340,10 @@ un salvavidas, no el motor principal.
   pantalla muestra como aviso para contrastar las cifras.
 - **Sin cortes en la web**: las respuestas que tardan > 25 s se aplazan
   (`202 { pending }` + `GET /api/pending/:id`, ver `docs/api.md`), porque
-  Cloudflare corta a los 100 s y Nginx a los 60 s.
+  Cloudflare corta a los 100 s y Nginx a los 60 s. Lo que el navegador ya no
+  quiere (cerrar, otro tono) se cancela en el servidor y deja libre la cola
+  (`DELETE /api/pending/:id` o el corte de la conexión; Nginx lo propaga con el
+  `proxy_ignore_client_abort off` por defecto).
 - **Vigilancia**: `/api/admin/ai-status` (incluye `local` y su cola) y el informe
   diario (línea «IA local» y aviso si no responde).
 - **Probar a mano** (en el VPS, `backend/`):

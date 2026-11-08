@@ -1578,6 +1578,8 @@ async function main() {
   await require('./session15b-t4.tests')({ post, put, get, call, check, checkAsync, getDB });
   // S15b T4 lote 11 — cifras, libro y facturas (retenciones antiguas, cobro, 5 %, recordatorios).
   await require('./session15b-t4-cifras.tests')({ post, put, get, call, check, checkAsync, getDB });
+  // S15b T4 lote 12 — IA y diagnóstico (cancelar en el servidor, reserva, compensación, facturas…).
+  await require('./session15b-t4-ia.tests')({ post, put, get, call, check, checkAsync, getDB });
 
   } catch (e) {
     console.error('TEST CRASH:', e.message);
