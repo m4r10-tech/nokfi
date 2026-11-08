@@ -240,8 +240,9 @@ Todo lo crítico está resuelto. Restos **no bloqueantes / opcionales**:
 1. Usuario commitea + `git push` (fuera de Claude Code).
 2. Claude: `git pull --ff-only` en el VPS.
 3. Si cambió el backend: `pm2 restart --update-env` (env del `.env` vivo).
-4. Si cambió el frontend: rebuild local del bundle (Nginx sirve `frontend/dist`;
-   el build en el VPS puede dar OOM → compilar en dev y rsync es el patrón usado).
+4. Si cambió el frontend: rebuild local del bundle con `VITE_API_URL=/api npm run build`
+   (Nginx sirve `frontend/dist`; nunca se compila en el VPS) y `rsync` del `dist`. Sin
+   `VITE_API_URL` el build avisa: el bundle llamaría a `http://localhost:3001/api`.
 5. Smoke: `/health` 200, `/api/payments/plans` 200.
 
 > El éxito del webhook y los cobros dependen de NO romper: Bot Fight Mode OFF,
@@ -276,8 +277,28 @@ Notas:
 - El script acepta `DB_PATH` como override; por defecto resuelve
   `backend/db/nokfi.db` relativo a su propia ubicación.
 - Requiere el binario `sqlite3` en el VPS (`sudo apt install sqlite3` si falta).
-- Las copias viven en el mismo disco: no sustituyen un backup off-box, pero
-  cubren corrupción/borrado accidental de la DB.
+- Las copias locales viven en el mismo disco (corrupción o borrado accidental);
+  la copia **fuera del VPS** es la de R2 (abajo).
+
+### Copia fuera del VPS: Cloudflare R2 (activa desde la S14, 2026-10-15)
+Tras cada copia local verificada, `backup-db.sh` llama a
+`scripts/offsite-backup.js` si el `.env` tiene `R2_BUCKET`. La copia se comprime
+(gzip) y se **cifra** (AES-256-GCM con `BACKUP_ENCRYPTION_KEY`) antes de salir del
+servidor, y se sube al bucket R2 `nokfi-backups` (jurisdicción UE; una regla de
+ciclo de vida la borra a los 30 días). El token de R2 solo da acceso a ese bucket
+y solo desde la IP del VPS (al cambiar de VPS hay que actualizarlo; ver la nota
+del 2026-10-22 arriba). Si la subida falla, la copia local sigue valiendo; cada
+subida buena escribe `db/backups/offsite.ok` y el informe diario avisa si la
+última tiene más de 26 h.
+- Variables: `R2_ACCOUNT_ID`, `R2_ACCESS_KEY_ID`, `R2_SECRET_ACCESS_KEY`,
+  `R2_BUCKET`, `R2_JURISDICTION=eu` y `BACKUP_ENCRYPTION_KEY` (ver
+  `backend/.env.example`). **La clave de cifrado se guarda también fuera del VPS**
+  (gestor de contraseñas): sin ella una copia de R2 no se puede restaurar.
+- Restaurar (desde `backend/`, con PM2 parado si se sustituye la BD viva):
+  `node scripts/offsite-backup.js --list` y
+  `node scripts/offsite-backup.js --restore latest /ruta/salida.db`
+  (o `--decrypt copia.db.gz.enc salida.db` para un archivo ya descargado).
+  Así se recuperó el VPS nuevo el 2026-10-22/23.
 
 ## 11. Monitor externo (pendiente, requiere cuenta del usuario)
 
@@ -298,9 +319,11 @@ con alerta por email. No se puede crear desde Claude Code (necesita cuenta).
   asegura node_modules alineado). Frontend: **no** aplicar `npm audit fix
   --force` — los fixes restantes son majors breaking (react-router 7, vite 8,
   jspdf 4); ver `proyecto.md` §22.
-- Redirect `www.nokfi.app → nokfi.app` (301): anotado como pendiente en
-  `deploy/nginx-nokfi.conf`; requiere editar el server block y recargar Nginx
-  (sudo, usuario).
+- Redirect `www.nokfi.app → nokfi.app` (301): **hecho**. Lo hace la Redirect
+  Rule de Cloudflare (§3, con la excepción del reto ACME) y, por si una petición
+  llega sin pasar por ella, también Nginx (`if ($host = www.nokfi.app) { return
+  301 … }` en `deploy/nginx-nokfi.conf`; se perdió con el VPS viejo y se repuso
+  en la plantilla, commit `04415bd`).
 - `robots.txt`, `og-image-square.png` (imagen al compartir, 512×512 con
   `twitter:card=summary`, S15b) y `og-image.png` (imagen de las guías en el
   JSON-LD) se sirven desde `frontend/dist` (los copia el build de Vite desde

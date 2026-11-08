@@ -31,7 +31,7 @@ export function LangSwitch({ className = '' }) {
     <label className={`relative inline-flex items-center ${className}`}>
       <Globe size={14} className="absolute left-2 pointer-events-none" style={{ color: 'var(--text-muted)' }} />
       <select value={lang} onChange={(e) => choose(e.target.value)} aria-label={t('config.language')}
-        className="appearance-none rounded-lg h-8 pl-7 pr-6 text-xs font-semibold cursor-pointer"
+        className="appearance-none rounded-lg h-10 md:h-8 pl-7 pr-6 text-xs font-semibold cursor-pointer"
         style={{ background: 'var(--surface-2)', border: '1px solid var(--border)', color: 'var(--text-primary)' }}>
         {options.map(l => <option key={l.code} value={l.code}>{l.name}</option>)}
       </select>
@@ -109,6 +109,8 @@ export function PublicHeader({ links = [] }) {
   );
 }
 
+// S15b T4 (lote 13): en el móvil, los enlaces del pie y el selector de idioma miden al menos
+// 40×40 px para el dedo (antes 16–24 px y 32 px); en escritorio quedan como estaban.
 export function PublicFooter() {
   const { t } = useLang();
   const pub = usePublicPath();
@@ -119,15 +121,15 @@ export function PublicFooter() {
           <p className="text-xs font-semibold mb-2" style={{ color: 'var(--text-primary)' }}>{t('seo.toolsHeading')}</p>
           <ul className="grid grid-cols-1 min-[420px]:grid-cols-2 gap-x-5 gap-y-0.5 text-xs" style={{ color: 'var(--text-secondary)' }}>
             {TOOL_IDS.map(id => (
-              <li key={id}><Link to={pub(id)} className="inline-flex items-center min-h-6 hover:underline">{t(`seo.tool_${id.startsWith('calendario') ? 'calendario' : id}`)}</Link></li>
+              <li key={id}><Link to={pub(id)} className="inline-flex items-center justify-center min-h-10 min-w-10 md:min-h-6 md:min-w-0 hover:underline">{t(`seo.tool_${id.startsWith('calendario') ? 'calendario' : id}`)}</Link></li>
             ))}
           </ul>
         </nav>
         <nav aria-label={t('seo.guidesHeading')}>
           <p className="text-xs font-semibold mb-2" style={{ color: 'var(--text-primary)' }}>{t('seo.resourcesHeading')}</p>
           <ul className="flex flex-col gap-y-0.5 text-xs" style={{ color: 'var(--text-secondary)' }}>
-            <li><Link to={pub('guides')} className="inline-flex items-center min-h-6 hover:underline">{t('seo.guidesHeading')}</Link></li>
-            <li><Link to={pub('api-docs')} className="inline-flex items-center min-h-6 hover:underline">{t('help.apiDocs')}</Link></li>
+            <li><Link to={pub('guides')} className="inline-flex items-center justify-center min-h-10 min-w-10 md:min-h-6 md:min-w-0 hover:underline">{t('seo.guidesHeading')}</Link></li>
+            <li><Link to={pub('api-docs')} className="inline-flex items-center justify-center min-h-10 min-w-10 md:min-h-6 md:min-w-0 hover:underline">{t('help.apiDocs')}</Link></li>
           </ul>
         </nav>
       </div>
@@ -137,11 +139,11 @@ export function PublicFooter() {
           <p className="text-xs" style={{ color: 'var(--text-muted)' }}>© {new Date().getFullYear()} Nokfi · {t('footer.rights')}</p>
         </div>
         <nav aria-label={t('footer.linksNav')} className="flex flex-wrap justify-center items-center gap-x-5 gap-y-1 text-xs" style={{ color: 'var(--text-secondary)' }}>
-          <Link to={pub('pricing')} className="inline-flex items-center min-h-6 hover:underline">{t('landing.plansHeading')}</Link>
-          <Link to="/privacidad" className="inline-flex items-center min-h-6 hover:underline">{t('landing.privacyLink')}</Link>
-          <Link to="/terminos" className="inline-flex items-center min-h-6 hover:underline">{t('legal.terms')}</Link>
-          <Link to={`${pub('home')}#contacto`} className="inline-flex items-center min-h-6 hover:underline">{t('landing.contactLink')}</Link>
-          <Link to="/login" className="inline-flex items-center min-h-6 hover:underline">{t('landing.login')}</Link>
+          <Link to={pub('pricing')} className="inline-flex items-center justify-center min-h-10 min-w-10 md:min-h-6 md:min-w-0 hover:underline">{t('landing.plansHeading')}</Link>
+          <Link to="/privacidad" className="inline-flex items-center justify-center min-h-10 min-w-10 md:min-h-6 md:min-w-0 hover:underline">{t('landing.privacyLink')}</Link>
+          <Link to="/terminos" className="inline-flex items-center justify-center min-h-10 min-w-10 md:min-h-6 md:min-w-0 hover:underline">{t('legal.terms')}</Link>
+          <Link to={`${pub('home')}#contacto`} className="inline-flex items-center justify-center min-h-10 min-w-10 md:min-h-6 md:min-w-0 hover:underline">{t('landing.contactLink')}</Link>
+          <Link to="/login" className="inline-flex items-center justify-center min-h-10 min-w-10 md:min-h-6 md:min-w-0 hover:underline">{t('landing.login')}</Link>
         </nav>
         <LangSwitch />
       </div>

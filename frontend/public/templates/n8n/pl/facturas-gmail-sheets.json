@@ -30,7 +30,7 @@
     },
     {
       "parameters": {
-        "jsCode": "// Convierte los adjuntos (binarios) en lotes de hasta 5 documentos para Nokfi.\nconst TYPES = ['application/pdf', 'image/jpeg', 'image/png', 'image/webp'];\nconst docs = [];\nfor (let i = 0; i < $input.all().length; i++) {\n  const item = $input.all()[i];\n  for (const [key, bin] of Object.entries(item.binary || {})) {\n    if (!TYPES.includes(bin.mimeType)) continue;\n    const buffer = await this.helpers.getBinaryDataBuffer(i, key);\n    docs.push({ name: bin.fileName || key, mime: bin.mimeType, data: buffer.toString('base64') });\n  }\n}\nconst batches = [];\nfor (let k = 0; k < docs.length; k += 5) batches.push({ json: { files: docs.slice(k, k + 5) } });\nreturn batches;"
+        "jsCode": "// Zamienia załączniki (dane binarne) na paczki do 5 dokumentów dla Nokfi.\nconst TYPES = ['application/pdf', 'image/jpeg', 'image/png', 'image/webp'];\nconst docs = [];\nfor (let i = 0; i < $input.all().length; i++) {\n  const item = $input.all()[i];\n  for (const [key, bin] of Object.entries(item.binary || {})) {\n    if (!TYPES.includes(bin.mimeType)) continue;\n    const buffer = await this.helpers.getBinaryDataBuffer(i, key);\n    docs.push({ name: bin.fileName || key, mime: bin.mimeType, data: buffer.toString('base64') });\n  }\n}\nconst batches = [];\nfor (let k = 0; k < docs.length; k += 5) batches.push({ json: { files: docs.slice(k, k + 5) } });\nreturn batches;"
       },
       "id": "12490827-93a5-54d1-b201-49e68b2c4985",
       "name": "Przygotuj dokumenty",
@@ -49,7 +49,7 @@
         "genericAuthType": "httpBearerAuth",
         "sendBody": true,
         "specifyBody": "json",
-        "jsonBody": "={{ JSON.stringify({ files: $json.files, lang: 'es' }) }}",
+        "jsonBody": "={{ JSON.stringify({ files: $json.files, lang: 'pl' }) }}",
         "options": {}
       },
       "id": "f1d58747-380c-56da-b90b-e4ccbd767b5b",
@@ -65,7 +65,7 @@
     },
     {
       "parameters": {
-        "jsCode": "// Una fila por factura, con las comprobaciones de Nokfi en columnas.\nconst rows = [];\nfor (const item of $input.all()) {\n  for (const inv of item.json.invoices || []) {\n    rows.push({ json: {\n      archivo: inv.file_name, emisor: inv.issuer_name, nif_emisor: inv.issuer_nif,\n      numero: inv.invoice_number, fecha: inv.invoice_date, vencimiento: inv.due_date,\n      base: inv.base, tipo_iva: inv.vat_rate, iva: inv.vat_amount, retencion: inv.irpf_amount, total: inv.total,\n      cuadra: inv.checks.totals_ok ? 'sí' : 'NO', nif_valido: inv.checks.nif_valid ? 'sí' : 'NO',\n      avisos: (inv.warnings || []).map(w => w.message).join(' · ')\n    } });\n  }\n}\nreturn rows;"
+        "jsCode": "// Jeden wiersz na fakturę, z kontrolami Nokfi w kolumnach.\nconst rows = [];\nfor (const item of $input.all()) {\n  for (const inv of item.json.invoices || []) {\n    rows.push({ json: {\n      plik: inv.file_name, wystawca: inv.issuer_name, nif_wystawcy: inv.issuer_nif,\n      numer: inv.invoice_number, data: inv.invoice_date, termin: inv.due_date,\n      netto: inv.base, stawka_vat: inv.vat_rate, vat: inv.vat_amount, potracenie: inv.irpf_amount, brutto: inv.total,\n      zgadza_sie: inv.checks.totals_ok ? 'tak' : 'NIE', nif_poprawny: inv.checks.nif_valid ? 'tak' : 'NIE',\n      uwagi: (inv.warnings || []).map(w => w.message).join(' · ')\n    } });\n  }\n}\nreturn rows;"
       },
       "id": "967391d3-9878-5088-910a-149c40199533",
       "name": "Jeden wiersz na fakturę",
@@ -87,7 +87,7 @@
         "sheetName": {
           "__rl": true,
           "mode": "name",
-          "value": "Facturas"
+          "value": "Faktury"
         },
         "columns": {
           "mappingMode": "autoMapInputData",

@@ -2,6 +2,7 @@ import { defineConfig } from 'vite';
 import react from '@vitejs/plugin-react';
 import { VitePWA } from 'vite-plugin-pwa';
 import { execSync } from 'node:child_process';
+import { warnMissingApiUrl } from './scripts/api-url-check.mjs';
 
 // §2.2 (sesión 4): versión visible en la app (Configuración, Ayuda y el
 // email de soporte) = hash corto de git + fecha de build. Responde a
@@ -48,6 +49,8 @@ export default defineConfig({
   },
   plugins: [
     react(),
+    // S15b T4: avisa si se construye sin VITE_API_URL (el dist llamaría a localhost:3001).
+    warnMissingApiUrl(),
     VitePWA({
       // §2.1: 'prompt' + <UpdatePrompt/> (antes 'autoUpdate' dejaba la pestaña
       // con el bundle viejo hasta cerrar todas las pestañas).
@@ -78,7 +81,10 @@ export default defineConfig({
         // Capturas reales de la app (las mismas de la landing, cuenta de ejemplo).
         screenshots: [
           { src: '/screens/inicio-dark.jpg', sizes: '1920x1200', type: 'image/jpeg', form_factor: 'wide', label: 'Inicio: próximo plazo fiscal, lo que apartar para Hacienda y cobros vencidos' },
-          { src: '/screens/cobros-dark.jpg', sizes: '1920x1200', type: 'image/jpeg', form_factor: 'wide', label: 'Cobros: quién te debe y cuánto' }
+          { src: '/screens/cobros-dark.jpg', sizes: '1920x1200', type: 'image/jpeg', form_factor: 'wide', label: 'Cobros: quién te debe y cuánto' },
+          // S15b T4: móvil («narrow»), con la cuenta de ejemplo (backend/scripts/landing-screens.js, SHOTS_ONLY=narrow).
+          { src: '/screens/inicio-dark-narrow.webp', sizes: '780x1688', type: 'image/webp', form_factor: 'narrow', label: 'Inicio: próximo plazo fiscal, lo que apartar para Hacienda y cobros vencidos' },
+          { src: '/screens/cobros-dark-narrow.webp', sizes: '780x1688', type: 'image/webp', form_factor: 'narrow', label: 'Cobros: quién te debe y cuánto' }
         ]
       },
       workbox: {

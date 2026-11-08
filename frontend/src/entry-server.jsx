@@ -4,6 +4,8 @@ import { StaticRouter } from 'react-router-dom/server';
 import App from './App';
 import { SeoCollector } from './seo/useSeo';
 import { setPrerenderPlans } from './hooks/usePlans';
+import { loadLanguage } from './i18n';
+import { loadSeoContent } from './seo/content';
 
 /**
  * Render en Node de una página pública (sesión 12, prerender del build).
@@ -12,7 +14,9 @@ import { setPrerenderPlans } from './hooks/usePlans';
  * que el HTML lleve el contenido completo y React pueda hidratarlo.
  * @returns {Promise<{ html: string, head: { title, tags } | null }>}
  */
-export function render(url, { plans } = {}) {
+export async function render(url, { plans } = {}) {
+  // S15b T4: en y el contenido público ya no van en el bundle; el prerender los necesita ya cargados.
+  await Promise.all([loadLanguage('en'), loadSeoContent('es'), loadSeoContent('en')]);
   setPrerenderPlans(plans || null);
   let head = null;
   const collect = (h) => { head = h; };

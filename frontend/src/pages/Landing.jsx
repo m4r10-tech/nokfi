@@ -176,13 +176,14 @@ export default function Landing() {
         <Section id="faq" title={t('landing.faqHeading')} narrow>
           <div className="flex flex-col gap-3">
             {Array.isArray(faqItems) && faqItems.map((f, i) => (
-              <RevealItem as="details" key={i} i={i} className="card group px-5 py-4">
-                <summary className="flex items-center justify-between gap-4 text-[15px] font-medium cursor-pointer select-none"
+              <RevealItem as="details" key={i} i={i} className="card group">
+                {/* S15b T4 (lote 13): el relleno va en <summary>, así toda la fila se puede pulsar (antes 23 px de alto en el móvil). */}
+                <summary className="flex items-center justify-between gap-4 px-5 py-4 text-[15px] font-medium cursor-pointer select-none"
                   style={{ color: 'var(--text-primary)' }}>
                   {f.q}
                   <ChevronDown size={18} className="details-chevron shrink-0" style={{ color: 'var(--text-muted)' }} />
                 </summary>
-                <p className="mt-3 text-sm leading-relaxed" style={{ color: 'var(--text-secondary)' }}>{f.a}</p>
+                <p className="-mt-1 px-5 pb-4 text-sm leading-relaxed" style={{ color: 'var(--text-secondary)' }}>{f.a}</p>
               </RevealItem>
             ))}
           </div>
@@ -353,7 +354,7 @@ function Fact({ f, visible }) {
       <p className="text-3xl md:text-4xl font-semibold tracking-tight tabular" style={{ color: 'var(--text-primary)' }}>
         {value}{f.suffix}
       </p>
-      <p className="mt-1.5 text-sm" style={{ color: 'var(--text-secondary)' }}>{f.label}</p>
+      <p className="mt-1.5 text-sm break-words hyphens-auto" style={{ color: 'var(--text-secondary)' }}>{f.label}</p>
     </div>
   );
 }
@@ -400,7 +401,7 @@ function ReportPreview({ t }) {
         <div className="grid grid-cols-3 gap-2 mb-5">
           {Array.isArray(kpis) && kpis.map((k, i) => (
             <div key={i} className="rounded-xl p-3" style={{ background: 'var(--surface-2)' }}>
-              <p className="text-[11px] leading-tight" style={{ color: 'var(--text-muted)' }}>{k.l}</p>
+              <p className="text-[11px] leading-tight break-words hyphens-auto" style={{ color: 'var(--text-muted)' }}>{k.l}</p>
               <p className="text-lg font-semibold tabular mt-1" style={{ color: 'var(--text-primary)' }}>{k.v}</p>
             </div>
           ))}

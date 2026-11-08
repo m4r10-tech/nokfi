@@ -6,8 +6,7 @@ import { pathFor, seoLang, pageById, TOOL_IDS, CALENDAR_YEARS } from '../../seo/
 import { AUTONOMO_TABLE, EMPLOYER_RATES } from '../../utils/spainRates';
 import { formatNumber } from '../../utils/money';
 import { track } from '../../utils/track';
-import es from '../../seo/content/es';
-import en from '../../seo/content/en';
+import { seoContent } from '../../seo/content';
 
 /**
  * Piezas comunes de las páginas públicas de la sesión 12 (herramientas,
@@ -15,13 +14,12 @@ import en from '../../seo/content/en';
  * frecuentes, llamada a la prueba gratis y enlaces internos.
  */
 export const CONTENT_UPDATED = '2026-10-02';
-const CONTENT = { es, en };
 
 /** Contenido y rutas en el idioma de la URL (es/en). */
 export function useSeoContent() {
   const { lang } = useLang();
   const l = seoLang(lang);
-  const c = CONTENT[l];
+  const c = seoContent(l); // S15b T4: solo el idioma de la página (si aún no está, Suspense espera)
   const fill = (s, vars = {}) => String(s ?? '').replace(/\{(\w+)\}/g, (m, k) => (vars[k] !== undefined ? String(vars[k]) : m));
   return { l, c, ui: c.ui, fill, path: (id) => pathFor(id, l) };
 }

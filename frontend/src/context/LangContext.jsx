@@ -46,6 +46,14 @@ function storedLang() {
   try { const v = localStorage.getItem(STORAGE_KEY); return isSupported(v) ? v : null; } catch { return null; }
 }
 
+/**
+ * S15b T4 (lote 13): idioma con el que se va a pintar `pathname` (el mismo cálculo que
+ * LangProvider). main.jsx carga su diccionario antes de pintar o hidratar.
+ */
+export function initialLang(pathname) {
+  return effectiveLang(pathname, storedLang() || browserLang().code || 'es');
+}
+
 export function LangProvider({ children }) {
   const initial = storedLang() || browserLang().code || 'es';
   const [userLang, setLangState] = useState(initial);

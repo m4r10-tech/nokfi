@@ -69,7 +69,7 @@
     },
     {
       "parameters": {
-        "jsCode": "// Convierte los adjuntos (binarios) en lotes de hasta 5 documentos para Nokfi.\nconst TYPES = ['application/pdf', 'image/jpeg', 'image/png', 'image/webp'];\nconst docs = [];\nfor (let i = 0; i < $input.all().length; i++) {\n  const item = $input.all()[i];\n  for (const [key, bin] of Object.entries(item.binary || {})) {\n    if (!TYPES.includes(bin.mimeType)) continue;\n    const buffer = await this.helpers.getBinaryDataBuffer(i, key);\n    docs.push({ name: bin.fileName || key, mime: bin.mimeType, data: buffer.toString('base64') });\n  }\n}\nconst batches = [];\nfor (let k = 0; k < docs.length; k += 5) batches.push({ json: { files: docs.slice(k, k + 5) } });\nreturn batches;"
+        "jsCode": "// Transforme les pièces jointes (binaires) en lots de 5 documents maximum pour Nokfi.\nconst TYPES = ['application/pdf', 'image/jpeg', 'image/png', 'image/webp'];\nconst docs = [];\nfor (let i = 0; i < $input.all().length; i++) {\n  const item = $input.all()[i];\n  for (const [key, bin] of Object.entries(item.binary || {})) {\n    if (!TYPES.includes(bin.mimeType)) continue;\n    const buffer = await this.helpers.getBinaryDataBuffer(i, key);\n    docs.push({ name: bin.fileName || key, mime: bin.mimeType, data: buffer.toString('base64') });\n  }\n}\nconst batches = [];\nfor (let k = 0; k < docs.length; k += 5) batches.push({ json: { files: docs.slice(k, k + 5) } });\nreturn batches;"
       },
       "id": "12490827-93a5-54d1-b201-49e68b2c4985",
       "name": "Préparer les documents",
@@ -88,7 +88,7 @@
         "genericAuthType": "httpBearerAuth",
         "sendBody": true,
         "specifyBody": "json",
-        "jsonBody": "={{ JSON.stringify({ files: $json.files, lang: 'es' }) }}",
+        "jsonBody": "={{ JSON.stringify({ files: $json.files, lang: 'fr' }) }}",
         "options": {}
       },
       "id": "f1d58747-380c-56da-b90b-e4ccbd767b5b",
@@ -104,7 +104,7 @@
     },
     {
       "parameters": {
-        "jsCode": "// Resumen del mes con las cifras de Nokfi (sumadas aquí, no por la IA).\nconst invs = $input.all().flatMap(i => i.json.invoices || []);\nconst errors = $input.all().flatMap(i => i.json.errors || []);\nconst sum = (k) => invs.reduce((s, x) => s + (Number(x[k]) || 0), 0);\nconst eur = (n) => n.toLocaleString('es-ES', { style: 'currency', currency: 'EUR', useGrouping: 'always' });\nconst bad = invs.filter(x => !x.checks.totals_ok || !x.checks.nif_valid || !x.checks.date_valid);\nconst lines = [\n  `Facturas leídas: ${invs.length}`,\n  `Base imponible: ${eur(sum('base'))}`, `IVA: ${eur(sum('vat_amount'))}`, `Retenciones: ${eur(sum('irpf_amount'))}`, `Total: ${eur(sum('total'))}`,\n  '', bad.length ? `Revisa ${bad.length} factura(s):` : 'Todas las facturas cuadran.',\n  ...bad.map(x => `- ${x.file_name}: ${(x.warnings || []).map(w => w.message).join('; ')}`),\n  ...(errors.length ? ['', 'No se pudieron leer:', ...errors.map(e => `- ${e.file_name}: ${e.message}`)] : [])\n];\nreturn [{ json: { subject: `Resumen de facturas · ${new Date().toLocaleDateString('es-ES', { month: 'long', year: 'numeric' })}`, text: lines.join('\\n') } }];"
+        "jsCode": "// Résumé du mois avec les chiffres de Nokfi (additionnés ici, pas par l’IA).\nconst invs = $input.all().flatMap(i => i.json.invoices || []);\nconst errors = $input.all().flatMap(i => i.json.errors || []);\nconst sum = (k) => invs.reduce((s, x) => s + (Number(x[k]) || 0), 0);\nconst eur = (n) => n.toLocaleString('fr-FR', { style: 'currency', currency: 'EUR', useGrouping: 'always' });\nconst bad = invs.filter(x => !x.checks.totals_ok || !x.checks.nif_valid || !x.checks.date_valid);\nconst lines = [\n  `Factures lues : ${invs.length}`,\n  `Base imposable : ${eur(sum('base'))}`, `TVA : ${eur(sum('vat_amount'))}`, `Retenues : ${eur(sum('irpf_amount'))}`, `Total : ${eur(sum('total'))}`,\n  '', bad.length ? `Vérifiez ${bad.length} facture(s) :` : 'Toutes les factures sont cohérentes.',\n  ...bad.map(x => `- ${x.file_name}: ${(x.warnings || []).map(w => w.message).join('; ')}`),\n  ...(errors.length ? ['', 'Illisibles :', ...errors.map(e => `- ${e.file_name}: ${e.message}`)] : [])\n];\nreturn [{ json: { subject: `Résumé des factures · ${new Date().toLocaleDateString('fr-FR', { month: 'long', year: 'numeric' })}`, text: lines.join('\\n') } }];"
       },
       "id": "ab2f103a-82a6-5a17-8bdf-e5eb62bb2a41",
       "name": "Résumé du mois",

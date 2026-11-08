@@ -1,11 +1,12 @@
 import es from './es';
-import en from './en';
 import { LANG_CODES } from './languages';
 
 /**
  * i18n de Nokfi (sesión 4, Fase A: es, en, fr, it, de, pl).
  *
- * - es y en van en el bundle; fr/it/de/pl se cargan bajo demanda (C7).
+ * - es va en el bundle; en, fr, it, de y pl se cargan bajo demanda (C7; en desde la S15b T4:
+ *   la calculadora de IVA y la landing en castellano no descargan el inglés). main.jsx espera
+ *   al idioma inicial antes de pintar, así no se ve un destello en otro idioma.
  * - Plurales con Intl.PluralRules: t('finance.days', { n: 3 }) busca
  *   `days_one` / `days_few` / `days_many` / `days_other` y, si no existen,
  *   usa `days` (polaco tiene 3 formas: 1 / 2-4 / 5+).
@@ -13,9 +14,10 @@ import { LANG_CODES } from './languages';
  *   .replace('{n}', …) siguen funcionando (sin variables no se interpola).
  * - Si falta una clave en un idioma, cae a inglés y después a castellano.
  */
-export const dictionaries = { es, en };
+export const dictionaries = { es };
 
 const loaders = {
+  en: () => import('./en'),
   fr: () => import('./fr'),
   it: () => import('./it'),
   de: () => import('./de'),
@@ -27,7 +29,8 @@ export const isSupported = (code) => LANG_CODES.includes(code);
 /** Carga el diccionario de un idioma (no-op si ya está). */
 export async function loadLanguage(code) {
   if (dictionaries[code] || !loaders[code]) return;
-  const mod = await loaders[code]();
+  // El inglés es el primer respaldo de las claves que falten (ver translate).
+  const [mod] = await Promise.all([loaders[code](), code !== 'en' ? loadLanguage('en') : null]);
   dictionaries[code] = mod.default;
 }
 
