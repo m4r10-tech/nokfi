@@ -322,7 +322,7 @@ export default {
     welcome: 'Witaj w Nokfi', subtitle: 'Opowiedz nam trochę o swojej firmie, abyśmy mogli dopasować analizy',
     companyName: 'Nazwa firmy', sector: 'Branża', size: 'Wielkość',
     mainExpenses: 'Główne wydatki firmy', start: 'Zacznij korzystać z Nokfi',
-    legalHint: 'Zmienia sposób liczenia podatków', optional: 'Opcjonalnie', reminders: 'Przypominaj mi przed każdym terminem podatkowym', remindersHint: 'Napiszemy do Ciebie kilka dni przed deklaracją 303, 130 i pozostałymi.', skip: 'Pomiń na razie', privacy: 'Używamy tych danych tylko do dopasowania analiz. Nikomu ich nie udostępniamy.', change: 'Zmień', sectorSearch: 'Wyszukaj branżę: warsztat, sklep, transport…'
+    legalHint: 'Zmienia sposób liczenia podatków', optional: 'Opcjonalnie', reminders: 'Przypominaj mi przed każdym terminem podatkowym', remindersHint: 'Napiszemy do Ciebie kilka dni przed każdą deklaracją, która Cię dotyczy (303 dla VAT i pozostałe).', skip: 'Pomiń na razie', privacy: 'Używamy tych danych tylko do dopasowania analiz. Nikomu ich nie udostępniamy.', change: 'Zmień', sectorSearch: 'Wyszukaj branżę: warsztat, sklep, transport…'
   },
   home: {
     deadlineDays_few: 'Zostały {n} dni', usageTotal_few: 'Wykonano {n} analizy',
@@ -940,6 +940,7 @@ export default {
     "defaultVat": "Domyślny VAT",
     "defaultIrpf": "Domyślna zaliczka IRPF",
     "irpfHint": "Wolne zawody: 15 % (7 % w pierwszych latach). Bez potrącenia: 0 %.",
+    "irpfHintCompany": "Spółki zwykle wystawiają faktury bez potrącenia (0 %). Stosuje się je tylko w określonych przypadkach, np. przy najmie lokalu (19 %).",
     "footer": "Tekst w stopce",
     "footerHint": "Na przykład dane z rejestru handlowego.",
     "langs": {
@@ -1150,6 +1151,7 @@ export default {
     totalMismatch: 'Netto + VAT − potrącenie nie zgadza się z kwotą razem. Sprawdź to.',
     duplicateEntry: 'W rejestrze jest już faktura o tym numerze od tego samego klienta lub dostawcy.',
     noResults: 'Żaden wpis nie pasuje do wyszukiwania.', quarterShort: 'Q{n}', paidAtIncome: 'Data wpływu', paidAtExpense: 'Data zapłaty', collectTitle: 'Oznacz jako opłaconą · {name}', collectText: 'Podaj dzień, w którym otrzymałeś zapłatę: na tej podstawie liczony jest średni czas spłaty.',
+    emptyPeriodTitle: 'Brak wpisów w tym okresie', emptyPeriodDesc: 'Twoja księga ma wpisy w innych kwartałach lub latach: wybierz inny okres powyżej albo dodaj nowy wpis.', exportEmpty: 'Brak wpisów w tym okresie: nie ma czego eksportować.', exportNoneFiltered: 'Żaden wpis nie pasuje do filtra: nie ma czego eksportować.', filteredTotals: 'Sumy i eksport obejmują tylko przefiltrowane wpisy: {n} z {total}.', companyNoIrpf: 'Spółki zwykle wystawiają faktury bez potrącenia IRPF, dlatego nie pytamy o nie tutaj.',
     confirmDelete: 'Usunąć ten wpis z rejestru?', deleted: 'Wpis usunięty', delete: 'Usuń',
     incomeBase: 'Przychody (netto)', expenseBase: 'Wydatki (netto)', vatBalance: 'VAT do zapłaty', vatBalanceNeg: 'VAT do rozliczenia', result: 'Wynik',
     reviewCount: '{n} wpisu się nie zgadza: sprawdź.', reviewCount_one: '{n} wpis się nie zgadza: sprawdź go.', reviewCount_few: '{n} wpisy się nie zgadzają: sprawdź je.', reviewCount_many: '{n} wpisów się nie zgadza: sprawdź je.', search: 'Szukaj…', ledgerSheet: 'Rejestr przychodów i wydatków',
@@ -1196,10 +1198,11 @@ export default {
       desc: 'Wybierz zdjęcia lub PDF faktur i paragonów albo otwórz cały folder. AI odczyta wystawcę, numer podatkowy, datę, kwotę netto, VAT, potrącenie i kwotę razem; sprawdzasz przed zapisaniem.',
       kind: 'Jakie to faktury?', kindAuto: 'Wykryj po moim nr podatkowym', kindExpense: 'Wydatki (otrzymane)', kindIncome: 'Przychody (wystawione)',
       noTaxId: 'Dodaj numer podatkowy w Ustawieniach, aby rozróżniać je automatycznie; w przeciwnym razie zostaną potraktowane jako wydatki.',
-      formats: 'PDF, JPG, PNG, WebP lub XML · do 60 faktur naraz · pliki nie są przechowywane: tylko dane, które zatwierdzisz.', xmlFree: 'Faktury elektroniczne (Facturae, UBL, Factur-X/ZUGFeRD jako XML lub PDF) są odczytywane natychmiast, dokładnie i bez zużywania analiz.',
-      willReadFree: 'Zostanie odczytanych {n} e-faktur, od razu i bez zużycia analiz.', willReadFree_one: 'Zostanie odczytana {n} e-faktura, od razu i bez zużycia analiz.', xmlInBatch: 'E-faktury ({n}) są odczytywane bez AI.', xmlInBatch_one: '{n} e-faktura jest odczytywana bez AI.',
-      willRead: 'Zostanie odczytane {n} faktury. Zużyje to 1 kredyt.', willRead_one: 'Zostanie odczytana {n} faktura. Zużyje to 1 kredyt.', willRead_few: 'Zostaną odczytane {n} faktury. Zużyje to 1 analizę z dziennego limitu.', willRead_many: 'Zostanie odczytanych {n} faktur. Zużyje to 1 analizę z dziennego limitu.', capped: 'Zostanie odczytanych tylko pierwszych {max}.',
+      formats: 'PDF, JPG, PNG, WebP lub XML · do 60 faktur naraz · pliki nie są przechowywane: tylko dane, które zatwierdzisz.', xmlFree: 'Faktury elektroniczne (Facturae, UBL, Factur-X/ZUGFeRD jako XML lub PDF) są odczytywane natychmiast, dokładnie i bez zużywania kredytów.',
+      willReadFree: 'Zostanie odczytanych {n} e-faktur, od razu i bez zużycia kredytów.', willReadFree_one: 'Zostanie odczytana {n} e-faktura, od razu i bez zużycia kredytów.', xmlInBatch: 'E-faktury ({n}, XML lub Factur-X) są odczytywane bez AI i bez zużycia kredytów.', xmlInBatch_one: '{n} e-faktura (XML lub Factur-X) jest odczytywana bez AI i bez zużycia kredytów.',
+      willRead: 'Zostanie odczytane {n} faktury. Zużyje to 1 kredyt.', willRead_one: 'Zostanie odczytana {n} faktura. Zużyje to 1 kredyt.', willRead_few: 'Zostaną odczytane {n} faktury. Zużyje to 1 kredyt.', willRead_many: 'Zostanie odczytanych {n} faktur. Zużyje to 1 kredyt.', capped: 'Zostanie odczytanych tylko pierwszych {max}.',
       start: 'Czytaj faktury', preparing: 'Przygotowanie', reading: 'Czytanie partii',
+      checkingFree: 'Sprawdzamy, które pliki PDF to e-faktury (Factur-X) – nie zużywają kredytów…', savedElsewhere: 'Zapisano {n} wpisów z innego okresu: trafiły do {periods}. Zmień okres powyżej, aby je zobaczyć.', savedElsewhere_one: 'Zapisano {n} wpis z innego okresu: trafił do {periods}. Zmień okres powyżej, aby go zobaczyć.', savedElsewhere_few: 'Zapisano {n} wpisy z innego okresu: trafiły do {periods}. Zmień okres powyżej, aby je zobaczyć.', savedElsewhere_many: 'Zapisano {n} wpisów z innego okresu: trafiły do {periods}. Zmień okres powyżej, aby je zobaczyć.',
       reviewHint: 'Sprawdź każdą fakturę z dokumentem obok. Na bursztynowo oznaczamy tylko pola, które się nie zgadzają lub których nie udało się odczytać.',
       andMore: 'i {n} więcej', toCheck: 'Pola do sprawdzenia: {n}', toCheck_one: '{n} pole do sprawdzenia', allGood: 'Wszystko się zgadza', showDoc: 'Pokaż dokument', hideDoc: 'Ukryj dokument', noPreview: 'Brak podglądu', xmlNoPreview: 'E-faktura: dane pochodzą z samego pliku, bez AI.', doubts: { amounts: 'Nie udało się odczytać kwot', total: 'Netto + VAT − potrącenie nie daje sumy', vat: 'Kwota VAT nie pasuje do stawki (kilka stawek?)', vatRate: 'Nietypowa stawka VAT', nif: 'NIP jest nieprawidłowy (cyfra kontrolna)', nifMissing: 'Nie znaleziono NIP', name: 'Nie znaleziono nazwy', date: 'Brak daty lub jest nieprawidłowa', dateFuture: 'Data jest późniejsza niż dziś', due: 'Termin płatności przed datą faktury', number: 'Nie znaleziono numeru faktury' },
       notInvoice: 'To nie faktura', duplicate: 'Duplikat', check: 'Sprawdź', noneFound: 'W plikach nie znaleziono faktur.',
@@ -1212,6 +1215,7 @@ export default {
       vatRefund: 'Możesz wnioskować o zwrot w deklaracji 303 za 4. kwartał albo przenieść kwotę do rozliczenia w kolejnym roku.', vatCompensate: 'Teraz nic nie płacisz ani nie odzyskujesz: kwota pomniejsza VAT kolejnych kwartałów. O zwrot wnioskuje się tylko w 4. kwartale (chyba że firma jest w rejestrze REDEME).',
       vatTitle: 'Kwartalny VAT (modelo 303)', vatOutput: 'VAT należny', vatInput: 'VAT naliczony', result: 'Wynik',
       vatExplain: 'VAT z twoich wystawionych faktur minus VAT z wydatków w kwartale.',
+      irpfExplain: 'Szacunek według podstawowego wzoru: nie odejmuje 5 % wydatków trudnych do udokumentowania (uproszczona metoda bezpośrednia, do 2000 € rocznie) ani obniżenia z art. 110.3.c rozporządzenia o IRPF. Jeśli Cię dotyczą, składany modelo 130 może wyjść nieco niższy.',
       irpfTitle: 'Zaliczka na podatek dochodowy (modelo 130)', accIncome: 'Przychody narastająco w roku', accExpense: 'Wydatki narastająco w roku',
       netIncome: 'Dochód netto', twentyPct: '20% dochodu', prevPayments: 'Zaliczki z poprzednich kwartałów', withholdings: 'Potrącone zaliczki',
       companyNote: 'Nokfi nie wylicza jeszcze podatku od osób prawnych (modelo 200), jego zaliczek (202) ani potrąceń, które odprowadzasz (111 i 115). Kwota powyżej to tylko VAT (303): odłóż też na te podatki.', companyWarning: 'Dla spółki liczony jest tu tylko VAT (303). Podatek od osób prawnych (200 i 202) i potrącenia (111 i 115) nie są jeszcze liczone i nie wchodzą w kwotę do odłożenia.', companyTitle: 'Podatek od osób prawnych i potrącenia',

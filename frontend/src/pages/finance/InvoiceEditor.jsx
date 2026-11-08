@@ -1,5 +1,5 @@
 import { useState, useEffect, useMemo, useRef } from 'react';
-import { Link, useNavigate, useSearchParams } from 'react-router-dom';
+import { Link, useNavigate, useSearchParams, useOutletContext } from 'react-router-dom';
 import { ArrowLeft, Plus, Trash2, Loader2, FileCheck2, Undo2 } from 'lucide-react';
 import { invoicingApi, newIdempotencyKey } from '../../middleware/api';
 import { useLang } from '../../context/LangContext';
@@ -9,7 +9,7 @@ import { Section, Field, ErrorBox, Notice, Segmented, Modal } from '../../compon
 import CustomerForm, { emptyCustomer } from '../../components/finance/CustomerForm';
 import {
   VAT_RATES, IRPF_RATES, EXEMPTIONS, PAYMENT_METHODS, RECTIFY_KINDS, INVOICE_LANGS, SIMPLIFIED_MAX,
-  computeTotals, lineAmount, emptyLine, invoiceError
+  computeTotals, lineAmount, emptyLine, invoiceError, irpfHintKey
 } from '../../components/finance/invoiceUtils';
 import { eur, todayIso } from '../../utils/money';
 
@@ -23,6 +23,7 @@ const addDays = (iso, d) => { const x = new Date(`${iso}T00:00:00Z`); x.setUTCDa
  */
 export default function InvoiceEditor() {
   const { t, lang } = useLang();
+  const outlet = useOutletContext(); // S15b T4: forma jurídica para la pista de la retención
   const toast = useToast();
   const navigate = useNavigate();
   const [params] = useSearchParams();
@@ -205,7 +206,7 @@ export default function InvoiceEditor() {
           <Field label={t('finance.date')} htmlFor="ie-date"><input id="ie-date" type="date" value={f.issue_date} max={todayIso()} onChange={(e) => set('issue_date', e.target.value)} className="input" required /></Field>
           {!original && <Field label={t('finance.dueDate')} htmlFor="ie-due"><input id="ie-due" type="date" value={f.due_date || ''} min={f.issue_date} onChange={(e) => set('due_date', e.target.value)} className="input" /></Field>}
           <Field label={t('invoices.operationDate')} htmlFor="ie-op" hint={t('invoices.operationHint')}><input id="ie-op" type="date" value={f.operation_date} onChange={(e) => set('operation_date', e.target.value)} className="input" /></Field>
-          <Field label={t('finance.irpfRate')} htmlFor="ie-irpf" hint={t('invoices.irpfHint')}>
+          <Field label={t('finance.irpfRate')} htmlFor="ie-irpf" hint={t(irpfHintKey(outlet?.profile?.legalForm))}>
             <select id="ie-irpf" value={f.irpf_rate} onChange={(e) => set('irpf_rate', Number(e.target.value))} className="input">
               {IRPF_RATES.map(v => <option key={v} value={v}>{v} %</option>)}
             </select>

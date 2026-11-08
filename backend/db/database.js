@@ -271,6 +271,7 @@ function initDB() {
       require('./invoicing').runInvoicingSchema(db); // sesión 11: emisión de facturas
       require('./verifactu').runVerifactuSchema(db); // sesión 11 (tanda 4): VERI*FACTU
       require('./credits').runCreditsSchema(db); // S15b (U1): paquetes de créditos
+      require('./schema4').fixNegativeWithholdings(db); // S15b T5: retenciones negativas antiguas → positivas
 
       console.log('✅  Base de datos inicializada en', DB_PATH);
       resolve(db);

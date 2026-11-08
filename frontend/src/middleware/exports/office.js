@@ -61,7 +61,48 @@ export async function exportDocx(model, filename) {
 }
 
 /* ── Hojas de cálculo: .xlsx y .ods (misma librería, distinto bookType) ── */
-export async function exportSheet(model, filename, bookType, labels) {
+// S15b T4: columnas tipadas también en las hojas (como en el CSV): 'date' → fecha
+// de verdad (no el texto ISO) y 'money' → número con 2 decimales.
+const ISO_DAY = /^\d{4}-\d{2}-\d{2}$/;
+const ODS_MONEY = '\u2063'; // marca invisible para dar formato 0,00 a los importes del .ods (se quita después)
+export function sheetCell(v, type, bookType) {
+  if (type === 'money' && v !== '' && v != null && Number.isFinite(Number(v))) {
+    const n = Math.round(Number(v) * 100) / 100;
+    return bookType === 'ods' ? { t: 'n', v: n, w: ODS_MONEY + n.toFixed(2) } : { t: 'n', v: n, z: '#,##0.00' };
+  }
+  const day = String(v ?? '').slice(0, 10);
+  if (type === 'date' && ISO_DAY.test(day)) {
+    const [y, m, d] = day.split('-').map(Number);
+    const utc = Date.UTC(y, m - 1, d);
+    // xlsx: número de serie de Excel (días desde 1899-12-30) con formato de fecha, sin zona horaria.
+    return bookType === 'ods' ? { t: 'd', v: new Date(utc), w: `${day.slice(8)}/${day.slice(5, 7)}/${y}` }
+      : { t: 'n', v: utc / 86400000 + 25569, z: 'dd/mm/yyyy' };
+  }
+  return neutralize(v ?? '');
+}
+
+// El escritor .ods de SheetJS no guarda formatos de número: se añade un estilo
+// «0,00» y se aplica a las celdas marcadas como importe.
+async function odsMoneyFormat(bytes) {
+  const { default: JSZip } = await import('jszip');
+  const zip = await JSZip.loadAsync(bytes);
+  let xml = await zip.file('content.xml').async('string');
+  if (!xml.includes(ODS_MONEY)) return bytes;
+  xml = xml.replace('<office:automatic-styles>', '<office:automatic-styles><number:number-style style:name="NKMONEY"><number:number number:decimal-places="2" number:min-decimal-places="2" number:min-integer-digits="1" number:grouping="true"/></number:number-style><style:style style:name="cekm" style:family="table-cell" style:data-style-name="NKMONEY"/>')
+    .replace(new RegExp(`<table:table-cell ([^>]*)><text:p>${ODS_MONEY}`, 'g'), '<table:table-cell $1 table:style-name="cekm"><text:p>');
+  // ODF: «mimetype» tiene que ser el primer archivo del ZIP y sin comprimir.
+  const odf = new JSZip();
+  odf.file('mimetype', 'application/vnd.oasis.opendocument.spreadsheet', { compression: 'STORE' });
+  for (const name of Object.keys(zip.files)) {
+    const f = zip.files[name];
+    if (name === 'mimetype' || f.dir) continue;
+    odf.file(name, name === 'content.xml' ? xml : await f.async('uint8array'), { compression: 'DEFLATE' });
+  }
+  return odf.generateAsync({ type: 'uint8array', mimeType: 'application/vnd.oasis.opendocument.spreadsheet' });
+}
+
+/** Bytes de la hoja (.xlsx / .ods) — separado de la descarga para poder probarlo. */
+export async function sheetBytes(model, bookType, labels) {
   const XLSX = await import('xlsx');
   const wb = XLSX.utils.book_new();
   const reportRows = modelToRows(model);
@@ -73,12 +114,19 @@ export async function exportSheet(model, filename, bookType, labels) {
     XLSX.utils.book_append_sheet(wb, ws, labels.sheet.slice(0, 31));
   }
   model.tables.forEach((tb, i) => {
-    const aoa = [tb.columns.map(c => c.label), ...tb.rows.map(r => tb.columns.map(c => neutralize(r[c.key] ?? '')))];
+    const aoa = [tb.columns.map(c => c.label), ...tb.rows.map(r => tb.columns.map(c => sheetCell(r[c.key], c.type, bookType)))];
     const ws = XLSX.utils.aoa_to_sheet(aoa);
     XLSX.utils.book_append_sheet(wb, ws, (tb.name || `Datos_${i + 1}`).replace(/[\\/?*[\]:]/g, ' ').slice(0, 31));
   });
   if (!wb.SheetNames.length) XLSX.utils.book_append_sheet(wb, XLSX.utils.aoa_to_sheet([[model.title]]), 'Nokfi');
-  XLSX.writeFile(wb, filename, { bookType });
+  const bytes = XLSX.write(wb, { bookType, type: 'array' });
+  return bookType === 'ods' ? odsMoneyFormat(bytes) : bytes;
+}
+
+export async function exportSheet(model, filename, bookType, labels) {
+  const bytes = await sheetBytes(model, bookType, labels);
+  const mime = bookType === 'ods' ? 'application/vnd.oasis.opendocument.spreadsheet' : 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet';
+  saveBlob(new Blob([bytes], { type: mime }), filename);
 }
 
 /* ── CSV (lo que importan A3, Sage, Holded, ContaSol… y las gestorías) ── */

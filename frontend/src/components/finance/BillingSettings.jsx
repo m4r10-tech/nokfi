@@ -1,11 +1,12 @@
 import { useState, useEffect } from 'react';
+import { useOutletContext } from 'react-router-dom';
 import { Loader2 } from 'lucide-react';
 import { invoicingApi } from '../../middleware/api';
 import { useLang } from '../../context/LangContext';
 import { useToast } from '../../context/ToastContext';
 import { Modal, Field, ErrorBox } from '../ui';
 import Skeleton from '../Skeleton';
-import { VAT_RATES, IRPF_RATES, INVOICE_LANGS, invoiceError, withProvince } from './invoiceUtils';
+import { VAT_RATES, IRPF_RATES, INVOICE_LANGS, invoiceError, withProvince, irpfHintKey } from './invoiceUtils';
 
 /**
  * Sesión 11: datos del emisor que salen en cada factura (razón social, NIF,
@@ -14,6 +15,7 @@ import { VAT_RATES, IRPF_RATES, INVOICE_LANGS, invoiceError, withProvince } from
  */
 export default function BillingSettings({ onClose, onSaved }) {
   const { t } = useLang();
+  const outlet = useOutletContext(); // S15b T4: forma jurídica para la pista de la retención
   const toast = useToast();
   const [p, setP] = useState(null);
   const [saving, setSaving] = useState(false);
@@ -76,7 +78,7 @@ export default function BillingSettings({ onClose, onSaved }) {
               {VAT_RATES.map(v => <option key={v} value={v}>{v} %</option>)}
             </select>
           </Field>
-          <Field label={t('invoices.defaultIrpf')} htmlFor="bs-default_irpf_rate" hint={t('invoices.irpfHint')}>
+          <Field label={t('invoices.defaultIrpf')} htmlFor="bs-default_irpf_rate" hint={t(irpfHintKey(outlet?.profile?.legalForm))}>
             <select id="bs-default_irpf_rate" value={p.default_irpf_rate} onChange={(e) => set('default_irpf_rate', Number(e.target.value))} className="input">
               {IRPF_RATES.map(v => <option key={v} value={v}>{v} %</option>)}
             </select>

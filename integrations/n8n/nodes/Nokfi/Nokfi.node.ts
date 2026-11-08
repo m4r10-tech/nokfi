@@ -527,7 +527,6 @@ export class Nokfi implements INodeType {
 					{ name: '10 %', value: 10 },
 					{ name: '21 %', value: 21 },
 					{ name: '4 %', value: 4 },
-					{ name: '5 %', value: 5 },
 				],
 				default: 21,
 			},
@@ -544,7 +543,7 @@ export class Nokfi implements INodeType {
 				type: 'boolean',
 				displayOptions: { show: { resource: ['tax'], operation: ['vat'] } },
 				default: false,
-				description: 'Whether to add the recargo de equivalencia (5.2 / 1.4 / 0.62 / 0.5 %)',
+				description: 'Whether to add the recargo de equivalencia (5.2 / 1.4 / 0.5 %)',
 			},
 			{
 				displayName: 'Withholding Type',

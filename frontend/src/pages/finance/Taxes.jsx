@@ -144,6 +144,8 @@ export default function Taxes() {
                 <Row label={t('finance.taxes.prevPayments')} value={minus(s.irpf130.previous_payments, lang)} />
                 <Row label={t('finance.taxes.withholdings')} value={minus(s.irpf130.withholdings, lang)} />
                 <Row label={t('finance.taxes.result')} value={eur(s.irpf130.result, lang)} strong />
+                {/* S15b T4: qué no resta la estimación (5 % de difícil justificación y minoración). */}
+                <p className="text-xs mt-2" style={{ color: 'var(--text-muted)' }}>{t('finance.taxes.irpfExplain')}</p>
               </Section>
             ) : (
               <Section title={t('finance.taxes.companyTitle')}>

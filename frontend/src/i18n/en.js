@@ -320,7 +320,7 @@ export default {
     welcome: 'Welcome to Nokfi', subtitle: 'Tell us a bit about your business to personalize your analyses',
     companyName: 'Company name', sector: 'Sector', size: 'Size',
     mainExpenses: 'Main business expenses', start: 'Start using Nokfi',
-    legalHint: 'Changes how taxes are estimated', optional: 'Optional', reminders: 'Remind me before each tax deadline', remindersHint: 'We email you a few days before form 303, form 130 and the other filings.', skip: 'Skip for now', privacy: 'We only use this to tailor your analyses. It is never shared.', change: 'Change', sectorSearch: 'Find your sector: garage, shop, transport…'
+    legalHint: 'Changes how taxes are estimated', optional: 'Optional', reminders: 'Remind me before each tax deadline', remindersHint: 'We email you a few days before each filing that applies to you (form 303 for VAT and the others).', skip: 'Skip for now', privacy: 'We only use this to tailor your analyses. It is never shared.', change: 'Change', sectorSearch: 'Find your sector: garage, shop, transport…'
   },
   home: {
     guideStart: 'Start here', guideGo: 'Start', deadlineTitle: 'Next tax deadline',
@@ -937,6 +937,7 @@ export default {
     "defaultVat": "Default VAT",
     "defaultIrpf": "Default income tax withholding (IRPF)",
     "irpfHint": "Freelance professionals: 15 % (7 % in the first years). If nothing is withheld, 0 %.",
+    "irpfHintCompany": "Companies normally invoice without withholding (0 %). It only applies in specific cases, such as renting out business premises (19 %).",
     "footer": "Footer text",
     "footerHint": "For example, your company registration details.",
     "langs": {
@@ -1147,6 +1148,7 @@ export default {
     totalMismatch: 'Net + VAT − withholding does not match the total. Please check it.',
     duplicateEntry: 'There is already an invoice with that number from the same client or supplier in the ledger.',
     noResults: 'No entries match your search.', quarterShort: 'Q{n}', paidAtIncome: 'Collection date', paidAtExpense: 'Payment date', collectTitle: 'Mark as collected · {name}', collectText: 'Enter the day you were paid: it is used to work out your average collection time.',
+    emptyPeriodTitle: 'No entries in this period', emptyPeriodDesc: 'Your ledger has entries in other quarters or years: pick another period above or add a new one.', exportEmpty: 'There are no entries in this period: nothing to export.', exportNoneFiltered: 'No entries match the filter: nothing to export.', filteredTotals: 'Totals and export include only the filtered entries: {n} of {total}.', companyNoIrpf: 'Companies normally invoice without IRPF withholding, so it is not asked here.',
     confirmDelete: 'Delete this ledger entry?', deleted: 'Entry deleted', delete: 'Delete',
     incomeBase: 'Income (net)', expenseBase: 'Expenses (net)', vatBalance: 'VAT to pay', vatBalanceNeg: 'VAT to offset', result: 'Result',
     reviewCount: '{n} entries do not add up: please review them.', reviewCount_one: '{n} entry does not add up: please review it.', search: 'Search…', ledgerSheet: 'Income and expense ledger',
@@ -1193,10 +1195,11 @@ export default {
       desc: 'Choose photos or PDFs of invoices and receipts, or open a whole folder. The AI extracts issuer, tax ID, date, net amount, VAT, withholding and total; you review before saving.',
       kind: 'What kind of invoices?', kindAuto: 'Detect with my tax ID', kindExpense: 'Expenses (received)', kindIncome: 'Income (issued)',
       noTaxId: 'Add your tax ID in Settings to tell them apart automatically; otherwise they will be treated as expenses.',
-      formats: 'PDF, JPG, PNG, WebP or XML · up to 60 invoices per read · files are not stored: only the data you confirm.', xmlFree: 'E-invoices (Facturae, UBL, Factur-X/ZUGFeRD as XML or PDF) are read instantly, exactly and without using any analysis.',
-      willReadFree: '{n} e-invoices will be read instantly, without using any analyses.', willReadFree_one: '{n} e-invoice will be read instantly, without using any analyses.', xmlInBatch: '{n} are e-invoices and are read without AI.', xmlInBatch_one: '{n} is an e-invoice and is read without AI.',
+      formats: 'PDF, JPG, PNG, WebP or XML · up to 60 invoices per read · files are not stored: only the data you confirm.', xmlFree: 'E-invoices (Facturae, UBL, Factur-X/ZUGFeRD as XML or PDF) are read instantly, exactly and without using any credits.',
+      willReadFree: '{n} e-invoices will be read instantly, without using any credits.', willReadFree_one: '{n} e-invoice will be read instantly, without using any credits.', xmlInBatch: '{n} are e-invoices (XML or Factur-X) and are read without AI, using no credits.', xmlInBatch_one: '{n} is an e-invoice (XML or Factur-X) and is read without AI, using no credits.',
       willRead: '{n} invoices will be read. It will use 1 credit.', willRead_one: '{n} invoice will be read. It will use 1 credit.', capped: 'Only the first {max} will be read.',
       start: 'Read invoices', preparing: 'Preparing', reading: 'Reading batch',
+      checkingFree: 'Checking which PDFs are e-invoices (Factur-X), which use no credits…', savedElsewhere: '{n} entries belong to another period and were saved in {periods}. Change the period above to see them.', savedElsewhere_one: '{n} entry belongs to another period and was saved in {periods}. Change the period above to see it.',
       reviewHint: 'Check each invoice against the document beside it. Only fields that don\'t add up or couldn\'t be read are marked in amber.',
       andMore: 'and {n} more', toCheck: '{n} fields to check', toCheck_one: '{n} field to check', allGood: 'All adds up', showDoc: 'View document', hideDoc: 'Hide document', noPreview: 'No preview', xmlNoPreview: 'E-invoice: the data comes from the file itself, without AI.', doubts: { amounts: 'The amounts could not be read', total: 'Base + VAT − withholding does not match the total', vat: 'The VAT amount does not match the rate (several rates?)', vatRate: 'Unusual VAT rate', nif: 'The tax ID is not valid (check digit)', nifMissing: 'No tax ID found', name: 'No name found', date: 'Date missing or not valid', dateFuture: 'The date is later than today', due: 'Due before the invoice date', number: 'No invoice number found' },
       notInvoice: 'Not an invoice', duplicate: 'Duplicate', check: 'Check', noneFound: 'No invoices were found in the files.',
@@ -1209,6 +1212,7 @@ export default {
       vatRefund: 'You can request the refund in the Q4 form 303 or carry it forward to offset next year.', vatCompensate: 'Nothing to pay or reclaim now: it is deducted from the VAT of the following quarters. Refunds are only requested in Q4 (except for businesses in the REDEME scheme).',
       vatTitle: 'Quarterly VAT (form 303)', vatOutput: 'Output VAT', vatInput: 'Input VAT', result: 'Result',
       vatExplain: 'VAT on your issued invoices minus VAT on your expenses for the quarter.',
+      irpfExplain: 'Estimate with the basic formula: it does not deduct the 5 % for hard-to-justify expenses (simplified direct assessment, up to €2,000 a year) or the reduction in art. 110.3.c of the IRPF Regulation. If they apply to you, the form 130 you file may come out somewhat lower.',
       irpfTitle: 'Income tax instalment (form 130)', accIncome: 'Income so far this year', accExpense: 'Expenses so far this year',
       netIncome: 'Net income', twentyPct: '20% of net income', prevPayments: 'Payments from previous quarters', withholdings: 'Withholdings applied to you',
       companyNote: 'Nokfi does not yet calculate Corporate Tax (form 200), its instalments (202) or the withholdings you pay over (111 and 115). The figure above is VAT only (303): set money aside for those taxes too.', companyWarning: 'As a company, only VAT (303) is calculated here. Corporate Tax (200 and 202) and withholdings (111 and 115) are not calculated yet and are not included in what to set aside.', companyTitle: 'Corporate Tax and withholdings',

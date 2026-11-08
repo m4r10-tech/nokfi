@@ -126,6 +126,11 @@ function listLedger(license_id, { from, to, type } = {}) {
     .all(...args).map(r => ({ ...r, party_name: nameCase(r.party_name), paid: !!r.paid, needs_review: !!r.needs_review, is_rectification: !!r.is_rectification }));
 }
 
+// S15b T4: para distinguir «este periodo no tiene apuntes» de «el libro está vacío».
+function hasEntries(license_id) {
+  return !!getDB().prepare('SELECT 1 FROM ledger_entries WHERE license_id = ? LIMIT 1').get(license_id);
+}
+
 function allEntries(license_id) {
   // Sesión 11: de una factura emitida en Nokfi se cobra lo que queda tras sus
   // rectificativas (rectified_total, en negativo si restan); las rectificativas
@@ -152,6 +157,8 @@ function updateEntry(license_id, id, partial) {
   const { entry, error } = normalizeEntry({ ...partial }, { partial: true });
   if (error) return { error };
   if (entry.paid === 1 && !current.paid && !entry.paid_at) entry.paid_at = todayIso();
+  // S15b T4: un apunte que sigue cobrado no pierde su fecha porque llegue paid_at vacío.
+  if (entry.paid_at === null && entry.paid !== 0 && current.paid) entry.paid_at = current.paid_at || todayIso();
   if (entry.paid === 0) entry.paid_at = null;
   // Recalcular needs_review con los valores finales.
   const merged = { ...current, ...entry };
@@ -202,4 +209,4 @@ function removeDismissal(license_id, party_key) {
 
 const dismissedSet = (license_id) => new Set(listDismissals(license_id).map(d => d.party_key));
 
-module.exports = { listDismissals, addDismissal, removeDismissal, dismissedSet, normalizeEntry, findDuplicate, insertEntries, listLedger, allEntries, getEntry, updateEntry, deleteEntry, getReserve, setReserve };
+module.exports = { listDismissals, addDismissal, removeDismissal, dismissedSet, normalizeEntry, findDuplicate, insertEntries, listLedger, hasEntries, allEntries, getEntry, updateEntry, deleteEntry, getReserve, setReserve };

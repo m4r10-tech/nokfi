@@ -70,8 +70,9 @@ function taxId(value) {
 }
 
 /* ── IVA y recargo de equivalencia ── */
-const VAT_RATES = [0, 4, 5, 10, 21];
-const SURCHARGE = { 21: 5.2, 10: 1.4, 5: 0.62, 4: 0.5, 0: 0 };
+// S15b: sin el 5 % (temporal, 7-2022 a 9-2024; ya no se aplica), como la calculadora web.
+const VAT_RATES = [0, 4, 10, 21];
+const SURCHARGE = { 21: 5.2, 10: 1.4, 4: 0.5, 0: 0 };
 
 function vat(input = {}) {
   const amount = num(input.amount);

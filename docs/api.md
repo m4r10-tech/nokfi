@@ -554,7 +554,7 @@ Aplica a `/api/proxy/ai`, `/api/analyses`, `/api/profile`,
 
 | Ruta | Qué hace |
 |---|---|
-| `GET/POST /api/ledger`, `PATCH/DELETE /api/ledger/:id` | Libro de facturas recibidas y emitidas (base, IVA, IRPF, total, cobro y su fecha `paid_at`). Fechas reales (`2026-02-30` → 400); la retención se guarda en positivo |
+| `GET/POST /api/ledger`, `PATCH/DELETE /api/ledger/:id` | Libro de facturas recibidas y emitidas (base, IVA, IRPF, total, cobro y su fecha `paid_at`). Fechas reales (`2026-02-30` → 400); la retención se guarda en positivo; un `paid_at` vacío sobre un apunte que sigue cobrado no borra su fecha de cobro. `GET` devuelve además `has_any` (el libro tiene apuntes aunque el periodo pedido no tenga ninguno) |
 | `GET /api/finance/taxes` · `PUT /api/finance/reserve` | 303 (descontando la cuota a compensar de trimestres anteriores del año: `vat.previous_compensation`) y 130 del trimestre desde el libro; lo apartado para Hacienda |
 | `GET /api/finance/receivables` · `POST /api/finance/collection-email` | Cobros pendientes y email de reclamación (amable, firme, formal) |
 | `GET /api/finance/leaks` · `POST/DELETE /api/finance/leaks/dismiss` | Fugas de dinero (suscripciones, subidas de proveedores…) |
@@ -650,7 +650,7 @@ hueco; la cuota diaria, hasta las 00:00 UTC).
 | Análisis | `POST /analyze`, `GET /analyses`, `GET /analyses/:id`, `PATCH /analyses/:id` (`{ title }`, renombrar), `DELETE /analyses/:id` (borrar con su plan de acción; no devuelve cuota) |
 | Facturas recibidas | `POST /invoices/extract` (PDF, imagen o texto con IA; XML UBL/Facturae/CII y Factur-X sin IA ni cuota) |
 | Emisión | `POST/GET /invoices`, `GET /invoices/:id`, `POST /invoices/:id/rectify`, `/cancel`, `/status`, `GET /invoices/:id/pdf`, `/xml?format=` · `GET/POST /customers` |
-| Herramientas sin IA | `GET/POST /tax/nif`, `POST /tax/vat`, `/tax/withholding`, `/tax/model-130`, `GET /tax/quarter`, `/tax/calendar` |
+| Herramientas sin IA | `GET/POST /tax/nif`, `POST /tax/vat` (tipos 0, 4, 10 y 21 %; el 5 % ya no se aplica), `/tax/withholding`, `/tax/model-130`, `GET /tax/quarter`, `/tax/calendar` |
 | Jobs y webhooks | `GET /jobs[/:id]` · `GET/POST /webhooks`, `GET/PATCH/DELETE /webhooks/:id`, `POST /webhooks/:id/test` |
 
 ## 12. Webhooks salientes

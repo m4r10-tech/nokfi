@@ -320,7 +320,7 @@ export default {
     welcome: 'Bienvenue sur Nokfi', subtitle: 'Parlez-nous un peu de votre activité pour personnaliser vos analyses',
     companyName: 'Nom de l’entreprise', sector: 'Secteur', size: 'Taille',
     mainExpenses: 'Principales dépenses de l’activité', start: 'Commencer à utiliser Nokfi',
-    legalHint: 'Change le calcul des impôts', optional: 'Facultatif', reminders: 'Me prévenir avant chaque échéance fiscale', remindersHint: 'Nous vous écrivons quelques jours avant le 303, le 130 et les autres déclarations.', skip: 'Passer pour l\'instant', privacy: 'Ces données servent uniquement à adapter vos analyses. Elles ne sont jamais partagées.', change: 'Changer', sectorSearch: 'Cherchez votre secteur : garage, boutique, transport…'
+    legalHint: 'Change le calcul des impôts', optional: 'Facultatif', reminders: 'Me prévenir avant chaque échéance fiscale', remindersHint: 'Nous vous écrivons quelques jours avant chaque déclaration qui vous concerne (le 303 de TVA et les autres).', skip: 'Passer pour l\'instant', privacy: 'Ces données servent uniquement à adapter vos analyses. Elles ne sont jamais partagées.', change: 'Changer', sectorSearch: 'Cherchez votre secteur : garage, boutique, transport…'
   },
   home: {
     guideStart: 'Commencez ici', guideGo: 'Commencer', deadlineTitle: 'Prochaine échéance fiscale',
@@ -937,6 +937,7 @@ export default {
     "defaultVat": "TVA par défaut",
     "defaultIrpf": "Retenue IRPF par défaut",
     "irpfHint": "Professions libérales : 15 % (7 % les premières années). Sans retenue, 0 %.",
+    "irpfHintCompany": "Les sociétés facturent normalement sans retenue (0 %). Elle ne s’applique que dans des cas précis, comme la location d’un local (19 %).",
     "footer": "Texte de pied de page",
     "footerHint": "Par exemple, les données d'immatriculation.",
     "langs": {
@@ -1147,6 +1148,7 @@ export default {
     totalMismatch: 'HT + TVA − retenue ne correspond pas au total. Vérifiez-le.',
     duplicateEntry: 'Une facture avec ce numéro du même client ou fournisseur figure déjà dans le registre.',
     noResults: 'Aucune écriture ne correspond à votre recherche.', quarterShort: 'T{n}', paidAtIncome: 'Date d’encaissement', paidAtExpense: 'Date de paiement', collectTitle: 'Marquer comme encaissée · {name}', collectText: 'Indiquez le jour où vous avez été payé : il sert à calculer le délai moyen d’encaissement.',
+    emptyPeriodTitle: 'Aucune écriture sur cette période', emptyPeriodDesc: 'Votre registre contient des écritures sur d’autres trimestres ou années : choisissez une autre période ci-dessus ou ajoutez-en une.', exportEmpty: 'Aucune écriture sur cette période : rien à exporter.', exportNoneFiltered: 'Aucune écriture ne correspond au filtre : rien à exporter.', filteredTotals: 'Les totaux et l’export ne portent que sur les écritures filtrées : {n} sur {total}.', companyNoIrpf: 'Les sociétés facturent normalement sans retenue d’IRPF : elle n’est donc pas demandée ici.',
     confirmDelete: 'Supprimer cette écriture du registre ?', deleted: 'Écriture supprimée', delete: 'Supprimer',
     incomeBase: 'Recettes (HT)', expenseBase: 'Dépenses (HT)', vatBalance: 'TVA à payer', vatBalanceNeg: 'TVA à reporter', result: 'Résultat',
     reviewCount: '{n} écritures ne sont pas cohérentes : vérifiez-les.', reviewCount_one: '{n} écriture n’est pas cohérente : vérifiez-la.', search: 'Rechercher…', ledgerSheet: 'Registre des recettes et dépenses',
@@ -1193,10 +1195,11 @@ export default {
       desc: 'Choisissez des photos ou des PDF de factures et de tickets, ou ouvrez un dossier entier. L’IA extrait l’émetteur, le numéro fiscal, la date, le HT, la TVA, la retenue et le total ; vous vérifiez avant d’enregistrer.',
       kind: 'Quel type de factures ?', kindAuto: 'Détecter avec mon n° fiscal', kindExpense: 'Dépenses (reçues)', kindIncome: 'Recettes (émises)',
       noTaxId: 'Ajoutez votre numéro fiscal dans les Paramètres pour les distinguer automatiquement ; sinon, elles seront traitées comme des dépenses.',
-      formats: 'PDF, JPG, PNG, WebP ou XML · jusqu’à 60 factures par lecture · les fichiers ne sont pas conservés : seulement les données que vous confirmez.', xmlFree: 'Les factures électroniques (Facturae, UBL, Factur-X/ZUGFeRD en XML ou PDF) sont lues instantanément, avec exactitude et sans consommer d’analyse.',
-      willReadFree: '{n} factures électroniques vont être lues instantanément, sans consommer d’analyse.', willReadFree_one: '{n} facture électronique va être lue instantanément, sans consommer d’analyse.', xmlInBatch: '{n} sont électroniques et se lisent sans IA.', xmlInBatch_one: '{n} est électronique et se lit sans IA.',
+      formats: 'PDF, JPG, PNG, WebP ou XML · jusqu’à 60 factures par lecture · les fichiers ne sont pas conservés : seulement les données que vous confirmez.', xmlFree: 'Les factures électroniques (Facturae, UBL, Factur-X/ZUGFeRD en XML ou PDF) sont lues instantanément, avec exactitude et sans consommer de crédit.',
+      willReadFree: '{n} factures électroniques vont être lues instantanément, sans consommer de crédit.', willReadFree_one: '{n} facture électronique va être lue instantanément, sans consommer de crédit.', xmlInBatch: '{n} sont électroniques (XML ou Factur-X) et se lisent sans IA, sans consommer de crédit.', xmlInBatch_one: '{n} est électronique (XML ou Factur-X) et se lit sans IA, sans consommer de crédit.',
       willRead: '{n} factures vont être lues. Cela consommera 1 crédit.', willRead_one: '{n} facture va être lue. Cela consommera 1 crédit.', capped: 'Seules les {max} premières seront lues.',
       start: 'Lire les factures', preparing: 'Préparation', reading: 'Lecture du lot',
+      checkingFree: 'Vérification des PDF qui sont des factures électroniques (Factur-X), qui ne consomment pas de crédit…', savedElsewhere: '{n} écritures appartiennent à une autre période et ont été enregistrées en {periods}. Changez de période ci-dessus pour les voir.', savedElsewhere_one: '{n} écriture appartient à une autre période et a été enregistrée en {periods}. Changez de période ci-dessus pour la voir.',
       reviewHint: 'Vérifiez chaque facture avec le document à côté. Seuls les champs qui ne concordent pas ou n\'ont pas pu être lus sont marqués en orange.',
       andMore: 'et {n} de plus', toCheck: '{n} champs à vérifier', toCheck_one: '{n} champ à vérifier', allGood: 'Tout concorde', showDoc: 'Voir le document', hideDoc: 'Masquer le document', noPreview: 'Pas d\'aperçu', xmlNoPreview: 'Facture électronique : les données viennent du fichier lui-même, sans IA.', doubts: { amounts: 'Les montants n\'ont pas pu être lus', total: 'Base + TVA − retenue ne donne pas le total', vat: 'La TVA ne correspond pas au taux (plusieurs taux ?)', vatRate: 'Taux de TVA inhabituel', nif: 'Le NIF n\'est pas valide (clé de contrôle)', nifMissing: 'Aucun NIF trouvé', name: 'Aucun nom trouvé', date: 'Date manquante ou non valide', dateFuture: 'La date est postérieure à aujourd\'hui', due: 'Échéance antérieure à la date de facture', number: 'Aucun numéro de facture trouvé' },
       notInvoice: 'Pas une facture', duplicate: 'Doublon', check: 'À vérifier', noneFound: 'Aucune facture trouvée dans les fichiers.',
@@ -1209,6 +1212,7 @@ export default {
       vatRefund: 'Vous pouvez demander le remboursement dans le modèle 303 du 4T ou le reporter sur l\'année suivante.', vatCompensate: 'Rien à payer ni à récupérer maintenant : le montant se déduit de la TVA des trimestres suivants. Le remboursement ne se demande qu\'au 4T (sauf inscription au REDEME).',
       vatTitle: 'TVA trimestrielle (modèle 303)', vatOutput: 'TVA collectée', vatInput: 'TVA déductible', result: 'Résultat',
       vatExplain: 'TVA de vos factures émises moins la TVA de vos dépenses du trimestre.',
+      irpfExplain: 'Estimation selon la formule de base : elle ne déduit ni les 5 % de frais difficiles à justifier (estimation directe simplifiée, jusqu’à 2 000 € par an) ni la minoration de l’art. 110.3.c du règlement de l’IRPF. S’ils s’appliquent à vous, le modèle 130 que vous déposerez peut être un peu plus bas.',
       irpfTitle: 'Acompte d’impôt sur le revenu (modèle 130)', accIncome: 'Recettes cumulées de l’année', accExpense: 'Dépenses cumulées de l’année',
       netIncome: 'Résultat net', twentyPct: '20 % du résultat', prevPayments: 'Acomptes des trimestres précédents', withholdings: 'Retenues subies',
       companyNote: 'Nokfi ne calcule pas encore l’impôt sur les sociétés (modèle 200), ses acomptes (202) ni les retenues que vous reversez (111 et 115). Le montant ci-dessus ne concerne que la TVA (303) : mettez aussi de côté pour ces impôts.', companyWarning: 'Pour une société, seule la TVA (303) est calculée ici. L’impôt sur les sociétés (200 et 202) et les retenues (111 et 115) ne sont pas encore calculés et ne sont pas inclus dans le montant à mettre de côté.', companyTitle: 'Impôt sur les sociétés et retenues',

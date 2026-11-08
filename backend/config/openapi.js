@@ -388,7 +388,7 @@ const spec = {
       post: {
         summary: 'Calcular IVA y recargo de equivalencia (sin IA)',
         requestBody: { required: true, content: { 'application/json': {
-          schema: { type: 'object', required: ['amount'], properties: { amount: num, rate: { type: 'number', enum: [0, 4, 5, 10, 21], default: 21 }, includes_vat: { type: 'boolean' }, equivalence_surcharge: { type: 'boolean', description: 'Recargo: 5,2 / 1,4 / 0,62 / 0,5 %' } } },
+          schema: { type: 'object', required: ['amount'], properties: { amount: num, rate: { type: 'number', enum: [0, 4, 10, 21], default: 21 }, includes_vat: { type: 'boolean' }, equivalence_surcharge: { type: 'boolean', description: 'Recargo: 5,2 / 1,4 / 0,5 %' } } },
           example: { amount: 1210, includes_vat: true }
         } } },
         responses: taxOk('{ base, vat_rate, vat_amount, surcharge_rate, surcharge_amount, total }')

@@ -319,4 +319,23 @@ function allowEinvoiceSource(db) {
   }
 }
 
-module.exports = { runSession4Schema, ensureColumn, hasColumn, allowEinvoiceSource };
+/**
+ * S15b T5: antes de L1 se podía guardar una retención negativa en un apunte a
+ * mano (−15 en vez de 15), y el 130 la sumaba como un pago que no existe. Se
+ * pasan a positivo (importe y tipo) SOLO los apuntes que cumplen la condición
+ * del informe del lote 4: retención negativa, base no negativa (no es un abono)
+ * y sin factura emitida en Nokfi detrás. Se recalcula «para revisar» con la
+ * retención ya corregida (base + IVA − retención = total). Idempotente: tras la
+ * primera pasada ninguna fila cumple la condición. Corre después del esquema de
+ * facturación (necesita ledger_entries.invoice_id). Devuelve las filas tocadas.
+ */
+function fixNegativeWithholdings(db) {
+  if (!hasColumn(db, 'ledger_entries', 'irpf_amount') || !hasColumn(db, 'ledger_entries', 'invoice_id')) return 0;
+  return db.prepare(`UPDATE ledger_entries SET
+      irpf_amount = ABS(irpf_amount),
+      irpf_rate = ABS(irpf_rate),
+      needs_review = CASE WHEN ABS(base + vat_amount - ABS(irpf_amount) - total) > 0.05 THEN 1 ELSE 0 END
+    WHERE irpf_amount < 0 AND base >= 0 AND invoice_id IS NULL`).run().changes;
+}
+
+module.exports = { runSession4Schema, ensureColumn, hasColumn, allowEinvoiceSource, fixNegativeWithholdings };

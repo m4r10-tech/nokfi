@@ -28,7 +28,7 @@ const ISO = /^\d{4}-\d{2}-\d{2}$/;
 const EMAIL = /^[^\s@<>"',;]+@[^\s@<>"',;]+\.[a-z]{2,}$/i;
 
 // El 5 % (temporal, 7-2022 a 9-2024) ya no existe: la AEAT lo rechaza en VERI*FACTU.
-// En el libro y en las calculadoras sigue (facturas antiguas).
+// En el libro sigue (facturas antiguas); la API de calculadoras ya no lo acepta (S15b).
 const VAT_RATES = [0, 4, 10, 21];
 // Recargo de equivalencia por tipo de IVA (art. 161 LIVA).
 const RE_RATES = { 21: 5.2, 10: 1.4, 5: 0.62, 4: 0.5, 0: 0 };
