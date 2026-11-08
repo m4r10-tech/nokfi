@@ -134,14 +134,18 @@ async function main() {
 
     // ── D4: cambiar de tono durante la redacción ──
     await p.goto(`${base}/app/finanzas/cobros`);
+    const redactar = () => p.getByRole('dialog').getByRole('button', { name: 'Redactar el email' }).click(); // S15b T4: solo al pedirlo
     await p.getByRole('button', { name: 'Reclamar' }).first().click();
+    await redactar();
     await wait(400); // empieza «Amable» (3 s)
     await p.getByRole('dialog').getByRole('radio', { name: 'Firme', exact: true }).click();
+    await redactar();
     await wait(4500); // la respuesta vieja ya habría llegado
     const subject = await p.getByRole('dialog').getByLabel('Asunto').inputValue().catch(() => '');
     check('D4: la respuesta vieja (Amable) no pisa la del tono elegido (Firme)', subject === 'Asunto Firme');
     const before = aiCalls.length;
     await p.getByRole('dialog').getByRole('radio', { name: 'Formal', exact: true }).click();
+    await redactar();
     await wait(1200);
     await p.getByRole('dialog').getByRole('radio', { name: 'Firme', exact: true }).click();
     await wait(800);
@@ -152,6 +156,7 @@ async function main() {
     // ── IA de respaldo en el email ──
     process.env.CHAT_PROVIDERS = 'local';
     await p.getByRole('button', { name: 'Reclamar' }).first().click();
+    await redactar();
     await p.getByRole('dialog').getByText('Redactado con la IA de respaldo').waitFor({ timeout: 8000 }).catch(() => {});
     check('Respaldo: el email avisa de que lo ha redactado la IA de respaldo', await p.getByRole('dialog').getByText('Redactado con la IA de respaldo').isVisible().catch(() => false));
     await p.keyboard.press('Escape');
