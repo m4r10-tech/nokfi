@@ -329,7 +329,21 @@ function InvoiceDetail({ id, onClose, onChanged }) {
               <p style={{ color: 'var(--text-primary)' }}>{t(`invoices.methods.${inv.payment_method}`)}{inv.iban ? ` · ${inv.iban.replace(/(.{4})/g, '$1 ').trim()}` : ''}</p>
             </div>}
           </div>
-          <div className="overflow-x-auto -mx-1">
+          {/* S15b T4 (lote 13): en el móvil, cada concepto en un bloque (sin scroll horizontal dentro del modal). */}
+          <ul className="sm:hidden flex flex-col" data-lines="mobile">
+            {inv.lines.map(l => (
+              <li key={l.position} className="py-2 flex items-start justify-between gap-3" style={{ borderTop: '1px solid var(--border)' }}>
+                <div className="min-w-0">
+                  <p className="break-words" style={{ color: 'var(--text-primary)' }}>{l.description}</p>
+                  <p className="text-xs tabular" style={{ color: 'var(--text-muted)' }}>
+                    {num(l.quantity, lang, 3)}{l.unit ? ` ${l.unit}` : ''} × {price(l.unit_price, lang)}{l.discount_pct ? ` −${l.discount_pct} %` : ''} · {t('finance.vat')} {l.vat_rate} %
+                  </p>
+                </div>
+                <p className="shrink-0 text-right tabular" style={{ color: 'var(--text-primary)' }}>{eur(l.amount, lang)}</p>
+              </li>
+            ))}
+          </ul>
+          <div className="hidden sm:block overflow-x-auto -mx-1">
             <table className="w-full text-sm min-w-[460px]">
               <thead><tr style={{ color: 'var(--text-muted)' }} className="text-xs text-left">
                 <th className="font-medium px-1 py-1">{t('invoices.description')}</th><th className="font-medium px-1 py-1 text-right">{t('invoices.qty')}</th>

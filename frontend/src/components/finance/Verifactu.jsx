@@ -104,7 +104,7 @@ export default function Verifactu({ onClose, onOpenInvoice }) {
                 <li key={r.id} className="flex items-start gap-2 sm:gap-3 px-1 py-2.5" style={{ borderTop: '1px solid var(--border)' }}>
                   <div className="flex-1 min-w-0">
                     <p className="flex flex-wrap items-center gap-x-2 gap-y-1">
-                      <button onClick={() => onOpenInvoice(r.invoice_id)} className="font-medium hover:underline" style={{ color: 'var(--text-primary)' }}>{r.number}</button>
+                      <button onClick={() => onOpenInvoice(r.invoice_id)} className="tap-target !justify-start font-medium hover:underline" style={{ color: 'var(--text-primary)' }}>{r.number}</button>
                       <span className="text-xs" style={{ color: 'var(--text-muted)' }}>{t(`verifactu.type.${r.type}`)} · #{r.id} · {isoDate(r.generated_at.slice(0, 10), lang)}</span>
                     </p>
                     <p className="text-[11px] font-mono truncate" style={{ color: 'var(--text-muted)' }} title={r.hash}>{t('verifactu.hash')} {r.hash.slice(0, 16)}…</p>
