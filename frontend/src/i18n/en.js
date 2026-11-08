@@ -1366,7 +1366,7 @@ export default {
     invoicesChecks: 'Nokfi checks every invoice itself, without trusting the AI: base + VAT − withholding must match the total, the NIF/CIF/NIE check digit, a valid, non-future date and a usual VAT rate. Anything that doesn’t add up comes back in warnings. Scanned PDFs come back in errors (pdf_scanned): send them as images.',
     mcpTitle: 'MCP server for AI agents',
     mcpText: 'Connect Nokfi as a tool for Claude, ChatGPT, Cursor or n8n’s AI Agent. It uses the same API key, the same quota and the same rules as the API.',
-    mcpTools: 'Tools: extract_invoices, analyze, validate_tax_id, calculate_vat, calculate_withholding, estimate_model_130, fiscal_calendar, get_usage, list_analyses, get_analysis, issue_invoice, list_invoices, get_invoice, cancel_invoice and set_invoice_status.'
+    mcpTools: 'Tools: extract_invoices, analyze, validate_tax_id, calculate_vat, calculate_withholding, estimate_model_130, fiscal_calendar, get_usage, list_analyses, get_analysis, rename_analysis, delete_analysis, issue_invoice, list_invoices, get_invoice, cancel_invoice and set_invoice_status.'
   },
   crash: { title: 'Something went wrong', desc: 'We have logged the error so we can fix it. Reload the page to continue.', reload: 'Reload' },
   update: { available: 'A new version of Nokfi is available.', reload: 'Reload' },

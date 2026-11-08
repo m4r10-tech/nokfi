@@ -1366,7 +1366,7 @@ export default {
     invoicesChecks: 'Nokfi controlla da sé ogni fattura, senza fidarsi dell’IA: imponibile + IVA − ritenuta uguale al totale, cifra di controllo del NIF/CIF/NIE spagnolo, data valida e non futura, aliquota IVA abituale. Ciò che non torna arriva in warnings. I PDF scansionati tornano in errors (pdf_scanned): inviali come immagine.',
     mcpTitle: 'Server MCP per agenti IA',
     mcpText: 'Collega Nokfi come strumento di Claude, ChatGPT, Cursor o dell’AI Agent di n8n. Stessa chiave API, stessa quota e stesse regole dell’API.',
-    mcpTools: 'Strumenti: extract_invoices, analyze, validate_tax_id, calculate_vat, calculate_withholding, estimate_model_130, fiscal_calendar, get_usage, list_analyses, get_analysis, issue_invoice, list_invoices, get_invoice, cancel_invoice e set_invoice_status.'
+    mcpTools: 'Strumenti: extract_invoices, analyze, validate_tax_id, calculate_vat, calculate_withholding, estimate_model_130, fiscal_calendar, get_usage, list_analyses, get_analysis, rename_analysis, delete_analysis, issue_invoice, list_invoices, get_invoice, cancel_invoice e set_invoice_status.'
   },
   crash: { title: 'Qualcosa è andato storto', desc: 'Abbiamo registrato l’errore per correggerlo. Ricarica la pagina per continuare.', reload: 'Ricarica' },
   update: { available: 'È disponibile una nuova versione di Nokfi.', reload: 'Ricarica' },

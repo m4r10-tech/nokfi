@@ -1366,7 +1366,7 @@ export default {
     invoicesChecks: 'Nokfi prüft jede Rechnung selbst, ohne der KI zu vertrauen: Netto + MwSt. − Einbehalt muss den Gesamtbetrag ergeben, Prüfziffer der spanischen NIF/CIF/NIE, gültiges und nicht zukünftiges Datum, üblicher MwSt.-Satz. Was nicht passt, kommt in warnings. Gescannte PDFs kommen in errors zurück (pdf_scanned): sende sie als Bild.',
     mcpTitle: 'MCP-Server für KI-Agenten',
     mcpText: 'Binde Nokfi als Tool in Claude, ChatGPT, Cursor oder den AI Agent von n8n ein. Gleicher API-Schlüssel, gleiches Kontingent und gleiche Regeln wie die API.',
-    mcpTools: 'Tools: extract_invoices, analyze, validate_tax_id, calculate_vat, calculate_withholding, estimate_model_130, fiscal_calendar, get_usage, list_analyses, get_analysis, issue_invoice, list_invoices, get_invoice, cancel_invoice und set_invoice_status.'
+    mcpTools: 'Tools: extract_invoices, analyze, validate_tax_id, calculate_vat, calculate_withholding, estimate_model_130, fiscal_calendar, get_usage, list_analyses, get_analysis, rename_analysis, delete_analysis, issue_invoice, list_invoices, get_invoice, cancel_invoice und set_invoice_status.'
   },
   crash: { title: 'Etwas ist schiefgelaufen', desc: 'Wir haben den Fehler protokolliert, um ihn zu beheben. Lade die Seite neu, um fortzufahren.', reload: 'Neu laden' },
   update: { available: 'Eine neue Version von Nokfi ist verfügbar.', reload: 'Neu laden' },
