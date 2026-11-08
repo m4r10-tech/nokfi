@@ -18,7 +18,8 @@ npm run dev            # → http://localhost:5173
 ## Build de producción
 
 ```bash
-npm run build          # → dist/ (listo para Nginx o cualquier servidor estático)
+VITE_API_URL=/api npm run build   # → dist/ (lo que se sube al VPS; sin VITE_API_URL el build avisa:
+                                  #   el dist llamaría a http://localhost:3001/api, el valor de desarrollo)
 npm run build:spa      # solo la SPA, sin prerender (más rápido para probar)
 npm run check:i18n     # mismas claves en los 6 idiomas
 npm run check:seo      # páginas públicas con contenido es/en y calendario igual que el backend
@@ -28,6 +29,8 @@ VITE_API_URL=/api npx vite build && node test/s15b-cifras.e2e.cjs   # Impuestos,
 node test/s15b-t4-cifras.test.mjs   # xlsx/ods del libro (fecha y 0,00), signo −, trimestres de lo importado, IRPF de sociedades, textos (sin navegador)
 VITE_API_URL=/api npx vite build && node test/s15b-t4-cifras.e2e.cjs   # Libro (periodo vacío, filtro, Excel), Factur-X gratis, otro trimestre, 130 y onboarding (Playwright; puertos 4201/4202)
 VITE_API_URL=/api npx vite build && node test/s15b-seguridad.e2e.cjs   # exportar informes sin innerHTML y un solo enlace de gestoría por envío (Playwright)
+node test/s15b-peticiones.test.mjs   # planes de menor a mayor, «el equipo de Nokfi», textos de sociedad (sin navegador)
+VITE_API_URL=/api npm run build && node test/s15b-t4.e2e.cjs   # modo de cada webhook e Idempotency-Key al emitir facturas (Playwright, puertos 4191-4192)
 node test/s15b-ia.test.mjs       # botones del asistente a partir de «[enlace: clave]» (sin navegador)
 VITE_API_URL=/api npx vite build && node test/s15b-ia.e2e.cjs   # Cuestionario, Reclamar, asistente e Historial con la IA simulada (Playwright)
 node test/s15b-t4-ia.test.mjs    # cifras clave de análisis antiguos en el historial (sin navegador)
@@ -38,13 +41,25 @@ VITE_API_URL=/api npm run build && AXE_PATH=/tmp/a11y-tools/node_modules/axe-cor
                                  # accesibilidad (Playwright): axe sin fallos serious/critical en 25 pantallas en claro y
                                  # oscuro, foco retenido y devuelto en modales, hoja «Más» y asistente, «Saltar al contenido»,
                                  # región viva de toasts y la landing pidiendo solo la captura visible en WebP (ONLY=axe|kbd|landing|misc)
+VITE_API_URL=/api npm run build && node test/s15b-t4-front.e2e.cjs
+                                 # foco del onboarding, landing sin desbordes y táctiles ≥ 40 px (6 idiomas), VERI*FACTU y
+                                 # conceptos en el móvil, plantillas n8n por idioma, JS de la calculadora de IVA, capturas
+                                 # «narrow» del manifest, demo-account/landing-screens y aviso sin VITE_API_URL
+                                 # (Playwright, puertos 4221-4223; ONLY=F1,F2,F3,F4,F5,F7,F8,F10 para acotar)
 ```
 
-Capturas de la landing (`public/screens/`): `<pantalla>-<tema>.jpg` (1920×1200, las genera
-`backend/scripts/landing-screens.js`) y sus versiones WebP `<pantalla>-<tema>-{640,960,1280,1920}.webp`,
-que son las que pide la landing (`<picture>` con `srcset`; el JPG queda de respaldo). Si se
-regeneran los JPG, hay que regenerar los WebP, p. ej. con ImageMagick:
-`convert inicio-dark.jpg -resize 960x -quality 78 -define webp:method=6 inicio-dark-960.webp`.
+Los tests con Playwright usan `playwright-core` y el Chromium de `~/.cache/ms-playwright` (no son
+dependencias del proyecto) y necesitan el `dist` construido con `VITE_API_URL=/api` (llaman a `/api`
+del mismo origen). Después de probar, vuelve a hacer el `npm run build` que vayas a subir.
+
+Capturas de la landing (`public/screens/`): `<pantalla>-<tema>.jpg` (1920×1200) y sus versiones WebP
+`<pantalla>-<tema>-{640,960,1280,1920}.webp`, que son las que pide la landing (`<picture>` con
+`srcset`; el JPG queda de respaldo). Las capturas «narrow» del manifest de la PWA son
+`<pantalla>-dark-narrow.webp` (780×1688, móvil). Todas las genera
+`backend/scripts/landing-screens.js` con la cuenta de ejemplo (datos ficticios, BD temporal), con el
+`dist` construido con `VITE_API_URL=/api`:
+`cd backend && PLAYWRIGHT_CORE=<ruta>/playwright-core node scripts/landing-screens.js`
+(`SHOTS_ONLY=narrow` para hacer solo las del manifest; `DEMO_PORT`/`DEMO_WEB_PORT` para otros puertos).
 
 `npm run build` hace tres pasos (sesión 12, SEO): `vite build` (la SPA),
 `vite build --ssr src/entry-server.jsx` y `scripts/prerender.mjs`, que renderiza
@@ -71,12 +86,12 @@ src/
 ├── App.jsx               todas las rutas (las públicas salen de seo/routes.js)
 ├── index.css             variables de tema + estilos base + fuente
 ├── context/              Auth, Theme, Lang (React Context)
-├── seo/                  routes.js (páginas públicas es/en), useSeo, content/{es,en}.js
+├── seo/                  routes.js (páginas públicas es/en), useSeo, content/{es,en}.js (se cargan por idioma)
 ├── middleware/           api.js (único cliente del backend), sanitize, exports…
 ├── hooks/                useCompanyProfile, usePlans, usePageMeta…
 ├── components/           calculators.jsx, PublicChrome, Sidebar, PlanCards…
 ├── layouts/              DashboardLayout (sidebar + onboarding + outlet)
-├── i18n/                 es, en, fr, it, de, pl
+├── i18n/                 es (en el bundle), en, fr, it, de, pl (bajo demanda; main.jsx espera al idioma inicial)
 └── pages/
     ├── Landing, Pricing, Legal, ApiDocs, Login, Reveal…   (públicas)
     ├── seo/              herramientas (ToolPage), guías (GuidePage, GuidesIndex)
