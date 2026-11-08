@@ -101,6 +101,17 @@ Documents that cannot be read come out as items with `is_invoice: false` and an 
 - [OpenAPI specification](https://nokfi.app/api/v1/openapi.json)
 - [n8n community nodes documentation](https://docs.n8n.io/integrations/#community-nodes)
 
+## Source and publishing
+
+The source of truth for this node is the Nokfi repository, folder `integrations/n8n/`:
+every change is made and reviewed there first, together with the API change it needs.
+The [`n8n-nodes-nokfi`](https://github.com/m4r10-tech/n8n-nodes-nokfi) repository is the
+copy that gets published (n8n requires publishing from GitHub Actions with npm provenance).
+To sync it, copy everything from `integrations/n8n/` into that repository except
+`node_modules/`, `dist/`, `.git/`, `.github/`, `.gitignore` and `.prettierrc.js` (those only
+exist there), run `npm run lint` and `npm run build`, and commit. Pushing a `vX.Y.Z` tag
+there publishes that version to npm. Never edit the published copy directly.
+
 ## Compatibility
 
 Built with `@n8n/node-cli` and tested with n8n 1.x. No runtime dependencies.
