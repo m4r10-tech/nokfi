@@ -376,7 +376,7 @@ periodo. **El cambio de plan NO está en el Portal** (se hace con `change-plan`)
 | 502 | `{ error: "stripe_error" }` | Error de Stripe |
 
 > **Configuración del Portal (en Stripe, no en código):** `subscription_update`
-> **desactivado**; `payment_method_update`, `invoice_history` y
+> y `customer_update` (cambiar el email) **desactivados**; `payment_method_update`, `invoice_history` y
 > `subscription_cancel` (`at_period_end`) activados.
 
 ### Modelo de cobro (S15b)

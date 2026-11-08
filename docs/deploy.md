@@ -136,10 +136,14 @@ all simulated renewals succeeded`).
   pagar un plan nuevo (`resume-checkout`); una tarjeta que ya tuvo trial no repite.
 - **Customer Portal LIVE** (Dashboard › Configuración › Billing › Portal de
   clientes, o `POST /v1/billing_portal/configurations/<bpc_…>`): **desactivar
-  «Cambiar de plan» (`features[subscription_update][enabled]=false`)**; dejar
-  activos método de pago, historial de facturas y cancelar al final del periodo.
+  «Cambiar de plan» (`features[subscription_update][enabled]=false`)** y
+  **desactivar «Actualizar datos del cliente»
+  (`features[customer_update][enabled]=false`)**: un email cambiado en el Portal
+  no se refleja en la licencia ni en los correos de Nokfi. Dejar activos método de
+  pago, historial de facturas y cancelar al final del periodo
+  (`subscription_cancel` con `mode=at_period_end`).
   Con el cambio de plan activo y proration `None` se podía usar Max pagando Mini.
-  El Portal de PRUEBA ya está así (2026-11-07).
+  El Portal de PRUEBA ya está así (cambio de plan 2026-11-07; email 2026-11-08).
 - **Reintentos de Stripe** (Billing › Revenue recovery): da igual cuántos haya,
   al primer `invoice.payment_failed` de una renovación el backend cancela la
   suscripción y anula la factura.
