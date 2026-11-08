@@ -307,7 +307,13 @@ router.post('/', requireApiKey, async (req, res) => {
       const rate = takeRate(req.apiKey.id, body.length - 1);
       if (!rate.ok) return rateLimited(res, rate.retryAfter, ' (en un lote JSON-RPC cuenta cada mensaje)');
     }
-    const replies = (await Promise.all(body.map(m => handleMessage(req, m)))).filter(Boolean);
+    // S15b T4: en orden, uno tras otro (antes Promise.all: varias IA a la vez y
+    // un mensaje podía adelantarse al anterior del que depende).
+    const replies = [];
+    for (const m of body) {
+      const r = await handleMessage(req, m);
+      if (r) replies.push(r);
+    }
     return replies.length ? res.json(replies) : res.status(202).end();
   }
   const reply = await handleMessage(req, body);

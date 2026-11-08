@@ -1087,6 +1087,7 @@ export default {
       "date": "Das Datum ist ungültig (zwischen Rechnungsdatum und heute).",
       "status_unchanged": "Die Rechnung hat diesen Status bereits.",
       "status_conflict": "Diese Änderung ist nicht möglich: Mache zuerst den vorherigen Status rückgängig.",
+      "not_in_ledger": "Diese Rechnung hat keinen Eintrag im Buch, daher kann sie weder als bezahlt noch als offen markiert werden.",
       "customer_incomplete": "Für dieses Format braucht der Kunde eine Steuernummer und eine vollständige Adresse (5-stellige PLZ in Spanien).",
       "format_unsupported": "Factur-X unterstützt den Ausgleichszuschlag nicht: Nutze UBL oder Facturae.",
       "not_fixable": "Nur ein abgelehnter oder mit Fehlern angenommener Ausstellungsdatensatz kann berichtigt werden."

@@ -105,6 +105,9 @@ function setStatus({ license, id, body = {}, ip = null, livemode = true }) {
   const out = D.setCustomerStatus(license.id, Number(id), { status: body.status, reason: body.reason, date: body.date }, ip);
   if (out.error) {
     const { error, ...extra } = out;
+    if (extra.reason === 'not_in_ledger') {
+      return { status: 409, body: { error, reason: 'not_in_ledger', message: 'Esta factura no tiene apunte en el libro, así que no se puede marcar como cobrada ni como pendiente.' } };
+    }
     return fail(error === 'invalid_input' ? 400 : 409, error, extra);
   }
   emit(license, STATUS_EVENT[body.status], out.invoice, body.status === 'rejected' ? { reason: out.invoice.customer_status_reason } : {});

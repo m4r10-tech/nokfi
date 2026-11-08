@@ -305,7 +305,7 @@ const spec = {
           schema: { type: 'object', required: ['url'], properties: { url: { type: 'string', example: 'https://n8n.midominio.com/webhook/abc' }, events: { oneOf: [{ type: 'string', example: '*' }, { type: 'array', items: { type: 'string' } }] }, description: { type: 'string' } } },
           example: { url: 'https://n8n.midominio.com/webhook/abc', events: ['analysis.completed', 'fiscal.deadline'] }
         } } },
-        responses: { 201: { description: 'Creado (con el secreto)', content: { 'application/json': { schema: { $ref: '#/components/schemas/WebhookEndpoint' } } } }, 400: { description: 'invalid_url, invalid_events o too_many_endpoints (máx. 10)' } }
+        responses: { 201: { description: 'Creado (con el secreto)', content: { 'application/json': { schema: { $ref: '#/components/schemas/WebhookEndpoint' } } } }, 400: { description: 'invalid_url, invalid_events o too_many_endpoints (máx. 10 por modo: 10 reales y 10 de prueba)' } }
       }
     },
     '/webhooks/{id}': {

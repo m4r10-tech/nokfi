@@ -441,7 +441,8 @@ function setCustomerStatus(license_id, id, { status, reason = '', date = null },
     db.prepare("UPDATE invoices SET customer_status = 'accepted', customer_status_reason = '', customer_status_at = datetime('now') WHERE id = ?").run(id);
     addEvent(license_id, id, 'accepted');
   } else if (status === 'paid' || status === 'unpaid') {
-    if (!inv.ledger_entry_id) return { error: 'status_conflict' };
+    // Factura real sin apunte en el libro: no hay nada que marcar (no es que haya que revertir otro estado).
+    if (!inv.ledger_entry_id) return { error: 'status_conflict', reason: 'not_in_ledger' };
     if ((status === 'paid') === inv.paid) return { error: 'status_unchanged' };
     if (status === 'paid' && inv.customer_status === 'rejected') return { error: 'status_conflict' };
     const paidAt = status === 'paid' ? (date || today) : null;

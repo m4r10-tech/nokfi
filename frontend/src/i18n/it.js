@@ -1087,6 +1087,7 @@ export default {
       "date": "La data non è valida (tra la data della fattura e oggi).",
       "status_unchanged": "La fattura ha già questo stato.",
       "status_conflict": "Questo cambio non è possibile: prima annulla lo stato precedente.",
+      "not_in_ledger": "Questa fattura non ha una registrazione nel registro, quindi non si può segnare come incassata né come in sospeso.",
       "customer_incomplete": "Per questo formato il cliente deve avere codice fiscale e indirizzo completo (CAP di 5 cifre in Spagna).",
       "format_unsupported": "Factur-X non supporta la sovrattassa di equivalenza: usa UBL o Facturae.",
       "not_fixable": "Si può correggere solo un registro di emissione rifiutato o accettato con errori."

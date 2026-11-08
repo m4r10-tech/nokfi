@@ -44,7 +44,8 @@ function publicEndpoint(row, { withSecret = false } = {}) {
 }
 
 function createEndpoint(license_id, { url, events, description = '', livemode = true }) {
-  const n = getDB().prepare('SELECT COUNT(*) c FROM webhook_endpoints WHERE license_id = ?').get(license_id).c;
+  // S15b T4 (T3): el máximo es por modo (los de prueba no quitan sitio a los reales).
+  const n = getDB().prepare('SELECT COUNT(*) c FROM webhook_endpoints WHERE license_id = ? AND livemode = ?').get(license_id, livemode ? 1 : 0).c;
   if (n >= MAX_ENDPOINTS) return { error: 'too_many_endpoints' };
   const info = getDB().prepare('INSERT INTO webhook_endpoints (license_id, url, events, description, secret, livemode) VALUES (?, ?, ?, ?, ?, ?)')
     .run(license_id, url, events.join(','), String(description || '').slice(0, 120), newSecret(), livemode ? 1 : 0);

@@ -1087,6 +1087,7 @@ export default {
       "date": "The date isn't valid (between the invoice date and today).",
       "status_unchanged": "The invoice already has that status.",
       "status_conflict": "That change isn't possible: undo the previous status first.",
+      "not_in_ledger": "This invoice has no entry in the ledger, so it can't be marked as paid or unpaid.",
       "customer_incomplete": "For this format the customer needs a tax ID and a full address (5-digit postcode in Spain).",
       "format_unsupported": "Factur-X doesn't support the equivalence surcharge: use UBL or Facturae.",
       "not_fixable": "Only a rejected or accepted-with-errors issue record can be corrected."

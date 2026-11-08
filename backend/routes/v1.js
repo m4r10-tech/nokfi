@@ -17,7 +17,10 @@
  * Sesión 9 (Bloque 2):
  *   ?async=true | Prefer: respond-async   en analyze e invoices/extract → 202 + job
  *   GET  /api/v1/jobs, /api/v1/jobs/:id   estado y resultado (24 h)
- *   Idempotency-Key                        en todos los POST
+ *   Idempotency-Key                        opcional en los POST que crean o cambian algo (analyze,
+ *                                          invoices/extract, webhooks, customers, invoices/:id/cancel
+ *                                          y /status); OBLIGATORIA en emitir y rectificar (30 días).
+ *                                          /tax/* y webhooks/:id/test la ignoran (no cambian nada).
  *   /api/v1/webhooks[/:id][/test]          endpoints de webhook (los usa el Trigger de n8n)
  *   /api/v1/tax/*                          herramientas sin IA (no gastan cuota)
  *
@@ -286,7 +289,7 @@ function createWebhook(license, body, ip, livemode = true) {
   const events = W.normalizeEvents(body?.events);
   if (!events) return { status: 400, body: { error: 'invalid_events', message: `events debe ser "*" o una lista de: ${W.EVENT_TYPES.join(', ')}.` } };
   const out = W.createEndpoint(license.id, { url: u.url, events, description: body?.description, livemode });
-  if (out.error) return { status: 400, body: { error: out.error, message: `Máximo ${W.MAX_ENDPOINTS} webhooks por cuenta.` } };
+  if (out.error) return { status: 400, body: { error: out.error, message: `Máximo ${W.MAX_ENDPOINTS} webhooks ${livemode ? 'reales' : 'de prueba'} por cuenta.` } };
   audit('WEBHOOK_CREATED', { license_id: license.id, ip, detail: `id=${out.endpoint.id}${livemode ? '' : ' test'}` });
   return { status: 201, body: out.endpoint };
 }

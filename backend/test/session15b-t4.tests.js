@@ -202,6 +202,71 @@ module.exports = async function session15bT4Tests({ post, put, get, call, check,
     check('T4 A6: la clave web se guarda 30 días en su propio espacio y sin clave se emite como siempre', () =>
       ttl?.ttl_hours === 720 && i5.status === 201 && countInv() === 4);
 
+    // ═══ 409 status_conflict de una factura real sin apunte: mensaje correcto ═══
+    getDB().prepare('UPDATE invoices SET ledger_entry_id = NULL WHERE id = ?').run(i4.data.id);
+    const nl = await post(`/api/invoicing/invoices/${i4.data.id}/status`, { status: 'paid' }, ivTok);
+    check('T4 409: marcar cobrada una factura real sin apunte → status_conflict con reason not_in_ledger y mensaje del libro', () =>
+      nl.status === 409 && nl.data.error === 'status_conflict' && nl.data.reason === 'not_in_ledger' && /apunte en el libro/.test(nl.data.message)
+      && !/revierte/.test(nl.data.message));
+    const rj = await post(`/api/invoicing/invoices/${i1.data.id}/status`, { status: 'paid' }, ivTok);
+    const rj2 = await post(`/api/invoicing/invoices/${i1.data.id}/status`, { status: 'rejected', reason: 'x' }, ivTok);
+    check('T4 409: el conflicto de verdad (rechazar una cobrada) sigue diciendo que se revierta antes', () =>
+      rj.status === 200 && rj2.status === 409 && rj2.data.error === 'status_conflict' && !rj2.data.reason && /revierte/.test(rj2.data.message));
+
+    // ═══ T3: 10 webhooks por modo ═══
+    const savedWh = { http: process.env.WEBHOOKS_ALLOW_HTTP, priv: process.env.WEBHOOKS_ALLOW_PRIVATE };
+    process.env.WEBHOOKS_ALLOW_HTTP = '1';
+    process.env.WEBHOOKS_ALLOW_PRIVATE = '1';
+    try {
+      const WH = mk('pro', { password: 'T4WhPass!x' });
+      const whTok = createSession(WH.id, '127.0.0.1').token;
+      const mkHook = (mode, i) => post('/api/dev/webhooks', { url: `http://127.0.0.1:9/${mode}-${i}`, events: '*', mode }, whTok);
+      const tests = [];
+      for (let i = 0; i < 10; i++) tests.push(await mkHook('test', i));
+      const live1 = await mkHook('live', 0);
+      const test11 = await mkHook('test', 10);
+      check('T4 T3: con 10 webhooks de prueba se puede crear uno real (el límite es por modo)', () =>
+        tests.every(r => r.status === 201) && live1.status === 201 && live1.data.livemode === true);
+      check('T4 T3: el 11.º de prueba → 400 too_many_endpoints con mensaje del modo', () =>
+        test11.status === 400 && test11.data.error === 'too_many_endpoints' && /de prueba/.test(test11.data.message));
+    } finally {
+      for (const [k, v] of Object.entries({ WEBHOOKS_ALLOW_HTTP: savedWh.http, WEBHOOKS_ALLOW_PRIVATE: savedWh.priv })) {
+        if (v === undefined) delete process.env[k]; else process.env[k] = v;
+      }
+    }
+
+    // ═══ T4: los lotes JSON-RPC del MCP se ejecutan en orden, uno tras otro ═══
+    const savedAi = { gk: process.env.GEMINI_API_KEY, rate: process.env.API_RATE_PER_MINUTE };
+    process.env.GEMINI_API_KEY = 'fake';
+    process.env.API_RATE_PER_MINUTE = '1000';
+    let inflight = 0, maxInflight = 0;
+    const order = [];
+    const stripeFetch = global.fetch;
+    global.fetch = async (url, opts) => {
+      if (String(url).startsWith('https://api.stripe.com/')) return stripeFetch(url, opts);
+      inflight++; maxInflight = Math.max(maxInflight, inflight);
+      const prompt = String(opts?.body || '');
+      order.push(/AAA-PRIMERO/.test(prompt) ? 'A' : /BBB-SEGUNDO/.test(prompt) ? 'B' : '?');
+      await new Promise(r => setTimeout(r, 60));
+      inflight--;
+      return { ok: true, status: 200, text: async () => '', json: async () => ({ candidates: [{ content: { parts: [{ text: JSON.stringify({ summary: 'Lote T4', priorities: [], action_plan: [] }) }] } }] }) };
+    };
+    try {
+      const MC = mk('pro', { password: 'T4McpPass!x' });
+      const mcTok = createSession(MC.id, '127.0.0.1').token;
+      const liveKey = (await post('/api/keys', { name: 't4-mcp' }, mcTok)).data.key;
+      const an = (id, tag) => ({ jsonrpc: '2.0', id, method: 'tools/call', params: { name: 'analyze', arguments: {
+        type: 'excel', title: tag, data: { module: 'ventas', files: [{ name: `${tag}.csv`, rows: [{ fecha: '2026-09-01', concepto: tag, importe: 100 }] }] } } } });
+      const batch = await raw('POST', '/api/mcp', { headers: { Authorization: `Bearer ${liveKey}` }, body: [an(1, 'AAA-PRIMERO'), an(2, 'BBB-SEGUNDO')] });
+      check('T4 MCP: un lote de 2 analyze se ejecuta en orden, nunca dos IA a la vez', () =>
+        batch.status === 200 && Array.isArray(batch.data) && batch.data.length === 2 && batch.data[0].id === 1 && batch.data[1].id === 2
+        && maxInflight === 1 && order.join('') === 'AB');
+    } finally {
+      global.fetch = stripeFetch;
+      for (const [k, v] of Object.entries({ GEMINI_API_KEY: savedAi.gk, API_RATE_PER_MINUTE: savedAi.rate })) {
+        if (v === undefined) delete process.env[k]; else process.env[k] = v;
+      }
+    }
   } finally {
     global.fetch = saved.fetch;
     for (const [k, v] of Object.entries({ STRIPE_SECRET_KEY: saved.key, STRIPE_PRICE_MINI: saved.mini, STRIPE_PRICE_PRO: saved.pro,

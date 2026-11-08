@@ -1087,6 +1087,7 @@ export default {
       "date": "La date n'est pas valide (entre la date de facture et aujourd'hui).",
       "status_unchanged": "La facture a déjà ce statut.",
       "status_conflict": "Ce changement n'est pas possible : annulez d'abord le statut précédent.",
+      "not_in_ledger": "Cette facture n'a pas d'écriture dans le registre : elle ne peut pas être marquée comme payée ni comme impayée.",
       "customer_incomplete": "Pour ce format, le client doit avoir un numéro fiscal et une adresse complète (code postal à 5 chiffres en Espagne).",
       "format_unsupported": "Factur-X ne gère pas le supplément d'équivalence : utilisez UBL ou Facturae.",
       "not_fixable": "Seul un enregistrement d'émission rejeté ou accepté avec erreurs peut être corrigé."

@@ -1090,6 +1090,7 @@ export default {
       "date": "Data jest nieprawidłowa (między datą faktury a dziś).",
       "status_unchanged": "Faktura ma już ten status.",
       "status_conflict": "Ta zmiana nie jest możliwa: najpierw cofnij poprzedni status.",
+      "not_in_ledger": "Ta faktura nie ma wpisu w księdze, więc nie można oznaczyć jej jako opłaconej ani nieopłaconej.",
       "customer_incomplete": "Dla tego formatu klient musi mieć numer podatkowy i pełny adres (5-cyfrowy kod pocztowy w Hiszpanii).",
       "format_unsupported": "Factur-X nie obsługuje dopłaty wyrównawczej: użyj UBL lub Facturae.",
       "not_fixable": "Poprawić można tylko odrzucony lub przyjęty z błędami rekord wystawienia."

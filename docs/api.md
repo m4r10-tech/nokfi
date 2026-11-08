@@ -616,7 +616,9 @@ y **no ve nada real**: `GET /analyses` vacío y `GET /analyses/:id` → 404 (tam
 `/tax/model-130` con `source: "ledger"` calculan con el libro vacío, y los trabajos y
 webhooks solo son los de su modo. Una clave real tampoco ve los de prueba. En una
 factura de prueba, `status: paid|unpaid` → `409 test_invoice_not_in_ledger`
-(no tiene asiento en el libro).
+(no tiene asiento en el libro). Una factura real sin apunte en el libro da
+`409 status_conflict` con `reason: "not_in_ledger"` y un mensaje que lo dice (el resto
+de `status_conflict` siguen siendo «primero revierte el estado anterior»).
 
 **Idempotency-Key** (hasta 255 caracteres): la admiten los POST de `analyze`,
 `invoices/extract`, `webhooks`, `invoices` y `invoices/:id/rectify` (en estas dos es
@@ -663,6 +665,8 @@ Max y de prueba en Mini (`mode: live` en Mini → `403 api_plan_required`). Solo
 y direcciones públicas: se rechazan `localhost` (también `localhost.`), `*.local`,
 `*.internal` y las redes privadas, de loopback, link-local, IPv4 compatibles
 (`::/96`), multicast (`ff00::/8`) y 6to4 (`2002::/16`), al registrar y al conectar.
+Máximo **10 webhooks por modo** (10 reales y 10 de prueba; S15b T4): el 11.º del mismo
+modo → `400 too_many_endpoints`.
 
 `PATCH /webhooks/:id` (y `PATCH /api/dev/webhooks/:id`) exige que `enabled` sea booleano
 (`true`/`false`); cualquier otro valor, como la cadena `"false"`, da `400 invalid_enabled`.
@@ -678,7 +682,7 @@ MCP por HTTP (`POST /api/mcp`, JSON-RPC) con la misma clave de API. Herramientas
 `set_invoice_status`, `list_analyses`, `get_analysis`. Misma separación de modos
 que la API REST. En un lote JSON-RPC (array) **cada mensaje cuenta** en el límite por
 minuto de la clave: si no caben todos → `429 rate_limited` con `Retry-After` y no se
-ejecuta ninguno.
+ejecuta ninguno. Los mensajes de un lote se ejecutan **en orden, uno tras otro** (S15b T4).
 
 ## 14. Nodo de n8n (`n8n-nodes-nokfi` 0.4.0)
 

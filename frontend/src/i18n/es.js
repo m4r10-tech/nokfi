@@ -1090,6 +1090,7 @@ export default {
       "date": "La fecha no es válida (entre la de la factura y hoy).",
       "status_unchanged": "La factura ya tiene ese estado.",
       "status_conflict": "Ese cambio no es posible: primero deshaz el estado anterior.",
+      "not_in_ledger": "Esta factura no tiene apunte en el libro, así que no se puede marcar como cobrada ni como pendiente.",
       "customer_incomplete": "Para este formato el cliente necesita NIF y dirección completa (y código postal de 5 cifras en España).",
       "format_unsupported": "Factur-X no admite el recargo de equivalencia: usa UBL o Facturae.",
       "not_fixable": "Solo se subsana un registro de alta rechazado o aceptado con errores."
