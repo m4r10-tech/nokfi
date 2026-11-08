@@ -342,7 +342,7 @@ module.exports = async function session9Tests({ post, put, get, call, check, che
       await checkAsync('S9 MCP: 15 herramientas, validate_tax_id y analyze con clave de prueba',
         Promise.all([rpc('tools/list', {}, live), rpc('tools/call', { name: 'validate_tax_id', arguments: { value: 'B12345674' } }, live),
           rpc('tools/call', { name: 'analyze', arguments: excelBody }, test)]),
-        ([l, v, a]) => l.data.result.tools.length === 15 && v.data.result.structuredContent.valid === true
+        ([l, v, a]) => l.data.result.tools.length === 17 && v.data.result.structuredContent.valid === true
           && a.data.result.structuredContent.test === true);
     }
 

@@ -261,6 +261,35 @@ module.exports = async function session15bT4Tests({ post, put, get, call, check,
       check('T4 MCP: un lote de 2 analyze se ejecuta en orden, nunca dos IA a la vez', () =>
         batch.status === 200 && Array.isArray(batch.data) && batch.data.length === 2 && batch.data[0].id === 1 && batch.data[1].id === 2
         && maxInflight === 1 && order.join('') === 'AB');
+
+      // ═══ D8 en MCP: rename_analysis / delete_analysis (respetando test/live) ═══
+      const testKey = (await post('/api/keys', { name: 't4-mcp-test', mode: 'test' }, mcTok)).data.key;
+      const tool = (key, name, args) => raw('POST', '/api/mcp', { headers: { Authorization: `Bearer ${key}` },
+        body: { jsonrpc: '2.0', id: 9, method: 'tools/call', params: { name, arguments: args } } }).then(r => r.data.result);
+      const ids = db.listAnalyses(MC.id).map(a => a.id);
+      const [a1, a2] = ids;
+      const title1 = db.listAnalyses(MC.id).find(a => a.id === a1)?.title;
+      const list = await raw('POST', '/api/mcp', { headers: { Authorization: `Bearer ${liveKey}` }, body: { jsonrpc: '2.0', id: 1, method: 'tools/list' } });
+      const names = (list.data.result?.tools || []).map(t => t.name);
+      const delTool = (list.data.result?.tools || []).find(t => t.name === 'delete_analysis');
+      check('T4 MCP: tools/list incluye rename_analysis y delete_analysis (marcada como destructiva)', () =>
+        names.includes('rename_analysis') && names.includes('delete_analysis') && delTool?.annotations?.destructiveHint === true);
+      const tRen = await tool(testKey, 'rename_analysis', { id: a1, title: 'Hackeado' });
+      const tDel = await tool(testKey, 'delete_analysis', { id: a1 });
+      check('T4 MCP: con clave de prueba rename/delete dan not_found y no tocan el historial real', () =>
+        tRen.isError === true && /not_found/.test(tRen.content[0].text) && tDel.isError === true
+        && db.listAnalyses(MC.id).length === 2 && ids.length === 2 && !!title1 && db.listAnalyses(MC.id).find(a => a.id === a1).title === title1);
+      const ren = await tool(liveKey, 'rename_analysis', { id: a1, title: 'Ventas de septiembre' });
+      const badT = await tool(liveKey, 'rename_analysis', { id: a1, title: '' });
+      check('T4 MCP: rename_analysis con clave real cambia el título; título vacío → invalid_title', () =>
+        !ren.isError && ren.structuredContent.title === 'Ventas de septiembre' && db.listAnalyses(MC.id).find(a => a.id === a1).title === 'Ventas de septiembre'
+        && badT.isError === true && /invalid_title/.test(badT.content[0].text));
+      const del = await tool(liveKey, 'delete_analysis', { id: a2 });
+      const del2 = await tool(liveKey, 'delete_analysis', { id: a2 });
+      const getDel = await tool(liveKey, 'get_analysis', { id: a2 });
+      check('T4 MCP: delete_analysis borra con clave real; repetirlo o leerlo después → not_found', () =>
+        !del.isError && del.structuredContent.deleted === true && del2.isError === true && getDel.isError === true
+        && db.listAnalyses(MC.id).map(a => a.id).join() === String(a1));
     } finally {
       global.fetch = stripeFetch;
       for (const [k, v] of Object.entries({ GEMINI_API_KEY: savedAi.gk, API_RATE_PER_MINUTE: savedAi.rate })) {

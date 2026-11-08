@@ -679,8 +679,10 @@ MCP por HTTP (`POST /api/mcp`, JSON-RPC) con la misma clave de API. Herramientas
 `extract_invoices`, `analyze`, `validate_tax_id`, `calculate_vat`,
 `calculate_withholding`, `estimate_model_130`, `fiscal_calendar`, `get_usage`,
 `issue_invoice`, `list_invoices`, `get_invoice`, `cancel_invoice`,
-`set_invoice_status`, `list_analyses`, `get_analysis`. Misma separación de modos
-que la API REST. En un lote JSON-RPC (array) **cada mensaje cuenta** en el límite por
+`set_invoice_status`, `list_analyses`, `get_analysis`, `rename_analysis` (`{ id, title }`)
+y `delete_analysis` (`{ id }`, destructiva: borra el análisis y su plan de acción; no
+devuelve el crédito) — S15b T4. Misma separación de modos que la API REST (con
+`nk_test_`, `rename_analysis`/`delete_analysis` dan `not_found` y no tocan nada real). En un lote JSON-RPC (array) **cada mensaje cuenta** en el límite por
 minuto de la clave: si no caben todos → `429 rate_limited` con `Retry-After` y no se
 ejecuta ninguno. Los mensajes de un lote se ejecutan **en orden, uno tras otro** (S15b T4).
 

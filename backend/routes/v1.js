@@ -137,21 +137,32 @@ router.get('/analyses/:id', requireApiKey, (req, res) => {
 });
 
 /* S15b D8: renombrar y borrar. Los análisis de prueba no se guardan, así que una
-   clave nk_test_ no puede tocar ninguno (404, como al leerlos): nunca toca el historial real. */
+   clave nk_test_ no puede tocar ninguno (404, como al leerlos): nunca toca el historial real.
+   Las mismas funciones las usa el MCP (rename_analysis / delete_analysis, S15b T4). */
+function renameApiAnalysis(license, rawId, rawTitle, livemode = true) {
+  const id = Number(rawId);
+  if (!livemode || !Number.isInteger(id)) return { status: 404, body: { error: 'not_found' } };
+  const title = validTitle(rawTitle);
+  if (!title) return { status: 400, body: { error: 'invalid_title', message: `title: texto de 1 a ${MAX_TITLE} caracteres.` } };
+  if (!renameAnalysis(license.id, id, title)) return { status: 404, body: { error: 'not_found' } };
+  return { status: 200, body: { id, title } };
+}
+
+function deleteApiAnalysis(license, rawId, livemode = true) {
+  const id = Number(rawId);
+  if (!livemode || !Number.isInteger(id)) return { status: 404, body: { error: 'not_found' } };
+  if (!deleteAnalysis(license.id, id)) return { status: 404, body: { error: 'not_found' } };
+  return { status: 200, body: { deleted: true, id } };
+}
+
 router.patch('/analyses/:id', requireApiKey, (req, res) => {
-  const id = Number(req.params.id);
-  if (!req.livemode || !Number.isInteger(id)) return res.status(404).json({ error: 'not_found' });
-  const title = validTitle(req.body?.title);
-  if (!title) return res.status(400).json({ error: 'invalid_title', message: `title: texto de 1 a ${MAX_TITLE} caracteres.` });
-  if (!renameAnalysis(req.license.id, id, title)) return res.status(404).json({ error: 'not_found' });
-  res.json({ id, title });
+  const out = renameApiAnalysis(req.license, req.params.id, req.body?.title, req.livemode);
+  res.status(out.status).json(out.body);
 });
 
 router.delete('/analyses/:id', requireApiKey, (req, res) => {
-  const id = Number(req.params.id);
-  if (!req.livemode || !Number.isInteger(id)) return res.status(404).json({ error: 'not_found' });
-  if (!deleteAnalysis(req.license.id, id)) return res.status(404).json({ error: 'not_found' });
-  res.json({ deleted: true, id });
+  const out = deleteApiAnalysis(req.license, req.params.id, req.livemode);
+  res.status(out.status).json(out.body);
 });
 
 /* ── Sesión 7: extracción de facturas (Bloque 1.2) ──
@@ -423,7 +434,7 @@ router.get('/tax/calendar', requireApiKey, (req, res) => send(res, T.calendar(re
 
 module.exports = router;
 module.exports.handlers = {
-  analyze, extractInvoices, readInvoiceFiles, usage, listApiAnalyses, getApiAnalysis, createWebhook, updateWebhook, deleteWebhook,
+  analyze, extractInvoices, readInvoiceFiles, usage, listApiAnalyses, getApiAnalysis, renameApiAnalysis, deleteApiAnalysis, createWebhook, updateWebhook, deleteWebhook,
   issueInvoice, rectifyInvoice, setInvoiceStatus, listCustomers, createCustomer,
   TYPES, INVOICE_MAX_FILES
 };
