@@ -123,6 +123,34 @@ module.exports = async function session15bT4Tests({ post, get, call, check, getD
     check('T4 alta bloqueada: una licencia revocada sigue sin clave en /reveal ni activación', () =>
       rvR.status === 404 && actR.status === 403 && actR.data.error === 'license_inactive');
 
+    // ═══ CORS: OpenAPI y MCP abiertos a cualquier origen, sin credenciales; el resto no ═══
+    const evil = 'https://swagger.example';
+    const oPre = await raw('OPTIONS', '/api/v1/openapi.json', { headers: { Origin: evil, 'Access-Control-Request-Method': 'GET' } });
+    const oGet = await raw('GET', '/api/v1/openapi.json', { headers: { Origin: evil } });
+    check('T4 CORS: /api/v1/openapi.json responde a cualquier origen (preflight y GET) con ACAO * y sin credenciales', () =>
+      oPre.status === 204 && oPre.headers['access-control-allow-origin'] === '*' && !oPre.headers['access-control-allow-credentials']
+      && oGet.status === 200 && oGet.headers['access-control-allow-origin'] === '*' && !!oGet.data.openapi);
+    const mPre = await raw('OPTIONS', '/api/mcp', { headers: { Origin: evil, 'Access-Control-Request-Method': 'POST',
+      'Access-Control-Request-Headers': 'authorization,content-type,mcp-protocol-version' } });
+    const mPost = await raw('POST', '/api/mcp', { headers: { Origin: evil }, body: { jsonrpc: '2.0', id: 1, method: 'tools/list' } });
+    const acah = String(mPre.headers['access-control-allow-headers'] || '').toLowerCase();
+    check('T4 CORS: /api/mcp acepta el preflight de otro origen (MCP Inspector) con Authorization y Mcp-Protocol-Version', () =>
+      mPre.status === 204 && mPre.headers['access-control-allow-origin'] === '*' && /authorization/.test(acah) && /mcp-protocol-version/.test(acah)
+      && !mPre.headers['access-control-allow-credentials']);
+    check('T4 CORS: un POST a /api/mcp desde otro origen llega al servidor (401 sin clave, no 403 de origen)', () =>
+      mPost.status === 401 && mPost.headers['access-control-allow-origin'] === '*');
+    const uPre = await raw('OPTIONS', '/api/v1/usage', { headers: { Origin: evil, 'Access-Control-Request-Method': 'GET' } });
+    const pGet = await raw('GET', '/api/payments/plans', { headers: { Origin: evil } });
+    const oPost = await raw('POST', '/api/v1/openapi.json', { headers: { Origin: evil }, body: {} });
+    check('T4 CORS: el resto de la API sigue cerrado a orígenes ajenos (403 origin_not_allowed)', () =>
+      uPre.status === 403 && pGet.status === 403 && pGet.data.error === 'origin_not_allowed' && !pGet.headers['access-control-allow-origin']
+      && oPost.status === 403);
+    const iPre = await raw('OPTIONS', '/api/invoicing/invoices', { headers: { Origin: 'http://localhost:5173', 'Access-Control-Request-Method': 'POST',
+      'Access-Control-Request-Headers': 'authorization,content-type,idempotency-key,prefer' } });
+    const iah = String(iPre.headers['access-control-allow-headers'] || '').toLowerCase();
+    check('T4 CORS: la web puede mandar Idempotency-Key y Prefer (allowedHeaders)', () =>
+      iPre.status === 204 && iPre.headers['access-control-allow-origin'] === 'http://localhost:5173' && /idempotency-key/.test(iah) && /prefer/.test(iah));
+
   } finally {
     global.fetch = saved.fetch;
     for (const [k, v] of Object.entries({ STRIPE_SECRET_KEY: saved.key, STRIPE_PRICE_MINI: saved.mini, STRIPE_PRICE_PRO: saved.pro,

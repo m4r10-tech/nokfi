@@ -38,6 +38,11 @@
 - Una petición con cabecera `Origin` que no está en `ALLOWED_ORIGINS` (preflight
   `OPTIONS` incluida) devuelve `403 { error: "origin_not_allowed" }`, sin traza en el
   log ni fila en `client_errors`. Sin `Origin` (curl, servidores, n8n) no aplica.
+  **Excepción:** `GET /api/v1/openapi.json` y `/api/mcp` admiten **cualquier origen sin
+  credenciales** (`Access-Control-Allow-Origin: *`) para Swagger/Postman web y el MCP
+  Inspector; el MCP sigue exigiendo la clave de API en `Authorization`.
+- Cabeceras que la web puede mandar (CORS `allowedHeaders`): `Content-Type`,
+  `Authorization`, `Idempotency-Key` y `Prefer`.
 
 ---
 
