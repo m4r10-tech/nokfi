@@ -10,7 +10,7 @@
 
 const http = require('http');
 
-module.exports = async function session15bT4Tests({ post, get, call, check, getDB }) {
+module.exports = async function session15bT4Tests({ post, put, get, call, check, getDB }) {
   const db = require('../db/database');
   const { createLicense, createSession, getLicenseById } = db;
   const baseUrl = `http://localhost:${process.env.PORT}`;
@@ -174,6 +174,34 @@ module.exports = async function session15bT4Tests({ post, get, call, check, getD
     const useB = await post('/api/auth/confirm-password-reset', { token: resetB, new_password: 'T4PwdAtk!xx' });
     check('T4 contraseña: al restablecerla con un enlace, el otro enlace pendiente deja de valer', () =>
       useA.status === 200 && useB.status === 400);
+
+    // ═══ A6: Idempotency-Key también al emitir/rectificar desde la web ═══
+    const IV = mk('pro', { password: 'T4InvPass!x' });
+    const ivTok = createSession(IV.id, '127.0.0.1').token;
+    await put('/api/invoicing/settings', { legal_name: 'Taller T4 SL', tax_id: 'B12345674', address: 'Calle Real 3', postal_code: '28013', city: 'Madrid' }, ivTok);
+    const invBody = { customer: { name: 'Ana López Pérez', tax_id: '12345678Z', address: 'Av. Sol 5', postal_code: '41001', city: 'Sevilla' },
+      lines: [{ description: 'Reparación', quantity: 1, unit_price: 100 }] };
+    const countInv = () => getDB().prepare('SELECT COUNT(*) c FROM invoices WHERE license_id = ?').get(IV.id).c;
+    const auth = { Authorization: `Bearer ${ivTok}`, 'Idempotency-Key': 'web-t4-1' };
+    const i1 = await raw('POST', '/api/invoicing/invoices', { headers: auth, body: invBody });
+    const i2 = await raw('POST', '/api/invoicing/invoices', { headers: auth, body: invBody });
+    check('T4 A6: emitir dos veces desde la web con la misma Idempotency-Key crea UNA factura y repite la respuesta', () =>
+      i1.status === 201 && i2.status === 201 && i1.data.id === i2.data.id && i2.headers['idempotent-replayed'] === 'true' && countInv() === 1);
+    const i3 = await raw('POST', '/api/invoicing/invoices', { headers: auth, body: { ...invBody, notes: 'otra' } });
+    const i4 = await raw('POST', '/api/invoicing/invoices', { headers: { Authorization: `Bearer ${ivTok}`, 'Idempotency-Key': 'web-t4-2' }, body: invBody });
+    check('T4 A6: misma clave con otra factura → 422; otra clave → factura nueva', () =>
+      i3.status === 422 && i3.data.error === 'idempotency_key_reused' && i4.status === 201 && i4.data.id !== i1.data.id && countInv() === 2);
+    const rBody = { rectifies_id: i1.data.id, rectification_kind: 'R1', rectification_reason: 'Error en el importe', lines: [{ description: 'Reparación', quantity: -1, unit_price: 100 }] };
+    const rAuth = { Authorization: `Bearer ${ivTok}`, 'Idempotency-Key': 'web-t4-rect' };
+    const r1 = await raw('POST', '/api/invoicing/invoices', { headers: rAuth, body: rBody });
+    const r2 = await raw('POST', '/api/invoicing/invoices', { headers: rAuth, body: rBody });
+    check('T4 A6: rectificar dos veces con la misma clave crea UNA rectificativa', () =>
+      r1.status === 201 && r2.status === 201 && r1.data.id === r2.data.id && countInv() === 3);
+    const ttl = getDB().prepare("SELECT ttl_hours FROM idempotency_keys WHERE license_id = ? AND idem_key = 'web:web-t4-1'").get(IV.id);
+    const i5 = await raw('POST', '/api/invoicing/invoices', { headers: { Authorization: `Bearer ${ivTok}` }, body: invBody });
+    check('T4 A6: la clave web se guarda 30 días en su propio espacio y sin clave se emite como siempre', () =>
+      ttl?.ttl_hours === 720 && i5.status === 201 && countInv() === 4);
+
   } finally {
     global.fetch = saved.fetch;
     for (const [k, v] of Object.entries({ STRIPE_SECRET_KEY: saved.key, STRIPE_PRICE_MINI: saved.mini, STRIPE_PRICE_PRO: saved.pro,

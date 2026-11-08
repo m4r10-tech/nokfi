@@ -1,7 +1,7 @@
-import { useState, useEffect, useMemo } from 'react';
+import { useState, useEffect, useMemo, useRef } from 'react';
 import { Link, useNavigate, useSearchParams } from 'react-router-dom';
 import { ArrowLeft, Plus, Trash2, Loader2, FileCheck2, Undo2 } from 'lucide-react';
-import { invoicingApi } from '../../middleware/api';
+import { invoicingApi, newIdempotencyKey } from '../../middleware/api';
 import { useLang } from '../../context/LangContext';
 import { useToast } from '../../context/ToastContext';
 import Skeleton from '../../components/Skeleton';
@@ -39,6 +39,7 @@ export default function InvoiceEditor() {
   const [error, setError] = useState(null);
   const [confirming, setConfirming] = useState(false);
   const [busy, setBusy] = useState(false);
+  const idem = useRef(null); // { sig, key } del último intento de emitir
 
   useEffect(() => {
     (async () => {
@@ -97,7 +98,12 @@ export default function InvoiceEditor() {
 
   const issue = async () => {
     setBusy(true); setError(null);
-    const res = await invoicingApi.issue(body());
+    // S15b T4 (A6): misma Idempotency-Key mientras no cambie la factura; si la
+    // respuesta se pierde y se reintenta, el servidor devuelve la misma factura.
+    const data = body();
+    const sig = JSON.stringify(data);
+    if (!idem.current || idem.current.sig !== sig) idem.current = { sig, key: newIdempotencyKey() };
+    const res = await invoicingApi.issue(data, idem.current.key);
     setBusy(false); setConfirming(false);
     if (!res.ok) { setError(invoiceError(t, res)); return; }
     toast.success(t('invoices.issuedOk', { n: res.data.number }));

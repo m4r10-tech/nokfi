@@ -576,6 +576,13 @@ Misma lógica para la app, la API v1 y el MCP (`services/invoicing`).
 | `POST /invoices/:id/send` | Enviar por email al cliente |
 | `GET /verifactu`, `GET /verifactu/chain`, `POST /verifactu/retry`, `POST /verifactu/records/:id/resubmit` | Panel VERI*FACTU: registros encadenados (SHA-256), comprobación de la cadena y reintentos |
 
+`POST /invoices` admite **`Idempotency-Key`** (opcional, 1–255 caracteres; S15b T4): la web
+manda una por intento de emitir o rectificar (la misma mientras no cambie la factura). Un
+reintento con la misma clave y el mismo cuerpo devuelve la misma factura
+(`Idempotent-Replayed: true`); con otro cuerpo, `422 idempotency_key_reused`; en curso,
+`409 idempotency_in_progress`. Se guarda **30 días**, en un espacio propio (no se cruza con
+las claves de la API v1), y solo si la respuesta es correcta.
+
 VERI*FACTU: `VERIFACTU_ENV=off|test|prod` (prod, además, `VERIFACTU_PROD_ENABLED=1`),
 `VERIFACTU_LICENSES` (licencias con envío), certificado `VERIFACTU_CERT_PATH` +
 `VERIFACTU_CERT_PASSWORD`, productor `VERIFACTU_PRODUCER_NAME` / `_NIF`. En producción
