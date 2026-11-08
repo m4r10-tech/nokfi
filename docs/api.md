@@ -111,7 +111,9 @@ Revela la clave tras reintroducir la contraseña. **Body:** `{ password }`.
 `200 { success: true }` | `401 invalid_credentials` | `400 weak_password` |
 `403/409` como reveal-key.
 Al cambiarla se **cierran las demás sesiones** de la cuenta (pasan a `401 session_invalid`);
-la sesión desde la que se cambia sigue abierta.
+la sesión desde la que se cambia sigue abierta. También dejan de valer los **enlaces
+pendientes** de restablecer la contraseña de esa licencia y los de recuperación (token y
+código OTP) de su email (`400 invalid_or_expired_token` si se usan después).
 
 ### `POST /api/auth/request-password-reset`
 Sin sesión. **Body:** `{ email, license_key }`.
@@ -135,7 +137,8 @@ Desde el enlace del email. **Setea contraseña y crea sesión** (no hace falta l
 
 > El reset por email **cierra todas las sesiones previas** (pasan a `401 session_invalid`);
 > solo vale el `token` nuevo de la respuesta. Lo mismo hacen `confirm-recovery` y el reset
-> forzado por admin (ver §5).
+> forzado por admin (ver §5). `confirm-password-reset` y `confirm-recovery` anulan además los
+> demás enlaces pendientes (como `change-password`).
 
 ### Recuperación de acceso con OTP (olvido de clave y/o contraseña)
 

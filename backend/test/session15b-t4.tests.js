@@ -151,6 +151,29 @@ module.exports = async function session15bT4Tests({ post, get, call, check, getD
     check('T4 CORS: la web puede mandar Idempotency-Key y Prefer (allowedHeaders)', () =>
       iPre.status === 204 && iPre.headers['access-control-allow-origin'] === 'http://localhost:5173' && /idempotency-key/.test(iah) && /prefer/.test(iah));
 
+    // ═══ Cambiar/restablecer la contraseña anula los enlaces pendientes ═══
+    const PW = mk('pro', { password: 'T4PwdOld!xx', email: 't4-pwd@nokfi.local' });
+    const PW2 = mk('mini', { password: 'T4PwdOld!yy', email: 't4-pwd@nokfi.local' });
+    const pwTok = createSession(PW.id, '127.0.0.1').token;
+    const reset1 = db.createResetToken(PW.id, 'password_reset', 30).token;
+    const recov1 = db.createResetToken(PW2.id, 'recovery', 30).token;
+    db.createOtp(PW.email);
+    const ch = await post('/api/auth/change-password', { current_password: 'T4PwdOld!xx', new_password: 'T4PwdNew!xx' }, pwTok);
+    const useReset = await post('/api/auth/confirm-password-reset', { token: reset1, new_password: 'T4PwdAtk!xx' });
+    const useRecov = await post('/api/auth/confirm-recovery', { recovery_token: recov1, license_key: PW.key, new_password: 'T4PwdAtk!xx' });
+    const otpLive = getDB().prepare('SELECT COUNT(*) c FROM otp_codes WHERE email = ? AND used = 0').get(PW.email).c;
+    check('T4 contraseña: tras cambiarla, el enlace de restablecer pedido antes ya no vale (400)', () =>
+      ch.status === 200 && useReset.status === 400 && useReset.data.error === 'invalid_or_expired_token');
+    check('T4 contraseña: tras cambiarla, la recuperación pendiente del mismo email y su código OTP tampoco valen', () =>
+      useRecov.status === 400 && useRecov.data.error === 'invalid_or_expired_token' && otpLive === 0);
+    const lgNew = await post('/api/auth/login', { email: PW.email, license_key: PW.key, password: 'T4PwdNew!xx' });
+    check('T4 contraseña: la contraseña nueva sigue valiendo (nadie la pisó con el enlace viejo)', () => lgNew.status === 200);
+    const resetA = db.createResetToken(PW.id, 'password_reset', 30).token;
+    const resetB = db.createResetToken(PW.id, 'password_reset', 30).token;
+    const useA = await post('/api/auth/confirm-password-reset', { token: resetA, new_password: 'T4PwdRst!xx' });
+    const useB = await post('/api/auth/confirm-password-reset', { token: resetB, new_password: 'T4PwdAtk!xx' });
+    check('T4 contraseña: al restablecerla con un enlace, el otro enlace pendiente deja de valer', () =>
+      useA.status === 200 && useB.status === 400);
   } finally {
     global.fetch = saved.fetch;
     for (const [k, v] of Object.entries({ STRIPE_SECRET_KEY: saved.key, STRIPE_PRICE_MINI: saved.mini, STRIPE_PRICE_PRO: saved.pro,
