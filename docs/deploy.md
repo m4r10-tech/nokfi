@@ -32,7 +32,7 @@
   Detalle en §3.
 - **Stripe LIVE cobrando de verdad**: pago real verificado de punta a punta
   (licencia `id=2`, mini trial 14d → 0€ hoy, correo recibido, Portal abierto).
-  Webhook LIVE con los **6 eventos** y entrega OK a través de CF. La cadena
+  Webhook LIVE con los **7 eventos** (desde la S15b) y entrega OK a través de CF. La cadena
   bloqueada desde el deploy del trial quedó validada.
 - **Mailer Resend 100%**: dominio `nokfi.app` verificado en Resend,
   `EMAIL_FROM=noreply@nokfi.app`; probe real `{sent:true}`.
@@ -143,7 +143,7 @@ all simulated renewals succeeded`).
   pago, historial de facturas y cancelar al final del periodo
   (`subscription_cancel` con `mode=at_period_end`).
   Con el cambio de plan activo y proration `None` se podía usar Max pagando Mini.
-  El Portal de PRUEBA ya está así (cambio de plan 2026-11-07; email 2026-11-08).
+  Aplicado en el Portal de PRUEBA (2026-11-07/08) y en el **LIVE (2026-11-08)**.
 - **Reintentos de Stripe** (Billing › Revenue recovery): da igual cuántos haya,
   al primer `invoice.payment_failed` de una renovación el backend cancela la
   suscripción y anula la factura.
@@ -155,13 +155,13 @@ all simulated renewals succeeded`).
   de pago único EUR (50 créditos = 5 €, 220 = 20 €, 550 = 50 €) y sus ids en
   `STRIPE_PRICE_PACK_50`, `STRIPE_PRICE_PACK_220`, `STRIPE_PRICE_PACK_550`. El
   importe que se muestra sale de `config/plans.js` (`CREDIT_PACKS`): si cambia en
-  Stripe, cambiarlo también allí. Añadir al webhook el evento
-  `checkout.session.async_payment_succeeded` (pagos asíncronos de paquetes).
-- **Webhook LIVE** registrado en `https://nokfi.app/api/webhooks/stripe` con **6
+  Stripe, cambiarlo también allí. Creados en LIVE el 2026-11-08; el webhook ya
+  recibe `checkout.session.async_payment_succeeded` (pagos asíncronos de paquetes).
+- **Webhook LIVE** registrado en `https://nokfi.app/api/webhooks/stripe` con **7
   eventos**: `checkout.session.completed`, `invoice.paid`,
   `customer.subscription.updated`, `customer.subscription.deleted`,
-  `invoice.payment_failed`, `charge.dispute.created` (S15b: añadir
-  `checkout.session.async_payment_succeeded` para los paquetes de créditos). Entrega OK a través de CF.
+  `invoice.payment_failed`, `charge.dispute.created` y
+  `checkout.session.async_payment_succeeded` (paquetes de créditos, añadido en la S15b). Entrega OK a través de CF.
   Un evento que llega antes que su licencia recibe `503` (Stripe lo reintenta);
   en el panel de webhooks pueden verse algunos `503` sueltos en las altas: es normal.
 - **Verificado end-to-end**: pago real mini (trial 14d → 0€) creó la licencia
@@ -225,7 +225,7 @@ Todo lo crítico está resuelto. Restos **no bloqueantes / opcionales**:
 
 | # | Deuda | Bloquea | Estado / acción |
 |---|-------|---------|-----------------|
-| A | Stripe LIVE — webhook + cobros reales | — | ✅ **RESUELTO** (pago real verificado end-to-end, 6 eventos, entrega por CF). |
+| A | Stripe LIVE — webhook + cobros reales | — | ✅ **RESUELTO** (pago real verificado end-to-end, 7 eventos desde la S15b, entrega por CF). |
 | B | `STRIPE_PRICE_{MINI,PRO,MAX}` + 3 Products + Portal proration=None | — | ✅ **RESUELTO / DESPLEGADO** (Deuda B). S15b: el cambio de plan sale del Portal (ver §4). |
 | C | Dominio + Nginx + SSL | — | ✅ **RESUELTO** (HTTPS vivo, cert LE, Cloudflare Full strict). |
 | H | Cuota diaria de IA vulnerable a overshoot por concurrencia (**TOCTOU**) | — | ✅ **RESUELTO (2026-08-17)** — cuota atómica vía tabla `ai_usage` (PK `license_id+day+slot`). `reserveAiSlot` inserta el slot ANTES del `await` a Gemini (INSERT atómico de mejor-sqlite3 → sin ventana TOCTOU); si la IA falla, `releaseAiSlot` lo libera y el fallo NO consume cuota. El `429` responde con mensaje específico. Detalle en `api.md` §2. |
@@ -246,7 +246,7 @@ Todo lo crítico está resuelto. Restos **no bloqueantes / opcionales**:
 5. Smoke: `/health` 200, `/api/payments/plans` 200.
 
 > El éxito del webhook y los cobros dependen de NO romper: Bot Fight Mode OFF,
-> WAF skip del webhook, real-IP conf, y los 6 eventos. No tocar eso sin riesgo.
+> WAF skip del webhook, real-IP conf, y los 7 eventos. No tocar eso sin riesgo.
 
 ## 9. Convenciones a recordar
 
