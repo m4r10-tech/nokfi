@@ -24,7 +24,7 @@
 ## 0. TL;DR (estado actual)
 
 - **Producción HTTPS viva**: `https://nokfi.app/` (Nginx + Let's Encrypt, cert
-  hasta **2026-11-01** autorenova via `certbot.timer`).
+  hasta **2027-01-21** (renovado; comprobado 2026-11-08) autorenova via `certbot.timer`).
 - **Cloudflare (edge) EN PROD — Full strict (2026-08-08/10), completo y
   verificado**: CF es el edge de `nokfi.app` (origen `<IP_DEL_VPS>` oculto tras
   anycast `104.21.6.208`/`172.67.135.69`). real-IP chain, Bot Fight OFF, WAF skip
@@ -77,8 +77,7 @@ Cadena de tráfico: **Cliente → TLS → Cloudflare (edge, valida LE) → TLS �
 
 ## 2. Estado de despliegue (back-end SERVICES)
 
-Backend PM2 `nokfi-backend` `:3001`. Smoke esperado: `/health` 200 (la raíz, SIN
-`/api` — `/api/health` NO existe, ojo), `/api/payments/plans` 200 (5/20/50),
+Backend PM2 `nokfi-backend` `:3001`. Smoke esperado: `/health` 200 (la raíz) y `/api/health` 200, `/api/payments/plans` 200 (5/20/50),
 `/api/profile` 401 sin auth, `/api/analyses` 401 sin auth.
 
 ## 3. Cloudflare (edge) — Full strict
@@ -107,9 +106,9 @@ Rule).
   "/.well-known/acme-challenge/"))` → Dynamic `concat("https://nokfi.app",
   uri.path)` + Preserve query + 301. **La exclusión acme es VITAL**: sin ella el
   redirect agarraría el reto HTTP-01 de www → el SAN www dejaría de renovar → el
-  cert caducaría (2026-11-01).
+  cert caducaría.
 
-### Nginx real-IP (`deploy/nginx-cloudflare-realip.conf` → `/etc/nginx/conf.d/cloudflare.conf`)
+### Nginx real-IP (`deploy/nginx-cloudflare-realip.conf` → `/etc/nginx/conf.d/cloudflare-realip.conf`)
 `ngx_http_realip_module`: `set_real_ip_from` (rango de CF: 15 v4 + 7 v6) +
 `real_ip_header CF-Connecting-IP` + `real_ip_recursive on`. **Solo** reescribe si
 la conexión entrante proviene de un rango CF → **anti-spoof**: un atacante que
@@ -120,7 +119,7 @@ de rangos: `https://www.cloudflare.com/ips/` (revisar en cada cambio).
 
 ### Cert LE
 Cert Let's Encrypt (SAN `nokfi.app` + `www`) en `/etc/letsencrypt/live/nokfi.app/`,
-caduca 2026-11-01. `certbot.timer` autorenueva por CF (reto HTTP-01 pasa por la
+caduca 2027-01-21 (comprobado 2026-11-08). `certbot.timer` autorenueva por CF (reto HTTP-01 pasa por la
 exclusión acme + Cache Rule bypass shell). Dry-run verificado (`Congratulations,
 all simulated renewals succeeded`).
 
