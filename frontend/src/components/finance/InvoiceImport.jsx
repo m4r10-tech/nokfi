@@ -22,7 +22,8 @@ import { invoiceDoubts } from '../../utils/invoiceDoubts';
  * leerlos: el archivo no se guarda. Lo que se guarda son los DATOS que el
  * usuario revisa y confirma, factura a factura, junto a la vista previa
  * del documento (sesión 10). Solo se marcan los campos dudosos.
- * Coste: 1 análisis por lectura, aunque vaya en varios lotes (job).
+ * Coste: 1 crédito por lectura, aunque vaya en varios lotes (job); las
+ * facturas electrónicas (XML y PDF Factur-X) no gastan.
  */
 // XML: facturas electrónicas estructuradas (Facturae/UBL/CII) → sin IA.
 const XML_EXT = ['.xml', '.xsig'];
@@ -52,9 +53,29 @@ export default function InvoiceImport({ profile, onSaved, onCancel }) {
   // Archivo de cada factura, para la vista previa (se pinta en el navegador).
   const files = useMemo(() => new Map((picked?.files || []).map(f => [f.name, f])), [picked]);
 
+  // S15b T4: los PDF Factur-X/ZUGFeRD también se leen sin IA; se miran al elegirlos
+  // para que el aviso de coste los cuente como gratis (null = comprobando).
+  const [freePdfs, setFreePdfs] = useState(0);
+  const pickSeq = useRef(0);
   const onPick = ({ name, files }) => {
     setError(null); setErrors([]);
-    setPicked({ name, files: files.slice(0, MAX_INVOICES), skipped: Math.max(0, files.length - MAX_INVOICES) });
+    const list = files.slice(0, MAX_INVOICES);
+    setPicked({ name, files: list, skipped: Math.max(0, files.length - MAX_INVOICES) });
+    const pdfs = list.filter(f => extOf(f.name) === '.pdf');
+    const seq = ++pickSeq.current;
+    setFreePdfs(pdfs.length ? null : 0);
+    if (!pdfs.length) return;
+    (async () => {
+      let n = 0;
+      try {
+        const { parseEmbeddedPdfInvoice } = await import('../../middleware/einvoice');
+        for (const f of pdfs) {
+          try { if ((await parseEmbeddedPdfInvoice(f))?.length) n++; } catch { /* PDF normal */ }
+          if (seq !== pickSeq.current) return;
+        }
+      } catch { /* sin lector: se cuentan como PDF normales */ }
+      if (seq === pickSeq.current) setFreePdfs(n);
+    })();
   };
 
   /**
@@ -161,7 +182,7 @@ export default function InvoiceImport({ profile, onSaved, onCancel }) {
     if (res.status === 409) { setDupes(res.data.duplicates || []); return; }
     if (!res.ok) { setError(apiErrorMessage(t, res)); return; }
     toast.success(t('finance.import.saved', { n: res.data.ids.length }));
-    onSaved();
+    onSaved(entries);
   };
 
   const selectedCount = rows.filter(r => r.include).length;
@@ -191,8 +212,9 @@ export default function InvoiceImport({ profile, onSaved, onCancel }) {
             <>
               <Notice icon={Info}>
                 {(() => {
-                  // Las facturas electrónicas XML se leen sin IA: no gastan cuota.
-                  const xml = picked.files.filter(f => XML_EXT.some(e => f.name.toLowerCase().endsWith(e))).length;
+                  // Las facturas electrónicas (XML y PDF Factur-X) se leen sin IA: no gastan créditos.
+                  const xml = picked.files.filter(f => XML_EXT.some(e => f.name.toLowerCase().endsWith(e))).length + (freePdfs || 0);
+                  if (freePdfs === null) return t('finance.import.checkingFree', { n: picked.files.length });
                   if (xml === picked.files.length) return t('finance.import.willReadFree', { n: xml });
                   return `${t('finance.import.willRead', { n: picked.files.length })}${xml ? ` ${t('finance.import.xmlInBatch', { n: xml })}` : ''}`;
                 })()}

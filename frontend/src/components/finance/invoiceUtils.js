@@ -9,6 +9,8 @@ import { apiErrorMessage } from '../../middleware/errors';
 // Tipos para EMITIR: sin el 5 % (solo existió de 7-2022 a 9-2024; la AEAT lo rechaza).
 export const VAT_RATES = [21, 10, 4, 0];
 export const IRPF_RATES = [0, 1, 2, 7, 15, 19];
+// S15b T4: las sociedades normalmente facturan sin retención; no se les da la pista de autónomo profesional.
+export const irpfHintKey = (legalForm) => (legalForm === 'sociedad' ? 'invoices.irpfHintCompany' : 'invoices.irpfHint');
 export const RE_RATES = { 21: 5.2, 10: 1.4, 5: 0.62, 4: 0.5, 0: 0 };
 export const EXEMPTIONS = ['E1', 'E2', 'E3', 'E4', 'E5', 'E6', 'N1', 'N2', 'S2'];
 export const PAYMENT_METHODS = ['transfer', 'direct_debit', 'card', 'cash', 'other'];

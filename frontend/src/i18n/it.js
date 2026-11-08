@@ -319,7 +319,7 @@ export default {
     welcome: 'Benvenuto in Nokfi', subtitle: 'Raccontaci un po’ della tua attività per personalizzare le analisi',
     companyName: 'Nome dell’azienda', sector: 'Settore', size: 'Dimensione',
     mainExpenses: 'Principali spese dell’attività', start: 'Inizia a usare Nokfi',
-    legalHint: 'Cambia il calcolo delle tasse', optional: 'Facoltativo', reminders: 'Avvisami prima di ogni scadenza fiscale', remindersHint: 'Ti scriviamo qualche giorno prima del 303, del 130 e degli altri modelli.', skip: 'Salta per ora', privacy: 'Usiamo questi dati solo per adattare le tue analisi. Non vengono condivisi.', change: 'Cambia', sectorSearch: 'Cerca il tuo settore: officina, negozio, trasporti…'
+    legalHint: 'Cambia il calcolo delle tasse', optional: 'Facoltativo', reminders: 'Avvisami prima di ogni scadenza fiscale', remindersHint: 'Ti scriviamo qualche giorno prima di ogni dichiarazione che ti riguarda (il 303 dell’IVA e gli altri modelli).', skip: 'Salta per ora', privacy: 'Usiamo questi dati solo per adattare le tue analisi. Non vengono condivisi.', change: 'Cambia', sectorSearch: 'Cerca il tuo settore: officina, negozio, trasporti…'
   },
   home: {
     guideStart: 'Inizia da qui', guideGo: 'Inizia', deadlineTitle: 'Prossima scadenza fiscale',
@@ -936,6 +936,7 @@ export default {
     "defaultVat": "IVA predefinita",
     "defaultIrpf": "Ritenuta IRPF predefinita",
     "irpfHint": "Professionisti: 15 % (7 % nei primi anni). Senza ritenuta, 0 %.",
+    "irpfHintCompany": "Le società normalmente fatturano senza ritenuta (0 %). Si applica solo in casi specifici, come l’affitto di un locale (19 %).",
     "footer": "Testo a piè di pagina",
     "footerHint": "Ad esempio, i dati di iscrizione al registro delle imprese.",
     "langs": {
@@ -1145,6 +1146,7 @@ export default {
     totalMismatch: 'Imponibile + IVA − ritenuta non corrisponde al totale. Controllalo.',
     duplicateEntry: 'Nel registro c’è già una fattura con questo numero dello stesso cliente o fornitore.',
     noResults: 'Nessuna registrazione corrisponde alla ricerca.', quarterShort: 'T{n}', paidAtIncome: 'Data di incasso', paidAtExpense: 'Data di pagamento', collectTitle: 'Segna come incassata · {name}', collectText: 'Indica il giorno in cui ti hanno pagato: serve a calcolare i giorni medi di incasso.',
+    emptyPeriodTitle: 'Nessuna registrazione in questo periodo', emptyPeriodDesc: 'Il tuo registro ha registrazioni in altri trimestri o anni: scegli un altro periodo qui sopra o aggiungine una nuova.', exportEmpty: 'Nessuna registrazione in questo periodo: non c’è niente da esportare.', exportNoneFiltered: 'Nessuna registrazione corrisponde al filtro: non c’è niente da esportare.', filteredTotals: 'Totali ed esportazione includono solo le registrazioni filtrate: {n} su {total}.', companyNoIrpf: 'Le società normalmente fatturano senza ritenuta IRPF, per questo qui non viene chiesta.',
     confirmDelete: 'Eliminare questa registrazione dal registro?', deleted: 'Registrazione eliminata', delete: 'Elimina',
     incomeBase: 'Entrate (imponibile)', expenseBase: 'Uscite (imponibile)', vatBalance: 'IVA da versare', vatBalanceNeg: 'IVA da compensare', result: 'Risultato',
     reviewCount: '{n} registrazioni non quadrano: controllale.', reviewCount_one: '{n} registrazione non quadra: controllala.', search: 'Cerca…', ledgerSheet: 'Registro di entrate e uscite',
@@ -1191,10 +1193,11 @@ export default {
       desc: 'Scegli foto o PDF di fatture e scontrini, oppure apri una cartella intera. L’IA estrae emittente, codice fiscale, data, imponibile, IVA, ritenuta e totale; tu controlli prima di salvare.',
       kind: 'Che fatture sono?', kindAuto: 'Rileva con il mio cod. fiscale', kindExpense: 'Uscite (ricevute)', kindIncome: 'Entrate (emesse)',
       noTaxId: 'Aggiungi il tuo codice fiscale nelle Impostazioni per distinguerle automaticamente; altrimenti verranno trattate come uscite.',
-      formats: 'PDF, JPG, PNG, WebP o XML · fino a 60 fatture per lettura · i file non vengono conservati: solo i dati che confermi.', xmlFree: 'Le fatture elettroniche (Facturae, UBL, Factur-X/ZUGFeRD in XML o PDF) si leggono all’istante, in modo esatto e senza consumare analisi.',
-      willReadFree: 'Verranno lette {n} fatture elettroniche, all’istante e senza consumare analisi.', willReadFree_one: 'Verrà letta {n} fattura elettronica, all’istante e senza consumare analisi.', xmlInBatch: '{n} sono elettroniche e si leggono senza IA.', xmlInBatch_one: '{n} è elettronica e si legge senza IA.',
+      formats: 'PDF, JPG, PNG, WebP o XML · fino a 60 fatture per lettura · i file non vengono conservati: solo i dati che confermi.', xmlFree: 'Le fatture elettroniche (Facturae, UBL, Factur-X/ZUGFeRD in XML o PDF) si leggono all’istante, in modo esatto e senza consumare crediti.',
+      willReadFree: 'Verranno lette {n} fatture elettroniche, all’istante e senza consumare crediti.', willReadFree_one: 'Verrà letta {n} fattura elettronica, all’istante e senza consumare crediti.', xmlInBatch: '{n} sono elettroniche (XML o Factur-X) e si leggono senza IA, senza consumare crediti.', xmlInBatch_one: '{n} è elettronica (XML o Factur-X) e si legge senza IA, senza consumare crediti.',
       willRead: 'Verranno lette {n} fatture. Consumerà 1 credito.', willRead_one: 'Verrà letta {n} fattura. Consumerà 1 credito.', capped: 'Verranno lette solo le prime {max}.',
       start: 'Leggi fatture', preparing: 'Preparazione', reading: 'Lettura del lotto',
+      checkingFree: 'Verifico quali PDF sono fatture elettroniche (Factur-X), che non consumano crediti…', savedElsewhere: '{n} registrazioni sono di un altro periodo e sono state salvate in {periods}. Cambia periodo qui sopra per vederle.', savedElsewhere_one: '{n} registrazione è di un altro periodo ed è stata salvata in {periods}. Cambia periodo qui sopra per vederla.',
       reviewHint: 'Controlla ogni fattura con il documento accanto. Segniamo in ambra solo i campi che non tornano o che non è stato possibile leggere.',
       andMore: 'e altri {n}', toCheck: '{n} campi da controllare', toCheck_one: '{n} campo da controllare', allGood: 'Tutto torna', showDoc: 'Vedi documento', hideDoc: 'Nascondi documento', noPreview: 'Nessuna anteprima', xmlNoPreview: 'Fattura elettronica: i dati provengono dal file stesso, senza IA.', doubts: { amounts: 'Non è stato possibile leggere gli importi', total: 'Imponibile + IVA − ritenuta non dà il totale', vat: 'L\'IVA non corrisponde all\'aliquota (più aliquote?)', vatRate: 'Aliquota IVA insolita', nif: 'Il codice fiscale non è valido (carattere di controllo)', nifMissing: 'Nessun codice fiscale trovato', name: 'Nessun nome trovato', date: 'Data mancante o non valida', dateFuture: 'La data è successiva a oggi', due: 'Scade prima della data della fattura', number: 'Nessun numero di fattura trovato' },
       notInvoice: 'Non è una fattura', duplicate: 'Duplicata', check: 'Da controllare', noneFound: 'Nessuna fattura trovata nei file.',
@@ -1207,6 +1210,7 @@ export default {
       vatRefund: 'Puoi chiedere il rimborso nel modello 303 del 4° trimestre o riportarlo in compensazione all\'anno successivo.', vatCompensate: 'Niente da pagare né da chiedere ora: si scala dall\'IVA dei trimestri successivi. Il rimborso si chiede solo nel 4° trimestre (salvo iscrizione al REDEME).',
       vatTitle: 'IVA trimestrale (modello 303)', vatOutput: 'IVA a debito', vatInput: 'IVA a credito', result: 'Risultato',
       vatExplain: 'IVA delle fatture emesse meno l’IVA delle spese del trimestre.',
+      irpfExplain: 'Stima con la formula di base: non sottrae il 5 % di spese di difficile giustificazione (stima diretta semplificata, fino a 2.000 € l’anno) né la riduzione dell’art. 110.3.c del Regolamento IRPF. Se ti spettano, il 130 che presenti può risultare un po’ più basso.',
       irpfTitle: 'Acconto IRPF (modello 130)', accIncome: 'Entrate cumulate dell’anno', accExpense: 'Uscite cumulate dell’anno',
       netIncome: 'Reddito netto', twentyPct: '20% del reddito', prevPayments: 'Acconti dei trimestri precedenti', withholdings: 'Ritenute subite',
       companyNote: 'Nokfi non calcola ancora l’imposta sulle società (modello 200), i suoi acconti (202) né le ritenute che versi (111 e 115). L’importo qui sopra è solo l’IVA (303): accantona anche per queste imposte.', companyWarning: 'Per una società qui si calcola solo l’IVA (303). L’imposta sulle società (200 e 202) e le ritenute (111 e 115) non sono ancora calcolate e non rientrano nell’importo da accantonare.', companyTitle: 'Imposta sulle società e ritenute',

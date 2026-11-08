@@ -3,6 +3,7 @@ import { Loader2, AlertTriangle, Trash2 } from 'lucide-react';
 import { useLang } from '../../context/LangContext';
 import { Modal, Segmented, Field, ErrorBox } from '../ui';
 import { todayIso } from '../../utils/money';
+import { IRPF_RATES } from './invoiceUtils';
 
 /**
  * Alta / edición de un apunte del libro (V1). La IA se equivoca: el usuario
@@ -61,7 +62,16 @@ export function checkOk(e) {
   return Math.abs(r2(e.base) + r2(e.vat_amount) - r2(e.irpf_amount) - r2(e.total)) <= 0.05;
 }
 
-export default function EntryForm({ initial, onSave, onClose, onDelete, saving, error }) {
+/**
+ * S15b T4: una sociedad no lleva retención de IRPF en sus facturas emitidas
+ * (salvo casos concretos, como el alquiler): en sus ingresos no se ofrece, a
+ * menos que el apunte ya tenga una.
+ */
+export function showIrpf(e, legalForm) {
+  return !(legalForm === 'sociedad' && e.type === 'income' && !Number(e.irpf_rate) && !Number(e.irpf_amount));
+}
+
+export default function EntryForm({ initial, onSave, onClose, onDelete, saving, error, legalForm }) {
   const { t } = useLang();
   const [e, setE] = useState(() => {
     const base = { ...emptyEntry(), ...initial, due_date: initial?.due_date || '' };
@@ -146,15 +156,18 @@ export default function EntryForm({ initial, onSave, onClose, onDelete, saving, 
           </Field>
           <Field label={t('finance.vat')} htmlFor="ef-vat_amount">{input('vat_amount', { type: 'number', step: '0.01', inputMode: 'decimal' })}</Field>
         </div>
+        {showIrpf(e, legalForm) ? (
         <div className="grid grid-cols-2 gap-2">
+          {/* S15b T4: mismos tipos que la factura emitida (1 % y 2 % de módulos y agrarias). */}
           <Field label={t('finance.irpfRate')} htmlFor="ef-irpf_rate">
             <select id="ef-irpf_rate" value={e.irpf_rate} onChange={(ev) => set('irpf_rate', Number(ev.target.value))} className="input">
-              {[0, 7, 15, 19].map(v => <option key={v} value={v}>{v} %</option>)}
+              {IRPF_RATES.map(v => <option key={v} value={v}>{v} %</option>)}
             </select>
           </Field>
           {/* S15b L1: la retención siempre en positivo (resta del total). */}
           <Field label={t('finance.irpf')} htmlFor="ef-irpf_amount">{input('irpf_amount', { type: 'number', step: '0.01', min: '0', inputMode: 'decimal' })}</Field>
         </div>
+        ) : <p className="text-xs self-center" style={{ color: 'var(--text-muted)' }}>{t('finance.companyNoIrpf')}</p>}
         <Field label={t('finance.total')} htmlFor="ef-total">{input('total', { type: 'number', step: '0.01', inputMode: 'decimal', required: true })}</Field>
         <label className="flex items-center gap-2 text-sm sm:col-span-2" style={{ color: 'var(--text-secondary)' }}>
           <input type="checkbox" checked={!!e.paid} onChange={(ev) => set('paid', ev.target.checked)} className="w-4 h-4" />

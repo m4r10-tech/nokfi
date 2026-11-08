@@ -319,7 +319,7 @@ export default {
     welcome: 'Bienvenido a Nokfi', subtitle: 'Cuéntanos un poco sobre tu negocio para personalizar tus análisis',
     companyName: 'Nombre de la empresa', sector: 'Sector', size: 'Tamaño',
     mainExpenses: 'Principales gastos del negocio', start: 'Empezar a usar Nokfi',
-    legalHint: 'Cambia el cálculo de impuestos', optional: 'Opcional', reminders: 'Avisarme antes de cada plazo fiscal', remindersHint: 'Te escribimos por email unos días antes del 303, el 130 y el resto de modelos.', skip: 'Omitir por ahora', privacy: 'Solo usamos estos datos para adaptar tus análisis. No se comparten con nadie.', change: 'Cambiar', sectorSearch: 'Busca tu sector: taller, tienda, transporte…'
+    legalHint: 'Cambia el cálculo de impuestos', optional: 'Opcional', reminders: 'Avisarme antes de cada plazo fiscal', remindersHint: 'Te escribimos por email unos días antes de cada declaración que te toque (el 303 del IVA y el resto de modelos).', skip: 'Omitir por ahora', privacy: 'Solo usamos estos datos para adaptar tus análisis. No se comparten con nadie.', change: 'Cambiar', sectorSearch: 'Busca tu sector: taller, tienda, transporte…'
   },
   home: {
     guideStart: 'Empieza por aquí', guideGo: 'Empezar', deadlineTitle: 'Próximo plazo fiscal',
@@ -939,6 +939,7 @@ export default {
     "defaultVat": "IVA por defecto",
     "defaultIrpf": "Retención IRPF por defecto",
     "irpfHint": "Profesionales: 15 % (7 % los primeros años). Si no te retienen, 0 %.",
+    "irpfHintCompany": "Las sociedades normalmente facturan sin retención (0 %). Solo se retiene en casos concretos, como el alquiler de un local (19 %).",
     "footer": "Texto al pie",
     "footerHint": "Por ejemplo, los datos del Registro Mercantil.",
     "langs": {
@@ -1148,6 +1149,7 @@ export default {
     totalMismatch: 'Base + IVA − retención no coincide con el total. Revísalo.',
     duplicateEntry: 'Ya hay en el libro una factura con ese número del mismo cliente o proveedor.',
     noResults: 'Ningún apunte coincide con tu búsqueda.', quarterShort: '{n}T', paidAtIncome: 'Fecha de cobro', paidAtExpense: 'Fecha de pago', collectTitle: 'Marcar como cobrada · {name}', collectText: 'Indica el día en que te pagaron: con él se calculan los días medios de cobro.',
+    emptyPeriodTitle: 'No hay apuntes en este periodo', emptyPeriodDesc: 'Tu libro tiene apuntes en otros trimestres o años: elige otro periodo arriba o añade uno nuevo.', exportEmpty: 'No hay apuntes en este periodo: no hay nada que exportar.', exportNoneFiltered: 'Ningún apunte coincide con el filtro: no hay nada que exportar.', filteredTotals: 'Los totales y la exportación incluyen solo lo filtrado: {n} de {total} apuntes.', companyNoIrpf: 'Las sociedades normalmente facturan sin retención de IRPF, así que aquí no se pide.',
     confirmDelete: '¿Borrar este apunte del libro?', deleted: 'Apunte borrado', delete: 'Borrar',
     incomeBase: 'Ingresos (base)', expenseBase: 'Gastos (base)', vatBalance: 'IVA a pagar', vatBalanceNeg: 'IVA a compensar', result: 'Resultado',
     reviewCount: '{n} apuntes no cuadran: revísalos.', reviewCount_one: '{n} apunte no cuadra: revísalo.', search: 'Buscar…', ledgerSheet: 'Libro de ingresos y gastos',
@@ -1194,10 +1196,11 @@ export default {
       desc: 'Elige fotos o PDF de facturas y tickets, o abre una carpeta entera. La IA extrae emisor, NIF, fecha, base, IVA, retención y total; tú revisas antes de guardar.',
       kind: '¿Qué facturas son?', kindAuto: 'Detectar con mi NIF', kindExpense: 'Gastos (recibidas)', kindIncome: 'Ingresos (emitidas)',
       noTaxId: 'Añade tu NIF en Configuración para distinguirlas automáticamente; si no, se tratarán como gastos.',
-      formats: 'PDF, JPG, PNG, WebP o XML · hasta 60 facturas por lectura · los archivos no se guardan: solo los datos que confirmes.', xmlFree: 'Las facturas electrónicas (Facturae, UBL, Factur-X/ZUGFeRD en XML o PDF) se leen al instante, de forma exacta y sin gastar análisis.',
-      willReadFree: 'Se van a leer {n} facturas electrónicas, al instante y sin gastar análisis.', willReadFree_one: 'Se va a leer {n} factura electrónica, al instante y sin gastar análisis.', xmlInBatch: '{n} son electrónicas y se leen sin IA.', xmlInBatch_one: '{n} es electrónica y se lee sin IA.',
+      formats: 'PDF, JPG, PNG, WebP o XML · hasta 60 facturas por lectura · los archivos no se guardan: solo los datos que confirmes.', xmlFree: 'Las facturas electrónicas (Facturae, UBL, Factur-X/ZUGFeRD en XML o PDF) se leen al instante, de forma exacta y sin gastar créditos.',
+      willReadFree: 'Se van a leer {n} facturas electrónicas, al instante y sin gastar créditos.', willReadFree_one: 'Se va a leer {n} factura electrónica, al instante y sin gastar créditos.', xmlInBatch: '{n} son electrónicas (XML o Factur-X) y se leen sin IA, sin gastar créditos.', xmlInBatch_one: '{n} es electrónica (XML o Factur-X) y se lee sin IA, sin gastar créditos.',
       willRead: 'Se van a leer {n} facturas. Gastará 1 crédito.', willRead_one: 'Se va a leer {n} factura. Gastará 1 crédito.', capped: 'Solo se leerán las primeras {max}.',
       start: 'Leer facturas', preparing: 'Preparando', reading: 'Leyendo lote',
+      checkingFree: 'Comprobando qué PDF son facturas electrónicas (Factur-X), que no gastan créditos…', savedElsewhere: '{n} apuntes son de otro periodo y han quedado en {periods}. Cambia el periodo arriba para verlos.', savedElsewhere_one: '{n} apunte es de otro periodo y ha quedado en {periods}. Cambia el periodo arriba para verlo.',
       reviewHint: 'Revisa cada factura con el documento al lado. Solo marcamos en ámbar los campos que no cuadran o que no se han podido leer.',
       andMore: 'y {n} más', toCheck: '{n} campos por revisar', toCheck_one: '{n} campo por revisar', allGood: 'Todo cuadra', showDoc: 'Ver documento', hideDoc: 'Ocultar documento', noPreview: 'Sin vista previa', xmlNoPreview: 'Factura electrónica: los datos vienen del propio archivo, sin IA.', doubts: { amounts: 'No se han podido leer los importes', total: 'Base + IVA − retención no da el total', vat: 'La cuota no cuadra con el tipo de IVA (¿varios tipos?)', vatRate: 'Tipo de IVA poco habitual', nif: 'El NIF no es válido (dígito de control)', nifMissing: 'No aparece el NIF', name: 'No aparece el nombre', date: 'Falta la fecha o no es válida', dateFuture: 'La fecha es posterior a hoy', due: 'Vence antes de la fecha de la factura', number: 'No aparece el número de factura' },
       notInvoice: 'No es factura', duplicate: 'Duplicada', check: 'Revisar', noneFound: 'No se encontraron facturas en los archivos.',
@@ -1210,6 +1213,7 @@ export default {
       vatRefund: 'Puedes pedir la devolución en el modelo 303 del 4T o dejarlo para compensar el año siguiente.', vatCompensate: 'No se paga ni se devuelve ahora: se descuenta del IVA de los próximos trimestres. La devolución solo se pide en el 4T (salvo inscritos en el REDEME).',
       vatTitle: 'IVA trimestral (modelo 303)', vatOutput: 'IVA repercutido', vatInput: 'IVA soportado', result: 'Resultado',
       vatExplain: 'IVA de tus facturas emitidas menos el IVA de tus gastos del trimestre.',
+      irpfExplain: 'Estimación con la fórmula básica: no resta el 5 % de gastos de difícil justificación (estimación directa simplificada, hasta 2.000 € al año) ni la minoración del art. 110.3.c del Reglamento del IRPF. Si te aplican, el 130 que presentes puede salir algo más bajo.',
       irpfTitle: 'Pago fraccionado IRPF (modelo 130)', accIncome: 'Ingresos acumulados del año', accExpense: 'Gastos acumulados del año',
       netIncome: 'Rendimiento neto', twentyPct: '20 % del rendimiento', prevPayments: 'Pagos de trimestres anteriores', withholdings: 'Retenciones que te han hecho',
       companyNote: 'Nokfi todavía no calcula el Impuesto sobre Sociedades (modelo 200), sus pagos fraccionados (202) ni las retenciones que ingresas (111 y 115). La cifra de arriba es solo el IVA (303): aparta también lo de esos impuestos.', companyWarning: 'Como sociedad, aquí solo se calcula el IVA (303). El Impuesto sobre Sociedades (200 y 202) y las retenciones (111 y 115) aún no se calculan: no están en lo que hay que apartar.', companyTitle: 'Impuesto sobre Sociedades y retenciones',

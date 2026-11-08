@@ -25,6 +25,8 @@ npm run check:seo      # páginas públicas con contenido es/en y calendario igu
 npm run test:einvoice  # lector de facturas electrónicas (Facturae, UBL, CII)
 node test/s15b-cifras.test.mjs   # CSV del libro, trimestres traducidos, errores de XML (sin navegador)
 VITE_API_URL=/api npx vite build && node test/s15b-cifras.e2e.cjs   # Impuestos, Cobros, Libro e Inicio en Chromium (Playwright)
+node test/s15b-t4-cifras.test.mjs   # xlsx/ods del libro (fecha y 0,00), signo −, trimestres de lo importado, IRPF de sociedades, textos (sin navegador)
+VITE_API_URL=/api npx vite build && node test/s15b-t4-cifras.e2e.cjs   # Libro (periodo vacío, filtro, Excel), Factur-X gratis, otro trimestre, 130 y onboarding (Playwright; puertos 4201/4202)
 VITE_API_URL=/api npx vite build && node test/s15b-seguridad.e2e.cjs   # exportar informes sin innerHTML y un solo enlace de gestoría por envío (Playwright)
 node test/s15b-ia.test.mjs       # botones del asistente a partir de «[enlace: clave]» (sin navegador)
 VITE_API_URL=/api npx vite build && node test/s15b-ia.e2e.cjs   # Cuestionario, Reclamar, asistente e Historial con la IA simulada (Playwright)

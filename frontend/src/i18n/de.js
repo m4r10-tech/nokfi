@@ -319,7 +319,7 @@ export default {
     welcome: 'Willkommen bei Nokfi', subtitle: 'Erzähl uns kurz von deinem Unternehmen, damit wir deine Analysen personalisieren können',
     companyName: 'Name des Unternehmens', sector: 'Branche', size: 'Größe',
     mainExpenses: 'Wichtigste Ausgaben', start: 'Nokfi nutzen',
-    legalHint: 'Ändert die Steuerberechnung', optional: 'Optional', reminders: 'Vor jeder Steuerfrist erinnern', remindersHint: 'Wir schreiben dir einige Tage vor Modell 303, 130 und den übrigen Erklärungen.', skip: 'Vorerst überspringen', privacy: 'Wir nutzen diese Angaben nur, um deine Analysen anzupassen. Sie werden nicht weitergegeben.', change: 'Ändern', sectorSearch: 'Branche suchen: Werkstatt, Laden, Transport…'
+    legalHint: 'Ändert die Steuerberechnung', optional: 'Optional', reminders: 'Vor jeder Steuerfrist erinnern', remindersHint: 'Wir schreiben dir einige Tage vor jeder Erklärung, die dich betrifft (Modell 303 für die USt. und die übrigen).', skip: 'Vorerst überspringen', privacy: 'Wir nutzen diese Angaben nur, um deine Analysen anzupassen. Sie werden nicht weitergegeben.', change: 'Ändern', sectorSearch: 'Branche suchen: Werkstatt, Laden, Transport…'
   },
   home: {
     guideStart: 'Hier anfangen', guideGo: 'Loslegen', deadlineTitle: 'Nächste Steuerfrist',
@@ -936,6 +936,7 @@ export default {
     "defaultVat": "Standard-MwSt.",
     "defaultIrpf": "Standard-Quellensteuer (IRPF)",
     "irpfHint": "Freiberufler: 15 % (7 % in den ersten Jahren). Ohne Einbehalt 0 %.",
+    "irpfHintCompany": "Gesellschaften stellen normalerweise ohne Einbehalt in Rechnung (0 %). Er gilt nur in bestimmten Fällen, etwa bei der Vermietung von Geschäftsräumen (19 %).",
     "footer": "Fußzeile",
     "footerHint": "Zum Beispiel die Handelsregisterdaten.",
     "langs": {
@@ -1145,6 +1146,7 @@ export default {
     totalMismatch: 'Netto + USt. − Einbehalt entspricht nicht dem Gesamtbetrag. Bitte prüfen.',
     duplicateEntry: 'Im Journal gibt es bereits eine Rechnung mit dieser Nummer vom selben Kunden oder Lieferanten.',
     noResults: 'Keine Buchung entspricht deiner Suche.', quarterShort: 'Q{n}', paidAtIncome: 'Zahlungseingang am', paidAtExpense: 'Bezahlt am', collectTitle: 'Als bezahlt markieren · {name}', collectText: 'Gib den Tag an, an dem du bezahlt wurdest: Daraus wird die durchschnittliche Zahlungsdauer berechnet.',
+    emptyPeriodTitle: 'Keine Buchungen in diesem Zeitraum', emptyPeriodDesc: 'Dein Buch hat Buchungen in anderen Quartalen oder Jahren: Wähle oben einen anderen Zeitraum oder füge eine neue hinzu.', exportEmpty: 'Keine Buchungen in diesem Zeitraum: Es gibt nichts zu exportieren.', exportNoneFiltered: 'Keine Buchung entspricht dem Filter: Es gibt nichts zu exportieren.', filteredTotals: 'Summen und Export umfassen nur die gefilterten Buchungen: {n} von {total}.', companyNoIrpf: 'Gesellschaften stellen normalerweise ohne IRPF-Einbehalt in Rechnung, daher wird er hier nicht abgefragt.',
     confirmDelete: 'Diese Buchung aus dem Journal löschen?', deleted: 'Buchung gelöscht', delete: 'Löschen',
     incomeBase: 'Einnahmen (netto)', expenseBase: 'Ausgaben (netto)', vatBalance: 'USt.-Zahllast', vatBalanceNeg: 'USt. zur Verrechnung', result: 'Ergebnis',
     reviewCount: '{n} Buchungen stimmen nicht: bitte prüfen.', reviewCount_one: '{n} Buchung stimmt nicht: bitte prüfen.', search: 'Suchen…', ledgerSheet: 'Einnahmen- und Ausgabenjournal',
@@ -1191,10 +1193,11 @@ export default {
       desc: 'Wähle Fotos oder PDFs von Rechnungen und Belegen oder öffne einen ganzen Ordner. Die KI liest Aussteller, Steuernummer, Datum, Nettobetrag, USt., Einbehalt und Gesamtbetrag aus; du prüfst vor dem Speichern.',
       kind: 'Welche Rechnungen sind es?', kindAuto: 'Mit meiner Steuernr. erkennen', kindExpense: 'Ausgaben (erhalten)', kindIncome: 'Einnahmen (ausgestellt)',
       noTaxId: 'Trage deine Steuernummer in den Einstellungen ein, um sie automatisch zu unterscheiden; sonst werden sie als Ausgaben behandelt.',
-      formats: 'PDF, JPG, PNG, WebP oder XML · bis zu 60 Rechnungen pro Durchgang · Dateien werden nicht gespeichert, nur die von dir bestätigten Daten.', xmlFree: 'E-Rechnungen (Facturae, UBL, Factur-X/ZUGFeRD als XML oder PDF) werden sofort, exakt und ohne Analyseverbrauch gelesen.',
-      willReadFree: '{n} E-Rechnungen werden sofort gelesen, ohne Analysen zu verbrauchen.', willReadFree_one: '{n} E-Rechnung wird sofort gelesen, ohne Analysen zu verbrauchen.', xmlInBatch: '{n} davon sind E-Rechnungen und werden ohne KI gelesen.', xmlInBatch_one: '{n} davon ist eine E-Rechnung und wird ohne KI gelesen.',
+      formats: 'PDF, JPG, PNG, WebP oder XML · bis zu 60 Rechnungen pro Durchgang · Dateien werden nicht gespeichert, nur die von dir bestätigten Daten.', xmlFree: 'E-Rechnungen (Facturae, UBL, Factur-X/ZUGFeRD als XML oder PDF) werden sofort, exakt und ohne Credit-Verbrauch gelesen.',
+      willReadFree: '{n} E-Rechnungen werden sofort gelesen, ohne Credits zu verbrauchen.', willReadFree_one: '{n} E-Rechnung wird sofort gelesen, ohne Credits zu verbrauchen.', xmlInBatch: '{n} davon sind E-Rechnungen (XML oder Factur-X) und werden ohne KI und ohne Credits gelesen.', xmlInBatch_one: '{n} davon ist eine E-Rechnung (XML oder Factur-X) und wird ohne KI und ohne Credits gelesen.',
       willRead: '{n} Rechnungen werden gelesen. Das verbraucht 1 Credit.', willRead_one: '{n} Rechnung wird gelesen. Das verbraucht 1 Credit.', capped: 'Es werden nur die ersten {max} gelesen.',
       start: 'Rechnungen lesen', preparing: 'Vorbereitung', reading: 'Stapel wird gelesen',
+      checkingFree: 'Prüfe, welche PDFs E-Rechnungen (Factur-X) sind – sie verbrauchen keine Credits…', savedElsewhere: '{n} Buchungen gehören zu einem anderen Zeitraum und wurden in {periods} gespeichert. Wechsle oben den Zeitraum, um sie zu sehen.', savedElsewhere_one: '{n} Buchung gehört zu einem anderen Zeitraum und wurde in {periods} gespeichert. Wechsle oben den Zeitraum, um sie zu sehen.',
       reviewHint: 'Prüfe jede Rechnung mit dem Dokument daneben. Nur Felder, die nicht stimmen oder nicht gelesen werden konnten, sind gelb markiert.',
       andMore: 'und {n} weitere', toCheck: '{n} Felder prüfen', toCheck_one: '{n} Feld prüfen', allGood: 'Alles stimmt', showDoc: 'Dokument anzeigen', hideDoc: 'Dokument ausblenden', noPreview: 'Keine Vorschau', xmlNoPreview: 'E-Rechnung: Die Daten stammen aus der Datei selbst, ohne KI.', doubts: { amounts: 'Die Beträge konnten nicht gelesen werden', total: 'Netto + MwSt. − Einbehalt ergibt nicht den Gesamtbetrag', vat: 'Die MwSt. passt nicht zum Satz (mehrere Sätze?)', vatRate: 'Ungewöhnlicher MwSt.-Satz', nif: 'Die Steuernummer ist ungültig (Prüfziffer)', nifMissing: 'Keine Steuernummer gefunden', name: 'Kein Name gefunden', date: 'Datum fehlt oder ist ungültig', dateFuture: 'Das Datum liegt nach heute', due: 'Fällig vor dem Rechnungsdatum', number: 'Keine Rechnungsnummer gefunden' },
       notInvoice: 'Keine Rechnung', duplicate: 'Duplikat', check: 'Prüfen', noneFound: 'In den Dateien wurden keine Rechnungen gefunden.',
@@ -1207,6 +1210,7 @@ export default {
       vatRefund: 'Du kannst die Erstattung im Modell 303 des 4. Quartals beantragen oder das Guthaben ins nächste Jahr vortragen.', vatCompensate: 'Jetzt ist nichts zu zahlen oder zu erstatten: Das Guthaben wird mit der USt. der Folgequartale verrechnet. Eine Erstattung wird nur im 4. Quartal beantragt (außer bei Eintragung im REDEME).',
       vatTitle: 'Quartals-Umsatzsteuer (Modelo 303)', vatOutput: 'Umsatzsteuer', vatInput: 'Vorsteuer', result: 'Ergebnis',
       vatExplain: 'USt. deiner ausgestellten Rechnungen minus Vorsteuer deiner Ausgaben im Quartal.',
+      irpfExplain: 'Schätzung nach der Grundformel: Die 5 % für schwer nachweisbare Ausgaben (vereinfachte direkte Schätzung, bis 2.000 € im Jahr) und die Minderung nach Art. 110.3.c der IRPF-Verordnung werden nicht abgezogen. Wenn sie für dich gelten, kann dein Modelo 130 etwas niedriger ausfallen.',
       irpfTitle: 'Einkommensteuer-Vorauszahlung (Modelo 130)', accIncome: 'Einnahmen seit Jahresbeginn', accExpense: 'Ausgaben seit Jahresbeginn',
       netIncome: 'Nettoeinkünfte', twentyPct: '20 % der Einkünfte', prevPayments: 'Vorauszahlungen der Vorquartale', withholdings: 'Einbehaltene Steuern',
       companyNote: 'Nokfi berechnet die Körperschaftsteuer (Modelo 200), ihre Vorauszahlungen (202) und die von dir abgeführten Einbehalte (111 und 115) noch nicht. Der Betrag oben ist nur die Umsatzsteuer (303): Lege auch für diese Steuern etwas zurück.', companyWarning: 'Für Gesellschaften wird hier nur die Umsatzsteuer (303) berechnet. Körperschaftsteuer (200 und 202) und Einbehalte (111 und 115) werden noch nicht berechnet und sind im Rücklagebetrag nicht enthalten.', companyTitle: 'Körperschaftsteuer und Einbehalte',

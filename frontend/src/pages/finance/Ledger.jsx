@@ -15,6 +15,21 @@ import { Section, Kpi, Segmented, Badge } from '../../components/ui';
 import ConfirmModal from '../../components/dev/ConfirmModal';
 import { eur, isoDate, currentQuarter, quarterRange, quarterLabel } from '../../utils/money';
 
+// S15b T4: el mismo signo menos (−) en todo el libro (Intl da un guion «-»).
+export const signedEur = (n, lang) => eur(n, lang).replace('-', '\u2212');
+
+/** S15b T4: trimestres («3T 2026») en los que han quedado apuntes guardados fuera del periodo que se ve. */
+export function periodsOutside(saved, range, t) {
+  const out = new Map();
+  for (const e of saved || []) {
+    const d = String(e.invoice_date || '');
+    if (!d || (d >= range.from && d <= range.to)) continue;
+    const label = quarterLabel(t, Math.floor((Number(d.slice(5, 7)) - 1) / 3) + 1, Number(d.slice(0, 4)));
+    out.set(label, (out.get(label) || 0) + 1);
+  }
+  return out;
+}
+
 /**
  * V1 — Libro de ingresos y gastos (sesión 4). Periodo por trimestre o año,
  * filtros, resumen (bases, IVA, resultado) y exportación trimestral para la
@@ -30,6 +45,7 @@ export default function Ledger() {
   const [type, setType] = useState('all');
   const [q, setQ] = useState('');
   const [entries, setEntries] = useState(null);
+  const [hasAny, setHasAny] = useState(true);
   const [failure, setFailure] = useState(null);
   const [importing, setImporting] = useState(false);
   const [editing, setEditing] = useState(null);
@@ -40,7 +56,7 @@ export default function Ledger() {
   const load = useCallback(async () => {
     setFailure(null);
     const res = await ledgerApi.list({ from: range.from, to: range.to });
-    if (res.ok) setEntries(res.data.entries);
+    if (res.ok) { setEntries(res.data.entries); setHasAny(res.data.has_any !== false); }
     else setFailure(res);
   }, [range.from, range.to]);
   useEffect(() => { setEntries(null); load(); }, [load]);
@@ -49,14 +65,16 @@ export default function Ledger() {
     (type === 'all' || e.type === type)
     && (!q || `${e.party_name} ${e.invoice_number} ${e.concept}`.toLowerCase().includes(q.toLowerCase()))), [entries, type, q]);
 
+  // S15b T4: totales y exportación siguen el filtro y la búsqueda activos.
+  const filtered = type !== 'all' || !!q;
   const totals = useMemo(() => {
     const s = { incomeBase: 0, expenseBase: 0, vatOut: 0, vatIn: 0, review: 0 };
-    for (const e of entries || []) {
+    for (const e of visible) {
       if (e.type === 'income') { s.incomeBase += e.base; s.vatOut += e.vat_amount; } else { s.expenseBase += e.base; s.vatIn += e.vat_amount; }
       if (e.needs_review) s.review++;
     }
     return s;
-  }, [entries]);
+  }, [visible]);
 
   const save = async (data) => {
     setSaving(true); setFormError(null);
@@ -103,12 +121,30 @@ export default function Ledger() {
       ['irpf_rate', t('finance.irpfRate')], ['irpf_amount', t('finance.irpf'), 'money'], ['total', t('finance.total'), 'money'], ['paid_label', t('finance.paidCol')]
     // S15b L2: `type` = cómo sale en el CSV (fecha DD/MM/AAAA, importes con 2 decimales).
     ].map(([key, label, type]) => ({ key, label, type })),
-    rows: (entries || []).slice().sort((a, b) => a.invoice_date.localeCompare(b.invoice_date)).map(e => ({
+    rows: visible.slice().sort((a, b) => a.invoice_date.localeCompare(b.invoice_date)).map(e => ({
       ...e, type_label: e.type === 'income' ? t('finance.income') : t('finance.expense'),
       category_label: e.category ? categoryLabel(t, e.category) : '', paid_label: e.paid ? t('common.yes') : t('common.no')
     }))
   };
   const periodLabel = quarter ? `${t('finance.quarterShort', { n: quarter })}_${year}` : `${year}`;
+  // S15b T4: nada que exportar → se avisa en vez de bajar un libro vacío.
+  const exportLedger = async (format) => {
+    if (!exportTable.rows.length) { toast.info(t(entries?.length ? 'finance.exportNoneFiltered' : 'finance.exportEmpty')); return; }
+    const { exportDoc } = await import('../../middleware/exports');
+    await exportDoc(format, ledgerDoc, { t, lang });
+  };
+  const ledgerDoc = { title: `${t('finance.ledgerSheet')} ${periodLabel.replace('_', ' ')}`, fileBase: `libro_${periodLabel}`, tables: [exportTable] };
+
+  // S15b T4: si se guardan facturas de otro trimestre, decir dónde han quedado.
+  const onImported = (saved) => {
+    setImporting(false);
+    const out = periodsOutside(saved, range, t);
+    if (out.size) {
+      const n = [...out.values()].reduce((a, b) => a + b, 0);
+      toast.info(t('finance.import.savedElsewhere', { n, periods: [...out].map(([p, c]) => (out.size > 1 ? `${p} (${c})` : p)).join(', ') }), { duration: 9000 });
+    }
+    load();
+  };
 
   return (
     <div className="flex flex-col gap-4">
@@ -123,20 +159,20 @@ export default function Ledger() {
         <div className="flex flex-wrap gap-2">
           <button onClick={() => setImporting(true)} className="btn btn-primary btn-sm"><ScanLine size={14} /> {t('finance.readInvoices')}</button>
           <button onClick={() => { setFormError(null); setEditing(emptyEntry()); }} className="btn btn-secondary btn-sm"><Plus size={14} /> {t('finance.addEntry')}</button>
-          <ExportMenu formats={['csv', 'xlsx', 'ods', 'pdf']} doc={{ title: `${t('finance.ledgerSheet')} ${periodLabel.replace('_', ' ')}`, fileBase: `libro_${periodLabel}`, tables: [exportTable] }} />
+          <ExportMenu formats={['csv', 'xlsx', 'ods', 'pdf']} doc={ledgerDoc} onExport={exportLedger} />
         </div>
       </div>
 
-      {importing && <InvoiceImport profile={profile} onCancel={() => setImporting(false)} onSaved={() => { setImporting(false); load(); }} />}
+      {importing && <InvoiceImport profile={profile} onCancel={() => setImporting(false)} onSaved={onImported} />}
 
       {/* Sin apuntes no hay métricas: solo el estado vacío (nada de ceros). */}
       {entries?.length > 0 && (
         <div className="grid grid-cols-2 lg:grid-cols-4 gap-2 sm:gap-3">
-          <Kpi label={t('finance.incomeBase')} value={eur(totals.incomeBase, lang)} />
-          <Kpi label={t('finance.expenseBase')} value={eur(totals.expenseBase, lang)} />
+          <Kpi label={t('finance.incomeBase')} value={signedEur(totals.incomeBase, lang)} />
+          <Kpi label={t('finance.expenseBase')} value={signedEur(totals.expenseBase, lang)} />
           <Kpi label={t(totals.vatOut - totals.vatIn < 0 ? 'finance.vatBalanceNeg' : 'finance.vatBalance')} value={eur(Math.abs(totals.vatOut - totals.vatIn), lang)}
-            hint={t('finance.vatSplit').replace('{out}', eur(totals.vatOut, lang)).replace('{in}', eur(totals.vatIn, lang))} />
-          <Kpi label={t('finance.result')} value={eur(totals.incomeBase - totals.expenseBase, lang)}
+            hint={t('finance.vatSplit').replace('{out}', signedEur(totals.vatOut, lang)).replace('{in}', signedEur(totals.vatIn, lang))} />
+          <Kpi label={t('finance.result')} value={signedEur(totals.incomeBase - totals.expenseBase, lang)}
             tone={totals.incomeBase - totals.expenseBase > 0 ? 'var(--positive)' : totals.incomeBase - totals.expenseBase < 0 ? 'var(--negative)' : undefined} />
         </div>
       )}
@@ -146,7 +182,7 @@ export default function Ledger() {
       ) : entries === null ? (
         <div className="card p-4 flex flex-col gap-3" aria-busy="true">{[0, 1, 2, 3].map(i => <Skeleton key={i} className="h-10" />)}</div>
       ) : entries.length === 0 && !importing ? (
-        <EmptyState icon={BookOpen} title={t('finance.emptyTitle')} description={t('finance.emptyDesc')}>
+        <EmptyState icon={BookOpen} title={t(hasAny ? 'finance.emptyPeriodTitle' : 'finance.emptyTitle')} description={t(hasAny ? 'finance.emptyPeriodDesc' : 'finance.emptyDesc')}>
           <button onClick={() => setImporting(true)} className="btn btn-primary"><ScanLine size={16} /> {t('finance.readInvoices')}</button>
           <button onClick={() => setEditing(emptyEntry())} className="btn btn-secondary"><Plus size={16} /> {t('finance.addEntry')}</button>
         </EmptyState>
@@ -161,6 +197,9 @@ export default function Ledger() {
               { value: 'all', label: t('history.filterAll') }, { value: 'income', label: t('finance.incomes') }, { value: 'expense', label: t('finance.expenses') }
             ]} />
           </div>}>
+          {filtered && visible.length > 0 && (
+            <p className="text-xs mb-3" style={{ color: 'var(--text-muted)' }}>{t('finance.filteredTotals', { n: visible.length, total: entries.length })}</p>
+          )}
           {totals.review > 0 && (
             <p className="text-xs mb-3 flex items-center gap-1.5" style={{ color: 'var(--warning)' }}><AlertTriangle size={13} /> {t('finance.reviewCount', { n: totals.review })}</p>
           )}
@@ -181,7 +220,7 @@ export default function Ledger() {
                   <p className="text-sm font-semibold tabular" style={{ color: e.type === 'income' ? 'var(--positive)' : 'var(--text-primary)' }}>
                     {(e.type === 'income') === (e.total >= 0) ? '+' : '−'}{eur(Math.abs(e.total), lang)}
                   </p>
-                  <p className="text-[11px] tabular" style={{ color: 'var(--text-muted)' }}>{t('finance.vat')} {eur(e.vat_amount, lang)}</p>
+                  <p className="text-[11px] tabular" style={{ color: 'var(--text-muted)' }}>{t('finance.vat')} {signedEur(e.vat_amount, lang)}</p>
                 </div>
                 {e.is_rectification ? <span className="shrink-0 hidden sm:inline-flex"><Badge tone="accent">{t('invoices.state.rectification')}</Badge></span> : (
                 <button onClick={() => togglePaid(e)} className="shrink-0 hidden sm:inline-flex" title={e.type === 'income' ? t('finance.markCollected') : t('finance.markPaid')}>
@@ -204,7 +243,7 @@ export default function Ledger() {
         </Section>
       )}
 
-      {editing && <EntryForm initial={editing} saving={saving} error={formError} onClose={() => setEditing(null)} onSave={save}
+      {editing && <EntryForm initial={editing} legalForm={profile?.legalForm} saving={saving} error={formError} onClose={() => setEditing(null)} onSave={save}
         onDelete={() => { const e = editing; setEditing(null); setDeleting(e); }} />}
       {paying && <PaidDateModal entry={paying} busy={payBusy} error={payError} onClose={() => setPaying(null)} onConfirm={(d) => setPaid(paying, true, d)} />}
       {deleting && (
