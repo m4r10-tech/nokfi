@@ -1,7 +1,8 @@
-import { useState, useMemo, useId } from 'react';
+import { useState, useMemo, useId, useRef, useEffect } from 'react';
 import { Link } from 'react-router-dom';
 import { Search, Check } from 'lucide-react';
 import { useLang } from '../context/LangContext';
+import { useFocusTrap } from '../hooks/useFocusTrap';
 
 // `value` es lo que se GUARDA en el perfil (se mantiene el literal histórico
 // en castellano para no romper perfiles existentes, el prompt ni la
@@ -60,6 +61,13 @@ export default function OnboardingModal({ onComplete }) {
   const [mainExpenses, setMainExpenses] = useState([]);
   // S15b F10: los avisos por email van desactivados por defecto (también al «Omitir»).
   const [fiscalReminders, setFiscalReminders] = useState(false);
+  // S15b T4 (lote 13): como el resto de diálogos, Tab y Shift+Tab no salen del modal
+  // (el menú de detrás queda fuera). Escape no hace nada: para salir está «Omitir por ahora».
+  const panelRef = useRef(null);
+  useFocusTrap(panelRef);
+  useEffect(() => {
+    if (!panelRef.current?.contains(document.activeElement)) panelRef.current?.focus({ preventScroll: true });
+  }, []);
 
   const toggleExpense = (exp) => {
     setMainExpenses(prev => prev.includes(exp) ? prev.filter(e => e !== exp) : [...prev, exp]);
@@ -87,7 +95,7 @@ export default function OnboardingModal({ onComplete }) {
   return (
     <div className="fixed inset-0 z-50 flex items-end sm:items-center justify-center sm:p-4 anim-fade" style={{ background: 'var(--overlay)' }}
       role="dialog" aria-modal="true" aria-labelledby="onboarding-title">
-      <div className="w-full max-w-lg rounded-t-2xl sm:rounded-2xl p-5 sm:p-8 max-h-[92dvh] overflow-y-auto overscroll-contain safe-bottom"
+      <div ref={panelRef} tabIndex={-1} className="w-full max-w-lg rounded-t-2xl sm:rounded-2xl p-5 sm:p-8 max-h-[92dvh] overflow-y-auto overscroll-contain safe-bottom outline-none"
         style={{ background: 'var(--surface-1)', border: '1px solid var(--border)', animation: 'fade-up var(--dur-slow) var(--ease-out) both' }}>
         <h2 id="onboarding-title" className="text-xl font-semibold mb-1" style={{ color: 'var(--text-primary)' }}>{t('onboarding.welcome')}</h2>
         <p className="text-sm mb-6" style={{ color: 'var(--text-secondary)' }}>{t('onboarding.subtitle')}</p>
