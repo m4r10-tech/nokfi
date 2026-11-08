@@ -1574,6 +1574,8 @@ async function main() {
   await require('./session15b-peticiones.tests')({ post, put, get, call, check, checkAsync, getDB });
   // S15b lote 6 — visual y móvil: /api/auth/verify fuera del limitador general.
   await require('./session15b-visual.tests')({ post, check });
+  // S15b T4 lote 12 — IA y diagnóstico (cancelar en el servidor, reserva, compensación, facturas…).
+  await require('./session15b-t4-ia.tests')({ post, put, get, call, check, checkAsync, getDB });
 
   } catch (e) {
     console.error('TEST CRASH:', e.message);

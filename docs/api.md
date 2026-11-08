@@ -227,6 +227,11 @@ caduca a los 30 min; `404 pending_not_found` si se reinició el servidor). Máxi
 en curso por licencia (`429 too_many_pending`). El navegador lo hace solo
 (`frontend/src/middleware/api.js`) y muestra un aviso mientras espera. La API v1 no
 cambia: para trabajos largos tiene su modo asíncrono (`?async=true`).
+**Cancelar (S15b T4):** si el navegador corta la petición antes de la respuesta, o
+llama a `DELETE /api/pending/:id` (con sesión; `{ cancelled }`, `404 pending_not_found`
+si no es suya o ya no existe), la generación se cancela en el servidor: sale de la
+cola de la IA local o se corta la conexión con el proveedor, y un análisis cancelado
+no gasta crédito. La web lo hace al cambiar de tono o cerrar Reclamar.
 
 **Cuota diaria por licencia (atómica):** `reserveAiSlot` reserva un hueco en
 `ai_usage` (PK `license_id+day+slot`) **antes** de llamar a la IA; si el análisis

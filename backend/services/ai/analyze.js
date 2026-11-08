@@ -63,7 +63,9 @@ const AI_ERROR_RESPONSES = {
   ai_empty_response: [502, 'El análisis no pudo generarse ahora mismo (la IA devolvió una respuesta vacía). Inténtalo de nuevo.'],
   ai_bad_output: [502, 'La IA devolvió una respuesta incompleta. Inténtalo de nuevo: no se ha descontado de tu cuota.'],
   // Solo quedaba la IA local y la petición era demasiado grande para ella.
-  prompt_too_long: [503, 'Hay demasiados datos para un solo análisis ahora mismo. Prueba con menos archivos o con uno más pequeño.']
+  prompt_too_long: [503, 'Hay demasiados datos para un solo análisis ahora mismo. Prueba con menos archivos o con uno más pequeño.'],
+  // S15b T4 (D4): el navegador la canceló (nadie lee esta respuesta; el crédito se devuelve).
+  ai_cancelled: [499, 'Análisis cancelado: no se ha descontado de tus créditos.']
 };
 
 /** Valida la entrada y prepara la llamada. Devuelve { error } o { plan }. */
@@ -153,8 +155,9 @@ function prepare(task, input, profile, lang, licenseId) {
  * @param {string} [o.jobId]
  * @param {string} [o.ip]
  * @param {string} [o.source]  'web' | 'api'
+ * @param {AbortSignal} [o.signal] S15b T4 (D4): cancelación desde el navegador
  */
-async function runAnalysis({ license, task, input, lang, title, jobId, ip, source = 'web' }) {
+async function runAnalysis({ license, task, input, lang, title, jobId, ip, source = 'web', signal }) {
   if (!ALL_TASKS.includes(task)) return bad('invalid_task', 'Tipo de análisis desconocido.');
   if (!providerOrder().length) {
     console.error('⚠️  Ningún proveedor de IA configurado (GROQ_API_KEY / CF_ACCOUNT_ID+CF_AI_TOKEN)');
@@ -185,7 +188,8 @@ async function runAnalysis({ license, task, input, lang, title, jobId, ip, sourc
       parts: plan.parts,
       schema: plan.schema,
       maxTokens: plan.maxTokens || 8000,
-      lang
+      lang,
+      signal // S15b T4 (D4): cancelada por el usuario → se devuelve el crédito (onFailure)
     });
   } catch (e) {
     permit.onFailure();

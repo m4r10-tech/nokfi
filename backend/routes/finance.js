@@ -151,7 +151,7 @@ Factura nº ${entry.invoice_number || '(sin número)'} del ${entry.invoice_date}
 Importe: ${formatEur(entry.total, req.body?.lang)}. ${days > 0 ? `Días desde el vencimiento: ${days}.` : 'Todavía no ha vencido: es un recordatorio previo al vencimiento.'}
 Concepto: ${entry.concept || '—'}.`;
   try {
-    const { text, provider } = await freeText({ system, prompt });
+    const { text, provider } = await freeText({ system, prompt, signal: req.aiSignal }); // S15b T4 (D4)
     // S15b D5: la línea del asunto puede no ser la primera (p. ej. «Aquí tienes el email:»
     // antes) o venir en negrita: se busca en cualquier línea y lo de antes se descarta.
     const m = text.match(/^[ \t>*_#-]*(?:ASUNTO|SUBJECT|OBJET|OGGETTO|BETREFF|TEMAT)[ \t*_]*:[ \t*_]*(.+?)[ \t*_]*$/im);
@@ -160,6 +160,7 @@ Concepto: ${entry.concept || '—'}.`;
     // provider: la web avisa cuando ha respondido la IA de respaldo ("local").
     res.json({ subject, body: body.trim(), tone, provider });
   } catch (e) {
+    if (e.code === 'ai_cancelled') return res.status(499).json({ error: 'ai_cancelled' });
     if (e.code === 'chat_unavailable') return res.status(503).json({ error: 'chat_unavailable' });
     res.status(500).json({ error: 'internal_error' });
   }

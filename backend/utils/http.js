@@ -22,7 +22,9 @@ const DEFAULT_TIMEOUT_MS = 60000; // 60s — generoso para IA, corto para cuelgu
 
 function fetchWithTimeout(url, options = {}, timeoutMs = DEFAULT_TIMEOUT_MS) {
   const ms = Number.isFinite(timeoutMs) && timeoutMs > 0 ? timeoutMs : DEFAULT_TIMEOUT_MS;
-  return fetch(url, { ...options, signal: AbortSignal.timeout(ms) });
+  // S15b T4 (D4): options.signal (el usuario canceló) se suma al plazo.
+  const timeout = AbortSignal.timeout(ms);
+  return fetch(url, { ...options, signal: options.signal ? AbortSignal.any([timeout, options.signal]) : timeout });
 }
 
 /**
@@ -32,8 +34,9 @@ function fetchWithTimeout(url, options = {}, timeoutMs = DEFAULT_TIMEOUT_MS) {
  * el único tope es timeoutMs. Devuelve un objeto con la forma de una Response de
  * fetch (ok, status, json(), text()) para que el código que lo usa no cambie.
  */
-function requestLong(url, { method = 'GET', headers = {}, body } = {}, timeoutMs = DEFAULT_TIMEOUT_MS) {
+function requestLong(url, { method = 'GET', headers = {}, body, signal } = {}, timeoutMs = DEFAULT_TIMEOUT_MS) {
   const u = new URL(url);
+  if (signal?.aborted) return Promise.reject(new Error('aborted'));
   const lib = u.protocol === 'https:' ? require('https') : require('http');
   return new Promise((resolve, reject) => {
     const req = lib.request(u, { method, headers: body ? { ...headers, 'Content-Length': Buffer.byteLength(body) } : headers }, (res) => {
@@ -52,6 +55,8 @@ function requestLong(url, { method = 'GET', headers = {}, body } = {}, timeoutMs
     });
     req.setTimeout(timeoutMs, () => req.destroy(new Error(`timeout ${Math.round(timeoutMs / 1000)} s`)));
     req.on('error', reject);
+    // S15b T4 (D4): si el usuario cancela, se corta la conexión (llama-server deja de generar).
+    if (signal) signal.addEventListener('abort', () => req.destroy(new Error('aborted')), { once: true });
     if (body) req.write(body);
     req.end();
   });

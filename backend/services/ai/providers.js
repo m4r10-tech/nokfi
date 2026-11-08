@@ -25,7 +25,7 @@ const { audit } = require('../../db/database');
 const budget = require('../../utils/aiBudget');
 const gemini = require('./gemini');
 const localAi = require('./localQueue');
-const { AiError, parseJsonLoose } = gemini;
+const { AiError, parseJsonLoose, cancelledError } = gemini;
 const { langDirective } = require('./prompts');
 
 const IMAGE_MIMES = ['image/jpeg', 'image/png', 'image/webp'];
@@ -73,7 +73,8 @@ function providerError(name, status, body) {
   return err;
 }
 
-async function openAiCompatible({ name, url, key, model, system, parts, schema, maxTokens, jsonMode, jsonSchema = false, extra = {}, timeoutMs = 90000, long = false }) {
+async function openAiCompatible({ name, url, key, model, system, parts, schema, maxTokens, jsonMode, jsonSchema = false, extra = {}, timeoutMs = 90000, long = false, signal }) {
+  if (signal?.aborted) throw cancelledError();
   // Con json_schema (IA local) la gramática ya impone la estructura: el esquema en
   // texto solo alarga la lectura (~500 tokens) y en las pruebas empeoraba el informe.
   const sys = schema && !jsonSchema ? `${system}\n\n${jsonInstruction(schema)}` : system;
@@ -100,9 +101,11 @@ async function openAiCompatible({ name, url, key, model, system, parts, schema, 
     res = await (long ? requestLong : fetchWithTimeout)(url, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json', ...(key ? { Authorization: `Bearer ${key}` } : {}) },
-      body: JSON.stringify(body)
+      body: JSON.stringify(body),
+      ...(signal ? { signal } : {})
     }, timeoutMs);
   } catch (e) {
+    if (signal?.aborted) throw cancelledError(); // S15b T4 (D4): cancelada por el usuario
     const err = new AiError('ai_provider_error', `${name}: ${e.message}`);
     err.retryable = true;
     throw err;
@@ -174,7 +177,7 @@ const PROVIDERS = {
         maxTokens: Math.min(o.maxTokens || 3000, Number(process.env.LOCAL_AI_MAX_TOKENS) || 3000),
         jsonSchema: true, extra: { chat_template_kwargs: { enable_thinking: false } }, long: true,
         timeoutMs: Number(process.env.LOCAL_AI_TIMEOUT_MS) || 12 * 60000
-      }));
+      }), { signal: o.signal });
     }
   }
 };
@@ -191,10 +194,12 @@ async function generate(opts) {
   if (!order.length) throw new AiError('ai_not_configured');
   let last;
   for (const name of order) {
+    if (opts.signal?.aborted) throw cancelledError(); // S15b T4 (D4)
     try {
       return await PROVIDERS[name].generate({ maxTokens: 8192, ...opts });
     } catch (e) {
       last = e;
+      if (e.code === 'ai_cancelled') throw e; // S15b T4 (D4): no es un fallo del proveedor
       // Para el email diario de salud (services/opsReport.js): sin datos del usuario.
       audit('AI_PROVIDER_FAILED', { detail: `analysis ${name}: ${String(e.code || e.message).slice(0, 120)}` });
       if (!(e instanceof AiError) || e.retryable === false) throw e;

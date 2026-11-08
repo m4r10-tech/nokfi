@@ -53,10 +53,12 @@ router.post('/', requireLicense, deferrable(async (req, res) => {
       lang: req.body?.lang,
       analysisContext,
       financeText,
-      messages
+      messages,
+      signal: req.aiSignal // S15b T4 (D4)
     });
     res.json({ reply: text, provider });
   } catch (e) {
+    if (e.code === 'ai_cancelled') return res.status(499).json({ error: 'ai_cancelled' });
     if (e.code === 'chat_unavailable') {
       return res.status(503).json({ error: 'chat_unavailable', message: 'El asistente está saturado. Prueba en un minuto.' });
     }

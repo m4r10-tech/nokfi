@@ -14,6 +14,11 @@
  * Los resultados viven solo en memoria (un único proceso PM2) y caducan a los
  * 30 min. Si el servidor se reinicia, la consulta da 404 pending_not_found y el
  * usuario lo vuelve a lanzar (la cuota de un análisis fallido no se descuenta).
+ *
+ * S15b T4 (D4): cancelar. El handler recibe `req.aiSignal` (AbortSignal). Se
+ * aborta si el navegador corta la petición antes de la respuesta, o con
+ * DELETE /api/pending/:id si ya estaba aplazada. La IA deja de generar (o sale
+ * de la cola de la IA local) y un análisis cancelado no gasta crédito.
  */
 
 'use strict';
@@ -24,7 +29,7 @@ const DEFER_AFTER_MS = Number(process.env.DEFER_AFTER_MS) || 25000;
 const TTL_MS = 30 * 60 * 1000;
 const MAX_PENDING_PER_LICENSE = 5;
 
-const store = new Map(); // id → { licenseId, done, status, body, expires }
+const store = new Map(); // id → { licenseId, done, status, body, expires, ctrl }
 
 setInterval(() => {
   const now = Date.now();
@@ -56,6 +61,10 @@ function deferrable(handler, { waitMs } = {}) {
     if (running >= MAX_PENDING_PER_LICENSE) {
       return res.status(429).json({ error: 'too_many_pending', message: 'Tienes varias tareas en curso. Espera a que terminen.' });
     }
+    const ctrl = new AbortController();
+    req.aiSignal = ctrl.signal;
+    // El navegador cortó antes de recibir nada (cerró, cambió de tono…): se cancela.
+    if (typeof res.on === 'function') res.on('close', () => { if (!res.writableFinished) ctrl.abort(); });
     const work = capture(handler, req).catch((e) => {
       console.error('[DEFERRED] Excepción:', e.message);
       return { status: 500, body: { error: 'internal_error', message: 'Ha ocurrido un error inesperado. Inténtalo de nuevo en unos minutos.' } };
@@ -67,7 +76,7 @@ function deferrable(handler, { waitMs } = {}) {
     if (first) return res.status(first.status).json(first.body);
 
     const id = `pend_${crypto.randomBytes(12).toString('hex')}`;
-    const entry = { licenseId, done: false, status: 0, body: null, expires: Date.now() + TTL_MS };
+    const entry = { licenseId, done: false, status: 0, body: null, expires: Date.now() + TTL_MS, ctrl };
     store.set(id, entry);
     work.then((out) => { entry.done = true; entry.status = out.status; entry.body = out.body; entry.expires = Date.now() + TTL_MS; });
     res.status(202).json({ pending: id });
@@ -86,4 +95,16 @@ function pendingHandler(req, res) {
   res.status(entry.status).json(entry.body);
 }
 
-module.exports = { deferrable, pendingHandler, DEFER_AFTER_MS, _store: store };
+/** DELETE /api/pending/:id — S15b T4 (D4): el navegador ya no la quiere; se cancela en el servidor. */
+function cancelHandler(req, res) {
+  const id = String(req.params.id || '');
+  const entry = store.get(id);
+  if (!entry || entry.licenseId !== req.license?.id) {
+    return res.status(404).json({ error: 'pending_not_found', message: 'La tarea se ha interrumpido. Vuelve a lanzarla.' });
+  }
+  store.delete(id);
+  if (!entry.done) entry.ctrl?.abort();
+  res.json({ cancelled: !entry.done });
+}
+
+module.exports = { deferrable, pendingHandler, cancelHandler, DEFER_AFTER_MS, _store: store };
