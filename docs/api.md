@@ -619,6 +619,11 @@ factura de prueba, `status: paid|unpaid` → `409 test_invoice_not_in_ledger`
 (no tiene asiento en el libro). Una factura real sin apunte en el libro da
 `409 status_conflict` con `reason: "not_in_ledger"` y un mensaje que lo dice (el resto
 de `status_conflict` siguen siendo «primero revierte el estado anterior»).
+Con clave de prueba, `GET /tax/calendar` (y `fiscal_calendar` del MCP) usa la **forma
+jurídica real del perfil** y la emisión de facturas de prueba usa los **datos de emisor
+reales** de Ajustes › Facturación (razón social, NIF, dirección): son datos del propio
+titular, no de terceros, y la factura `TEST-…` sale como saldría la real (decisión T7 de
+la S15b). Lo que no se ve en prueba son los datos de terceros y el libro.
 
 **Idempotency-Key** (hasta 255 caracteres): la admiten los POST de `analyze`,
 `invoices/extract`, `webhooks`, `invoices` y `invoices/:id/rectify` (en estas dos es
@@ -689,7 +694,8 @@ ejecuta ninguno. Los mensajes de un lote se ejecutan **en orden, uno tras otro**
 ## 14. Nodo de n8n (`n8n-nodes-nokfi` 0.4.0)
 
 La copia buena es la del repositorio, `integrations/n8n/`; el repositorio hermano
-`../n8n-nodes-nokfi` es desde donde se publica en npm y se copia de aquí. Nodo de
+`../n8n-nodes-nokfi` es desde donde se publica en npm y se copia de aquí (qué se copia y
+cómo se publica: «Source and publishing» en `integrations/n8n/README.md`). Nodo de
 acciones (análisis, facturas recibidas, emisión, clientes, trabajos, herramientas
 fiscales) y Trigger por webhooks (crea y borra su endpoint con `/api/v1/webhooks`;
 «Only Live Events» activado por defecto). 0.3.0 publicada en npm el 2026-10-02;
