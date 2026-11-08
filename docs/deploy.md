@@ -28,7 +28,8 @@
 - **Cloudflare (edge) EN PROD — Full strict (2026-08-08/10), completo y
   verificado**: CF es el edge de `nokfi.app` (origen `<IP_DEL_VPS>` oculto tras
   anycast `104.21.6.208`/`172.67.135.69`). real-IP chain, Bot Fight OFF, WAF skip
-  webhook, 3 Cache Rules, Redirect www→nokfi 301, renewal HTTP-01 a través de CF.
+  webhook, caché por defecto de CF (sin Cache Rules), www→nokfi 301 en Nginx, renewal
+  HTTP-01 a través de CF.
   Detalle en §3.
 - **Stripe LIVE cobrando de verdad**: pago real verificado de punta a punta
   (licencia `id=2`, mini trial 14d → 0€ hoy, correo recibido, Portal abierto).
@@ -96,17 +97,18 @@ Rule).
 - **WAF Custom rule** `Skip WAF — Stripe webhook` sobre `uri.path eq
   "/api/webhooks/stripe"` → skip (defensa futura; el `webhookLimiter` Express +
   firma HMAC siguen vigentes).
-- **3 Cache Rules** (orden 1>2>3): (1) Bypass `/api/*`; (2) Cache `/assets/*`
-  Apply-origin-TTL (respeta `expires 1y` de Nginx, assets con hash = inmutables);
-  (3) Bypass SPA shell `not /api/ and not /assets/` (cubre `/`, `/login` `/app/*`,
-  `sw.js`). Razón del bypass del shell: si CF cachea `index.html`, un deploy nuevo
-  no se ve hasta pasar el TTL del edge.
-- **Redirect Rule** `Canonicalize www → nokfi` 301: expression
-  `(http.host eq "www.nokfi.app" and not starts_with(uri.path,
-  "/.well-known/acme-challenge/"))` → Dynamic `concat("https://nokfi.app",
-  uri.path)` + Preserve query + 301. **La exclusión acme es VITAL**: sin ella el
-  redirect agarraría el reto HTTP-01 de www → el SAN www dejaría de renovar → el
-  cert caducaría.
+- **Cache Rules y Redirect Rules: NINGUNA** (comprobado en el panel y con cabeceras el
+  2026-11-08; las 3 Cache Rules y la Redirect Rule que se crearon en agosto ya no están).
+  Funciona con la caché por defecto de CF: `/assets/*`, `/screens/*` y `/fonts/*` salen
+  `HIT` con el TTL del origen (1 año y 30 días); `/`, `/login`, `/app/*` y `/api/*` salen
+  `DYNAMIC` (CF no cachea HTML ni `/api`). **Única diferencia:** `sw.js` lo cachea CF
+  (`REVALIDATED`) y el «Browser Cache TTL» de la zona le pone `max-age=14400` aunque
+  Nginx mande `expires -1`; el navegador revalida igualmente el script del service
+  worker al buscar actualizaciones. Si se quiere dejar como antes: Cache Rule «Bypass
+  cache» para `/sw.js`, `/registerSW.js` y `/manifest.webmanifest`.
+- **www → nokfi.app 301 lo hace Nginx** (`if ($host = www.nokfi.app)` en el server de
+  443, ver `deploy/nginx-nokfi.conf`), no Cloudflare. El reto HTTP-01 de www entra por
+  el puerto 80 y la renovación funciona (`certbot renew --dry-run` OK el 2026-11-08).
 
 ### Nginx real-IP (`deploy/nginx-cloudflare-realip.conf` → `/etc/nginx/conf.d/cloudflare-realip.conf`)
 `ngx_http_realip_module`: `set_real_ip_from` (rango de CF: 15 v4 + 7 v6) +
@@ -119,8 +121,8 @@ de rangos: `https://www.cloudflare.com/ips/` (revisar en cada cambio).
 
 ### Cert LE
 Cert Let's Encrypt (SAN `nokfi.app` + `www`) en `/etc/letsencrypt/live/nokfi.app/`,
-caduca 2027-01-21 (comprobado 2026-11-08). `certbot.timer` autorenueva por CF (reto HTTP-01 pasa por la
-exclusión acme + Cache Rule bypass shell). Dry-run verificado (`Congratulations,
+caduca 2027-01-21 (comprobado 2026-11-08). `certbot.timer` autorenueva por CF (reto HTTP-01 por el puerto 80; CF
+no cachea `/.well-known/`). Dry-run verificado (`Congratulations,
 all simulated renewals succeeded`).
 
 ## 4. Stripe LIVE
