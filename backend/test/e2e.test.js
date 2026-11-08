@@ -1580,6 +1580,12 @@ async function main() {
   await require('./session15b-t4-cifras.tests')({ post, put, get, call, check, checkAsync, getDB });
   // S15b T4 lote 12 — IA y diagnóstico (cancelar en el servidor, reserva, compensación, facturas…).
   await require('./session15b-t4-ia.tests')({ post, put, get, call, check, checkAsync, getDB });
+  // S15b T4 lote 9 — el backend escucha en HOST (127.0.0.1 en producción).
+  {
+    const { listenHost } = require('../utils/listenHost');
+    check('S15b S9: HOST=127.0.0.1 → el servidor escucha solo en 127.0.0.1', () => listenHost({ HOST: '127.0.0.1' }) === '127.0.0.1');
+    check('S15b S9: sin HOST escucha en todas las interfaces (desarrollo y tests)', () => listenHost({}) === undefined && listenHost({ HOST: '  ' }) === undefined);
+  }
 
   } catch (e) {
     console.error('TEST CRASH:', e.message);

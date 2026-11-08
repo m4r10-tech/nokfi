@@ -242,9 +242,9 @@ Copias de cada archivo tocado en `/home/deploy/backups/s15b-2026-11-08/` (700/60
 - **fail2ban** (`/etc/fail2ban/jail.d/nokfi.local`): `bantime 1h`, `findtime 10m`,
   `maxretry 4` y jail `recidive` (reincidentes: 1 semana).
 - **Actualizaciones**: `unattended-upgrades` activo (orígenes `noble-security`).
-- **Pendiente**: el backend escucha en `*:3001` (todas las interfaces) porque
-  `server.js` llama a `app.listen(PORT)` sin host; hoy lo tapa `ufw` (3001 no está
-  abierto). Para dejarlo en `127.0.0.1` hace falta un cambio de código.
+- **Backend solo en `127.0.0.1:3001`**: `HOST=127.0.0.1` en el `.env` del VPS
+  (`server.js` escucha en `HOST`; sin `HOST`, en todas las interfaces, como en
+  desarrollo). Además `ufw` no abre el 3001.
 
 ### Endurecimientos de seguridad (2026-09-14)
 

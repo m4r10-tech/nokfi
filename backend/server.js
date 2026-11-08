@@ -417,8 +417,9 @@ initDB()
     // Sesión 11 — cola de envío de VERI*FACTU (no hace nada con VERIFACTU_ENV=off).
     require('./services/verifactu').startScheduler();
 
-    app.listen(PORT, () => {
-      console.log(`\n✅  Nokfi Backend corriendo en puerto ${PORT}`);
+    const HOST = require('./utils/listenHost').listenHost();
+    app.listen(PORT, HOST, () => {
+      console.log(`\n✅  Nokfi Backend corriendo en ${HOST || '*'}:${PORT}`);
       console.log(`    Health check: http://localhost:${PORT}/health\n`);
     });
   })
