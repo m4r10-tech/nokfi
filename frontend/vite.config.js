@@ -2,6 +2,7 @@ import { defineConfig } from 'vite';
 import react from '@vitejs/plugin-react';
 import { VitePWA } from 'vite-plugin-pwa';
 import { execSync } from 'node:child_process';
+import { warnMissingApiUrl } from './scripts/api-url-check.mjs';
 
 // §2.2 (sesión 4): versión visible en la app (Configuración, Ayuda y el
 // email de soporte) = hash corto de git + fecha de build. Responde a
@@ -48,6 +49,8 @@ export default defineConfig({
   },
   plugins: [
     react(),
+    // S15b T4: avisa si se construye sin VITE_API_URL (el dist llamaría a localhost:3001).
+    warnMissingApiUrl(),
     VitePWA({
       // §2.1: 'prompt' + <UpdatePrompt/> (antes 'autoUpdate' dejaba la pestaña
       // con el bundle viejo hasta cerrar todas las pestañas).

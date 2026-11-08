@@ -5,6 +5,8 @@
  * usar fetch() directamente. Sigue el contrato de nokfi_api_contract.md.
  */
 
+// Sin VITE_API_URL se usa el backend de desarrollo; `vite build` avisa si falta
+// (scripts/api-url-check.mjs, S15b T4): en producción se construye con VITE_API_URL=/api.
 const API_BASE = import.meta.env.VITE_API_URL || 'http://localhost:3001/api';
 
 let sessionToken = null;
