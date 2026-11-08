@@ -40,6 +40,7 @@ The credential test calls `GET /api/v1/usage`.
 | Invoice | Extract | Reads up to 5 documents per request (PDF, JPG, PNG, WebP or text). Use `*` as the binary field to send every attachment of the item. Outputs one item per invoice (or one item with all of them). |
 | Analysis | Create | Runs an analysis. For spreadsheets, "All Input Items as Rows" sends the whole input (e.g. a Google Sheets node) as one table. |
 | Analysis | Get / Get Many | Reads reports you already have. |
+| Analysis | Rename / Delete | Changes the title of a saved report, or deletes it with its action plan (the credit is not returned). With a test key they return "not found". |
 | Customer | Get Many / Create | Lists or searches your address book, or adds a customer (with a test key the list is empty and a new customer is only validated). |
 | Job | Get | Status and result of a background job (*Run in Background*), kept 24 h. |
 | Tax | Validate Tax ID | NIF, NIE or CIF check digit, entity type and EU VAT number. |

@@ -6,6 +6,7 @@
 
 ## 0.4.0
 
+- Analysis › **Rename** (new title, 1–120 characters) and **Delete** (the analysis and its action plan; the credit is not returned). With a test key they return "not found" and never touch real data.
 - New **Customer** resource: Get Many (list or search your address book) and Create.
 - New **Job** resource: Get the status and result of a background job (*Run in Background*).
 - New **Tax › Get Quarter Summary**: VAT (303) and IRPF (130) of a quarter from your Nokfi ledger.
