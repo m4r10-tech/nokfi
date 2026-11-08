@@ -236,7 +236,7 @@ export default {
     yourKey: 'Dein Lizenzschlüssel', alsoEmailed: 'Wir haben ihn dir auch per E-Mail geschickt.',
     goLogin: 'Zur Anmeldung', notFound: 'Wir haben deine Zahlung nicht gefunden. Wenn du glaubst, dass das ein Fehler ist, schreib uns.',
     pending: 'Wir bestätigen deine Zahlung, einen Moment…',
-    titleTrial: 'Test aktiviert!', subtitleTrial: 'Heute wurde nichts abgebucht. Das ist dein Nokfi-Lizenzschlüssel.', alreadyShown: 'Dieser Schlüssel wurde bereits angezeigt und wird aus Sicherheitsgründen hier nicht noch einmal gezeigt. Du findest ihn in der E-Mail, die wir dir geschickt haben; falls nicht, stelle ihn über „Schlüssel vergessen?“ wieder her.'
+    titleTrial: 'Test aktiviert!', subtitleTrial: 'Heute wurde nichts abgebucht. Das ist dein Nokfi-Lizenzschlüssel.', alreadyShown: 'Dieser Schlüssel wurde bereits angezeigt und wird aus Sicherheitsgründen hier nicht noch einmal gezeigt. Du findest ihn in der E-Mail, die wir dir geschickt haben; falls nicht, stelle ihn über „Schlüssel vergessen?“ wieder her.', titleBlocked: 'Der erste Monat konnte nicht abgebucht werden', subtitleBlocked: 'Diese Karte hat den kostenlosen Test schon genutzt und die Zahlung ist nicht durchgegangen, daher ist das Konto pausiert. Bewahre deinen Schlüssel auf: Beim Anmelden kannst du einen Tarif bezahlen und loslegen.'
   },
   config: {
     title: 'Einstellungen',

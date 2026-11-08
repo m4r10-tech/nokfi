@@ -236,7 +236,7 @@ export default {
     yourKey: 'Tu clave de licencia', alsoEmailed: 'También te la hemos enviado por email.',
     goLogin: 'Ir a iniciar sesión', notFound: 'No se encontró tu pago. Si crees que es un error, escríbenos.',
     pending: 'Estamos confirmando tu pago, un momento...',
-    titleTrial: '¡Prueba activada!', subtitleTrial: 'Hoy no se ha cobrado nada. Esta es tu clave de licencia de Nokfi.', alreadyShown: 'Esta clave ya se mostró y, por seguridad, no se vuelve a enseñar aquí. La tienes en el email que te enviamos; si no lo encuentras, recupérala desde «¿Olvidaste tu clave?».'
+    titleTrial: '¡Prueba activada!', subtitleTrial: 'Hoy no se ha cobrado nada. Esta es tu clave de licencia de Nokfi.', alreadyShown: 'Esta clave ya se mostró y, por seguridad, no se vuelve a enseñar aquí. La tienes en el email que te enviamos; si no lo encuentras, recupérala desde «¿Olvidaste tu clave?».', titleBlocked: 'No se pudo cobrar el primer mes', subtitleBlocked: 'Esta tarjeta ya usó la prueba gratuita y el cobro no se completó, así que la cuenta está en pausa. Guarda tu clave: al iniciar sesión podrás pagar un plan y empezar.'
   },
   config: {
     title: 'Configuración',

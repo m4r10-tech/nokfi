@@ -115,6 +115,22 @@ router.post('/activate', (req, res) => {
     return res.status(404).json({ error: 'not_found', message: 'Email o clave de licencia incorrectos.' });
   }
 
+  // S15b T4 (borde del lote 2): alta con una tarjeta que ya tuvo trial cuyo
+  // primer cobro falla → la licencia nace bloqueada por impago y sin contraseña.
+  // Se deja elegir la contraseña y se responde como el login de una cuenta
+  // bloqueada (403 account_blocked + sesión que solo sirve para reanudar), así
+  // llega a la pantalla de pagar un plan.
+  if (license.status !== 'active' && license.blocked_reason === 'payment_failed' && license.status !== 'revoked') {
+    if (isPasswordSet(license)) {
+      // Ya tiene contraseña: que entre por /login (allí ve la pantalla de reanudar).
+      return res.status(409).json({ error: 'already_activated', message: 'Esta licencia ya tiene una contraseña. Usa la opción de iniciar sesión, o restablece la contraseña si la has olvidado.' });
+    }
+    setPasswordHash(license.id, hashPassword(password), device_name || '');
+    const { token } = createSession(license.id, ip);
+    audit('ACTIVATION_BLOCKED_PAYMENT_FAILED', { license_id: license.id, ip });
+    return res.status(403).json({ error: 'account_blocked', reason: 'payment_failed', resume_token: token, email: license.email, plan: license.plan });
+  }
+
   if (license.status !== 'active') {
     audit('ACTIVATION_FAILED_INACTIVE', { license_id: license.id, ip, detail: `status=${license.status}` });
     const message = license.status === 'revoked'
@@ -175,6 +191,11 @@ router.post('/login', (req, res) => {
         && isPasswordSet(license) && verifyPassword(password, license.password_hash)) {
       const { token } = createSession(license.id, ip);
       return res.status(403).json({ error: 'account_blocked', reason: 'payment_failed', resume_token: token, email: license.email, plan: license.plan });
+    }
+    // Bloqueada sin contraseña todavía (nunca activada): como en una cuenta
+    // activa sin contraseña, se invita a activar (el par email+clave ya es válido).
+    if (license.blocked_reason === 'payment_failed' && license.status !== 'revoked' && !isPasswordSet(license)) {
+      return res.status(409).json({ error: 'not_activated', message: 'Esta licencia aún no tiene contraseña. Usa la opción de activación inicial.' });
     }
     // Mensaje genérico para no revelar que SÍ existe la cuenta pero está inactiva vía credenciales.
     return res.status(401).json({ error: 'invalid_credentials', message: 'Email, clave o contraseña incorrectos.' });

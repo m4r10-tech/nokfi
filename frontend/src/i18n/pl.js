@@ -238,7 +238,7 @@ export default {
     yourKey: 'Twój klucz licencyjny', alsoEmailed: 'Wysłaliśmy go też e-mailem.',
     goLogin: 'Przejdź do logowania', notFound: 'Nie znaleźliśmy twojej płatności. Jeśli uważasz, że to błąd, napisz do nas.',
     pending: 'Potwierdzamy płatność, chwileczkę…',
-    titleTrial: 'Okres próbny aktywny!', subtitleTrial: 'Dziś nic nie zostało pobrane. Oto twój klucz licencyjny Nokfi.', alreadyShown: 'Ten klucz został już wyświetlony i ze względów bezpieczeństwa nie pokazujemy go tu ponownie. Masz go w e-mailu, który ci wysłaliśmy; jeśli go nie znajdziesz, odzyskaj go przez „Nie pamiętasz klucza?”.'
+    titleTrial: 'Okres próbny aktywny!', subtitleTrial: 'Dziś nic nie zostało pobrane. Oto twój klucz licencyjny Nokfi.', alreadyShown: 'Ten klucz został już wyświetlony i ze względów bezpieczeństwa nie pokazujemy go tu ponownie. Masz go w e-mailu, który ci wysłaliśmy; jeśli go nie znajdziesz, odzyskaj go przez „Nie pamiętasz klucza?”.', titleBlocked: 'Nie udało się pobrać opłaty za pierwszy miesiąc', subtitleBlocked: 'Ta karta wykorzystała już darmowy okres próbny, a płatność nie powiodła się, więc konto jest wstrzymane. Zachowaj klucz: po zalogowaniu możesz opłacić plan i zacząć.'
   },
   config: {
     title: 'Ustawienia',

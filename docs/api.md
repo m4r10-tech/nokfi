@@ -58,6 +58,7 @@ Primer acceso (licencia sin contraseña todavía).
 |--------|------|--------|
 | 201 | `{ success: true, token, expires_at, license }` | Activación correcta |
 | 409 | `{ error: "already_activated" }` | Ya tiene contraseña → `/login` |
+| 403 | `{ error: "account_blocked", reason: "payment_failed", resume_token, email, plan }` | Alta bloqueada nada más nacer (tarjeta que ya tuvo trial y el primer cobro falla): guarda la contraseña y da el `resume_token` para pagar un plan, como el login |
 | 403 | `{ error: "license_inactive" }` | Suspendida/revocada (mensaje distingue) |
 | 404 | `{ error: "not_found" }` | email+clave no coinciden (anti-enumeración) |
 | 400 | `{ error: "weak_password" \| "invalid_email" \| "invalid_key_format" }` | Validación |
@@ -68,7 +69,7 @@ Primer acceso (licencia sin contraseña todavía).
 | Status | Body | Cuándo |
 |--------|------|--------|
 | 200 | `{ success: true, token, expires_at, license }` | Login correcto |
-| 409 | `{ error: "not_activated" }` | No tiene contraseña → flujo `/activate` |
+| 409 | `{ error: "not_activated" }` | No tiene contraseña → flujo `/activate` (también si está bloqueada por impago y nunca se activó) |
 | 401 | `{ error: "invalid_credentials" }` | Credenciales incorrectas (mensaje SIEMPRE genérico) |
 | 403 | `{ error: "account_blocked", reason: "payment_failed", resume_token, email, plan }` | Cuenta bloqueada por una renovación rechazada **y contraseña correcta**. `resume_token` solo sirve para `POST /api/payments/stripe/resume-checkout` (con contraseña mala → 401 genérico) |
 | 400 | `{ error: "invalid_input" }` | Formato inválido |
@@ -340,7 +341,8 @@ facturas con IA). `credit_packs` (S15b): paquetes de pago único que no caducan.
 (10/50/130) es decisión de producto, no env-driven.
 
 ### `POST /api/payments/stripe/create-checkout`  *(público)*
-Crea una Checkout Session en modo **suscripción** mensual.
+Crea una Checkout Session en modo **suscripción** mensual, **solo con tarjeta**
+(`payment_method_types[0]=card`; los paquetes de créditos mantienen los métodos dinámicos).
 
 **Body:** `{ email, plan: "mini" | "pro" | "max" }`
 
@@ -447,7 +449,7 @@ solo entrega al navegador del comprador).
 
 | Status | Body | Cuándo |
 |--------|------|--------|
-| 200 | `{ key, email, plan, trial, trial_ends_at }` | El webhook ya creó la licencia (`active`). `trial=true` → hoy no se ha cobrado |
+| 200 | `{ key, email, plan, trial, trial_ends_at, blocked }` | El webhook ya creó la licencia (`active`). `trial=true` → hoy no se ha cobrado. `blocked=true` → la cuenta nació bloqueada (tarjeta que ya tuvo trial y el primer cobro falló): al entrar se paga un plan |
 | 400 | `{ error: "missing_session_id" }` | Falta el parámetro |
 | 404 | `{ error: "not_found" }` | Webhook aún no llegó, o id inexistente |
 | 410 | `{ error: "already_revealed", email }` | La clave ya se mostró (se tolera repetir 2 min tras la primera vez) |

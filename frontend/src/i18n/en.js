@@ -236,7 +236,7 @@ export default {
     yourKey: 'Your license key', alsoEmailed: 'We have also emailed it to you.',
     goLogin: 'Go to login', notFound: 'We could not find your payment. If you believe this is an error, contact us.',
     pending: 'We are confirming your payment, one moment...',
-    titleTrial: 'Trial activated!', subtitleTrial: 'Nothing has been charged today. This is your Nokfi licence key.', alreadyShown: 'This key has already been shown and, for security, is not displayed here again. You have it in the email we sent you; if you can’t find it, recover it from “Forgot your key?”.'
+    titleTrial: 'Trial activated!', subtitleTrial: 'Nothing has been charged today. This is your Nokfi licence key.', alreadyShown: 'This key has already been shown and, for security, is not displayed here again. You have it in the email we sent you; if you can’t find it, recover it from “Forgot your key?”.', titleBlocked: 'We couldn’t charge the first month', subtitleBlocked: 'This card has already used the free trial and the payment didn’t go through, so the account is on hold. Keep your key: when you sign in you can pay for a plan and get started.'
   },
   config: {
     title: 'Settings',

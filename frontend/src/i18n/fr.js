@@ -236,7 +236,7 @@ export default {
     yourKey: 'Votre clé de licence', alsoEmailed: 'Nous vous l’avons aussi envoyée par e-mail.',
     goLogin: 'Aller à la connexion', notFound: 'Nous n’avons pas trouvé votre paiement. Si vous pensez qu’il s’agit d’une erreur, écrivez-nous.',
     pending: 'Nous confirmons votre paiement, un instant…',
-    titleTrial: 'Essai activé !', subtitleTrial: 'Rien n’a été débité aujourd’hui. Voici votre clé de licence Nokfi.', alreadyShown: 'Cette clé a déjà été affichée et, par sécurité, elle n’est plus montrée ici. Vous l’avez dans l’e-mail que nous vous avons envoyé ; si vous ne le trouvez pas, récupérez-la via « Clé oubliée ? ».'
+    titleTrial: 'Essai activé !', subtitleTrial: 'Rien n’a été débité aujourd’hui. Voici votre clé de licence Nokfi.', alreadyShown: 'Cette clé a déjà été affichée et, par sécurité, elle n’est plus montrée ici. Vous l’avez dans l’e-mail que nous vous avons envoyé ; si vous ne le trouvez pas, récupérez-la via « Clé oubliée ? ».', titleBlocked: 'Le premier mois n’a pas pu être débité', subtitleBlocked: 'Cette carte a déjà utilisé l’essai gratuit et le paiement n’a pas abouti : le compte est en pause. Gardez votre clé : en vous connectant, vous pourrez payer un forfait et commencer.'
   },
   config: {
     title: 'Paramètres',

@@ -1574,6 +1574,8 @@ async function main() {
   await require('./session15b-peticiones.tests')({ post, put, get, call, check, checkAsync, getDB });
   // S15b lote 6 — visual y móvil: /api/auth/verify fuera del limitador general.
   await require('./session15b-visual.tests')({ post, check });
+  // S15b T4 lote 10 — pagos, API y seguridad (Checkout solo tarjeta, alta bloqueada, CORS, MCP…).
+  await require('./session15b-t4.tests')({ post, put, get, call, check, checkAsync, getDB });
 
   } catch (e) {
     console.error('TEST CRASH:', e.message);

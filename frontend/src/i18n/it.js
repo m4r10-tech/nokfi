@@ -236,7 +236,7 @@ export default {
     yourKey: 'La tua chiave di licenza', alsoEmailed: 'Te l’abbiamo inviata anche via email.',
     goLogin: 'Vai all’accesso', notFound: 'Non abbiamo trovato il tuo pagamento. Se pensi che sia un errore, scrivici.',
     pending: 'Stiamo confermando il pagamento, un momento…',
-    titleTrial: 'Prova attivata!', subtitleTrial: 'Oggi non è stato addebitato nulla. Questa è la tua chiave di licenza Nokfi.', alreadyShown: 'Questa chiave è già stata mostrata e, per sicurezza, qui non viene mostrata di nuovo. La trovi nell’email che ti abbiamo inviato; se non la trovi, recuperala da «Hai dimenticato la chiave?».'
+    titleTrial: 'Prova attivata!', subtitleTrial: 'Oggi non è stato addebitato nulla. Questa è la tua chiave di licenza Nokfi.', alreadyShown: 'Questa chiave è già stata mostrata e, per sicurezza, qui non viene mostrata di nuovo. La trovi nell’email che ti abbiamo inviato; se non la trovi, recuperala da «Hai dimenticato la chiave?».', titleBlocked: 'Non è stato possibile addebitare il primo mese', subtitleBlocked: 'Questa carta ha già usato la prova gratuita e il pagamento non è andato a buon fine, quindi l’account è in pausa. Conserva la chiave: quando accedi potrai pagare un piano e iniziare.'
   },
   config: {
     title: 'Impostazioni',
