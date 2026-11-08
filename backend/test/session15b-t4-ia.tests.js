@@ -140,4 +140,81 @@ module.exports = async function session15bT4IaTests({ post, put, get, call, chec
       () => ai.aborted === aborted0 + 1);
     ai.restore();
   }
+
+  // ── 2 (A8 de sub4): el diagnóstico tiene en cuenta el fondo de reserva ──
+  {
+    const { WEIGHTS } = require('../utils/healthScore');
+    const answers = Object.fromEntries(Object.keys(WEIGHTS).map(id => [id, true]));
+    Object.assign(answers, { fondo_reserva: false, previsiones_ventas: 'partial', control_stock: 'na' });
+    const ai = fakeAi();
+    ai.reply = JSON.stringify({ summary: 'Resumen', key_figures: [], priorities: [{ title: 'Fondo de reserva', detail: 'd', severity: 'high' }], action_plan: [], strengths: [], glossary: [] });
+    const a = await account('ia-t4-2@nokfi.local');
+    const r = await post('/api/ai/analyze', { task: 'cuestionario', input: { answers }, lang: 'es' }, a.tok);
+    const sent = JSON.stringify(ai.last?.contents || '');
+    ai.restore();
+    check('S15b T4 2: el prompt del diagnóstico lista lo que más resta (Fondo de reserva primero, con sus puntos) y obliga a tratarlo',
+      () => r.status === 200 && /Áreas del cuestionario que MÁS restan de la nota/.test(sent) && /- Fondo de reserva: −\d+,\d puntos \(sin gestionar\)/.test(sent)
+        && sent.indexOf('Fondo de reserva: −') < sent.indexOf('Previsiones de ventas: −') && sent.includes('(a medias)')
+        && sent.includes('Al menos una de las prioridades y un paso del plan tratan la primera de estas áreas'));
+    check('S15b T4 2: explica qué es el fondo de reserva (colchón de caja, no lo apartado para impuestos) y enlaza la previsión',
+      () => sent.includes('colchón de caja para imprevistos (no el dinero apartado para impuestos)') && sent.includes('enlaza prevision') && !sent.includes('Control de stock/inventario: −'));
+  }
+
+  // ── 6: el contexto de la IA dice la compensación aplicada al 303 ──
+  {
+    const { financeContext } = require('../services/ai/financeContext');
+    const a = await account('ia-t4-6@nokfi.local', 'autonomo');
+    await post('/api/ledger', { entries: [
+      { type: 'expense', party_name: 'Proveedor 2T', invoice_number: 'G-1', invoice_date: '2026-05-10', base: 1000, vat_amount: 210, total: 1210 },
+      { type: 'income', party_name: 'Cliente 3T', invoice_number: 'F-1', invoice_date: '2026-08-03', base: 2000, vat_amount: 420, total: 2420 }
+    ] }, a.tok);
+    const line = (today) => financeContext(a.lid, { today }).text.split('\n').find(l => l.startsWith('Impuestos estimados')) || '';
+    const q3 = line('2026-08-15');
+    check('S15b T4 6: con IVA a compensar del 2T, el 303 del 3T dice cuánto se ha descontado y el IVA del propio trimestre',
+      () => q3.includes('IVA (303) a pagar 210,00 €') && q3.includes('ya descontados 210,00 € de IVA a compensar de trimestres anteriores')
+        && q3.includes('el IVA del propio trimestre sale 420,00 €'));
+    check('S15b T4 6: sin compensación no se dice nada de descuentos', () => !line('2026-05-20').includes('ya descontados'));
+  }
+
+  // ── 7 (sub2 #9): la lectura de facturas no recorta el nombre del proveedor ──
+  {
+    const ai = fakeAi();
+    ai.reply = JSON.stringify({ invoices: [
+      { file_name: 'qa.pdf', is_invoice: true, issuer_name: 'Proveedor Ficticio SL', issuer_nif: 'B12345678', recipient_name: 'Taller García SL', invoice_date: '2026-10-02', base: 100, vat_amount: 21, irpf_amount: 0, total: 121 },
+      { file_name: 'otra.pdf', is_invoice: true, issuer_name: 'Proveedor Ficticio SL', invoice_date: '2026-10-03', base: 10, vat_amount: 2.1, total: 12.1 }
+    ] });
+    const a = await account('ia-t4-7@nokfi.local');
+    const r = await post('/api/ai/analyze', { task: 'invoices', input: { files: [
+      { name: 'qa.pdf', text: 'QA S15 Proveedor Ficticio SL\nNIF: B12345678\nCliente: Taller García SL\nFactura nº 7 · 02/10/2026\nBase 100,00 IVA 21,00 Total 121,00' },
+      { name: 'otra.pdf', text: 'Factura nº 8 Proveedor Ficticio SL\nTotal 12,10' }
+    ] } }, a.tok);
+    const sent = JSON.stringify(ai.last?.contents || '');
+    ai.restore();
+    const inv = r.data?.invoices || [];
+    check('S15b T4 7: el prompt de facturas pide copiar los nombres COMPLETOS (sin quitar la primera palabra)',
+      () => sent.includes('se copian COMPLETOS y letra por letra') && sent.includes('no quites la primera palabra'));
+    check('S15b T4 7: si la IA recorta el nombre («Proveedor Ficticio SL»), se recupera del texto («QA S15 Proveedor Ficticio SL»)',
+      () => r.status === 200 && inv[0]?.issuer_name === 'QA S15 Proveedor Ficticio SL' && inv[0]?.recipient_name === 'Taller García SL');
+    check('S15b T4 7: lo que hay delante del nombre y es una etiqueta («Factura nº 8») no se pega al nombre',
+      () => inv[1]?.issuer_name === 'Proveedor Ficticio SL');
+  }
+
+  // ── 5: primer aviso amable (la IA sabe si ya se le reclamó) ──
+  {
+    const ai = fakeAi();
+    ai.reply = 'ASUNTO: Recordatorio\n\nHola.';
+    const a = await account('ia-t4-5@nokfi.local');
+    const eid = (await post('/api/ledger', { entries: [{ type: 'income', party_name: 'Primera SL', invoice_number: 'P-1', invoice_date: '2026-06-01', base: 100, vat_amount: 21, total: 121 }] }, a.tok)).data.ids?.[0];
+    const prompt = () => JSON.stringify(ai.last?.contents || '');
+    await post('/api/finance/collection-email', { entry_id: eid, lang: 'es' }, a.tok);
+    const first = prompt();
+    getDB().prepare('INSERT INTO reminders_sent (license_id, deadline_key, lead_days) VALUES (?, ?, 1)').run(a.lid, `collect-${eid}`);
+    await post('/api/finance/collection-email', { entry_id: eid, tone: 'firm', lang: 'es' }, a.tok);
+    const later = prompt();
+    check('S15b T4 5: sin tono, el email es el amable y la IA sabe que es el PRIMER aviso (no da a entender que ya se reclamó)',
+      () => first.includes('amable y cercano') && first.includes('Es el primer aviso que recibe el cliente por esta factura'));
+    check('S15b T4 5: tras un recordatorio automático, la IA sabe cuántos se han enviado',
+      () => later.includes('Nokfi ya le ha enviado 1 recordatorio automático') && !later.includes('Es el primer aviso'));
+    ai.restore();
+  }
 };

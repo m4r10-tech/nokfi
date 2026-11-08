@@ -131,6 +131,13 @@ const TONES = {
   formal: 'aviso formal: menciona que, de no recibir el pago en 7 días, se valorarán otras medidas (sin amenazas concretas ni lenguaje legal inventado)'
 };
 
+/** S15b T4: la IA sabe si es el primer aviso (amable, sin dar a entender que ya se reclamó). */
+function previousNotice(sent) {
+  return sent > 0
+    ? `Nokfi ya le ha enviado ${sent} recordatorio${sent === 1 ? '' : 's'} automático${sent === 1 ? '' : 's'} por esta factura.`
+    : 'Es el primer aviso que recibe el cliente por esta factura: no digas ni des a entender que ya se le ha reclamado antes.';
+}
+
 finance.post('/collection-email', requireLicense, deferrable(async (req, res) => {
   const entry = F.getEntry(req.license.id, Number(req.body?.entry_id));
   if (!entry || entry.type !== 'income') return res.status(404).json({ error: 'not_found' });
@@ -149,7 +156,8 @@ finance.post('/collection-email', requireLicense, deferrable(async (req, res) =>
 Cliente: ${entry.party_name || 'cliente'}.
 Factura nº ${entry.invoice_number || '(sin número)'} del ${entry.invoice_date}${pend ? `, con vencimiento el ${pend.effective_due_date}` : ''}.
 Importe: ${formatEur(entry.total, req.body?.lang)}. ${days > 0 ? `Días desde el vencimiento: ${days}.` : 'Todavía no ha vencido: es un recordatorio previo al vencimiento.'}
-Concepto: ${entry.concept || '—'}.`;
+Concepto: ${entry.concept || '—'}.
+${previousNotice(sentStages(req.license.id)[entry.id] || 0)}`;
   try {
     const { text, provider } = await freeText({ system, prompt, signal: req.aiSignal }); // S15b T4 (D4)
     // S15b D5: la línea del asunto puede no ser la primera (p. ej. «Aquí tienes el email:»

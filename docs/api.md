@@ -551,7 +551,7 @@ Aplica a `/api/proxy/ai`, `/api/analyses`, `/api/profile`,
 |---|---|
 | `GET/POST /api/ledger`, `PATCH/DELETE /api/ledger/:id` | Libro de facturas recibidas y emitidas (base, IVA, IRPF, total, cobro y su fecha `paid_at`). Fechas reales (`2026-02-30` → 400); la retención se guarda en positivo |
 | `GET /api/finance/taxes` · `PUT /api/finance/reserve` | 303 (descontando la cuota a compensar de trimestres anteriores del año: `vat.previous_compensation`) y 130 del trimestre desde el libro; lo apartado para Hacienda |
-| `GET /api/finance/receivables` · `POST /api/finance/collection-email` | Cobros pendientes y email de reclamación (amable, firme, formal) |
+| `GET /api/finance/receivables` · `POST /api/finance/collection-email` | Cobros pendientes y email de reclamación (amable, firme, formal; sin `tone`, amable). La IA sabe si es el primer aviso o cuántos recordatorios automáticos se han enviado; la web lo redacta solo al pulsar «Redactar el email» |
 | `GET /api/finance/leaks` · `POST/DELETE /api/finance/leaks/dismiss` | Fugas de dinero (suscripciones, subidas de proveedores…) |
 | `GET /api/finance/forecast` · `GET /api/finance/benchmark` | Previsión de caja y comparación con el sector |
 | `GET /api/finance/calendar?year=` | Calendario fiscal (`utils/fiscalCalendar.js`; la web pública usa una copia en `frontend/src/utils/fiscalCalendar.js`, comprobada con `npm run check:seo`) |

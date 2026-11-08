@@ -103,9 +103,14 @@ function financeContext(licenseId, { lang = 'es', maxChars = 3000, today = iso(n
   const vat = tax.vat.result < 0
     ? `IVA (303) a compensar ${f.eur(-tax.vat.result)}: no se paga ni se devuelve ahora, se descuenta en los trimestres siguientes`
     : `IVA (303) a pagar ${f.eur(tax.vat.result)}`;
+  // S15b T4: si el 303 descuenta IVA a compensar de trimestres anteriores, se dice (si no, la
+  // IA ve un 303 menor que el IVA del trimestre y no sabe por qué).
+  const comp = tax.vat.previous_compensation > 0
+    ? ` (ya descontados ${f.eur(tax.vat.previous_compensation)} de IVA a compensar de trimestres anteriores; el IVA del propio trimestre sale ${f.eur(tax.vat.quarter_result)})`
+    : '';
   const irpf = tax.irpf130 ? `; IRPF (130) ${f.eur(tax.irpf130.result)}` : '';
   const estModels = tax.irpf130 ? 'modelos 303 y 130' : 'modelo 303';
-  lines.push(`Impuestos estimados del ${cq.quarter}T ${cq.year}, solo ${estModels} (plazo de estos modelos: hasta el ${f.date(tax.due_date)}; no mezcles este importe ni este plazo con los de otros modelos como el 111 o el 115): ${vat}${irpf}; total a pagar ${f.eur(tax.total_estimated)}; apartado ${f.eur(tax.reserved)}; falta por apartar ${f.eur(tax.missing)} [enlace: impuestos].`);
+  lines.push(`Impuestos estimados del ${cq.quarter}T ${cq.year}, solo ${estModels} (plazo de estos modelos: hasta el ${f.date(tax.due_date)}; no mezcles este importe ni este plazo con los de otros modelos como el 111 o el 115): ${vat}${comp}${irpf}; total a pagar ${f.eur(tax.total_estimated)}; apartado ${f.eur(tax.reserved)}; falta por apartar ${f.eur(tax.missing)} [enlace: impuestos].`);
 
   // Cobros pendientes: total, vencido y los deudores más importantes.
   const rec = receivables(entries, today);

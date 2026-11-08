@@ -250,6 +250,14 @@ function buildQuestionnaire({ answers, health, finance }) {
     else if (answers[id] === 'partial') partial.push(name);
     else if (answers[id] === 'na') na.push(name);
   }
+  // S15b T4 (A8): lo que más resta de la nota también tiene que llegar al informe, no solo el libro.
+  const fmtPts = (n) => String(n).replace('.', ',');
+  const lost = (health.lost || []).filter(l => QUESTIONNAIRE_ITEMS[l.id]).slice(0, 3);
+  const lostText = lost.length ? `
+Áreas del cuestionario que MÁS restan de la nota (de más a menos):
+${lost.map(l => `- ${QUESTIONNAIRE_ITEMS[l.id]}: −${fmtPts(l.points)} puntos (${l.partial ? 'a medias' : 'sin gestionar'})`).join('\n')}
+Al menos una de las prioridades y un paso del plan tratan la primera de estas áreas (aunque el libro no tenga cifras de ella), salvo que el libro tenga algo más urgente con plazo; en ese caso va justo después.
+${lost.some(l => l.id === 'fondo_reserva') ? 'Fondo de reserva: es un colchón de caja para imprevistos (no el dinero apartado para impuestos). Propón cuánto apartar con las cifras de caja y gastos del libro si las hay (por ejemplo, unos 3 meses de gastos fijos) y enlaza prevision.\n' : ''}` : '';
   const text = `TAREA: diagnóstico financiero del negocio. Cruza el cuestionario (cómo dice que se gestiona) con los datos del libro de Nokfi (lo que de verdad está pasando) y di qué hacer primero.
 
 DATOS — Cuestionario:
@@ -265,6 +273,7 @@ ${na.length ? `
 Áreas que NO APLICAN a este negocio (${na.length}; no las menciones ni las propongas):
 ${na.map(i => '- ' + i).join('\n')}
 ` : ''}
+${lostText}
 Nota de salud calculada por Nokfi con reglas fijas: ${health.score}/100. Ya se muestra en un medidor: no la pongas en key_figures ni la repitas en el resumen.
 
 DATOS — Libro de Nokfi (calculados por Nokfi, fiables; copia las cifras y fechas tal cual):
@@ -423,9 +432,9 @@ const INVOICE_SCHEMA = {
         properties: {
           file_name: { type: 'STRING' },
           is_invoice: { type: 'BOOLEAN', description: 'false si el documento no es una factura o ticket.' },
-          issuer_name: { type: 'STRING' },
+          issuer_name: { type: 'STRING', description: 'Nombre o razón social COMPLETO del emisor, copiado tal cual (con todas sus palabras, siglas y números y la forma jurídica).' },
           issuer_nif: { type: 'STRING' },
-          recipient_name: { type: 'STRING' },
+          recipient_name: { type: 'STRING', description: 'Nombre o razón social COMPLETO del cliente, copiado tal cual.' },
           recipient_nif: { type: 'STRING' },
           invoice_number: { type: 'STRING' },
           invoice_date: { type: 'STRING', description: 'Formato YYYY-MM-DD' },
@@ -448,7 +457,7 @@ const INVOICE_SCHEMA = {
 
 function buildInvoices({ files }) {
   const parts = [{
-    text: `TAREA: extrae los datos de cada factura o ticket adjunto. Devuelve un elemento por documento, en el mismo orden, con file_name igual al nombre indicado. Usa números con punto decimal, sin símbolo de moneda. Si un dato no aparece, deja la cadena vacía o 0; NO lo inventes. Si hay varios tipos de IVA, suma las cuotas y usa el tipo principal.`
+    text: `TAREA: extrae los datos de cada factura o ticket adjunto. Devuelve un elemento por documento, en el mismo orden, con file_name igual al nombre indicado. Usa números con punto decimal, sin símbolo de moneda. Si un dato no aparece, deja la cadena vacía o 0; NO lo inventes. Si hay varios tipos de IVA, suma las cuotas y usa el tipo principal. Los nombres del emisor y del cliente se copian COMPLETOS y letra por letra, como aparecen en el documento: con todas sus palabras, siglas, números y la forma jurídica (SL, SA, SLU…); no los acortes, no quites la primera palabra y no los corrijas.`
   }];
   let chars = parts[0].text.length;
   for (const f of files) {
@@ -477,6 +486,27 @@ const isoDate = (s) => {
   return d >= 1 && d <= 31 && mo >= 1 && mo <= 12 ? `${y}-${String(mo).padStart(2, '0')}-${String(d).padStart(2, '0')}` : '';
 };
 
+/**
+ * S15b T4 (sub2 #9): si la IA se come el principio del nombre («QA S15 Proveedor Ficticio SL»
+ * → «Proveedor Ficticio SL») y el documento trae texto, se recupera el nombre completo de la
+ * línea donde aparece. Solo si el nombre cierra la línea, lo que falta es corto (≤ 3 palabras),
+ * va al principio de la línea o tras «:» y no es una etiqueta (Factura, Ticket, NIF…).
+ */
+const NAME_LABEL = /\b(factura|invoice|fecha|date|n[ºo°.]|n[uú]m|cliente|emisor|destinatario|nif|cif|dni|tel|total|iva|base|direcci[oó]n|c\/|raz[oó]n|nombre|name|empresa|company|from|seller|vendedor|bill|ticket|recibo|receipt|albar[aá]n|presupuesto|proforma|abono|rectificativa|nota)/i;
+function fullName(name, text) {
+  if (!name || name.length < 6 || !text) return name;
+  for (const line of String(text).split(/\r?\n/)) {
+    const at = line.indexOf(name);
+    if (at <= 0 || line.slice(at + name.length).trim()) continue;
+    const before = line.slice(0, at);
+    const prefix = before.slice(before.lastIndexOf(':') + 1).replace(/^[\s\t|·•-]+/, '');
+    if (!prefix.trim() || !/\s$/.test(prefix) || prefix.length > 30 || prefix.trim().split(/\s+/).length > 3 || NAME_LABEL.test(prefix)) continue;
+    if (!/[A-Za-zÀ-ÿ0-9]/.test(prefix)) continue;
+    return clean(prefix + name, 160);
+  }
+  return name;
+}
+
 function normalizeInvoices(raw, files) {
   const list = arr(raw?.invoices);
   return files.map((f, i) => {
@@ -486,9 +516,9 @@ function normalizeInvoices(raw, files) {
       // Los modelos pequeños a veces marcan como "no factura" un documento del
       // que sí han sacado emisor e importe: si los hay, se trata como factura.
       is_invoice: inv.is_invoice !== false || (Number(inv.total) > 0 && !!clean(inv.issuer_name, 160)),
-      issuer_name: clean(inv.issuer_name, 160),
+      issuer_name: fullName(clean(inv.issuer_name, 160), f.text),
       issuer_nif: clean(inv.issuer_nif, 20).toUpperCase().replace(/[\s-]/g, ''),
-      recipient_name: clean(inv.recipient_name, 160),
+      recipient_name: fullName(clean(inv.recipient_name, 160), f.text),
       recipient_nif: clean(inv.recipient_nif, 20).toUpperCase().replace(/[\s-]/g, ''),
       invoice_number: clean(inv.invoice_number, 60),
       invoice_date: isoDate(inv.invoice_date),
