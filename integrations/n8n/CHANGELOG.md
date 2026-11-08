@@ -10,6 +10,7 @@
 - New **Customer** resource: Get Many (list or search your address book) and Create.
 - New **Job** resource: Get the status and result of a background job (*Run in Background*).
 - New **Tax › Get Quarter Summary**: VAT (303) and IRPF (130) of a quarter from your Nokfi ledger.
+- Tax: the **5 %** VAT rate option is gone (it is no longer a Spanish VAT rate; the API rejects it), and the equivalence surcharge description lists 5.2 / 1.4 / 0.5 %.
 - Invoice › Issue: the **Idempotency Key** lasts **30 days** (the description used to say "always"; before, the API kept it 24 h).
 - Nokfi Trigger: **Only Live Events** is now **on by default** (workflows that relied on the old default receive no test events; turn it off while building with a test key). A webhook created with a test key only receives test events.
 - Nokfi Trigger: the saved webhook is only forgotten when Nokfi answers 404 (a 429 or a network error no longer creates a second, orphaned webhook), and a webhook disabled after too many failed deliveries, or with different events, is reactivated and updated on activation. Deleting an already deleted webhook no longer fails.
