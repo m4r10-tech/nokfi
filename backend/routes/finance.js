@@ -43,7 +43,9 @@ const dashboard = express.Router();
 
 /* ── V1: libro ── */
 ledger.get('/', requireLicense, (req, res) => {
-  res.json({ entries: F.listLedger(req.license.id, req.query) });
+  const entries = F.listLedger(req.license.id, req.query);
+  // S15b T4: has_any = el libro tiene apuntes aunque este periodo no tenga ninguno.
+  res.json({ entries, has_any: entries.length > 0 || F.hasEntries(req.license.id) });
 });
 
 ledger.post('/', requireLicense, (req, res) => {

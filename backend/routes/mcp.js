@@ -79,7 +79,7 @@ const TOOLS = [
   {
     name: 'calculate_vat',
     title: 'Calculate VAT',
-    description: 'Spanish VAT (IVA) from a net or gross amount, optionally with recargo de equivalencia (5.2 / 1.4 / 0.62 / 0.5 %). Returns base, VAT, surcharge and total. No quota.',
+    description: 'Spanish VAT (IVA) from a net or gross amount, optionally with recargo de equivalencia (5.2 / 1.4 / 0.5 %). Returns base, VAT, surcharge and total. No quota.',
     inputSchema: {
       type: 'object',
       properties: {
