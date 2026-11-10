@@ -368,8 +368,9 @@ con alerta por email. No se puede crear desde Claude Code (necesita cuenta).
   301 … }` en `deploy/nginx-nokfi.conf`; se perdió con el VPS viejo y se repuso
   en la plantilla, commit `04415bd`).
 - `robots.txt`, `og-image-square.png` (imagen al compartir, 512×512 con
-  `twitter:card=summary`, S15b) y `og-image.png` (imagen de las guías en el
-  JSON-LD) se sirven desde `frontend/dist` (los copia el build de Vite desde
+  `twitter:card=summary`, S15b; también es la `image` del JSON-LD de las guías) y
+  `og-image.png` (desde 2026-11-10 es una copia de la cuadrada: la URL vieja sigue
+  publicada para los resultados que Google ya tenía guardados) se sirven desde `frontend/dist` (los copia el build de Vite desde
   `public/`); sin config extra de Nginx. Las redes cachean la vista previa unos
   días: tras un cambio, forzarla con sus depuradores (Facebook Sharing
   Debugger, LinkedIn Post Inspector).

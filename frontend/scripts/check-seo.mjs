@@ -63,6 +63,15 @@ function checkShare(file, html) {
   const png = fs.readFileSync(local);
   const pw = png.readUInt32BE(16), ph = png.readUInt32BE(20);
   if (pw !== ph || String(pw) !== w) fail(`${file}: la imagen mide ${pw}x${ph} y las etiquetas dicen ${w}x${h}`);
+  // S15b: la imagen de los datos estructurados (la que usa Google en los resultados) es la
+  // misma que la de compartir; nunca la vieja og-image.png (rectangular, logo pequeño).
+  if (html.includes('/og-image.png')) fail(`${file}: cita la imagen vieja og-image.png`);
+  for (const m of html.matchAll(/"image":"([^"]+)"/g)) if (m[1] !== img) fail(`${file}: JSON-LD con image ${m[1]} (debe ser ${img})`);
+}
+// La URL vieja sigue publicada para los resultados que Google ya tiene guardados: que sea la cuadrada.
+{
+  const old = path.join(ROOT, 'public', 'og-image.png');
+  if (fs.existsSync(old)) { const b = fs.readFileSync(old); if (b.readUInt32BE(16) !== b.readUInt32BE(20)) fail('public/og-image.png sigue siendo la imagen vieja (no cuadrada)'); }
 }
 checkShare('index.html', fs.readFileSync(path.join(ROOT, 'index.html'), 'utf8'));
 let shared = 1;

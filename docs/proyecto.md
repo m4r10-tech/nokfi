@@ -495,8 +495,8 @@ aquí queda el resumen operativo.
      local de archivos, terceros Stripe/Gemini/Resend/Cloudflare, RGPD).
    - `Landing.jsx`: sección FAQ (5 Q&A reales, i18n) + enlace a privacidad en
      footer.
-   - `index.html`: canonical + OG/Twitter card (`og-image.png` 1200×630 generado
-     del favicon real, sin inventar imagen de marca).
+   - `index.html`: canonical + OG/Twitter card (hoy `og-image-square.png` 512×512, el
+     logo del favicon; `og-image.png` quedó como copia de la cuadrada, S15b).
    - `public/robots.txt`: permite `/`, `/pricing`, `/privacidad`; disallow
      `/app`, `/login`, `/reset-password`, `/reveal`, `/api/`.
    - i18n `es.js`/`en.js`: claves `meta.*`, `landing.faq*`, `privacy.*`,
@@ -508,7 +508,7 @@ tiempos de respuesta ni datos de contacto que no existan).
 **Cómo validar:**
 ```bash
 cd backend && node test/e2e.test.js   # 107 OK / 0 FAIL
-cd frontend && npm run build          # build OK; dist incluye robots.txt y og-image.png
+cd frontend && npm run build          # build OK; dist incluye robots.txt y og-image-square.png
 ```
 
 **Pendiente tras este handoff (no bloqueante):**

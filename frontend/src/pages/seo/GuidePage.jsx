@@ -26,7 +26,7 @@ export default function GuidePage({ id }) {
       {
         '@type': 'Article', headline: guide.h1, description: guide.description, inLanguage: l, url,
         mainEntityOfPage: url, dateModified: CONTENT_UPDATED, datePublished: CONTENT_UPDATED,
-        image: `${SITE}/og-image.png`,
+        image: `${SITE}/og-image-square.png`,
         author: { '@id': `${SITE}/#organization` }, publisher: { '@id': `${SITE}/#organization` }
       },
       faqLd(guide.faq),
