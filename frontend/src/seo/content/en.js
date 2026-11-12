@@ -488,6 +488,72 @@ export default {
         { q: 'Do I need a lawyer for a monitorio?', a: 'Not for debts up to €2,000. Above that, you need a lawyer and a court agent.' }
       ],
       guides: ['factura', 'apartar']
+    },
+
+    // Comparison (2026-11-12). Holded and Quipu data: ONLY what their own sites
+    // (holded.com/es/precios and getquipu.com) published that day, list price without
+    // promotions. Nokfi prices are not written here: {mini}, {pro} and {max} come from
+    // the catalogue (GuidePage › PricedSections).
+    programas: {
+      title: 'Invoicing software for freelancers in Spain: how to choose',
+      description: 'Invoicing software for freelancers in Spain compared: Nokfi, Holded, Quipu and the spreadsheet. What each one does, what it costs and who it suits.',
+      h1: 'Invoicing software for freelancers in Spain: a comparison',
+      intro: 'Nokfi, Holded, Quipu or a spreadsheet: what each option does, what it costs and who it suits best. The data on the other products is what they published on their websites on 12 November 2026.',
+      priced: true,
+      note: 'Holded and Quipu prices and features checked on their websites on 12 November 2026 (list price, without promotions); they may have changed. Holded and Quipu are trademarks of their owners, unrelated to Nokfi.',
+      sections: [
+        { h: 'What to look at before choosing',
+          list: [
+            'That it is VERI*FACTU-ready: in 2027 it becomes mandatory for anyone invoicing with software (January for companies, July for freelancers).',
+            'That it saves typing: automatic reading of expense invoices and receipts.',
+            'That it tells you how much VAT (form 303) and income tax (form 130) you will pay before the quarter ends.',
+            'That it reminds you of tax deadlines and of invoices you have not been paid.',
+            'The list price, not the promotion for the first months.',
+            'That you do not pay for modules you will not use.'
+          ] },
+        { h: 'Nokfi: invoices and taxes for freelancers and small businesses',
+          ps: ['Nokfi is a web app focused on what a freelancer or a small business does every quarter: recording invoices, knowing how much to set aside for the tax office and getting paid on time.'],
+          list: [
+            'Reads invoices with AI (PDFs, photos and e-invoices) and records them in the invoice book.',
+            'Works out forms 303 and 130 for the quarter and how much to set aside. It gives the figures; you do the filing.',
+            'Issues VERI*FACTU invoices and e-invoices.',
+            'Payment tracking, chasing unpaid invoices and a tax calendar with email reminders.',
+            'Mini plan: €{mini} a month, with a 14-day free trial (card required). Pro plan: €{pro} a month. Max plan: €{max} a month. No lock-in.',
+            'It has no bank connection, no statutory accounting (journal, annual accounts) and no inventory or payroll management.'
+          ] },
+        { h: 'Holded: a full business management suite',
+          ps: ['Holded is business management software (ERP) for freelancers and companies, with many more modules than invoicing.'],
+          list: [
+            'Invoicing, accounting, bank connections and CRM; inventory, point of sale and HR as separate paid modules.',
+            'VAT forms 303, 347, 349, 369 and 390.',
+            'For freelancers, from €19 a month; for companies, from €34 a month (Basic plan). Discounted for the first three months.',
+            '14-day free trial, no card needed.'
+          ] },
+        { h: 'Quipu: invoicing and cash management',
+          ps: ['Quipu is invoicing software for freelancers, companies and accountancy firms.'],
+          list: [
+            'Starter plan (€17 a month): VERI*FACTU-ready, unlimited invoices and quotes, 30 scans a month with the automatic reader, tax forecast and mobile app.',
+            'Solution plan (€30 a month): adds bank connection and reconciliation and 250 scans a month.',
+            'Premium plan (€59 a month): adds a cash dashboard, direct debits and forecasts.',
+            'Discounted for the first three months.'
+          ] },
+        { h: 'The spreadsheet',
+          ps: ['Excel or Google Sheets are fine to start with and cost nothing, but everything is manual: you type every invoice, you work out VAT and income tax yourself and nobody reminds you of deadlines. VERI*FACTU does not apply if you invoice by hand or with Word and Excel.'] },
+        { h: 'Which one to choose',
+          list: [
+            'You are a freelancer or run a small business and want invoices, quarterly taxes and payment tracking at the lowest price: Nokfi.',
+            'You need full accounting, inventory, point of sale or team management: Holded.',
+            'You want bank connection and reconciliation, or you work closely with an accountancy firm: Quipu or Holded.',
+            'You issue very few invoices a year and do not mind doing everything by hand: a spreadsheet may be enough.'
+          ] }
+      ],
+      faq: [
+        { q: 'What is the best invoicing software for freelancers in Spain?', a: 'It depends on what you need. For invoices, quarterly taxes and payment tracking on a small budget, a simple app such as Nokfi. If you need full accounting, inventory or team management, a business suite such as Holded. If you want bank reconciliation, Quipu or Holded.' },
+        { q: 'Is there free invoicing software for freelancers in Spain?', a: 'A spreadsheet is free, but everything is manual. Nokfi and Holded offer a 14-day free trial.' },
+        { q: 'What is the difference between Nokfi and Holded?', a: 'Nokfi focuses on invoices, quarterly taxes (forms 303 and 130) and getting paid, for freelancers and small businesses. Holded is a full business suite with accounting, banks, CRM, inventory and HR.' },
+        { q: 'Do I need VERI*FACTU-ready software?', a: 'If you invoice with software, it will have to be VERI*FACTU-ready from 1 January 2027 (companies) or 1 July 2027 (freelancers). If you invoice by hand or with Word and Excel, it does not apply to you.' }
+      ],
+      guides: ['verifactu', 'factura', 'apartar']
     }
   }
 };

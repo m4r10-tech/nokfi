@@ -2,10 +2,23 @@ import { Link } from 'react-router-dom';
 import { Calculator, ArrowRight } from 'lucide-react';
 import { useSeo, ldGraph, faqLd, breadcrumbLd } from '../../seo/useSeo';
 import { SITE, pageById, CALENDAR_YEARS } from '../../seo/routes';
+import { usePlans } from '../../hooks/usePlans';
 import {
   SeoShell, Breadcrumbs, PageIntro, ContentSections, Faq, TrialCta, RelatedGuides, RelatedTools,
   useSeoContent, useUpdatedLabel, toolKey, CONTENT_UPDATED
 } from './SeoLayout';
+
+/**
+ * Secciones de una guía que cita los precios de Nokfi ({mini}, {pro}, {max}): salen del
+ * catálogo (usePlans), nunca escritos a mano. Si el catálogo no ha cargado, las frases
+ * con precio no se muestran.
+ */
+function PricedSections({ sections }) {
+  const { plans } = usePlans();
+  const vars = Object.fromEntries(plans.map(p => [p.id, p.price]));
+  const ready = (s) => [...s.matchAll(/\{(\w+)\}/g)].every(m => vars[m[1]] !== undefined);
+  return <ContentSections vars={vars} sections={sections.map(s => ({ ...s, list: s.list?.filter(ready), ps: s.ps?.filter(ready) }))} />;
+}
 
 /**
  * Guía pública (sesión 12): /guias/<slug> y /en/guides/<slug>. Amplía las
@@ -45,8 +58,8 @@ export default function GuidePage({ id }) {
           <span className="text-sm inline-flex items-center gap-1" style={{ color: 'var(--accent-text)' }}>{ui.useTool} <ArrowRight size={14} /></span>
         </Link>
       )}
-      <ContentSections sections={guide.sections} />
-      <p className="mt-6 text-xs" style={{ color: 'var(--text-muted)' }}>{ui.disclaimer}</p>
+      {guide.priced ? <PricedSections sections={guide.sections} /> : <ContentSections sections={guide.sections} />}
+      <p className="mt-6 text-xs" style={{ color: 'var(--text-muted)' }}>{guide.note || ui.disclaimer}</p>
       <Faq items={guide.faq} />
       <TrialCta />
       <RelatedGuides ids={guide.guides} />

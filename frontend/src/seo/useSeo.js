@@ -1,6 +1,7 @@
 import { createContext, useContext, useEffect } from 'react';
 import { useLocation } from 'react-router-dom';
 import { SITE, seoMatch } from './routes.js';
+import { ABOUT } from './about.js';
 
 /**
  * useSeo (sesión 12) — metaetiquetas de una página pública indexable:
@@ -84,6 +85,7 @@ export const ORGANIZATION_LD = {
   '@type': 'Organization',
   '@id': `${SITE}/#organization`,
   name: 'Nokfi',
+  description: ABOUT.es.summary,
   url: SITE,
   logo: `${SITE}/icons/icon-512.png`,
   email: 'info@nokfi.app'

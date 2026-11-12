@@ -287,6 +287,9 @@ Todo lo crítico está resuelto. Restos **no bloqueantes / opcionales**:
    (Nginx sirve `frontend/dist`; nunca se compila en el VPS) y `rsync` del `dist`. Sin
    `VITE_API_URL` el build avisa: el bundle llamaría a `http://localhost:3001/api`.
 5. Smoke: `/health` 200, `/api/payments/plans` 200.
+6. Si cambiaron páginas públicas: `cd frontend && npm run indexnow` (avisa a Bing por
+   IndexNow; con rutas como argumentos, solo esas). Comprobar que `/llms.txt` responde
+   texto (`# Nokfi…`) y no la SPA.
 
 > El éxito del webhook y los cobros dependen de NO romper: Bot Fight Mode OFF,
 > WAF skip del webhook, real-IP conf, y los 7 eventos. No tocar eso sin riesgo.

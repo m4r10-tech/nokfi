@@ -25,8 +25,9 @@
   ya no se usa por defecto (queda como proveedor opcional en el código).
 - **Integraciones**: API pública v1, servidor MCP 1.3.0, nodo n8n 0.4.0 (en npm, 0.3.0 hasta publicar la 0.4.0).
 - **Web pública (sesión 12)**: landing, precios, 5 calculadoras, calendario
-  fiscal, validador de NIF y 8 guías, en castellano (raíz) e inglés (`/en/…`),
-  prerenderizadas en el build y con `sitemap.xml`. Ver §24.
+  fiscal, validador de NIF y 9 guías (la novena, una comparativa de programas de
+  facturación), en castellano (raíz) e inglés (`/en/…`), prerenderizadas en el
+  build y con `sitemap.xml` y `llms.txt`. Ver §24.
 - **Idiomas de la app**: es, en, fr, it, de, pl.
 - **Tests**: `cd backend && node test/e2e.test.js` → **778**. Frontend:
   `npm run check:i18n`, `npm run check:seo`, `npm run test:einvoice`.
@@ -610,4 +611,14 @@ emails de OTP salen por Resend con el dominio ya verificado — sin config nueva
   empezados y usos de herramientas) en el informe diario.
 - **Rendimiento**: React aparte de las librerías pesadas y fuente alojada en
   Nokfi; Lighthouse móvil: SEO, accesibilidad y buenas prácticas 100.
+- **Asistentes de IA (2026-11-12)**: `src/seo/about.js` es la descripción única
+  de Nokfi (frase y funciones, es/en); va en `Organization.description` y en
+  `/llms.txt`, que el prerender escribe en `dist/` con esa descripción, los
+  planes del catálogo y los enlaces a todas las páginas públicas. La guía
+  «Programa de facturación para autónomos» compara Nokfi con Holded, Quipu y la
+  hoja de cálculo: los datos ajenos son solo los publicados en sus webs en la
+  fecha que indica la página (revisarlos al menos una vez al año) y los precios
+  de Nokfi salen del catálogo (`{mini}`, `{pro}`, `{max}`). `npm run indexnow`
+  avisa a Bing por IndexNow tras cada despliegue (clave pública en
+  `public/<clave>.txt`).
 

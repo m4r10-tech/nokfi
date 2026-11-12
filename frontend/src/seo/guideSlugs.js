@@ -11,5 +11,6 @@ export const GUIDE_SLUGS = [
   { id: 'gastos', es: 'gastos-deducibles-autonomos', en: 'tax-deductible-expenses-self-employed' },
   { id: 'factura', es: 'como-hacer-una-factura', en: 'how-to-issue-an-invoice-in-spain' },
   { id: 'verifactu', es: 'factura-electronica-y-verifactu', en: 'e-invoicing-and-verifactu' },
-  { id: 'reclamar', es: 'reclamar-factura-impagada', en: 'chasing-an-unpaid-invoice' }
+  { id: 'reclamar', es: 'reclamar-factura-impagada', en: 'chasing-an-unpaid-invoice' },
+  { id: 'programas', es: 'programa-facturacion-autonomos', en: 'invoicing-software-for-freelancers-in-spain' }
 ];

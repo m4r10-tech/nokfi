@@ -494,6 +494,72 @@ export default {
         { q: '¿Necesito abogado para el monitorio?', a: 'No si la deuda es de hasta 2.000 €. Por encima, sí necesitas abogado y procurador.' }
       ],
       guides: ['factura', 'apartar']
+    },
+
+    // Comparativa (2026-11-12). Datos de Holded y Quipu: SOLO lo publicado en sus webs
+    // (holded.com/es/precios y getquipu.com) ese día, precio normal sin promociones.
+    // Revisar al cambiar el año o si cambian sus precios. Los precios de Nokfi no se
+    // escriben: {mini}, {pro} y {max} salen del catálogo (GuidePage › PricedSections).
+    programas: {
+      title: 'Programa de facturación para autónomos: cómo elegir',
+      description: 'Comparativa de programas de facturación para autónomos en España: Nokfi, Holded, Quipu y la hoja de cálculo. Qué hace cada uno, precio y para quién encaja.',
+      h1: 'Programa de facturación para autónomos: comparativa',
+      intro: 'Nokfi, Holded, Quipu o una hoja de cálculo: qué hace cada opción, cuánto cuesta y para quién encaja mejor. Los datos de los otros programas son los que publicaban en su web el 12 de noviembre de 2026.',
+      priced: true,
+      note: 'Precios y funciones de Holded y Quipu consultados en sus webs el 12 de noviembre de 2026 (precio normal, sin promociones); pueden haber cambiado. Holded y Quipu son marcas de sus titulares, sin relación con Nokfi.',
+      sections: [
+        { h: 'Qué mirar antes de elegir',
+          list: [
+            'Que esté adaptado a VERI*FACTU: en 2027 será obligatorio para quien factura con un programa (enero para las sociedades, julio para los autónomos).',
+            'Que te ahorre teclear: lectura automática de las facturas y tickets de gastos.',
+            'Que te diga cuánto vas a pagar de IVA (modelo 303) y de IRPF (modelo 130) antes de que acabe el trimestre.',
+            'Que te avise de los plazos fiscales y de las facturas que no te han pagado.',
+            'El precio normal, no el de la promoción de los primeros meses.',
+            'Que no te cobre por módulos que no vas a usar.'
+          ] },
+        { h: 'Nokfi: facturas e impuestos para autónomos y pequeños negocios',
+          ps: ['Nokfi es una app web centrada en lo que un autónomo o un negocio pequeño hace cada trimestre: apuntar facturas, saber cuánto apartar para Hacienda y cobrar a tiempo.'],
+          list: [
+            'Lee facturas con IA (PDF, fotos y facturas electrónicas) y las apunta en el libro de facturas.',
+            'Calcula el 303 y el 130 del trimestre y cuánto apartar. Da las cifras; la presentación la haces tú.',
+            'Emite facturas con VERI*FACTU y factura electrónica.',
+            'Control de cobros, reclamación de impagos y calendario fiscal con avisos por email.',
+            'Plan Mini: {mini} € al mes, con 14 días de prueba gratis (pide tarjeta). Plan Pro: {pro} € al mes. Plan Max: {max} € al mes. Sin permanencia.',
+            'No tiene conexión con el banco, ni contabilidad oficial (libro diario, cuentas anuales), ni gestión de inventario o nóminas.'
+          ] },
+        { h: 'Holded: un programa de gestión completo',
+          ps: ['Holded es un programa de gestión (ERP) para autónomos y empresas, con muchos más módulos que la facturación.'],
+          list: [
+            'Facturación, contabilidad, conexión con bancos y CRM; inventario, punto de venta y recursos humanos como módulos de pago aparte.',
+            'Modelos de IVA 303, 347, 349, 369 y 390.',
+            'Para autónomos, desde 19 € al mes; para empresas, desde 34 € al mes (plan Basic). Con descuento los tres primeros meses.',
+            '14 días de prueba gratis, sin tarjeta.'
+          ] },
+        { h: 'Quipu: facturación y tesorería',
+          ps: ['Quipu es un programa de facturación para autónomos, empresas y asesorías.'],
+          list: [
+            'Plan Starter (17 € al mes): adaptado a VERI*FACTU, facturas y presupuestos ilimitados, 30 escaneos al mes del lector automático, previsión de impuestos y app móvil.',
+            'Plan Solution (30 € al mes): añade conexión y conciliación bancaria y 250 escaneos al mes.',
+            'Plan Premium (59 € al mes): añade panel de tesorería, remesas y previsiones.',
+            'Con descuento los tres primeros meses.'
+          ] },
+        { h: 'La hoja de cálculo',
+          ps: ['Excel o Google Sheets sirven para empezar y no cuestan nada, pero todo es manual: tecleas cada factura, calculas tú el IVA y el IRPF y nadie te avisa de los plazos. VERI*FACTU no afecta a quien factura a mano o con Word y Excel.'] },
+        { h: 'Cuál elegir según tu caso',
+          list: [
+            'Eres autónomo o tienes un negocio pequeño y quieres facturas, impuestos del trimestre y cobros al menor precio: Nokfi.',
+            'Necesitas contabilidad completa, inventario, punto de venta o gestionar un equipo: Holded.',
+            'Quieres conexión y conciliación con el banco o trabajas codo con codo con una asesoría: Quipu u Holded.',
+            'Emites muy pocas facturas al año y no te importa hacerlo todo a mano: una hoja de cálculo puede bastar.'
+          ] }
+      ],
+      faq: [
+        { q: '¿Cuál es el mejor programa de facturación para autónomos?', a: 'Depende de lo que necesites. Para llevar facturas, impuestos del trimestre y cobros con poco gasto, una app sencilla como Nokfi. Si necesitas contabilidad completa, inventario o gestión de equipo, un programa de gestión como Holded. Si quieres conciliación bancaria, Quipu u Holded.' },
+        { q: '¿Hay programas de facturación gratis para autónomos?', a: 'La hoja de cálculo es gratis, pero todo es manual. Nokfi y Holded ofrecen 14 días de prueba gratis.' },
+        { q: '¿Qué diferencia hay entre Nokfi y Holded?', a: 'Nokfi se centra en facturas, impuestos del trimestre (303 y 130) y cobros para autónomos y negocios pequeños. Holded es un programa de gestión completo, con contabilidad, bancos, CRM, inventario y recursos humanos.' },
+        { q: '¿Necesito un programa con VERI*FACTU?', a: 'Si facturas con un programa, tendrá que estar adaptado a VERI*FACTU desde el 1 de enero de 2027 (sociedades) o el 1 de julio de 2027 (autónomos). Si facturas a mano o con Word y Excel, no te afecta.' }
+      ],
+      guides: ['verifactu', 'factura', 'apartar']
     }
   }
 };

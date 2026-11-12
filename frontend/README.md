@@ -22,7 +22,8 @@ VITE_API_URL=/api npm run build   # → dist/ (lo que se sube al VPS; sin VITE_A
                                   #   el dist llamaría a http://localhost:3001/api, el valor de desarrollo)
 npm run build:spa      # solo la SPA, sin prerender (más rápido para probar)
 npm run check:i18n     # mismas claves en los 6 idiomas
-npm run check:seo      # páginas públicas con contenido es/en y calendario igual que el backend
+npm run check:seo      # páginas públicas con contenido es/en, calendario igual que el backend, llms.txt e IndexNow
+npm run indexnow       # tras desplegar: avisa a Bing (IndexNow) de las páginas públicas; con rutas, solo esas
 npm run test:einvoice  # lector de facturas electrónicas (Facturae, UBL, CII)
 node test/s15b-cifras.test.mjs   # CSV del libro, trimestres traducidos, errores de XML (sin navegador)
 VITE_API_URL=/api npx vite build && node test/s15b-cifras.e2e.cjs   # Impuestos, Cobros, Libro e Inicio en Chromium (Playwright)
@@ -65,7 +66,8 @@ Capturas de la landing (`public/screens/`): `<pantalla>-<tema>.jpg` (1920×1200)
 `vite build --ssr src/entry-server.jsx` y `scripts/prerender.mjs`, que renderiza
 con React en Node cada página pública de `src/seo/routes.js` y escribe
 `dist/<ruta>/index.html` (contenido + title, canonical, hreflang, JSON-LD) y
-`dist/sitemap.xml`. Los precios los pide a `https://nokfi.app/api/payments/plans`
+`dist/sitemap.xml`, además de `dist/llms.txt` (resumen de Nokfi para los asistentes
+de IA, a partir de `src/seo/about.js`). Los precios los pide a `https://nokfi.app/api/payments/plans`
 (`PRERENDER_API=<url>` para usar otro backend).
 
 Incluye el manifest de PWA y el service worker. En producción el frontend y el

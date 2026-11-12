@@ -12,12 +12,18 @@
  * - Precios: GET /api/payments/plans de producción (PRERENDER_API=<url> para
  *   cambiarlo). Si no responde, las páginas salen sin precios (no falla).
  * - Falla (exit 1) si una página no tiene canonical, h1 o título.
+ * - dist/llms.txt: resumen en texto de qué es Nokfi, sus planes y sus páginas
+ *   públicas, para los asistentes de IA (formato llmstxt.org). Sale de
+ *   src/seo/about.js, de las mismas rutas y contenidos y del catálogo de planes.
  * - No es un servidor de SSR: en producción solo hay HTML estático.
  */
 import fs from 'node:fs';
 import path from 'node:path';
 import { fileURLToPath, pathToFileURL } from 'node:url';
-import { SEO_PAGES, SITE } from '../src/seo/routes.js';
+import { SEO_PAGES, SITE, CALENDAR_YEARS } from '../src/seo/routes.js';
+import { ABOUT } from '../src/seo/about.js';
+import es from '../src/seo/content/es.js';
+import en from '../src/seo/content/en.js';
 
 const ROOT = path.join(path.dirname(fileURLToPath(import.meta.url)), '..');
 const DIST = path.join(ROOT, 'dist');
@@ -67,6 +73,36 @@ function sitemap() {
   return `<?xml version="1.0" encoding="UTF-8"?>\n<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9" xmlns:xhtml="http://www.w3.org/1999/xhtml">\n${urls.join('\n')}\n</urlset>\n`;
 }
 
+/** /llms.txt: qué es Nokfi y dónde está cada cosa, en texto plano (Markdown). */
+function llmsTxt(plans) {
+  const L = {
+    es: { c: es, for: 'Para quién', what: 'Qué hace', plans: 'Planes y precios', month: '€ al mes', credits: 'créditos de IA al día', trial: '14 días de prueba gratis', noLock: 'Suscripción mensual sin permanencia.', pricing: 'Precios', tools: 'Herramientas gratis', guides: 'Guías', more: 'Más', api: 'Documentación de la API', contact: 'Contacto' },
+    en: { c: en, for: 'Who it is for', what: 'What it does', plans: 'Plans and pricing', month: 'EUR a month', credits: 'AI credits a day', trial: '14-day free trial', noLock: 'Monthly subscription, no lock-in.', pricing: 'Pricing', tools: 'Free tools', guides: 'Guides', more: 'More', api: 'API documentation', contact: 'Contact' }
+  };
+  const fill = (s) => String(s).replace(/\{y\}/g, CALENDAR_YEARS[0]);
+  const block = (l) => {
+    const t = L[l], a = ABOUT[l];
+    const url = (page) => SITE + (page.paths[l] || page.paths.es);
+    const byId = (id) => SEO_PAGES.find(p => p.id === id);
+    const link = (page, item) => `- [${fill(item.h1)}](${url(page)}): ${fill(item.description)}`;
+    const tools = SEO_PAGES.filter(p => p.tool).map(p => link(p, t.c.tools[p.toolId || p.id]));
+    const guides = SEO_PAGES.filter(p => p.guide).map(p => link(p, t.c.guides[p.guide]));
+    const sorted = plans ? [...plans].sort((x, y) => Number(x.price_eur) - Number(y.price_eur)) : [];
+    return [
+      `> ${a.summary}`, '',
+      `- Web: ${url(byId('home'))}`, `- ${t.for}: ${a.audience}`, `- ${t.contact}: info@nokfi.app`, '',
+      `## ${t.what}`, '', ...a.features.map(f => `- ${f}`), '',
+      ...(sorted.length ? [`## ${t.plans}`, '',
+        ...sorted.map(p => `- Nokfi ${p.name}: ${p.price_eur} ${t.month}, ${p.quota} ${t.credits}${p.trial ? `, ${t.trial}` : ''}.`),
+        `- ${t.noLock}`, `- [${t.pricing}](${url(byId('pricing'))})`, ''] : []),
+      `## ${t.tools}`, '', ...tools, '',
+      `## ${t.guides}`, '', ...guides, '',
+      `## ${t.more}`, '', `- [${t.api}](${url(byId('api-docs'))})`, ''
+    ].join('\n');
+  };
+  return `# Nokfi\n\n${block('es')}\n---\n\n# Nokfi (English)\n\n${block('en')}`;
+}
+
 const shell = stripHead(fs.readFileSync(path.join(DIST, 'index.html'), 'utf8'));
 if (!shell.includes('<div id="root"></div>')) throw new Error('index.html sin <div id="root"></div>');
 const { render } = await import(pathToFileURL(path.join(SSR, 'entry-server.js')).href);
@@ -92,7 +128,8 @@ try {
     }
   }
   fs.writeFileSync(path.join(DIST, 'sitemap.xml'), sitemap());
-  console.log(`✅ Prerender: ${count} páginas y sitemap.xml en dist/${plans ? '' : ' (sin precios)'}`);
+  fs.writeFileSync(path.join(DIST, 'llms.txt'), llmsTxt(plans));
+  console.log(`✅ Prerender: ${count} páginas, sitemap.xml y llms.txt en dist/${plans ? '' : ' (sin precios)'}`);
 } catch (e) {
   console.error(`❌ Prerender: ${e.stack || e.message}`);
   process.exitCode = 1;

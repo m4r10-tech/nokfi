@@ -7,6 +7,9 @@
  *  3. S15b (U8): la imagen al compartir es cuadrada (og:image 512x512 que
  *     existe en public/ con esas medidas, twitter:card=summary) en index.html
  *     y, si hay build, en todas las páginas prerenderizadas de dist/.
+ *  4. /llms.txt (resumen para los asistentes de IA): si hay build, existe en
+ *     dist/, es texto (no la SPA) y enlaza todas las páginas públicas. La
+ *     clave de IndexNow de scripts/indexnow.mjs está publicada en public/.
  */
 import { createRequire } from 'node:module';
 import fs from 'node:fs';
@@ -85,5 +88,25 @@ const walk = (dir) => {
 };
 walk(path.join(ROOT, 'dist'));
 
-console.log(problems ? `❌ ${problems} problemas` : `✅ SEO: calendario igual en frontend y backend; ${seen.size} rutas públicas con contenido; imagen al compartir cuadrada en ${shared} páginas`);
+// 4. llms.txt e IndexNow.
+{
+  const { SITE } = await import('../src/seo/routes.js');
+  const llms = path.join(ROOT, 'dist', 'llms.txt');
+  if (fs.existsSync(path.join(ROOT, 'dist'))) {
+    if (!fs.existsSync(llms)) fail('dist/llms.txt no existe (lo escribe scripts/prerender.mjs)');
+    else {
+      const txt = fs.readFileSync(llms, 'utf8');
+      if (!txt.startsWith('# Nokfi')) fail('dist/llms.txt no empieza por «# Nokfi» (¿es HTML?)');
+      for (const page of SEO_PAGES.filter(p => p.guide || p.tool || ['home', 'pricing', 'api-docs'].includes(p.id))) {
+        for (const route of Object.values(page.paths)) if (!txt.includes(`(${SITE}${route})`) && !txt.includes(`: ${SITE}${route}\n`)) fail(`dist/llms.txt no enlaza ${route}`);
+      }
+      if (/\{\w+\}|undefined/.test(txt)) fail('dist/llms.txt tiene un hueco sin rellenar ({…} o undefined)');
+    }
+  }
+  const { INDEXNOW_KEY } = await import('./indexnow.mjs');
+  const keyFile = path.join(ROOT, 'public', `${INDEXNOW_KEY}.txt`);
+  if (!fs.existsSync(keyFile) || fs.readFileSync(keyFile, 'utf8').trim() !== INDEXNOW_KEY) fail(`public/${INDEXNOW_KEY}.txt no existe o no contiene la clave de IndexNow`);
+}
+
+console.log(problems ? `❌ ${problems} problemas` : `✅ SEO: calendario igual en frontend y backend; ${seen.size} rutas públicas con contenido; imagen al compartir cuadrada en ${shared} páginas; llms.txt e IndexNow`);
 process.exit(problems ? 1 : 0);
