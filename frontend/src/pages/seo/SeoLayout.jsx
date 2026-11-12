@@ -64,9 +64,9 @@ export function PageIntro({ h1, intro, updated }) {
   );
 }
 
-export function useUpdatedLabel() {
+export function useUpdatedLabel(date = CONTENT_UPDATED) {
   const { ui, l, fill } = useSeoContent();
-  const m = new Date(`${CONTENT_UPDATED}T12:00:00Z`).toLocaleDateString(l === 'en' ? 'en-GB' : 'es-ES', { month: 'long', year: 'numeric' });
+  const m = new Date(`${date}T12:00:00Z`).toLocaleDateString(l === 'en' ? 'en-GB' : 'es-ES', { month: 'long', year: 'numeric' });
   return fill(ui.updated, { m });
 }
 

@@ -29,6 +29,8 @@ export default function GuidePage({ id }) {
   const page = pageById(`guide-${id}`);
   const guide = c.guides[id];
   const url = SITE + page.paths[l];
+  // La guía puede llevar su propia fecha (guide.updated) si se escribió después que el resto.
+  const updated = guide.updated || CONTENT_UPDATED;
   const trail = [[ui.home, path('home')], [ui.guides, path('guides')], [guide.h1, page.paths[l]]];
   const tool = guide.tool && c.tools[toolKey(guide.tool)];
 
@@ -38,7 +40,7 @@ export default function GuidePage({ id }) {
     jsonLd: ldGraph(
       {
         '@type': 'Article', headline: guide.h1, description: guide.description, inLanguage: l, url,
-        mainEntityOfPage: url, dateModified: CONTENT_UPDATED, datePublished: CONTENT_UPDATED,
+        mainEntityOfPage: url, dateModified: updated, datePublished: updated,
         image: `${SITE}/og-image-square.png`,
         author: { '@id': `${SITE}/#organization` }, publisher: { '@id': `${SITE}/#organization` }
       },
@@ -50,7 +52,7 @@ export default function GuidePage({ id }) {
   return (
     <SeoShell>
       <Breadcrumbs trail={trail} />
-      <PageIntro h1={guide.h1} intro={guide.intro} updated={useUpdatedLabel()} />
+      <PageIntro h1={guide.h1} intro={guide.intro} updated={useUpdatedLabel(updated)} />
       {tool && (
         <Link to={path(guide.tool)} className="card card-interactive p-4 flex items-center gap-3">
           <Calculator size={18} className="shrink-0" style={{ color: 'var(--accent-text)' }} />

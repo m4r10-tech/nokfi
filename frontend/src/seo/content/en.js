@@ -500,6 +500,7 @@ export default {
       h1: 'Invoicing software for freelancers in Spain: a comparison',
       intro: 'Nokfi, Holded, Quipu or a spreadsheet: what each option does, what it costs and who it suits best. The data on the other products is what they published on their websites on 12 November 2026.',
       priced: true,
+      updated: '2026-11-12',
       note: 'Holded and Quipu prices and features checked on their websites on 12 November 2026 (list price, without promotions); they may have changed. Holded and Quipu are trademarks of their owners, unrelated to Nokfi.',
       sections: [
         { h: 'What to look at before choosing',
@@ -535,7 +536,7 @@ export default {
             'Starter plan (€17 a month): VERI*FACTU-ready, unlimited invoices and quotes, 30 scans a month with the automatic reader, tax forecast and mobile app.',
             'Solution plan (€30 a month): adds bank connection and reconciliation and 250 scans a month.',
             'Premium plan (€59 a month): adds a cash dashboard, direct debits and forecasts.',
-            'Discounted for the first three months.'
+            '15-day free trial, no card needed. Discounted for the first three months.'
           ] },
         { h: 'The spreadsheet',
           ps: ['Excel or Google Sheets are fine to start with and cost nothing, but everything is manual: you type every invoice, you work out VAT and income tax yourself and nobody reminds you of deadlines. VERI*FACTU does not apply if you invoice by hand or with Word and Excel.'] },
@@ -549,7 +550,7 @@ export default {
       ],
       faq: [
         { q: 'What is the best invoicing software for freelancers in Spain?', a: 'It depends on what you need. For invoices, quarterly taxes and payment tracking on a small budget, a simple app such as Nokfi. If you need full accounting, inventory or team management, a business suite such as Holded. If you want bank reconciliation, Quipu or Holded.' },
-        { q: 'Is there free invoicing software for freelancers in Spain?', a: 'A spreadsheet is free, but everything is manual. Nokfi and Holded offer a 14-day free trial.' },
+        { q: 'Is there free invoicing software for freelancers in Spain?', a: 'A spreadsheet is free, but everything is manual. Nokfi and Holded offer a 14-day free trial, and Quipu a 15-day one.' },
         { q: 'What is the difference between Nokfi and Holded?', a: 'Nokfi focuses on invoices, quarterly taxes (forms 303 and 130) and getting paid, for freelancers and small businesses. Holded is a full business suite with accounting, banks, CRM, inventory and HR.' },
         { q: 'Do I need VERI*FACTU-ready software?', a: 'If you invoice with software, it will have to be VERI*FACTU-ready from 1 January 2027 (companies) or 1 July 2027 (freelancers). If you invoice by hand or with Word and Excel, it does not apply to you.' }
       ],

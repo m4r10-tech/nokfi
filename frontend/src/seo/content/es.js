@@ -506,6 +506,7 @@ export default {
       h1: 'Programa de facturación para autónomos: comparativa',
       intro: 'Nokfi, Holded, Quipu o una hoja de cálculo: qué hace cada opción, cuánto cuesta y para quién encaja mejor. Los datos de los otros programas son los que publicaban en su web el 12 de noviembre de 2026.',
       priced: true,
+      updated: '2026-11-12',
       note: 'Precios y funciones de Holded y Quipu consultados en sus webs el 12 de noviembre de 2026 (precio normal, sin promociones); pueden haber cambiado. Holded y Quipu son marcas de sus titulares, sin relación con Nokfi.',
       sections: [
         { h: 'Qué mirar antes de elegir',
@@ -541,7 +542,7 @@ export default {
             'Plan Starter (17 € al mes): adaptado a VERI*FACTU, facturas y presupuestos ilimitados, 30 escaneos al mes del lector automático, previsión de impuestos y app móvil.',
             'Plan Solution (30 € al mes): añade conexión y conciliación bancaria y 250 escaneos al mes.',
             'Plan Premium (59 € al mes): añade panel de tesorería, remesas y previsiones.',
-            'Con descuento los tres primeros meses.'
+            '15 días de prueba gratis, sin tarjeta. Con descuento los tres primeros meses.'
           ] },
         { h: 'La hoja de cálculo',
           ps: ['Excel o Google Sheets sirven para empezar y no cuestan nada, pero todo es manual: tecleas cada factura, calculas tú el IVA y el IRPF y nadie te avisa de los plazos. VERI*FACTU no afecta a quien factura a mano o con Word y Excel.'] },
@@ -555,7 +556,7 @@ export default {
       ],
       faq: [
         { q: '¿Cuál es el mejor programa de facturación para autónomos?', a: 'Depende de lo que necesites. Para llevar facturas, impuestos del trimestre y cobros con poco gasto, una app sencilla como Nokfi. Si necesitas contabilidad completa, inventario o gestión de equipo, un programa de gestión como Holded. Si quieres conciliación bancaria, Quipu u Holded.' },
-        { q: '¿Hay programas de facturación gratis para autónomos?', a: 'La hoja de cálculo es gratis, pero todo es manual. Nokfi y Holded ofrecen 14 días de prueba gratis.' },
+        { q: '¿Hay programas de facturación gratis para autónomos?', a: 'La hoja de cálculo es gratis, pero todo es manual. Nokfi y Holded ofrecen 14 días de prueba gratis, y Quipu, 15.' },
         { q: '¿Qué diferencia hay entre Nokfi y Holded?', a: 'Nokfi se centra en facturas, impuestos del trimestre (303 y 130) y cobros para autónomos y negocios pequeños. Holded es un programa de gestión completo, con contabilidad, bancos, CRM, inventario y recursos humanos.' },
         { q: '¿Necesito un programa con VERI*FACTU?', a: 'Si facturas con un programa, tendrá que estar adaptado a VERI*FACTU desde el 1 de enero de 2027 (sociedades) o el 1 de julio de 2027 (autónomos). Si facturas a mano o con Word y Excel, no te afecta.' }
       ],

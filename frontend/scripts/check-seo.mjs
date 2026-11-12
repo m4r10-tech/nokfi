@@ -47,6 +47,8 @@ for (const page of SEO_PAGES) {
     if (item.title && item.title.length > 65) fail(`${page.id} (${lang}): título de ${item.title.length} caracteres (máx. 65)`);
     if (item.description && (item.description.length < 70 || item.description.length > 160)) fail(`${page.id} (${lang}): descripción de ${item.description.length} caracteres (70-160)`);
     if (!item.faq?.length) fail(`${page.id} (${lang}): sin preguntas frecuentes`);
+    // Una guía que cita datos con fecha (precios de otros programas) lleva su propia fecha de actualización.
+    if (item.priced && !/^\d{4}-\d{2}-\d{2}$/.test(item.updated || '')) fail(`${page.id} (${lang}): guía con precios sin fecha propia (updated)`);
   }
 }
 
